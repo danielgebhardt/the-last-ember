@@ -66,6 +66,9 @@ describe("Activity history on the play screen", () => {
 	it("clears history on New Dungeon", async () => {
 		renderWithHistory();
 		await userEvent.click(screen.getByRole("button", { name: "New Dungeon" }));
+		await userEvent.click(
+			screen.getByRole("button", { name: "Start new dungeon" }),
+		);
 		expect(
 			within(screen.getByRole("log", { name: "Activity log" })).queryAllByRole(
 				"listitem",

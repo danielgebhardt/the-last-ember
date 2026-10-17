@@ -133,6 +133,7 @@ describe("Complete monster encounters on screen", () => {
 		await closeSettings(user);
 		expect(screen.getByRole("alert")).toHaveTextContent("You died.");
 		await user.click(screen.getByRole("button", { name: "New Dungeon" }));
+		await user.click(screen.getByRole("button", { name: "Start new dungeon" }));
 		expect(screen.queryByRole("alert")).not.toBeInTheDocument();
 		expect(screen.getByLabelText("Player health")).toHaveTextContent(
 			"Health 10 / 10",

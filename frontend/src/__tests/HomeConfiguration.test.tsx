@@ -102,6 +102,9 @@ describe("Home dungeon configuration", () => {
 				screen.getByRole("heading", { name: "Floor 2 of 3" }),
 			).toBeVisible();
 			await user.click(screen.getByRole("button", { name: "New Dungeon" }));
+			await user.click(
+				screen.getByRole("button", { name: "Start new dungeon" }),
+			);
 			expect(generate).toHaveBeenLastCalledWith(
 				expect.any(Number),
 				5,
@@ -164,6 +167,7 @@ describe("Home dungeon configuration", () => {
 		await closeSettings(user);
 		vi.spyOn(Math, "random").mockReturnValue(0);
 		await user.click(screen.getByRole("button", { name: "New Dungeon" }));
+		await user.click(screen.getByRole("button", { name: "Start new dungeon" }));
 		await enterDungeonFromTown(user);
 		expect(generate).toHaveBeenLastCalledWith(0, 6, {
 			...DEFAULT_DUNGEON_CONFIG,

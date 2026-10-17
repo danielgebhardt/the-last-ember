@@ -64,6 +64,9 @@ describe("Player status on the play screen", () => {
 	it("restores full health and turn zero on New Dungeon", async () => {
 		startWithInjuredPlayer();
 		await userEvent.click(screen.getByRole("button", { name: "New Dungeon" }));
+		await userEvent.click(
+			screen.getByRole("button", { name: "Start new dungeon" }),
+		);
 		expect(screen.getByLabelText("Player health")).toHaveTextContent(
 			"Health 10 / 10",
 		);

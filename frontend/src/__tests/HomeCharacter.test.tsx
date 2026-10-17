@@ -206,6 +206,12 @@ describe("Character sheet", () => {
 				await screen.findByRole("dialog", { name: "Settings" });
 			}
 			await user.click(screen.getByRole("button", { name: restart }));
+			if (restart === "New Dungeon")
+				await user.click(
+					screen.getByRole("button", {
+						name: "Start new dungeon",
+					}),
+				);
 			await waitFor(() =>
 				expect(screen.queryByRole("dialog")).not.toBeInTheDocument(),
 			);

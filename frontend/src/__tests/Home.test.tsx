@@ -247,6 +247,7 @@ describe("Home rendering and movement", () => {
 
 		generateSpy.mockReturnValue(second);
 		await user.click(screen.getByRole("button", { name: "New Dungeon" }));
+		await user.click(screen.getByRole("button", { name: "Start new dungeon" }));
 		await enterDungeonFromTown(user);
 
 		await user.keyboard("{ArrowUp}");

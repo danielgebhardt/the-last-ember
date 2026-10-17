@@ -263,7 +263,7 @@ test("map following keeps five-tile margins, preserves manual scrolling and cent
 test("fresh starts, New Dungeon and seed replay restore starter potions without locking their shortcuts", async ({
 	page,
 }) => {
-	await page.getByRole("radio", { name: /Small/ }).check();
+	await page.getByRole("radio", { name: /Small/ }).locator("..").click();
 	await page
 		.getByRole("button", { name: "Begin Adventure", exact: true })
 		.click();
@@ -306,6 +306,9 @@ test("fresh starts, New Dungeon and seed replay restore starter potions without 
 		}),
 	).toBeVisible();
 	await page.getByRole("button", { name: "New Dungeon", exact: true }).click();
+	await page
+		.getByRole("button", { name: "Start new dungeon", exact: true })
+		.click();
 	await enterDungeonFromTown(page);
 	await expect(
 		page.getByRole("button", {
@@ -494,8 +497,11 @@ test("welcome choices and keyboard Settings apply return control to the map", as
 	page,
 }) => {
 	await expect(page.getByRole("radio", { name: /Medium/ })).toBeChecked();
-	await page.getByRole("radio", { name: /Small/ }).check();
-	await page.getByRole("radio", { name: /Harder/ }).check();
+	await page.getByRole("radio", { name: /Small/ }).locator("..").click();
+	await page
+		.getByRole("radio", { name: /Harder/ })
+		.locator("..")
+		.click();
 	await page
 		.getByRole("button", { name: "Begin Adventure", exact: true })
 		.click();
@@ -516,7 +522,10 @@ test("welcome choices and keyboard Settings apply return control to the map", as
 	await settings
 		.getByRole("textbox", { name: "Columns", exact: true })
 		.fill("15");
-	await settings.getByRole("radio", { name: /Easier/ }).check();
+	await settings
+		.getByRole("radio", { name: /Easier/ })
+		.locator("..")
+		.click();
 	await settings
 		.getByRole("textbox", { name: "Floors", exact: true })
 		.fill("5");
@@ -856,6 +865,9 @@ test("a queued corridor step stays canceled through confirmed save/load and a ne
 		page.getByRole("status", { name: "Corridor travel", exact: true }),
 	).toContainText("Running");
 	await page.getByRole("button", { name: "New Dungeon", exact: true }).click();
+	await page
+		.getByRole("button", { name: "Start new dungeon", exact: true })
+		.click();
 	await enterDungeonFromTown(page);
 	await expect(turns(page)).toHaveText("Turn 0");
 	await page.waitForTimeout(400);
@@ -1867,4 +1879,105 @@ test("all player status icons fit without moving the dungeon when they expire", 
 	).toHaveCount(0);
 	expect(await map(page).boundingBox()).toEqual(before);
 	await expect(map(page)).toBeFocused();
+});
+
+for (const width of [390, 1280])
+	for (const theme of ["Light", "Dark"]) {
+		test(`New Dungeon requires confirmation and restores map focus at ${width}px ${theme}`, async ({
+			page,
+		}, testInfo) => {
+			await page.setViewportSize({ width, height: width === 390 ? 740 : 720 });
+			await importAdventure(page, "corridor-large");
+			await page.getByRole("button", { name: "Settings", exact: true }).click();
+			await page.getByRole("button", { name: theme, exact: true }).click();
+			await page.keyboard.press("Escape");
+			await expect(map(page)).toBeFocused();
+			await page.keyboard.press("Space");
+			const before = await turns(page).textContent();
+			await page
+				.getByRole("button", { name: "Save/Load", exact: true })
+				.click();
+			await page
+				.getByRole("button", { name: "Save adventure", exact: true })
+				.click();
+			await page
+				.getByRole("button", { name: "Confirm save", exact: true })
+				.click();
+			await page.keyboard.press("Escape");
+			await expect(map(page)).toBeFocused();
+			const saved = await page.evaluate(() =>
+				localStorage.getItem("larn:adventure-save"),
+			);
+			const newDungeon = page.getByRole("button", {
+				name: "New Dungeon",
+				exact: true,
+			});
+			const dialog = page.getByRole("dialog", {
+				name: "Start a new dungeon?",
+				exact: true,
+			});
+			await newDungeon.click();
+			await expect(dialog).toBeInViewport({ ratio: 1 });
+			await expect(
+				dialog.getByRole("button", { name: "Cancel", exact: true }),
+			).toBeFocused();
+			await page.keyboard.press("ArrowRight");
+			await page.keyboard.press("6");
+			await expect(turns(page)).toHaveText(before ?? "");
+			await page.screenshot({
+				path: testInfo.outputPath(`new-dungeon-${width}-${theme}.png`),
+			});
+			await page.keyboard.press("Escape");
+			await expect(dialog).toHaveCount(0);
+			await expect(map(page)).toBeFocused();
+			await expect(turns(page)).toHaveText(before ?? "");
+			await newDungeon.click();
+			await dialog.getByRole("button", { name: "Cancel", exact: true }).click();
+			await expect(map(page)).toBeFocused();
+			await expect(turns(page)).toHaveText(before ?? "");
+			await newDungeon.click();
+			await page.mouse.click(2, 2);
+			await expect(dialog).toHaveCount(0);
+			await expect(map(page)).toBeFocused();
+			await expect(turns(page)).toHaveText(before ?? "");
+			await newDungeon.click();
+			await dialog
+				.getByRole("button", { name: "Start new dungeon", exact: true })
+				.click();
+			const town = page.getByLabel("Town map", { exact: true });
+			await expect(town).toBeFocused();
+			await expect(turns(page)).toHaveText("Turn 0");
+			expect(
+				await page.evaluate(() => localStorage.getItem("larn:adventure-save")),
+			).toBe(saved);
+			await newDungeon.click();
+			await page.keyboard.press("Escape");
+			await expect(town).toBeFocused();
+		});
+	}
+
+test("New Dungeon cancellation keeps queued corridor steps canceled", async ({
+	page,
+}) => {
+	await importAdventure(page, "corridor-large");
+	await page.keyboard.press("r");
+	await page.keyboard.press("ArrowRight");
+	await expect(
+		page.getByRole("status", { name: "Corridor travel", exact: true }),
+	).toContainText("Running");
+	await page.getByRole("button", { name: "New Dungeon", exact: true }).click();
+	const dialog = page.getByRole("dialog", {
+		name: "Start a new dungeon?",
+		exact: true,
+	});
+	await expect(dialog).toBeVisible();
+	const before = await turns(page).textContent();
+	await page.waitForTimeout(300);
+	await expect(turns(page)).toHaveText(before ?? "");
+	await page.keyboard.press("Escape");
+	await expect(map(page)).toBeFocused();
+	await page.waitForTimeout(300);
+	await expect(turns(page)).toHaveText(before ?? "");
+	await page.keyboard.press("ArrowRight");
+	await expect(turns(page)).not.toHaveText(before ?? "");
 });

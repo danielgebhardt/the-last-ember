@@ -25,6 +25,7 @@ it("uses the recommended configuration on Begin and retains it for random restar
 		expect.objectContaining({ rows: 40, cols: 40 }),
 	);
 	await user.click(screen.getByRole("button", { name: "New Dungeon" }));
+	await user.click(screen.getByRole("button", { name: "Start new dungeon" }));
 	expect(generate).toHaveBeenLastCalledWith(
 		expect.any(Number),
 		20,

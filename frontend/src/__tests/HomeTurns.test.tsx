@@ -68,18 +68,26 @@ describe("Turn display", () => {
 		expect(screen.getByLabelText("row1col1 - player")).toBeVisible();
 	});
 
-	it("resets the turn for seed replay and New Dungeon", async () => {
-		stubDungeonRun(createThreeFloorTraversalRun());
-		const user = userEvent.setup();
-		renderHome(<Home />);
-		await user.keyboard("{ArrowRight}");
-		const seed = await openSettings(user);
-		await user.clear(seed);
-		await user.type(seed, "123{Enter}");
-		await waitForSettingsClosed();
-		expect(screen.getByLabelText("Turn count")).toHaveTextContent("Turn 0");
-		await user.keyboard("{ArrowRight}");
-		await user.click(screen.getByRole("button", { name: "New Dungeon" }));
-		expect(screen.getByLabelText("Turn count")).toHaveTextContent("Turn 0");
-	});
+	it.each(["seed replay", "New Dungeon"])(
+		"resets the turn for %s",
+		async (restart) => {
+			stubDungeonRun(createThreeFloorTraversalRun());
+			const user = userEvent.setup();
+			renderHome(<Home />);
+			await user.keyboard("{ArrowRight}");
+			expect(screen.getByLabelText("Turn count")).toHaveTextContent("Turn 1");
+			if (restart === "seed replay") {
+				const seed = await openSettings(user);
+				await user.clear(seed);
+				await user.type(seed, "123{Enter}");
+				await waitForSettingsClosed();
+			} else {
+				await user.click(screen.getByRole("button", { name: "New Dungeon" }));
+				await user.click(
+					screen.getByRole("button", { name: "Start new dungeon" }),
+				);
+			}
+			expect(screen.getByLabelText("Turn count")).toHaveTextContent("Turn 0");
+		},
+	);
 });

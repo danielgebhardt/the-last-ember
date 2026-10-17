@@ -169,6 +169,9 @@ describe("Home exploration integration", () => {
 		]) {
 			vi.spyOn(Math, "random").mockReturnValue(seed / 4294967296);
 			await user.click(screen.getByRole("button", { name: "New Dungeon" }));
+			await user.click(
+				screen.getByRole("button", { name: "Start new dungeon" }),
+			);
 			await enterDungeonFromTown(user);
 			expectFloor(seed, 1, { row: 1, col: 1 + offset });
 			expect(await openSettings(user)).toHaveValue(String(seed));

@@ -106,6 +106,7 @@ describe("Fog across complete dungeon runs", () => {
 		).toBeVisible();
 		await user.keyboard(walkRight(6));
 		await user.click(screen.getByRole("button", { name: "New Dungeon" }));
+		await user.click(screen.getByRole("button", { name: "Start new dungeon" }));
 		await enterDungeonFromTown(user);
 		expect(screen.getByRole("heading", { name: "Floor 1 of 2" })).toBeVisible();
 		await user.keyboard(walkRight(9));
@@ -154,6 +155,7 @@ describe("Fog across complete dungeon runs", () => {
 		await user.click(screen.getByRole("button", { name: "Light" }));
 		await closeSettings(user);
 		await user.click(screen.getByRole("button", { name: "New Dungeon" }));
+		await user.click(screen.getByRole("button", { name: "Start new dungeon" }));
 		await enterDungeonFromTown(user);
 		await openSettings(user);
 		expect(

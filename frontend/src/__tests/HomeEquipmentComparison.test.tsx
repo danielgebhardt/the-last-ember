@@ -144,6 +144,7 @@ describe("Equipment comparison in Character", () => {
 		).toHaveAccessibleDescription(/Better/);
 		await user.keyboard("c");
 		await user.click(screen.getByRole("button", { name: "New Dungeon" }));
+		await user.click(screen.getByRole("button", { name: "Start new dungeon" }));
 		await user.click(screen.getByRole("button", { name: "Character" }));
 		expect(screen.getByLabelText("Bag capacity")).toHaveTextContent("2 / 27");
 		expect(

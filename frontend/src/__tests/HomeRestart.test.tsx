@@ -76,6 +76,8 @@ describe("Home run restart", () => {
 		generateSpy.mockReturnValue(secondRun);
 
 		await user.click(screen.getByRole("button", { name: "New Dungeon" }));
+
+		await user.click(screen.getByRole("button", { name: "Start new dungeon" }));
 		await enterDungeonFromTown(user);
 
 		expect(generateSpy).toHaveBeenCalledTimes(callsBeforeClick + 1);
@@ -122,6 +124,10 @@ describe("Home run restart", () => {
 			).toBeVisible();
 
 			await user.click(screen.getByRole("button", { name: "New Dungeon" }));
+
+			await user.click(
+				screen.getByRole("button", { name: "Start new dungeon" }),
+			);
 			await enterDungeonFromTown(user);
 
 			expect(
@@ -148,6 +154,8 @@ describe("Home run restart", () => {
 		expect(screen.getByRole("heading", { name: "Floor 2 of 3" })).toBeVisible();
 
 		await user.click(screen.getByRole("button", { name: "New Dungeon" }));
+
+		await user.click(screen.getByRole("button", { name: "Start new dungeon" }));
 		await enterDungeonFromTown(user);
 
 		expect(screen.getByRole("heading", { name: "Floor 1 of 3" })).toBeVisible();

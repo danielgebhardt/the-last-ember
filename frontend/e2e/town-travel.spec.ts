@@ -5,7 +5,7 @@ test("live town is centered over transparent space, preserves the dungeon, and r
 	page,
 }, info) => {
 	await page.goto("/");
-	await page.getByRole("radio", { name: /Small/ }).check();
+	await page.getByRole("radio", { name: /Small/ }).locator("..").click();
 	await page
 		.getByRole("button", { name: "Begin Adventure", exact: true })
 		.click();

@@ -121,6 +121,11 @@ describe("Combat on the play screen", () => {
 			await user.keyboard("dd");
 			if (restart === "new dungeon") {
 				await user.click(screen.getByRole("button", { name: "New Dungeon" }));
+				await user.click(
+					screen.getByRole("button", {
+						name: "Start new dungeon",
+					}),
+				);
 				await enterDungeonFromTown(user);
 			} else {
 				await openSettings(user);

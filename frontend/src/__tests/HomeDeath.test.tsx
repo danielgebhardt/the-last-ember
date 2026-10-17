@@ -59,6 +59,11 @@ describe("Ending a run on player death", () => {
 			expect(screen.getByRole("alert")).toHaveTextContent(deathMessage);
 			if (restart === "new dungeon") {
 				await user.click(screen.getByRole("button", { name: "New Dungeon" }));
+				await user.click(
+					screen.getByRole("button", {
+						name: "Start new dungeon",
+					}),
+				);
 				await enterDungeonFromTown(user);
 			} else {
 				await openSettings(user);

@@ -282,6 +282,7 @@ describe("Confirmed local Save and Load", () => {
 		).toHaveValue("2");
 		await closeSettings(user);
 		await user.click(screen.getByRole("button", { name: "New Dungeon" }));
+		await user.click(screen.getByRole("button", { name: "Start new dungeon" }));
 		await enterDungeonFromTown(user);
 		expect(screen.getAllByRole("cell")).toHaveLength(120);
 		expect(screen.getByLabelText("Player level")).toHaveTextContent("Level 1");

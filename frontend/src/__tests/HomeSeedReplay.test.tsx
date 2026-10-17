@@ -185,6 +185,9 @@ describe("Home seed replay", () => {
 			await user.type(input, "bad{Enter}");
 			await closeSettings(user);
 			await user.click(screen.getByRole("button", { name: "New Dungeon" }));
+			await user.click(
+				screen.getByRole("button", { name: "Start new dungeon" }),
+			);
 			expect(await openSettings(user)).toHaveValue(expected);
 			expect(screen.getByLabelText("Current dungeon seed").textContent).toBe(
 				expected,

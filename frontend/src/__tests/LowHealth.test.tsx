@@ -130,6 +130,9 @@ describe("Low-health feedback", () => {
 		await userEvent
 			.setup()
 			.click(screen.getByRole("button", { name: "New Dungeon" }));
+		await userEvent
+			.setup()
+			.click(screen.getByRole("button", { name: "Start new dungeon" }));
 		expect(screen.queryByText("Low health")).not.toBeInTheDocument();
 		expect(screen.getByLabelText("Player health")).toHaveTextContent(
 			"Health 10 / 10",

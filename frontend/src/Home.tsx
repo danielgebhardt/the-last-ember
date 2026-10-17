@@ -131,6 +131,8 @@ const Home = ({
 	const [seedError, setSeedError] = useState<string | null>(null);
 	const [settingsOpen, setSettingsOpen] = useState(false);
 	const [saveOpen, setSaveOpen] = useState(false);
+	const [newDungeonOpen, setNewDungeonOpen] = useState(false);
+	const cancelNewDungeonRef = useRef<HTMLButtonElement>(null);
 	const [townShopOpen, setTownShopOpen] = useState(false);
 	const [catalogOpen, setCatalogOpen] = useState(false);
 	const [helpOpen, setHelpOpen] = useState(false);
@@ -294,6 +296,7 @@ const Home = ({
 		else handleActionRequested({ type: "interact" });
 	};
 	const mapInputAvailable =
+		!newDungeonOpen &&
 		merchantId === null &&
 		!townShopOpen &&
 		!deathOpen &&
@@ -364,7 +367,7 @@ const Home = ({
 			<Header
 				floorNumber={town ? 0 : activeFloor.floorNumber}
 				floorCount={run.floors.length}
-				onNewDungeon={handleNewDungeon}
+				onNewDungeon={() => setNewDungeonOpen(true)}
 				characterAction={
 					<Dialog.Root open={characterOpen} onOpenChange={setCharacterOpen}>
 						<Dialog.Trigger
@@ -833,6 +836,50 @@ const Home = ({
 					</div>
 				</section>
 			</main>
+			<Dialog.Root
+				open={newDungeonOpen}
+				onOpenChange={setNewDungeonOpen}
+				onOpenChangeComplete={(open) => {
+					if (!open && !settingsOpen)
+						mapRef.current?.focus({ preventScroll: true });
+				}}
+			>
+				<Dialog.Portal>
+					<Dialog.Backdrop className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs" />
+					<Dialog.Popup
+						initialFocus={cancelNewDungeonRef}
+						finalFocus={settingsOpen ? false : mapRef}
+						className="fixed top-1/2 left-1/2 z-50 w-[calc(100%-2rem)] max-w-md -translate-x-1/2 -translate-y-1/2 rounded-xl border bg-popover p-5 text-popover-foreground shadow-xl"
+					>
+						<Dialog.Title className="text-lg font-semibold">
+							Start a new dungeon?
+						</Dialog.Title>
+						<Dialog.Description className="mt-2 text-sm text-muted-foreground">
+							This replaces your current adventure. Unsaved progress will be
+							lost. Your browser save and exported save files will remain
+							available.
+						</Dialog.Description>
+						<div className="mt-5 flex flex-wrap justify-end gap-2">
+							<Button
+								ref={cancelNewDungeonRef}
+								variant="outline"
+								onClick={() => setNewDungeonOpen(false)}
+							>
+								Cancel
+							</Button>
+							<Button
+								onClick={() => {
+									setNewDungeonOpen(false);
+									handleNewDungeon();
+								}}
+							>
+								Start new dungeon
+							</Button>
+						</div>
+					</Dialog.Popup>
+				</Dialog.Portal>
+			</Dialog.Root>
+
 			<GameOverDialog
 				state={game.state}
 				open={deathOpen}
