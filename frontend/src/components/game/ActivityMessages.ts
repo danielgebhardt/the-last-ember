@@ -2,7 +2,7 @@ import type { ActivityEvent } from "../../domain/game/ActivityHistory.ts";
 import { ADVENTURE_STORY } from "../../domain/game/AdventureStory";
 import { SPELL_DEFINITIONS } from "../../domain/game/Spells";
 import { EFFECT_DEFINITIONS } from "../../domain/game/TimedEffects";
-import { EQUIPMENT_SLOT_LABELS } from "../../domain/items/Equipment";
+import { equipmentPlacementLabel } from "../../domain/items/Equipment";
 import { ITEM_DEFINITIONS } from "../../domain/items/Item";
 import { MONSTER_DEFINITIONS } from "../../domain/monsters/Monster";
 import { ESCAPE_PURSUIT_RULES } from "../../domain/monsters/PursuitRules";
@@ -146,7 +146,7 @@ export const formatActivityEvent = (event: ActivityEvent): string => {
 		case "player-died":
 			return `${prefix}You die.`;
 		case "item-equipped": {
-			const slot = EQUIPMENT_SLOT_LABELS[event.slot].toLowerCase();
+			const slot = equipmentPlacementLabel(event.slot);
 			const replaced = event.replaced
 				? `, returning ${ITEM_DEFINITIONS[event.replaced].name} to your bag`
 				: "";

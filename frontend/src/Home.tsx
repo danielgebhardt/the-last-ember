@@ -694,12 +694,12 @@ const Home = ({
 								)}
 							</DungeonFrame>
 							{/* Transient notices share reserved space so the map never reflows. */}
-							<div className="relative h-16 shrink-0 lg:h-12">
+							<div className="relative h-32 shrink-0 lg:h-24">
 								<section
 									aria-label="Dungeon notices"
 									// biome-ignore lint/a11y/noNoninteractiveTabindex: Keyboard users need to scroll longer notices.
 									tabIndex={0}
-									className={`h-full overflow-y-auto focus-visible:outline-1 focus-visible:-outline-offset-1 focus-visible:outline-ring ${atDungeonEntrance(game.state) && canPlay ? "pr-40" : ""}`}
+									className={`h-full overflow-y-auto px-1 py-1 focus-visible:outline-1 focus-visible:-outline-offset-1 focus-visible:outline-ring ${atDungeonEntrance(game.state) && canPlay ? "pr-40" : ""}`}
 								>
 									<VisibleEffects
 										monsterPoisonDamage={

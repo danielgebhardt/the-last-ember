@@ -5,6 +5,7 @@ import type { Bag } from "../../domain/items/Bag";
 import {
 	EQUIPMENT_SLOT_LABELS,
 	type EquipmentSlot,
+	equipmentPlacementLabel,
 	equipmentSlotsFor,
 } from "../../domain/items/Equipment";
 import type { EquipmentComparisonContext } from "../../domain/items/EquipmentComparison";
@@ -137,7 +138,7 @@ const ItemDetails = ({
 								key={slot}
 								onClick={() => act({ type: "equip", itemId: item.id, slot })}
 							>
-								Equip on {EQUIPMENT_SLOT_LABELS[slot].toLowerCase()}
+								Equip on {equipmentPlacementLabel(slot)}
 							</Button>
 						))}
 						{details.type === "scroll" && (

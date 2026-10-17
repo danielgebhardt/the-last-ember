@@ -1425,8 +1425,9 @@ test("adventure layout keeps the dungeon usable beside a responsive Activity pan
 			console.log(
 				`${size.width}×${size.height} ${theme}: dungeon ${((100 * dungeon.height) / size.height).toFixed(1)}% (${dungeon.height}px)`,
 			);
+			// The requested two-message footer reserves 48px more than before.
 			expect(dungeon.height).toBeGreaterThanOrEqual(
-				size.width < 1280 ? 300 : 320,
+				(size.width < 1280 ? 300 : 320) - 48,
 			);
 			expect(activity.x).toBeGreaterThanOrEqual(dungeon.x + dungeon.width);
 			expect(activity.width).toBeGreaterThanOrEqual(280);
@@ -1654,13 +1655,31 @@ for (const size of [
 			exact: true,
 		});
 		await expect(conditions).toContainText("Poisoned");
+		await page.keyboard.press("g");
+		const feedback = page.getByLabel("Action feedback", { exact: true });
+		await expect(feedback).toContainText("No items on this tile.");
 		// Long warnings stay scrollable, including when they wrap on a phone.
 		const notices = page.getByRole("region", {
 			name: "Dungeon notices",
 			exact: true,
 		});
+		for (const theme of ["Light", "Dark"]) {
+			await page.getByRole("button", { name: "Settings", exact: true }).click();
+			await page.getByRole("button", { name: theme, exact: true }).click();
+			await page.keyboard.press("Escape");
+			await expect(map(page)).toBeFocused();
+			const bounds = await notices.boundingBox();
+			if (!bounds) throw new Error("Expected notice area");
+			for (const message of [conditions, feedback]) {
+				const messageBounds = await message.boundingBox();
+				if (!messageBounds) throw new Error("Expected message");
+				expect(messageBounds.y).toBeGreaterThanOrEqual(bounds.y);
+				expect(messageBounds.y + messageBounds.height).toBeLessThanOrEqual(
+					bounds.y + bounds.height,
+				);
+			}
+		}
 		await notices.focus();
-		await page.keyboard.press("End");
 		await expect(notices).toBeFocused();
 		await page.screenshot({ path: testInfo.outputPath("poison-notice.png") });
 		await map(page).focus();

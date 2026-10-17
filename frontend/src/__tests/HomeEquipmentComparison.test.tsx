@@ -196,7 +196,7 @@ describe("Equipment comparison in Character", () => {
 			"Mana 3 / 16",
 		);
 		expect(screen.getByLabelText("Turn count")).toHaveTextContent("Turn 0");
-		await user.click(panel.getByRole("button", { name: "Equip on left ring" }));
+		await user.click(panel.getByRole("button", { name: "Equip on left hand" }));
 		expect(panel.getByLabelText("Character attack")).toHaveTextContent(
 			"Attack 3–5",
 		);

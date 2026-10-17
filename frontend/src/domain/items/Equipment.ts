@@ -9,6 +9,14 @@ export const EQUIPMENT_SLOT_LABELS = {
 	rightRing: "Right ring",
 } as const;
 export type EquipmentSlot = keyof typeof EQUIPMENT_SLOT_LABELS;
+
+export const equipmentPlacementLabel = (slot: EquipmentSlot): string =>
+	slot === "leftRing"
+		? "left hand"
+		: slot === "rightRing"
+			? "right hand"
+			: EQUIPMENT_SLOT_LABELS[slot].toLowerCase();
+
 export type Equipment = Readonly<Record<EquipmentSlot, ItemInstance | null>>;
 
 export const equipmentSlotFor = (item: ItemInstance): EquipmentSlot | null => {
