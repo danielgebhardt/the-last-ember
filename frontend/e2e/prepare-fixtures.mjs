@@ -20,6 +20,9 @@ export default async function prepareFixtures() {
 			"/src/domain/dungeon/DungeonRun.ts",
 		);
 		const { createGameState } = await load("/src/domain/game/GameState.ts");
+		const { PLAYER_EFFECT_KINDS } = await load(
+			"/src/domain/game/TimedEffects.ts",
+		);
 		const { createReviewEncounter } = await load("/scripts/evasion-review.ts");
 		const { updateExploration } = await load(
 			"/src/domain/dungeon/Exploration.ts",
@@ -518,6 +521,19 @@ export default async function prepareFixtures() {
 							activated: true,
 						},
 					],
+				},
+				configuration,
+			],
+			[
+				"viewport-status-icons",
+				{
+					...viewportFeedback,
+					effects: PLAYER_EFFECT_KINDS.map((kind) => ({
+						actorId: "player",
+						floorNumber: null,
+						kind,
+						remaining: 2,
+					})),
 				},
 				configuration,
 			],

@@ -1,5 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
+import StatusEffectIcons from "../components/game/StatusEffectIcons";
 import VisibleEffects from "../components/game/VisibleEffects";
 import type { Monster } from "../domain/monsters/Monster";
 import { monsterTraits } from "../domain/monsters/MonsterTraits";
@@ -35,7 +36,7 @@ describe("Actionable visible threats", () => {
 			screen.queryByRole("list", { name: "Visible threats" }),
 		).not.toBeInTheDocument();
 	});
-	it("explains poison timing and the available antidote counterplay", () => {
+	it("moves player conditions into the HUD without duplicating dungeon notices", () => {
 		render(
 			<VisibleEffects
 				effects={[
@@ -50,8 +51,23 @@ describe("Actionable visible threats", () => {
 			/>,
 		);
 		expect(
-			screen.getByRole("list", { name: "Your conditions" }),
-		).toHaveTextContent(/1 damage after monsters.*Antidote/i);
+			screen.queryByRole("list", { name: "Your conditions" }),
+		).not.toBeInTheDocument();
+		render(
+			<StatusEffectIcons
+				effects={[
+					{
+						actorId: "player",
+						floorNumber: null,
+						kind: "poisoned",
+						remaining: 2,
+					},
+				]}
+			/>,
+		);
+		expect(
+			screen.getByRole("button", { name: "Poisoned — 2 phases remaining" }),
+		).toHaveAccessibleDescription(/1 damage after monsters.*Antidote/i);
 	});
 	it("explains ranged cover and prepared-attack interruption without new rules", () => {
 		expect(monsterTraits("goblin-archer").join(" ")).toMatch(

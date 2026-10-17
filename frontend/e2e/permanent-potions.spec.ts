@@ -35,7 +35,10 @@ for (const width of [390, 1440])
 				page.getByLabel("Player health", { exact: true }),
 			).toContainText("5 / 10");
 			await expect(
-				page.getByRole("list", { name: "Your conditions", exact: true }),
+				page.getByRole("list", {
+					name: "Active player conditions",
+					exact: true,
+				}),
 			).toHaveCount(0);
 			await page.keyboard.press("c");
 			for (const attribute of ["Strength", "Dexterity", "Intelligence"])

@@ -35,7 +35,6 @@ const VisibleEffects = ({
 	visible?: VisibilityGrid;
 	monsterPoisonDamage?: number;
 }) => {
-	const own = effects.filter((effect) => effect.actorId === "player");
 	const entries = effects.flatMap((effect) => {
 		const actor = monsters.find(
 			(monster) => monster.id === effect.actorId && monster.health > 0,
@@ -61,8 +60,7 @@ const VisibleEffects = ({
 			(visible === undefined ||
 				visible[actor.coordinate.row]?.[actor.coordinate.col]),
 	);
-	if (!entries.length && !own.length && !threats.length && !prepared.length)
-		return null;
+	if (!entries.length && !threats.length && !prepared.length) return null;
 	return (
 		<div className="mb-2 grid gap-1 text-xs">
 			{prepared.length > 0 && (
@@ -95,27 +93,6 @@ const VisibleEffects = ({
 							{MONSTER_DEFINITIONS[actor.kind].name}: {intent.element} blast ·{" "}
 							{intent.remaining} response{" "}
 							{intent.remaining === 1 ? "turn" : "turns"} left
-						</li>
-					))}
-				</ul>
-			)}
-			{own.length > 0 && (
-				<ul
-					aria-label="Your conditions"
-					className="flex flex-wrap justify-center gap-2"
-				>
-					{own.map((effect) => (
-						<li
-							key={effect.kind}
-							className={
-								effect.kind === "poisoned"
-									? "rounded-md border border-destructive/40 bg-destructive/10 px-2 py-1 text-destructive"
-									: "rounded-md border border-emerald-500/40 bg-emerald-500/10 px-2 py-1 text-emerald-800 dark:text-emerald-200"
-							}
-						>
-							{effectLabel(effect)}
-							{effect.kind === "poisoned" &&
-								` · 1 damage after monsters each committed turn; up to ${effect.remaining} damage remaining. Antidote removes current poison before that tick.`}
 						</li>
 					))}
 				</ul>

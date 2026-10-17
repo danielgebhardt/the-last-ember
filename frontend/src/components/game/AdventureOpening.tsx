@@ -47,6 +47,7 @@ const AdventureOpening = ({
                      bg-popover text-popover-foreground
                      shadow-[0_24px_70px_rgba(0,0,0,0.35)]
                      dark:border-amber-600/35
+                     [@media(max-height:800px)]:[&_label]:py-1.5
                   "
 					>
 						{/* Title and emblem */}
@@ -58,9 +59,10 @@ const AdventureOpening = ({
                         px-5 pt-4 pb-3 text-center
                         dark:border-amber-500/20
                         dark:from-[#302318] dark:via-card dark:to-card
+                        [@media(max-height:800px)]:pt-3 [@media(max-height:800px)]:pb-2
                      "
 						>
-							<EmberEmblem className="mx-auto size-14" />
+							<EmberEmblem className="mx-auto size-14 [@media(max-height:800px)]:size-10" />
 
 							<Dialog.Title
 								ref={title}
@@ -88,9 +90,7 @@ const AdventureOpening = ({
 							</p>
 						</div>
 
-						<div className="space-y-3 px-5 py-4 sm:px-6">
-							{/* Framed prologue */}
-
+						<div className="space-y-3 px-5 py-4 sm:px-6 [@media(max-height:800px)]:space-y-2 [@media(max-height:800px)]:py-3">
 							{/* Framed prologue */}
 							<div
 								className="
@@ -129,7 +129,7 @@ const AdventureOpening = ({
 
 							{/* Adventure settings */}
 							<form
-								className="grid gap-3"
+								className="grid gap-3 [@media(max-height:800px)]:gap-2"
 								onSubmit={(event) => {
 									event.preventDefault();
 									onBegin(configuration);

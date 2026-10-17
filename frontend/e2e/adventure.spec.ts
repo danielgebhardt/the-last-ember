@@ -1645,43 +1645,42 @@ for (const size of [
 		});
 	}
 
-	test(`poison expiration does not shift the dungeon at ${size.width}px`, async ({
+	test(`poison icons replace notices and expiration does not shift the dungeon at ${size.width}px`, async ({
 		page,
 	}, testInfo) => {
 		await page.setViewportSize(size);
 		await importAdventure(page, "viewport-poison");
 		const conditions = page.getByRole("list", {
-			name: "Your conditions",
+			name: "Active player conditions",
 			exact: true,
 		});
-		await expect(conditions).toContainText("Poisoned");
+		const poison = conditions.getByRole("button", {
+			name: "Poisoned — 1 phase remaining",
+		});
+		await expect(poison).toBeVisible();
 		await page.keyboard.press("g");
-		const feedback = page.getByLabel("Action feedback", { exact: true });
-		await expect(feedback).toContainText("No items on this tile.");
-		// Long warnings stay scrollable, including when they wrap on a phone.
 		const notices = page.getByRole("region", {
 			name: "Dungeon notices",
 			exact: true,
 		});
+		await expect(notices).toContainText("No items on this tile.");
+		await expect(notices).not.toContainText("Poisoned");
 		for (const theme of ["Light", "Dark"]) {
 			await page.getByRole("button", { name: "Settings", exact: true }).click();
 			await page.getByRole("button", { name: theme, exact: true }).click();
 			await page.keyboard.press("Escape");
 			await expect(map(page)).toBeFocused();
-			const bounds = await notices.boundingBox();
-			if (!bounds) throw new Error("Expected notice area");
-			for (const message of [conditions, feedback]) {
-				const messageBounds = await message.boundingBox();
-				if (!messageBounds) throw new Error("Expected message");
-				expect(messageBounds.y).toBeGreaterThanOrEqual(bounds.y);
-				expect(messageBounds.y + messageBounds.height).toBeLessThanOrEqual(
-					bounds.y + bounds.height,
-				);
-			}
+			await poison.click();
+			const details = page.getByRole("dialog");
+			await expect(details).toContainText("Antidote removes current poison");
+			await expect(details).toBeInViewport({ ratio: 1 });
+			await page.screenshot({
+				path: testInfo.outputPath(`poison-icon-${theme}.png`),
+			});
+			await page.keyboard.press("Escape");
+			await expect(details).toHaveCount(0);
 		}
-		await notices.focus();
-		await expect(notices).toBeFocused();
-		await page.screenshot({ path: testInfo.outputPath("poison-notice.png") });
+
 		await map(page).focus();
 		const before = await map(page).boundingBox();
 		await page.keyboard.press("Space");
@@ -1827,4 +1826,45 @@ test("reliquary confirms its ten-health lethal sacrifice and supports free cance
 		page.getByRole("dialog", { name: "You died", exact: true }),
 	).toBeVisible();
 	await expect(page.getByRole("log")).toContainText("The seal deals 10 damage");
+});
+
+test("all player status icons fit without moving the dungeon when they expire", async ({
+	page,
+}, testInfo) => {
+	await importAdventure(page, "viewport-status-icons");
+	for (const width of [320, 390, 1024, 1280, 1920]) {
+		await page.setViewportSize({ width, height: width < 1024 ? 740 : 900 });
+		const icons = page.getByRole("list", {
+			name: "Active player conditions",
+			exact: true,
+		});
+		await expect(icons.getByRole("button")).toHaveCount(6);
+		const bounds = await icons.boundingBox();
+		if (!bounds) throw new Error("Expected icons");
+		for (const icon of await icons.getByRole("button").all()) {
+			const box = await icon.boundingBox();
+			if (!box) throw new Error("Expected icon");
+			expect(box.x).toBeGreaterThanOrEqual(0);
+			expect(box.x + box.width).toBeLessThanOrEqual(width);
+		}
+		expect(
+			await page
+				.locator("html")
+				.evaluate((node) => node.scrollWidth <= node.clientWidth),
+		).toBe(true);
+		await page.screenshot({
+			path: testInfo.outputPath(`all-status-icons-${width}.png`),
+			fullPage: true,
+		});
+	}
+	await page.setViewportSize({ width: 1280, height: 720 });
+	await map(page).focus();
+	const before = await map(page).boundingBox();
+	await page.keyboard.press("Space");
+	await page.keyboard.press("Space");
+	await expect(
+		page.getByRole("list", { name: "Active player conditions", exact: true }),
+	).toHaveCount(0);
+	expect(await map(page).boundingBox()).toEqual(before);
+	await expect(map(page)).toBeFocused();
 });
