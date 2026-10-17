@@ -24,7 +24,11 @@ for (const width of [390, 1440])
 			await page.getByRole("button", { name: theme, exact: true }).click();
 			await page.keyboard.press("Escape");
 			await expect(map).toBeFocused();
-			await page.keyboard.press("e");
+			if (width === 390)
+				await map
+					.getByRole("button", { name: "Inspect Potion store", exact: true })
+					.click();
+			else await page.keyboard.press("e");
 			const store = page.getByRole("dialog", { name: "Town potion store" });
 			await expect(store).toBeVisible();
 			await expect(store.getByRole("listitem")).toHaveCount(8);

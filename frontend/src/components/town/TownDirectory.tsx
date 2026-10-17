@@ -41,8 +41,10 @@ const TownDirectory = ({
 						press E to browse.
 					</Dialog.Description>
 					<p className="mb-3 text-sm">
-						Beacon square: 8, 14 · South arrival: 17, 14 · Dungeon gate: 19, 14.
-						Enter on the gate descends; E inspects signs.
+						Beacon square: {TOWN.beacon.row}, {TOWN.beacon.col} · South arrival:{" "}
+						{TOWN.arrival.row}, {TOWN.arrival.col} · Dungeon gate:{" "}
+						{TOWN.gate.row}, {TOWN.gate.col}. Enter on the gate descends; E
+						inspects signs.
 					</p>
 					<ul className="grid gap-2 sm:grid-cols-2">
 						{TOWN.buildings.map((building) => (

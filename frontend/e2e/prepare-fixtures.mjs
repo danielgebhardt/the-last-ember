@@ -561,7 +561,7 @@ export default async function prepareFixtures() {
 					gold: 5000,
 					town: {
 						...createTownLocation(),
-						coordinate: { row: 13, col: store === "armor" ? 10 : 18 },
+						coordinate: { row: 13, col: store === "armor" ? 7 : 16 },
 					},
 				},
 				configuration,
@@ -596,7 +596,7 @@ export default async function prepareFixtures() {
 				{
 					...quiet,
 					gold: 5000,
-					town: { ...createTownLocation(), coordinate: { row: 13, col: 4 } },
+					town: { ...createTownLocation(), coordinate: { row: 13, col: 3 } },
 				},
 				configuration,
 			],
@@ -687,7 +687,7 @@ export default async function prepareFixtures() {
 				{
 					...quiet,
 					gold: 1000,
-					town: { ...createTownLocation(), coordinate: { row: 13, col: 4 } },
+					town: { ...createTownLocation(), coordinate: { row: 13, col: 3 } },
 					effects: [
 						{
 							actorId: "player",

@@ -1,6 +1,7 @@
 import type { Coordinate } from "../dungeon/DungeonTypes";
 
-export const TOWN_LAYOUT_ID = "beacon-town:v1";
+// New layout version because building positions and entrances changed.
+export const TOWN_LAYOUT_ID = "beacon-town:v2";
 
 export type TownBuilding = Readonly<{
 	id: string;
@@ -26,12 +27,9 @@ const buildings: readonly TownBuilding[] = Object.freeze(
 			mark: "L",
 			row: 2,
 			col: 2,
-			width: 5,
+			width: 3,
 			height: 3,
-			entry: {
-				row: 4,
-				col: 4,
-			},
+			entry: { row: 4, col: 3 },
 		},
 		{
 			id: "sanctuary",
@@ -40,13 +38,10 @@ const buildings: readonly TownBuilding[] = Object.freeze(
 			district: "Quiet Lane",
 			mark: "H",
 			row: 2,
-			col: 8,
-			width: 5,
+			col: 6,
+			width: 3,
 			height: 3,
-			entry: {
-				row: 4,
-				col: 10,
-			},
+			entry: { row: 4, col: 7 },
 		},
 		{
 			id: "storage",
@@ -55,13 +50,10 @@ const buildings: readonly TownBuilding[] = Object.freeze(
 			district: "Forge Court",
 			mark: "C",
 			row: 2,
-			col: 18,
-			width: 5,
+			col: 15,
+			width: 3,
 			height: 3,
-			entry: {
-				row: 4,
-				col: 20,
-			},
+			entry: { row: 4, col: 16 },
 		},
 		{
 			id: "forge",
@@ -70,13 +62,10 @@ const buildings: readonly TownBuilding[] = Object.freeze(
 			district: "Forge Court",
 			mark: "F",
 			row: 2,
-			col: 24,
+			col: 19,
 			width: 3,
 			height: 3,
-			entry: {
-				row: 4,
-				col: 25,
-			},
+			entry: { row: 4, col: 20 },
 		},
 		{
 			id: "potions",
@@ -86,12 +75,9 @@ const buildings: readonly TownBuilding[] = Object.freeze(
 			mark: "P",
 			row: 14,
 			col: 2,
-			width: 5,
+			width: 3,
 			height: 3,
-			entry: {
-				row: 14,
-				col: 4,
-			},
+			entry: { row: 14, col: 3 },
 		},
 		{
 			id: "armor",
@@ -100,13 +86,10 @@ const buildings: readonly TownBuilding[] = Object.freeze(
 			district: "Market Street",
 			mark: "A",
 			row: 14,
-			col: 8,
-			width: 5,
+			col: 6,
+			width: 3,
 			height: 3,
-			entry: {
-				row: 14,
-				col: 10,
-			},
+			entry: { row: 14, col: 7 },
 		},
 		{
 			id: "weapons",
@@ -115,13 +98,10 @@ const buildings: readonly TownBuilding[] = Object.freeze(
 			district: "Market Street",
 			mark: "W",
 			row: 14,
-			col: 16,
-			width: 5,
+			col: 15,
+			width: 3,
 			height: 3,
-			entry: {
-				row: 14,
-				col: 18,
-			},
+			entry: { row: 14, col: 16 },
 		},
 		{
 			id: "scrolls",
@@ -130,13 +110,10 @@ const buildings: readonly TownBuilding[] = Object.freeze(
 			district: "Market Street",
 			mark: "S",
 			row: 14,
-			col: 22,
-			width: 5,
+			col: 19,
+			width: 3,
 			height: 3,
-			entry: {
-				row: 14,
-				col: 24,
-			},
+			entry: { row: 14, col: 20 },
 		},
 		{
 			id: "vault-plot",
@@ -146,12 +123,9 @@ const buildings: readonly TownBuilding[] = Object.freeze(
 			mark: "V",
 			row: 18,
 			col: 2,
-			width: 5,
+			width: 3,
 			height: 2,
-			entry: {
-				row: 18,
-				col: 4,
-			},
+			entry: { row: 18, col: 3 },
 		},
 		{
 			id: "expansion-plot",
@@ -160,13 +134,10 @@ const buildings: readonly TownBuilding[] = Object.freeze(
 			district: "South Approach",
 			mark: "?",
 			row: 18,
-			col: 22,
-			width: 5,
+			col: 19,
+			width: 3,
 			height: 2,
-			entry: {
-				row: 18,
-				col: 24,
-			},
+			entry: { row: 18, col: 20 },
 		},
 	].map((building) =>
 		Object.freeze({
@@ -179,42 +150,43 @@ const buildings: readonly TownBuilding[] = Object.freeze(
 	),
 );
 
-// Authored map, independent of dungeon seeds, generation settings and random streams.
-// # wall, . ground, = paving, R roof, D closed threshold, B beacon, G dungeon gate.
+// Authored map, independent of dungeon seeds and random streams.
+// # wall, . ground, = paving, R roof,
+// D threshold, B beacon, G dungeon gate.
 const terrain = Object.freeze([
-	"#############################",
-	"#.............=.............#",
-	"#.RRRRR.RRRRR.=...RRRRR.RRR.#",
-	"#.RRRRR.RRRRR.=...RRRRR.RRR.#",
-	"#.RRDRR.RRDRR.=...RRDRR.RDR.#",
-	"#...=.....=...=.....=....=..#",
-	"#.=========================.#",
-	"#.=........=======........=.#",
-	"#.=........===B===........=.#",
-	"#.=........=======........=.#",
-	"#.=........=======........=.#",
-	"#.=...........=...........=.#",
-	"#.=========================.#",
-	"#...=.....=...=...=.....=...#",
-	"#.RRDRR.RRDRR.=.RRDRR.RRDRR.#",
-	"#.RRRRR.RRRRR.=.RRRRR.RRRRR.#",
-	"#.RRRRR.RRRRR.=.RRRRR.RRRRR.#",
-	"#.=========================.#",
-	"#.RRDRR.......=.......RRDRR.#",
-	"#.RRRRR.......G.......RRRRR.#",
-	"#############################",
+	"#########################",
+	"#...........=...........#",
+	"#.RRR.RRR...=..RRR.RRR..#",
+	"#.RRR.RRR...=..RRR.RRR..#",
+	"#.RDR.RDR...=..RDR.RDR..#",
+	"#..=...=....=...=...=...#",
+	"#.=====================.#",
+	"#.=.......=====.......=.#",
+	"#.=.......==B==.......=.#",
+	"#.=.......=====.......=.#",
+	"#.=.......=====.......=.#",
+	"#.=.........=.........=.#",
+	"#.=====================.#",
+	"#..=...=....=...=...=...#",
+	"#.RDR.RDR...=..RDR.RDR..#",
+	"#.RRR.RRR...=..RRR.RRR..#",
+	"#.RRR.RRR...=..RRR.RRR..#",
+	"#.=====================.#",
+	"#.RDR.......=......RDR..#",
+	"#.RRR.......G......RRR..#",
+	"#########################",
 ]);
 
 export const TOWN = Object.freeze({
 	layoutId: TOWN_LAYOUT_ID,
 	level: 0 as const,
-	width: 29,
+	width: 25,
 	height: 21,
 	terrain,
 	buildings,
-	arrival: Object.freeze({ row: 17, col: 14 }),
-	beacon: Object.freeze({ row: 8, col: 14 }),
-	gate: Object.freeze({ row: 19, col: 14 }),
+	arrival: Object.freeze({ row: 17, col: 12 }),
+	beacon: Object.freeze({ row: 8, col: 12 }),
+	gate: Object.freeze({ row: 19, col: 12 }),
 });
 
 export const townTileAt = ({ row, col }: Coordinate): string | undefined =>

@@ -22,3 +22,26 @@ it("offers a named SVG landmark directory without moving or opening services, an
 	await user.keyboard("{Escape}");
 	expect(screen.getByLabelText("Town map", { exact: true })).toHaveFocus();
 });
+
+it("keeps disabled town maps from moving, inspecting, opening the directory or descending", async () => {
+	const onAction = vi.fn(),
+		onTravel = vi.fn();
+	const user = userEvent.setup();
+	render(
+		<TownMap
+			location={createTownLocation()}
+			onAction={onAction}
+			onTravel={onTravel}
+			enabled={false}
+		/>,
+	);
+	const map = screen.getByLabelText("Town map", { exact: true });
+	map.focus();
+	await user.keyboard("sse?{Enter}");
+	expect(onAction).not.toHaveBeenCalled();
+	expect(onTravel).not.toHaveBeenCalled();
+	expect(screen.getByRole("button", { name: "Town directory" })).toBeDisabled();
+	expect(
+		screen.queryByRole("button", { name: "Walk south" }),
+	).not.toBeInTheDocument();
+});

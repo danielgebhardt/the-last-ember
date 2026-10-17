@@ -22,9 +22,9 @@ describe("fixed level-zero town", () => {
 	it("has its own fixed dimensions, safe arrival and reachable closed destinations", () => {
 		expect(TOWN.level).toBe(0);
 		expect(TOWN.terrain).toHaveLength(21);
-		expect(TOWN.terrain.every((row) => row.length === 29)).toBe(true);
-		expect(TOWN.arrival).toEqual({ row: 17, col: 14 });
-		const distances = new Map([["17,14", 0]]);
+		expect(TOWN.terrain.every((row) => row.length === 25)).toBe(true);
+		expect(TOWN.arrival).toEqual({ row: 17, col: 12 });
+		const distances = new Map([["17,12", 0]]);
 		const queue: Coordinate[] = [TOWN.arrival];
 		for (let index = 0; index < queue.length; index++) {
 			const current = queue[index];
@@ -51,8 +51,8 @@ describe("fixed level-zero town", () => {
 				distances.get(`${building.entry.row},${building.entry.col}`),
 			).toBeLessThanOrEqual(30);
 		}
-		expect(distances.has("19,14")).toBe(true);
-		for (const coordinate of neighbors(17, 14))
+		expect(distances.has(`${TOWN.gate.row},${TOWN.gate.col}`)).toBe(true);
+		for (const coordinate of neighbors(TOWN.arrival.row, TOWN.arrival.col))
 			expect(isTownWalkable(coordinate)).toBe(true);
 		expect(Object.isFrozen(TOWN)).toBe(true);
 		expect(Object.isFrozen(TOWN.buildings[0].entry)).toBe(true);
@@ -90,11 +90,11 @@ describe("fixed level-zero town", () => {
 		{ row: -1, col: 0 },
 		{ row: 21, col: 1 },
 		{ row: 1, col: 29 },
-		{ row: 1.5, col: 14 },
+		{ row: 1.5, col: 12 },
 		{ row: NaN, col: 1 },
-		{ row: 0, col: 14 },
+		{ row: 0, col: 12 },
 		{ row: 2, col: 2 },
-		{ row: 8, col: 14 },
+		{ row: 8, col: 12 },
 	])("blocks invalid or solid town coordinates %j", (coordinate) => {
 		expect(isTownWalkable(coordinate)).toBe(false);
 		expect(isAdventureLocation({ ...createTownLocation(), coordinate })).toBe(
@@ -104,8 +104,8 @@ describe("fixed level-zero town", () => {
 	it("moves through the domain boundary without a turn and cannot enter roofs or leave town", () => {
 		const start = createTownLocation();
 		const moved = resolveTownAction(start, { type: "move", direction: "down" });
-		expect(moved.location.coordinate).toEqual({ row: 18, col: 14 });
-		expect(start.coordinate).toEqual({ row: 17, col: 14 });
+		expect(moved.location.coordinate).toEqual({ row: 18, col: 12 });
+		expect(start.coordinate).toEqual({ row: 17, col: 12 });
 		expect(moved.turnAdvanced).toBe(false);
 		const gate = resolveTownAction(moved.location, {
 			type: "move",
@@ -119,7 +119,7 @@ describe("fixed level-zero town", () => {
 			resolveTownAction(gate.location, { type: "move", direction: "down" })
 				.location,
 		).toBe(gate.location);
-		const roof = { ...start, coordinate: { row: 13, col: 3 } };
+		const roof = { ...start, coordinate: { row: 13, col: 2 } };
 		expect(
 			resolveTownAction(roof, { type: "move", direction: "down" }).location,
 		).toBe(roof);
@@ -127,7 +127,7 @@ describe("fixed level-zero town", () => {
 	it("inspects a closed threshold without opening a shop or mutating ownership", () => {
 		const location = {
 			...createTownLocation(),
-			coordinate: { row: 13, col: 4 },
+			coordinate: { row: 13, col: 3 },
 		};
 		const result = resolveTownAction(location, { type: "inspect" });
 		expect(result.location).toBe(location);
@@ -173,7 +173,7 @@ describe("fixed level-zero town", () => {
 			location,
 		);
 		snapshot.location.coordinate.col = 1;
-		expect(location.coordinate.col).toBe(13);
+		expect(location.coordinate.col).toBe(11);
 	});
 	it.each([
 		null,
@@ -185,7 +185,7 @@ describe("fixed level-zero town", () => {
 			location: {
 				kind: "dungeon",
 				floorNumber: 0,
-				coordinate: { row: 17, col: 14 },
+				coordinate: { row: 17, col: 12 },
 			},
 		},
 		{

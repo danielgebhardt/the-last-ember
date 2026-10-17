@@ -45,3 +45,5 @@ Current and legacy dungeon saves keep their played dungeon locations and all act
 | Preview the town while an adventure is running | Clearly marked preview; the adventure and its save/export remain unchanged. |
 
 Original Larn inspires the town and its shops. This authored settlement belongs to The Last Ember; taxes, interest, classes, crafting and NPC quest systems are not implied by this plan. Developer review remains final acceptance.
+
+The compact `beacon-town:v2` layout relocates valid older v1 town visits to its safe arrival square. Original positions are checked against the original geometry before migration. This layout-only migration does not change the outer save schema, dungeon state, resources, time, inventory or store depletion; malformed or unknown town locations are still rejected.

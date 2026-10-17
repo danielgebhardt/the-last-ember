@@ -33,7 +33,7 @@ test("fixed town preview works in both themes on phone, laptop and desktop witho
 			await preview.focus();
 			await page.keyboard.type("sse");
 			await expect(sheet.getByRole("status")).toContainText("not connected");
-			const player = preview.getByRole("cell", { name: /19, 14: player/ });
+			const player = preview.getByRole("cell", { name: /19, 12: player/ });
 			await expect(player).toBeInViewport();
 			const [bounds, tile] = await Promise.all([
 				preview.boundingBox(),
@@ -49,7 +49,7 @@ test("fixed town preview works in both themes on phone, laptop and desktop witho
 				),
 			).toBe(true);
 			await sheet.getByRole("button", { name: "Walk north" }).click();
-			await expect(sheet.getByText(/Position:/)).toContainText("18, 14");
+			await expect(sheet.getByText(/Position:/)).toContainText("18, 12");
 			await expect(preview).toBeFocused();
 			await page.screenshot({
 				path: testInfo.outputPath(`town-${size.width}-${theme}.png`),

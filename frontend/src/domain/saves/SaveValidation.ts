@@ -1,3 +1,4 @@
+import { migrateLegacyTownLocation } from "../town/LegacyTownLocation";
 import { isConsistentSave } from "./SaveConsistency";
 import type { SaveDocument, SaveResult } from "./SaveFormat";
 import {
@@ -24,6 +25,24 @@ export const validateSaveDocument = (
 			ok: false,
 			error: "This save uses an unsupported format version.",
 		};
+	// Town layout identity versions its coordinates independently of the save
+	// schema. Only valid legacy town positions are normalized; all remaining
+	// source-version and consistency checks still run below.
+	if (
+		typeof data === "object" &&
+		data !== null &&
+		"version" in data &&
+		typeof data.version === "number" &&
+		data.version >= 23 &&
+		data.version <= 26 &&
+		"state" in data &&
+		typeof data.state === "object" &&
+		data.state !== null &&
+		"town" in data.state
+	) {
+		const town = migrateLegacyTownLocation(data.state.town);
+		if (town) data = { ...data, state: { ...data.state, town } };
+	}
 	if (!isSaveSourceDocument(data))
 		return {
 			ok: false,

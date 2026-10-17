@@ -23,7 +23,7 @@ import { COMPACT_TEST_CONFIGURATION as config } from "./TestRunConfiguration";
 
 const shopState = () => ({
 	...createGameState(connectDungeonFloors(generateDungeonRun(123, 5, config))),
-	town: { ...createTownLocation(), coordinate: { row: 13, col: 4 } },
+	town: { ...createTownLocation(), coordinate: { row: 13, col: 3 } },
 	gold: 1000,
 	turn: 29,
 	mana: 2,

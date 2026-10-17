@@ -79,7 +79,7 @@ describe("deliberate town travel", () => {
 			type: "move",
 			direction: "down",
 		});
-		expect(moved.state.town?.coordinate).toEqual({ row: 18, col: 14 });
+		expect(moved.state.town?.coordinate).toEqual({ row: 18, col: 12 });
 		expect(moved.state.run).toBe(state.run);
 		expect(moved.state.turn).toBe(29);
 		expect(moved.state.mana).toBe(1);

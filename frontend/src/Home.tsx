@@ -697,7 +697,14 @@ const Home = ({
 								)}
 							</DungeonFrame>
 							{/* Transient notices share reserved space so the map never reflows. */}
-							<div className="relative h-32 shrink-0 lg:h-24">
+
+							<div
+								className={
+									town
+										? "relative h-14 shrink-0"
+										: "relative h-32 shrink-0 lg:h-24"
+								}
+							>
 								<section
 									aria-label="Dungeon notices"
 									// biome-ignore lint/a11y/noNoninteractiveTabindex: Keyboard users need to scroll longer notices.
@@ -746,7 +753,7 @@ const Home = ({
 											{corridor.description}
 										</p>
 									)}
-									{!town && game.actionError && merchantId === null && (
+									{game.actionError && (town || merchantId === null) && (
 										<p
 											role="status"
 											aria-label="Action feedback"
@@ -755,16 +762,8 @@ const Home = ({
 											{game.actionError}
 										</p>
 									)}
-									{town ? (
-										<p
-											role="status"
-											aria-label="Action feedback"
-											className="py-2 text-sm text-muted-foreground"
-										>
-											{game.actionError ||
-												"Potion, armor and weapon stores open; other shops closed. Arrows/WASD to walk; E inspects signs. Stand on the south gate and press Enter to descend. Town actions do not advance time or restore resources."}
-										</p>
-									) : (
+
+									{!town && (
 										<ObjectContext
 											state={game.state}
 											visible={

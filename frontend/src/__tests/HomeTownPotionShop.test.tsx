@@ -18,14 +18,16 @@ it("browses freely, confirms one real purchase, prevents repeat buying, and rest
 	);
 	const state = {
 		...initial.state,
-		town: { ...createTownLocation(), coordinate: { row: 13, col: 4 } },
+		town: { ...createTownLocation(), coordinate: { row: 13, col: 3 } },
 		gold: 300,
 	};
 	render(<Home initialAdventure={{ ...initial, state }} />, {
 		wrapper: ThemeProvider,
 	});
 	const user = userEvent.setup();
-	await user.keyboard("e");
+	await user.click(
+		screen.getByRole("button", { name: "Inspect Potion store" }),
+	);
 	const store = within(
 		await screen.findByRole("dialog", { name: "Town potion store" }),
 	);

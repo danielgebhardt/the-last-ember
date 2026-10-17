@@ -36,7 +36,7 @@ const TownPreview = () => {
 				<div className="min-w-0 space-y-3">
 					<TownMap location={result.location} onAction={dispatch} preview />
 					<p className="text-sm tabular-nums">
-						Position: {row}, {col} · Town 29 × 21
+						Position: {row}, {col} · Town {TOWN.width} × {TOWN.height}
 					</p>
 					<p role="status" className="min-h-12 text-sm text-muted-foreground">
 						{result.message ||
@@ -47,7 +47,9 @@ const TownPreview = () => {
 				<div className="space-y-3">
 					<h4 className="font-semibold">Districts & destinations</h4>
 					<p className="text-sm text-muted-foreground">
-						Beacon square: 8, 14 · Arrival: 17, 14 · Dungeon gate: 19, 14
+						Beacon square: {TOWN.beacon.row}, {TOWN.beacon.col} · Arrival:{" "}
+						{TOWN.arrival.row}, {TOWN.arrival.col} · Dungeon gate:{" "}
+						{TOWN.gate.row}, {TOWN.gate.col}
 					</p>
 					<ul className="grid gap-2 sm:grid-cols-2 lg:grid-cols-1">
 						{TOWN.buildings.map((building) => (

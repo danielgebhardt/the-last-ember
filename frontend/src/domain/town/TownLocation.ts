@@ -1,6 +1,7 @@
 import type { DungeonRun } from "../dungeon/DungeonRun";
 import type { Coordinate } from "../dungeon/DungeonTypes";
 import { WALL } from "../dungeon/Tiles";
+import { migrateLegacyTownLocation } from "./LegacyTownLocation";
 import { isTownWalkable, TOWN, TOWN_LAYOUT_ID } from "./TownDefinition";
 
 export type TownLocation = {
@@ -83,9 +84,10 @@ export const snapshotTownLocation = (
 	if (!isTownLocation(location)) throw new RangeError("Invalid town location");
 	return { version: 1, location: copyTownLocation(location) };
 };
-export const restoreTownLocation = (snapshot: unknown): TownLocation | null =>
-	record(snapshot) &&
-	snapshot.version === 1 &&
-	isTownLocation(snapshot.location)
+
+export const restoreTownLocation = (snapshot: unknown): TownLocation | null => {
+	if (!record(snapshot) || snapshot.version !== 1) return null;
+	return isTownLocation(snapshot.location)
 		? copyTownLocation(snapshot.location)
-		: null;
+		: migrateLegacyTownLocation(snapshot.location);
+};

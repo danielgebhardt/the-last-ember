@@ -22,7 +22,7 @@ const shop = (store: "armor" | "weapons") => {
 		gold: 5000,
 		town: {
 			...createTownLocation(),
-			coordinate: { row: 13, col: store === "armor" ? 10 : 18 },
+			coordinate: { row: 13, col: store === "armor" ? 7 : 16 },
 		},
 	};
 };

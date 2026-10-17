@@ -14,25 +14,56 @@ test("live town is centered over transparent space, preserves the dungeon, and r
 	const layout = town.getByRole("table");
 	for (const size of [
 		{ width: 1920, height: 1080 },
-		{ width: 390, height: 667 },
+		{ width: 1440, height: 900 },
+		{ width: 1280, height: 800 },
+		{ width: 1024, height: 768 },
+		{ width: 390, height: 740 },
+		{ width: 320, height: 667 },
 	]) {
 		await page.setViewportSize(size);
-		await expect(town).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
-		if (size.width > 1000) {
-			const bounds = await town.boundingBox(),
-				grid = await layout.boundingBox();
-			if (!bounds || !grid) throw new Error("Expected town map");
+		for (const theme of ["Light", "Dark"]) {
+			await page.getByRole("button", { name: "Settings", exact: true }).click();
+			await page.getByRole("button", { name: theme, exact: true }).click();
+			await page.keyboard.press("Escape");
+			await expect(town).toBeFocused();
+			await expect(town).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
+			const welcome = page.getByRole("complementary", {
+				name: "Welcome to Beacon",
+				exact: true,
+			});
+			const [bounds, grid, panel] = await Promise.all([
+				town.boundingBox(),
+				layout.boundingBox(),
+				welcome.boundingBox(),
+			]);
+			if (!bounds || !grid || !panel)
+				throw new Error("Expected town presentation");
+			if (size.width >= 1440)
+				expect(panel.x).toBeGreaterThanOrEqual(bounds.x + bounds.width);
+			else expect(panel.y).toBeGreaterThanOrEqual(bounds.y + bounds.height);
 			expect(
-				Math.abs(grid.x + grid.width / 2 - bounds.x - bounds.width / 2),
-			).toBeLessThan(2);
-			expect(
-				Math.abs(grid.y + grid.height / 2 - bounds.y - bounds.height / 2),
-			).toBeLessThan(2);
+				await page
+					.locator("html")
+					.evaluate((node) => node.scrollWidth <= node.clientWidth),
+			).toBe(true);
+			const directoryButton = welcome.getByRole("button", {
+				name: "Town directory",
+				exact: true,
+			});
+			await directoryButton.scrollIntoViewIfNeeded();
+			await expect(directoryButton).toBeInViewport({ ratio: 1 });
+			await page.screenshot({
+				path: info.outputPath(`live-town-${size.width}-${theme}.png`),
+			});
+			await directoryButton.click();
+			await expect(
+				page.getByRole("dialog", { name: "Town directory", exact: true }),
+			).toBeVisible();
+			await page.keyboard.press("Escape");
+			await expect(town).toBeFocused();
 		}
-		await page.screenshot({
-			path: info.outputPath(`live-town-${size.width}.png`),
-		});
 	}
+
 	await town.focus();
 	await page.keyboard.press("?");
 	const directory = page.getByRole("dialog", { name: "Town directory" });
@@ -45,7 +76,7 @@ test("live town is centered over transparent space, preserves the dungeon, and r
 	await page.keyboard.press("Escape");
 	await expect(town).toBeFocused();
 	await expect(
-		town.getByRole("cell", { name: /17, 14: player/ }),
+		town.getByRole("cell", { name: /17, 12: player/ }),
 	).toBeVisible();
 	await enterDungeonFromTown(page);
 	const map = page.getByLabel("Dungeon map", { exact: true });
@@ -63,7 +94,7 @@ test("live town is centered over transparent space, preserves the dungeon, and r
 	const snapshot = await page.evaluate(() =>
 		JSON.parse(localStorage.getItem("larn:adventure-save") ?? "null"),
 	);
-	expect(snapshot.state.town.coordinate).toEqual({ row: 17, col: 13 });
+	expect(snapshot.state.town.coordinate).toEqual({ row: 17, col: 11 });
 	expect(snapshot.state.run.activeFloor).toBe(1);
 	await page.reload();
 	await page
@@ -75,7 +106,7 @@ test("live town is centered over transparent space, preserves the dungeon, and r
 	await page.getByRole("button", { name: "Confirm load", exact: true }).click();
 	await expect(town).toBeFocused();
 	await expect(
-		town.getByRole("cell", { name: /17, 13: player/ }),
+		town.getByRole("cell", { name: /17, 11: player/ }),
 	).toBeVisible();
 	await page.keyboard.press("d");
 	await enterDungeonFromTown(page);
