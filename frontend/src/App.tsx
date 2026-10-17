@@ -1,5 +1,6 @@
 import { createAdventureSession } from "./components/game/useAdventureSession";
 import "./App.css";
+import { Analytics } from "@vercel/analytics/react";
 import { useState } from "react";
 import AdventureOpening from "./components/game/AdventureOpening";
 import { DEFAULT_FOG_CONFIGURATION } from "./domain/dungeon/RunConfiguration";
@@ -38,6 +39,7 @@ function App() {
 			) : (
 				<Home initialAdventure={adventure} />
 			)}
+			<Analytics />
 		</ThemeProvider>
 	);
 }
