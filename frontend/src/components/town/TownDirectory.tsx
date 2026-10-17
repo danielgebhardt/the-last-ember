@@ -46,22 +46,48 @@ const TownDirectory = ({
 						{TOWN.gate.row}, {TOWN.gate.col}. Enter on the gate descends; E
 						inspects signs.
 					</p>
+
 					<ul className="grid gap-2 sm:grid-cols-2">
-						{TOWN.buildings.map((building) => (
-							<li key={building.id} className="rounded-lg border p-3 text-sm">
-								<h3 className="flex items-center gap-2 font-semibold">
-									<TownBuildingIcon id={building.id} />
-									{building.name}
-								</h3>
-								<p>
-									{building.district} · Door {building.entry.row},{" "}
-									{building.entry.col} ·{" "}
-									{building.status === "closed" ? "Closed" : "Open"}
-								</p>
-								<p className="mt-1 text-muted-foreground">{building.sign}</p>
-							</li>
-						))}
+						{TOWN.buildings.map((building) => {
+							const isOpen = building.status === "open";
+
+							return (
+								<li
+									key={building.id}
+									className={`
+               rounded-lg border p-3 text-sm
+               ${
+									isOpen
+										? "border-emerald-600/30 bg-emerald-100/75 dark:border-emerald-500/30 dark:bg-emerald-950/45"
+										: "border-rose-500/25 bg-rose-100/65 dark:border-rose-500/25 dark:bg-rose-950/30"
+}
+            `}
+								>
+									<h3 className="flex items-center gap-2 font-semibold">
+										<TownBuildingIcon id={building.id} />
+										{building.name}
+									</h3>
+
+									<p className="mt-1">
+										{building.district} · Door {building.entry.row},{" "}
+										{building.entry.col} ·{" "}
+										<span
+											className={
+												isOpen
+													? "font-semibold text-emerald-800 dark:text-emerald-300"
+													: "font-semibold text-rose-800 dark:text-rose-300"
+											}
+										>
+											{isOpen ? "Open" : "Closed"}
+										</span>
+									</p>
+
+									<p className="mt-1 text-muted-foreground">{building.sign}</p>
+								</li>
+							);
+						})}
 					</ul>
+
 					<Button variant="outline" className="mt-4 min-h-11" onClick={onClose}>
 						Close directory
 					</Button>
