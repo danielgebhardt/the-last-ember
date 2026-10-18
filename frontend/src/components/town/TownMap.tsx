@@ -1,4 +1,4 @@
-import { ChevronsDown, Flame, UserRound } from "lucide-react";
+import { ChevronsDown, CircleDot, Flame, UserRound } from "lucide-react";
 import {
 	type RefObject,
 	useCallback,
@@ -16,6 +16,7 @@ import {
 	type TownBuilding,
 } from "../../domain/town/TownDefinition";
 import type { TownLocation } from "../../domain/town/TownLocation";
+import { townPortalMessage } from "../../domain/town/TownPortal";
 import TownDirectory from "./TownDirectory";
 import { TownBuildingIcon } from "./TownVisuals";
 import TownWelcome from "./TownWelcome";
@@ -93,6 +94,8 @@ type TownMapProps = {
 	enabled?: boolean;
 	preview?: boolean;
 	onTravel?: () => void;
+	travelLabel?: string;
+	portalFloor?: number;
 	interactionLabel?: string;
 	onCharacterRequested?: () => void;
 };
@@ -104,6 +107,7 @@ const TownTileContent = ({
 	occupied,
 	row,
 	col,
+	portalFloor,
 }: {
 	tile: string;
 	building?: TownBuilding;
@@ -111,10 +115,21 @@ const TownTileContent = ({
 	occupied: boolean;
 	row: number;
 	col: number;
+	portalFloor?: number;
 }) => {
 	if (occupied)
 		return (
-			<UserRound aria-hidden="true" className="relative z-10 mx-auto size-4" />
+			<UserRound
+				aria-hidden="true"
+				className={`relative z-10 mx-auto size-4 ${row === TOWN.portal.row && col === TOWN.portal.col ? (portalFloor ? "rounded-full ring-2 ring-cyan-500 dark:ring-cyan-300" : "rounded-full ring-1 ring-slate-500") : ""}`}
+			/>
+		);
+	if (row === TOWN.portal.row && col === TOWN.portal.col)
+		return (
+			<CircleDot
+				aria-hidden="true"
+				className={`mx-auto size-4 ${portalFloor ? "text-cyan-700 dark:text-cyan-300" : "text-muted-foreground"}`}
+			/>
 		);
 	if (gate === "center")
 		return (
@@ -157,6 +172,8 @@ const TownMap = ({
 	enabled = true,
 	preview = false,
 	onTravel,
+	travelLabel = "Enter dungeon",
+	portalFloor,
 	interactionLabel = "Inspect nearby",
 	onCharacterRequested,
 }: TownMapProps) => {
@@ -208,7 +225,9 @@ const TownMap = ({
 				Use arrows or WASD to walk, or tap neighboring tiles. E or tapping your
 				character inspects signs. Tap a nearby doorway to browse. Stand on the
 				dungeon gate and press Enter or tap your character to descend. Press
-				question mark for the town directory.
+				question mark for the town directory. The portal circle west of the
+				beacon returns you to the dungeon when active; stand on it and press
+				Enter.
 			</p>
 			<div
 				className={`m-auto grid min-w-0 max-w-full items-center justify-items-center gap-5 ${preview ? "w-fit" : "w-full @min-[58rem]/town:w-fit @min-[58rem]/town:grid-cols-[500px_380px]"}`}
@@ -288,7 +307,12 @@ const TownMap = ({
 													: gate === "pillar"
 														? "dungeon entrance stone pillar"
 														: TILE_NAME[tile];
-										const label = `${row}, ${col}: ${occupied ? "player; " : ""}${building ? `${building.name}, ${tile === "D" ? `${building.status} entrance` : "roof"}` : featureLabel}`;
+										const portal =
+											row === TOWN.portal.row && col === TOWN.portal.col;
+										const portalLabel = portalFloor
+											? `town portal to floor ${portalFloor}`
+											: "dormant town portal";
+										const label = `${row}, ${col}: ${occupied ? "player; " : ""}${building ? `${building.name}, ${tile === "D" ? `${building.status} entrance` : "roof"}` : portal ? portalLabel : featureLabel}`;
 										const distance =
 											Math.abs(row - playerRow) + Math.abs(col - playerCol);
 										const inspect =
@@ -304,10 +328,10 @@ const TownMap = ({
 														: "right";
 										const actionLabel = occupied
 											? onTravel
-												? "Enter dungeon"
+												? travelLabel
 												: interactionLabel
 											: inspect
-												? `Inspect ${building?.name ?? "beacon"}`
+												? `Inspect ${building?.name ?? (portal ? "town portal" : "beacon")}`
 												: `Walk ${{ up: "north", down: "south", left: "west", right: "east" }[direction]}`;
 										const actionable =
 											controlsEnabled &&
@@ -315,6 +339,7 @@ const TownMap = ({
 												(distance === 1 && isTownWalkable({ row, col })));
 										const content = (
 											<TownTileContent
+												portalFloor={portalFloor}
 												tile={tile}
 												building={building}
 												gate={gate}
@@ -364,6 +389,11 @@ const TownMap = ({
 				{!preview && (
 					<div className="w-full min-w-0 max-w-[380px]">
 						<TownWelcome
+							portalNotice={townPortalMessage(
+								portalFloor
+									? { floorNumber: portalFloor, coordinate: TOWN.portal }
+									: null,
+							)}
 							enabled={controlsEnabled}
 							interactionLabel={interactionLabel}
 							onDirectoryRequested={() => setDirectoryOpen(true)}

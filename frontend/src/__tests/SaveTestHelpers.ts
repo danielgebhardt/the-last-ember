@@ -64,6 +64,7 @@ export const historicalSaveText = (document: {
 	state: object;
 }): string => {
 	const state = { ...document.state };
+	if (document.version < 27) Reflect.deleteProperty(state, "townPortal");
 	if (
 		document.version < 26 &&
 		"progression" in state &&

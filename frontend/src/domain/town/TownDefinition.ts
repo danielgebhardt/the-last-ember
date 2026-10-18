@@ -187,6 +187,7 @@ export const TOWN = Object.freeze({
 	terrain,
 	buildings,
 	arrival: Object.freeze({ row: 17, col: 12 }),
+	portal: Object.freeze({ row: 8, col: 9 }),
 	beacon: Object.freeze({ row: 8, col: 12 }),
 	gate: Object.freeze({ row: 19, col: 12 }),
 });

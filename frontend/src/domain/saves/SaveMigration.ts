@@ -367,7 +367,7 @@ const migratePlayedSaveToV25 = (
 	};
 };
 
-export const migratePlayedSave = (
+const migratePlayedSaveToV26 = (
 	document:
 		| Parameters<typeof migratePlayedSaveToV25>[0]
 		| import("./SaveDocumentV25").SaveDocumentV25,
@@ -384,5 +384,19 @@ export const migratePlayedSave = (
 				permanentAttributes: createPermanentAttributes(),
 			},
 		},
+	};
+};
+
+export const migratePlayedSave = (
+	document:
+		| Parameters<typeof migratePlayedSaveToV26>[0]
+		| import("./SaveDocumentV26").SaveDocumentV26,
+): import("./SaveDocumentV27").SaveDocumentV27 => {
+	const previous =
+		document.version === 26 ? document : migratePlayedSaveToV26(document);
+	return {
+		...previous,
+		version: 27,
+		state: { ...previous.state, townPortal: null },
 	};
 };

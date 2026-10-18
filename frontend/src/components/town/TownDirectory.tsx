@@ -44,7 +44,9 @@ const TownDirectory = ({
 						Beacon square: {TOWN.beacon.row}, {TOWN.beacon.col} · South arrival:{" "}
 						{TOWN.arrival.row}, {TOWN.arrival.col} · Dungeon gate:{" "}
 						{TOWN.gate.row}, {TOWN.gate.col}. Enter on the gate descends; E
-						inspects signs.
+						inspects signs. The town portal circle is at {TOWN.portal.row},{" "}
+						{TOWN.portal.col}, west of the beacon. Read a portal scroll in the
+						dungeon to activate a return trip.
 					</p>
 
 					<ul className="grid gap-2 sm:grid-cols-2">

@@ -148,7 +148,7 @@ const ItemDetails = ({
 								aria-describedby={carryingEmber ? exitRestrictionId : undefined}
 								onClick={() => act({ type: "exit-dungeon", itemId: item.id })}
 							>
-								Read exit scroll
+								Read town portal scroll
 							</Button>
 						)}
 						{details.type === "potion" && (

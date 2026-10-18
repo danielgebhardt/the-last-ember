@@ -12,12 +12,14 @@ type TownWelcomeProps = {
 	onDirectoryRequested: () => void;
 	enabled: boolean;
 	interactionLabel: string;
+	portalNotice?: string;
 };
 
 const TownWelcome = ({
 	onDirectoryRequested,
 	enabled,
 	interactionLabel,
+	portalNotice,
 }: TownWelcomeProps) => {
 	const titleId = useId();
 	return (
@@ -130,6 +132,15 @@ const TownWelcome = ({
 				&amp; Bone. Town actions don't advance time or restore resources.
 			</p>
 
+			{portalNotice && (
+				<p
+					role="status"
+					aria-label="Town portal status"
+					className="mt-2 text-xs leading-relaxed text-muted-foreground"
+				>
+					{portalNotice}
+				</p>
+			)}
 			{/* Town Directory */}
 			<Button
 				type="button"

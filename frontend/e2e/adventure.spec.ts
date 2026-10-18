@@ -896,63 +896,122 @@ test("a fatal ordinary corridor phase cancels its queue and replay starts idle",
 	await expect(turns(page)).toHaveText("Turn 0");
 });
 
-test("exit scroll reading returns to floor 1, preserves the stack and restores focus", async ({
-	page,
-}, testInfo) => {
-	await importAdventure(page, "exit-scrolls");
-	await page.keyboard.press("i");
-	const character = page.getByRole("dialog", {
-		name: "Character",
-		exact: true,
-	});
-	const scroll = character.getByRole("button", {
-		name: "Exit dungeon scroll, slot 1",
-		exact: true,
-	});
-	await scroll.screenshot({
-		path: testInfo.outputPath("exit-scroll-item.png"),
-	});
-	await scroll.click();
-	const details = character.getByRole("region", {
-		name: "Item details",
-		exact: true,
-	});
-	await expect(details).toContainText("one scroll and one turn");
-	await details.screenshot({ path: testInfo.outputPath("exit-scroll.png") });
-	await details
-		.getByRole("button", { name: "Read exit scroll", exact: true })
-		.click();
-	await expect(character).toBeHidden();
-	await expect(map(page)).toBeFocused();
-	await expect(page.getByText("Floor 1 of 5", { exact: true })).toBeVisible();
-	await expect(turns(page)).toHaveText("Turn 1");
-	await expect(page.getByLabel("Player health", { exact: true })).toContainText(
-		"5 / 10",
-	);
-	await expect(page.getByLabel("Player mana", { exact: true })).toContainText(
-		"0 / 10",
-	);
-	await expect(page.getByRole("log")).toContainText("read an exit scroll");
-	await page.setViewportSize({ width: 390, height: 667 });
-	await page.keyboard.press("i");
-	await character
-		.getByRole("button", { name: "Exit dungeon scroll, slot 1", exact: true })
-		.click();
-	await expect(
-		character.getByRole("button", { name: "Mana potion, slot 2", exact: true }),
-	).toBeVisible();
-	await details
-		.getByRole("button", { name: "Read exit scroll", exact: true })
-		.click();
-	await expect(character.getByRole("alert")).toContainText("already beside");
-	await expect(turns(page)).toHaveText("Turn 1");
-	await expect(character).toBeVisible();
-	expect(
-		await character.evaluate((node) => node.scrollWidth <= node.clientWidth),
-	).toBe(true);
-	await page.keyboard.press("Escape");
-	await expect(map(page)).toBeFocused();
-});
+for (const width of [390, 1440])
+	for (const theme of ["Light", "Dark"]) {
+		test(`town portal round trip persists its anchor at ${width}px ${theme}`, async ({
+			page,
+		}, testInfo) => {
+			await page.setViewportSize({ width, height: width === 390 ? 740 : 900 });
+			await importAdventure(page, "exit-scrolls");
+			await page.getByRole("button", { name: "Settings", exact: true }).click();
+			await page.getByRole("button", { name: theme, exact: true }).click();
+			await page.keyboard.press("Escape");
+			await expect(map(page)).toBeFocused();
+			const origin = await map(page)
+				.getByRole("cell", { name: / - player$/ })
+				.getAttribute("aria-label");
+			await page.keyboard.press("i");
+			const character = page.getByRole("dialog", {
+				name: "Character",
+				exact: true,
+			});
+			await character
+				.getByRole("button", {
+					name: "Town portal scroll, slot 1",
+					exact: true,
+				})
+				.click();
+			await character
+				.getByRole("button", { name: "Read town portal scroll", exact: true })
+				.click();
+			const town = page.getByLabel("Town map", { exact: true });
+			await expect(character).toBeHidden();
+			await expect(town).toBeFocused();
+			await expect(page.getByLabel("Town portal status")).toContainText(
+				"floor 3",
+			);
+			await expect(
+				town.getByRole("cell", {
+					name: /8, 9: player; town portal to floor 3/,
+				}),
+			).toBeVisible();
+			await expect(turns(page)).toHaveText("Turn 1");
+			await page.screenshot({
+				path: testInfo.outputPath(`town-portal-${width}-${theme}.png`),
+			});
+			await page.keyboard.press("s");
+			// Town business and walking preserve the anchor and scroll stack.
+			await page.keyboard.press("c");
+			await character
+				.getByRole("button", {
+					name: "Town portal scroll, slot 1",
+					exact: true,
+				})
+				.click();
+			await expect(
+				character.getByRole("button", {
+					name: "Mana potion, slot 2",
+					exact: true,
+				}),
+			).toBeVisible();
+			await page.keyboard.press("Escape");
+			await expect(town).toBeFocused();
+			await page
+				.getByRole("button", { name: "Save/Load", exact: true })
+				.click();
+			await page
+				.getByRole("button", { name: "Save adventure", exact: true })
+				.click();
+			await page
+				.getByRole("button", { name: "Confirm save", exact: true })
+				.click();
+			const saved = await page.evaluate(() =>
+				JSON.parse(localStorage.getItem("larn:adventure-save") ?? "null"),
+			);
+			expect(saved.version).toBe(27);
+			expect(saved.state.townPortal.floorNumber).toBe(3);
+			expect(
+				saved.state.bag.items.filter(
+					(item: { kind: string }) => item.kind === "exit-scroll",
+				),
+			).toHaveLength(1);
+			await page.reload();
+			await page
+				.getByRole("button", { name: "Load an existing save", exact: true })
+				.click();
+			await page
+				.getByRole("button", { name: "Load adventure", exact: true })
+				.click();
+			await page
+				.getByRole("button", { name: "Confirm load", exact: true })
+				.click();
+			await expect(town).toBeFocused();
+			if (width === 390) {
+				await town
+					.getByRole("cell", {
+						name: "8, 9: town portal to floor 3",
+						exact: true,
+					})
+					.getByRole("button", { name: "Walk north", exact: true })
+					.click();
+				await town
+					.getByRole("button", { name: "Return to floor 3", exact: true })
+					.click();
+			} else {
+				await page.keyboard.press("w");
+				await page.keyboard.press("Enter");
+			}
+			await expect(map(page)).toBeFocused();
+			await expect(
+				page.getByText("Floor 3 of 5", { exact: true }),
+			).toBeVisible();
+			await expect(
+				map(page).getByRole("cell", { name: / - player$/ }),
+			).toHaveAttribute("aria-label", origin ?? "");
+			await expect(turns(page)).toHaveText("Turn 1");
+			await expect(page.getByRole("log")).toContainText("portal closes");
+		});
+	}
 
 test("a restored ember carrier cannot read an exit scroll", async ({
 	page,
@@ -964,10 +1023,10 @@ test("a restored ember carrier cannot read an exit scroll", async ({
 		exact: true,
 	});
 	await character
-		.getByRole("button", { name: "Exit dungeon scroll, slot 1", exact: true })
+		.getByRole("button", { name: "Town portal scroll, slot 1", exact: true })
 		.click();
 	const read = character.getByRole("button", {
-		name: "Read exit scroll",
+		name: "Read town portal scroll",
 		exact: true,
 	});
 	await expect(read).toBeDisabled();

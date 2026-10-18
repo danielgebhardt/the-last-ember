@@ -29,7 +29,7 @@ it("round-trips friendly fire and twenty-turn buffs, then continues deterministi
 	const parsed = parseSave(serializeSave(source));
 	if (!parsed.ok) throw new Error(parsed.error);
 	expect(parsed.value).toEqual(source);
-	expect(parsed.value.version).toBe(26);
+	expect(parsed.value.version).toBe(27);
 	expect(
 		resolvePlayerAction(restoreSave(parsed.value).state, { type: "wait" }),
 	).toEqual(resolvePlayerAction(restoreSave(source).state, { type: "wait" }));
@@ -46,7 +46,7 @@ it("migrates v21 without extending active timers, adding books or replacing play
 	const before = structuredClone(source);
 	const parsed = parseSave(historicalSaveText(source));
 	if (!parsed.ok) throw new Error(parsed.error);
-	expect(parsed.value).toEqual({ ...source, version: 26 });
+	expect(parsed.value).toEqual({ ...source, version: 27 });
 	expect(source).toEqual(before);
 });
 it.each([

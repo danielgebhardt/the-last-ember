@@ -1,76 +1,66 @@
-import type { Coordinate } from "../dungeon/DungeonTypes";
-import { FLOOR } from "../dungeon/Tiles";
+import { hasLineOfSight } from "../dungeon/Visibility";
 import { appendActivityEvents } from "../game/ActivityHistory";
 import type { GameState } from "../game/GameState";
 import { navigationRun } from "../objects/NavigationTerrain";
+import { TOWN } from "../town/TownDefinition";
+import { createTownLocation } from "../town/TownLocation";
 import { removeBagItem } from "./Bag";
 
 export type ExitDungeonAction = { type: "exit-dungeon"; itemId: string };
 export const EXIT_SCROLL_EMBER_RESTRICTION =
-	"Exit scrolls cannot be used while carrying the Last Ember.";
-const same = (a: Coordinate, b: Coordinate) =>
-	a.row === b.row && a.col === b.col;
-// Stable compass order, not a new random roll. Inspect only four neighbors;
-// never overwrite existing content or silently choose a more distant arrival.
-export const exitScrollArrival = (state: GameState): Coordinate | undefined => {
-	const floor = navigationRun(state).floors[0];
-	if (!floor) return;
-	const entrance = state.quest.entrance;
-	const candidates = [
-		{ row: entrance.row - 1, col: entrance.col },
-		{ row: entrance.row, col: entrance.col + 1 },
-		{ row: entrance.row + 1, col: entrance.col },
-		{ row: entrance.row, col: entrance.col - 1 },
-	];
-	return candidates.find(
-		(point) =>
-			floor.terrain[point.row]?.[point.col] === FLOOR &&
-			![floor.upStair?.coordinate, floor.downStair?.coordinate].some(
-				(stair) => stair && same(stair, point),
-			) &&
-			!state.objects.some(
-				(x) => x.floorNumber === 1 && same(x.coordinate, point),
-			) &&
-			!state.floorItems.some(
-				(x) => x.floorNumber === 1 && same(x.coordinate, point),
-			) &&
-			!state.monsters.some(
-				(x) => x.floorNumber === 1 && x.health > 0 && same(x.coordinate, point),
-			),
-	);
+	"Town portal scrolls cannot be used while carrying the Last Ember.";
+export const PORTAL_SAFETY_RADIUS = 8;
+export const exitScrollRestriction = (state: GameState): string | null => {
+	if (state.player.health <= 0 || state.quest.victory)
+		return "The adventure has ended.";
+	if (
+		state.quest.cureRecovered ||
+		state.bag.items.some((item) => item.kind === "cure")
+	)
+		return EXIT_SCROLL_EMBER_RESTRICTION;
+	if (state.town || state.townPortal)
+		return "Return through or abandon your existing portal before reading another scroll.";
+	const terrain =
+		navigationRun(state).floors[state.run.activeFloor - 1]?.terrain;
+	if (!terrain) return "There is no dungeon here to anchor a portal.";
+	const origin = state.run.playerCoordinate;
+	if (
+		state.monsters.some(
+			(actor) =>
+				actor.floorNumber === state.run.activeFloor &&
+				actor.health > 0 &&
+				(actor.intent.type.startsWith("preparing-") ||
+					((actor.coordinate.row - origin.row) ** 2 +
+						(actor.coordinate.col - origin.col) ** 2 <=
+						PORTAL_SAFETY_RADIUS ** 2 &&
+						hasLineOfSight(terrain, origin, actor.coordinate))),
+		)
+	)
+		return "Clear nearby enemies and prepared attacks before opening a town portal.";
+	return null;
 };
 export const readExitScroll = (
 	state: GameState,
 	action: ExitDungeonAction,
 ): GameState | { error: string } => {
-	if (state.player.health <= 0 || state.quest.victory)
-		return { error: "The adventure has ended." };
-	const scroll = state.bag.items.find((x) => x.id === action.itemId);
+	const restriction = exitScrollRestriction(state);
+	if (restriction) return { error: restriction };
+	const scroll = state.bag.items.find((item) => item.id === action.itemId);
 	if (scroll?.kind !== "exit-scroll")
-		return { error: "Choose an exit scroll in your bag." };
-	if (state.quest.cureRecovered)
-		return { error: EXIT_SCROLL_EMBER_RESTRICTION };
-	const { row, col } = state.run.playerCoordinate;
-	const entrance = state.quest.entrance;
-	if (
-		state.run.activeFloor === 1 &&
-		Math.abs(row - entrance.row) + Math.abs(col - entrance.col) === 1
-	)
-		return { error: "You are already beside the dungeon entrance." };
-	const arrival = exitScrollArrival(state);
-	if (!arrival)
-		return {
-			error:
-				"There is no safe tile beside the dungeon entrance. The scroll remains unread.",
-		};
+		return { error: "Choose a town portal scroll in your bag." };
 	return {
 		...state,
-		run: { ...state.run, activeFloor: 1, playerCoordinate: arrival },
+		town: { ...createTownLocation(), coordinate: { ...TOWN.portal } },
+		townPortal: {
+			floorNumber: state.run.activeFloor,
+			coordinate: { ...state.run.playerCoordinate },
+		},
 		bag: removeBagItem(state.bag, scroll.id),
 		activityHistory: appendActivityEvents(state.activityHistory, [
 			{
 				type: "exit-scroll-used",
 				fromFloor: state.run.activeFloor,
+				destination: "town",
 				turn: state.turn,
 			},
 		]),

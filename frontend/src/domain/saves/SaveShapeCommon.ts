@@ -258,7 +258,10 @@ const eventFields = {
 } satisfies Record<
 	Exclude<
 		ActivityEvent["type"],
-		"monster-door-opened" | "exit-scroll-used" | "player-spell-hit"
+		| "monster-door-opened"
+		| "exit-scroll-used"
+		| "player-spell-hit"
+		| "town-portal-returned"
 	>,
 	Record<string, Schema>
 >;

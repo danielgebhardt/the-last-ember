@@ -49,7 +49,7 @@ describe("Difficulty save continuation", () => {
 			const parsed = parseSave(serializeSave(document));
 			expect(parsed.ok).toBe(true);
 			if (!parsed.ok) throw new Error(parsed.error);
-			expect(parsed.value.version).toBe(26);
+			expect(parsed.value.version).toBe(27);
 			const restored = restoreSave(parsed.value);
 			expect(restored.state).toEqual(played);
 			expect(

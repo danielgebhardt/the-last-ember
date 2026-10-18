@@ -1,73 +1,56 @@
 import { expect, it } from "vitest";
 import type { GameState } from "../domain/game/GameState";
 import { resolvePlayerAction } from "../domain/game/PlayerActions";
-import { bagSlots } from "../domain/items/Bag";
-import {
-	exitScrollArrival,
-	readExitScroll,
-} from "../domain/items/ExitDungeonScroll";
+import { TOWN } from "../domain/town/TownDefinition";
 import { corridorContinuationAdventure } from "./CorridorContinuationTestHelpers";
 
-const adventure = (): GameState => {
-	const { state } = corridorContinuationAdventure();
-	return {
-		...state,
-		quest: { ...state.quest, entrance: { row: 7, col: 1 } },
-		run: {
-			...state.run,
-			floors: state.run.floors.map((f, i) =>
-				i === 0 && f.downStair
-					? {
-							...f,
-							downStair: { ...f.downStair, coordinate: { row: 7, col: 22 } },
-						}
-					: i === 1 && f.upStair
-						? {
-								...f,
-								upStair: {
-									...f.upStair,
-									arrivalCoordinate: { row: 7, col: 22 },
-								},
-							}
-						: f,
-			),
-		},
-		monsters: [],
-		effects: [],
-		bag: {
-			items: [
-				{ id: "exit:1", kind: "exit-scroll" },
-				{ id: "mana", kind: "mana-potion" },
-				{ id: "exit:2", kind: "exit-scroll" },
-			],
-		},
-	};
-};
-const read = (state: GameState, id = "exit:1") =>
-	resolvePlayerAction(state, { type: "exit-dungeon", itemId: id });
-it("returns to a deterministic adjacent tile, consumes one stable copy and commits one ordinary turn", () => {
+const adventure = (): GameState => ({
+	...corridorContinuationAdventure().state,
+	monsters: [],
+	effects: [],
+	town: null,
+	townPortal: null,
+	bag: {
+		items: [
+			{ id: "exit:1", kind: "exit-scroll" },
+			{ id: "exit:2", kind: "exit-scroll" },
+			{ id: "mana", kind: "mana-potion" },
+		],
+	},
+});
+const read = (state: GameState) =>
+	resolvePlayerAction(state, { type: "exit-dungeon", itemId: "exit:1" });
+const back = (state: GameState) =>
+	resolvePlayerAction(state, { type: "return-town-portal" });
+it("consumes one scroll and one originating-floor turn, then returns exactly once without another scroll or turn", () => {
 	const state = adventure();
-	const result = read(state);
-	expect(result.turnAdvanced).toBe(true);
-	expect(result.state.run.activeFloor).toBe(1);
-	expect(result.state.run.playerCoordinate).toEqual({ row: 7, col: 2 });
-	expect(result.state.turn).toBe(29);
-	expect(result.state.player).toEqual(state.player);
-	expect(result.state.mana).toBe(state.mana);
-	expect(result.state.gold).toBe(state.gold);
-	expect(result.state.merchantStock).toEqual(state.merchantStock);
-	expect(result.state.bag.items.map((x) => x.id)).toEqual(["exit:2", "mana"]);
-	expect(bagSlots(state.bag)[0].count).toBe(2);
-	expect(bagSlots(result.state.bag)[0].count).toBe(1);
-	expect(result.state.quest).toEqual(state.quest);
-	expect(result.state.escape).toBeNull();
-	expect(result.state.run.floors).toBe(state.run.floors);
-	expect(
-		result.state.activityHistory.entries.some(
-			(x) => x.event.type === "exit-scroll-used",
-		),
-	).toBe(true);
-	expect(read(state)).toEqual(result);
+	const departed = read(state);
+	expect(departed.error).toBeUndefined();
+	expect(departed.turnAdvanced).toBe(true);
+	expect(departed.state.turn).toBe(state.turn + 1);
+	expect(departed.state.town?.coordinate).toEqual(TOWN.portal);
+	expect(departed.state.townPortal).toEqual({
+		floorNumber: state.run.activeFloor,
+		coordinate: state.run.playerCoordinate,
+	});
+	expect(departed.state.run).toBe(state.run);
+	expect(departed.state.bag.items.map((item) => item.id)).toEqual([
+		"exit:2",
+		"mana",
+	]);
+	const returned = back(departed.state);
+	expect(returned.error).toBeUndefined();
+	expect(returned.turnAdvanced).toBe(false);
+	expect(returned.state.town).toBeNull();
+	expect(returned.state.townPortal).toBeNull();
+	expect(returned.state.run.activeFloor).toBe(state.run.activeFloor);
+	expect(returned.state.run.playerCoordinate).toEqual(
+		state.run.playerCoordinate,
+	);
+	expect(returned.state.run.floors).toBe(state.run.floors);
+	expect(returned.state.turn).toBe(state.turn + 1);
+	expect(back(returned.state).state).toBe(returned.state);
+	expect(read(state)).toEqual(departed);
 });
 it.each([
 	"ember",
@@ -75,19 +58,19 @@ it.each([
 	"wrong item",
 	"dead",
 	"victory",
-	"already beside",
-])("rejects %s without consuming, moving, or committing a turn", (reason) => {
+	"town",
+	"enemy",
+	"pending",
+])("rejects %s without spending a turn or scroll", (reason) => {
 	let state = adventure();
-	let id = "exit:1";
 	if (reason === "ember")
+		state = { ...state, quest: { ...state.quest, cureRecovered: true } };
+	if (reason === "missing") state = { ...state, bag: { items: [] } };
+	if (reason === "wrong item")
 		state = {
 			...state,
-			quest: { ...state.quest, cureRecovered: true },
-			escape: { startedTurn: 20, activatedFloors: [2] },
-			floorItems: [],
+			bag: { items: [{ id: "exit:1", kind: "mana-potion" }] },
 		};
-	if (reason === "missing") id = "missing";
-	if (reason === "wrong item") id = "mana";
 	if (reason === "dead")
 		state = { ...state, player: { ...state.player, health: 0 } };
 	if (reason === "victory")
@@ -106,66 +89,66 @@ it.each([
 				},
 			},
 		};
-	if (reason === "already beside")
+	if (reason === "town") state = read(state).state;
+	if (reason === "pending")
 		state = {
 			...state,
-			run: {
-				...state.run,
-				activeFloor: 1,
-				playerCoordinate: { row: 7, col: 2 },
+			townPortal: {
+				floorNumber: state.run.activeFloor,
+				coordinate: state.run.playerCoordinate,
 			},
 		};
-	const before = structuredClone(state);
-	const result = read(state, id);
-	expect(result.turnAdvanced).toBe(false);
+	if (reason === "enemy")
+		state = {
+			...state,
+			monsters: [
+				{
+					id: "2:enemy",
+					kind: "skeleton",
+					floorNumber: state.run.activeFloor,
+					coordinate: {
+						...state.run.playerCoordinate,
+						col: state.run.playerCoordinate.col + 1,
+					},
+					health: 8,
+					intent: { type: "idle" },
+				},
+			],
+		};
+	const result = read(state);
+	expect(result.error).toBeDefined();
 	expect(result.state).toBe(state);
-	expect(state).toEqual(before);
-	if (reason === "ember") expect(result.error).toMatch(/ember/i);
+	expect(result.turnAdvanced).toBe(false);
 });
-it.each(["wall", "stair", "door", "spent object", "loot", "creature"])(
-	"does not overwrite a %s or search beyond the entrance's neighbors",
+it("blocks return away from the circle and makes ordinary arrivals dormant", () => {
+	const portal = read(adventure()).state;
+	if (!portal.town) throw new Error("Expected town");
+	const away = {
+		...portal,
+		town: { ...portal.town, coordinate: TOWN.arrival },
+	};
+	expect(back(away).state).toBe(away);
+	const dormant = { ...portal, townPortal: null };
+	expect(back(dormant).error).toMatch(/dormant/i);
+	expect(back(dormant).state).toBe(dormant);
+});
+it.each(["creature", "wall", "loot", "object", "stair"])(
+	"preserves content and returns safely with %s on the anchor",
 	(obstacle) => {
-		let state = adventure();
-		const point = { row: 7, col: 2 };
-		if (obstacle === "wall")
+		const departed = read(adventure()).state;
+		const point = departed.run.playerCoordinate;
+		let state = departed;
+		if (obstacle === "creature")
 			state = {
 				...state,
-				run: {
-					...state.run,
-					floors: state.run.floors.map((f, i) =>
-						i === 0
-							? {
-									...f,
-									terrain: f.terrain.map((r, y) =>
-										r.map((t, x) => (y === 7 && x === 2 ? "#" : t)),
-									),
-								}
-							: f,
-					),
-				},
-			};
-		if (obstacle === "stair")
-			state = {
-				...state,
-				run: {
-					...state.run,
-					floors: state.run.floors.map((f, i) =>
-						i === 0 && f.downStair
-							? { ...f, downStair: { ...f.downStair, coordinate: point } }
-							: f,
-					),
-				},
-			};
-		if (obstacle === "door" || obstacle === "spent object")
-			state = {
-				...state,
-				objects: [
+				monsters: [
 					{
-						id: "blocked",
-						kind: obstacle === "door" ? "door" : "chest",
-						floorNumber: 1,
+						id: "2:blocker",
+						kind: "skeleton",
+						floorNumber: state.run.activeFloor,
 						coordinate: point,
-						activated: obstacle !== "door",
+						health: 8,
+						intent: { type: "idle" },
 					},
 				],
 			};
@@ -175,130 +158,115 @@ it.each(["wall", "stair", "door", "spent object", "loot", "creature"])(
 				floorItems: [
 					...state.floorItems,
 					{
-						item: { id: "blocked", kind: "healing-potion" },
-						floorNumber: 1,
+						item: { id: "loot", kind: "mana-potion" },
+						floorNumber: state.run.activeFloor,
 						coordinate: point,
 					},
 				],
 			};
-		if (obstacle === "creature")
+		if (obstacle === "object")
 			state = {
 				...state,
-				monsters: [
+				objects: [
 					{
-						id: "1:1",
-						kind: "goblin",
-						floorNumber: 1,
+						id: "trap",
+						kind: "trap",
+						floorNumber: state.run.activeFloor,
 						coordinate: point,
-						health: 4,
-						intent: { type: "idle" },
+						activated: false,
 					},
 				],
 			};
-		expect(exitScrollArrival(state)).toBeUndefined();
-		const result = read(state);
-		expect(result.state).toBe(state);
-		expect(result.turnAdvanced).toBe(false);
-		expect(result.error).toMatch(/safe/i);
+		if (obstacle === "wall" || obstacle === "stair")
+			state = {
+				...state,
+				run: {
+					...state.run,
+					floors: state.run.floors.map((floor) =>
+						floor.floorNumber !== state.run.activeFloor
+							? floor
+							: obstacle === "wall"
+								? {
+										...floor,
+										terrain: floor.terrain.map((row, r) =>
+											row.map((tile, c) =>
+												r === point.row && c === point.col ? "#" : tile,
+											),
+										),
+									}
+								: {
+										...floor,
+										upStair: {
+											destinationFloor: 1,
+											coordinate: point,
+											arrivalCoordinate: point,
+										},
+									},
+					),
+				},
+			};
+		const result = back(state);
+		expect(result.error).toBeUndefined();
+		if (obstacle === "loot" || obstacle === "stair")
+			expect(result.state.run.playerCoordinate).toEqual(point);
+		else expect(result.state.run.playerCoordinate).not.toEqual(point);
+		expect(back(state)).toEqual(result);
+		expect(result.state.monsters).toBe(state.monsters);
+		expect(result.state.floorItems).toBe(state.floorItems);
 	},
 );
-it("can reposition within floor 1 and chooses another adjacent tile when the preferred one is occupied", () => {
-	const remote = adventure();
-	const state = {
-		...remote,
+it("retains an unusable return portal instead of trapping or charging the player", () => {
+	const state = read(adventure()).state;
+	const blocked = {
+		...state,
 		run: {
-			...remote.run,
-			activeFloor: 1,
-			playerCoordinate: { row: 7, col: 8 },
-			floors: remote.run.floors.map((f, i) =>
-				i === 0
-					? {
-							...f,
-							terrain: f.terrain.map((r, y) =>
-								r.map((t, x) => (y === 6 && x === 1 ? "." : t)),
-							),
-						}
-					: f,
-			),
+			...state.run,
+			floors: state.run.floors.map((floor) => ({
+				...floor,
+				terrain: floor.terrain.map((row) => row.map(() => "#")),
+			})),
 		},
 	};
-	expect(exitScrollArrival(state)).toEqual({ row: 6, col: 1 });
-	const occupied = {
-		...state,
-		floorItems: [
-			...state.floorItems,
-			{
-				item: { id: "north", kind: "healing-potion" as const },
-				floorNumber: 1,
-				coordinate: { row: 6, col: 1 },
-			},
-		],
-	};
-	expect(exitScrollArrival(occupied)).toEqual({ row: 7, col: 2 });
-	expect(read(occupied).state.run.playerCoordinate).toEqual({ row: 7, col: 2 });
+	expect(back(blocked).error).toMatch(/safe/i);
+	expect(back(blocked).state).toBe(blocked);
 });
-it("runs one arrival-floor monster/effect phase, freezes the departure floor, and retains consumption if the player dies", () => {
+it("ticks poison/recovery once on departure; fatal poison consumes the scroll but leaves no town portal", () => {
 	const base = adventure();
-	const state: GameState = {
+	const state = {
 		...base,
 		turn: 29,
-		player: { ...base.player, health: 1 },
 		effects: [
-			{ actorId: "player", floorNumber: null, kind: "poisoned", remaining: 2 },
-			{ actorId: "2:1", floorNumber: 2, kind: "poisoned", remaining: 3 },
-		],
-		monsters: [
 			{
-				id: "1:1",
-				kind: "goblin",
-				floorNumber: 1,
-				coordinate: { row: 7, col: 5 },
-				health: 4,
-				intent: { type: "idle" },
-			},
-			{
-				id: "2:1",
-				kind: "skeleton",
-				floorNumber: 2,
-				coordinate: { row: 7, col: 18 },
-				health: 8,
-				intent: { type: "idle" },
+				actorId: "player",
+				floorNumber: null,
+				kind: "poisoned" as const,
+				remaining: 2,
 			},
 		],
 	};
 	const result = read(state);
-	expect(result.state.turn).toBe(30);
-	expect(result.state.player.health).toBe(0);
-	expect(result.state.monsters[0].coordinate).toEqual({ row: 7, col: 4 });
-	expect(result.state.monsters[1]).toEqual(state.monsters[1]);
-	expect(result.state.effects.find((x) => x.actorId === "2:1")).toEqual(
-		state.effects[1],
-	);
-	expect(result.state.bag.items.some((x) => x.id === "exit:1")).toBe(false);
-	expect(result.state.run.activeFloor).toBe(1);
-});
-it("direct scroll execution also rejects an ember-carrier", () => {
-	const state = adventure();
-	expect(
-		readExitScroll(
-			{ ...state, quest: { ...state.quest, cureRecovered: true } },
-			{ type: "exit-dungeon", itemId: "exit:1" },
-		),
-	).toEqual({ error: expect.stringMatching(/ember/i) });
-});
-
-it("advances player poison and normal turn-30 mana recovery once on arrival", () => {
-	const base = adventure();
-	const state: GameState = {
-		...base,
-		turn: 29,
-		effects: [
-			{ actorId: "player", floorNumber: null, kind: "poisoned", remaining: 2 },
-		],
-	};
-	const result = read(state);
-	expect(result.state.turn).toBe(30);
 	expect(result.state.player.health).toBe(state.player.health - 1);
 	expect(result.state.mana).toBe(1);
 	expect(result.state.effects[0].remaining).toBe(1);
+	expect(back(result.state).state.effects).toBe(result.state.effects);
+	const fatal = read({ ...state, player: { ...state.player, health: 1 } });
+	expect(fatal.state.player.health).toBe(0);
+	expect(fatal.state.town).toBeNull();
+	expect(fatal.state.townPortal).toBeNull();
+	expect(fatal.state.bag.items.some((item) => item.id === "exit:1")).toBe(
+		false,
+	);
+});
+it("using the south gate abandons the portal and enters floor 1", () => {
+	const state = read(adventure()).state;
+	if (!state.town) throw new Error("Expected town");
+	const result = resolvePlayerAction(
+		{ ...state, town: { ...state.town, coordinate: TOWN.gate } },
+		{ type: "travel", destination: "dungeon" },
+	);
+	expect(result.error).toBeUndefined();
+	expect(result.state.run.activeFloor).toBe(1);
+	expect(result.state.run.playerCoordinate).toEqual(state.quest.entrance);
+	expect(result.state.townPortal).toBeNull();
+	expect(result.turnAdvanced).toBe(false);
 });

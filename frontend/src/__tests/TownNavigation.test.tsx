@@ -48,3 +48,22 @@ it("keeps disabled town maps from moving, inspecting, opening the directory or d
 		screen.queryByRole("button", { name: "Walk south" }),
 	).not.toBeInTheDocument();
 });
+
+it("shows a dormant portal and lets touch users walk onto its circle", async () => {
+	const onAction = vi.fn();
+	const user = userEvent.setup();
+	render(
+		<TownMap
+			location={{ ...createTownLocation(), coordinate: { row: 8, col: 8 } }}
+			onAction={onAction}
+		/>,
+	);
+	expect(screen.getByLabelText("Town portal status")).toHaveTextContent(
+		/dormant/,
+	);
+	const circle = screen.getByRole("cell", {
+		name: "8, 9: dormant town portal",
+	});
+	await user.click(within(circle).getByRole("button", { name: "Walk east" }));
+	expect(onAction).toHaveBeenCalledWith({ type: "move", direction: "right" });
+});

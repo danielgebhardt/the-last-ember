@@ -166,6 +166,7 @@ describe("finite town potion purchases", () => {
 			DEFAULT_FOG_CONFIGURATION,
 		);
 		const legacy = { ...old, version: 23, state: { ...old.state } };
+		Reflect.deleteProperty(legacy.state, "townPortal");
 		Reflect.deleteProperty(legacy.state, "townPotionStock");
 		Reflect.deleteProperty(legacy.state, "townEquipmentStock");
 		Reflect.deleteProperty(legacy.state.progression, "permanentAttributes");

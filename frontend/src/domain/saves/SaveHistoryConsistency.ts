@@ -12,6 +12,8 @@ export const hasConsistentHistory = (document: SaveSourceDocument): boolean => {
 				entry.id < state.activityHistory.nextId &&
 				(!i || entry.id > entries[i - 1].id) &&
 				entry.event.turn <= state.turn &&
+				(entry.event.type !== "town-portal-returned" ||
+					entry.event.toFloor <= run.floors.length) &&
 				(entry.event.type !== "exit-scroll-used" ||
 					entry.event.fromFloor <= run.floors.length) &&
 				(!i || entry.event.turn >= entries[i - 1].event.turn),

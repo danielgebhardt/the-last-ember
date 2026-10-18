@@ -46,7 +46,7 @@ export const travelBetweenTownAndDungeon = (
 		if (!atDungeonEntrance(state))
 			return reject("Stand on the floor-1 entrance to return to town.");
 		return {
-			state: { ...state, town: createTownLocation() },
+			state: { ...state, town: createTownLocation(), townPortal: null },
 			turnAdvanced: false,
 			message:
 				"You return to Beacon town. The dungeon waits exactly as you left it.",
@@ -58,8 +58,9 @@ export const travelBetweenTownAndDungeon = (
 	const tile =
 		navigationRun(state).floors[0]?.terrain[coordinate.row]?.[coordinate.col];
 	if (
-		state.run.activeFloor !== 1 ||
-		!same(state.run.playerCoordinate, coordinate) ||
+		(!state.townPortal &&
+			(state.run.activeFloor !== 1 ||
+				!same(state.run.playerCoordinate, coordinate))) ||
 		tile !== FLOOR ||
 		state.monsters.some(
 			(monster) =>
@@ -70,8 +71,19 @@ export const travelBetweenTownAndDungeon = (
 	)
 		return reject("The dungeon arrival is blocked. Travel was canceled.");
 	return {
-		state: { ...state, town: null },
+		state: {
+			...state,
+			town: null,
+			townPortal: null,
+			run: {
+				...state.run,
+				activeFloor: 1,
+				playerCoordinate: { ...coordinate },
+			},
+		},
 		turnAdvanced: false,
-		message: "You enter floor 1 at the dungeon entrance.",
+		message: state.townPortal
+			? "You leave by the south gate. Your portal closes; you enter floor 1."
+			: "You enter floor 1 at the dungeon entrance.",
 	};
 };

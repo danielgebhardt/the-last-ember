@@ -25,7 +25,8 @@ const TownPreview = () => {
 				<h3 className="text-lg font-semibold">Beacon town · Level 0</h3>
 				<p className="text-sm text-muted-foreground">
 					Town plan — preview only. Walking here does not change your adventure.
-					The potion store is open in live town. This preview cannot trade.
+					Open shops work in live town. This preview cannot trade or open a
+					portal.
 				</p>
 			</div>
 			<p className="text-sm">

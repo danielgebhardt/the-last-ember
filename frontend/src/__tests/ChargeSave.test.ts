@@ -102,7 +102,7 @@ describe("Saved charger preparation", () => {
 	it("migrates historical awareness without adding charger state", () => {
 		const parsed = parseSave(oldFile);
 		if (!parsed.ok) throw new Error(parsed.error);
-		expect(parsed.value.version).toBe(26);
+		expect(parsed.value.version).toBe(27);
 		expect(parsed.value.state.monsters[0].intent).toEqual({ type: "idle" });
 	});
 });

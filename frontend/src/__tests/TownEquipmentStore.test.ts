@@ -221,6 +221,7 @@ it("migrates v24 potion depletion and played data without inventing owned equipm
 			townPotionStock: { ...document.state.townPotionStock, antidote: 2 },
 		},
 	};
+	Reflect.deleteProperty(old.state, "townPortal");
 	Reflect.deleteProperty(old.state, "townEquipmentStock");
 	Reflect.deleteProperty(old.state.progression, "permanentAttributes");
 	const result = parseSave(JSON.stringify(old));
@@ -228,6 +229,7 @@ it("migrates v24 potion depletion and played data without inventing owned equipm
 	if (!result.ok) throw new Error(result.error);
 	expect(result.value.state).toEqual({
 		...old.state,
+		townPortal: null,
 		townEquipmentStock: createTownEquipmentStock(),
 		progression: {
 			...old.state.progression,

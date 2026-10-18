@@ -303,6 +303,19 @@ const DungeonHelp = ({
 						you recover the ember.
 					</li>
 					<li>
+						<span className="font-medium text-foreground">Town portals.</span>{" "}
+						Read a Town portal scroll in the dungeon to travel to the circle
+						west of the beacon. It costs one scroll and one originating-floor
+						turn, including monsters, effects and recovery. Nearby enemies in
+						sight within 8 tiles and prepared enemy attacks prevent reading.
+						Town pauses the dungeon. Stand on the active circle and press Enter
+						to return to your departure floor and tile for free, using a nearby
+						safe tile if blocked. The portal closes after return; leaving by the
+						south gate abandons it and enters floor 1. Ordinary town visits
+						leave the circle dormant. Portals cannot be used while carrying the
+						ember.
+					</li>
+					<li>
 						<span className="font-medium text-foreground">Mana.</span> Recover 1
 						mana after every {MANA_RECOVERY_INTERVAL} successful turns,
 						including waiting, after monsters act. Safe rooms allow unlimited

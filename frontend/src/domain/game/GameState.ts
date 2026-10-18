@@ -28,6 +28,7 @@ import {
 } from "../town/TownEconomy";
 import { createTownEquipmentStock } from "../town/TownEquipmentStock";
 import type { TownLocation } from "../town/TownLocation";
+import type { TownPortal } from "../town/TownPortal";
 import {
 	type ActivityHistory,
 	createActivityHistory,
@@ -43,6 +44,7 @@ import { createKnownSpells, type SpellKind } from "./Spells";
 import type { TimedEffect } from "./TimedEffects";
 
 export type GameState = {
+	townPortal: TownPortal | null;
 	townEquipmentStock: readonly ItemInstance[];
 	townPotionStock: TownPotionStock;
 	town: TownLocation | null;
@@ -96,6 +98,7 @@ export const createGameState = (
 	});
 	return {
 		town: null,
+		townPortal: null,
 		townPotionStock: createTownPotionStock(),
 		townEquipmentStock: createTownEquipmentStock(),
 		difficulty,

@@ -53,6 +53,11 @@ import {
 	buyTownEquipment,
 } from "../town/TownEquipmentStore";
 import {
+	type ReturnTownPortalAction,
+	returnThroughTownPortal,
+	townPortalMessage,
+} from "../town/TownPortal";
+import {
 	type BuyTownPotionAction,
 	buyTownPotion,
 } from "../town/TownPotionStore";
@@ -86,6 +91,7 @@ import {
 import { advanceTimedEffects } from "./TimedEffects";
 
 export type PlayerAction =
+	| ReturnTownPortalAction
 	| TownSellAction
 	| BuyTownEquipmentAction
 	| BuyTownPotionAction
@@ -123,7 +129,9 @@ export const resolvePlayerAction = (
 			state,
 			turnAdvanced: false,
 			...(action.type === "cast" ||
+			action.type === "exit-dungeon" ||
 			action.type === "travel" ||
+			action.type === "return-town-portal" ||
 			action.type === "buy-town-potion" ||
 			action.type === "buy-town-equipment" ||
 			action.type === "sell-town-equipment" ||
@@ -164,6 +172,8 @@ export const resolvePlayerAction = (
 			...(action.type === "cast"
 				? { error: "You cannot cast after death." }
 				: action.type === "travel" ||
+						action.type === "exit-dungeon" ||
+						action.type === "return-town-portal" ||
 						action.type === "buy-town-potion" ||
 						action.type === "buy-town-equipment" ||
 						action.type === "sell-town-equipment" ||
@@ -176,6 +186,8 @@ export const resolvePlayerAction = (
 		action.type === "sell-town-lower"
 	)
 		return sellAtTownSalvageShop(state, action);
+	if (action.type === "return-town-portal")
+		return returnThroughTownPortal(state);
 	if (action.type === "travel")
 		return travelBetweenTownAndDungeon(state, action);
 	if (action.type === "buy-town-equipment")
@@ -193,6 +205,7 @@ export const resolvePlayerAction = (
 			state.town,
 			action.type === "move" ? action : { type: "inspect" },
 			"Dungeon entrance — stand on the gate and press Enter to descend.",
+			townPortalMessage(state.townPortal),
 		);
 		if (result.location.kind !== "town" || result.error)
 			return {
@@ -241,7 +254,7 @@ export const resolvePlayerAction = (
 	const committed = { ...state, turn: state.turn + 1 };
 	const effect = resolvePlayerEffect(committed, action, rollSource);
 	const result =
-		effect && !("error" in effect)
+		effect && !("error" in effect) && action.type !== "exit-dungeon"
 			? announceObjectArrival(
 					state,
 					triggerArrivalTrap(collectGoldAtPlayer(effect)),
@@ -250,13 +263,24 @@ export const resolvePlayerAction = (
 	if (!result) return { state, turnAdvanced: false };
 	if ("error" in result)
 		return { state, turnAdvanced: false, error: result.error };
+	// A scroll's committed response happens on the originating floor before town freezes it.
+	const responseState =
+		action.type === "exit-dungeon" ? { ...result, town: null } : result;
+	const resolved =
+		responseState.quest.victory || responseState.player.health <= 0
+			? responseState
+			: recoverManaAfterTurn(
+					advanceTimedEffects(resolveMonsterPhase(responseState, rollSource)),
+				);
 	return {
 		state:
-			result.quest.victory || result.player.health <= 0
-				? result
-				: recoverManaAfterTurn(
-						advanceTimedEffects(resolveMonsterPhase(result, rollSource)),
-					),
+			action.type === "exit-dungeon"
+				? {
+						...resolved,
+						town: resolved.player.health > 0 ? result.town : null,
+						townPortal: resolved.player.health > 0 ? result.townPortal : null,
+					}
+				: resolved,
 		turnAdvanced: true,
 	};
 };
@@ -269,6 +293,7 @@ const resolvePlayerEffect = (
 		| HotbarAction
 		| SpellAssignmentAction
 		| TownTravelAction
+		| ReturnTownPortalAction
 		| BuyTownEquipmentAction
 		| BuyTownPotionAction
 		| TownSellAction

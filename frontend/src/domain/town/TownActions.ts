@@ -5,6 +5,7 @@ import {
 import type { Coordinate } from "../dungeon/DungeonTypes";
 import { isTownWalkable, TOWN } from "./TownDefinition";
 import { type AdventureLocation, isTownLocation } from "./TownLocation";
+import { DORMANT_PORTAL_MESSAGE } from "./TownPortal";
 
 export type TownAction =
 	| { type: "move"; direction: MovementDirection }
@@ -23,6 +24,7 @@ export const resolveTownAction = (
 	location: AdventureLocation,
 	action: unknown,
 	gateMessage = "Dungeon entrance — travel is not connected in this preview.",
+	portalMessage = DORMANT_PORTAL_MESSAGE,
 ): TownActionResult => {
 	const unchanged = (message: string, error?: string): TownActionResult => ({
 		location,
@@ -45,6 +47,8 @@ export const resolveTownAction = (
 			return unchanged(
 				`${building.sign} ${building.status === "open" ? "Open. Press E beside the door to browse." : "Closed."}`,
 			);
+		if (distance(location.coordinate, TOWN.portal) <= 1)
+			return unchanged(portalMessage);
 		if (distance(location.coordinate, TOWN.beacon) <= 1)
 			return unchanged(
 				"The beacon is dying. No one has volunteered to tell it.",

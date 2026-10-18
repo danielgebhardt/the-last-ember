@@ -80,7 +80,11 @@ export const formatActivityEvent = (event: ActivityEvent): string => {
 		case "entrance-reminder":
 			return `${prefix}The last ember is still on floor ${event.goalFloor}. Return with it to leave.`;
 		case "exit-scroll-used":
-			return `${prefix}You read an exit scroll and return from floor ${event.fromFloor} to the entrance approach on floor 1.`;
+			return event.destination === "town"
+				? `${prefix}You read a town portal scroll on floor ${event.fromFloor}. A return portal opens in Beacon town.`
+				: `${prefix}You read an exit scroll and return from floor ${event.fromFloor} to the entrance approach on floor 1.`;
+		case "town-portal-returned":
+			return `${prefix}You return through the town portal to floor ${event.toFloor}. The portal closes.`;
 		case "floor-changed":
 			return `${prefix}You ${event.toFloor > event.fromFloor ? "descend" : "ascend"} to floor ${event.toFloor}.`;
 		case "monster-missed":

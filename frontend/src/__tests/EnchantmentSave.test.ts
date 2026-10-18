@@ -35,7 +35,7 @@ describe("Versioned owned enchantments", () => {
 		];
 		const parsed = parseSave(serializeSave(document));
 		if (!parsed.ok) throw new Error(parsed.error);
-		expect(parsed.value.version).toBe(26);
+		expect(parsed.value.version).toBe(27);
 		const restored = restoreSave(parsed.value);
 		expect(restored.state.equipment.mainHand?.enchantment).toBe(2);
 		expect(restored.state.bag.items[0].enchantment).toBe(1);

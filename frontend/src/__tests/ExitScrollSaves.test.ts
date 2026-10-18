@@ -35,7 +35,7 @@ it("round-trips scroll copies and the explicit exit event, then continues determ
 	const document = snapshot();
 	const loaded = parseSave(serializeSave(document));
 	if (!loaded.ok) throw new Error(loaded.error);
-	expect(loaded.value.version).toBe(26);
+	expect(loaded.value.version).toBe(27);
 	const restored = restoreSave(loaded.value);
 	const result = resolvePlayerAction(restored.state, {
 		type: "exit-dungeon",
@@ -57,8 +57,12 @@ it("round-trips scroll copies and the explicit exit event, then continues determ
 	const current = restoreSave(reread.value).state;
 	expect(current.bag.items.map((x) => x.id)).toEqual(["scroll:2"]);
 	expect(current.activityHistory).toEqual(result.state.activityHistory);
-	expect(resolvePlayerAction(current, { type: "wait" }).state).toEqual(
-		resolvePlayerAction(result.state, { type: "wait" }).state,
+	expect(current.townPortal).toEqual(result.state.townPortal);
+	expect(current.townPortal?.floorNumber).toBe(restored.state.run.activeFloor);
+	expect(
+		resolvePlayerAction(current, { type: "return-town-portal" }).state,
+	).toEqual(
+		resolvePlayerAction(result.state, { type: "return-town-portal" }).state,
 	);
 });
 it("migrates an actual v20 snapshot without injecting scrolls or regenerating played state", () => {
@@ -75,7 +79,7 @@ it("migrates an actual v20 snapshot without injecting scrolls or regenerating pl
 	const before = structuredClone(source);
 	const parsed = parseSave(historicalSaveText(source));
 	if (!parsed.ok) throw new Error(parsed.error);
-	expect(parsed.value).toEqual({ ...source, version: 26 });
+	expect(parsed.value).toEqual({ ...source, version: 27 });
 	expect(source).toEqual(before);
 });
 it("restores ember possession and denies every scroll use without consuming or spending a turn", () => {
@@ -162,3 +166,43 @@ it("rejects unknown item kinds, invalid enhancement and duplicate scroll ownersh
 		).ok,
 	).toBe(false);
 });
+
+it("migrates a real v26 save with a dormant portal and no resource or position changes", () => {
+	const doc = snapshot();
+	const old = { ...doc, version: 26 };
+	const loaded = parseSave(historicalSaveText(old));
+	if (!loaded.ok) throw new Error(loaded.error);
+	expect(loaded.value.state.townPortal).toBeNull();
+	expect(loaded.value.state.run).toEqual(doc.state.run);
+	expect(loaded.value.state.bag).toEqual(doc.state.bag);
+	expect(loaded.value.state.turn).toBe(doc.state.turn);
+});
+it.each(["floor", "coordinate", "outside town", "ember", "legacy", "missing"])(
+	"rejects inconsistent portal data: %s",
+	(reason) => {
+		const doc = snapshot();
+		const original = restoreSave(doc);
+		const departed = resolvePlayerAction(original.state, {
+			type: "exit-dungeon",
+			itemId: "scroll:1",
+		}).state;
+		const saved = createSaveDocument(
+			departed,
+			original.exploration,
+			original.configuration,
+			original.fog,
+		);
+		if (!saved.state.townPortal) throw new Error("Expected open portal");
+		if (reason === "floor") saved.state.townPortal.floorNumber = 999;
+		if (reason === "coordinate") saved.state.townPortal.coordinate.row = -1;
+		if (reason === "outside town") saved.state.town = null;
+		if (reason === "ember")
+			saved.state.quest = { ...saved.state.quest, cureRecovered: true };
+		if (reason === "missing") Reflect.deleteProperty(saved.state, "townPortal");
+		const serialized =
+			reason === "legacy"
+				? JSON.stringify({ ...saved, version: 26 })
+				: serializeSave(saved);
+		expect(parseSave(serialized).ok).toBe(false);
+	},
+);

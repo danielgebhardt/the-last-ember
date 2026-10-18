@@ -30,12 +30,12 @@ export type ItemDefinition = {
 export const ITEM_DEFINITIONS = {
 	"exit-scroll": {
 		specialFindOnly: true,
-		name: "Exit dungeon scroll",
+		name: "Town portal scroll",
 		type: "scroll",
 		attackBonus: 0,
 		armor: 0,
 		description:
-			"Read to return beside the dungeon entrance on floor 1. Costs one scroll and one turn; enemies act on arrival. Cannot be used while carrying the Last Ember. Already beside the entrance or no safe arrival: no cost.",
+			"Read in a cleared dungeon area to open a single-use return portal in Beacon town. Costs one scroll and one turn; monsters, effects and recovery resolve on the originating floor before town pauses it. Enemies in sight within 8 tiles or preparing attacks prevent use. Stand on the town portal and press Enter to return to your exact departure location, or a nearby safe tile if blocked, for free. Returning or using the south gate closes the portal. Cannot be used while carrying the Last Ember. Rejected reading costs nothing.",
 		minFloor: 2,
 		maxFloor: MAX_FLOORS,
 		foundWeight: 0,

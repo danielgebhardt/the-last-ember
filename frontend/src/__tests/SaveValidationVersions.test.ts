@@ -9,6 +9,7 @@ import { savedAdventure } from "./SaveTestHelpers";
 const sourceForVersion = (version: number) => {
 	const source = version <= 2 ? JSON.parse(versionOneFile) : savedAdventure();
 	source.version = version;
+	if (version < 27) Reflect.deleteProperty(source.state, "townPortal");
 	if (version < 26)
 		Reflect.deleteProperty(source.state.progression, "permanentAttributes");
 	if (version < 25) Reflect.deleteProperty(source.state, "townEquipmentStock");
@@ -22,7 +23,7 @@ const sourceForVersion = (version: number) => {
 		source.state.spellHotbar = ["magic-missile", "heal", null, null];
 	return source;
 };
-const versions = Array.from({ length: 26 }, (_, index) => index + 1);
+const versions = Array.from({ length: 27 }, (_, index) => index + 1);
 
 describe("Supported save versions", () => {
 	it.each(versions)(
@@ -33,7 +34,7 @@ describe("Supported save versions", () => {
 			const result = validateSaveDocument(source);
 			expect(result.ok).toBe(true);
 			if (!result.ok) throw new Error(result.error);
-			expect(result.value.version).toBe(26);
+			expect(result.value.version).toBe(27);
 			expect(result.value.state.turn).toBe(source.state.turn);
 			expect(result.value.state.run).toEqual(source.state.run);
 			expect(source).toEqual(before);
@@ -108,7 +109,7 @@ describe("Supported save versions", () => {
 	it.each([
 		{},
 		{ version: 0 },
-		{ version: 27 },
+		{ version: 28 },
 		{ version: "19" },
 		{ version: "toString" },
 	])("reports unsupported versions for %j", (source) => {

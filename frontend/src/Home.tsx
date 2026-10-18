@@ -64,6 +64,7 @@ import {
 	type SaveDocument,
 } from "./domain/saves/SaveFormat";
 import { reachableTownEquipmentStore } from "./domain/town/TownEquipmentStore";
+import { atTownPortal } from "./domain/town/TownPortal";
 import { canReachTownPotionStore } from "./domain/town/TownPotionStore";
 import { canReachTownSalvageShop } from "./domain/town/TownSalvageShop";
 import { atDungeonEntrance, atTownGate } from "./domain/town/TownTravel";
@@ -583,6 +584,14 @@ const Home = ({
 							<DungeonFrame>
 								{town ? (
 									<TownMap
+										portalFloor={game.state.townPortal?.floorNumber}
+										travelLabel={
+											atTownPortal(game.state)
+												? game.state.townPortal
+													? `Return to floor ${game.state.townPortal.floorNumber}`
+													: "Inspect dormant portal"
+												: "Enter dungeon"
+										}
 										location={town}
 										mapRef={mapRef}
 										enabled={gameplayEnabled}
@@ -612,12 +621,13 @@ const Home = ({
 												);
 										}}
 										onTravel={
-											atTownGate(game.state)
+											atTownGate(game.state) || atTownPortal(game.state)
 												? () =>
-														handleActionRequested({
-															type: "travel",
-															destination: "dungeon",
-														})
+														handleActionRequested(
+															atTownPortal(game.state)
+																? { type: "return-town-portal" }
+																: { type: "travel", destination: "dungeon" },
+														)
 												: undefined
 										}
 										onCharacterRequested={() => {

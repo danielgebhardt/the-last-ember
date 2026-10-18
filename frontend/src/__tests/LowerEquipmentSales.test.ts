@@ -211,7 +211,7 @@ it("retains completed bulk sales in a v20 save and preserves the next ordinary t
 	);
 	const parsed = parseSave(serializeSave(document));
 	if (!parsed.ok) throw new Error(parsed.error);
-	expect(parsed.value.version).toBe(26);
+	expect(parsed.value.version).toBe(27);
 	const loaded = restoreSave(parsed.value).state;
 	expect(loaded).toEqual(state);
 	expect(resolvePlayerAction(loaded, { type: "wait" })).toEqual(

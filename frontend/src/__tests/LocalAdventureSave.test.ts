@@ -26,7 +26,7 @@ describe("One local adventure save slot", () => {
 		const loaded = readLocalSave(() => storage);
 		expect(loaded).toEqual(parseSave(versionOneFile));
 		if (!loaded.ok || !loaded.value) throw new Error("Legacy slot must load");
-		expect(loaded.value.version).toBe(26);
+		expect(loaded.value.version).toBe(27);
 		expect(set).not.toHaveBeenCalled();
 		expect(storage.getItem(LOCAL_SAVE_KEY)).toBe(versionOneFile);
 
@@ -81,7 +81,7 @@ describe("One local adventure save slot", () => {
 		writeLocalSave(previous, () => storage);
 		const set = vi.spyOn(storage, "setItem");
 		expect(
-			writeLocalSave({ ...previous, version: 99 as 26 }, () => storage).ok,
+			writeLocalSave({ ...previous, version: 99 as 27 }, () => storage).ok,
 		).toBe(false);
 		expect(set).not.toHaveBeenCalled();
 		expect(readLocalSave(() => storage)).toEqual({ ok: true, value: previous });

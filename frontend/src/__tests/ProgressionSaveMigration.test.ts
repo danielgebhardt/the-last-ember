@@ -26,7 +26,7 @@ it.each([false, true])(
 		const parsed = parseSave(historicalSaveText(legacy));
 		expect(parsed.ok).toBe(true);
 		if (!parsed.ok) throw new Error(parsed.error);
-		expect(parsed.value.version).toBe(26);
+		expect(parsed.value.version).toBe(27);
 		const restored = restoreSave(parsed.value);
 		expect(restored.state.progression.experience).toBe(1000);
 		expect(levelForExperience(restored.state.progression.experience)).toBe(11);

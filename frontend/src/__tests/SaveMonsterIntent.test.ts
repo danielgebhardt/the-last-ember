@@ -55,11 +55,12 @@ describe("Monster intent and versioned saves", () => {
 		if (!parsed.ok) throw new Error(parsed.error);
 		expect(parsed.value).toEqual({
 			...legacy,
-			version: 26,
+			version: 27,
 			configuration: { ...legacy.configuration, difficulty: 1 },
 			state: {
 				...legacy.state,
 				town: null,
+				townPortal: null,
 				progression: {
 					...legacy.state.progression,
 					permanentAttributes: createPermanentAttributes(),
@@ -97,7 +98,7 @@ describe("Monster intent and versioned saves", () => {
 		const parsed = parseSave(serializeSave(document));
 		if (!parsed.ok) throw new Error(parsed.error);
 		const restored = restoreSave(parsed.value);
-		expect(parsed.value.version).toBe(26);
+		expect(parsed.value.version).toBe(27);
 		expect(restored.state.monsters).toEqual([preparing]);
 		const written = createSaveDocument(
 			restored.state,

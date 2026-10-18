@@ -34,7 +34,7 @@ export const validateSaveDocument = (
 		"version" in data &&
 		typeof data.version === "number" &&
 		data.version >= 23 &&
-		data.version <= 26 &&
+		data.version <= 27 &&
 		"state" in data &&
 		typeof data.state === "object" &&
 		data.state !== null &&
@@ -50,7 +50,7 @@ export const validateSaveDocument = (
 		};
 	// Source-version rules must pass before migration can normalize old fields.
 	if (!isConsistentSave(data)) return inconsistent;
-	if (data.version === 26) return { ok: true, value: data };
+	if (data.version === 27) return { ok: true, value: data };
 	const grown =
 		data.version === 1 || data.version === 2
 			? migrateSaveV2(data.version === 1 ? migrateSaveV1(data) : data)

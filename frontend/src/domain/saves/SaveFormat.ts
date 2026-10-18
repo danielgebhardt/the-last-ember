@@ -12,14 +12,14 @@ import { permanentAttributeGains } from "../game/PermanentAttributes";
 import { levelForExperience } from "../game/Progression";
 import type { ItemInstance } from "../items/Item";
 import { navigationRun } from "../objects/NavigationTerrain";
-import type { SaveDocumentV26 } from "./SaveDocumentV26";
+import type { SaveDocumentV27 } from "./SaveDocumentV27";
 import { validateSaveDocument } from "./SaveValidation";
 
-export const SAVE_FORMAT_VERSION = 26;
+export const SAVE_FORMAT_VERSION = 27;
 // Bound imported input before parsing. A maximum-size snapshot is measured in the review.
 export const MAX_SAVE_BYTES = 4 * 1024 * 1024;
 
-export type SaveDocument = SaveDocumentV26;
+export type SaveDocument = SaveDocumentV27;
 export type RestoredAdventure = {
 	state: GameState;
 	exploration: ExplorationState;
@@ -49,6 +49,9 @@ export const createSaveDocument = (
 	configuration: { ...configuration, difficulty: state.difficulty },
 	fog: { ...fog },
 	state: {
+		townPortal: state.townPortal
+			? { ...state.townPortal, coordinate: { ...state.townPortal.coordinate } }
+			: null,
 		townEquipmentStock: state.townEquipmentStock.map(savedItem),
 		townPotionStock: { ...state.townPotionStock },
 		town: state.town

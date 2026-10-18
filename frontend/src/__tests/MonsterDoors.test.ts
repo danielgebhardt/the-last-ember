@@ -205,7 +205,7 @@ describe("Capable enemies opening ordinary doors", () => {
 		const old = { ...tacticalSnapshot(state), version: 18 };
 		const parsed = parseSave(historicalSaveText(old));
 		if (!parsed.ok) throw Error(parsed.error);
-		expect(parsed.value.version).toBe(26);
+		expect(parsed.value.version).toBe(27);
 		expect(restoreSave(parsed.value).state).toEqual(state);
 	});
 	it.each([null, 12, "", "x".repeat(201)])(

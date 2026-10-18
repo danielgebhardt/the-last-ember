@@ -176,6 +176,7 @@ describe("deliberate town travel", () => {
 			state: {
 				...doc.state,
 				town: undefined,
+				townPortal: undefined,
 				townPotionStock: undefined,
 				townEquipmentStock: undefined,
 				progression: { experience: doc.state.progression.experience },

@@ -18,15 +18,25 @@ export const isConsistentSave = (document: SaveSourceDocument): boolean =>
 
 const hasConsistentTown = (document: SaveSourceDocument): boolean => {
 	const { state } = document;
-	if (!("town" in state) || state.town === null) return true;
+	const portal = "townPortal" in state ? state.townPortal : null;
+	if (!("town" in state) || state.town === null) return !portal;
+	const atEntrance =
+		state.run.activeFloor === 1 &&
+		state.run.playerCoordinate.row === state.quest.entrance.row &&
+		state.run.playerCoordinate.col === state.quest.entrance.col;
+	const atPortalAnchor =
+		!!portal &&
+		portal.floorNumber <= state.run.floors.length &&
+		portal.floorNumber === state.run.activeFloor &&
+		portal.coordinate.row === state.run.playerCoordinate.row &&
+		portal.coordinate.col === state.run.playerCoordinate.col;
+
 	return (
 		isTownLocation(state.town) &&
 		state.player.health > 0 &&
 		!state.quest.victory &&
 		!state.quest.cureRecovered &&
 		!state.bag.items.some((item) => item.kind === "cure") &&
-		state.run.activeFloor === 1 &&
-		state.run.playerCoordinate.row === state.quest.entrance.row &&
-		state.run.playerCoordinate.col === state.quest.entrance.col
+		(portal ? atPortalAnchor : atEntrance)
 	);
 };
