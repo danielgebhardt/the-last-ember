@@ -3,16 +3,17 @@ import {
 	ArrowLeft,
 	ArrowRight,
 	ArrowUp,
+	BookOpen,
 	Footprints,
 	Keyboard,
 	Map as MapIcon,
 	Shield,
 } from "lucide-react";
 import type { ReactNode, RefObject } from "react";
+import { EmberMenuHeader } from "@/components/ui/EmberMenu";
 import {
 	SheetContent,
 	SheetDescription,
-	SheetHeader,
 	SheetTitle,
 } from "@/components/ui/sheet";
 import DungeonLegend from "../components/dungeon/DungeonLegend.tsx";
@@ -67,14 +68,21 @@ const DungeonHelp = ({
 }) => (
 	<SheetContent
 		finalFocus={finalFocus}
-		className="overflow-y-auto data-[side=right]:w-full sm:data-[side=right]:max-w-4xl"
+		className="ember-menu-frame overflow-y-auto data-[side=right]:w-full sm:data-[side=right]:max-w-4xl"
 	>
-		<SheetHeader>
-			<SheetTitle>Help / Controls</SheetTitle>
-			<SheetDescription>
-				A quick guide to exploring the dungeon.
-			</SheetDescription>
-		</SheetHeader>
+		<EmberMenuHeader
+			className="pr-12"
+			icon={<BookOpen className="size-5" />}
+			heading={
+				<SheetTitle className="ember-menu-title">Help / Controls</SheetTitle>
+			}
+			subtitle={
+				<SheetDescription className="ember-menu-description">
+					A quick guide to exploring the dungeon.
+				</SheetDescription>
+			}
+		/>
+
 		<div className="grid gap-6 px-4 pb-6">
 			<div className="grid items-start gap-6 md:grid-cols-2">
 				<section

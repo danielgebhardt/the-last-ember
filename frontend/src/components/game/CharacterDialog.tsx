@@ -1,7 +1,10 @@
 import { Dialog } from "@base-ui/react/dialog";
 import { Tabs } from "@base-ui/react/tabs";
+import { Backpack, BookOpen, UserRound } from "lucide-react";
 import { type RefObject, useLayoutEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { EmberMenuHeader } from "@/components/ui/EmberMenu";
+import { EmberTab, EmberTabsList } from "@/components/ui/EmberTabs";
 import type { ActivityHistory } from "../../domain/game/ActivityHistory";
 import type { QuestState } from "../../domain/game/Adventure";
 import type { PlayerAction } from "../../domain/game/PlayerActions";
@@ -120,48 +123,72 @@ const CharacterDialog = ({
 					event.stopPropagation();
 					if (!event.repeat) onCloseRequested();
 				}}
-				className="fixed top-1/2 left-1/2 z-50 flex h-[min(52rem,calc(100dvh-2rem))] max-h-[calc(100dvh-2rem)] w-[calc(100%-2rem)] max-w-7xl -translate-x-1/2 -translate-y-1/2 flex-col overflow-hidden rounded-xl border bg-popover text-sm text-popover-foreground shadow-lg"
+				className="
+   ember-menu-frame
+   fixed top-1/2 left-1/2 z-50
+   flex h-[min(52rem,calc(100dvh-2rem))]
+   max-h-[calc(100dvh-2rem)]
+   w-[calc(100%-2rem)] max-w-7xl
+   -translate-x-1/2 -translate-y-1/2
+   flex-col overflow-hidden rounded-xl border
+   text-sm text-popover-foreground
+"
 			>
-				<div className="flex shrink-0 items-start justify-between gap-4 border-b p-4">
-					<div>
-						<Dialog.Title ref={titleRef} tabIndex={-1} className="outline-none">
-							Character
-						</Dialog.Title>
-						<Dialog.Description>
-							Your progression, equipment, carried items, and known spells.
-						</Dialog.Description>
-					</div>
-					<Dialog.Close render={<Button variant="outline" size="sm" />}>
-						Close
-					</Dialog.Close>
+				<div className="relative shrink-0">
+					<EmberMenuHeader
+						className="shrink-0"
+						icon={<Backpack className="size-5" />}
+						heading={
+							<Dialog.Title
+								ref={titleRef}
+								tabIndex={-1}
+								className="ember-menu-title outline-none"
+							>
+								The Adventurer's Ledger
+							</Dialog.Title>
+						}
+						subtitle={
+							<Dialog.Description className="ember-menu-description">
+								Your progression, equipment, carried items, and known spells.
+							</Dialog.Description>
+						}
+						actions={
+							<Dialog.Close
+								render={
+									<Button
+										variant="outline"
+										size="sm"
+										className="shrink-0 border-primary/25"
+									/>
+								}
+							>
+								Close
+							</Dialog.Close>
+						}
+					/>
 				</div>
+
 				<Tabs.Root
 					defaultValue="character"
 					className="flex min-h-0 flex-1 flex-col"
 				>
-					<Tabs.List
-						activateOnFocus
-						aria-label="Character sections"
-						className="flex shrink-0 gap-1 border-b px-4 pt-2"
-					>
-						<Tabs.Tab
-							value="character"
-							className="rounded-t-md border-b-2 border-transparent px-4 py-2 font-medium text-muted-foreground outline-offset-2 focus-visible:outline-2 focus-visible:outline-primary data-active:border-primary data-active:text-foreground"
-						>
+					<EmberTabsList aria-label="Character sections" className="px-4 pt-2">
+						<EmberTab value="character">
+							<UserRound aria-hidden="true" className="size-4" />
 							Character
-						</Tabs.Tab>
-						<Tabs.Tab
-							value="spells"
-							className="rounded-t-md border-b-2 border-transparent px-4 py-2 font-medium text-muted-foreground outline-offset-2 focus-visible:outline-2 focus-visible:outline-primary data-active:border-primary data-active:text-foreground"
-						>
+						</EmberTab>
+
+						<EmberTab value="spells">
+							<BookOpen aria-hidden="true" className="size-4" />
 							Spells
-						</Tabs.Tab>
-					</Tabs.List>
+						</EmberTab>
+					</EmberTabsList>
+
 					<Tabs.Panel
 						value="character"
 						className="min-h-0 flex-1 overflow-y-auto"
 					>
-						<div className="shrink-0 border-b px-4 py-2">
+						<div className="shrink-0 border-b border-primary/20 bg-primary/[0.035] px-4 py-3">
 							<CharacterStats
 								effects={effects}
 								player={player}
@@ -273,7 +300,7 @@ const CharacterDialog = ({
 						/>
 					</Tabs.Panel>
 				</Tabs.Root>
-				<div className="grid max-h-36 shrink-0 overflow-y-auto gap-2 border-t bg-popover px-4 py-3">
+				<div className="ember-menu-footer grid max-h-36 shrink-0 overflow-y-auto gap-2 px-4 py-3">
 					{actionError && (
 						<p role="alert" className="text-sm text-destructive">
 							{actionError}

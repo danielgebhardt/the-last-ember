@@ -1,4 +1,5 @@
 import { Tabs } from "@base-ui/react/tabs";
+import { LibraryBig } from "lucide-react";
 import {
 	Children,
 	type ReactNode,
@@ -6,11 +7,12 @@ import {
 	useId,
 	useState,
 } from "react";
+import { EmberMenuHeader } from "@/components/ui/EmberMenu";
+import { EmberTab, EmberTabsList } from "@/components/ui/EmberTabs";
 import { Input } from "@/components/ui/input";
 import {
 	SheetContent,
 	SheetDescription,
-	SheetHeader,
 	SheetTitle,
 } from "@/components/ui/sheet";
 import { SPELL_DEFINITIONS, type SpellKind } from "../../domain/game/Spells";
@@ -132,16 +134,26 @@ const DeveloperCatalog = ({
 	return (
 		<SheetContent
 			finalFocus={finalFocus}
-			className="data-[side=right]:w-full sm:data-[side=right]:max-w-5xl"
+			className="ember-menu-frame data-[side=right]:w-full sm:data-[side=right]:max-w-5xl"
 		>
-			<SheetHeader className="shrink-0">
-				<SheetTitle>Developer catalog</SheetTitle>
-				<SheetDescription>
-					Normal baseline definitions and game visuals. Active difficulty values
-					are shown in Help. Inspection is free; this view includes undiscovered
-					content. The Town tab offers an isolated walkable town preview.
-				</SheetDescription>
-			</SheetHeader>
+			<EmberMenuHeader
+				className="pr-12"
+				icon={<LibraryBig className="size-5" />}
+				heading={
+					<SheetTitle className="ember-menu-title">
+						Developer Catalog
+					</SheetTitle>
+				}
+				subtitle={
+					<SheetDescription className="ember-menu-description">
+						Normal baseline definitions and game visuals. Active difficulty
+						values are shown in Help. Inspection is free; this view includes
+						undiscovered content. The Town tab offers an isolated walkable town
+						preview.
+					</SheetDescription>
+				}
+			/>
+
 			<Tabs.Root
 				defaultValue="Monsters"
 				onValueChange={(value) => {
@@ -150,21 +162,14 @@ const DeveloperCatalog = ({
 				}}
 				className="flex min-h-0 flex-1 flex-col gap-4 px-4 pb-6"
 			>
-				<Tabs.List
-					activateOnFocus
-					aria-label="Catalog sections"
-					className="flex shrink-0 flex-wrap gap-1 border-b"
-				>
+				<EmberTabsList aria-label="Catalog sections" className="px-2 pt-2">
 					{CATALOG_SECTIONS.map((section) => (
-						<Tabs.Tab
-							key={section}
-							value={section}
-							className="rounded-t-md border-b-2 border-transparent px-3 py-2 font-medium text-muted-foreground outline-offset-2 focus-visible:outline-2 focus-visible:outline-primary data-active:border-primary data-active:text-foreground"
-						>
+						<EmberTab key={section} value={section}>
 							{section}
-						</Tabs.Tab>
+						</EmberTab>
 					))}
-				</Tabs.List>
+				</EmberTabsList>
+
 				{!townSelected && (
 					<label
 						htmlFor={filterId}

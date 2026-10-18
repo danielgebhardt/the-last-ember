@@ -1,14 +1,14 @@
 import { Toggle } from "@base-ui/react/toggle";
 import { ToggleGroup } from "@base-ui/react/toggle-group";
-import { Monitor, Moon, Sun } from "lucide-react";
+import { Monitor, Moon, Settings2, Sun } from "lucide-react";
 import { type RefObject, type SubmitEvent, useRef } from "react";
 import { Button, buttonVariants } from "@/components/ui/button";
+import { EmberMenuHeader, EmberPanel } from "@/components/ui/EmberMenu";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
 	SheetContent,
 	SheetDescription,
-	SheetHeader,
 	SheetTitle,
 } from "@/components/ui/sheet";
 import DifficultyChoice from "../components/game/DifficultyChoice";
@@ -66,16 +66,21 @@ const DungeonSettings = ({
 		<SheetContent
 			initialFocus={inputRef}
 			finalFocus={finalFocus}
-			className="overflow-y-auto data-[side=right]:w-full data-[side=right]:sm:max-w-3xl"
+			className="ember-menu-frame overflow-y-auto data-[side=right]:w-full data-[side=right]:sm:max-w-3xl"
 		>
-			<SheetHeader>
-				<SheetTitle>Settings</SheetTitle>
-				<SheetDescription>
-					Choose your appearance or start a dungeon from another seed.
-				</SheetDescription>
-			</SheetHeader>
+			<EmberMenuHeader
+				className="pr-12"
+				icon={<Settings2 className="size-5" />}
+				heading={<SheetTitle className="ember-menu-title">Settings</SheetTitle>}
+				subtitle={
+					<SheetDescription className="ember-menu-description">
+						Choose your appearance or start a dungeon from another seed.
+					</SheetDescription>
+				}
+			/>
+
 			<div className="grid items-start gap-5 px-4 pb-4 sm:grid-cols-2">
-				<div className="grid gap-4 rounded-xl border bg-muted/20 p-4">
+				<EmberPanel className="grid content-start gap-4">
 					<p className="text-sm text-muted-foreground">
 						Current seed:{" "}
 						<output
@@ -190,8 +195,8 @@ const DungeonSettings = ({
 							Start from seed
 						</Button>
 					</form>
-				</div>
-				<div className="grid gap-4 rounded-xl border bg-muted/20 p-4">
+				</EmberPanel>
+				<EmberPanel className="grid content-start gap-4">
 					<FogSettings
 						configuration={fogConfiguration}
 						onEnabledChange={onFogEnabledChange}
@@ -233,7 +238,7 @@ const DungeonSettings = ({
 							Saved on this device. System follows your device’s appearance.
 						</p>
 					</div>
-				</div>
+				</EmberPanel>
 			</div>
 		</SheetContent>
 	);
