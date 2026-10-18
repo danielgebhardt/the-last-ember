@@ -1,6 +1,6 @@
 import { Dialog } from "@base-ui/react/dialog";
 import { Tabs } from "@base-ui/react/tabs";
-import { Backpack, BookOpen, UserRound } from "lucide-react";
+import { Backpack, BookOpen, PackageOpen, UserRound } from "lucide-react";
 import { type RefObject, useLayoutEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { EmberMenuHeader } from "@/components/ui/EmberMenu";
@@ -128,7 +128,7 @@ const CharacterDialog = ({
    fixed top-1/2 left-1/2 z-50
    flex h-[min(52rem,calc(100dvh-2rem))]
    max-h-[calc(100dvh-2rem)]
-   w-[calc(100%-2rem)] max-w-[90rem]
+   w-[calc(100%-2rem)] max-w-[86rem]
    -translate-x-1/2 -translate-y-1/2
    flex-col overflow-hidden rounded-xl border
    text-sm text-popover-foreground
@@ -184,25 +184,29 @@ const CharacterDialog = ({
 
                 <Tabs.Panel
                    value="character"
-                   className="min-h-0 min-w-0 flex-1 overflow-x-hidden overflow-y-auto"
+                   className="min-h-0 min-w-0 flex-1 overflow-x-auto overflow-y-auto"
                 >
                    <div className="shrink-0 border-b border-primary/20 bg-primary/[0.035] px-4 py-3">
                       <CharacterStats
                          effects={effects}
                          player={player}
+                         mana={mana}
                          equipment={equipment}
                          progression={progression}
                       />
                    </div>
                    <div className="min-w-0 p-2 pb-4">
                       <div
-						  className="grid min-w-0 items-start gap-3 md:grid-cols-2 xl:grid-cols-[minmax(0,0.7fr)_minmax(0,1fr)_minmax(36rem,1.6fr)]"
+
+
+						  className="grid min-w-0 items-start gap-3 md:grid-cols-2 xl:grid-cols-[minmax(0,0.8fr)_minmax(0,1.1fr)_minmax(0,38.125rem)]"
+
+
 					  >
                          <ProgressionView
                             equipment={equipment}
                             effects={effects}
                             progression={progression}
-                            mana={mana}
                          />
                          <div className="grid min-w-0 content-start gap-2">
                             <EquipmentView
@@ -277,12 +281,18 @@ const CharacterDialog = ({
                                ) : null}
                             </BagContents>
                             <QuestStatus quest={quest} pouch />
-                            <FloorItemsView
-                               compactEmpty
-                               items={floorItems}
-                               alive={player.health > 0 && !won}
-                               onAction={onAction}
-                            />
+                            <div className="ember-menu-panel min-w-0">
+                               <h3 className="ember-menu-section-heading mb-2 flex items-center gap-2">
+                                  <PackageOpen aria-hidden="true" className="size-4 text-primary" />
+                                  Nearby / Ground
+                               </h3>
+                               <FloorItemsView
+                                  compactEmpty
+                                  items={floorItems}
+                                  alive={player.health > 0 && !won}
+                                  onAction={onAction}
+                               />
+                            </div>
                          </div>
                       </div>
                    </div>
