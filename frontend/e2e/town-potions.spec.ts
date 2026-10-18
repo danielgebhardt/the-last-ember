@@ -112,3 +112,54 @@ for (const width of [390, 1440])
 			).toBe(true);
 		});
 	}
+
+test("a fresh town budget buys two healing potions, survives travel and resets only for a new run", async ({
+	page,
+}) => {
+	await page.goto("/");
+	await page.getByRole("radio", { name: /Small/ }).locator("..").click();
+	await page
+		.getByRole("button", { name: "Begin Adventure", exact: true })
+		.click();
+	const town = page.getByLabel("Town map", { exact: true });
+	const gold = page.getByLabel("Player gold", { exact: true });
+	await expect(town).toBeFocused();
+	await expect(gold).toHaveText("Gold 300");
+	for (const width of [1024, 1280, 1920, 390, 320]) {
+		await page.setViewportSize({ width, height: 768 });
+		expect((await gold.boundingBox())?.height).toBeLessThanOrEqual(24);
+	}
+	await page.setViewportSize({ width: 1280, height: 720 });
+	await page.keyboard.type("wwwwaaaaaaaaae");
+	const store = page.getByRole("dialog", {
+		name: "Town potion store",
+		exact: true,
+	});
+	await expect(store).toBeVisible();
+	for (const remaining of [150, 0]) {
+		await store
+			.getByRole("button", { name: "Buy Healing potion", exact: true })
+			.click();
+		await store
+			.getByRole("button", { name: "Confirm purchase", exact: true })
+			.click();
+		await expect(
+			store.getByText(`Gold: ${remaining}`, { exact: true }),
+		).toBeVisible();
+	}
+	await page.keyboard.press("Escape");
+	await expect(town).toBeFocused();
+	await expect(page.getByLabel("Turn count")).toHaveText("Turn 0");
+	await page.keyboard.type("dddddddddssssss");
+	await page.keyboard.press("Enter");
+	await expect(page.getByLabel("Dungeon map", { exact: true })).toBeFocused();
+	await page.keyboard.press("Enter");
+	await expect(town).toBeFocused();
+	await expect(gold).toHaveText("Gold 0");
+	await page.getByRole("button", { name: "New Dungeon", exact: true }).click();
+	await page
+		.getByRole("button", { name: "Start new dungeon", exact: true })
+		.click();
+	await expect(town).toBeFocused();
+	await expect(gold).toHaveText("Gold 300");
+});

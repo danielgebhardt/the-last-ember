@@ -139,7 +139,7 @@ const PlayerStatus = ({
 				className="
       grid grid-cols-2 items-stretch gap-y-1
       lg:grid-cols-[minmax(160px,1.7fr)_minmax(110px,1fr)_minmax(110px,1fr)_minmax(50px,0.4fr)_minmax(185px,1.05fr)]
-      xl:grid-cols-[minmax(260px,1.7fr)_minmax(174px,1fr)_minmax(174px,1fr)_minmax(55px,0.4fr)_minmax(200px,1.05fr)]
+      xl:grid-cols-[minmax(235px,1.7fr)_minmax(174px,1fr)_minmax(174px,1fr)_minmax(80px,0.4fr)_minmax(200px,1.05fr)]
    "
 			>
 				{/* Portrait, character details, and status effects */}
@@ -243,7 +243,7 @@ const PlayerStatus = ({
                   flex min-w-0 items-center justify-center gap-2
                   border-r border-border/70 px-2 py-2
                   lg:flex-col lg:gap-1 lg:px-1
-                  xl:flex-row xl:gap-2 xl:px-2
+                  xl:flex-row xl:flex-wrap xl:gap-2 xl:px-2
                "
 				>
 					<Coins
@@ -253,7 +253,7 @@ const PlayerStatus = ({
 
 					<output
 						aria-label="Player gold"
-						className="break-all font-serif text-base font-semibold"
+						className="whitespace-nowrap font-serif text-base font-semibold"
 					>
 						<span className="sr-only">Gold </span>
 						{gold}

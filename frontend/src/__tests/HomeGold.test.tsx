@@ -34,10 +34,16 @@ it("shows coins, collects them by walking and includes the total in Character", 
 	screen.getByLabelText("Dungeon map", { exact: true }).focus();
 	const user = userEvent.setup();
 	await user.keyboard("d");
-	expect(screen.getByLabelText("Player gold")).toHaveTextContent("Gold 6");
+	expect(screen.getByLabelText("Player gold")).toHaveTextContent(
+		`Gold ${GameState.STARTING_GOLD + 6}`,
+	);
 	await user.keyboard("a");
 	expect(screen.getByRole("cell", { name: "row1col2 - floor" })).toBeVisible();
 	await user.keyboard("i");
 	const dialog = await screen.findByRole("dialog", { name: "Character" });
-	expect(within(dialog).getByText(/Gold 6 · Turn/)).toBeVisible();
+	expect(
+		within(dialog).getByText(
+			new RegExp(`Gold ${GameState.STARTING_GOLD + 6} · Turn`),
+		),
+	).toBeVisible();
 });

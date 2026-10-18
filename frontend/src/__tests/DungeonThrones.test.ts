@@ -78,7 +78,7 @@ it("prying either grants gold or a bounded wound once, including across turns", 
 		expect(result.gold).toBe(replay.gold);
 		expect(result.player).toEqual(replay.player);
 		expect(result.objects[0].activated).toBe(true);
-		seen.add(result.gold > 0 ? "gold" : "wound");
+		seen.add(result.gold > state.gold ? "gold" : "wound");
 		expect(result.player.health).toBeGreaterThanOrEqual(4);
 	}
 	expect(seen).toEqual(new Set(["gold", "wound"]));

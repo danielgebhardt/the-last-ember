@@ -20,6 +20,7 @@ import MonsterIcon from "../components/monsters/MonsterIcon";
 import ObservedCreatures from "../components/monsters/ObservedCreatures";
 import type { VisibilityGrid } from "../domain/dungeon/Visibility";
 import type { Difficulty } from "../domain/game/Difficulty";
+import { STARTING_GOLD } from "../domain/game/GameState";
 import { MANA_RECOVERY_INTERVAL } from "../domain/game/Mana";
 import {
 	MONSTER_HIT_CHANCE,
@@ -288,12 +289,13 @@ const DungeonHelp = ({
 						protect against a fresh poison attack.
 					</li>
 					<li>
-						<span className="font-medium text-foreground">Town.</span> Use E at
-						a shop doorway to browse. Shops trade in gold; purchases go into
-						your bag. Town movement and shopping do not advance dungeon turns or
-						restore health or mana. Stand on the south gate and press Enter to
-						enter the dungeon. At the floor-1 exit, Enter returns to town until
-						you recover the ember.
+						<span className="font-medium text-foreground">Town.</span> New
+						adventures begin with {STARTING_GOLD} gold for a modest upgrade or
+						supplies. Use E at a shop doorway to browse. Shops trade in gold;
+						purchases go into your bag. Town movement and shopping do not
+						advance dungeon turns or restore health or mana. Stand on the south
+						gate and press Enter to enter the dungeon. At the floor-1 exit,
+						Enter returns to town until you recover the ember.
 					</li>
 					<li>
 						<span className="font-medium text-foreground">Mana.</span> Recover 1

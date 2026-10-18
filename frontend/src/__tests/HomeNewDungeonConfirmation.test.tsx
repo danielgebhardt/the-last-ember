@@ -61,4 +61,5 @@ it("only generates a replacement after explicit confirmation", async () => {
 		expect(screen.getByLabelText("Town map", { exact: true })).toHaveFocus(),
 	);
 	expect(screen.getByLabelText("Turn count")).toHaveTextContent("Turn 0");
+	expect(screen.getByLabelText("Player gold")).toHaveTextContent("Gold 300");
 });

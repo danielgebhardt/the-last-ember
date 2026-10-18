@@ -9,6 +9,7 @@ describe("New game state", () => {
 		const run = createThreeFloorTraversalRun();
 		const game = createGameState(run);
 		expect(game.turn).toBe(0);
+		expect(game.gold).toBe(300);
 		expect(game.run).toBe(run);
 	});
 
@@ -16,9 +17,12 @@ describe("New game state", () => {
 		const previous = {
 			...createGameState(createThreeFloorTraversalRun()),
 			turn: 7,
+			gold: 42,
 		};
 		const restarted = createGameState(previous.run);
 		expect(restarted.turn).toBe(0);
+		expect(restarted.gold).toBe(300);
+		expect(previous.gold).toBe(42);
 		expect(previous.turn).toBe(7);
 		expect(restarted.run).toBe(previous.run);
 	});

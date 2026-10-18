@@ -33,7 +33,7 @@ it("walking onto gold collects it once without bag space or an extra turn", () =
 		type: "move",
 		direction: "right",
 	}).state;
-	expect(collected.gold).toBe(amount);
+	expect(collected.gold).toBe(initial.gold + amount);
 	expect(collected.turn).toBe(1);
 	expect(collected.bag).toEqual(initial.bag);
 	expect(
@@ -45,7 +45,7 @@ it("walking onto gold collects it once without bag space or an extra turn", () =
 	}).state;
 	expect(
 		resolvePlayerAction(back, { type: "move", direction: "right" }).state.gold,
-	).toBe(amount);
+	).toBe(initial.gold + amount);
 });
 it("one confirmed defeat grants seeded gold once even if an old actor reference is reused", () => {
 	const monster = {
@@ -63,7 +63,7 @@ it("one confirmed defeat grants seeded gold once even if an old actor reference 
 		objects: [],
 	};
 	const killed = damageMonster(initial, monster, 100, { type: "player-hit" });
-	expect(killed.gold).toBeGreaterThan(0);
+	expect(killed.gold).toBeGreaterThan(initial.gold);
 	expect(damageMonster(killed, monster, 100, { type: "player-hit" })).toBe(
 		killed,
 	);

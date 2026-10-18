@@ -69,6 +69,9 @@ export type GameState = {
 	activityHistory: ActivityHistory;
 };
 
+// Fresh adventures only; loading and town travel preserve the saved balance.
+export const STARTING_GOLD = 300;
+
 export const createGameState = (
 	run: DungeonRun,
 	difficulty: number = 1,
@@ -100,7 +103,7 @@ export const createGameState = (
 		escape: null,
 		merchantStock: createMerchantStock(),
 		objects: placeMerchants({ ...encounters, run, floorItems }),
-		gold: 0,
+		gold: STARTING_GOLD,
 		turn: 0,
 		knownSpells: createKnownSpells(),
 		spellHotbar: createSpellHotbar(createKnownSpells()),
