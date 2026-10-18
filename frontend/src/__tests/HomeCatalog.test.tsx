@@ -39,6 +39,9 @@ describe("Developer catalog", () => {
 				Object.keys(definitions).length,
 			);
 		}
+		expect(sheet.querySelector(".dungeon-stone-wall")).toBeInTheDocument();
+		expect(sheet.querySelector(".dungeon-flagstone svg")).toBeInTheDocument();
+		expect(within(sheet).queryByText(/Missing icon/)).not.toBeInTheDocument();
 		await user.keyboard("{ArrowRight}gh ");
 		expect(screen.getByLabelText("Turn count")).toHaveTextContent("Turn 0");
 		await user.keyboard("{Escape}");

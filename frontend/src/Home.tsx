@@ -578,7 +578,7 @@ const Home = ({
 						</div>
 					</FantasyRail>
 					<div className="grid min-h-0 flex-1 grid-cols-1 gap-2 lg:grid-cols-[minmax(0,1fr)_18rem] lg:grid-rows-[minmax(0,1fr)_auto] xl:grid-cols-[minmax(0,1fr)_20rem] 2xl:grid-cols-[minmax(0,1fr)_22rem] min-[112.5rem]:grid-cols-[minmax(0,1fr)_26rem]">
-						<div className="flex h-[50dvh] min-h-64 min-w-0 flex-col lg:col-start-1 lg:row-start-1 lg:h-auto lg:min-h-0">
+						<div className="flex h-[50dvh] min-h-[23rem] min-w-0 flex-col lg:col-start-1 lg:row-start-1 lg:h-auto lg:min-h-0">
 							<DungeonFrame>
 								{town ? (
 									<TownMap
@@ -709,7 +709,7 @@ const Home = ({
 									aria-label="Dungeon notices"
 									// biome-ignore lint/a11y/noNoninteractiveTabindex: Keyboard users need to scroll longer notices.
 									tabIndex={0}
-									className={`h-full overflow-y-auto px-1 py-1 focus-visible:outline-1 focus-visible:-outline-offset-1 focus-visible:outline-ring ${atDungeonEntrance(game.state) && canPlay ? "pr-40" : ""}`}
+									className="h-full overflow-y-auto px-1 py-1 focus-visible:outline-1 focus-visible:-outline-offset-1 focus-visible:outline-ring"
 								>
 									<VisibleEffects
 										monsterPoisonDamage={
@@ -773,24 +773,19 @@ const Home = ({
 											}
 										/>
 									)}
+									{atDungeonEntrance(game.state) &&
+										!game.state.quest.cureRecovered &&
+										canPlay &&
+										!spells.targeting && (
+											<p
+												role="status"
+												aria-label="Dungeon exit"
+												className="py-2 text-xs text-muted-foreground"
+											>
+												You see dungeon exit. Press Enter to return to town.
+											</p>
+										)}
 								</section>
-								{atDungeonEntrance(game.state) &&
-									!game.state.quest.cureRecovered &&
-									canPlay && (
-										<Button
-											className="absolute right-0 top-1"
-											variant="outline"
-											disabled={!gameplayEnabled}
-											onClick={() =>
-												handleActionRequested({
-													type: "travel",
-													destination: "town",
-												})
-											}
-										>
-											Return to town (Enter)
-										</Button>
-									)}
 							</div>
 						</div>
 						<div className="order-3 flex min-h-0 min-w-0 flex-col lg:col-start-2 lg:row-span-2 lg:row-start-1 [&>*]:flex-1 [&>*]:min-h-0">

@@ -28,12 +28,8 @@ import {
 	type DungeonObjectKind,
 	OBJECT_DEFINITIONS,
 } from "../../domain/objects/DungeonObject";
-import {
-	TILE_BACKGROUNDS,
-	TILE_ICON_COLORS,
-	TILE_ICONS,
-	TILE_LABELS,
-} from "../dungeon/TileVisuals";
+import TileIcon from "../dungeon/TileIcon";
+import { TILE_LABELS, TILE_TERRAIN_CLASSES } from "../dungeon/TileVisuals";
 import ItemIcon from "../items/ItemIcon";
 import MonsterIcon from "../monsters/MonsterIcon";
 import DungeonObjectIcon from "../objects/DungeonObjectIcon";
@@ -56,7 +52,7 @@ const Card = ({
 	kind: string;
 	name: string;
 	icon: ReactNode;
-	children: ReactNode;
+	children?: ReactNode;
 }) => (
 	<li className="grid content-start gap-2 rounded-lg border bg-muted/20 p-3">
 		<Preview icon={icon} />
@@ -137,7 +133,7 @@ const DeveloperCatalog = ({
 			<SheetHeader className="shrink-0">
 				<SheetTitle>Developer catalog</SheetTitle>
 				<SheetDescription>
-					Normal baseline definitions and game SVGs. Active difficulty values
+					Normal baseline definitions and game visuals. Active difficulty values
 					are shown in Help. Inspection is free; this view includes undiscovered
 					content. The Town tab offers an isolated walkable town preview.
 				</SheetDescription>
@@ -335,29 +331,19 @@ const DeveloperCatalog = ({
 					{Object.entries(TILE_LABELS)
 						.filter(([kind, name]) => matches(kind, name ?? kind))
 						.map(([kind, name]) => {
-							const Icon = TILE_ICONS[kind];
 							return (
 								<Card
 									key={kind}
 									kind={kind}
 									name={name ?? kind}
 									icon={
-										Icon ? (
-											<span
-												className={`block size-full ${TILE_BACKGROUNDS[kind] ?? ""}`}
-											>
-												<Icon
-													aria-hidden="true"
-													className={`size-full ${TILE_ICON_COLORS[kind] ?? ""}`}
-												/>
-											</span>
-										) : (
-											<span>Missing icon</span>
-										)
+										<span
+											className={`block size-full ${TILE_TERRAIN_CLASSES[kind] ?? ""}`}
+										>
+											<TileIcon tile={kind} />
+										</span>
 									}
-								>
-									{!Icon && <p role="alert">Missing registered icon</p>}
-								</Card>
+								/>
 							);
 						})}
 				</Group>

@@ -110,6 +110,13 @@ const DungeonHelp = ({
 							<Keycap>Space</Keycap>
 						</li>
 						<li className="flex items-center justify-between gap-3 py-2">
+							<span>
+								Enter the dungeon at the town gate / return to town at the
+								dungeon exit
+							</span>
+							<Keycap>Enter</Keycap>
+						</li>
+						<li className="flex items-center justify-between gap-3 py-2">
 							<span>Interact with a nearby object</span>
 							<Keycap>E</Keycap>
 						</li>
@@ -256,15 +263,37 @@ const DungeonHelp = ({
 					</li>
 					<li>
 						<span className="font-medium text-foreground">Potions.</span> Select
-						a healing or mana potion in Character and choose Drink potion. New
-						adventures start with one Healing potion on key 1 and one Mana
-						potion on key 2. You can freely change these assignments. Picking up
-						a new potion kind assigns it to the first empty shortcut. You can
-						also assign it to a shortcut and use keys 1–4 (or click its slot
-						above the map). It restores up to 5 health or mana before monsters
-						act, using one turn. At full health or mana respectively, it costs
-						nothing and stays in your bag. Empty or unavailable shortcuts also
-						cost nothing. Potions cannot be used after death.
+						a potion in Character and choose Drink potion. New adventures start
+						with one Healing potion on key 1 and one Mana potion on key 2. You
+						can freely change these assignments. Picking up a new potion kind
+						assigns it to the first empty shortcut. You can also assign it to a
+						shortcut and use keys 1–4 (or click its slot below the map). Basic
+						healing and mana potions restore up to 5 health or mana before
+						monsters act, using one turn. At full health or mana respectively,
+						it costs nothing and stays in your bag. Empty or unavailable
+						shortcuts also cost nothing. Potions cannot be used after death.
+					</li>
+					<li>
+						<span className="font-medium text-foreground">Stat potions.</span>{" "}
+						Potions of Strength, Dexterity and Intelligence permanently add 1 to
+						their attribute. Bottles stack; buying one does not apply its effect
+						until you drink it.
+					</li>
+					<li>
+						<span className="font-medium text-foreground">Status effects.</span>{" "}
+						Select a status icon in the player bar for its remaining duration
+						and effect. The Activity log records changes. Poison lasts six
+						active phases on players and monsters, ticking after monsters act.
+						Antidote removes current poison before that tick; it does not
+						protect against a fresh poison attack.
+					</li>
+					<li>
+						<span className="font-medium text-foreground">Town.</span> Use E at
+						a shop doorway to browse. Shops trade in gold; purchases go into
+						your bag. Town movement and shopping do not advance dungeon turns or
+						restore health or mana. Stand on the south gate and press Enter to
+						enter the dungeon. At the floor-1 exit, Enter returns to town until
+						you recover the ember.
 					</li>
 					<li>
 						<span className="font-medium text-foreground">Mana.</span> Recover 1
@@ -342,9 +371,10 @@ const DungeonHelp = ({
 					original target when you return.
 				</p>
 				<p>
-					Breath attacks mark an area and show a response countdown above the
-					map. Leave the highlighted tiles before the blast resolves. Walls
-					block the footprint; changing floors pauses the warning.
+					Breath attacks mark an area and show a response countdown in the
+					dungeon notices below the map. Leave the highlighted tiles before the
+					blast resolves. Walls block the footprint; changing floors pauses the
+					warning.
 				</p>
 			</section>
 			<section
@@ -353,7 +383,7 @@ const DungeonHelp = ({
 			>
 				<h3 className="font-medium">Spells and mana</h3>
 				<p>
-					Both starting spells are known. Click a spell above the map, or use
+					Both starting spells are known. Click a spell below the map, or use
 					its shortcut after closing menus.
 				</p>
 				<p>

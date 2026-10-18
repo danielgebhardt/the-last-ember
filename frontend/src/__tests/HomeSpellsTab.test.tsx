@@ -104,6 +104,6 @@ describe("Character and Spells tabs", () => {
 		expect(
 			help.getByRole("region", { name: "Spellcasting" }),
 		).toHaveTextContent(/Escape or Z/);
-		expect(help.getByText(/healing or mana potion in Character/)).toBeVisible();
+		expect(help.getByText(/a potion in Character/)).toBeVisible();
 	});
 });

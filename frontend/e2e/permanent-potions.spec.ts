@@ -11,6 +11,10 @@ const importAdventure = async (page: Page, name: string) => {
 		.setInputFiles(
 			fileURLToPath(new URL(`.generated/${name}.json`, import.meta.url)),
 		);
+	await expect(
+		page.getByRole("dialog", { name: "Load adventure", exact: true }),
+	).toHaveCount(0);
+	await expect(page.getByLabel(/^(Town|Dungeon) map$/)).toBeFocused();
 };
 for (const width of [390, 1440])
 	for (const theme of ["Light", "Dark"]) {

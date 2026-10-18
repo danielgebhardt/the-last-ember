@@ -5,6 +5,7 @@ import {
 	PLAYER,
 	STAIRS_DOWN,
 	STAIRS_UP,
+	WALL,
 } from "../../domain/dungeon/Tiles.ts";
 import type { FloorItem } from "../../domain/items/FloorItems";
 import { ITEM_DEFINITIONS, type ItemKind } from "../../domain/items/Item";
@@ -20,7 +21,11 @@ import MonsterIcon from "../monsters/MonsterIcon.tsx";
 import { MONSTER_VISUALS } from "../monsters/MonsterVisuals.ts";
 import DungeonObjectIcon from "../objects/DungeonObjectIcon";
 import TileIcon from "./TileIcon.tsx";
-import { TILE_BACKGROUNDS, TILE_LABELS } from "./TileVisuals.ts";
+import {
+	TILE_BACKGROUNDS,
+	TILE_LABELS,
+	TILE_TERRAIN_CLASSES,
+} from "./TileVisuals.ts";
 
 type TileVisibility = "visible" | "remembered" | "unknown";
 
@@ -89,6 +94,14 @@ const DungeonCell = memo(function DungeonCell({
 				: tile === undefined
 					? ""
 					: (TILE_BACKGROUNDS[tile] ?? "bg-fog-visible");
+
+	const terrainClass =
+		visibility === "visible" && tile !== undefined
+			? (TILE_TERRAIN_CLASSES[tile] ?? "")
+			: visibility === "remembered" && tile === WALL
+				? "dungeon-remembered-wall"
+				: "";
+
 	return (
 		<td
 			ref={playerRef}
@@ -105,7 +118,7 @@ const DungeonCell = memo(function DungeonCell({
 								: undefined
 			}
 			data-visibility={visibility}
-			className={`relative size-[var(--dungeon-tile-size)] ${background}`}
+			className={`relative size-[var(--dungeon-tile-size)] ${background} ${terrainClass}`}
 		>
 			{monsterKind ? (
 				targetable && monsterId ? (

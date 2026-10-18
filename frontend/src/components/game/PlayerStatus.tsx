@@ -138,8 +138,8 @@ const PlayerStatus = ({
 			<div
 				className="
       grid grid-cols-2 items-stretch gap-y-1
-      lg:grid-cols-[minmax(205px,1.7fr)_minmax(110px,1fr)_minmax(110px,1fr)_minmax(50px,0.4fr)_minmax(140px,1.05fr)]
-      xl:grid-cols-[minmax(305px,1.7fr)_minmax(174px,1fr)_minmax(174px,1fr)_minmax(55px,0.4fr)_minmax(155px,1.05fr)]
+      lg:grid-cols-[minmax(160px,1.7fr)_minmax(110px,1fr)_minmax(110px,1fr)_minmax(50px,0.4fr)_minmax(185px,1.05fr)]
+      xl:grid-cols-[minmax(260px,1.7fr)_minmax(174px,1fr)_minmax(174px,1fr)_minmax(55px,0.4fr)_minmax(200px,1.05fr)]
    "
 			>
 				{/* Portrait, character details, and status effects */}

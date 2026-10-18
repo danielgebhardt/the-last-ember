@@ -1,4 +1,4 @@
-import { BrickWall, DoorOpen, Dot, User } from "lucide-react";
+import { DoorOpen } from "lucide-react";
 import type { ComponentType, SVGProps } from "react";
 import {
 	ENTRANCE,
@@ -13,10 +13,7 @@ import { StairsDownIcon, StairsUpIcon } from "./StairIcons.tsx";
 export const TILE_ICONS: Partial<
 	Record<string, ComponentType<SVGProps<SVGSVGElement>>>
 > = {
-	[WALL]: BrickWall,
 	[ENTRANCE]: DoorOpen,
-	[FLOOR]: Dot,
-	[PLAYER]: User,
 	[STAIRS_UP]: StairsUpIcon,
 	[STAIRS_DOWN]: StairsDownIcon,
 };
@@ -31,14 +28,23 @@ export const TILE_LABELS: Partial<Record<string, string>> = {
 };
 
 export const TILE_ICON_COLORS: Partial<Record<string, string>> = {
-	[WALL]: "text-wall-icon",
 	[ENTRANCE]: "text-item-cure",
-	[FLOOR]: "text-floor-dot",
 	[PLAYER]: "text-player",
 	[STAIRS_UP]: "text-stairs",
 	[STAIRS_DOWN]: "text-stairs",
 };
 
+// Wall/floor backgrounds are now supplied by the terrain CSS classes.
+// Retained as the baseline surface for wall tiles beneath fog styling.
 export const TILE_BACKGROUNDS: Partial<Record<string, string>> = {
 	[WALL]: "bg-wall-tile",
+};
+
+export const TILE_TERRAIN_CLASSES: Partial<Record<string, string>> = {
+	[WALL]: "dungeon-stone-wall",
+	[FLOOR]: "dungeon-flagstone",
+	[PLAYER]: "dungeon-flagstone",
+	[ENTRANCE]: "dungeon-flagstone",
+	[STAIRS_UP]: "dungeon-flagstone",
+	[STAIRS_DOWN]: "dungeon-flagstone",
 };

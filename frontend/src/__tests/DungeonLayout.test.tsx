@@ -173,12 +173,12 @@ describe("Dungeon layout and controlled rendering", () => {
 			expect(map).toHaveFocus();
 		});
 		it.each([
-			{ tile: FLOOR, description: "floor", icons: 1 },
+			{ tile: FLOOR, description: "floor", icons: 0 },
 			{ tile: PLAYER, description: "player", icons: 1 },
 			{ tile: STAIRS_UP, description: "stairs up", icons: 1 },
 			{ tile: STAIRS_DOWN, description: "stairs down", icons: 1 },
 		])(
-			"renders $description with decorative SVGs instead of a glyph",
+			"renders $description decoratively instead of a glyph",
 			({ tile, description, icons }) => {
 				render(
 					<DungeonLayout
@@ -195,6 +195,7 @@ describe("Dungeon layout and controlled rendering", () => {
 					name: `row1col1 - ${description}`,
 				});
 				expect(cell).not.toHaveTextContent(tile);
+				if (tile === FLOOR) expect(cell).toHaveClass("dungeon-flagstone");
 				const svgs = cell.querySelectorAll("svg");
 				expect(svgs).toHaveLength(icons);
 				for (const svg of svgs) {
@@ -214,8 +215,8 @@ describe("Dungeon layout and controlled rendering", () => {
 
 			const wall = screen.getByRole("cell", { name: "row0col0 - wall" });
 			expect(wall).not.toHaveTextContent(WALL);
-			expect(wall.querySelector("svg")).toHaveAttribute("aria-hidden", "true");
-			expect(wall.querySelector("svg")).toHaveAttribute("focusable", "false");
+			expect(wall).toHaveClass("dungeon-stone-wall");
+			expect(wall.querySelector("svg")).toBeNull();
 			expect(
 				screen.getByRole("cell", { name: "row1col0 - wall" }),
 			).toBeVisible();

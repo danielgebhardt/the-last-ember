@@ -39,6 +39,9 @@ describe("Fog display states", () => {
 		expect(
 			screen.getByRole("cell", { name: "row1col2 - floor" }),
 		).toHaveAttribute("data-visibility", "visible");
+		expect(screen.getByRole("cell", { name: "row1col2 - floor" })).toHaveClass(
+			"dungeon-flagstone",
+		);
 	});
 
 	it("marks remembered walls and stairs without calling them visible", () => {
@@ -51,6 +54,9 @@ describe("Fog display states", () => {
 		expect(
 			screen.getByRole("cell", { name: "row0col2 - remembered wall" }),
 		).toHaveAttribute("data-visibility", "remembered");
+		expect(
+			screen.getByRole("cell", { name: "row0col2 - remembered wall" }),
+		).toHaveClass("dungeon-remembered-wall");
 	});
 
 	it("does not leak terrain or a staircase through undiscovered icons or labels", () => {
@@ -60,6 +66,11 @@ describe("Fog display states", () => {
 				name: `${position} - undiscovered`,
 			});
 			expect(tile).toHaveAttribute("data-visibility", "unknown");
+			expect(tile).not.toHaveClass(
+				"dungeon-stone-wall",
+				"dungeon-flagstone",
+				"dungeon-remembered-wall",
+			);
 			expect(tile.querySelector("svg")).toBeNull();
 			expect(tile).toHaveTextContent("");
 		}

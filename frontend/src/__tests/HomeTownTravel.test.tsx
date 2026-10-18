@@ -39,6 +39,14 @@ it("walks deliberately into the dungeon, returns without a turn and restores exa
 	await user.keyboard("{Enter}");
 	const map = screen.getByLabelText("Dungeon map", { exact: true });
 	expect(map).toHaveFocus();
+	expect(
+		screen.queryByRole("button", { name: "Return to town (Enter)" }),
+	).not.toBeInTheDocument();
+	expect(
+		within(screen.getByRole("region", { name: "Dungeon notices" })).getByText(
+			"You see dungeon exit. Press Enter to return to town.",
+		),
+	).toBeVisible();
 	expect(screen.getByRole("heading", { name: "Floor 1 of 5" })).toBeVisible();
 	expect(screen.getByLabelText("Turn count")).toHaveTextContent("Turn 0");
 	await user.keyboard("{Enter}");
@@ -60,7 +68,7 @@ it("walks deliberately into the dungeon, returns without a turn and restores exa
 	);
 });
 
-it("clears spell targeting when traveling, without casting or resuming queued input", async () => {
+it("cancels spell targeting before returning to town without casting or resuming queued input", async () => {
 	const initial = createAdventureSession(123, config, {
 		...DEFAULT_FOG_CONFIGURATION,
 		enabled: false,
@@ -86,9 +94,12 @@ it("clears spell targeting when traveling, without casting or resuming queued in
 	const user = userEvent.setup();
 	await user.keyboard("z");
 	expect(screen.getByLabelText("Spell targeting")).toBeVisible();
-	await user.click(
-		screen.getByRole("button", { name: "Return to town (Enter)" }),
+	expect(screen.queryByLabelText("Dungeon exit")).not.toBeInTheDocument();
+	await user.keyboard("{Escape}");
+	expect(screen.getByLabelText("Dungeon exit")).toHaveTextContent(
+		"Press Enter to return to town.",
 	);
+	await user.keyboard("{Enter}");
 	expect(screen.queryByLabelText("Spell targeting")).not.toBeInTheDocument();
 	expect(screen.getByLabelText("Town map", { exact: true })).toHaveFocus();
 	await user.keyboard("ss{Enter}");
