@@ -446,10 +446,15 @@ const DungeonHelp = ({
 				</p>
 				<p className="mt-2 text-muted-foreground">
 					Strength adds to melee damage alongside your weapon. Dexterity
-					improves accuracy and evasion; armor reduces damage after a hit lands.
-					Attributes grow automatically at alternating levels, with no point
-					allocation. Character shows the actual contributions and final
-					chances.
+					improves accuracy and evasion; armor reduces physical damage after a
+					hit lands. Intelligence also grants modest magic resistance: 5% base
+					plus 1 percentage point per positive Intelligence modifier (one per 2
+					Intelligence above 10), capped at 50%. It reduces enemy spells and
+					fire/cold breath after difficulty scaling, rounding to the nearest
+					whole number with a minimum hit of 1. It does not resist poison,
+					traps, afflictions or your own Fireball. Attributes grow automatically
+					at alternating levels, with no point allocation. Character shows the
+					actual contributions and final chances.
 				</p>
 			</section>
 			<p className="flex items-start gap-2 rounded-lg border bg-muted/30 p-3 text-xs leading-relaxed text-muted-foreground">

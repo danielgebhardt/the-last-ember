@@ -95,6 +95,10 @@ it("resumes the caster's cadence and seeded damage after saving", () => {
 		throw new Error("Fixture requires a safe neighbouring tile.");
 	let uninterrupted: GameState = {
 		...original.state,
+		progression: {
+			...original.state.progression,
+			permanentAttributes: { strength: 0, dexterity: 0, intelligence: 40 },
+		},
 		monsters: [
 			{
 				id: "1:1",
@@ -126,3 +130,40 @@ it("resumes the caster's cadence and seeded damage after saving", () => {
 		expect(resumed).toEqual(uninterrupted);
 	}
 });
+
+it.each(["cultist", "necromancer"] as const)(
+	"%s magic uses effective Intelligence once after difficulty scaling",
+	(kind) => {
+		const initial: GameState = {
+			...encounter(),
+			difficulty: 1.25,
+			progression: {
+				experience: 0,
+				permanentAttributes: { strength: 0, dexterity: 0, intelligence: 40 },
+			},
+		};
+		initial.monsters = [{ ...initial.monsters[0], kind, health: 100 }];
+		// Cultists use Ember Bolt; necromancers use Shock across casting windows.
+		for (const turn of [0, 3]) {
+			const before = {
+				...initial,
+				turn,
+				player: { health: 100, maxHealth: 100 },
+			};
+			const after = resolvePlayerAction(before, { type: "wait" }, () => ({
+				d20: () => 20,
+				damage: (_min, max) => max,
+			})).state;
+			const event = after.activityHistory.entries.findLast(
+				(entry) => entry.event.type === "monster-spell-hit",
+			)?.event;
+			// 25% MR: Ember Bolt 7 -> difficulty 9 -> 7; Shock 8 -> 10 -> 8.
+			const expected = kind === "necromancer" ? 8 : 7;
+			expect(after.player.health).toBe(100 - expected);
+			expect(event).toMatchObject({
+				type: "monster-spell-hit",
+				damage: expected,
+			});
+		}
+	},
+);

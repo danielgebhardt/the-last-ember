@@ -65,6 +65,15 @@ const comparisonRows = ({ before, after }: EquipmentComparison) => [
 	),
 	bonusRow("Heal bonus", before.spellPowerBonus, after.spellPowerBonus),
 	numericRow("Armor", before.armor, after.armor),
+	{
+		...numericRow(
+			"Magic resistance",
+			before.magicResistance,
+			after.magicResistance,
+			true,
+		),
+		after: `${after.magicResistance}% (${difference(before.magicResistance, after.magicResistance)} pp)`,
+	},
 	numericRow("Hit chance", before.hitChance, after.hitChance, true),
 	numericRow("Evasion", before.evadeChance, after.evadeChance, true),
 ];

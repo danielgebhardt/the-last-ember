@@ -128,8 +128,9 @@ const ProgressionView = ({
 					</p>
 					<p className="text-xs text-muted-foreground">
 						+{attributes.intelligenceModifier} spell damage / healing · +
-						{attributes.intelligenceModifier * 2} mana capacity · grows at odd
-						levels from 3
+						{attributes.intelligenceModifier * 2} mana capacity · +
+						{Math.max(0, attributes.intelligenceModifier)} percentage points
+						magic resistance (50% total cap) · grows at odd levels from 3
 					</p>
 					<p className="border-t pt-2 text-xs leading-relaxed text-muted-foreground">
 						+{HEALTH_PER_LEVEL} current / maximum HP per level · cap{" "}

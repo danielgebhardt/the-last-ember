@@ -94,8 +94,8 @@ it("shows a spell bonus downgrade when replacing an Intelligence ring with mana 
 		compareEquipment({ id: "mana", kind: "ring-mana" }, context, "leftRing"),
 	).toMatchObject({
 		label: "Tradeoff",
-		before: { maxMana: 14, spellPowerBonus: 2 },
-		after: { maxMana: 16, spellPowerBonus: 1 },
+		before: { maxMana: 14, spellPowerBonus: 2, magicResistance: 7 },
+		after: { maxMana: 16, spellPowerBonus: 1, magicResistance: 6 },
 	});
 });
 

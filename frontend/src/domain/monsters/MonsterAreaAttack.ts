@@ -2,6 +2,10 @@ import { hasLineOfSight } from "../dungeon/Visibility";
 import type { ActivityEvent } from "../game/ActivityHistory";
 import { spellArea } from "../game/AreaSpells";
 import type { AttackRollSource } from "../game/CombatRandomness";
+import {
+	deriveCombatStats,
+	resolveIncomingMagicDamage,
+} from "../game/CombatStats";
 import { scaleEnemyValue } from "../game/Difficulty";
 import type { GameState } from "../game/GameState";
 import { MONSTER_DEFINITIONS, type Monster } from "./Monster";
@@ -75,7 +79,11 @@ export const resolveMonsterArea = (
 			attackerId: `${monster.id}:area:${intent.element}`,
 			targetId: "player",
 		}).damage(profile.minDamage, profile.maxDamage);
-		const damage = scaleEnemyValue(rawDamage, state.difficulty);
+		const damage = resolveIncomingMagicDamage(
+			scaleEnemyValue(rawDamage, state.difficulty),
+			deriveCombatStats(state.equipment, state.progression, state.effects)
+				.magicResistance,
+		);
 		return {
 			monster: finished,
 			damage,

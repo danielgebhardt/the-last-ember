@@ -30,6 +30,8 @@ const EquipmentPreviews = ({
 				attacks add twice this modifier; Renewal and poison add half, rounded
 				down. Control and movement effects do not scale. Spell cards show
 				current amounts; target defenses and area rules still apply.
+				Intelligence also adds modest magic resistance against enemy spells and
+				elemental breath.
 			</p>
 			<p className="text-xs text-muted-foreground">
 				Preview uses current active effects, before monsters act. Capacity gains

@@ -62,6 +62,8 @@ describe("Equipment comparison in Character", () => {
 		const previews = panel.getAllByLabelText("Equipment comparison");
 		expect(previews[0]).toHaveTextContent("Base spell modifier +1 → +0 (−1)");
 		expect(previews[0]).toHaveTextContent("Heal bonus +1 → +0 (−1)");
+		expect(previews[0]).toHaveTextContent("Magic resistance 6% → 5% (−1 pp)");
+		expect(previews[1]).toHaveTextContent("Magic resistance 6% → 6% (0 pp)");
 		expect(previews[1]).toHaveTextContent("Base spell modifier +1 → +1 (0)");
 		const loss = within(previews[0]).getByText(/^Base spell modifier/);
 		expect(within(loss).getByText("+0 (−1)")).toHaveClass("text-red-700");

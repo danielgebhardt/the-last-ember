@@ -151,7 +151,7 @@ export const ITEM_DEFINITIONS = {
 		armor: 0,
 		stats: { intelligence: 2 },
 		description:
-			"Adds 2 intelligence while equipped in either ring slot. Capacity increases do not refill resources.",
+			"Adds 2 Intelligence while equipped in either ring slot, improving spells, mana capacity and magic resistance. Capacity increases do not refill resources.",
 		minFloor: 6,
 		maxFloor: 20,
 		foundWeight: 1,
@@ -406,7 +406,7 @@ export const ITEM_DEFINITIONS = {
 		armor: 1,
 		stats: { intelligence: 2 },
 		description:
-			"Light chest protection: 1 armor and +2 Intelligence. Trades protection for stronger spells and more mana capacity; equipping does not refill mana.",
+			"Light chest protection: 1 armor and +2 Intelligence. Trades protection for stronger spells, more mana capacity and modest magic resistance; equipping does not refill mana.",
 		minFloor: 7,
 		maxFloor: 16,
 		foundWeight: 1,

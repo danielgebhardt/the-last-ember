@@ -93,12 +93,27 @@ const CharacterStats = ({
 					</output>
 				</div>
 			</div>
+			<div className="rounded-lg border bg-muted/30 p-2">
+				<output
+					aria-label="Character magic resistance"
+					className="text-xs font-medium tabular-nums sm:text-sm"
+				>
+					Magic resistance {combat.magicResistance}%
+				</output>
+				<p className="mt-1 text-xs text-muted-foreground">
+					Base 5% + Intelligence {combat.magicResistanceIntelligenceBonus}%
+					(maximum 50%)
+				</p>
+			</div>
 			<details className="text-xs leading-relaxed text-muted-foreground">
 				<summary className="cursor-pointer">Combat rules</summary>
 				<p>
-					Attack shows damage before armor. Armor reduces landed damage; hits
-					deal at least 1 damage. Misses deal none. Evasion avoids hits; armor
-					reduces damage.
+					Attack shows damage before armor. Armor reduces landed physical
+					damage; hits deal at least 1 damage. Misses deal none. Evasion avoids
+					hits; armor reduces physical damage. Magic resistance reduces enemy
+					spell and fire/cold breath damage, rounded to the nearest whole number
+					with a minimum of 1. It does not resist poison, traps, afflictions or
+					your own Fireball.
 				</p>
 				<p>
 					Inspecting is free. Successful equipment changes, pickups, drops and

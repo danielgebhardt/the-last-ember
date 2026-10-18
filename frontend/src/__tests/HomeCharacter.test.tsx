@@ -43,6 +43,12 @@ describe("Character sheet", () => {
 	it("shows derived attack and armor with an understandable weapon breakdown", async () => {
 		const user = renderCharacterRun();
 		const panel = within(await openCharacter(user));
+		expect(
+			panel.getByLabelText("Character magic resistance"),
+		).toHaveTextContent("Magic resistance 5%");
+		expect(
+			panel.getByText("Base 5% + Intelligence 0% (maximum 50%)"),
+		).toBeVisible();
 		expect(panel.getByLabelText("Character hit chance")).toHaveTextContent(
 			"Hit 85%",
 		);

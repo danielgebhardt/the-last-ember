@@ -2040,3 +2040,41 @@ test("New Dungeon cancellation keeps queued corridor steps canceled", async ({
 	await page.keyboard.press("ArrowRight");
 	await expect(turns(page)).not.toHaveText(before ?? "");
 });
+
+test("magic resistance stays readable in Character on desktop and mobile in both themes", async ({
+	page,
+}) => {
+	await importAdventure(page);
+	await page.keyboard.press("c");
+	const character = page.getByRole("dialog", {
+		name: "Character",
+		exact: true,
+	});
+	const resistance = character.getByLabel("Character magic resistance", {
+		exact: true,
+	});
+	for (const width of [1280, 390]) {
+		await page.setViewportSize({ width, height: 800 });
+		for (const dark of [false, true]) {
+			await page
+				.locator("html")
+				.evaluate(
+					(element, value) => element.classList.toggle("dark", value),
+					dark,
+				);
+			await resistance.scrollIntoViewIfNeeded();
+			await expect(resistance).toHaveText("Magic resistance 5%");
+			await expect(resistance).toBeInViewport();
+			await expect(
+				character.getByText("Base 5% + Intelligence 0% (maximum 50%)"),
+			).toBeVisible();
+			const fits = await resistance.evaluate((element) => {
+				const card = element.parentElement;
+				return card !== null && card.scrollWidth <= card.clientWidth;
+			});
+			expect(fits).toBe(true);
+		}
+	}
+	await page.keyboard.press("Escape");
+	await expect(map(page)).toBeFocused();
+});

@@ -88,6 +88,9 @@ const itemBonuses = (definition: ItemDefinition) =>
 	[
 		definition.attackBonus ? `Attack +${definition.attackBonus}` : null,
 		definition.armor ? `Armor +${definition.armor}` : null,
+		definition.stats?.intelligence
+			? "Intelligence also improves magic resistance (50% cap)"
+			: null,
 		...Object.entries(definition.stats ?? {}).map(
 			([stat, value]) => `${stat} +${value}`,
 		),

@@ -131,3 +131,46 @@ it("Sleep cancels the prepared blast and Drain Life heals only damage after resi
 	).toBe(true);
 	expect(drained.monsters[0].health).toBe(26);
 });
+
+it.each(["salamander", "frost-giant"] as const)(
+	"%s breath applies resistance after difficulty and logs the actual HP loss",
+	(kind) => {
+		let state: GameState = {
+			...arena(),
+			difficulty: 1.25,
+			player: { health: 100, maxHealth: 100 },
+			progression: {
+				experience: 0,
+				permanentAttributes: { strength: 0, dexterity: 0, intelligence: 40 },
+			},
+		};
+		state.monsters = [
+			{
+				...state.monsters[0],
+				kind,
+				health: 100,
+				coordinate: { row: 4, col: 2 },
+			},
+		];
+		const roll = () => ({
+			d20: () => 20,
+			damage: (_min: number, max: number) => max,
+		});
+		// Resolve the complete warning countdown.
+		state = resolvePlayerAction(state, { type: "wait" }, roll).state;
+		for (
+			let phase = 0;
+			phase < 4 && state.monsters[0].intent.type !== "idle";
+			phase++
+		)
+			state = resolvePlayerAction(state, { type: "wait" }, roll).state;
+		// Fire: 10 -> harder 13 -> 10; cold: 12 -> harder 15 -> 11.
+		const expected = kind === "salamander" ? 10 : 11;
+		expect(state.player.health).toBe(100 - expected);
+		expect(
+			state.activityHistory.entries
+				.filter((entry) => entry.event.type === "monster-area-hit")
+				.map((entry) => entry.event),
+		).toMatchObject([{ type: "monster-area-hit", damage: expected }]);
+	},
+);

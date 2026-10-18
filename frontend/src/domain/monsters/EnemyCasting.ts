@@ -1,4 +1,8 @@
 import type { AttackRollSource } from "../game/CombatRandomness";
+import {
+	deriveCombatStats,
+	resolveIncomingMagicDamage,
+} from "../game/CombatStats";
 import { scaleEnemyValue } from "../game/Difficulty";
 import type { GameState } from "../game/GameState";
 import { SPELL_DEFINITIONS } from "../game/Spells";
@@ -63,6 +67,10 @@ export const chooseEnemySpell = (
 	return {
 		type: "damage",
 		spell,
-		damage: scaleEnemyValue(rawDamage, state.difficulty),
+		damage: resolveIncomingMagicDamage(
+			scaleEnemyValue(rawDamage, state.difficulty),
+			deriveCombatStats(state.equipment, state.progression, state.effects)
+				.magicResistance,
+		),
 	};
 };

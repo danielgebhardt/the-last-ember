@@ -38,6 +38,8 @@ const attack = (game: ReturnType<typeof encounter>) =>
 describe("Equipment combat values", () => {
 	it("falls back to base attack and zero armor with empty hands", () => {
 		expect(deriveCombatStats(createEquipment(), createProgression())).toEqual({
+			magicResistance: 5,
+			magicResistanceIntelligenceBonus: 0,
 			baseAttack: 1,
 			weaponBonus: 0,
 			strengthBonus: 0,
@@ -49,6 +51,8 @@ describe("Equipment combat values", () => {
 		expect(
 			deriveCombatStats(createStartingEquipment(), createProgression()),
 		).toEqual({
+			magicResistance: 5,
+			magicResistanceIntelligenceBonus: 0,
 			baseAttack: 1,
 			weaponBonus: 1,
 			strengthBonus: 0,

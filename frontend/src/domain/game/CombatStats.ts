@@ -12,17 +12,22 @@ export const deriveCombatStats = (
 	progression: Progression,
 	effects: readonly TimedEffect[] = [],
 ) => {
-	const strengthBonus = deriveAttributes(
-		progression,
-		effects,
-		equipment,
-	).strengthModifier;
+	const attributes = deriveAttributes(progression, effects, equipment);
+	const strengthBonus = attributes.strengthModifier;
 	const weaponBonus = itemAttackBonus(equipment.mainHand);
 	const armor = Object.values(armorContributions(equipment)).reduce<number>(
 		(sum, value) => sum + value,
 		0,
 	);
 	return {
+		magicResistance: Math.min(
+			50,
+			5 + Math.max(0, attributes.intelligenceModifier),
+		),
+		magicResistanceIntelligenceBonus: Math.max(
+			0,
+			attributes.intelligenceModifier,
+		),
 		baseAttack: BASE_PLAYER_ATTACK_DAMAGE,
 		weaponBonus,
 		strengthBonus,
@@ -44,3 +49,16 @@ export const armorContributions = (equipment: Equipment) => ({
 	chest: itemArmor(equipment.chest),
 	head: itemArmor(equipment.head),
 });
+
+// Enemy magic bypasses physical armor. Round only after difficulty scaling and
+// resistance, preserving a minimum landed hit and consuming no random rolls.
+export const resolveIncomingMagicDamage = (
+	incoming: number,
+	resistance: number,
+): number =>
+	Math.max(
+		1,
+		Math.round(
+			(incoming * (100 - Math.max(0, Math.min(50, resistance)))) / 100,
+		),
+	);
