@@ -57,6 +57,10 @@ import {
 	buyTownPotion,
 } from "../town/TownPotionStore";
 import {
+	sellAtTownSalvageShop,
+	type TownSellAction,
+} from "../town/TownSalvageShop";
+import {
 	type TownTravelAction,
 	travelBetweenTownAndDungeon,
 } from "../town/TownTravel";
@@ -82,6 +86,7 @@ import {
 import { advanceTimedEffects } from "./TimedEffects";
 
 export type PlayerAction =
+	| TownSellAction
 	| BuyTownEquipmentAction
 	| BuyTownPotionAction
 	| TownTravelAction
@@ -120,7 +125,9 @@ export const resolvePlayerAction = (
 			...(action.type === "cast" ||
 			action.type === "travel" ||
 			action.type === "buy-town-potion" ||
-			action.type === "buy-town-equipment"
+			action.type === "buy-town-equipment" ||
+			action.type === "sell-town-equipment" ||
+			action.type === "sell-town-lower"
 				? { error: "The adventure is complete." }
 				: {}),
 		};
@@ -158,10 +165,17 @@ export const resolvePlayerAction = (
 				? { error: "You cannot cast after death." }
 				: action.type === "travel" ||
 						action.type === "buy-town-potion" ||
-						action.type === "buy-town-equipment"
+						action.type === "buy-town-equipment" ||
+						action.type === "sell-town-equipment" ||
+						action.type === "sell-town-lower"
 					? { error: "This adventure has ended." }
 					: {}),
 		};
+	if (
+		action.type === "sell-town-equipment" ||
+		action.type === "sell-town-lower"
+	)
+		return sellAtTownSalvageShop(state, action);
 	if (action.type === "travel")
 		return travelBetweenTownAndDungeon(state, action);
 	if (action.type === "buy-town-equipment")
@@ -257,6 +271,7 @@ const resolvePlayerEffect = (
 		| TownTravelAction
 		| BuyTownEquipmentAction
 		| BuyTownPotionAction
+		| TownSellAction
 		| { type: "inspect-town" }
 	>,
 	rollSource: AttackRollSource,

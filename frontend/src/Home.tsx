@@ -65,6 +65,7 @@ import {
 } from "./domain/saves/SaveFormat";
 import { reachableTownEquipmentStore } from "./domain/town/TownEquipmentStore";
 import { canReachTownPotionStore } from "./domain/town/TownPotionStore";
+import { canReachTownSalvageShop } from "./domain/town/TownSalvageShop";
 import { atDungeonEntrance, atTownGate } from "./domain/town/TownTravel";
 import Header from "./Header.tsx";
 import DungeonSettings from "./settings/DungeonSettings.tsx";
@@ -590,13 +591,16 @@ const Home = ({
 												? "Potion store (E)"
 												: reachableTownEquipmentStore(game.state)
 													? "Equipment store (E)"
-													: "Inspect nearby"
+													: canReachTownSalvageShop(game.state)
+														? "The Rag & Bone (E)"
+														: "Inspect nearby"
 										}
 										onAction={(action) => {
 											if (
 												action.type === "inspect" &&
 												(canReachTownPotionStore(game.state) ||
-													reachableTownEquipmentStore(game.state))
+													reachableTownEquipmentStore(game.state) ||
+													canReachTownSalvageShop(game.state))
 											) {
 												setActionError("");
 												setTownShopOpen(true);
@@ -899,6 +903,18 @@ const Home = ({
 				error={game.actionError}
 				onClose={() => setTownShopOpen(false)}
 				onBuy={handleActionRequested}
+				mapRef={mapRef}
+			/>
+			<MerchantDialog
+				venue="rag-and-bone"
+				open={townShopOpen && canPlay && canReachTownSalvageShop(game.state)}
+				onSell={(itemId) =>
+					handleActionRequested({ type: "sell-town-equipment", itemId })
+				}
+				onSellLower={() => handleActionRequested({ type: "sell-town-lower" })}
+				state={game.state}
+				error={game.actionError}
+				onClose={() => setTownShopOpen(false)}
 				mapRef={mapRef}
 			/>
 			<MerchantDialog

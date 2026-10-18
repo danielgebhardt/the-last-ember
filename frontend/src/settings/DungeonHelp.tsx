@@ -292,10 +292,13 @@ const DungeonHelp = ({
 						<span className="font-medium text-foreground">Town.</span> New
 						adventures begin with {STARTING_GOLD} gold for a modest upgrade or
 						supplies. Use E at a shop doorway to browse. Shops trade in gold;
-						purchases go into your bag. Town movement and shopping do not
-						advance dungeon turns or restore health or mana. Stand on the south
-						gate and press Enter to enter the dungeon. At the floor-1 exit,
-						Enter returns to town until you recover the ember.
+						purchases go into your bag. The Rag &amp; Bone buys carried
+						equipment at the old expansion plot in the southeast. Its Sell menu
+						includes confirmed Sell all Lower items; worn gear and supplies stay
+						yours. Town movement and shopping do not advance dungeon turns or
+						restore health or mana. Stand on the south gate and press Enter to
+						enter the dungeon. At the floor-1 exit, Enter returns to town until
+						you recover the ember.
 					</li>
 					<li>
 						<span className="font-medium text-foreground">Mana.</span> Recover 1

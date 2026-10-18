@@ -2,6 +2,7 @@ import {
 	Anvil,
 	Archive,
 	BookOpen,
+	Coins,
 	Cross,
 	FlaskConical,
 	Landmark,
@@ -21,7 +22,7 @@ const ICONS: Record<string, typeof MapPin> = {
 	weapons: Swords,
 	scrolls: ScrollText,
 	"vault-plot": Landmark,
-	"expansion-plot": MapPin,
+	"rag-and-bone": Coins,
 };
 export const TownBuildingIcon = ({
 	id,

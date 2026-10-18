@@ -27,6 +27,7 @@ import ItemIcon from "../items/ItemIcon";
 import MerchantIcon from "../objects/MerchantIcon";
 
 type Props = {
+	venue?: "dungeon" | "rag-and-bone";
 	open: boolean;
 	state: GameState;
 	error?: string;
@@ -37,6 +38,7 @@ type Props = {
 	onSellLower?: () => void;
 };
 const MerchantDialog = ({
+	venue = "dungeon",
 	open,
 	state,
 	error,
@@ -46,6 +48,7 @@ const MerchantDialog = ({
 	onSell,
 	onSellLower,
 }: Props) => {
+	const inTown = venue === "rag-and-bone";
 	const [confirmLowerSale, setConfirmLowerSale] = useState(false);
 	const confirmationRef = useRef<HTMLFieldSetElement>(null);
 	const lowerSale = lowerEquipmentSale(state);
@@ -57,7 +60,7 @@ const MerchantDialog = ({
 		if (!open) setConfirmLowerSale(false);
 	}, [open]);
 	const titleRef = useRef<HTMLHeadingElement>(null),
-		[tab, setTab] = useState<"buy" | "sell">("buy");
+		[tab, setTab] = useState<"buy" | "sell">(inTown ? "sell" : "buy");
 	const buyTab = useRef<HTMLButtonElement>(null),
 		sellTab = useRef<HTMLButtonElement>(null),
 		[focusAfterSale, setFocusAfterSale] = useState(false);
@@ -101,7 +104,7 @@ const MerchantDialog = ({
 						if (event.repeat || event.ctrlKey || event.metaKey || event.altKey)
 							return;
 						const key = event.key.toLowerCase();
-						if (key === "b" || key === "s") {
+						if ((!inTown && key === "b") || key === "s") {
 							event.preventDefault();
 							event.stopPropagation();
 							setTab(key === "b" ? "buy" : "sell");
@@ -137,11 +140,12 @@ const MerchantDialog = ({
 								<span className="size-7">
 									<MerchantIcon />
 								</span>
-								Wandering potion merchant
+								{inTown ? "The Rag & Bone" : "Wandering potion merchant"}
 							</Dialog.Title>
 							<Dialog.Description className="mt-1 text-sm text-muted-foreground">
-								Shared stock for this adventure. Browsing is free; each trade
-								takes one turn and monsters act.
+								{inTown
+									? "We buy what the ruins failed to keep. Sentiment has no resale value. Browsing and selling do not advance dungeon time."
+									: "Shared stock for this adventure. Browsing is free; each trade takes one turn and monsters act."}
 							</Dialog.Description>
 						</div>
 						<Dialog.Close render={<Button variant="outline" />}>
@@ -162,13 +166,15 @@ const MerchantDialog = ({
 							className="flex shrink-0 items-center gap-2 border-b"
 							aria-label="Merchant trading"
 						>
-							<Tabs.Tab
-								value="buy"
-								ref={buyTab}
-								className="rounded-t px-4 py-2 font-semibold data-[active]:border-b-2 data-[active]:border-primary"
-							>
-								Buy
-							</Tabs.Tab>
+							{!inTown && (
+								<Tabs.Tab
+									value="buy"
+									ref={buyTab}
+									className="rounded-t px-4 py-2 font-semibold data-[active]:border-b-2 data-[active]:border-primary"
+								>
+									Buy
+								</Tabs.Tab>
+							)}
 							<Tabs.Tab
 								value="sell"
 								ref={sellTab}
@@ -180,43 +186,45 @@ const MerchantDialog = ({
 								Gold {state.gold}
 							</p>
 						</Tabs.List>
-						<Tabs.Panel
-							value="buy"
-							className="grid min-h-0 flex-1 content-start gap-2 overflow-y-auto sm:grid-cols-2 lg:grid-cols-4"
-						>
-							{supplies.map((kind, index) => (
-								<Button
-									key={kind}
-									variant="outline"
-									className="relative grid h-auto min-w-0 content-start justify-items-start gap-2 whitespace-normal p-3 text-left"
-									disabled={
-										!onBuy ||
-										state.merchantStock[kind] === 0 ||
-										state.gold < MERCHANT_OFFERS[kind].price
-									}
-									onClick={() => onBuy?.(kind)}
-								>
-									<kbd className="absolute top-3 right-3 rounded border px-1.5 text-xs text-muted-foreground">
-										{index + 1}
-									</kbd>
-									<span className="size-7 shrink-0">
-										<ItemIcon kind={kind} />
-									</span>
-									<span>
-										<span className="block font-semibold">
-											{ITEM_DEFINITIONS[kind].name}
+						{!inTown && (
+							<Tabs.Panel
+								value="buy"
+								className="grid min-h-0 flex-1 content-start gap-2 overflow-y-auto sm:grid-cols-2 lg:grid-cols-4"
+							>
+								{supplies.map((kind, index) => (
+									<Button
+										key={kind}
+										variant="outline"
+										className="relative grid h-auto min-w-0 content-start justify-items-start gap-2 whitespace-normal p-3 text-left"
+										disabled={
+											!onBuy ||
+											state.merchantStock[kind] === 0 ||
+											state.gold < MERCHANT_OFFERS[kind].price
+										}
+										onClick={() => onBuy?.(kind)}
+									>
+										<kbd className="absolute top-3 right-3 rounded border px-1.5 text-xs text-muted-foreground">
+											{index + 1}
+										</kbd>
+										<span className="size-7 shrink-0">
+											<ItemIcon kind={kind} />
 										</span>
-										<span className="block text-xs text-muted-foreground">
-											{MERCHANT_OFFERS[kind].price} gold ·{" "}
-											{state.merchantStock[kind]} remaining
+										<span>
+											<span className="block font-semibold">
+												{ITEM_DEFINITIONS[kind].name}
+											</span>
+											<span className="block text-xs text-muted-foreground">
+												{MERCHANT_OFFERS[kind].price} gold ·{" "}
+												{state.merchantStock[kind]} remaining
+											</span>
+											<span className="mt-1 block text-xs font-normal text-muted-foreground">
+												{ITEM_DEFINITIONS[kind].description}
+											</span>
 										</span>
-										<span className="mt-1 block text-xs font-normal text-muted-foreground">
-											{ITEM_DEFINITIONS[kind].description}
-										</span>
-									</span>
-								</Button>
-							))}
-						</Tabs.Panel>
+									</Button>
+								))}
+							</Tabs.Panel>
+						)}
 						<Tabs.Panel value="sell" className="min-h-0 flex-1 overflow-y-auto">
 							<p className="mb-2 text-xs text-muted-foreground">
 								Unequip worn gear first. Sell carried equipment only; supplies
@@ -332,7 +340,9 @@ const MerchantDialog = ({
 											{lowerSale.gold} gold?
 										</p>
 										<p className="text-xs text-muted-foreground">
-											The whole sale takes one turn, then monsters act once.
+											{inTown
+												? "The whole sale is free of dungeon time."
+												: "The whole sale takes one turn, then monsters act once."}
 										</p>
 									</div>
 									<div className="flex flex-wrap gap-2">
@@ -382,8 +392,9 @@ const MerchantDialog = ({
 						)}
 					</div>
 					<p className="shrink-0 text-xs text-muted-foreground">
-						B / S switches tabs · 1–4 buys on Buy · Tab and Enter select
-						equipment on Sell · Escape closes.
+						{inTown
+							? "Tab and Enter select equipment on Sell · Escape closes."
+							: "B / S switches tabs · 1–4 buys on Buy · Tab and Enter select equipment on Sell · Escape closes."}
 					</p>
 				</Dialog.Popup>
 			</Dialog.Portal>

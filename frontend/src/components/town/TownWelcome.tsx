@@ -126,8 +126,8 @@ const TownWelcome = ({
             text-xs leading-4 text-muted-foreground
          "
 			>
-				Potion, armor, and weapon shops are open. Town actions don't advance
-				time or restore resources.
+				Potion, armor, and weapon shops are open. Sell spare gear at The Rag
+				&amp; Bone. Town actions don't advance time or restore resources.
 			</p>
 
 			{/* Town Directory */}

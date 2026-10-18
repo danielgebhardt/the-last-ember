@@ -1,0 +1,53 @@
+import { appendActivityEvents } from "../game/ActivityHistory";
+import type { GameState } from "../game/GameState";
+import { createBag } from "../items/Bag";
+import { lowerEquipmentSale } from "./LowerEquipmentSales";
+import { equipmentSalePrice } from "./MerchantRules";
+
+// Ownership, pricing and atomic mutations are shared by town and dungeon buyers.
+export const sellLowerCarriedEquipment = (
+	state: GameState,
+): GameState | { error: string } => {
+	const sale = lowerEquipmentSale(state);
+	if (!sale.items.length) return { error: "No Lower equipment to sell." };
+	if (!Number.isSafeInteger(state.gold + sale.gold))
+		return { error: "You cannot carry more gold." };
+	const soldIds = new Set(sale.items.map((item) => item.id));
+	return {
+		...state,
+		gold: state.gold + sale.gold,
+		bag: createBag(state.bag.items.filter((item) => !soldIds.has(item.id))),
+		activityHistory: appendActivityEvents(
+			state.activityHistory,
+			sale.items.map((item) => ({
+				type: "merchant-sold" as const,
+				item: item.kind,
+				gold: equipmentSalePrice(item) ?? 0,
+				turn: state.turn,
+			})),
+		),
+	};
+};
+export const sellCarriedEquipment = (
+	state: GameState,
+	itemId: string,
+): GameState | { error: string } => {
+	const item = state.bag.items.find((copy) => copy.id === itemId);
+	if (!item)
+		return {
+			error: "That equipment is not in your bag. Unequip worn gear first.",
+		};
+	const gold = equipmentSalePrice(item);
+	if (gold === null)
+		return { error: "The merchant buys only carried equipment." };
+	if (!Number.isSafeInteger(state.gold + gold))
+		return { error: "You cannot carry more gold." };
+	return {
+		...state,
+		gold: state.gold + gold,
+		bag: createBag(state.bag.items.filter((copy) => copy.id !== item.id)),
+		activityHistory: appendActivityEvents(state.activityHistory, [
+			{ type: "merchant-sold", item: item.kind, gold, turn: state.turn },
+		]),
+	};
+};

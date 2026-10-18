@@ -2,7 +2,7 @@
 
 Reviewable authored plan for #325. See [the original v1 foundation map](town-layout.svg) and [time/homecoming rules](town-rules.md). The developer explicitly requested a seed-independent town of its own fixed size; neither dungeon dimensions nor floor count affect this plan.
 
-The town is **25 columns × 21 rows**, indexed from 0. North is the top of the map. Its boundary is closed, roofs and the beacon plinth block walking, and door thresholds remain accessible from the streets. These are reserved service entrances, not enterable interiors. Potion, armor and weapon shops are open; other destinations remain closed and explain their status without opening empty shop menus.
+The town is **25 columns × 21 rows**, indexed from 0. North is the top of the map. Its boundary is closed, roofs and the beacon plinth block walking, and door thresholds remain accessible from the streets. These are reserved service entrances, not enterable interiors. Potion, armor and weapon shops, plus The Rag & Bone equipment buyer, are open; other destinations remain closed and explain their status without opening empty shop menus.
 
 ## Routes and landmarks
 
@@ -19,7 +19,7 @@ The southern approach starts at (17, 12), with its gate at (19, 12) and a clear 
 | Market Street | Weapon store (W) | (14, 16) | Open |
 | Market Street | Scroll shop (S) | (14, 20) | Closed / reserved |
 | South Approach | Reserved vault plot (V) | (18, 3) | Closed / reserved |
-| South Approach | Reserved expansion plot (?) | (18, 20) | Closed / reserved |
+| South Approach | The Rag & Bone (R) | (18, 20) | Open / equipment buyer |
 
 ## Presentation and access
 

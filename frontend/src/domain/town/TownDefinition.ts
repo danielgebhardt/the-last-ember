@@ -128,11 +128,11 @@ const buildings: readonly TownBuilding[] = Object.freeze(
 			entry: { row: 18, col: 3 },
 		},
 		{
-			id: "expansion-plot",
-			name: "Reserved expansion plot",
-			sign: "Reserved plot — room for another good intention.",
+			id: "rag-and-bone",
+			name: "The Rag & Bone",
+			sign: "The Rag & Bone — we buy what the ruins failed to keep. Carried equipment only; sentiment has no resale value.",
 			district: "South Approach",
-			mark: "?",
+			mark: "R",
 			row: 18,
 			col: 19,
 			width: 3,
@@ -143,7 +143,9 @@ const buildings: readonly TownBuilding[] = Object.freeze(
 		Object.freeze({
 			...building,
 			entry: Object.freeze(building.entry),
-			status: ["potions", "armor", "weapons"].includes(building.id)
+			status: ["potions", "armor", "weapons", "rag-and-bone"].includes(
+				building.id,
+			)
 				? ("open" as const)
 				: ("closed" as const),
 		}),

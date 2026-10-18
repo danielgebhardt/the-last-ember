@@ -699,6 +699,39 @@ export default async function prepareFixtures() {
 				},
 				configuration,
 			],
+			[
+				"town-rag-and-bone",
+				{
+					...quiet,
+					town: { ...createTownLocation(), coordinate: { row: 17, col: 20 } },
+					gold: 700,
+					mana: 2,
+					effects: [
+						{
+							actorId: "player",
+							floorNumber: null,
+							kind: "poisoned",
+							remaining: 3,
+						},
+					],
+					equipment: {
+						...quiet.equipment,
+						mainHand: { id: "rag:worn", kind: "iron-sword", enchantment: 1 },
+						chest: { id: "rag:plate", kind: "plate-armor" },
+					},
+					bag: {
+						items: [
+							{ id: "rag:single", kind: "short-sword", enchantment: 1 },
+							{ id: "rag:lower", kind: "short-sword" },
+							{ id: "rag:same", kind: "iron-sword", enchantment: 1 },
+							{ id: "rag:better", kind: "short-sword", enchantment: 3 },
+							{ id: "rag:tradeoff", kind: "scholar-robe" },
+							{ id: "rag:potion", kind: "healing-potion" },
+						],
+					},
+				},
+				configuration,
+			],
 			["ready", quiet, configuration],
 			["poisoned", poisoned, configuration],
 			["scrolling", scrolling, configuration],
