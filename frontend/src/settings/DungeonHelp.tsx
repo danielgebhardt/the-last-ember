@@ -10,7 +10,10 @@ import {
 	Shield,
 } from "lucide-react";
 import type { ReactNode, RefObject } from "react";
-import { EmberMenuHeader } from "@/components/ui/EmberMenu";
+import {
+	EmberMenuHeader,
+	EmberPanel,
+} from "@/components/ui/EmberMenu";
 import {
 	SheetContent,
 	SheetDescription,
@@ -85,11 +88,13 @@ const DungeonHelp = ({
 
 		<div className="grid gap-6 px-4 pb-6">
 			<div className="grid items-start gap-6 md:grid-cols-2">
-				<section
+
+				<EmberPanel
 					aria-labelledby="keyboard-controls-title"
-					className="grid gap-3"
+					className="grid content-start gap-3"
 				>
-					<h3
+
+				<h3
 						id="keyboard-controls-title"
 						className="flex items-center gap-2 font-medium"
 					>
@@ -179,9 +184,14 @@ const DungeonHelp = ({
 						either run. Step off a landmark before starting. Manual input, menus
 						or focus loss cancel it.
 					</p>
-				</section>
-				<section aria-labelledby="map-symbols-title" className="grid gap-3">
-					<h3
+				</EmberPanel>
+
+				<EmberPanel
+					aria-labelledby="keyboard-controls-title"
+					className="grid content-start gap-3"
+				>
+
+				<h3
 						id="map-symbols-title"
 						className="flex items-center gap-2 font-medium"
 					>
@@ -195,7 +205,7 @@ const DungeonHelp = ({
 					<p className="text-xs leading-relaxed text-muted-foreground">
 						Visibility shading applies when fog of war is enabled.
 					</p>
-				</section>
+				</EmberPanel>
 			</div>
 			<section aria-labelledby="gameplay-notes-title" className="grid gap-3">
 				<h3

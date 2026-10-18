@@ -516,3 +516,100 @@
 .ember-menu-header .ember-menu-description {
 	overflow-wrap: anywhere;
 }
+
+
+/* ==========================================
+   Adventurer's Ledger — Inner Panels
+   ========================================== */
+
+.ember-menu-section-heading {
+	font-family: Georgia, "Times New Roman", serif;
+	font-size: 1rem;
+	font-weight: 700;
+	letter-spacing: 0.015em;
+	color: var(--foreground);
+}
+
+/* Inventory and equipment slots */
+.ember-item-slot {
+	border-color: color-mix(
+			in srgb,
+			var(--primary) 22%,
+			var(--border)
+	);
+
+	background: color-mix(
+			in srgb,
+			var(--card) 75%,
+			var(--muted)
+	);
+
+	transition:
+			background-color 140ms ease,
+			border-color 140ms ease;
+}
+
+.ember-item-slot:hover:not(:disabled) {
+	border-color: color-mix(
+			in srgb,
+			var(--primary) 55%,
+			var(--border)
+	);
+	background: var(--accent);
+}
+
+.ember-item-slot[aria-pressed="true"] {
+	border-color: var(--primary);
+	background: color-mix(
+			in srgb,
+			var(--primary) 12%,
+			var(--card)
+	);
+
+	box-shadow: inset 0 0 0 1px
+	color-mix(in srgb, var(--primary) 35%, transparent);
+}
+
+/* Empty bag slots */
+.ember-item-slot-empty {
+	border-color: color-mix(
+			in srgb,
+			var(--primary) 12%,
+			var(--border)
+	);
+
+	background: color-mix(
+			in srgb,
+			var(--muted) 28%,
+			transparent
+	);
+}
+
+/* Magical accent on spell entries */
+.ember-spell-card {
+	border-color: color-mix(
+			in srgb,
+			#9879c6 25%,
+			var(--border)
+	);
+}
+
+.ember-spell-card:hover {
+	border-color: color-mix(
+			in srgb,
+			#9879c6 48%,
+			var(--border)
+	);
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.ember-item-slot {
+		transition: none;
+	}
+}
+
+@media (forced-colors: active) {
+	.ember-item-slot[aria-pressed="true"] {
+		border-color: Highlight;
+	}
+}

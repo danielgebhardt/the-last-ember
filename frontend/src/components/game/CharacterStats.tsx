@@ -31,7 +31,7 @@ const CharacterStats = ({
 
 	return (
 		<section aria-label="Character stats" className="grid gap-2">
-			<div className="grid grid-cols-3 gap-2">
+			<div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
 				<div className="rounded-lg border bg-muted/30 p-2">
 					<Heart
 						aria-hidden="true"
@@ -92,19 +92,20 @@ const CharacterStats = ({
 						Evade {accuracy.evadeChance}%
 					</output>
 				</div>
+				<div className="rounded-lg border bg-muted/30 p-2">
+					<output
+						aria-label="Character magic resistance"
+						className="text-xs font-medium tabular-nums sm:text-sm"
+					>
+						Magic resistance {combat.magicResistance}%
+					</output>
+					<p className="mt-1 text-xs text-muted-foreground">
+						Base 5% + Intelligence {combat.magicResistanceIntelligenceBonus}%
+						(maximum 50%)
+					</p>
+				</div>
 			</div>
-			<div className="rounded-lg border bg-muted/30 p-2">
-				<output
-					aria-label="Character magic resistance"
-					className="text-xs font-medium tabular-nums sm:text-sm"
-				>
-					Magic resistance {combat.magicResistance}%
-				</output>
-				<p className="mt-1 text-xs text-muted-foreground">
-					Base 5% + Intelligence {combat.magicResistanceIntelligenceBonus}%
-					(maximum 50%)
-				</p>
-			</div>
+
 			<details className="text-xs leading-relaxed text-muted-foreground">
 				<summary className="cursor-pointer">Combat rules</summary>
 				<p>

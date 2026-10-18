@@ -1,3 +1,4 @@
+
 import type { RefObject } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -16,12 +17,13 @@ const slots = [
 	{ key: "rightRing", position: "col-start-3 row-start-3" },
 	{ key: "chest", position: "col-start-2 row-start-3" },
 ] as const;
+
 const EquipmentView = ({
-	equipment,
-	selectedId,
-	onSelect,
-	headingRef,
-}: {
+						   equipment,
+						   selectedId,
+						   onSelect,
+						   headingRef,
+					   }: {
 	equipment: Equipment;
 	selectedId: string | null;
 	onSelect: (slot: EquipmentSlot) => void;
@@ -30,19 +32,21 @@ const EquipmentView = ({
 	return (
 		<section
 			aria-labelledby="character-equipment-title"
-			className="grid content-start gap-2"
+			className="ember-menu-panel grid content-start gap-3"
 		>
 			<h3
 				ref={headingRef}
 				tabIndex={-1}
 				id="character-equipment-title"
-				className="font-medium outline-none"
+				className="ember-menu-section-heading outline-none"
 			>
 				Equipment
 			</h3>
-			<div className="grid grid-cols-3 items-center gap-2 rounded-lg border bg-muted/20 p-2">
+
+			<div className="grid grid-cols-3 items-center gap-2 rounded-lg border border-primary/15 bg-background/35 p-2">
 				{slots.map(({ key, position }) => {
 					const label = EQUIPMENT_SLOT_LABELS[key];
+
 					return (
 						<section
 							key={key}
@@ -55,32 +59,38 @@ const EquipmentView = ({
 							>
 								{label}
 							</h4>
+
 							<Button
 								type="button"
 								variant="outline"
 								aria-label={`${label}: ${equipment[key] ? itemName(equipment[key]) : "empty"}`}
 								aria-pressed={
-									selectedId === equipment[key]?.id && selectedId !== null
+									selectedId === equipment[key]?.id &&
+									selectedId !== null
 								}
 								onClick={() => onSelect(key)}
-								className="grid h-auto min-h-12 w-full justify-items-center gap-1 whitespace-normal p-1 text-center aria-pressed:border-primary aria-pressed:bg-primary/10"
+								className="ember-item-slot grid h-auto min-h-12 w-full justify-items-center gap-1 whitespace-normal p-1 text-center aria-pressed:border-primary aria-pressed:bg-primary/10"
 							>
 								{equipment[key] ? (
 									<>
-										<span className="size-5">
-											<ItemIcon kind={equipment[key].kind} />
-										</span>
-										<span className="text-xs">{itemName(equipment[key])}</span>
+                              <span className="size-5">
+                                 <ItemIcon kind={equipment[key].kind} />
+                              </span>
+
+										<span className="text-xs">
+                                 {itemName(equipment[key])}
+                              </span>
 									</>
 								) : (
 									<span className="text-xs text-muted-foreground">
-										{label} empty
-									</span>
+                              {label} empty
+                           </span>
 								)}
 							</Button>
 						</section>
 					);
 				})}
+
 				<svg
 					aria-hidden="true"
 					focusable="false"
@@ -98,4 +108,5 @@ const EquipmentView = ({
 		</section>
 	);
 };
+
 export default EquipmentView;
