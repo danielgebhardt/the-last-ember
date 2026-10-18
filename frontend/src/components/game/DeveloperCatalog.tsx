@@ -27,6 +27,7 @@ import { monsterTraits } from "../../domain/monsters/MonsterTraits";
 import {
 	type DungeonObjectKind,
 	OBJECT_DEFINITIONS,
+	TRAP_DISARM_EXPERIENCE,
 } from "../../domain/objects/DungeonObject";
 import TileIcon from "../dungeon/TileIcon";
 import { TILE_LABELS, TILE_TERRAIN_CLASSES } from "../dungeon/TileVisuals";
@@ -315,6 +316,12 @@ const DeveloperCatalog = ({
 										{Math.round(definition.chance * 100)}% placement chance
 									</p>
 									<p>{definition.freshLabel}</p>
+									{kind === "trap" && (
+										<p>
+											Successful disarm: {TRAP_DISARM_EXPERIENCE} XP (once per
+											trap)
+										</p>
+									)}
 									<Preview
 										icon={
 											<DungeonObjectIcon

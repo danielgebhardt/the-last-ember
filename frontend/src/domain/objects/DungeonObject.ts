@@ -1,4 +1,5 @@
 export const RELIQUARY_HEALTH_COST = 10;
+export const TRAP_DISARM_EXPERIENCE = 5;
 
 import type { Coordinate } from "../dungeon/DungeonTypes";
 export const OBJECT_DEFINITIONS = {

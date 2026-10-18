@@ -85,7 +85,7 @@ test("live town is centered over transparent space, preserves the dungeon, and r
 	).toHaveCount(0);
 	await expect(
 		page.getByRole("region", { name: "Dungeon notices", exact: true }),
-	).toContainText("You see dungeon exit. Press Enter to return to town.");
+	).toContainText("You see the dungeon exit. Press Enter to return to town.");
 	await page.screenshot({ path: info.outputPath("dungeon-exit-hint.png") });
 	const original = await map
 		.getByRole("cell", { name: / - player$/ })

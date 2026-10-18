@@ -32,6 +32,7 @@ import { ESCAPE_ENCOUNTER_RULES } from "../domain/monsters/EscapeEncounters";
 import type { Monster } from "../domain/monsters/Monster";
 import { MONSTER_DEFINITIONS } from "../domain/monsters/Monster";
 import { ESCAPE_PURSUIT_RULES } from "../domain/monsters/PursuitRules";
+import { TRAP_DISARM_EXPERIENCE } from "../domain/objects/DungeonObject";
 
 const Keycap = ({
 	children,
@@ -233,7 +234,8 @@ const DungeonHelp = ({
 						Walking onto coins collects gold. Traps are visible: avoid them,
 						cross for 2–6 damage, or use E to attempt disarm for one turn. Base
 						disarm chance is 55%, +5% per Dexterity modifier (maximum 95%);
-						failure springs the trap. Spent traps cannot hurt again. Fountains
+						success grants {TRAP_DISARM_EXPERIENCE} XP once; failure springs the
+						trap. Spent traps cannot hurt again or grant more XP. Fountains
 						offer a safe sip or a stronger risky draw. E opens their choices;
 						number keys choose and Escape cancels for free. Each chosen draw
 						empties the fountain.

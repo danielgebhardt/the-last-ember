@@ -44,7 +44,7 @@ it("walks deliberately into the dungeon, returns without a turn and restores exa
 	).not.toBeInTheDocument();
 	expect(
 		within(screen.getByRole("region", { name: "Dungeon notices" })).getByText(
-			"You see dungeon exit. Press Enter to return to town.",
+			"You see the dungeon exit. Press Enter to return to town.",
 		),
 	).toBeVisible();
 	expect(screen.getByRole("heading", { name: "Floor 1 of 5" })).toBeVisible();

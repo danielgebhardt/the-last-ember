@@ -6,6 +6,7 @@ import {
 	type DungeonObjectKind,
 	objectLabel,
 	RELIQUARY_HEALTH_COST,
+	TRAP_DISARM_EXPERIENCE,
 } from "./DungeonObject";
 
 const hints: Record<DungeonObjectKind, { fresh: string; spent: string }> = {
@@ -41,8 +42,7 @@ const hints: Record<DungeonObjectKind, { fresh: string; spent: string }> = {
 			"Already opened; any remaining reward is on the floor. Press E on its tile to choose loot, or G to collect items here.",
 	},
 	trap: {
-		fresh:
-			"Cross for 2–6 damage, or press E within reach to attempt disarm. Failure springs it.",
+		fresh: `Cross for 2–6 damage, or press E within reach to attempt disarm. Success grants ${TRAP_DISARM_EXPERIENCE} XP once; failure springs it.`,
 		spent: "Already spent; it cannot hurt you again.",
 	},
 	fountain: {

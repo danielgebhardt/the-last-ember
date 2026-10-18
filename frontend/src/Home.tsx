@@ -786,7 +786,7 @@ const Home = ({
 												aria-label="Dungeon exit"
 												className="py-2 text-xs text-muted-foreground"
 											>
-												You see dungeon exit. Press Enter to return to town.
+												You see the dungeon exit. Press Enter to return to town.
 											</p>
 										)}
 								</section>

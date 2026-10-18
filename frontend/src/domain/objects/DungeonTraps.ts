@@ -2,8 +2,9 @@ import { hashStringToUint32 } from "../dungeon/DungeonRun";
 import { createSeededRandom } from "../dungeon/Seed";
 import { appendActivityEvents } from "../game/ActivityHistory";
 import { deriveAttributes } from "../game/Attributes";
+import { awardExperience } from "../game/ExperienceRewards";
 import type { GameState } from "../game/GameState";
-import type { DungeonObject } from "./DungeonObject";
+import { type DungeonObject, TRAP_DISARM_EXPERIENCE } from "./DungeonObject";
 import { objectDamage, spendObject } from "./ObjectEffects";
 export const trapDamage = (seed: number, trap: DungeonObject): number =>
 	2 +
@@ -36,12 +37,15 @@ export const disarmTrap = (
 	)();
 	if (roll >= chance) return springTrap(state, trap);
 	const spent = spendObject(state, trap);
-	return {
-		...spent,
-		activityHistory: appendActivityEvents(spent.activityHistory, [
-			{ type: "trap-disarmed", turn: state.turn },
-		]),
-	};
+	return awardExperience(
+		{
+			...spent,
+			activityHistory: appendActivityEvents(spent.activityHistory, [
+				{ type: "trap-disarmed", turn: state.turn },
+			]),
+		},
+		TRAP_DISARM_EXPERIENCE,
+	);
 };
 export const triggerArrivalTrap = (state: GameState): GameState => {
 	const trap = state.objects.find(
