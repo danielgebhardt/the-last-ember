@@ -11,7 +11,6 @@ import {
 	serializeSave,
 } from "../domain/saves/SaveFormat";
 import { bruteEncounter } from "./BruteTestHelpers";
-import { historicalSaveText } from "./SaveTestHelpers";
 import { tacticalSnapshot } from "./TacticalReplayTestHelpers";
 
 const encounter = (): GameState => {
@@ -193,21 +192,6 @@ describe("Capable enemies opening ordinary doors", () => {
 			).entries,
 		).toEqual(state.activityHistory.entries);
 	});
-	it("migrates v18 without regenerating played data or losing enchantment", () => {
-		const state = {
-			...encounter(),
-			bag: {
-				items: [
-					{ id: "enchanted", kind: "iron-sword" as const, enchantment: 2 },
-				],
-			},
-		};
-		const old = { ...tacticalSnapshot(state), version: 18 };
-		const parsed = parseSave(historicalSaveText(old));
-		if (!parsed.ok) throw Error(parsed.error);
-		expect(parsed.value.version).toBe(27);
-		expect(restoreSave(parsed.value).state).toEqual(state);
-	});
 	it.each([null, 12, "", "x".repeat(201)])(
 		"rejects invalid actor identities in the new saved event (%s)",
 		(actorId) => {
@@ -234,7 +218,7 @@ describe("Capable enemies opening ordinary doors", () => {
 					},
 				},
 			};
-			expect(parseSave(historicalSaveText(corrupted)).ok).toBe(false);
+			expect(parseSave(JSON.stringify(corrupted)).ok).toBe(false);
 		},
 	);
 });

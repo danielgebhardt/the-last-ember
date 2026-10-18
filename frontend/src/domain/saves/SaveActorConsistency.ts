@@ -11,9 +11,9 @@ import {
 	savedLocations,
 	unique,
 } from "./SaveConsistencyHelpers";
-import type { SaveSourceDocument } from "./SaveSource";
+import type { SaveDocument } from "./SaveDocument";
 
-export const hasConsistentActors = (document: SaveSourceDocument): boolean => {
+export const hasConsistentActors = (document: SaveDocument): boolean => {
 	const { state } = document;
 	const { run } = state;
 	const { floorAt, walkable } = savedLocations(document);
@@ -40,6 +40,11 @@ export const hasConsistentActors = (document: SaveSourceDocument): boolean => {
 				!protectedLocations
 					.get(entry.floorNumber)
 					?.some((location) => sameCoordinate(location, entry.coordinate)) &&
+				(entry.lastDamagedTurn == null ||
+					entry.lastDamagedTurn <= state.turn) &&
+				(entry.awareness === undefined ||
+					entry.awareness.type === "idle" ||
+					walkable(entry.floorNumber, entry.awareness.target)) &&
 				entry.health <=
 					maximumMonsterHealth(
 						entry.kind,
@@ -59,7 +64,6 @@ export const hasConsistentActors = (document: SaveSourceDocument): boolean => {
 	)
 		return false;
 	if (
-		document.version !== 1 &&
 		!document.state.monsters.every(
 			(monster) =>
 				monster.intent.type === "idle" ||

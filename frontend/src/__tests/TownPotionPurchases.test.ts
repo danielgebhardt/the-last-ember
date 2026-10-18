@@ -1,3 +1,4 @@
+// @vitest-environment node
 import { describe, expect, it } from "vitest";
 import {
 	connectDungeonFloors,
@@ -141,7 +142,7 @@ describe("finite town potion purchases", () => {
 		};
 		expect(buy(enormous).state).toBe(enormous);
 	});
-	it("persists depletion and ownership, rejects forged refills, and migrates old adventures once", () => {
+	it("persists depletion and ownership, rejects forged refills", () => {
 		const state = shopState(),
 			next = buy(state).state;
 		const doc = createSaveDocument(
@@ -159,25 +160,6 @@ describe("finite town potion purchases", () => {
 			state: { ...doc.state, townPotionStock: createTownPotionStock() },
 		};
 		expect(parseSave(JSON.stringify(forged)).ok).toBe(false);
-		const old = createSaveDocument(
-			state,
-			updateExploration(state.run, 8),
-			config,
-			DEFAULT_FOG_CONFIGURATION,
-		);
-		const legacy = { ...old, version: 23, state: { ...old.state } };
-		Reflect.deleteProperty(legacy.state, "townPortal");
-		Reflect.deleteProperty(legacy.state, "townPotionStock");
-		Reflect.deleteProperty(legacy.state, "townEquipmentStock");
-		Reflect.deleteProperty(legacy.state.progression, "permanentAttributes");
-		const migrated = parseSave(JSON.stringify(legacy));
-		if (!migrated.ok) throw new Error(migrated.error);
-		expect(migrated.value.state.townPotionStock).toEqual(
-			createTownPotionStock(),
-		);
-		expect(migrated.value.state.town).toEqual(state.town);
-		expect(migrated.value.state.run).toEqual(old.state.run);
-		expect(parseSave(JSON.stringify({ ...old, version: 23 })).ok).toBe(false);
 	});
 	it("depletes every offered stock without changing the wandering pool", () => {
 		for (const kind of Object.keys(TOWN_POTION_OFFERS) as TownPotion[]) {

@@ -12,7 +12,7 @@ import {
 	serializeSave,
 } from "../domain/saves/SaveFormat";
 import { createCorridorEncounter } from "./MonsterEncounterTestHelpers";
-import { historicalSaveText, savedAdventure } from "./SaveTestHelpers";
+import { savedAdventure } from "./SaveTestHelpers";
 
 it("walking onto gold collects it once without bag space or an extra turn", () => {
 	const initial = {
@@ -68,7 +68,7 @@ it("one confirmed defeat grants seeded gold once even if an old actor reference 
 		killed,
 	);
 });
-it("saves gold and migrates pre-gold adventures with zero rather than rerolling rewards", () => {
+it("saves the actual gold balance and rejects negative gold", () => {
 	const restored = restoreSave(savedAdventure());
 	const state = { ...restored.state, gold: 42 };
 	const doc = createSaveDocument(
@@ -79,20 +79,6 @@ it("saves gold and migrates pre-gold adventures with zero rather than rerolling 
 	);
 	expect(parseSave(serializeSave(doc))).toEqual({ ok: true, value: doc });
 	expect(
-		parseSave(
-			historicalSaveText({
-				...doc,
-				version: 9,
-				state: {
-					...doc.state,
-					spellHotbar: doc.state.spellHotbar.slice(0, 4),
-					gold: undefined,
-				},
-			}),
-		),
-	).toMatchObject({ ok: true, value: { state: { gold: 0 } } });
-	expect(
-		parseSave(historicalSaveText({ ...doc, state: { ...doc.state, gold: -1 } }))
-			.ok,
+		parseSave(JSON.stringify({ ...doc, state: { ...doc.state, gold: -1 } })).ok,
 	).toBe(false);
 });

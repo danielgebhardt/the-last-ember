@@ -1,8 +1,12 @@
 import { render, screen } from "@testing-library/react";
 import { HttpResponse, http } from "msw";
-import { describe, expect, it } from "vitest";
+import { afterAll, afterEach, beforeAll, describe, expect, it } from "vitest";
 import APICheck from "../APICheck.tsx";
 import { server } from "../mocks/server.ts";
+
+beforeAll(() => server.listen({ onUnhandledRequest: "error" }));
+afterEach(() => server.resetHandlers());
+afterAll(() => server.close());
 
 describe("APICheck", () => {
 	it("should render the title from the backend", async () => {

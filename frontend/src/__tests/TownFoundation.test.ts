@@ -1,3 +1,4 @@
+// @vitest-environment node
 import { describe, expect, it } from "vitest";
 import { generateDungeonRun } from "../domain/dungeon/DungeonRun";
 import type { Coordinate } from "../domain/dungeon/DungeonTypes";

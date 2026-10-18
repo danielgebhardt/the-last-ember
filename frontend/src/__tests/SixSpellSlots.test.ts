@@ -6,13 +6,8 @@ import {
 	createSpellHotbar,
 	type SpellSlot,
 } from "../domain/game/SpellHotbar";
-import {
-	createSaveDocument,
-	parseSave,
-	restoreSave,
-	serializeSave,
-} from "../domain/saves/SaveFormat";
-import { historicalSaveText, savedAdventure } from "./SaveTestHelpers";
+import { parseSave } from "../domain/saves/SaveFormat";
+import { savedAdventure } from "./SaveTestHelpers";
 
 describe("Six spell shortcuts", () => {
 	it("provides six slots and moves, replaces and clears the sixth assignment", () => {
@@ -62,57 +57,6 @@ describe("Six spell shortcuts", () => {
 			}),
 		).toEqual(["magic-missile", null, null, null, null, null]);
 	});
-	it("preserves four legacy assignments and appends two empty slots", () => {
-		const current = savedAdventure();
-		const old = {
-			...current,
-			version: 11,
-			state: {
-				...current.state,
-				spellHotbar: [null, "heal", null, "magic-missile"],
-			},
-		};
-		const parsed = parseSave(historicalSaveText(old));
-		expect(
-			parseSave(
-				historicalSaveText({
-					...old,
-					state: {
-						...old.state,
-						spellHotbar: [null, "heal", null, "magic-missile", null, null],
-					},
-				}),
-			).ok,
-		).toBe(false);
-		expect(parsed.ok).toBe(true);
-		if (!parsed.ok) throw new Error(parsed.error);
-		expect(parsed.value.state.spellHotbar).toEqual([
-			null,
-			"heal",
-			null,
-			"magic-missile",
-			null,
-			null,
-		]);
-		const restored = restoreSave(parsed.value);
-		const state = {
-			...restored.state,
-			spellHotbar: ["magic-missile", null, null, null, null, "heal"] as const,
-		};
-		const roundTrip = parseSave(
-			serializeSave(
-				createSaveDocument(
-					state,
-					restored.exploration,
-					restored.configuration,
-					restored.fog,
-				),
-			),
-		);
-		expect(roundTrip.ok).toBe(true);
-		if (!roundTrip.ok) throw new Error(roundTrip.error);
-		expect(roundTrip.value.state.spellHotbar).toEqual(state.spellHotbar);
-	});
 	it.each([
 		["four slots", ["magic-missile", "heal", null, null]],
 		["duplicate in sixth", ["heal", null, null, null, null, "heal"]],
@@ -124,7 +68,7 @@ describe("Six spell shortcuts", () => {
 		const document = savedAdventure();
 		expect(
 			parseSave(
-				historicalSaveText({
+				JSON.stringify({
 					...document,
 					state: { ...document.state, spellHotbar: slots },
 				}),

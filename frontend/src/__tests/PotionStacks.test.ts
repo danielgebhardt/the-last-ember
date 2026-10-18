@@ -6,7 +6,7 @@ import { resolvePlayerAction } from "../domain/game/PlayerActions";
 import { BAG_CAPACITY, bagSlots, createBag } from "../domain/items/Bag";
 import type { ItemInstance, ItemKind } from "../domain/items/Item";
 import { parseSave, serializeSave } from "../domain/saves/SaveFormat";
-import { historicalSaveText, savedAdventure } from "./SaveTestHelpers";
+import { savedAdventure } from "./SaveTestHelpers";
 import { createThreeFloorTraversalRun } from "./testhelpers";
 
 const copies = (kind: ItemKind, count: number): ItemInstance[] =>
@@ -104,7 +104,7 @@ describe("Potion stacks and 27 bag slots", () => {
 		]) {
 			expect(
 				parseSave(
-					historicalSaveText({
+					JSON.stringify({
 						...document,
 						state: { ...document.state, bag: { items } },
 					}),
@@ -112,34 +112,12 @@ describe("Potion stacks and 27 bag slots", () => {
 			).toBe(false);
 		}
 	});
-	it("round-trips more than twenty bottles and migrates an old bag without losing copies", () => {
+	it("round-trips more than twenty bottles without losing copies", () => {
 		const current = savedAdventure();
 		current.state.bag = createBag(copies("mana-potion", 40));
 		expect(parseSave(serializeSave(current))).toEqual({
 			ok: true,
 			value: current,
 		});
-		const legacy = {
-			...current,
-			version: 10,
-			state: {
-				...current.state,
-				spellHotbar: current.state.spellHotbar.slice(0, 4),
-				bag: { items: copies("mana-potion", 20) },
-			},
-		};
-		const parsed = parseSave(historicalSaveText(legacy));
-		expect(parsed.ok).toBe(true);
-		if (!parsed.ok) throw new Error(parsed.error);
-		expect(parsed.value.state.bag.items).toEqual(legacy.state.bag.items);
-		expect(bagSlots(parsed.value.state.bag)[0].count).toBe(20);
-		expect(
-			parseSave(
-				historicalSaveText({
-					...legacy,
-					state: { ...legacy.state, bag: current.state.bag },
-				}),
-			).ok,
-		).toBe(false);
 	});
 });

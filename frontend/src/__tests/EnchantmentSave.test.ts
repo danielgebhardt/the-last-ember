@@ -8,7 +8,7 @@ import {
 	restoreSave,
 	serializeSave,
 } from "../domain/saves/SaveFormat";
-import { historicalSaveText, savedAdventure } from "./SaveTestHelpers";
+import { savedAdventure } from "./SaveTestHelpers";
 
 describe("Versioned owned enchantments", () => {
 	it("round-trips equipped, bag and dropped bonuses while selecting only declared item fields", () => {
@@ -67,7 +67,7 @@ describe("Versioned owned enchantments", () => {
 			const document = savedAdventure();
 			expect(
 				parseSave(
-					historicalSaveText({
+					JSON.stringify({
 						...document,
 						state: {
 							...document.state,
@@ -89,7 +89,7 @@ describe("Versioned owned enchantments", () => {
 		for (const kind of ["ring-strength", "healing-potion"]) {
 			expect(
 				parseSave(
-					historicalSaveText({
+					JSON.stringify({
 						...document,
 						state: {
 							...document.state,
@@ -100,46 +100,19 @@ describe("Versioned owned enchantments", () => {
 			).toBe(false);
 		}
 	});
-	it("does not promote unknown legacy item metadata to an owned bonus", () => {
+	it("rejects unexpected equipment slots safely in the current format", () => {
 		const document = savedAdventure();
-		const parsed = parseSave(
-			historicalSaveText({
+		for (const extra of [null, 10, { id: "extra:gear", kind: "not-a-kind" }]) {
+			const content = JSON.stringify({
 				...document,
-				version: 17,
+				version: 27,
 				state: {
 					...document.state,
-					equipment: {
-						...document.state.equipment,
-						mainHand: { ...document.state.equipment.mainHand, enchantment: 2 },
-					},
+					equipment: { ...document.state.equipment, extra },
 				},
-			}),
-		);
-		if (!parsed.ok) throw new Error(parsed.error);
-		expect(parsed.value.state.equipment.mainHand).not.toHaveProperty(
-			"enchantment",
-		);
+			});
+			expect(() => parseSave(content)).not.toThrow();
+			expect(parseSave(content).ok).toBe(false);
+		}
 	});
-	it.each([17, 18])(
-		"rejects unexpected equipment slots safely in version %i",
-		(version) => {
-			const document = savedAdventure();
-			for (const extra of [
-				null,
-				10,
-				{ id: "extra:gear", kind: "not-a-kind" },
-			]) {
-				const content = JSON.stringify({
-					...document,
-					version,
-					state: {
-						...document.state,
-						equipment: { ...document.state.equipment, extra },
-					},
-				});
-				expect(() => parseSave(content)).not.toThrow();
-				expect(parseSave(content).ok).toBe(false);
-			}
-		},
-	);
 });

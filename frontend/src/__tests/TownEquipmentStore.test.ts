@@ -211,32 +211,6 @@ it("keeps duplicate kinds independently owned and accepts later enchanting witho
 	};
 	expect(parseSave(JSON.stringify(enchanted)).ok).toBe(true);
 });
-it("migrates v24 potion depletion and played data without inventing owned equipment", () => {
-	const document = savedAdventure();
-	const old = {
-		...document,
-		version: 24,
-		state: {
-			...document.state,
-			townPotionStock: { ...document.state.townPotionStock, antidote: 2 },
-		},
-	};
-	Reflect.deleteProperty(old.state, "townPortal");
-	Reflect.deleteProperty(old.state, "townEquipmentStock");
-	Reflect.deleteProperty(old.state.progression, "permanentAttributes");
-	const result = parseSave(JSON.stringify(old));
-	expect(result.ok).toBe(true);
-	if (!result.ok) throw new Error(result.error);
-	expect(result.value.state).toEqual({
-		...old.state,
-		townPortal: null,
-		townEquipmentStock: createTownEquipmentStock(),
-		progression: {
-			...old.state.progression,
-			permanentAttributes: { strength: 0, dexterity: 0, intelligence: 0 },
-		},
-	});
-});
 it("rejects duplicate, unknown and modified unsold stock copies", () => {
 	const document = savedAdventure(),
 		first = createTownEquipmentStock()[0];

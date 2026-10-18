@@ -11,7 +11,7 @@ import {
 	restoreSave,
 	serializeSave,
 } from "../domain/saves/SaveFormat";
-import { historicalSaveText, savedAdventure } from "./SaveTestHelpers";
+import { savedAdventure } from "./SaveTestHelpers";
 
 const ring = { id: "ring:1", kind: "copper-ring" as const };
 it.each(["leftRing", "rightRing"] as const)(
@@ -69,30 +69,9 @@ it("rejects rings in armor slots and the same physical ring in two slots", () =>
 		/same item/,
 	);
 });
-it("migrates version-five equipment to empty ring slots and persists equipped rings", () => {
+it("persists equipped rings", () => {
 	const saved = savedAdventure();
-	const legacy = {
-		...saved,
-		version: 5,
-		state: {
-			...saved.state,
-			spellHotbar: saved.state.spellHotbar.slice(0, 4),
-			equipment: {
-				mainHand: saved.state.equipment.mainHand,
-				offHand: saved.state.equipment.offHand,
-				chest: saved.state.equipment.chest,
-				head: saved.state.equipment.head,
-			},
-		},
-	};
-	const migrated = parseSave(historicalSaveText(legacy));
-	expect(migrated.ok).toBe(true);
-	if (!migrated.ok) throw new Error(migrated.error);
-	expect(migrated.value.state.equipment).toMatchObject({
-		leftRing: null,
-		rightRing: null,
-	});
-	const restored = restoreSave(migrated.value);
+	const restored = restoreSave(saved);
 	const state = {
 		...restored.state,
 		equipment: { ...restored.state.equipment, rightRing: ring },
@@ -136,5 +115,5 @@ it("rejects duplicated ring ownership in imported saves and charges normal turns
 			equipment: { ...saved.state.equipment, leftRing: ring, rightRing: ring },
 		},
 	};
-	expect(parseSave(historicalSaveText(duplicate)).ok).toBe(false);
+	expect(parseSave(JSON.stringify(duplicate)).ok).toBe(false);
 });

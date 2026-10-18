@@ -10,7 +10,7 @@ import {
 	serializeSave,
 } from "../domain/saves/SaveFormat";
 import { createCorridorEncounter } from "./MonsterEncounterTestHelpers";
-import { historicalSaveText, savedAdventure } from "./SaveTestHelpers";
+import { savedAdventure } from "./SaveTestHelpers";
 
 it("assigns known spells without turns and moves an existing assignment instead of duplicating it", () => {
 	const state = {
@@ -72,21 +72,9 @@ it("rejects an unlearned spell without changing state or spending a turn", () =>
 	expect(result.turnAdvanced).toBe(false);
 	expect(result.error).toMatch(/learned/i);
 });
-it("round trips custom assignments and migrates v3 knowledge into default slots", () => {
+it("round trips custom assignments", () => {
 	const saved = savedAdventure();
-	const old = { ...saved, version: 3 };
-	const migrated = parseSave(historicalSaveText(old));
-	expect(migrated.ok).toBe(true);
-	if (!migrated.ok) throw new Error(migrated.error);
-	expect(migrated.value.state.spellHotbar).toEqual([
-		"magic-missile",
-		"heal",
-		null,
-		null,
-		null,
-		null,
-	]);
-	const restored = restoreSave(migrated.value);
+	const restored = restoreSave(saved);
 	const assigned = resolvePlayerAction(restored.state, {
 		type: "assign-spell",
 		slot: 4,
@@ -123,7 +111,7 @@ it.each([
 	const document = savedAdventure();
 	expect(
 		parseSave(
-			historicalSaveText({
+			JSON.stringify({
 				...document,
 				state: { ...document.state, spellHotbar: slots },
 			}),

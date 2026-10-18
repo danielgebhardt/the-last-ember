@@ -1,5 +1,7 @@
 # Larn Remake roadmap
 
+For current implemented behavior, see [README](README.md). This roadmap retains historical story ordering and review-stage notes; it is not a substitute for the live GitHub backlog. The October 18 cleanup establishes [v27-only save support](docs/save-policy.md).
+
 Updated October 15, 2026. This project reimagines Larn while providing a place to practice TDD and software design. The aim is an enjoyable, understandable dungeon crawler; original Larn is inspiration rather than a specification.
 
 [Issue #38](https://github.com/danielgebhardt/larn-remake/issues/38) is the running index and discussion point. This file owns the detailed order; individual stories own acceptance criteria. Planning does not authorize implementation. Future epics use native GitHub parent/sub-issue links.

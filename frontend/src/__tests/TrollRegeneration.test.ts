@@ -10,7 +10,7 @@ import {
 	serializeSave,
 } from "../domain/saves/SaveFormat";
 import { createCorridorEncounter } from "./MonsterEncounterTestHelpers";
-import { historicalSaveText, savedAdventure } from "./SaveTestHelpers";
+import { savedAdventure } from "./SaveTestHelpers";
 
 const hit = () => ({ d20: () => 20, damage: (min: number) => min });
 const encounter = () => ({
@@ -118,27 +118,8 @@ it("saved injury timing pauses recovery after loading without replaying damage",
 	).toBe(12);
 });
 
-it("migrates old injury metadata to an explicit unknown time and rejects future timestamps", () => {
+it("rejects future injury timestamps", () => {
 	const saved = savedAdventure();
-	const legacy = {
-		...saved,
-		version: 6,
-		state: {
-			...saved.state,
-			spellHotbar: saved.state.spellHotbar.slice(0, 4),
-			monsters: saved.state.monsters.map(
-				({ lastDamagedTurn: _old, ...actor }) => actor,
-			),
-		},
-	};
-	const migrated = parseSave(historicalSaveText(legacy));
-	expect(migrated.ok).toBe(true);
-	if (!migrated.ok) throw new Error(migrated.error);
-	expect(
-		migrated.value.state.monsters.every(
-			(actor) => actor.lastDamagedTurn === null,
-		),
-	).toBe(true);
 	const invalid = {
 		...saved,
 		state: {
@@ -149,5 +130,5 @@ it("migrates old injury metadata to an explicit unknown time and rejects future 
 			})),
 		},
 	};
-	expect(parseSave(historicalSaveText(invalid)).ok).toBe(false);
+	expect(parseSave(JSON.stringify(invalid)).ok).toBe(false);
 });

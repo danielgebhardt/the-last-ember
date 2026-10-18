@@ -27,7 +27,6 @@ import {
 	restoreSave,
 	serializeSave,
 } from "../domain/saves/SaveFormat";
-import { historicalSaveText } from "./SaveTestHelpers";
 import { COMPACT_TEST_CONFIGURATION } from "./TestRunConfiguration";
 
 const configuration = { ...COMPACT_TEST_CONFIGURATION, floorCount: 20 };
@@ -117,37 +116,6 @@ describe("Shared merchant economy continuation", () => {
 		expect(atMerchant(loaded, 5).merchantStock["healing-potion"]).toBe(8);
 		expect(fresh().merchantStock["healing-potion"]).toBe(10);
 	});
-	it("adds reachable merchant locations to older saves without replacing their played content", () => {
-		const generated = snapshot(fresh());
-		// Version 16 predates exit-scroll content.
-		const document = {
-			...generated,
-			state: {
-				...generated.state,
-				floorItems: generated.state.floorItems.filter(
-					(entry) => entry.item.kind !== "exit-scroll",
-				),
-			},
-		};
-		const objects = document.state.objects.filter((o) => o.kind !== "merchant");
-		const old = {
-			...document,
-			version: 16,
-			state: { ...document.state, merchantStock: undefined, objects },
-		};
-		const parsed = parseSave(historicalSaveText(old));
-		if (!parsed.ok) throw new Error(parsed.error);
-		expect(
-			parsed.value.state.objects
-				.filter((o) => o.kind === "merchant")
-				.map((o) => o.floorNumber),
-		).toEqual([5, 10, 15]);
-		expect(
-			parsed.value.state.objects.filter((o) => o.kind !== "merchant"),
-		).toEqual(objects);
-		expect(parsed.value.state.monsters).toEqual(document.state.monsters);
-		expect(parsed.value.state.floorItems).toEqual(document.state.floorItems);
-	});
 	it("rejects purchased-copy identity beyond spent stock or with the wrong supply kind", () => {
 		const state = fresh();
 		const document = snapshot(state);
@@ -157,7 +125,7 @@ describe("Shared merchant economy continuation", () => {
 		])
 			expect(
 				parseSave(
-					historicalSaveText({
+					JSON.stringify({
 						...document,
 						state: { ...document.state, bag: { items: [item] } },
 					}),

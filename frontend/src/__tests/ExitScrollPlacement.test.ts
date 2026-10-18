@@ -1,3 +1,4 @@
+// @vitest-environment node
 import { expect, it } from "vitest";
 import { spawnRunExitScrolls } from "../domain/items/ExitScrollPlacement";
 import { spawnRunItems } from "../domain/items/ItemPlacement";

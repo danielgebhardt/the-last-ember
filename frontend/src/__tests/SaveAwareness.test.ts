@@ -6,7 +6,7 @@ import {
 	restoreSave,
 	serializeSave,
 } from "../domain/saves/SaveFormat";
-import { historicalSaveText, savedAdventure } from "./SaveTestHelpers";
+import { savedAdventure } from "./SaveTestHelpers";
 
 describe("Saved monster awareness", () => {
 	it("retains the last seen tile and remaining pursuit phases", () => {
@@ -37,19 +37,6 @@ describe("Saved monster awareness", () => {
 			blocked: 0,
 		});
 	});
-	it("migrates v12 actors to idle without trusting unknown awareness data", () => {
-		const document = savedAdventure();
-		const legacy = { ...document, version: 12 };
-		const parsed = parseSave(historicalSaveText(legacy));
-		expect(parsed.ok).toBe(true);
-		if (!parsed.ok) throw new Error(parsed.error);
-		expect(
-			parsed.value.state.monsters.every(
-				(monster) => (monster.awareness?.type ?? "idle") === "idle",
-			),
-		).toBe(true);
-		expect(parsed.value.state.run).toEqual(document.state.run);
-	});
 	it.each(["wall", "negative duration", "invalid state"])(
 		"rejects %s memory without loading it",
 		(kind) => {
@@ -63,7 +50,7 @@ describe("Saved monster awareness", () => {
 			};
 			expect(
 				parseSave(
-					historicalSaveText({
+					JSON.stringify({
 						...document,
 						state: {
 							...document.state,

@@ -1,25 +1,26 @@
 import { isTownLocation } from "../town/TownLocation";
 import { hasConsistentActors } from "./SaveActorConsistency";
+import type { SaveDocument } from "./SaveDocument";
 import { hasConsistentGeometry } from "./SaveGeometryConsistency";
 import { hasConsistentHistory } from "./SaveHistoryConsistency";
 import { hasConsistentInventory } from "./SaveInventoryConsistency";
 import { hasConsistentResources } from "./SaveResourceConsistency";
-import type { SaveSourceDocument } from "./SaveSource";
 
 // Shape validation precedes these cross-field invariants. Validate equipment
 // ownership first, before resource calculations consult catalog bonuses.
-export const isConsistentSave = (document: SaveSourceDocument): boolean =>
+export const isConsistentSave = (document: SaveDocument): boolean =>
 	hasConsistentInventory(document) &&
 	hasConsistentResources(document) &&
 	hasConsistentGeometry(document) &&
 	hasConsistentActors(document) &&
 	hasConsistentHistory(document) &&
-	hasConsistentTown(document);
+	hasConsistentTown(document) &&
+	hasConsistentEscape(document);
 
-const hasConsistentTown = (document: SaveSourceDocument): boolean => {
+const hasConsistentTown = (document: SaveDocument): boolean => {
 	const { state } = document;
-	const portal = "townPortal" in state ? state.townPortal : null;
-	if (!("town" in state) || state.town === null) return !portal;
+	const portal = state.townPortal;
+	if (state.town === null) return !portal;
 	const atEntrance =
 		state.run.activeFloor === 1 &&
 		state.run.playerCoordinate.row === state.quest.entrance.row &&
@@ -38,5 +39,18 @@ const hasConsistentTown = (document: SaveSourceDocument): boolean => {
 		!state.quest.cureRecovered &&
 		!state.bag.items.some((item) => item.kind === "cure") &&
 		(portal ? atPortalAnchor : atEntrance)
+	);
+};
+
+const hasConsistentEscape = ({ state }: SaveDocument): boolean => {
+	const escapeState = state.escape;
+	if (escapeState === null)
+		return !state.quest.cureRecovered || state.quest.victory !== null;
+	return (
+		state.quest.cureRecovered &&
+		escapeState.startedTurn <= state.turn &&
+		new Set(escapeState.activatedFloors).size ===
+			escapeState.activatedFloors.length &&
+		escapeState.activatedFloors.every((floor) => floor < state.quest.goalFloor)
 	);
 };

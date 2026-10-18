@@ -2,7 +2,7 @@
 
 Reviewable authored plan for #325. See [the original v1 foundation map](town-layout.svg) and [time/homecoming rules](town-rules.md). The developer explicitly requested a seed-independent town of its own fixed size; neither dungeon dimensions nor floor count affect this plan.
 
-The town is **25 columns × 21 rows**, indexed from 0. North is the top of the map. Its boundary is closed, roofs and the beacon plinth block walking, and door thresholds remain accessible from the streets. These are reserved service entrances, not enterable interiors. Potion, armor and weapon shops, plus The Rag & Bone equipment buyer, are open; other destinations remain closed and explain their status without opening empty shop menus.
+The town is **25 columns × 21 rows**, indexed from 0. North is the top of the map. Its boundary is closed, roofs and the beacon plinth block walking, and door thresholds remain accessible from the streets. These are service entrances, not enterable interiors. Potion, armor and weapon shops, plus The Rag & Bone equipment buyer, are open; other destinations remain closed and explain their status without opening empty shop menus.
 
 ## Routes and landmarks
 
@@ -31,4 +31,4 @@ A desktop viewport shows the grid alongside a destination/sign list; phones reta
 
 Every threshold, safe arrival and the gate is reachable from the square. No roof or boundary is walkable; the beacon requires walking around it. All important routes are short (at most 30 orthogonal steps from the southern arrival to a destination). A different seed, dungeon size, replay, save/load or difficulty yields the same authored identity, dimensions, terrain and entries. Closed-service inspection is free, cancellable and cannot grant items or recovery. The developer reviews this plan and the isolated walkable preview before live travel/services are connected.
 
-The compact authored layout is `beacon-town:v2`. Valid saved town visits using the original v1 geometry resume at the v2 arrival square; dungeon data, time, resources, owned items and depleted store stock are preserved. Invalid original positions and unknown layout identities remain rejected. The linked SVG records the original foundation plan, rather than the current compact presentation.
+The compact authored layout is `beacon-town:v2`. Current saves retain exact valid positions; unsupported layout identities are rejected. See [save policy](save-policy.md).

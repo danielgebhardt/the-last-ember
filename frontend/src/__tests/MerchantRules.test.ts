@@ -12,7 +12,7 @@ import {
 	restoreSave,
 	serializeSave,
 } from "../domain/saves/SaveFormat";
-import { historicalSaveText, savedAdventure } from "./SaveTestHelpers";
+import { savedAdventure } from "./SaveTestHelpers";
 
 describe("Shared merchant stock and prices", () => {
 	it("starts each adventure with independent stock of ten of each of four supplies", () => {
@@ -50,7 +50,7 @@ describe("Shared merchant stock and prices", () => {
 			equipmentSalePrice({ id: "bag:2", kind: "short-sword" }) ?? 0,
 		);
 	});
-	it("persists partially spent shared stock and supplies old saves exactly once", () => {
+	it("persists partially spent shared stock", () => {
 		const document = savedAdventure();
 		document.state.merchantStock = {
 			...createMerchantStock(),
@@ -61,14 +61,6 @@ describe("Shared merchant stock and prices", () => {
 		expect(restoreSave(parsed.value).state.merchantStock["mana-potion"]).toBe(
 			3,
 		);
-		const old = {
-			...document,
-			version: 16,
-			state: { ...document.state, merchantStock: undefined },
-		};
-		const migrated = parseSave(historicalSaveText(old));
-		if (!migrated.ok) throw new Error(migrated.error);
-		expect(migrated.value.state.merchantStock).toEqual(createMerchantStock());
 	});
 	it.each([-1, 11, 0.5, NaN, "10"])(
 		"rejects invalid shared stock %s",
@@ -76,7 +68,7 @@ describe("Shared merchant stock and prices", () => {
 			const document = savedAdventure();
 			expect(
 				parseSave(
-					historicalSaveText({
+					JSON.stringify({
 						...document,
 						state: {
 							...document.state,

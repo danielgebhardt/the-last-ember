@@ -12,11 +12,9 @@ import {
 import { TOWN_POTION_OFFERS, type TownPotion } from "../town/TownEconomy";
 import { TOWN_EQUIPMENT_OFFERS } from "../town/TownEquipmentStock";
 import { savedLocations, unique } from "./SaveConsistencyHelpers";
-import type { SaveSourceDocument } from "./SaveSource";
+import type { SaveDocument } from "./SaveDocument";
 
-export const hasConsistentInventory = (
-	document: SaveSourceDocument,
-): boolean => {
+export const hasConsistentInventory = (document: SaveDocument): boolean => {
 	const { state } = document;
 	const { quest } = state;
 	const { walkable } = savedLocations(document);
@@ -29,36 +27,33 @@ export const hasConsistentInventory = (
 		)
 			return false;
 	}
-	if (bagSlots(state.bag).length > (document.version >= 11 ? BAG_CAPACITY : 20))
-		return false;
+	if (bagSlots(state.bag).length > BAG_CAPACITY) return false;
 	const allItems = [
 		...state.bag.items,
 		...Object.values(state.equipment).filter((entry) => entry !== null),
 		...state.floorItems.map((entry) => entry.item),
 	];
 	if (!unique(allItems.map((entry) => entry.id))) return false;
-	if ("merchantStock" in state)
-		for (const item of allItems) {
-			if (!item.id.startsWith("merchant:")) continue;
-			const parts = item.id.split(":"),
-				kind = parts[1],
-				index = Number(parts[2]);
-			if (
-				parts.length !== 3 ||
-				kind !== item.kind ||
-				!Object.hasOwn(MERCHANT_OFFERS, kind) ||
-				!Number.isInteger(index) ||
-				index < 1 ||
-				index > 10 ||
-				String(index) !== parts[2] ||
-				index > 10 - state.merchantStock[kind as MerchantSupply]
-			)
-				return false;
-		}
+	for (const item of allItems) {
+		if (!item.id.startsWith("merchant:")) continue;
+		const parts = item.id.split(":"),
+			kind = parts[1],
+			index = Number(parts[2]);
+		if (
+			parts.length !== 3 ||
+			kind !== item.kind ||
+			!Object.hasOwn(MERCHANT_OFFERS, kind) ||
+			!Number.isInteger(index) ||
+			index < 1 ||
+			index > 10 ||
+			String(index) !== parts[2] ||
+			index > 10 - state.merchantStock[kind as MerchantSupply]
+		)
+			return false;
+	}
 
 	for (const item of allItems) {
 		if (!item.id.startsWith("town-potion:")) continue;
-		if (document.version < 24) return false;
 		const parts = item.id.split(":"),
 			kind = parts[1] as TownPotion,
 			index = Number(parts[2]);
@@ -70,21 +65,14 @@ export const hasConsistentInventory = (
 			index < 1 ||
 			String(index) !== parts[2] ||
 			index >
-				TOWN_POTION_OFFERS[kind].quantity -
-					("townPotionStock" in document.state
-						? document.state.townPotionStock[kind]
-						: 0)
+				TOWN_POTION_OFFERS[kind].quantity - document.state.townPotionStock[kind]
 		)
 			return false;
 	}
 
 	for (const item of allItems) {
 		if (!item.id.startsWith("town-gear:")) continue;
-		if (
-			!("townEquipmentStock" in state) ||
-			!Object.hasOwn(TOWN_EQUIPMENT_OFFERS, item.id)
-		)
-			return false;
+		if (!Object.hasOwn(TOWN_EQUIPMENT_OFFERS, item.id)) return false;
 		const offer = TOWN_EQUIPMENT_OFFERS[item.id];
 		if (
 			item.kind !== offer.item.kind ||

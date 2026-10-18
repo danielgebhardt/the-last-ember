@@ -1,3 +1,4 @@
+// @vitest-environment node
 import { describe, expect, it } from "vitest";
 import { createAdventureSession } from "../components/game/useAdventureSession";
 import { generateDungeonRun } from "../domain/dungeon/DungeonRun";
@@ -170,23 +171,6 @@ describe("deliberate town travel", () => {
 			...state,
 			town: null,
 		});
-		const legacy = {
-			...doc,
-			version: 22,
-			state: {
-				...doc.state,
-				town: undefined,
-				townPortal: undefined,
-				townPotionStock: undefined,
-				townEquipmentStock: undefined,
-				progression: { experience: doc.state.progression.experience },
-			},
-		};
-		const migrated = parseSave(JSON.stringify(legacy));
-		expect(migrated.ok).toBe(true);
-		if (!migrated.ok) throw new Error(migrated.error);
-		expect(migrated.value.state.town).toBeNull();
-		expect(migrated.value.state.run).toEqual(doc.state.run);
 	});
 	it("rejects malformed, ended or ember-carrying town saves and historical claims of town ownership", () => {
 		const session = createAdventureSession(

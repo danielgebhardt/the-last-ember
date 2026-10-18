@@ -10,7 +10,7 @@ import {
 	serializeSave,
 } from "../domain/saves/SaveFormat";
 import { createCorridorEncounter } from "./MonsterEncounterTestHelpers";
-import { historicalSaveText, savedAdventure } from "./SaveTestHelpers";
+import { savedAdventure } from "./SaveTestHelpers";
 
 it("starts freely with one healing potion on 1 and one mana potion on 2", () => {
 	const state = createGameState(createCorridorEncounter());
@@ -126,27 +126,24 @@ it("uses the starter copies through ordinary shortcuts and leaves exhausted assi
 	expect(replay.turn).toBe(0);
 });
 
-it.each([19, 20])(
-	"loads a v%i empty bag and custom shortcuts without granting or assigning starter potions",
-	(version) => {
-		const document = savedAdventure();
-		const old = {
-			...document,
-			version,
-			state: {
-				...document.state,
-				bag: { items: [] },
-				potionHotbar: [null, null, "mana-potion", null],
-			},
-		};
-		const parsed = parseSave(historicalSaveText(old));
-		if (!parsed.ok) throw new Error(parsed.error);
-		const loaded = restoreSave(parsed.value).state;
-		expect(loaded.bag.items).toEqual([]);
-		expect(loaded.potionHotbar).toEqual(old.state.potionHotbar);
-		expect(loaded.turn).toBe(document.state.turn);
-	},
-);
+it("loads a v%i empty bag and custom shortcuts without granting or assigning starter potions", () => {
+	const document = savedAdventure();
+	const old = {
+		...document,
+		version: 27,
+		state: {
+			...document.state,
+			bag: { items: [] },
+			potionHotbar: [null, null, "mana-potion", null],
+		},
+	};
+	const parsed = parseSave(JSON.stringify(old));
+	if (!parsed.ok) throw new Error(parsed.error);
+	const loaded = restoreSave(parsed.value).state;
+	expect(loaded.bag.items).toEqual([]);
+	expect(loaded.potionHotbar).toEqual(old.state.potionHotbar);
+	expect(loaded.turn).toBe(document.state.turn);
+});
 
 it("round-trips new starter ownership without duplicating bottles", () => {
 	const document = savedAdventure();

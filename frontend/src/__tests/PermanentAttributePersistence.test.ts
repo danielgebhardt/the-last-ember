@@ -10,7 +10,7 @@ import {
 	restoreSave,
 } from "../domain/saves/SaveFormat";
 import { createCorridorEncounter } from "./MonsterEncounterTestHelpers";
-import { historicalSaveText, savedAdventure } from "./SaveTestHelpers";
+import { savedAdventure } from "./SaveTestHelpers";
 
 it("saves a consumed permanent point and continues deterministically without spending the bottle twice", () => {
 	const initial = restoreSave(savedAdventure());
@@ -91,38 +91,6 @@ it("keeps gains through level growth, gear removal, temporary expiry and floor t
 		dexterity: 0,
 		intelligence: 0,
 	});
-});
-it("migrates old temporary boosts without converting or extending them", () => {
-	const document = savedAdventure();
-	const legacy = {
-		...document,
-		version: 25,
-		state: {
-			...document.state,
-			mana: 12,
-			effects: [
-				{
-					actorId: "player",
-					floorNumber: null,
-					kind: "enlightened",
-					remaining: 1,
-				},
-			],
-		},
-	};
-	const parsed = parseSave(historicalSaveText(legacy));
-	if (!parsed.ok) throw new Error(parsed.error);
-	expect(parsed.value.state.effects).toEqual(legacy.state.effects);
-	expect(parsed.value.state.progression.permanentAttributes).toEqual({
-		strength: 0,
-		dexterity: 0,
-		intelligence: 0,
-	});
-	const continued = resolvePlayerAction(restoreSave(parsed.value).state, {
-		type: "wait",
-	}).state;
-	expect(continued.effects).toEqual([]);
-	expect(continued.mana).toBe(10);
 });
 it("rejects malformed or smuggled permanent contributions", () => {
 	const document = savedAdventure();

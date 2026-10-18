@@ -9,7 +9,6 @@ import {
 	serializeSave,
 } from "../domain/saves/SaveFormat";
 import { corridorContinuationAdventure } from "./CorridorContinuationTestHelpers";
-import { historicalSaveText } from "./SaveTestHelpers";
 
 const snapshot = () => {
 	const base = corridorContinuationAdventure();
@@ -65,23 +64,6 @@ it("round-trips scroll copies and the explicit exit event, then continues determ
 		resolvePlayerAction(result.state, { type: "return-town-portal" }).state,
 	);
 });
-it("migrates an actual v20 snapshot without injecting scrolls or regenerating played state", () => {
-	const base = corridorContinuationAdventure();
-	const source = {
-		...createSaveDocument(
-			base.state,
-			base.exploration,
-			base.configuration,
-			base.fog,
-		),
-		version: 20,
-	};
-	const before = structuredClone(source);
-	const parsed = parseSave(historicalSaveText(source));
-	if (!parsed.ok) throw new Error(parsed.error);
-	expect(parsed.value).toEqual({ ...source, version: 27 });
-	expect(source).toEqual(before);
-});
 it("restores ember possession and denies every scroll use without consuming or spending a turn", () => {
 	const document = snapshot();
 	document.state.quest = { ...document.state.quest, cureRecovered: true };
@@ -101,7 +83,7 @@ it("restores ember possession and denies every scroll use without consuming or s
 it.each([1, 19, 20])(
 	"rejects new scroll ownership declared as legacy v%s",
 	(version) => {
-		expect(parseSave(historicalSaveText({ ...snapshot(), version })).ok).toBe(
+		expect(parseSave(JSON.stringify({ ...snapshot(), version })).ok).toBe(
 			false,
 		);
 	},
@@ -130,7 +112,7 @@ it("rejects unknown item kinds, invalid enhancement and duplicate scroll ownersh
 	const document = snapshot();
 	expect(
 		parseSave(
-			historicalSaveText({
+			JSON.stringify({
 				...document,
 				state: {
 					...document.state,
@@ -141,7 +123,7 @@ it("rejects unknown item kinds, invalid enhancement and duplicate scroll ownersh
 	).toBe(false);
 	expect(
 		parseSave(
-			historicalSaveText({
+			JSON.stringify({
 				...document,
 				state: {
 					...document.state,
@@ -154,7 +136,7 @@ it("rejects unknown item kinds, invalid enhancement and duplicate scroll ownersh
 	).toBe(false);
 	expect(
 		parseSave(
-			historicalSaveText({
+			JSON.stringify({
 				...document,
 				state: {
 					...document.state,
@@ -165,17 +147,6 @@ it("rejects unknown item kinds, invalid enhancement and duplicate scroll ownersh
 			}),
 		).ok,
 	).toBe(false);
-});
-
-it("migrates a real v26 save with a dormant portal and no resource or position changes", () => {
-	const doc = snapshot();
-	const old = { ...doc, version: 26 };
-	const loaded = parseSave(historicalSaveText(old));
-	if (!loaded.ok) throw new Error(loaded.error);
-	expect(loaded.value.state.townPortal).toBeNull();
-	expect(loaded.value.state.run).toEqual(doc.state.run);
-	expect(loaded.value.state.bag).toEqual(doc.state.bag);
-	expect(loaded.value.state.turn).toBe(doc.state.turn);
 });
 it.each(["floor", "coordinate", "outside town", "ember", "legacy", "missing"])(
 	"rejects inconsistent portal data: %s",

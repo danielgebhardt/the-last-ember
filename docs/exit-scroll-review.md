@@ -1,5 +1,7 @@
 # Exit-dungeon scrolls — #324
 
+> Historical review of #324. Superseded by the single-use town portal in #354; see [current town rules](town-rules.md). Historical save versions described below are retired under the [save policy](save-policy.md).
+
 Select an Exit dungeon scroll stack in Character and choose **Read exit scroll**. One physical copy and one normal turn return the player to floor 1 beside the dungeon entrance. Successful reading closes Character and restores map focus; fatal arrival responses keep defeat ownership. Potions/spell hotbars are unchanged. The shared icon is a blue scroll with an upward arrow, used in map, bag and catalog.
 
 `ExitDungeonScroll.ts` owns a pure arrival query and the domain effect behind `exit-dungeon`. It validates actual owned kind/ID, alive/non-victorious state and ember possession. The UI disables reading with an accessible ember explanation; the domain independently rejects it, including restored adventures. Already orthogonally adjacent on floor 1 is a free no-op. Other floor-1 positions can use the scroll. Arrival uses fixed north/east/south/west order, inspecting exactly four entrance neighbors. Walls, stairs, all objects (including spent ones), floor items and living creatures exclude a tile. There is no distant fallback or overwritten actor/content. If none qualify, the scroll and turn remain owned.

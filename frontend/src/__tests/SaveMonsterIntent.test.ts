@@ -1,7 +1,6 @@
 // @vitest-environment node
 import { describe, expect, it } from "vitest";
 import { createGameState } from "../domain/game/GameState";
-import { createPermanentAttributes } from "../domain/game/PermanentAttributes";
 import { resolvePlayerAction } from "../domain/game/PlayerActions";
 import {
 	createSaveDocument,
@@ -9,9 +8,6 @@ import {
 	restoreSave,
 	serializeSave,
 } from "../domain/saves/SaveFormat";
-import { createTownPotionStock } from "../domain/town/TownEconomy";
-import { createTownEquipmentStock } from "../domain/town/TownEquipmentStock";
-import versionOneFile from "./fixtures/adventure-v1.json?raw";
 import { savedAdventure } from "./SaveTestHelpers";
 
 // Use a real floor-2 actor and one neighbouring walkable tile. The player
@@ -47,50 +43,6 @@ describe("Monster intent and versioned saves", () => {
 		expect(replay.monsters.length).toBeGreaterThan(0);
 		for (const monster of [...state.monsters, ...replay.monsters])
 			expect(monster.intent).toEqual({ type: "idle" });
-	});
-
-	it("migrates a literal v1 save to the current format without changing its played data", () => {
-		const legacy = JSON.parse(versionOneFile);
-		const parsed = parseSave(versionOneFile);
-		if (!parsed.ok) throw new Error(parsed.error);
-		expect(parsed.value).toEqual({
-			...legacy,
-			version: 27,
-			configuration: { ...legacy.configuration, difficulty: 1 },
-			state: {
-				...legacy.state,
-				town: null,
-				townPortal: null,
-				progression: {
-					...legacy.state.progression,
-					permanentAttributes: createPermanentAttributes(),
-				},
-				townPotionStock: createTownPotionStock(),
-				townEquipmentStock: createTownEquipmentStock(),
-				equipment: {
-					...legacy.state.equipment,
-					leftRing: null,
-					rightRing: null,
-				},
-				effects: [],
-				escape: null,
-				objects: [],
-				gold: 0,
-				merchantStock: {
-					"healing-potion": 10,
-					"mana-potion": 10,
-					"greater-healing-potion": 10,
-					"greater-mana-potion": 10,
-				},
-				spellHotbar: ["magic-missile", "heal", null, null, null, null],
-				monsters: legacy.state.monsters.map((monster: object) => ({
-					...monster,
-					intent: { type: "idle" },
-					lastDamagedTurn: null,
-				})),
-			},
-		});
-		expect(JSON.stringify(legacy)).not.toContain('"intent"');
 	});
 
 	it("round-trips a fixed prepared target on an inactive floor in the current format", () => {
@@ -187,20 +139,5 @@ describe("Monster intent and versioned saves", () => {
 		if (!target) throw new Error("Fixture requires the named target location");
 		preparing.intent.target = { row: target.row, col: target.col };
 		expect(parseSave(serializeSave(document)).ok).toBe(false);
-	});
-
-	it("validates legacy safe arrivals before migration", () => {
-		const legacy = JSON.parse(versionOneFile);
-		legacy.state.monsters[0].coordinate =
-			legacy.state.run.floors[0].downStair.coordinate;
-		expect(parseSave(JSON.stringify(legacy)).ok).toBe(false);
-	});
-
-	it("gives legacy monsters idle intent even if the file has incidental extra fields", () => {
-		const legacy = JSON.parse(versionOneFile);
-		legacy.state.monsters[0].intent = { type: "unknown-legacy-extra" };
-		const parsed = parseSave(JSON.stringify(legacy));
-		if (!parsed.ok) throw new Error(parsed.error);
-		expect(parsed.value.state.monsters[0].intent).toEqual({ type: "idle" });
 	});
 });

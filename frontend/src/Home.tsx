@@ -24,8 +24,10 @@ import DungeonLayout from "./components/dungeon/DungeonLayout.tsx";
 import ActivityLog from "./components/game/ActivityLog.tsx";
 import AdventureSaveSheet from "./components/game/AdventureSaveSheet";
 import CharacterDialog from "./components/game/CharacterDialog.tsx";
+import DungeonNotices from "./components/game/DungeonNotices";
 import GameOverDialog from "./components/game/GameOverDialog";
 import { isLowHealth } from "./components/game/HealthDisplay";
+import NewDungeonDialog from "./components/game/NewDungeonDialog";
 import PickupDialog from "./components/game/PickupDialog";
 import PlayerStatus from "./components/game/PlayerStatus.tsx";
 import PotionHotbarView from "./components/game/PotionHotbarView";
@@ -35,10 +37,8 @@ import { useAdventureSession } from "./components/game/useAdventureSession";
 import { useCorridorTravel } from "./components/game/useCorridorTravel";
 import { useSpellTargeting } from "./components/game/useSpellTargeting";
 import VictoryDialog from "./components/game/VictoryDialog";
-import VisibleEffects from "./components/game/VisibleEffects";
 import MerchantDialog from "./components/merchant/MerchantDialog";
 import ObjectChoiceDialog from "./components/objects/ObjectChoiceDialog";
-import ObjectContext from "./components/objects/ObjectContext";
 import TownEquipmentShop from "./components/town/TownEquipmentShop";
 import TownMap from "./components/town/TownMap";
 import TownPotionShop from "./components/town/TownPotionShop";
@@ -50,7 +50,6 @@ import {
 } from "./domain/dungeon/RunConfiguration.ts";
 import { MAX_SEED, parseSeedInput } from "./domain/dungeon/Seed.ts";
 import type { VictorySummary } from "./domain/game/Adventure";
-import { ongoingSpellPotency } from "./domain/game/OngoingSpellPotency";
 import { canAddToBag } from "./domain/items/Bag";
 import { emptyEquipmentSlotFor } from "./domain/items/Equipment";
 import { ITEM_DEFINITIONS } from "./domain/items/Item";
@@ -134,7 +133,6 @@ const Home = ({
 	const [settingsOpen, setSettingsOpen] = useState(false);
 	const [saveOpen, setSaveOpen] = useState(false);
 	const [newDungeonOpen, setNewDungeonOpen] = useState(false);
-	const cancelNewDungeonRef = useRef<HTMLButtonElement>(null);
 	const [townShopOpen, setTownShopOpen] = useState(false);
 	const [catalogOpen, setCatalogOpen] = useState(false);
 	const [helpOpen, setHelpOpen] = useState(false);
@@ -710,97 +708,19 @@ const Home = ({
 									/>
 								)}
 							</DungeonFrame>
-							{/* Transient notices share reserved space so the map never reflows. */}
-
-							<div
-								className={
-									town
-										? "relative h-14 shrink-0"
-										: "relative h-32 shrink-0 lg:h-24"
+							<DungeonNotices
+								state={game.state}
+								visible={
+									fogConfiguration.enabled ? exploration.visible : undefined
 								}
-							>
-								<section
-									aria-label="Dungeon notices"
-									// biome-ignore lint/a11y/noNoninteractiveTabindex: Keyboard users need to scroll longer notices.
-									tabIndex={0}
-									className="h-full overflow-y-auto px-1 py-1 focus-visible:outline-1 focus-visible:-outline-offset-1 focus-visible:outline-ring"
-								>
-									<VisibleEffects
-										monsterPoisonDamage={
-											ongoingSpellPotency(
-												game.state.progression,
-												game.state.equipment,
-												game.state.effects,
-											).poisonDamage
-										}
-										effects={game.state.effects}
-										monsters={activeMonsters}
-										visible={
-											fogConfiguration.enabled ? exploration.visible : undefined
-										}
-									/>
-									{victory && (
-										<Button
-											variant="outline"
-											size="sm"
-											className="mb-3 self-center"
-											onClick={() => setDismissedVictory(null)}
-										>
-											Victory summary
-										</Button>
-									)}
-									{spells.description && (
-										<p
-											role="status"
-											aria-label="Spell targeting"
-											className="mb-2 rounded-md border border-violet-500/50 bg-violet-500/10 px-3 py-2 text-center text-sm"
-										>
-											{spells.description}
-										</p>
-									)}
-									{corridor.description && (
-										<p
-											role="status"
-											aria-label="Corridor travel"
-											className="mb-1 text-center text-xs text-muted-foreground"
-										>
-											{corridor.description}
-										</p>
-									)}
-									{game.actionError && (town || merchantId === null) && (
-										<p
-											role="status"
-											aria-label="Action feedback"
-											className="py-2 text-sm text-muted-foreground"
-										>
-											{game.actionError}
-										</p>
-									)}
-
-									{!town && (
-										<ObjectContext
-											state={game.state}
-											visible={
-												fogConfiguration.enabled
-													? exploration.visible
-													: undefined
-											}
-										/>
-									)}
-									{atDungeonEntrance(game.state) &&
-										!game.state.quest.cureRecovered &&
-										canPlay &&
-										!spells.targeting && (
-											<p
-												role="status"
-												aria-label="Dungeon exit"
-												className="py-2 text-xs text-muted-foreground"
-											>
-												You see the dungeon exit. Press Enter to return to town.
-											</p>
-										)}
-								</section>
-							</div>
+								monsters={activeMonsters}
+								actionError={game.actionError}
+								showActionFeedback={!!town || merchantId === null}
+								spellDescription={spells.description}
+								corridorDescription={corridor.description}
+								targeting={!!spells.targeting}
+								onVictorySummary={() => setDismissedVictory(null)}
+							/>
 						</div>
 						<div className="order-3 flex min-h-0 min-w-0 flex-col lg:col-start-2 lg:row-span-2 lg:row-start-1 [&>*]:flex-1 [&>*]:min-h-0">
 							<ActivityLog
@@ -844,49 +764,13 @@ const Home = ({
 					</div>
 				</section>
 			</main>
-			<Dialog.Root
+			<NewDungeonDialog
 				open={newDungeonOpen}
 				onOpenChange={setNewDungeonOpen}
-				onOpenChangeComplete={(open) => {
-					if (!open && !settingsOpen)
-						mapRef.current?.focus({ preventScroll: true });
-				}}
-			>
-				<Dialog.Portal>
-					<Dialog.Backdrop className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs" />
-					<Dialog.Popup
-						initialFocus={cancelNewDungeonRef}
-						finalFocus={settingsOpen ? false : mapRef}
-						className="fixed top-1/2 left-1/2 z-50 w-[calc(100%-2rem)] max-w-md -translate-x-1/2 -translate-y-1/2 rounded-xl border bg-popover p-5 text-popover-foreground shadow-xl"
-					>
-						<Dialog.Title className="text-lg font-semibold">
-							Start a new dungeon?
-						</Dialog.Title>
-						<Dialog.Description className="mt-2 text-sm text-muted-foreground">
-							This replaces your current adventure. Unsaved progress will be
-							lost. Your browser save and exported save files will remain
-							available.
-						</Dialog.Description>
-						<div className="mt-5 flex flex-wrap justify-end gap-2">
-							<Button
-								ref={cancelNewDungeonRef}
-								variant="outline"
-								onClick={() => setNewDungeonOpen(false)}
-							>
-								Cancel
-							</Button>
-							<Button
-								onClick={() => {
-									setNewDungeonOpen(false);
-									handleNewDungeon();
-								}}
-							>
-								Start new dungeon
-							</Button>
-						</div>
-					</Dialog.Popup>
-				</Dialog.Portal>
-			</Dialog.Root>
+				onConfirm={handleNewDungeon}
+				settingsOpen={settingsOpen}
+				mapRef={mapRef}
+			/>
 
 			<GameOverDialog
 				state={game.state}

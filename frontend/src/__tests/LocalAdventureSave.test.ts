@@ -6,7 +6,7 @@ import {
 	readLocalSave,
 	writeLocalSave,
 } from "../persistence/LocalAdventureSave";
-import versionOneFile from "./fixtures/adventure-v1.json?raw";
+import capturedSaveFile from "./fixtures/adventure-v27.json?raw";
 import { savedAdventure } from "./SaveTestHelpers";
 
 const memoryStorage = () => {
@@ -19,16 +19,17 @@ const memoryStorage = () => {
 	};
 };
 describe("One local adventure save slot", () => {
-	it("reads a legacy slot as the current format without rewriting the original until Save", () => {
+	it("reads a captured current slot without rewriting the original until Save", () => {
 		const storage = memoryStorage();
-		storage.setItem(LOCAL_SAVE_KEY, versionOneFile);
+		storage.setItem(LOCAL_SAVE_KEY, capturedSaveFile);
 		const set = vi.spyOn(storage, "setItem");
 		const loaded = readLocalSave(() => storage);
-		expect(loaded).toEqual(parseSave(versionOneFile));
-		if (!loaded.ok || !loaded.value) throw new Error("Legacy slot must load");
+		expect(loaded).toEqual(parseSave(capturedSaveFile));
+		if (!loaded.ok || !loaded.value)
+			throw new Error("Captured current slot must load");
 		expect(loaded.value.version).toBe(27);
 		expect(set).not.toHaveBeenCalled();
-		expect(storage.getItem(LOCAL_SAVE_KEY)).toBe(versionOneFile);
+		expect(storage.getItem(LOCAL_SAVE_KEY)).toBe(capturedSaveFile);
 
 		writeLocalSave(loaded.value, () => storage);
 		expect(storage.getItem(LOCAL_SAVE_KEY)).toBe(serializeSave(loaded.value));

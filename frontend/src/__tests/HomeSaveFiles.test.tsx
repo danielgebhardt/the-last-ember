@@ -4,7 +4,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { serializeSave } from "../domain/saves/SaveFormat";
 import { LOCAL_SAVE_KEY } from "../persistence/LocalAdventureSave";
 import { ThemeProvider } from "../settings/ThemeProvider";
-import versionOneFile from "./fixtures/adventure-v1.json?raw";
+import capturedSaveFile from "./fixtures/adventure-v27.json?raw";
 import {
 	closeSaveSheet,
 	openSaveSheet,
@@ -26,7 +26,7 @@ afterEach(() => {
 	vi.unstubAllGlobals();
 });
 describe("Save file controls in Save/Load", () => {
-	it.each(["current", "legacy"])(
+	it.each(["current", "captured"])(
 		"imports a %s file directly, leaving the local slot untouched",
 		async (format) => {
 			const previous = serializeSave(savedAdventure());
@@ -36,7 +36,7 @@ describe("Save file controls in Save/Load", () => {
 			await user.upload(
 				screen.getByLabelText("Import adventure file"),
 				new File(
-					[format === "legacy" ? versionOneFile : previous],
+					[format === "captured" ? capturedSaveFile : previous],
 					"save.json",
 					{ type: "application/json" },
 				),

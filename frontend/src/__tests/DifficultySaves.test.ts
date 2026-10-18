@@ -11,8 +11,7 @@ import {
 	restoreSave,
 	serializeSave,
 } from "../domain/saves/SaveFormat";
-import versionOneFile from "./fixtures/adventure-v1.json?raw";
-import { historicalSaveText, savedAdventure } from "./SaveTestHelpers";
+import { savedAdventure } from "./SaveTestHelpers";
 
 describe("Difficulty save continuation", () => {
 	it.each([0.75, 1, 1.25])(
@@ -62,35 +61,16 @@ describe("Difficulty save continuation", () => {
 			);
 		},
 	);
-	it.each([
-		versionOneFile,
-		JSON.stringify({ ...savedAdventure(), version: 19 }),
-	])(
-		"migrates legacy played state to Normal without regenerating it",
-		(text) => {
-			const source = JSON.parse(text);
-			source.configuration.difficulty = 1.25; // Unintroduced legacy metadata cannot select a harder run.
-			const result = parseSave(historicalSaveText(source));
-			if (!result.ok) throw new Error(result.error);
-			const restored = restoreSave(result.value);
-			expect(restored.state.difficulty).toBe(1);
-			expect(restored.state.run.seed).toBe(source.state.run.seed);
-			expect(result.value.state.run).toEqual(source.state.run);
-			expect(result.value.state.monsters.map((actor) => actor.health)).toEqual(
-				source.state.monsters.map((actor: { health: number }) => actor.health),
-			);
-		},
-	);
 	it.each([undefined, null, 0, 2, "1", 1.1])(
 		"rejects missing/unsupported current difficulty %s",
 		(difficulty) => {
 			const source = savedAdventure();
 			const corrupted = {
 				...source,
-				version: 20,
+				version: 27,
 				configuration: { ...source.configuration, difficulty },
 			};
-			expect(parseSave(historicalSaveText(corrupted)).ok).toBe(false);
+			expect(parseSave(JSON.stringify(corrupted)).ok).toBe(false);
 		},
 	);
 	it("rejects easier actors above their scaled limit before restoring", () => {
@@ -103,6 +83,6 @@ describe("Difficulty save continuation", () => {
 			base.fog,
 		);
 		source.state.monsters[0].health = 4; // A fresh easier goblin has a maximum of 3.
-		expect(parseSave(historicalSaveText(source)).ok).toBe(false);
+		expect(parseSave(JSON.stringify(source)).ok).toBe(false);
 	});
 });

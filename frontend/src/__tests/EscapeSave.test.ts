@@ -6,8 +6,7 @@ import {
 	restoreSave,
 	serializeSave,
 } from "../domain/saves/SaveFormat";
-import versionThirteenFile from "./fixtures/adventure-v13.json?raw";
-import { historicalSaveText, savedAdventure } from "./SaveTestHelpers";
+import { savedAdventure } from "./SaveTestHelpers";
 
 const escapingAdventure = () => {
 	const document = savedAdventure();
@@ -24,14 +23,6 @@ const escapingAdventure = () => {
 	};
 };
 describe("Saved escape phase", () => {
-	it("loads a captured pre-escape save without altering its searching actor", () => {
-		const parsed = parseSave(versionThirteenFile);
-		if (!parsed.ok) throw new Error(parsed.error);
-		expect(parsed.value.state.escape).toBeNull();
-		expect(parsed.value.state.monsters[0].awareness).toEqual(
-			JSON.parse(versionThirteenFile).state.monsters[0].awareness,
-		);
-	});
 	it("round-trips the start turn and already activated floors", () => {
 		const document = escapingAdventure();
 		const parsed = parseSave(serializeSave(document));
@@ -39,16 +30,6 @@ describe("Saved escape phase", () => {
 		expect(restoreSave(parsed.value).state.escape).toEqual(
 			document.state.escape,
 		);
-	});
-	it("starts legacy cure carriers in escape and exempts their current floor from fresh spawns", () => {
-		const legacy = { ...escapingAdventure(), version: 13 };
-		const parsed = parseSave(historicalSaveText(legacy));
-		if (!parsed.ok) throw new Error(parsed.error);
-		expect(parsed.value.version).toBe(27);
-		expect(parsed.value.state.escape).toEqual({
-			startedTurn: legacy.state.turn,
-			activatedFloors: [1],
-		});
 	});
 	it.each([
 		null,
@@ -60,7 +41,7 @@ describe("Saved escape phase", () => {
 		const document = escapingAdventure();
 		expect(
 			parseSave(
-				historicalSaveText({
+				JSON.stringify({
 					...document,
 					state: { ...document.state, escape: escapeState },
 				}),
@@ -71,7 +52,7 @@ describe("Saved escape phase", () => {
 		const document = savedAdventure();
 		expect(
 			parseSave(
-				historicalSaveText({
+				JSON.stringify({
 					...document,
 					state: {
 						...document.state,

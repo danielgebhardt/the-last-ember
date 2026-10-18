@@ -8,7 +8,7 @@ import {
 	restoreSave,
 	serializeSave,
 } from "../domain/saves/SaveFormat";
-import { historicalSaveText, savedAdventure } from "./SaveTestHelpers";
+import { savedAdventure } from "./SaveTestHelpers";
 
 it("round-trips friendly fire and twenty-turn buffs, then continues deterministically", () => {
 	const source = savedAdventure();
@@ -34,20 +34,7 @@ it("round-trips friendly fire and twenty-turn buffs, then continues deterministi
 		resolvePlayerAction(restoreSave(parsed.value).state, { type: "wait" }),
 	).toEqual(resolvePlayerAction(restoreSave(source).state, { type: "wait" }));
 	for (const version of [20, 21])
-		expect(parseSave(historicalSaveText({ ...source, version })).ok).toBe(
-			false,
-		);
-});
-it("migrates v21 without extending active timers, adding books or replacing played state", () => {
-	const source = { ...savedAdventure(), version: 21 };
-	source.state.effects = [
-		{ actorId: "player", floorNumber: null, kind: "protected", remaining: 3 },
-	];
-	const before = structuredClone(source);
-	const parsed = parseSave(historicalSaveText(source));
-	if (!parsed.ok) throw new Error(parsed.error);
-	expect(parsed.value).toEqual({ ...source, version: 27 });
-	expect(source).toEqual(before);
+		expect(parseSave(JSON.stringify({ ...source, version })).ok).toBe(false);
 });
 it.each([
 	{ spell: "heal", damage: 8 },
@@ -59,7 +46,7 @@ it.each([
 	const history = source.state.activityHistory;
 	expect(
 		parseSave(
-			historicalSaveText({
+			JSON.stringify({
 				...source,
 				state: {
 					...source.state,

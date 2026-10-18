@@ -1,17 +1,11 @@
-import { migrateLegacyTownLocation } from "../town/LegacyTownLocation";
 import { isConsistentSave } from "./SaveConsistency";
-import type { SaveDocument, SaveResult } from "./SaveFormat";
 import {
-	migratePlayedSave,
-	migrateSaveV1,
-	migrateSaveV2,
-} from "./SaveMigration";
-import { hasSupportedSaveVersion, isSaveSourceDocument } from "./SaveSource";
+	SAVE_FORMAT_VERSION,
+	type SaveDocument,
+	type SaveResult,
+} from "./SaveFormat";
+import { isSaveDocument } from "./SaveShape";
 
-const inconsistent = {
-	ok: false,
-	error: "This save contains inconsistent adventure data.",
-} as const;
 export const validateSaveDocument = (
 	data: unknown,
 ): SaveResult<SaveDocument> => {
@@ -19,44 +13,21 @@ export const validateSaveDocument = (
 		typeof data === "object" &&
 		data !== null &&
 		!Array.isArray(data) &&
-		!hasSupportedSaveVersion(data)
+		(!("version" in data) || data.version !== SAVE_FORMAT_VERSION)
 	)
 		return {
 			ok: false,
 			error: "This save uses an unsupported format version.",
 		};
-	// Town layout identity versions its coordinates independently of the save
-	// schema. Only valid legacy town positions are normalized; all remaining
-	// source-version and consistency checks still run below.
-	if (
-		typeof data === "object" &&
-		data !== null &&
-		"version" in data &&
-		typeof data.version === "number" &&
-		data.version >= 23 &&
-		data.version <= 27 &&
-		"state" in data &&
-		typeof data.state === "object" &&
-		data.state !== null &&
-		"town" in data.state
-	) {
-		const town = migrateLegacyTownLocation(data.state.town);
-		if (town) data = { ...data, state: { ...data.state, town } };
-	}
-	if (!isSaveSourceDocument(data))
+	if (!isSaveDocument(data))
 		return {
 			ok: false,
 			error: "This save contains invalid or missing adventure data.",
 		};
-	// Source-version rules must pass before migration can normalize old fields.
-	if (!isConsistentSave(data)) return inconsistent;
-	if (data.version === 27) return { ok: true, value: data };
-	const grown =
-		data.version === 1 || data.version === 2
-			? migrateSaveV2(data.version === 1 ? migrateSaveV1(data) : data)
-			: data;
-	const current = migratePlayedSave(grown);
-	return isConsistentSave(current)
-		? { ok: true, value: current }
-		: inconsistent;
+	if (!isConsistentSave(data))
+		return {
+			ok: false,
+			error: "This save contains inconsistent adventure data.",
+		};
+	return { ok: true, value: data };
 };

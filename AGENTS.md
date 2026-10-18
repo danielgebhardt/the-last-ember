@@ -15,3 +15,7 @@ Follow `docs/ai-working-agreement.md` and `docs/definition-of-done.md`. Implemen
 - Keep progress updates concise and meaningful. In the final handoff, explain the result, essential engineering decisions, verification, compatibility implications and commit/branch; summarize routine commands.
 
 Efficiency must preserve correctness, deterministic gameplay, save ownership, keyboard focus and the developer's requested engineering explanations. This guidance does not authorize unrelated work, change story scope or reduce acceptance criteria.
+
+## Save compatibility
+
+The pre-public-release baseline supports **v27 only**; the developer explicitly retired v1–v26 and older town layouts. Follow `docs/save-policy.md`. Do not recreate historical migrations or version-by-version test matrices unless the developer changes that policy. Preserve current-format validation, ownership/corruption checks and deterministic save/load continuation. Once outside players join, make the compatibility decision explicit before changing the persisted contract.

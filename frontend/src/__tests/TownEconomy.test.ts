@@ -1,3 +1,4 @@
+// @vitest-environment node
 import { expect, it } from "vitest";
 import { ITEM_DEFINITIONS } from "../domain/items/Item";
 import {

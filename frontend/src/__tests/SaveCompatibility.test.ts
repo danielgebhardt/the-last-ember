@@ -6,44 +6,18 @@ import {
 	restoreSave,
 	serializeSave,
 } from "../domain/saves/SaveFormat";
-import versionOneFile from "./fixtures/adventure-v1.json?raw";
+import version27File from "./fixtures/adventure-v27.json?raw";
 
-// Captured before this refactor. Do not regenerate it from today's writer:
-// an old file must stay loadable when the live state model grows.
-const loadVersionOne = () => {
-	const parsed = parseSave(versionOneFile);
+// Captured v27 baseline. Keep this file independent of future writer changes.
+const loadVersion27 = () => {
+	const parsed = parseSave(version27File);
 	if (!parsed.ok) throw new Error(parsed.error);
 	return { document: parsed.value, adventure: restoreSave(parsed.value) };
 };
 
-describe("Version-1 save compatibility", () => {
-	it("loads a captured old file and writes the same migrated played data", () => {
-		const { document, adventure } = loadVersionOne();
-		expect(document).toMatchObject({
-			version: 27,
-			state: { turn: 3, run: { seed: 123, activeFloor: 1 } },
-		});
-		const written = createSaveDocument(
-			adventure.state,
-			adventure.exploration,
-			adventure.configuration,
-			adventure.fog,
-			new Date(document.savedAt),
-		);
-		expect(parseSave(serializeSave(written))).toEqual({
-			ok: true,
-			value: document,
-		});
-	});
-	it("keeps carried gear from an old save even though new bags are empty", () => {
-		const { adventure } = loadVersionOne();
-		expect(adventure.state.bag.items).toEqual([
-			{ id: "starting:bag:1", kind: "iron-sword" },
-			{ id: "starting:bag:2", kind: "wooden-shield" },
-		]);
-	});
+describe("Version-27 save baseline", () => {
 	it("does not implicitly add new top-level game state to the current format", () => {
-		const { document, adventure } = loadVersionOne();
+		const { document, adventure } = loadVersion27();
 		const extendedState = { ...adventure.state, uiSelectedItem: "bag:sword" };
 		const written = createSaveDocument(
 			extendedState,
@@ -55,7 +29,7 @@ describe("Version-1 save compatibility", () => {
 		expect(written.state).not.toHaveProperty("uiSelectedItem");
 	});
 	it("does not implicitly add new monster state to the current format", () => {
-		const { adventure } = loadVersionOne();
+		const { adventure } = loadVersion27();
 		const extendedState = {
 			...adventure.state,
 			monsters: adventure.state.monsters.map((monster) => ({
@@ -73,7 +47,7 @@ describe("Version-1 save compatibility", () => {
 		expect(written.state.monsters[0]).not.toHaveProperty("debugLabel");
 	});
 	it("distinguishes unsupported versions, missing fields and inconsistent resources", () => {
-		const { document } = loadVersionOne();
+		const { document } = loadVersion27();
 		expect(parseSave(JSON.stringify({ ...document, version: 999 }))).toEqual({
 			ok: false,
 			error: "This save uses an unsupported format version.",

@@ -9,11 +9,9 @@ import {
 	savedLocations,
 	unique,
 } from "./SaveConsistencyHelpers";
-import type { SaveSourceDocument } from "./SaveSource";
+import type { SaveDocument } from "./SaveDocument";
 
-export const hasConsistentGeometry = (
-	document: SaveSourceDocument,
-): boolean => {
+export const hasConsistentGeometry = (document: SaveDocument): boolean => {
 	const { state, configuration: config } = document;
 	const { run, quest } = state;
 	const { floorAt, walkable } = savedLocations(document);
@@ -69,92 +67,91 @@ export const hasConsistentGeometry = (
 		)
 			return false;
 	}
-	if ("objects" in document.state) {
-		const objects = document.state.objects;
-		if (
-			!unique(objects.map((object) => object.id)) ||
-			!unique(
-				objects.map(
-					(object) =>
-						`${object.floorNumber}:${object.coordinate.row}:${object.coordinate.col}`,
-				),
-			)
-		)
-			return false;
-		for (const object of objects) {
-			if (object.kind === "merchant") {
-				const floor = run.floors[object.floorNumber - 1];
-				if (
-					!floor ||
-					sealedEliteTiles(
-						{ ...floor, terrain: floor.terrain.map((row) => row.split("")) },
-						objects.map((object) =>
-							object.kind === "elite-door"
-								? { ...object, activated: false }
-								: object,
-						),
-					).has(`${object.coordinate.row}:${object.coordinate.col}`)
-				)
-					return false;
-			}
 
+	const objects = document.state.objects;
+	if (
+		!unique(objects.map((object) => object.id)) ||
+		!unique(
+			objects.map(
+				(object) =>
+					`${object.floorNumber}:${object.coordinate.row}:${object.coordinate.col}`,
+			),
+		)
+	)
+		return false;
+	for (const object of objects) {
+		if (object.kind === "merchant") {
+			const floor = run.floors[object.floorNumber - 1];
 			if (
-				object.kind === "merchant" &&
-				(object.floorNumber % 5 !== 0 ||
-					object.floorNumber >= run.floors.length ||
-					object.activated ||
-					objects.filter(
-						(o) =>
-							o.kind === "merchant" && o.floorNumber === object.floorNumber,
-					).length !== 1)
-			)
-				return false;
-			if (object.kind === "elite-door") {
-				const floor = run.floors[object.floorNumber - 1];
-				const required = protectedFloorLocations(run, object.floorNumber);
-				required.push(
-					...state.floorItems
-						.filter(
-							(i) =>
-								i.floorNumber === object.floorNumber && i.item.kind === "cure",
-						)
-						.map((i) => i.coordinate),
-				);
-				if (
-					!floor ||
-					!findOptionalEliteRooms(
-						{ ...floor, terrain: floor.terrain.map((row) => row.split("")) },
-						required,
-					).some((chamber) => sameCoordinate(chamber.gate, object.coordinate))
-				)
-					return false;
-			}
-			if (
-				!object.id.startsWith(
-					`floor:${object.floorNumber}:object:${object.kind}:`,
-				) ||
-				!walkable(object.floorNumber, object.coordinate) ||
-				protectedFloorLocations(run, object.floorNumber).some((tile) =>
-					sameCoordinate(tile, object.coordinate),
-				) ||
-				(object.floorNumber === 1 &&
-					sameCoordinate(object.coordinate, quest.entrance))
-			)
-				return false;
-			if (
-				isDoor(object) &&
-				!object.activated &&
-				((object.floorNumber === run.activeFloor &&
-					sameCoordinate(object.coordinate, run.playerCoordinate)) ||
-					state.monsters.some(
-						(actor) =>
-							actor.floorNumber === object.floorNumber &&
-							sameCoordinate(actor.coordinate, object.coordinate),
-					))
+				!floor ||
+				sealedEliteTiles(
+					{ ...floor, terrain: floor.terrain.map((row) => row.split("")) },
+					objects.map((object) =>
+						object.kind === "elite-door"
+							? { ...object, activated: false }
+							: object,
+					),
+				).has(`${object.coordinate.row}:${object.coordinate.col}`)
 			)
 				return false;
 		}
+
+		if (
+			object.kind === "merchant" &&
+			(object.floorNumber % 5 !== 0 ||
+				object.floorNumber >= run.floors.length ||
+				object.activated ||
+				objects.filter(
+					(o) => o.kind === "merchant" && o.floorNumber === object.floorNumber,
+				).length !== 1)
+		)
+			return false;
+		if (object.kind === "elite-door") {
+			const floor = run.floors[object.floorNumber - 1];
+			const required = protectedFloorLocations(run, object.floorNumber);
+			required.push(
+				...state.floorItems
+					.filter(
+						(i) =>
+							i.floorNumber === object.floorNumber && i.item.kind === "cure",
+					)
+					.map((i) => i.coordinate),
+			);
+			if (
+				!floor ||
+				!findOptionalEliteRooms(
+					{ ...floor, terrain: floor.terrain.map((row) => row.split("")) },
+					required,
+				).some((chamber) => sameCoordinate(chamber.gate, object.coordinate))
+			)
+				return false;
+		}
+		if (
+			!object.id.startsWith(
+				`floor:${object.floorNumber}:object:${object.kind}:`,
+			) ||
+			!walkable(object.floorNumber, object.coordinate) ||
+			protectedFloorLocations(run, object.floorNumber).some((tile) =>
+				sameCoordinate(tile, object.coordinate),
+			) ||
+			(object.floorNumber === 1 &&
+				sameCoordinate(object.coordinate, quest.entrance))
+		)
+			return false;
+		if (
+			isDoor(object) &&
+			!object.activated &&
+			((object.floorNumber === run.activeFloor &&
+				sameCoordinate(object.coordinate, run.playerCoordinate)) ||
+				state.monsters.some(
+					(actor) =>
+						actor.floorNumber === object.floorNumber &&
+						sameCoordinate(actor.coordinate, object.coordinate),
+				))
+		)
+			return false;
 	}
+
 	if (
 		!unique(document.explored.map((entry) => entry.floorNumber)) ||
 		!document.explored.every(

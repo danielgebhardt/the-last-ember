@@ -17,7 +17,7 @@ import {
 	restoreSave,
 	serializeSave,
 } from "../domain/saves/SaveFormat";
-import { historicalSaveText, savedAdventure } from "./SaveTestHelpers";
+import { savedAdventure } from "./SaveTestHelpers";
 
 it("seeds doors in straight passage tiles without occupying actors, loot or protected stairs", () => {
 	const run = connectDungeonFloors(
@@ -95,13 +95,4 @@ it("preserves an opened door through saving and restores closed-door sight from 
 	if (!resumed.ok) throw new Error(resumed.error);
 	expect(restoreSave(resumed.value).state.objects[0].activated).toBe(true);
 	expect(restoreSave(resumed.value).exploration.visible[7][9]).toBe(true);
-	const old = {
-		...doc,
-		version: 8,
-		state: { ...doc.state, spellHotbar: doc.state.spellHotbar.slice(0, 4) },
-	};
-	delete (old.state as Partial<typeof old.state>).objects;
-	const migrated = parseSave(historicalSaveText(old));
-	if (!migrated.ok) throw new Error(migrated.error);
-	expect(migrated.value.state.objects).toEqual([]);
 });

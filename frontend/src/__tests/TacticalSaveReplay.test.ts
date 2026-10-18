@@ -17,7 +17,6 @@ import {
 	readLocalSave,
 	writeLocalSave,
 } from "../persistence/LocalAdventureSave";
-import legacyFile from "./fixtures/adventure-v1.json?raw";
 import {
 	afterMixedEncounter,
 	mixedEncounter,
@@ -167,24 +166,6 @@ describe("Tactical save and deterministic continuation", () => {
 			expect(current).toEqual(restoreSave(previous).state);
 		},
 	);
-
-	it("migrates the same legacy actors through both adapters without rewriting the source", async () => {
-		localStorage.setItem(LOCAL_SAVE_KEY, legacyFile);
-		const local = readLocalSave();
-		const imported = await readAdventureFile(new File([legacyFile], "v1.json"));
-		expect(local).toEqual(imported);
-		if (!local.ok || !local.value)
-			throw new Error("Legacy fixture must migrate.");
-		const legacy = JSON.parse(legacyFile);
-		expect(local.value.state.monsters).toEqual(
-			legacy.state.monsters.map((actor: object) => ({
-				...actor,
-				intent: { type: "idle" },
-				lastDamagedTurn: null,
-			})),
-		);
-		expect(localStorage.getItem(LOCAL_SAVE_KEY)).toBe(legacyFile);
-	});
 
 	it("keeps death and victory terminal after saving pending tactical intent", () => {
 		let dead = preparedMixedEncounter();

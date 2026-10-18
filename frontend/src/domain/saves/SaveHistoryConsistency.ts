@@ -1,7 +1,7 @@
 import { sameCoordinate, savedLevel } from "./SaveConsistencyHelpers";
-import type { SaveSourceDocument } from "./SaveSource";
+import type { SaveDocument } from "./SaveDocument";
 
-export const hasConsistentHistory = (document: SaveSourceDocument): boolean => {
+export const hasConsistentHistory = (document: SaveDocument): boolean => {
 	const { state } = document;
 	const { run, quest } = state;
 	const level = savedLevel(document);

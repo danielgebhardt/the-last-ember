@@ -1,14 +1,9 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import {
-	MAX_SAVE_BYTES,
-	parseSave,
-	serializeSave,
-} from "../domain/saves/SaveFormat";
+import { MAX_SAVE_BYTES, serializeSave } from "../domain/saves/SaveFormat";
 import {
 	exportAdventureFile,
 	readAdventureFile,
 } from "../persistence/AdventureSaveFiles";
-import versionOneFile from "./fixtures/adventure-v1.json?raw";
 import { savedAdventure } from "./SaveTestHelpers";
 
 afterEach(() => {
@@ -16,20 +11,6 @@ afterEach(() => {
 	vi.unstubAllGlobals();
 });
 describe("Portable adventure save files", () => {
-	it("imports a legacy v1 file through the same migration as local saves", async () => {
-		const imported = await readAdventureFile(
-			new File([versionOneFile], "legacy.json"),
-		);
-		expect(imported).toEqual(parseSave(versionOneFile));
-		if (!imported.ok) throw new Error(imported.error);
-		expect(imported.value.version).toBe(27);
-		expect(
-			imported.value.state.monsters.every(
-				(monster) => monster.intent.type === "idle",
-			),
-		).toBe(true);
-	});
-
 	it("downloads the same save format with a descriptive name and releases the URL", async () => {
 		const document = savedAdventure();
 		let downloaded: Blob | undefined;

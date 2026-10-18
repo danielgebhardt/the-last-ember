@@ -9,7 +9,7 @@ import { resolvePlayerAction } from "../domain/game/PlayerActions";
 import { createSaveDocument } from "../domain/saves/SaveFormat";
 import { COMPACT_TEST_CONFIGURATION } from "./TestRunConfiguration";
 
-export const savedAdventure = () => {
+const buildSavedAdventure = () => {
 	const run = connectDungeonFloors(
 		generateDungeonRun(
 			123,
@@ -36,6 +36,13 @@ export const savedAdventure = () => {
 	);
 };
 
+// Build expensive deterministic geometry once per test module; every caller owns a deep clone.
+let cachedAdventure: ReturnType<typeof buildSavedAdventure> | undefined;
+export const savedAdventure = () => {
+	cachedAdventure ??= buildSavedAdventure();
+	return structuredClone(cachedAdventure);
+};
+
 // A quiet saved run with both shortcuts immediately usable after restoration.
 export const savedAdventureWithPickupAndHealing = () => {
 	const document = savedAdventure();
@@ -56,27 +63,4 @@ export const savedAdventureWithPickupAndHealing = () => {
 			],
 		},
 	};
-};
-
-// Build historical inputs without the stock field introduced in v24. Played fields remain intact.
-export const historicalSaveText = (document: {
-	version: number;
-	state: object;
-}): string => {
-	const state = { ...document.state };
-	if (document.version < 27) Reflect.deleteProperty(state, "townPortal");
-	if (
-		document.version < 26 &&
-		"progression" in state &&
-		typeof state.progression === "object" &&
-		state.progression !== null
-	) {
-		const progression = { ...state.progression };
-		Reflect.deleteProperty(progression, "permanentAttributes");
-		Reflect.set(state, "progression", progression);
-	}
-	if (document.version < 25)
-		Reflect.deleteProperty(state, "townEquipmentStock");
-	if (document.version < 24) Reflect.deleteProperty(state, "townPotionStock");
-	return JSON.stringify({ ...document, state });
 };
