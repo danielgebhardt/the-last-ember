@@ -16,10 +16,12 @@ import { createThreeFloorTraversalRun } from "./testhelpers";
 afterEach(resetHomeTestState);
 const openCharacter = async (user: ReturnType<typeof userEvent.setup>) => {
 	await user.click(screen.getByRole("button", { name: "Character" }));
-	const panel = await screen.findByRole("dialog", { name: "Character" });
+	const panel = await screen.findByRole("dialog", {
+		name: "The Adventurer's Ledger",
+	});
 	await waitFor(() =>
 		expect(
-			within(panel).getByRole("heading", { name: "Character" }),
+			within(panel).getByRole("heading", { name: "The Adventurer's Ledger" }),
 		).toHaveFocus(),
 	);
 	return within(panel);
@@ -31,7 +33,9 @@ describe("Changing gear in Character", () => {
 		const panel = await openCharacter(user);
 		await user.click(panel.getByRole("button", { name: "Iron sword, slot 1" }));
 		await user.click(panel.getByRole("button", { name: "Equip on main hand" }));
-		expect(screen.getByRole("dialog", { name: "Character" })).toBeVisible();
+		expect(
+			screen.getByRole("dialog", { name: "The Adventurer's Ledger" }),
+		).toBeVisible();
 		expect(
 			within(panel.getByRole("region", { name: "Main hand" })).getByText(
 				"Iron sword",

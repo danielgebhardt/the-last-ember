@@ -55,7 +55,9 @@ describe("Heal activation", () => {
 		fireEvent.keyDown(window, { key: "h", repeat: true });
 		fireEvent.keyDown(window, { key: "h", altKey: true });
 		await user.keyboard("i");
-		const dialog = await screen.findByRole("dialog", { name: "Character" });
+		const dialog = await screen.findByRole("dialog", {
+			name: "The Adventurer's Ledger",
+		});
 		await user.keyboard("h");
 		expect(within(dialog).getByLabelText("Character health")).toHaveTextContent(
 			"Health 4 / 10",

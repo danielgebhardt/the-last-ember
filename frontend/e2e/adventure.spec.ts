@@ -128,7 +128,7 @@ test("a loaded late-game character shows the applied evasion curve and returns m
 	await importAdventure(page, "evasion");
 	await page.keyboard.press("c");
 	const character = page.getByRole("dialog", {
-		name: "Character",
+		name: "The Adventurer's Ledger",
 		exact: true,
 	});
 	await expect(

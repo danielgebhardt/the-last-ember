@@ -35,7 +35,7 @@ describe("Monster loot on screen", () => {
 		);
 		await user.keyboard("{ArrowRight}");
 		await user.click(screen.getByRole("button", { name: "Character" }));
-		await screen.findByRole("dialog", { name: "Character" });
+		await screen.findByRole("dialog", { name: "The Adventurer's Ledger" });
 		await user.click(
 			screen.getByRole("button", { name: `Pick up ${name}, item 1` }),
 		);

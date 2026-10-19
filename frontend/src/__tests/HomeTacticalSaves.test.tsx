@@ -58,7 +58,7 @@ describe("Restored tactical encounters in Home", () => {
 				screen.getByLabelText("row4col4 - player - prepared heavy attack"),
 			).toBeVisible();
 			await user.keyboard("i");
-			await screen.findByRole("dialog", { name: "Character" });
+			await screen.findByRole("dialog", { name: "The Adventurer's Ledger" });
 			await user.keyboard(" zh");
 			expect(screen.getByLabelText("Turn count")).toHaveTextContent("Turn 1");
 			expect(localStorage.getItem(LOCAL_SAVE_KEY)).toBe(bytes);

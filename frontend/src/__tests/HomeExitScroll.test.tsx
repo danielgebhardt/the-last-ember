@@ -47,7 +47,7 @@ it("opens a one-use town portal, preserves the scroll stack and returns with Ent
 	);
 	await waitFor(() =>
 		expect(
-			screen.queryByRole("dialog", { name: "Character" }),
+			screen.queryByRole("dialog", { name: "The Adventurer's Ledger" }),
 		).not.toBeInTheDocument(),
 	);
 	await waitFor(() =>
@@ -73,7 +73,9 @@ it("opens a one-use town portal, preserves the scroll stack and returns with Ent
 	);
 	expect(screen.getByRole("alert")).toHaveTextContent("Enter the dungeon");
 	expect(screen.getByLabelText("Turn count")).toHaveTextContent("Turn 29");
-	expect(screen.getByRole("dialog", { name: "Character" })).toBeVisible();
+	expect(
+		screen.getByRole("dialog", { name: "The Adventurer's Ledger" }),
+	).toBeVisible();
 	expect(stack).toBeInTheDocument();
 	await user.keyboard("{Escape}");
 	await user.keyboard("{Enter}");

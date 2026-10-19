@@ -30,7 +30,7 @@ test("fresh starts, New Dungeon and seed replay restore starter potions without 
 	await expect(turns(page)).toHaveText("Turn 0");
 	await page.keyboard.press("c");
 	const character = page.getByRole("dialog", {
-		name: "Character",
+		name: "The Adventurer's Ledger",
 		exact: true,
 	});
 	await character
@@ -113,7 +113,7 @@ test("interleaved scroll stacks keep their coordinates and selected actions acro
 	await importAdventure(page, "stacks");
 	await page.keyboard.press("c");
 	const character = page.getByRole("dialog", {
-		name: "Character",
+		name: "The Adventurer's Ledger",
 		exact: true,
 	});
 	const scroll = character.getByRole("button", {
@@ -189,7 +189,7 @@ test("shortcut and Character potion use retain the stack, reject full mana freel
 	await expect(turns(page)).toHaveText("Turn 1");
 	await page.keyboard.press("c");
 	const character = page.getByRole("dialog", {
-		name: "Character",
+		name: "The Adventurer's Ledger",
 		exact: true,
 	});
 	const mana = character.getByRole("button", {

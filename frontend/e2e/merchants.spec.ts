@@ -128,17 +128,14 @@ test("merchant comparisons open with Enter after import and only selling spends 
 	await expect(previews).toHaveCount(2);
 	await expect(previews.nth(0)).toContainText("Tradeoff · Left ring");
 	await expect(previews.nth(0)).toContainText("Damage 4–6 → 3–5");
-	await expect(previews.nth(0)).toContainText(
-		"Base spell modifier +1 → +2 (+1)",
-	);
-	await expect(previews.nth(0)).toContainText("Heal bonus +1 → +2 (+1)");
-	await expect(previews.nth(1)).toContainText("Maximum mana 16 → 14 (−2)");
-	await expect(previews.nth(1)).toContainText(
-		"Base spell modifier +1 → +2 (+1)",
-	);
+	await expect(previews.nth(0)).toContainText("Base spell modifier +1 → +2");
+	await expect(previews.nth(0)).toContainText("Magic resistance 6% → 7%");
+	await expect(previews.nth(1)).toContainText("Maximum mana 16 → 14");
+	await expect(previews.nth(1)).toContainText("Base spell modifier +1 → +2");
 	await previews
 		.nth(0)
 		.getByText(/^Base spell modifier/)
+		.first()
 		.scrollIntoViewIfNeeded();
 	await page.screenshot({
 		path: testInfo.outputPath("merchant-spell-bonus.png"),
@@ -149,7 +146,7 @@ test("merchant comparisons open with Enter after import and only selling spends 
 	await expect(map(page)).toBeFocused();
 	await page.keyboard.press("c");
 	const character = page.getByRole("dialog", {
-		name: "Character",
+		name: "The Adventurer's Ledger",
 		exact: true,
 	});
 	await expect(
@@ -169,10 +166,10 @@ test("merchant comparisons open with Enter after import and only selling spends 
 	});
 	await expect(characterPreviews).toHaveCount(2);
 	await expect(characterPreviews.nth(0)).toContainText(
-		"Base spell modifier +1 → +2 (+1)",
+		"Base spell modifier +1 → +2",
 	);
 	await expect(characterPreviews.nth(1)).toContainText(
-		"Heal bonus +1 → +2 (+1)",
+		"Magic resistance 6% → 7%",
 	);
 	await expect(
 		character.getByText(/Control and movement effects/),
@@ -184,6 +181,7 @@ test("merchant comparisons open with Enter after import and only selling spends 
 	await characterPreviews
 		.nth(0)
 		.getByText(/^Base spell modifier/)
+		.first()
 		.scrollIntoViewIfNeeded();
 	await page.screenshot({
 		path: testInfo.outputPath("character-spell-bonus.png"),

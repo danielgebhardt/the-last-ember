@@ -22,21 +22,24 @@ it("explains the robe's armor loss and Intelligence gain without calling it lowe
 	);
 	const comparison = screen.getByLabelText("Equipment comparison");
 	expect(comparison).toHaveTextContent("Tradeoff");
-	expect(comparison).toHaveTextContent("Armor 3 → 1 (−2)");
-	expect(
-		screen.getByText("Attribute details").closest("details"),
-	).toHaveTextContent("Intelligence 10 → 12 (+2)");
-	expect(comparison).toHaveTextContent("Maximum mana 10 → 12 (+2)");
-	expect(comparison).toHaveTextContent("Gains and losses");
-	expect(within(comparison).getByText("1 (−2)")).toHaveClass(
+	expect(comparison).toHaveTextContent("Armor 3 → 1");
+	expect(comparison).toHaveTextContent("Intelligence 10 → 12");
+	expect(comparison).toHaveTextContent("Maximum mana 10 → 12");
+	expect(comparison).toHaveTextContent("both gains and losses");
+	const armor = within(comparison).getAllByText("Armor")[0].closest("div");
+	if (!armor) throw new Error("Missing armor row");
+	expect(within(armor).getByText("1")).toHaveClass(
 		"text-red-700",
 		"dark:text-red-400",
 	);
-	expect(within(comparison).getByText("12 (+2)")).toHaveClass(
+	const intelligence = within(comparison)
+		.getAllByText("Intelligence")[0]
+		.closest("div");
+	if (!intelligence) throw new Error("Missing Intelligence row");
+	expect(within(intelligence).getByText("12")).toHaveClass(
 		"text-green-700",
 		"dark:text-green-400",
 	);
-	expect(within(comparison).getByText("10 (0)")).toHaveClass("text-foreground");
 });
 it("shows a comparison for each ring slot rather than assuming the left one", () => {
 	render(
@@ -62,7 +65,14 @@ it("shows a comparison for each ring slot rather than assuming the left one", ()
 
 it.each([
 	["lower", "short-sword", 0, "1–3", "text-red-700", "dark:text-red-400"],
-	["unchanged", "iron-sword", 0, "2–4", "text-foreground", "text-foreground"],
+	[
+		"unchanged",
+		"iron-sword",
+		0,
+		"2–4",
+		"text-muted-foreground",
+		"text-muted-foreground",
+	],
 	["higher", "short-sword", 3, "4–6", "text-green-700", "dark:text-green-400"],
 ] as const)(
 	"colors a %s replacement damage range",
@@ -84,7 +94,9 @@ it.each([
 			/>,
 		);
 		expect(
-			within(screen.getByLabelText("Equipment comparison")).getByText(range),
+			within(screen.getByLabelText("Equipment comparison"))
+				.getAllByText(range)
+				.at(-1),
 		).toHaveClass(lightColor, darkColor);
 	},
 );

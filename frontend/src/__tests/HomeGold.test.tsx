@@ -40,7 +40,9 @@ it("shows coins, collects them by walking and includes the total in Character", 
 	await user.keyboard("a");
 	expect(screen.getByRole("cell", { name: "row1col2 - floor" })).toBeVisible();
 	await user.keyboard("i");
-	const dialog = await screen.findByRole("dialog", { name: "Character" });
+	const dialog = await screen.findByRole("dialog", {
+		name: "The Adventurer's Ledger",
+	});
 	expect(
 		within(dialog).getByText(
 			new RegExp(`Gold ${GameState.STARTING_GOLD + 6} · Turn`),

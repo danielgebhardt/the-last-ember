@@ -29,12 +29,12 @@ it("uses a boost potion from a numbered shortcut and displays boosted mana and c
 		/Intelligence permanently increases by 1/,
 	);
 	await user.keyboard("c");
-	await screen.findByRole("dialog", { name: "Character" });
+	await screen.findByRole("dialog", { name: "The Adventurer's Ledger" });
 	expect(screen.getByLabelText("Character Intelligence")).toHaveTextContent(
 		"Intelligence 11",
 	);
 	expect(screen.getByLabelText("Permanent potion gains")).toHaveTextContent(
-		"Intelligence +1",
+		"INT +1",
 	);
 	expect(screen.getByLabelText("Character mana")).toHaveTextContent("10 / 10");
 	await user.keyboard("{Escape}");

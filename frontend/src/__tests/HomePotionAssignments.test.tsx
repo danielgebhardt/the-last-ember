@@ -43,7 +43,7 @@ const setup = async (assignedSlot?: 1 | 2 | 3 | 4) => {
 	const user = userEvent.setup();
 	await user.click(screen.getByRole("button", { name: "Character" }));
 	const panel = within(
-		await screen.findByRole("dialog", { name: "Character" }),
+		await screen.findByRole("dialog", { name: "The Adventurer's Ledger" }),
 	);
 	await user.click(
 		panel.getByRole("button", { name: "Healing potion, slot 1" }),
@@ -136,7 +136,7 @@ describe("Assigning potion shortcuts in Character", () => {
 		await enterDungeonFromTown(user);
 		await user.keyboard("i");
 		const fresh = within(
-			await screen.findByRole("dialog", { name: "Character" }),
+			await screen.findByRole("dialog", { name: "The Adventurer's Ledger" }),
 		);
 		expect(fresh.getByLabelText("Potion slot 3 assignment")).toHaveTextContent(
 			"Empty",

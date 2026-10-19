@@ -67,7 +67,7 @@ describe("Confirmed local Save and Load", () => {
 		await user.keyboard("wz 1hci{ArrowRight}");
 		expect(screen.getByLabelText("Turn count")).toHaveTextContent("Turn 0");
 		expect(
-			screen.queryByRole("dialog", { name: "Character" }),
+			screen.queryByRole("dialog", { name: "The Adventurer's Ledger" }),
 		).not.toBeInTheDocument();
 		await closeSaveSheet(user);
 		expect(screen.getByLabelText("Dungeon map", { exact: true })).toHaveFocus();

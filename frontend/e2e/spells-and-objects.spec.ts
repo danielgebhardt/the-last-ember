@@ -10,7 +10,7 @@ test("a restored ember carrier cannot read an exit scroll", async ({
 	await importAdventure(page, "exit-scrolls-ember");
 	await page.keyboard.press("i");
 	const character = page.getByRole("dialog", {
-		name: "Character",
+		name: "The Adventurer's Ledger",
 		exact: true,
 	});
 	await character
@@ -34,19 +34,19 @@ test("improved spell cards and Fireball preview explain splash risk before a com
 	await importAdventure(page, "spell-balance");
 	await page.keyboard.press("i");
 	const character = page.getByRole("dialog", {
-		name: "Character",
+		name: "The Adventurer's Ledger",
 		exact: true,
 	});
 	await character.getByRole("tab", { name: "Spells", exact: true }).click();
 	await expect(
-		character.getByRole("region", { name: "Fireball", exact: true }),
+		character.getByRole("article", { name: "Fireball", exact: true }),
 	).toContainText("16–24");
 	await expect(
-		character.getByRole("region", { name: "Protection", exact: true }),
+		character.getByRole("article", { name: "Protection", exact: true }),
 	).toContainText("20 committed turns");
 	await expect(
-		character.getByRole("region", { name: "Renewal", exact: true }),
-	).toContainText("Currently 2 health per turn");
+		character.getByRole("article", { name: "Renewal", exact: true }),
+	).toContainText("2 HP/turn");
 	await page.setViewportSize({ width: 390, height: 667 });
 	expect(
 		await character.evaluate((node) => node.scrollWidth <= node.clientWidth),
@@ -126,7 +126,7 @@ for (const width of [390, 1440])
 				.getAttribute("aria-label");
 			await page.keyboard.press("i");
 			const character = page.getByRole("dialog", {
-				name: "Character",
+				name: "The Adventurer's Ledger",
 				exact: true,
 			});
 			await character

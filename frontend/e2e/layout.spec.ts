@@ -248,7 +248,7 @@ test("magic resistance stays readable in Character on desktop and mobile in both
 	await importAdventure(page);
 	await page.keyboard.press("c");
 	const character = page.getByRole("dialog", {
-		name: "Character",
+		name: "The Adventurer's Ledger",
 		exact: true,
 	});
 	const resistance = character.getByLabel("Character magic resistance", {
@@ -267,7 +267,7 @@ test("magic resistance stays readable in Character on desktop and mobile in both
 			await expect(resistance).toHaveText("Magic resistance 5%");
 			await expect(resistance).toBeInViewport();
 			await expect(
-				character.getByText("Base 5% + Intelligence 0% (maximum 50%)"),
+				character.getByText("Base 5% + Intelligence 0% (max 50%)"),
 			).toBeVisible();
 			const fits = await resistance.evaluate((element) => {
 				const card = element.parentElement;

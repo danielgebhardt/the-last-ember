@@ -13,7 +13,7 @@ const props = {
 	progression: { experience: 0 },
 };
 describe("Compact spell library", () => {
-	it("explains casting once and shows every learned spell's full rules without a disclosure", () => {
+	it("shows compact spell summaries and reveals full mechanics on demand", async () => {
 		render(
 			<SpellsView
 				{...props}
@@ -26,24 +26,33 @@ describe("Compact spell library", () => {
 		).toHaveLength(1);
 		for (const definition of Object.values(SPELL_DEFINITIONS)) {
 			const card = within(
-				screen.getByRole("region", { name: definition.name }),
+				screen.getByRole("article", { name: definition.name }),
 			);
 			expect(
 				card.getByText(definition.description, { exact: true }),
 			).toBeVisible();
-			expect(card.queryByText("Spell details")).not.toBeInTheDocument();
+			const disclosure = card.queryByText("Spell details");
+			if (disclosure) await userEvent.setup().click(disclosure);
 		}
-		const frost = within(screen.getByRole("region", { name: "Frost Bolt" }));
+		const frost = within(screen.getByRole("article", { name: "Frost Bolt" }));
 		expect(
 			frost.getByText(/cold damage.*Slowed.*3 active phases/i),
 		).toBeVisible();
 		expect(frost.getByText(/Range 5/)).toBeVisible();
-		expect(frost.getByText("Damage 2–4 · 4 mana")).toBeVisible();
+		expect(frost.getByText("Damage 2–4")).toBeVisible();
+		expect(frost.getByLabelText("Frost Bolt mana cost")).toHaveTextContent(
+			"4Mana",
+		);
+		expect(
+			within(screen.getByRole("article", { name: "Poison Dart" })).getByText(
+				/24 ongoing damage before resistance/,
+			),
+		).toBeVisible();
 	});
 	it("uses six number-only controls with descriptive names and a highlighted assignment", async () => {
 		const onAction = vi.fn();
 		const view = render(<SpellsView {...props} onAction={onAction} />);
-		const card = within(screen.getByRole("region", { name: "Magic Missile" }));
+		const card = within(screen.getByRole("article", { name: "Magic Missile" }));
 		const controls = within(
 			card.getByRole("group", { name: "Assign Magic Missile shortcut" }),
 		);

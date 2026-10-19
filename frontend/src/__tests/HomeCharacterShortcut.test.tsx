@@ -26,7 +26,7 @@ describe("Character shortcut", () => {
 			const { map, user } = setup();
 			await user.keyboard(key);
 			expect(
-				await screen.findByRole("dialog", { name: "Character" }),
+				await screen.findByRole("dialog", { name: "The Adventurer's Ledger" }),
 			).toBeVisible();
 			await user.keyboard("{ArrowRight} g");
 			expect(screen.getByLabelText("Turn count")).toHaveTextContent("Turn 0");
@@ -44,7 +44,7 @@ describe("Character shortcut", () => {
 			const trigger = screen.getByRole("button", { name: "Character" });
 			if (opener === "button") await user.click(trigger);
 			else await user.keyboard("i");
-			await screen.findByRole("dialog", { name: "Character" });
+			await screen.findByRole("dialog", { name: "The Adventurer's Ledger" });
 			await user.click(
 				screen.getByRole("button", { name: "Main hand: Short sword" }),
 			);
@@ -52,7 +52,9 @@ describe("Character shortcut", () => {
 				screen.getByRole("button", { name: "Main hand: Short sword" }),
 				{ key: "i", repeat: true },
 			);
-			expect(screen.getByRole("dialog", { name: "Character" })).toBeVisible();
+			expect(
+				screen.getByRole("dialog", { name: "The Adventurer's Ledger" }),
+			).toBeVisible();
 			await user.keyboard("I");
 			await waitFor(() =>
 				expect(screen.queryByRole("dialog")).not.toBeInTheDocument(),
@@ -71,7 +73,7 @@ describe("Character shortcut", () => {
 		await inspectEndedRun(user);
 		await user.keyboard("i");
 		expect(
-			await screen.findByRole("dialog", { name: "Character" }),
+			await screen.findByRole("dialog", { name: "The Adventurer's Ledger" }),
 		).toBeVisible();
 		expect(screen.getByLabelText("Character health")).toHaveTextContent(
 			"Health 0 / 10",
@@ -95,7 +97,7 @@ describe("Character shortcut", () => {
 			await screen.findByRole("dialog");
 			await user.keyboard("ic");
 			expect(
-				screen.queryByRole("dialog", { name: "Character" }),
+				screen.queryByRole("dialog", { name: "The Adventurer's Ledger" }),
 			).not.toBeInTheDocument();
 		},
 	);

@@ -51,9 +51,7 @@ for (const width of [390, 1440])
 				).toContainText(`${attribute} 12`);
 			await expect(
 				page.getByLabel("Permanent potion gains", { exact: true }),
-			).toHaveText(
-				"Permanent potions: Strength +2 · Dexterity +2 · Intelligence +2",
-			);
+			).toHaveText("STR +2 · DEX +2 · INT +2");
 			await page.screenshot({
 				path: info.outputPath(`permanent-${width}-${theme}.png`),
 			});
@@ -82,7 +80,7 @@ for (const width of [390, 1440])
 			await page.keyboard.press("c");
 			await expect(
 				page.getByLabel("Permanent potion gains", { exact: true }),
-			).toContainText("Intelligence +2");
+			).toContainText("INT +2");
 			await expect(
 				page.getByLabel("Character Intelligence", { exact: true }),
 			).toContainText("12");
@@ -121,5 +119,5 @@ test("town stat potions cost 1,500 gold and buying grants a bottle rather than a
 	await page.keyboard.press("c");
 	await expect(
 		page.getByLabel("Permanent potion gains", { exact: true }),
-	).toContainText("Strength +0");
+	).toContainText("STR +0");
 });

@@ -21,10 +21,12 @@ const renderCharacterRun = () => {
 };
 const openCharacter = async (user: ReturnType<typeof userEvent.setup>) => {
 	await user.click(screen.getByRole("button", { name: "Character" }));
-	const panel = await screen.findByRole("dialog", { name: "Character" });
+	const panel = await screen.findByRole("dialog", {
+		name: "The Adventurer's Ledger",
+	});
 	await waitFor(() =>
 		expect(
-			within(panel).getByRole("heading", { name: "Character" }),
+			within(panel).getByRole("heading", { name: "The Adventurer's Ledger" }),
 		).toHaveFocus(),
 	);
 	return panel;
@@ -33,7 +35,7 @@ const dismissCharacter = async (user: ReturnType<typeof userEvent.setup>) => {
 	await user.keyboard("{Escape}");
 	await waitFor(() =>
 		expect(
-			screen.queryByRole("dialog", { name: "Character" }),
+			screen.queryByRole("dialog", { name: "The Adventurer's Ledger" }),
 		).not.toBeInTheDocument(),
 	);
 };
@@ -47,7 +49,7 @@ describe("Character sheet", () => {
 			panel.getByLabelText("Character magic resistance"),
 		).toHaveTextContent("Magic resistance 5%");
 		expect(
-			panel.getByText("Base 5% + Intelligence 0% (maximum 50%)"),
+			panel.getByText("Base 5% + Intelligence 0% (max 50%)"),
 		).toBeVisible();
 		expect(panel.getByLabelText("Character hit chance")).toHaveTextContent(
 			"Hit 85%",
@@ -83,7 +85,7 @@ describe("Character sheet", () => {
 		const character = within(await openCharacter(user));
 		await waitFor(() =>
 			expect(
-				character.getByRole("heading", { name: "Character" }),
+				character.getByRole("heading", { name: "The Adventurer's Ledger" }),
 			).toHaveFocus(),
 		);
 		expect(character.getByLabelText("Character health")).toHaveTextContent(
@@ -133,12 +135,12 @@ describe("Character sheet", () => {
 		expect(screen.getByRole("button", { name: "Character" })).toHaveFocus();
 		await user.keyboard("{Enter}");
 		expect(
-			await screen.findByRole("dialog", { name: "Character" }),
+			await screen.findByRole("dialog", { name: "The Adventurer's Ledger" }),
 		).toBeVisible();
 		await dismissCharacter(user);
 		await user.keyboard(" ");
 		expect(
-			await screen.findByRole("dialog", { name: "Character" }),
+			await screen.findByRole("dialog", { name: "The Adventurer's Ledger" }),
 		).toBeVisible();
 		expect(screen.getByLabelText("Turn count")).toHaveTextContent("Turn 0");
 	});

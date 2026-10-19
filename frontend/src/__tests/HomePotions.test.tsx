@@ -41,11 +41,11 @@ const renderPotionRun = (health: number, withMonster = false) => {
 const selectPotion = async (user: ReturnType<typeof userEvent.setup>) => {
 	await user.click(screen.getByRole("button", { name: "Character" }));
 	const panel = within(
-		await screen.findByRole("dialog", { name: "Character" }),
+		await screen.findByRole("dialog", { name: "The Adventurer's Ledger" }),
 	);
 	await waitFor(() =>
 		expect(
-			panel.getByRole("heading", { name: "Character", level: 2 }),
+			panel.getByRole("heading", { name: "The Adventurer's Ledger", level: 2 }),
 		).toHaveFocus(),
 	);
 	await user.click(
@@ -87,7 +87,7 @@ describe("Healing potions in Character", () => {
 		expect(screen.getByRole("log")).not.toHaveTextContent("You drink");
 		await user.click(screen.getByRole("button", { name: "Character" }));
 		const fresh = within(
-			await screen.findByRole("dialog", { name: "Character" }),
+			await screen.findByRole("dialog", { name: "The Adventurer's Ledger" }),
 		);
 		expect(fresh.getByLabelText("Character health")).toHaveTextContent(
 			"Health 10 / 10",

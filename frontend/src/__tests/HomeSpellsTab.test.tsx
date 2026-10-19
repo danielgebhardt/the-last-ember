@@ -28,7 +28,9 @@ describe("Character and Spells tabs", () => {
 	it("keeps Character as the default and shows level-derived Intelligence and mana", async () => {
 		const user = setup();
 		await user.keyboard("c");
-		const dialog = await screen.findByRole("dialog", { name: "Character" });
+		const dialog = await screen.findByRole("dialog", {
+			name: "The Adventurer's Ledger",
+		});
 		expect(
 			within(dialog).getByRole("tab", { name: "Character" }),
 		).toHaveAttribute("aria-selected", "true");
@@ -43,17 +45,20 @@ describe("Character and Spells tabs", () => {
 	it("shows known spells with derived effects, protects keys and resets the selected tab on reopening", async () => {
 		const user = setup();
 		await user.keyboard("i");
-		const dialog = await screen.findByRole("dialog", { name: "Character" });
+		const dialog = await screen.findByRole("dialog", {
+			name: "The Adventurer's Ledger",
+		});
 		await user.click(within(dialog).getByRole("tab", { name: "Spells" }));
 		const spells = within(dialog).getByRole("tabpanel", { name: "Spells" });
 		expect(
 			within(spells).getByRole("heading", { name: "Magic Missile" }),
 		).toBeVisible();
-		expect(within(spells).getByText("Damage 4–6 · 3 mana")).toBeVisible();
+		expect(within(spells).getByText("Damage 4–6")).toBeVisible();
 		expect(
-			within(spells).getByText("Heal up to 5 health · 4 mana"),
-		).toBeVisible();
-		expect(spells).toHaveTextContent("1 mana every 30 successful turns");
+			within(spells).getByLabelText("Magic Missile mana cost"),
+		).toHaveTextContent("3Mana");
+		expect(within(spells).getByText("Heal up to 5 HP")).toBeVisible();
+		expect(spells).toHaveTextContent("Mana · +1 every 30 successful turns");
 		await user.keyboard("zh{ArrowRight}{Enter}");
 		expect(screen.getByLabelText("Turn count")).toHaveTextContent("Turn 0");
 		await user.keyboard("i");

@@ -166,7 +166,7 @@ describe("Potion hotbar gameplay", () => {
 			}),
 		).toBeVisible();
 		await user.keyboard("i");
-		await screen.findByRole("dialog", { name: "Character" });
+		await screen.findByRole("dialog", { name: "The Adventurer's Ledger" });
 		expect(screen.getByLabelText("Potion slot 1 assignment")).toHaveTextContent(
 			"Healing potion",
 		);

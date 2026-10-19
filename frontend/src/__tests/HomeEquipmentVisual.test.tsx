@@ -16,7 +16,9 @@ const setup = async () => {
 	await user.click(screen.getByRole("button", { name: "Character" }));
 	return {
 		user,
-		panel: within(await screen.findByRole("dialog", { name: "Character" })),
+		panel: within(
+			await screen.findByRole("dialog", { name: "The Adventurer's Ledger" }),
+		),
 	};
 };
 afterEach(resetHomeTestState);

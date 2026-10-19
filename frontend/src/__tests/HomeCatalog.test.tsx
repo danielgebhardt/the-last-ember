@@ -21,7 +21,7 @@ describe("Developer catalog", () => {
 		const user = userEvent.setup();
 		await user.click(screen.getByRole("button", { name: "Catalog" }));
 		const sheet = await screen.findByRole("dialog", {
-			name: "Developer catalog",
+			name: "Developer Catalog",
 		});
 		for (const [label, definitions] of [
 			["Monsters", MONSTER_DEFINITIONS],
@@ -55,7 +55,7 @@ describe("Developer catalog", () => {
 		const user = userEvent.setup();
 		await user.click(screen.getByRole("button", { name: "Catalog" }));
 		const sheet = await screen.findByRole("dialog", {
-			name: "Developer catalog",
+			name: "Developer Catalog",
 		});
 		await user.type(
 			within(sheet).getByRole("searchbox", { name: "Filter catalog" }),
@@ -75,7 +75,7 @@ describe("Developer catalog", () => {
 		const user = userEvent.setup();
 		await user.click(screen.getByRole("button", { name: "Catalog" }));
 		const sheet = within(
-			await screen.findByRole("dialog", { name: "Developer catalog" }),
+			await screen.findByRole("dialog", { name: "Developer Catalog" }),
 		);
 		expect(sheet.getByRole("tab", { name: "Monsters" })).toHaveAttribute(
 			"aria-selected",
@@ -110,7 +110,7 @@ describe("Developer catalog", () => {
 		const user = userEvent.setup();
 		await user.click(screen.getByRole("button", { name: "Catalog" }));
 		const sheet = within(
-			await screen.findByRole("dialog", { name: "Developer catalog" }),
+			await screen.findByRole("dialog", { name: "Developer Catalog" }),
 		);
 		await user.click(sheet.getByRole("tab", { name: "Monsters" }));
 		await user.keyboard("{ArrowRight}");
@@ -128,7 +128,7 @@ describe("Developer catalog", () => {
 			.getAttribute("aria-label");
 		await user.click(screen.getByRole("button", { name: "Catalog" }));
 		const sheet = within(
-			await screen.findByRole("dialog", { name: "Developer catalog" }),
+			await screen.findByRole("dialog", { name: "Developer Catalog" }),
 		);
 		await user.click(sheet.getByRole("tab", { name: "Town" }));
 		expect(sheet.queryByRole("searchbox")).not.toBeInTheDocument();
@@ -151,7 +151,7 @@ describe("Developer catalog", () => {
 		const user = userEvent.setup();
 		await user.click(screen.getByRole("button", { name: "Catalog" }));
 		const sheet = within(
-			await screen.findByRole("dialog", { name: "Developer catalog" }),
+			await screen.findByRole("dialog", { name: "Developer Catalog" }),
 		);
 		await user.click(sheet.getByRole("tab", { name: "Items" }));
 		const names = sheet

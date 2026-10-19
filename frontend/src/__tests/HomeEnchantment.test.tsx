@@ -30,7 +30,9 @@ it("keeps the selected scroll stack usable in its slot through 3 → 2 → 1 and
 	const user = userEvent.setup();
 	screen.getByLabelText("Dungeon map", { exact: true }).focus();
 	await user.keyboard("c");
-	const dialog = await screen.findByRole("dialog", { name: "Character" });
+	const dialog = await screen.findByRole("dialog", {
+		name: "The Adventurer's Ledger",
+	});
 	await user.click(
 		within(dialog).getByRole("button", { name: "Enchantment scroll, slot 1" }),
 	);
@@ -83,7 +85,9 @@ it("inspects/cancels freely and enchants a chosen equipped item with Enter, show
 	map.focus();
 	const user = userEvent.setup();
 	await user.keyboard("c");
-	const dialog = await screen.findByRole("dialog", { name: "Character" });
+	const dialog = await screen.findByRole("dialog", {
+		name: "The Adventurer's Ledger",
+	});
 	await user.click(
 		within(dialog).getByRole("button", { name: "Enchantment scroll, slot 1" }),
 	);

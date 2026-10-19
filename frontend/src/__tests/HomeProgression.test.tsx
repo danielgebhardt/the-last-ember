@@ -62,7 +62,7 @@ describe("Progression on the play screen", () => {
 		);
 		await user.keyboard("c");
 		const dialog = within(
-			await screen.findByRole("dialog", { name: "Character" }),
+			await screen.findByRole("dialog", { name: "The Adventurer's Ledger" }),
 		);
 		expect(
 			dialog.getByRole("region", { name: "Character progression" }),
@@ -71,10 +71,13 @@ describe("Progression on the play screen", () => {
 			"14 XP",
 		);
 		expect(
-			dialog.getByRole("progressbar", { name: "Experience progress" }),
+			dialog.getByRole("progressbar", { name: "Player experience progress" }),
 		).toHaveAttribute("value", "4");
-		expect(dialog.getByLabelText("Experience to next level")).toHaveTextContent(
-			"16 XP to level 3",
+		expect(
+			dialog.getByRole("progressbar", { name: "Player experience progress" }),
+		).toHaveAttribute(
+			"aria-valuetext",
+			expect.stringContaining("16 XP to level 3"),
 		);
 		await user.keyboard("C");
 		await waitFor(() =>
@@ -120,7 +123,7 @@ describe("Progression on the play screen", () => {
 		const user = setup(3800);
 		await user.keyboard("i");
 		const dialog = within(
-			await screen.findByRole("dialog", { name: "Character" }),
+			await screen.findByRole("dialog", { name: "The Adventurer's Ledger" }),
 		);
 		expect(dialog.getByLabelText("Character level")).toHaveTextContent(
 			"Level 20",

@@ -47,6 +47,8 @@ Browser Save/Load and file import/export persist the actual dungeon, discovery, 
 | `components/game/useAdventureSession.ts` | Atomic game/configuration/discovery ownership |
 | `components/game/DungeonNotices.tsx` | Reserved notice area; feedback cannot resize the dungeon |
 | `components/game/NewDungeonDialog.tsx` | Explicit restart confirmation and focus return |
+| `components/ui/EmberMenu.tsx`, `EmberTabs.tsx`, `styles/Menus.css` | Shared sheet/dialog framing, headers, tabs and panel styles |
+| `components/game/SpellsView.tsx`, `SpellLibraryCard.tsx` | Spell-library layout and individual spell summaries/assignments |
 | `domain/game/PlayerActions.ts` | Committed-turn boundary and domain action dispatch |
 | `domain/dungeon/` | Seeded generation, geometry, stairs and discovery |
 | `domain/items/`, `domain/monsters/`, `domain/objects/` | Content and combat/interaction rules |
@@ -55,7 +57,7 @@ Browser Save/Load and file import/export persist the actual dungeon, discovery, 
 | `domain/saves/*Consistency.ts` | Ownership, resource, geometry, actor, history and town invariants |
 | `frontend/e2e/` | Feature-based Chromium scenarios and shared import/focus helpers |
 
-Paths in the table are relative to `frontend/src` unless prefixed with `frontend`. `RunConfiguration.ts` owns generator/default limits; `UIConfiguration.ts` owns player-follow margins; `App.css` owns theme/terrain styling. Changes should preserve domain/UI separation, deterministic streams and immutable state.
+Paths in the table are relative to `frontend/src` unless prefixed with `frontend`. `RunConfiguration.ts` owns generator/default limits; `UIConfiguration.ts` owns player-follow margins; `App.css` owns global theme/framing; `styles/` separates menu, town and dungeon-terrain styling. Changes should preserve domain/UI separation, deterministic streams and immutable state.
 
 ## Verification
 

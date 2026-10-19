@@ -32,7 +32,7 @@ describe("Generated loot on the play screen", () => {
 			`You see ${ITEM_DEFINITIONS[target.item.kind].name} here.`,
 		);
 		await user.click(screen.getByRole("button", { name: "Character" }));
-		await screen.findByRole("dialog", { name: "Character" });
+		await screen.findByRole("dialog", { name: "The Adventurer's Ledger" });
 		await user.click(
 			screen.getByRole("button", {
 				name: `Pick up ${ITEM_DEFINITIONS[target.item.kind].name}, item 1`,

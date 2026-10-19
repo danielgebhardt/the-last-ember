@@ -34,7 +34,7 @@ it("learns a found book with G, announces it, and shows the spell in the library
 	).toBeVisible();
 	await user.keyboard("i");
 	await user.click(screen.getByRole("tab", { name: "Spells" }));
-	expect(screen.getByRole("region", { name: "Ember Bolt" })).toHaveTextContent(
+	expect(screen.getByRole("article", { name: "Ember Bolt" })).toHaveTextContent(
 		"Damage 8–12",
 	);
 });

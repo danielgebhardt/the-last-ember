@@ -1,5 +1,6 @@
 import { createAdventureSession } from "./components/game/useAdventureSession";
 import "./App.css";
+import "./styles/Menus.css";
 import "./styles/Town.css";
 import "./styles/DungeonTerrain.css";
 import { Analytics } from "@vercel/analytics/react";

@@ -24,16 +24,13 @@ it("shows effective combat and attributes while earned experience remains unchan
 	render(
 		<>
 			<CharacterStats
+				mana={5}
 				player={state.player}
 				equipment={state.equipment}
 				progression={state.progression}
 				effects={effects}
 			/>
-			<ProgressionView
-				mana={state.mana}
-				progression={state.progression}
-				effects={effects}
-			/>
+			<ProgressionView progression={state.progression} effects={effects} />
 		</>,
 	);
 	expect(screen.getByLabelText("Character attack")).toHaveTextContent(

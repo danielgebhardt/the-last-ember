@@ -87,7 +87,7 @@ describe("G pickup from gameplay", () => {
 			);
 			if (route === "Character") {
 				await user.click(screen.getByRole("button", { name: "Character" }));
-				await screen.findByRole("dialog", { name: "Character" });
+				await screen.findByRole("dialog", { name: "The Adventurer's Ledger" });
 				await user.click(
 					screen.getByRole("button", {
 						name: "Pick up Healing potion, item 1",

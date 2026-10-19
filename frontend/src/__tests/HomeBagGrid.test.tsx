@@ -24,7 +24,9 @@ const setup = async (bag = bagWithSpareGear()) => {
 	await user.click(screen.getByRole("button", { name: "Character" }));
 	return {
 		user,
-		panel: within(await screen.findByRole("dialog", { name: "Character" })),
+		panel: within(
+			await screen.findByRole("dialog", { name: "The Adventurer's Ledger" }),
+		),
 	};
 };
 afterEach(resetHomeTestState);
@@ -46,7 +48,7 @@ describe("Visual bag and shared item details", () => {
 		);
 		const bag = within(panel.getByRole("region", { name: "Bag" }));
 		expect(bag.getByLabelText("Bag capacity")).toHaveTextContent(
-			"1 / 27 slots used",
+			"1 / 27 slots",
 		);
 		const stack = bag.getByRole("button", { name: "Healing potion, slot 1" });
 		expect(stack).toHaveAccessibleDescription("2 carried");
@@ -57,7 +59,7 @@ describe("Visual bag and shared item details", () => {
 			bag.getByRole("button", { name: "Healing potion, slot 1" }),
 		).toBeVisible();
 		expect(bag.getByLabelText("Bag capacity")).toHaveTextContent(
-			"1 / 27 slots used",
+			"1 / 27 slots",
 		);
 	});
 	it("uses one details area and only one selection across bag and equipped gear", async () => {

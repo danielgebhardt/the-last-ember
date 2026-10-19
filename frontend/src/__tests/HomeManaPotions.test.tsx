@@ -41,7 +41,9 @@ describe("Mana potion controls", () => {
 		screen.getByLabelText("Dungeon map", { exact: true }).focus();
 		const user = userEvent.setup();
 		await user.keyboard("gi");
-		const dialog = await screen.findByRole("dialog", { name: "Character" });
+		const dialog = await screen.findByRole("dialog", {
+			name: "The Adventurer's Ledger",
+		});
 		await user.click(
 			within(dialog).getByRole("button", { name: "Mana potion, slot 2" }),
 		);

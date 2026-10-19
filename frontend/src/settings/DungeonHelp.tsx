@@ -3,16 +3,17 @@ import {
 	ArrowLeft,
 	ArrowRight,
 	ArrowUp,
+	BookOpen,
 	Footprints,
 	Keyboard,
 	Map as MapIcon,
 	Shield,
 } from "lucide-react";
 import type { ReactNode, RefObject } from "react";
+import { EmberMenuHeader, EmberPanel } from "@/components/ui/EmberMenu";
 import {
 	SheetContent,
 	SheetDescription,
-	SheetHeader,
 	SheetTitle,
 } from "@/components/ui/sheet";
 import DungeonLegend from "../components/dungeon/DungeonLegend.tsx";
@@ -67,19 +68,26 @@ const DungeonHelp = ({
 }) => (
 	<SheetContent
 		finalFocus={finalFocus}
-		className="overflow-y-auto data-[side=right]:w-full sm:data-[side=right]:max-w-4xl"
+		className="ember-menu-frame overflow-y-auto data-[side=right]:w-full sm:data-[side=right]:max-w-4xl"
 	>
-		<SheetHeader>
-			<SheetTitle>Help / Controls</SheetTitle>
-			<SheetDescription>
-				A quick guide to exploring the dungeon.
-			</SheetDescription>
-		</SheetHeader>
+		<EmberMenuHeader
+			className="pr-12"
+			icon={<BookOpen className="size-5" />}
+			heading={
+				<SheetTitle className="ember-menu-title">Help / Controls</SheetTitle>
+			}
+			subtitle={
+				<SheetDescription className="ember-menu-description">
+					A quick guide to exploring the dungeon.
+				</SheetDescription>
+			}
+		/>
+
 		<div className="grid gap-6 px-4 pb-6">
 			<div className="grid items-start gap-6 md:grid-cols-2">
-				<section
+				<EmberPanel
 					aria-labelledby="keyboard-controls-title"
-					className="grid gap-3"
+					className="grid content-start gap-3"
 				>
 					<h3
 						id="keyboard-controls-title"
@@ -171,8 +179,12 @@ const DungeonHelp = ({
 						either run. Step off a landmark before starting. Manual input, menus
 						or focus loss cancel it.
 					</p>
-				</section>
-				<section aria-labelledby="map-symbols-title" className="grid gap-3">
+				</EmberPanel>
+
+				<EmberPanel
+					aria-labelledby="map-symbols-title"
+					className="grid content-start gap-3"
+				>
 					<h3
 						id="map-symbols-title"
 						className="flex items-center gap-2 font-medium"
@@ -187,7 +199,7 @@ const DungeonHelp = ({
 					<p className="text-xs leading-relaxed text-muted-foreground">
 						Visibility shading applies when fog of war is enabled.
 					</p>
-				</section>
+				</EmberPanel>
 			</div>
 			<section aria-labelledby="gameplay-notes-title" className="grid gap-3">
 				<h3

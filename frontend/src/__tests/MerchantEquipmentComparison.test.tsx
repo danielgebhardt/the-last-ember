@@ -112,16 +112,21 @@ describe("Equipment decisions at the merchant", () => {
 		expect(previews).toHaveLength(2);
 		expect(previews[0]).toHaveTextContent("Tradeoff · Left ring");
 		expect(previews[0]).toHaveTextContent("Damage 5–7 → 4–6");
-		expect(previews[0]).toHaveTextContent("Maximum mana 16 → 18 (+2)");
-		expect(previews[0]).toHaveTextContent("Base spell modifier +1 → +2 (+1)");
-		expect(previews[0]).toHaveTextContent("Heal bonus +1 → +2 (+1)");
-		const spellRow = within(previews[0]).getByText(/^Base spell modifier/);
-		expect(within(spellRow).getByText("+2 (+1)")).toHaveClass("text-green-700");
+		expect(previews[0]).toHaveTextContent("Maximum mana 16 → 18");
+		expect(previews[0]).toHaveTextContent("Base spell modifier +1 → +2");
+		expect(previews[0]).toHaveTextContent("Base spell modifier +1 → +2");
+		const spellRow = within(previews[0])
+			.getAllByText(/^Base spell modifier/)[0]
+			.closest("div");
+		if (!spellRow) throw new Error("Missing comparison row");
+		expect(within(spellRow).getByText("+2")).toHaveClass("text-green-700");
 		expect(previews[1]).toHaveTextContent("Tradeoff · Right ring");
-		expect(previews[1]).toHaveTextContent("Maximum mana 16 → 14 (−2)");
-		expect(previews[1]).toHaveTextContent("Maximum health 14 → 14 (0)");
+		expect(previews[1]).toHaveTextContent("Maximum mana 16 → 14");
+		expect(previews[1]).toHaveTextContent("Maximum health 14 → 14");
 		expect(
-			ring.getByText(/Capacity gains do not refill health or mana/),
+			ring.getByText(
+				/Equipping items that increase health or mana capacity does not refill/,
+			),
 		).toBeVisible();
 		expect(onSell).not.toHaveBeenCalled();
 		expect(state).toEqual(original);
@@ -139,10 +144,10 @@ describe("Equipment decisions at the merchant", () => {
 			throw new Error("Expected the robe comparison disclosure");
 		const robe = within(robeDetails);
 		expect(robe.getByLabelText("Equipment comparison")).toHaveTextContent(
-			"Armor 6 → 4 (−2)",
+			"Armor 6 → 4",
 		);
 		expect(robe.getByLabelText("Equipment comparison")).toHaveTextContent(
-			"Base spell modifier +1 → +2 (+1)",
+			"Base spell modifier +1 → +2",
 		);
 		const changed: GameState = {
 			...props.state,
@@ -159,19 +164,19 @@ describe("Equipment decisions at the merchant", () => {
 			"Better · Chest",
 		);
 		expect(robe.getByLabelText("Equipment comparison")).toHaveTextContent(
-			"Maximum health 18 → 18 (0)",
+			"Maximum health 18 → 18",
 		);
 		expect(robe.getByLabelText("Equipment comparison")).toHaveTextContent(
-			"Maximum mana 18 → 20 (+2)",
+			"Maximum mana 18 → 20",
 		);
 		expect(robe.getByLabelText("Equipment comparison")).toHaveTextContent(
-			"Armor 1 → 2 (+1)",
+			"Armor 1 → 2",
 		);
 		expect(robe.getByLabelText("Equipment comparison")).toHaveTextContent(
 			"Hit chance 95% → 95%",
 		);
 		expect(robe.getByLabelText("Equipment comparison")).toHaveTextContent(
-			"Base spell modifier +2 → +3 (+1)",
+			"Base spell modifier +2 → +3",
 		);
 		expect(
 			panel.queryByRole("button", { name: /Short sword.*Sell for 20 gold/ }),

@@ -1,0 +1,325 @@
+/* ==========================================
+   The Last Ember — Shared Menu Tabs
+   ========================================== */
+
+.ember-tabs-list {
+	border-bottom: 1px solid color-mix(in srgb, var(--primary) 35%, var(--border));
+
+	background: linear-gradient(
+		to bottom,
+		color-mix(in srgb, var(--card) 95%, var(--accent)),
+		color-mix(in srgb, var(--card) 88%, var(--muted))
+	);
+
+	scrollbar-width: thin;
+}
+
+.ember-tab {
+	position: relative;
+
+	border: 1px solid transparent;
+	border-bottom: 2px solid transparent;
+	border-radius: 7px 7px 0 0;
+
+	color: var(--muted-foreground);
+	background: transparent;
+
+	transition:
+		color 150ms ease,
+		background-color 150ms ease,
+		border-color 150ms ease;
+}
+
+.ember-tab:hover:not([data-disabled]):not(:disabled) {
+	color: var(--foreground);
+	background: color-mix(in srgb, var(--accent) 40%, transparent);
+}
+
+.ember-tab[data-active] {
+	color: var(--foreground);
+
+	border-color: color-mix(in srgb, var(--primary) 35%, var(--border));
+	border-bottom-color: var(--primary);
+
+	background: linear-gradient(
+		to bottom,
+		color-mix(in srgb, var(--accent) 65%, var(--card)),
+		color-mix(in srgb, var(--accent) 35%, var(--card))
+	);
+
+	box-shadow: inset 0 1px 0 color-mix(in srgb, var(--primary) 14%, transparent);
+}
+
+.ember-tab[data-active] svg {
+	color: var(--primary);
+}
+
+.ember-tab[data-disabled] {
+	cursor: not-allowed;
+	opacity: 0.4;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.ember-tab {
+		transition: none;
+	}
+}
+
+@media (forced-colors: active) {
+	.ember-tab[data-active] {
+		border: 1px solid Highlight;
+		border-bottom: 2px solid Highlight;
+		color: Highlight;
+	}
+}
+
+/* ==========================================
+   The Last Ember — Shared Menu System
+   ========================================== */
+
+/* Applies to an existing Dialog.Popup or SheetContent */
+.ember-menu-frame {
+	--ember-menu-trim: #a77a3e;
+	--ember-menu-soft: rgb(167 122 62 / 25%);
+
+	isolation: isolate;
+
+	border-color: var(--ember-menu-trim);
+
+	background:
+		radial-gradient(ellipse at 50% 0%, rgb(177 124 54 / 7%), transparent 65%),
+		var(--popover);
+
+	box-shadow:
+		0 20px 65px rgb(0 0 0 / 25%),
+		inset 0 0 0 3px var(--popover),
+		inset 0 0 0 4px var(--ember-menu-soft);
+}
+
+.dark .ember-menu-frame {
+	--ember-menu-trim: #987240;
+	--ember-menu-soft: rgb(201 152 74 / 24%);
+
+	box-shadow:
+		0 24px 70px rgb(0 0 0 / 50%),
+		inset 0 0 0 3px var(--popover),
+		inset 0 0 0 4px var(--ember-menu-soft);
+}
+
+/* Decorative corners; don't interfere with controls */
+.ember-menu-frame::before,
+.ember-menu-frame::after {
+	content: "";
+	position: absolute;
+	z-index: 2;
+	pointer-events: none;
+	width: 17px;
+	height: 17px;
+}
+
+.ember-menu-frame::before {
+	top: 4px;
+	left: 4px;
+	border-top: 2px solid var(--ember-menu-trim);
+	border-left: 2px solid var(--ember-menu-trim);
+	border-radius: 4px 0 0 0;
+}
+
+.ember-menu-frame::after {
+	right: 4px;
+	bottom: 4px;
+	border-right: 2px solid var(--ember-menu-trim);
+	border-bottom: 2px solid var(--ember-menu-trim);
+	border-radius: 0 0 4px 0;
+}
+
+/* Shared header */
+@layer components {
+	.ember-menu-header {
+		flex-shrink: 0;
+		padding: 16px 20px 12px;
+		border-bottom: 1px solid var(--ember-menu-soft);
+
+		background: linear-gradient(
+			to bottom,
+			color-mix(in srgb, var(--card) 92%, var(--accent)),
+			transparent
+		);
+	}
+}
+
+.ember-menu-title {
+	font-family: Georgia, "Times New Roman", serif;
+	font-size: 1.35rem;
+	font-weight: 700;
+	line-height: 1.25;
+	letter-spacing: 0.012em;
+	color: var(--foreground);
+}
+
+.ember-menu-description {
+	margin-top: 4px;
+	color: var(--muted-foreground);
+	font-size: 0.8rem;
+	line-height: 1.5;
+}
+
+.ember-menu-icon {
+	display: flex;
+	width: 42px;
+	height: 42px;
+	flex: none;
+	align-items: center;
+	justify-content: center;
+	border-radius: 9px;
+	border: 1px solid var(--ember-menu-soft, var(--border));
+	background: color-mix(in srgb, var(--accent) 65%, var(--card));
+	color: var(--primary);
+}
+
+.ember-menu-divider {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	color: var(--ember-menu-trim);
+}
+
+.ember-menu-divider::before,
+.ember-menu-divider::after {
+	content: "";
+	height: 1px;
+	flex: 1;
+	background: linear-gradient(
+		to right,
+		transparent,
+		var(--ember-menu-soft),
+		transparent
+	);
+}
+
+/* Reusable content section */
+@layer components {
+	.ember-menu-panel {
+		min-width: 0;
+		border: 1px solid var(--ember-menu-soft, var(--border));
+		border-radius: 10px;
+		padding: 16px;
+
+		background: color-mix(in srgb, var(--card) 90%, var(--muted));
+
+		box-shadow: inset 0 1px 0 rgb(255 255 255 / 5%);
+	}
+}
+
+.ember-menu-panel h2,
+.ember-menu-panel h3 {
+	color: var(--foreground);
+}
+
+/* Optional footer and action styling */
+.ember-menu-footer {
+	border-top: 1px solid var(--ember-menu-soft);
+	background: color-mix(in srgb, var(--popover) 90%, var(--accent));
+}
+
+@media (max-width: 640px) {
+	@layer components {
+		.ember-menu-header {
+			padding: 14px 16px 12px;
+		}
+	}
+
+	.ember-menu-title {
+		font-size: 1.2rem;
+	}
+
+	.ember-menu-icon {
+		width: 36px;
+		height: 36px;
+	}
+}
+
+@media (forced-colors: active) {
+	.ember-menu-frame,
+	.ember-menu-panel {
+		border-color: CanvasText;
+	}
+}
+
+/* Keep header actions visible on narrow screens. */
+.ember-menu-header > div:first-child {
+	min-width: 0;
+}
+
+.ember-menu-header .ember-menu-title,
+.ember-menu-header .ember-menu-description {
+	overflow-wrap: anywhere;
+}
+
+/* ==========================================
+   Adventurer's Ledger — Inner Panels
+   ========================================== */
+
+.ember-menu-section-heading {
+	font-family: Georgia, "Times New Roman", serif;
+	font-size: 1rem;
+	font-weight: 700;
+	letter-spacing: 0.015em;
+	color: var(--foreground);
+}
+
+/* Inventory and equipment slots */
+@layer components {
+	.ember-item-slot {
+		border-color: color-mix(in srgb, var(--primary) 22%, var(--border));
+
+		background: color-mix(in srgb, var(--card) 75%, var(--muted));
+
+		transition:
+			background-color 140ms ease,
+			border-color 140ms ease;
+	}
+}
+
+.ember-item-slot:hover:not(:disabled) {
+	border-color: color-mix(in srgb, var(--primary) 55%, var(--border));
+	background: var(--accent);
+}
+
+.ember-item-slot[aria-pressed="true"] {
+	border-color: var(--primary);
+	background: color-mix(in srgb, var(--primary) 12%, var(--card));
+
+	box-shadow: inset 0 0 0 1px
+		color-mix(in srgb, var(--primary) 35%, transparent);
+}
+
+/* Empty bag slots */
+.ember-item-slot-empty {
+	border-color: color-mix(in srgb, var(--primary) 12%, var(--border));
+
+	background: color-mix(in srgb, var(--muted) 28%, transparent);
+}
+
+/* Magical accent on spell entries */
+@layer components {
+	.ember-spell-card {
+		border-color: color-mix(in srgb, #9879c6 25%, var(--border));
+	}
+}
+
+.ember-spell-card:hover {
+	border-color: color-mix(in srgb, #9879c6 48%, var(--border));
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.ember-item-slot {
+		transition: none;
+	}
+}
+
+@media (forced-colors: active) {
+	.ember-item-slot[aria-pressed="true"] {
+		border-color: Highlight;
+	}
+}

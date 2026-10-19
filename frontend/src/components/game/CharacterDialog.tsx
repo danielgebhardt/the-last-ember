@@ -1,7 +1,10 @@
 import { Dialog } from "@base-ui/react/dialog";
 import { Tabs } from "@base-ui/react/tabs";
+import { Backpack, BookOpen, PackageOpen, UserRound } from "lucide-react";
 import { type RefObject, useLayoutEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { EmberMenuHeader } from "@/components/ui/EmberMenu";
+import { EmberTab, EmberTabsList } from "@/components/ui/EmberTabs";
 import type { ActivityHistory } from "../../domain/game/ActivityHistory";
 import type { QuestState } from "../../domain/game/Adventure";
 import type { PlayerAction } from "../../domain/game/PlayerActions";
@@ -120,64 +123,86 @@ const CharacterDialog = ({
 					event.stopPropagation();
 					if (!event.repeat) onCloseRequested();
 				}}
-				className="fixed top-1/2 left-1/2 z-50 flex h-[min(52rem,calc(100dvh-2rem))] max-h-[calc(100dvh-2rem)] w-[calc(100%-2rem)] max-w-7xl -translate-x-1/2 -translate-y-1/2 flex-col overflow-hidden rounded-xl border bg-popover text-sm text-popover-foreground shadow-lg"
+				className="
+   ember-menu-frame
+   fixed top-1/2 left-1/2 z-50
+   flex h-[min(52rem,calc(100dvh-2rem))]
+   max-h-[calc(100dvh-2rem)]
+   w-[calc(100%-2rem)] max-w-[86rem]
+   -translate-x-1/2 -translate-y-1/2
+   flex-col overflow-hidden rounded-xl border
+   text-sm text-popover-foreground
+"
 			>
-				<div className="flex shrink-0 items-start justify-between gap-4 border-b p-4">
-					<div>
-						<Dialog.Title ref={titleRef} tabIndex={-1} className="outline-none">
-							Character
+				<EmberMenuHeader
+					className="shrink-0"
+					icon={<Backpack className="size-5" />}
+					heading={
+						<Dialog.Title
+							ref={titleRef}
+							tabIndex={-1}
+							className="ember-menu-title outline-none"
+						>
+							The Adventurer's Ledger
 						</Dialog.Title>
-						<Dialog.Description>
+					}
+					subtitle={
+						<Dialog.Description className="ember-menu-description">
 							Your progression, equipment, carried items, and known spells.
 						</Dialog.Description>
-					</div>
-					<Dialog.Close render={<Button variant="outline" size="sm" />}>
-						Close
-					</Dialog.Close>
-				</div>
+					}
+					actions={
+						<Dialog.Close
+							render={
+								<Button
+									variant="outline"
+									size="sm"
+									className="shrink-0 border-primary/25"
+								/>
+							}
+						>
+							Close
+						</Dialog.Close>
+					}
+				/>
+
 				<Tabs.Root
 					defaultValue="character"
-					className="flex min-h-0 flex-1 flex-col"
+					className="flex min-h-0 min-w-0 flex-1 flex-col"
 				>
-					<Tabs.List
-						activateOnFocus
-						aria-label="Character sections"
-						className="flex shrink-0 gap-1 border-b px-4 pt-2"
-					>
-						<Tabs.Tab
-							value="character"
-							className="rounded-t-md border-b-2 border-transparent px-4 py-2 font-medium text-muted-foreground outline-offset-2 focus-visible:outline-2 focus-visible:outline-primary data-active:border-primary data-active:text-foreground"
-						>
+					<EmberTabsList aria-label="Character sections" className="px-4 pt-2">
+						<EmberTab value="character">
+							<UserRound aria-hidden="true" className="size-4" />
 							Character
-						</Tabs.Tab>
-						<Tabs.Tab
-							value="spells"
-							className="rounded-t-md border-b-2 border-transparent px-4 py-2 font-medium text-muted-foreground outline-offset-2 focus-visible:outline-2 focus-visible:outline-primary data-active:border-primary data-active:text-foreground"
-						>
+						</EmberTab>
+
+						<EmberTab value="spells">
+							<BookOpen aria-hidden="true" className="size-4" />
 							Spells
-						</Tabs.Tab>
-					</Tabs.List>
+						</EmberTab>
+					</EmberTabsList>
+
 					<Tabs.Panel
 						value="character"
-						className="min-h-0 flex-1 overflow-y-auto"
+						className="min-h-0 min-w-0 flex-1 overflow-x-auto overflow-y-auto"
 					>
-						<div className="shrink-0 border-b px-4 py-2">
+						<div className="shrink-0 border-b border-primary/20 bg-primary/[0.035] px-4 py-3">
 							<CharacterStats
 								effects={effects}
 								player={player}
+								mana={mana}
 								equipment={equipment}
 								progression={progression}
 							/>
 						</div>
-						<div className="min-h-0 overflow-y-auto p-2">
-							<div className="grid items-start gap-3 md:grid-cols-2 lg:grid-cols-[minmax(0,0.65fr)_minmax(0,1fr)_minmax(28rem,1.5fr)] xl:grid-cols-[minmax(0,0.65fr)_minmax(0,1fr)_minmax(36rem,1.5fr)]">
+						<div className="min-w-0 p-2 pb-4">
+							<div className="grid min-w-0 items-start gap-3 md:grid-cols-2 xl:grid-cols-[minmax(0,0.8fr)_minmax(0,1.1fr)_minmax(0,38.125rem)]">
 								<ProgressionView
 									equipment={equipment}
 									effects={effects}
 									progression={progression}
-									mana={mana}
 								/>
-								<div className="grid content-start gap-2">
+								<div className="grid min-w-0 content-start gap-2">
 									<EquipmentView
 										equipment={equipment}
 										selectedId={
@@ -202,7 +227,7 @@ const CharacterDialog = ({
 										onAction={onAction}
 									/>
 								</div>
-								<div className="grid content-start gap-2">
+								<div className="grid min-w-0 content-start gap-2">
 									<BagContents
 										bag={bag}
 										comparisonContext={comparisonContext}
@@ -213,7 +238,7 @@ const CharacterDialog = ({
 										onSelect={(key) => setSelection({ source: "bag", key })}
 									>
 										{selected && selection ? (
-											<div ref={detailsRef}>
+											<div ref={detailsRef} className="min-w-0">
 												<ItemDetails
 													bag={bag}
 													onCancel={() => {
@@ -250,17 +275,29 @@ const CharacterDialog = ({
 										) : null}
 									</BagContents>
 									<QuestStatus quest={quest} pouch />
-									<FloorItemsView
-										compactEmpty
-										items={floorItems}
-										alive={player.health > 0 && !won}
-										onAction={onAction}
-									/>
+									<div className="ember-menu-panel min-w-0">
+										<h3 className="ember-menu-section-heading mb-2 flex items-center gap-2">
+											<PackageOpen
+												aria-hidden="true"
+												className="size-4 text-primary"
+											/>
+											Nearby / Ground
+										</h3>
+										<FloorItemsView
+											compactEmpty
+											items={floorItems}
+											alive={player.health > 0 && !won}
+											onAction={onAction}
+										/>
+									</div>
 								</div>
 							</div>
 						</div>
 					</Tabs.Panel>
-					<Tabs.Panel value="spells" className="min-h-0 flex-1 overflow-y-auto">
+					<Tabs.Panel
+						value="spells"
+						className="min-h-0 min-w-0 flex-1 overflow-x-hidden overflow-y-auto"
+					>
 						<SpellsView
 							effects={effects}
 							equipment={equipment}
@@ -273,7 +310,7 @@ const CharacterDialog = ({
 						/>
 					</Tabs.Panel>
 				</Tabs.Root>
-				<div className="grid max-h-36 shrink-0 overflow-y-auto gap-2 border-t bg-popover px-4 py-3">
+				<div className="ember-menu-footer grid max-h-36 shrink-0 overflow-y-auto gap-2 px-4 py-3">
 					{actionError && (
 						<p role="alert" className="text-sm text-destructive">
 							{actionError}

@@ -40,7 +40,7 @@ describe("Character armor slots", () => {
 			const user = userEvent.setup();
 			await user.keyboard("i");
 			const dialog = within(
-				await screen.findByRole("dialog", { name: "Character" }),
+				await screen.findByRole("dialog", { name: "The Adventurer's Ledger" }),
 			);
 			expect(
 				dialog.getByRole("button", { name: `${label}: empty` }),

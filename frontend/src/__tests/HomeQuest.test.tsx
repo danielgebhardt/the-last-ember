@@ -59,7 +59,7 @@ describe("Visible adventure objective", () => {
 			);
 			await user.click(screen.getByRole("button", { name: "Character" }));
 			const panel = within(
-				await screen.findByRole("dialog", { name: "Character" }),
+				await screen.findByRole("dialog", { name: "The Adventurer's Ledger" }),
 			);
 			expect(panel.getByLabelText("Quest pouch")).toHaveTextContent(
 				"Ember protected",

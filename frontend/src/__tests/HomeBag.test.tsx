@@ -25,7 +25,7 @@ const openBag = async (bag: Bag = bagWithSpareGear()) => {
 	const user = userEvent.setup();
 	await user.click(screen.getByRole("button", { name: "Character" }));
 	const panel = within(
-		await screen.findByRole("dialog", { name: "Character" }),
+		await screen.findByRole("dialog", { name: "The Adventurer's Ledger" }),
 	);
 	return {
 		user,
@@ -39,7 +39,7 @@ describe("Character bag", () => {
 	it("shows carried spares and used/available capacity separately from equipment", async () => {
 		const { panel, bagView } = await openBag();
 		expect(bagView.getByLabelText("Bag capacity")).toHaveTextContent(
-			"2 / 27 slots used · 25 available",
+			"2 / 27 slots",
 		);
 		expect(
 			bagView.getByRole("button", { name: "Iron sword, slot 1" }),
@@ -99,7 +99,7 @@ describe("Character bag", () => {
 		const { bagView } = await openBag(createBag());
 		expect(bagView.getByText("Your bag is empty.")).toBeVisible();
 		expect(bagView.getByLabelText("Bag capacity")).toHaveTextContent(
-			"0 / 27 slots used · 27 available",
+			"0 / 27 slots",
 		);
 		expect(bagView.queryByRole("button")).not.toBeInTheDocument();
 	});
@@ -112,7 +112,7 @@ describe("Character bag", () => {
 		);
 		const { bagView } = await openBag(bag);
 		expect(bagView.getByLabelText("Bag capacity")).toHaveTextContent(
-			"27 / 27 slots used · 0 available",
+			"27 / 27 slots",
 		);
 		expect(bagView.getAllByRole("button")).toHaveLength(27);
 	});

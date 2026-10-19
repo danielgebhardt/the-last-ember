@@ -39,7 +39,9 @@ const setup = async (overrides: Partial<GameState.GameState> = {}) => {
 	await user.click(screen.getByRole("button", { name: "Character" }));
 	return {
 		user,
-		panel: within(screen.getByRole("dialog", { name: "Character" })),
+		panel: within(
+			screen.getByRole("dialog", { name: "The Adventurer's Ledger" }),
+		),
 	};
 };
 afterEach(resetHomeTestState);
@@ -60,16 +62,21 @@ describe("Equipment comparison in Character", () => {
 			panel.getByRole("button", { name: "Ring of Mana, slot 1" }),
 		);
 		const previews = panel.getAllByLabelText("Equipment comparison");
-		expect(previews[0]).toHaveTextContent("Base spell modifier +1 → +0 (−1)");
-		expect(previews[0]).toHaveTextContent("Heal bonus +1 → +0 (−1)");
-		expect(previews[0]).toHaveTextContent("Magic resistance 6% → 5% (−1 pp)");
-		expect(previews[1]).toHaveTextContent("Magic resistance 6% → 6% (0 pp)");
-		expect(previews[1]).toHaveTextContent("Base spell modifier +1 → +1 (0)");
-		const loss = within(previews[0]).getByText(/^Base spell modifier/);
-		expect(within(loss).getByText("+0 (−1)")).toHaveClass("text-red-700");
-		const unchanged = within(previews[1]).getByText(/^Base spell modifier/);
-		expect(within(unchanged).getByText("+1 (0)")).toHaveClass(
-			"text-foreground",
+		expect(previews[0]).toHaveTextContent("Base spell modifier +1 → +0");
+		expect(previews[0]).toHaveTextContent("Magic resistance 6% → 5%");
+		expect(previews[1]).toHaveTextContent("Magic resistance 6% → 6%");
+		expect(previews[1]).toHaveTextContent("Base spell modifier +1 → +1");
+		const loss = within(previews[0])
+			.getAllByText(/^Base spell modifier/)[0]
+			.closest("div");
+		if (!loss) throw new Error("Missing comparison row");
+		expect(within(loss).getByText("+0")).toHaveClass("text-red-700");
+		const unchanged = within(previews[1])
+			.getAllByText(/^Base spell modifier/)[0]
+			.closest("div");
+		if (!unchanged) throw new Error("Missing comparison row");
+		expect(within(unchanged).getAllByText("+1").at(-1)).toHaveClass(
+			"text-muted-foreground",
 		);
 		expect(panel.getByText(/Control and movement effects/)).toBeVisible();
 		expect(screen.getByLabelText("Turn count")).toHaveTextContent("Turn 0");
@@ -108,7 +115,7 @@ describe("Equipment comparison in Character", () => {
 			panel.getByRole("button", { name: "Leather cap, slot 3" }),
 		);
 		expect(panel.getByLabelText("Equipment comparison")).toHaveTextContent(
-			"Armor 1 → 2 (+1)",
+			"Armor 1 → 2",
 		);
 		await user.click(panel.getByRole("button", { name: "Equip on head" }));
 		await user.click(panel.getByRole("button", { name: "Head: Leather cap" }));
@@ -185,12 +192,14 @@ describe("Equipment comparison in Character", () => {
 		const [left, right] = panel.getAllByLabelText("Equipment comparison");
 		expect(left).toHaveTextContent("Tradeoff · Left ring");
 		expect(left).toHaveTextContent("Damage 4–6 → 3–5");
-		expect(left).toHaveTextContent("Maximum mana 16 → 18 (+2)");
+		expect(left).toHaveTextContent("Maximum mana 16 → 18");
 		expect(right).toHaveTextContent("Tradeoff · Right ring");
-		expect(right).toHaveTextContent("Maximum mana 16 → 14 (−2)");
-		expect(right).toHaveTextContent("Armor 3 → 3 (0)");
+		expect(right).toHaveTextContent("Maximum mana 16 → 14");
+		expect(right).toHaveTextContent("Armor 3 → 3");
 		expect(
-			panel.getByText(/Capacity gains do not refill health or mana/),
+			panel.getByText(
+				/Equipping items that increase health or mana capacity does not refill/,
+			),
 		).toBeVisible();
 		expect(panel.getByLabelText("Character health")).toHaveTextContent(
 			"Health 7 / 14",

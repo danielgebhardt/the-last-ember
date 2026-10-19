@@ -24,7 +24,7 @@ describe("Picking up and dropping from Character", () => {
 		const user = userEvent.setup();
 		await user.click(screen.getByRole("button", { name: "Character" }));
 		const panel = within(
-			await screen.findByRole("dialog", { name: "Character" }),
+			await screen.findByRole("dialog", { name: "The Adventurer's Ledger" }),
 		);
 		await user.click(panel.getByRole("button", { name: "Iron sword, slot 1" }));
 		await user.click(panel.getByRole("button", { name: "Drop item" }));
@@ -69,7 +69,7 @@ describe("Picking up and dropping from Character", () => {
 		const user = userEvent.setup();
 		await user.click(screen.getByRole("button", { name: "Character" }));
 		const panel = within(
-			await screen.findByRole("dialog", { name: "Character" }),
+			await screen.findByRole("dialog", { name: "The Adventurer's Ledger" }),
 		);
 		const ground = within(panel.getByRole("region", { name: "On your tile" }));
 		expect(ground.getAllByRole("button")).toHaveLength(2);
