@@ -1,9 +1,11 @@
 import { appendActivityEvents } from "../game/ActivityHistory";
+import { removeDisease } from "../game/Disease";
 import type { GameState } from "../game/GameState";
+import { maximumHealth } from "../game/PlayerHealth";
 import { TOWN } from "./TownDefinition";
 import { isTownLocation } from "./TownLocation";
 
-export type SanctuaryService = "health";
+export type SanctuaryService = "health" | "poison" | "disease" | "cleanse";
 export type SanctuaryQuote = Readonly<{
 	service: SanctuaryService;
 	cost: number;
@@ -17,8 +19,16 @@ export type SanctuaryAction = {
 };
 export const SANCTUARY_SERVICE_NAMES: Record<SanctuaryService, string> = {
 	health: "Restore health",
+	poison: "Cure poison",
+	disease: "Cure Disease",
+	cleanse: "Complete cleanse",
 };
-export const SANCTUARY_SERVICES: readonly SanctuaryService[] = ["health"];
+export const SANCTUARY_SERVICES: readonly SanctuaryService[] = [
+	"health",
+	"poison",
+	"disease",
+	"cleanse",
+];
 export const canReachSanctuary = (state: GameState): boolean => {
 	const building = TOWN.buildings.find((b) => b.id === "sanctuary");
 	return (
@@ -33,13 +43,43 @@ export const sanctuaryQuote = (
 	state: GameState,
 	service: SanctuaryService,
 ): SanctuaryQuote => {
-	const health = Math.max(0, state.player.maxHealth - state.player.health);
+	if (service === "health") {
+		const health = Math.max(0, state.player.maxHealth - state.player.health);
+		return {
+			service,
+			cost: Math.min(150, health * 10),
+			health,
+			maximumHealth: state.player.maxHealth,
+			conditions: [],
+		};
+	}
+	const active = [
+		...(state.effects.some(
+			(e) => e.actorId === "player" && e.kind === "poisoned",
+		)
+			? ["poisoned"]
+			: []),
+		...(state.afflictions?.some((a) => a.kind === "disease")
+			? ["disease"]
+			: []),
+	];
+	const conditions = active.filter(
+		(c) =>
+			service === "cleanse" ||
+			(service === "poison" ? c === "poisoned" : c === "disease"),
+	);
+	const cost = conditions.reduce(
+		(sum, c) => sum + (c === "poisoned" ? 40 : 150),
+		0,
+	);
 	return {
 		service,
-		cost: Math.min(150, health * 10),
-		health,
-		maximumHealth: state.player.maxHealth,
-		conditions: [],
+		cost: Math.min(600, cost),
+		health: 0,
+		maximumHealth: conditions.includes("disease")
+			? maximumHealth(state.progression, state.equipment, [])
+			: state.player.maxHealth,
+		conditions,
 	};
 };
 export const sameSanctuaryQuote = (
@@ -76,12 +116,25 @@ export const treatAtSanctuary = (state: GameState, action: SanctuaryAction) => {
 	if (!quote.cost) return reject("No treatment is needed.");
 	if (!Number.isSafeInteger(state.gold) || state.gold < quote.cost)
 		return reject("You do not have enough gold.");
+	let treated = quote.conditions.includes("disease")
+		? removeDisease(state, "Sanctuary")
+		: state;
+	if (quote.conditions.includes("poisoned"))
+		treated = {
+			...treated,
+			effects: treated.effects.filter(
+				(e) => e.actorId !== "player" || e.kind !== "poisoned",
+			),
+		};
 	return {
 		state: {
-			...state,
+			...treated,
 			gold: state.gold - quote.cost,
-			player: { ...state.player, health: state.player.health + quote.health },
-			activityHistory: appendActivityEvents(state.activityHistory, [
+			player: {
+				...treated.player,
+				health: treated.player.health + quote.health,
+			},
+			activityHistory: appendActivityEvents(treated.activityHistory, [
 				{
 					type: "sanctuary-treated",
 					service: quote.service,

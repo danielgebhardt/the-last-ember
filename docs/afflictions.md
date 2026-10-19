@@ -23,3 +23,7 @@ New adventures set the optional v27 `dungeonRemedies` marker. Remedy loot has we
 ## Sanctuary access and health (#337)
 
 The authored sanctuary doorway at row 4 / column 7 is open. E beside it or its named touch control opens the same town service dialog; inspection and cancellation are free. Health restoration quotes actual missing effective HP at 10 gold per HP, capped at 150 gold. Full health is a no-op. Confirmations carry the exact cost, amount, capacity and conditions; changed quotes, insufficient gold, wrong locations and ended runs are rejected atomically. Successful treatment spends gold without a dungeon phase or mana refill. Paid condition coverage follows in #364 before sources are enabled.
+
+## Sanctuary conditions (#364, partial)
+
+The same sanctuary quotes poison at 40 gold and Disease at 150. Complete cleanse costs `min(600, sum of supported active fees)` (190 for both), removes only supported harmful conditions, preserves buffs and restores no current HP or mana. Disease capacity returns before any separate healing quote. Quotes list exact conditions, charge and resulting maximum HP; changed, empty and unaffordable transactions are atomic no-ops. Confirmed treatment never advances a dungeon phase. These unlimited paid services do not regenerate item stock. #364 remains open for later conditions.
