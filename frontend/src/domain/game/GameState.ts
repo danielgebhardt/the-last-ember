@@ -10,6 +10,10 @@ import {
 	createStartingPotionHotbar,
 	type PotionHotbar,
 } from "../items/PotionHotbar";
+import {
+	allocateRunRareEquipment,
+	type RareEquipmentAllocation,
+} from "../items/RareEquipment";
 import { spawnRunSpellbooks } from "../items/SpellbookPlacement";
 import { placeMerchants } from "../merchant/MerchantPlacement";
 import {
@@ -44,6 +48,8 @@ import { createKnownSpells, type SpellKind } from "./Spells";
 import type { TimedEffect } from "./TimedEffects";
 
 export type GameState = {
+	rareEquipment?: RareEquipmentAllocation | null;
+	townEquipmentPurchases?: readonly string[];
 	townPortal: TownPortal | null;
 	townEquipmentStock: readonly ItemInstance[];
 	townPotionStock: TownPotionStock;
@@ -96,7 +102,16 @@ export const createGameState = (
 		floorItems,
 		objects: spawnRunObjects(run, monsters, floorItems),
 	});
+	const objects = placeMerchants({ ...encounters, run, floorItems });
+	const rare = allocateRunRareEquipment(
+		run,
+		encounters.monsters,
+		floorItems,
+		objects,
+	);
 	return {
+		rareEquipment: rare.allocation,
+		townEquipmentPurchases: [],
 		town: null,
 		townPortal: null,
 		townPotionStock: createTownPotionStock(),
@@ -105,7 +120,7 @@ export const createGameState = (
 		run,
 		escape: null,
 		merchantStock: createMerchantStock(),
-		objects: placeMerchants({ ...encounters, run, floorItems }),
+		objects,
 		gold: STARTING_GOLD,
 		turn: 0,
 		knownSpells: createKnownSpells(),
@@ -119,7 +134,7 @@ export const createGameState = (
 		equipment: createStartingEquipment(),
 		bag: createStartingBag(),
 		potionHotbar: createStartingPotionHotbar(),
-		floorItems,
+		floorItems: [...floorItems, ...rare.items],
 		monsters:
 			difficulty === 1
 				? encounters.monsters

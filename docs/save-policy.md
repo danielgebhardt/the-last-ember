@@ -26,3 +26,9 @@ Treat v27 as an explicit baseline, not a promise of perpetual compatibility. Bef
 ## Ancient sarcophagi (#350)
 
 Retain v27 with additive, explicitly selected fields: optional `Monster.heroic` and `DungeonObject.sarcophagusOutcome`. Existing v27 saves have neither and continue without regenerating content. New tombs fix their result from the saved seed and stable object identity; opening stores that result and the existing activated flag. Guardian health is saved as played, never rescaled on restore. Validation checks the selected result, guardian identity/kind/health and treasure ownership. No historical migration or save-format bump is introduced.
+
+## Rare MR equipment (#374 / #375)
+
+Retain v27. MR is immutable item-catalog data, so owned items persist only their ordinary ID, kind and optional enchantment. The optional `rareEquipment` record fixes the seeded dungeon allocation, acquired flag and original location. Previous v27 town allocations remain readable; new town stock is universal and independent of the dungeon roll.
+
+New adventures also save `townEquipmentPurchases`, a per-copy purchase ledger. It prevents purchased/sold copies from reappearing in stock and permits one finite town copy of each MR item alongside the independent dungeon copy. Existing v27 saves without this ledger retain actual played stock/ownership; loading never adds the new universal stock. Three retired +1 store IDs remain recognized solely so existing stock/owned gear stays loadable. They are excluded from active offers and cannot be bought. This is current-v27 validation, with no retired-format migration or regeneration.

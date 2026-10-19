@@ -40,6 +40,7 @@ describe("Equipment combat values", () => {
 		expect(deriveCombatStats(createEquipment(), createProgression())).toEqual({
 			magicResistance: 5,
 			magicResistanceIntelligenceBonus: 0,
+			magicResistanceEquipmentBonus: 0,
 			baseAttack: 1,
 			weaponBonus: 0,
 			strengthBonus: 0,
@@ -53,6 +54,7 @@ describe("Equipment combat values", () => {
 		).toEqual({
 			magicResistance: 5,
 			magicResistanceIntelligenceBonus: 0,
+			magicResistanceEquipmentBonus: 0,
 			baseAttack: 1,
 			weaponBonus: 1,
 			strengthBonus: 0,

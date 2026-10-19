@@ -27,35 +27,45 @@ export const TOWN_EQUIPMENT_OFFERS: Readonly<Record<string, Offer>> =
 			offer("armor", "leather-armor", 150),
 			offer("armor", "chain-armor", 500),
 			offer("armor", "scholar-robe", 650),
-			offer("armor", "leather-armor", 400, 1, 1),
 			offer("armor", "leather-cap", 100),
 			offer("armor", "iron-helmet", 350),
 			offer("armor", "wooden-shield", 125),
 			offer("armor", "iron-shield", 450),
-			offer("weapons", "short-sword", 150, 1, 1),
+			offer("armor", "warding-cloak", 900),
+			offer("armor", "spellguard-shield", 900),
 			offer("weapons", "iron-sword", 250),
 			offer("weapons", "iron-sword", 250, 2),
-			offer("weapons", "iron-sword", 550, 1, 1),
 			offer("weapons", "steel-sword", 700),
 			offer("weapons", "battle-axe", 1100),
 		].map((entry) => [entry.item.id, entry]),
 	);
+// v27 recognition only: existing enchanted copies remain valid, but are not offers.
+const retiredOffers = [
+	offer("armor", "leather-armor", 400, 1, 1),
+	offer("weapons", "short-sword", 150, 1, 1),
+	offer("weapons", "iron-sword", 550, 1, 1),
+];
+export const SAVED_TOWN_EQUIPMENT_OFFERS: Readonly<Record<string, Offer>> = {
+	...TOWN_EQUIPMENT_OFFERS,
+	...Object.fromEntries(retiredOffers.map((entry) => [entry.item.id, entry])),
+};
 export const createTownEquipmentStock = (): readonly ItemInstance[] =>
 	Object.values(TOWN_EQUIPMENT_OFFERS).map(({ item }) => ({ ...item }));
+export const townEquipmentOffers = () => Object.values(TOWN_EQUIPMENT_OFFERS);
 export const isTownEquipmentStock = (
 	value: unknown,
 ): value is readonly ItemInstance[] =>
 	Array.isArray(value) &&
-	value.length <= Object.keys(TOWN_EQUIPMENT_OFFERS).length &&
+	value.length <= Object.keys(SAVED_TOWN_EQUIPMENT_OFFERS).length &&
 	new Set(value.map((item) => item?.id)).size === value.length &&
 	value.every((item) => {
 		if (
 			!item ||
 			typeof item !== "object" ||
-			!Object.hasOwn(TOWN_EQUIPMENT_OFFERS, item.id)
+			!Object.hasOwn(SAVED_TOWN_EQUIPMENT_OFFERS, item.id)
 		)
 			return false;
-		const expected = TOWN_EQUIPMENT_OFFERS[item.id].item;
+		const expected = SAVED_TOWN_EQUIPMENT_OFFERS[item.id].item;
 		return (
 			item.kind === expected.kind &&
 			item.enchantment === expected.enchantment &&

@@ -93,6 +93,17 @@ const comparisonRows = ({
 		after.magicResistance,
 		true,
 	),
+	...(before.magicResistanceEquipmentBonus ||
+	after.magicResistanceEquipmentBonus
+		? [
+				numericRow(
+					"Equipment MR",
+					before.magicResistanceEquipmentBonus,
+					after.magicResistanceEquipmentBonus,
+					true,
+				),
+			]
+		: []),
 	numericRow("Hit chance", before.hitChance, after.hitChance, true),
 	numericRow("Evasion", before.evadeChance, after.evadeChance, true),
 ];

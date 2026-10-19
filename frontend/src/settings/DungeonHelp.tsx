@@ -410,6 +410,30 @@ const DungeonHelp = ({
 				</p>
 			</section>
 			<section
+				aria-label="Rare magic-resistant equipment"
+				className="grid gap-3 rounded-lg border p-4 text-sm"
+			>
+				<h3 className="font-medium">Rare magic-resistant equipment</h3>
+				<p>
+					Every new adventure's armor store carries one Warding Cloak and one
+					Spellguard Shield for 900 gold each. These finite store copies are
+					separate from the optional seeded dungeon find on floors 5–20.
+					Browsing, reloading and selling cannot reroll dungeon loot or restock
+					purchased copies. No rare item is required to win.
+				</p>
+				<p>
+					The cloak uses Chest; the shield uses Off hand. Each gives 1 armor and
+					+10 percentage points magic resistance, trading physical protection
+					for resistance to enemy spells and fire/cold breath. MR adds to the
+					base and Intelligence bonus, with a 50% total cap; it does not protect
+					against physical attacks, poison, traps, afflictions or your own
+					Fireball. Enchantment improves armor only. Character shows effective
+					MR and equipment contributions, and comparisons show both effective MR
+					and uncapped equipment MR so defensive sidegrades stay out of Sell all
+					Lower. Properties and prices are initial playtest values.
+				</p>
+			</section>
+			<section
 				aria-label="Ancient sarcophagi"
 				className="grid gap-3 rounded-lg border p-4 text-sm"
 			>
@@ -486,12 +510,13 @@ const DungeonHelp = ({
 					improves accuracy and evasion; armor reduces physical damage after a
 					hit lands. Intelligence also grants modest magic resistance: 5% base
 					plus 1 percentage point per positive Intelligence modifier (one per 2
-					Intelligence above 10), capped at 50%. It reduces enemy spells and
-					fire/cold breath after difficulty scaling, rounding to the nearest
-					whole number with a minimum hit of 1. It does not resist poison,
-					traps, afflictions or your own Fireball. Attributes grow automatically
-					at alternating levels, with no point allocation. Character shows the
-					actual contributions and final chances.
+					Intelligence above 10), plus explicit equipment bonuses, capped at
+					50%. It reduces enemy spells and fire/cold breath after difficulty
+					scaling, rounding to the nearest whole number with a minimum hit of 1.
+					It does not resist poison, traps, afflictions or your own Fireball.
+					Attributes grow automatically at alternating levels, with no point
+					allocation. Character shows the actual contributions and final
+					chances.
 				</p>
 			</section>
 			<p className="flex items-start gap-2 rounded-lg border bg-muted/30 p-3 text-xs leading-relaxed text-muted-foreground">

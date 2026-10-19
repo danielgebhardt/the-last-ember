@@ -8,7 +8,10 @@ import {
 } from "../../domain/items/Equipment";
 import { compareEquipment } from "../../domain/items/EquipmentComparison";
 import { ITEM_DEFINITIONS } from "../../domain/items/Item";
-import { TOWN_EQUIPMENT_OFFERS } from "../../domain/town/TownEquipmentStock";
+import {
+	TOWN_EQUIPMENT_OFFERS,
+	townEquipmentOffers,
+} from "../../domain/town/TownEquipmentStock";
 import {
 	type BuyTownEquipmentAction,
 	reachableTownEquipmentStore,
@@ -48,7 +51,7 @@ const TownEquipmentShop = ({
 			return "Sold out";
 		if (state.gold < offer.price) return "Not enough gold";
 		if (!canAddToBag(state.bag, offer.item)) return "Bag full";
-		return "Available";
+		return null;
 	};
 	const finish = () => {
 		setPending(null);
@@ -90,7 +93,7 @@ const TownEquipmentShop = ({
 					</Dialog.Description>
 					<p className="shrink-0 font-semibold">Gold: {state.gold}</p>
 					<ul className="grid min-h-0 gap-3 overflow-y-auto sm:grid-cols-2">
-						{Object.values(TOWN_EQUIPMENT_OFFERS)
+						{townEquipmentOffers()
 							.filter((offer) => offer.store === store)
 							.map(({ item, price }) => {
 								const definition = ITEM_DEFINITIONS[item.kind],
@@ -116,9 +119,7 @@ const TownEquipmentShop = ({
 											Dungeon tier {definition.minFloor} · Enchantment +
 											{item.enchantment ?? 0}
 										</p>
-										<p>
-											{price} gold · {unavailable(item.id)}
-										</p>
+										<p>{price} gold</p>
 										{comparison && (
 											<EquipmentComparisonView comparison={comparison} />
 										)}
@@ -126,12 +127,13 @@ const TownEquipmentShop = ({
 											variant="outline"
 											className="mt-auto min-h-11 whitespace-normal"
 											disabled={
-												pending !== null || unavailable(item.id) !== "Available"
+												pending !== null || unavailable(item.id) !== null
 											}
 											onClick={() => setPending(item.id)}
 										>
 											Buy {definition.name}
 											{item.enchantment ? ` +${item.enchantment}` : ""}
+											{unavailable(item.id) ? ` (${unavailable(item.id)})` : ""}
 										</Button>
 									</li>
 								);
@@ -161,7 +163,7 @@ const TownEquipmentShop = ({
 										Cancel purchase
 									</Button>
 									<Button
-										disabled={unavailable(pending) !== "Available"}
+										disabled={unavailable(pending) !== null}
 										onClick={() => {
 											onBuy({ type: "buy-town-equipment", offerId: pending });
 											finish();

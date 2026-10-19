@@ -15,7 +15,7 @@ import { SPELL_DEFINITIONS } from "../game/Spells";
 import { EFFECT_DEFINITIONS } from "../game/TimedEffects";
 import { MAX_BAG_ITEMS } from "../items/Bag";
 import { EQUIPMENT_SLOT_LABELS } from "../items/Equipment";
-import { ITEM_DEFINITIONS } from "../items/Item";
+import { ITEM_DEFINITIONS, RARE_EQUIPMENT_KINDS } from "../items/Item";
 import { isEnchantableKind, MAX_ENCHANTMENT } from "../items/ItemValues";
 import { isMerchantStock } from "../merchant/MerchantRules";
 import { MONSTER_DEFINITIONS } from "../monsters/Monster";
@@ -352,10 +352,25 @@ const documentShape = object({
 		radius: integer(FOG_RADIUS_LIMITS.min, FOG_RADIUS_LIMITS.max),
 	}),
 	state: object({
+		rareEquipment: optional(
+			nullable(
+				(value) =>
+					record(value) &&
+					object({
+						kind: oneOf(RARE_EQUIPMENT_KINDS),
+						source: oneOf(["dungeon", "town"]),
+						acquired: boolean,
+					})(value) &&
+					(value.source === "town"
+						? value.floorNumber === undefined && value.coordinate === undefined
+						: object({ floorNumber: integer(5, 20), coordinate })(value)),
+			),
+		),
 		townPortal: nullable(object({ floorNumber, coordinate })),
 		town: nullable(isTownLocation),
 		townPotionStock: isTownPotionStock,
 		townEquipmentStock: isTownEquipmentStock,
+		townEquipmentPurchases: optional(array(text)),
 		merchantStock: isMerchantStock,
 		gold: natural,
 		escape: nullable(

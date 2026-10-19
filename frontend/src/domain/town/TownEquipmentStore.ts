@@ -1,6 +1,7 @@
 import { appendActivityEvents } from "../game/ActivityHistory";
 import type { GameState } from "../game/GameState";
 import { canAddToBag, createBag } from "../items/Bag";
+import { rareEquipmentId } from "../items/RareEquipment";
 import { TOWN } from "./TownDefinition";
 import {
 	TOWN_EQUIPMENT_OFFERS,
@@ -52,6 +53,8 @@ export const buyTownEquipment = (
 	const offer = TOWN_EQUIPMENT_OFFERS[action.offerId];
 	if (offer.store !== store)
 		return reject("That item belongs to another store.");
+	if (state.townEquipmentPurchases?.includes(action.offerId))
+		return reject("That copy is sold out.");
 	const item = state.townEquipmentStock.find(
 		(copy) => copy.id === action.offerId,
 	);
@@ -80,6 +83,13 @@ export const buyTownEquipment = (
 		state: {
 			...state,
 			gold: state.gold - offer.price,
+			...(state.townEquipmentPurchases !== undefined
+				? { townEquipmentPurchases: [...state.townEquipmentPurchases, item.id] }
+				: {}),
+			...(state.rareEquipment &&
+			rareEquipmentId(state.rareEquipment) === item.id
+				? { rareEquipment: { ...state.rareEquipment, acquired: true } }
+				: {}),
 			bag: createBag([...state.bag.items, { ...item }]),
 			townEquipmentStock: state.townEquipmentStock.filter(
 				(copy) => copy.id !== item.id,

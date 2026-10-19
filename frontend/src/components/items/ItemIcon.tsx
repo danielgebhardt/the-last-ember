@@ -19,6 +19,8 @@ import EmberIcon from "./EmberIcon";
 import ExitScrollIcon from "./ExitScrollIcon";
 import PotionIcon from "./PotionIcon";
 import RingIcon from "./RingIcon";
+import SpellguardShieldIcon from "./SpellguardShieldIcon";
+import WardingCloakIcon from "./WardingCloakIcon";
 
 const isPotionKind = (kind: ItemKind): kind is PotionKind =>
 	ITEM_DEFINITIONS[kind].type === "potion";
@@ -34,6 +36,8 @@ const icons: Record<
 	Exclude<ItemKind, BookKind | PotionKind | RingKind>,
 	ComponentType<SVGProps<SVGSVGElement>>
 > = {
+	"warding-cloak": WardingCloakIcon,
+	"spellguard-shield": SpellguardShieldIcon,
 	"enchantment-scroll": ScrollText,
 	"exit-scroll": ExitScrollIcon,
 	cure: EmberIcon,

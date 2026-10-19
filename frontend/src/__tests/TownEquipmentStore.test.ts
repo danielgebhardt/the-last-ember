@@ -98,11 +98,9 @@ describe.each(["armor", "weapons"] as const)("town %s store", (store) => {
 			}).error,
 		).toBeTruthy();
 	});
-	it("preserves depletion and enchantments through save/load and rejects forged stock ownership", () => {
+	it("preserves depletion through save/load and rejects forged stock ownership", () => {
 		const state = shop(store),
-			offer = required(
-				offers.find((x) => x.store === store && x.item.enchantment === 1),
-			);
+			offer = required(offers.find((x) => x.store === store));
 		const bought = resolvePlayerAction(state, {
 			type: "buy-town-equipment",
 			offerId: offer.item.id,
@@ -137,6 +135,7 @@ describe.each(["armor", "weapons"] as const)("town %s store", (store) => {
 	});
 	it("compares full loadouts at early and late levels without mutating ownership", () => {
 		const state = shop(store);
+		const stockBefore = structuredClone(state.townEquipmentStock);
 		for (const offer of offers.filter((x) => x.store === store)) {
 			for (const experience of [0, 5000]) {
 				const comparison = compareEquipment(offer.item, {
@@ -160,14 +159,14 @@ describe.each(["armor", "weapons"] as const)("town %s store", (store) => {
 				expect(stronger?.label).toBe("Lower");
 			}
 		}
-		expect(state.townEquipmentStock).toEqual(createTownEquipmentStock());
+		expect(state.townEquipmentStock).toEqual(stockBefore);
 	});
 });
-it("stocks separate duplicate and enchanted copies deterministically, without rare or strongest gear", () => {
+it("stocks finite plain copies and both MR items deterministically, without strongest gear", () => {
 	const first = createTownEquipmentStock();
 	expect(first).toEqual(createTownEquipmentStock());
 	expect(first).not.toBe(createTownEquipmentStock());
-	expect(first.filter((x) => x.kind === "iron-sword")).toHaveLength(3);
+	expect(first.filter((x) => x.kind === "iron-sword")).toHaveLength(2);
 	expect(
 		first.some(
 			(x) =>

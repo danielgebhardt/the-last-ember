@@ -20,6 +20,9 @@ export default async function prepareFixtures() {
 			"/src/domain/dungeon/DungeonRun.ts",
 		);
 		const { createGameState } = await load("/src/domain/game/GameState.ts");
+		const { rareEquipmentAdventure } = await load(
+			"/src/__tests/RareEquipmentTestHelpers.ts",
+		);
 		const { sarcophagusEncounter } = await load(
 			"/src/__tests/SarcophagusTestHelpers.ts",
 		);
@@ -510,7 +513,31 @@ export default async function prepareFixtures() {
 			],
 		});
 		await mkdir(directory, { recursive: true });
+		const rareTownGear = (kind) => {
+			const state = rareEquipmentAdventure(kind, "town");
+			return {
+				...state,
+				gold: 1200,
+				monsters: [],
+				town: { ...createTownLocation(), coordinate: { row: 13, col: 7 } },
+				equipment: {
+					...state.equipment,
+					chest: { id: "review:chain", kind: "chain-armor" },
+					offHand: { id: "review:iron", kind: "iron-shield" },
+				},
+			};
+		};
 		for (const [name, state, config, fixtureFog = fog] of [
+			[
+				"rare-cloak",
+				rareTownGear("warding-cloak"),
+				{ ...configuration, rows: 15, cols: 15, difficulty: 1 },
+			],
+			[
+				"rare-shield",
+				rareTownGear("spellguard-shield"),
+				{ ...configuration, rows: 15, cols: 15, difficulty: 1 },
+			],
 			[
 				"viewport-error",
 				{

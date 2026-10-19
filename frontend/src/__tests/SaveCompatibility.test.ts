@@ -65,3 +65,20 @@ describe("Version-27 save baseline", () => {
 		});
 	});
 });
+
+it("retains existing v27 enchanted equipment without offering retired stock for purchase", () => {
+	const { document } = loadVersion27();
+	const id = "town-gear:armor:leather-armor:1:1";
+	const item = { id, kind: "leather-armor", enchantment: 1 };
+	const previous = {
+		...document,
+		state: {
+			...document.state,
+			townEquipmentStock: document.state.townEquipmentStock.filter(
+				(i) => i.id !== id,
+			),
+			bag: { items: [...document.state.bag.items, item] },
+		},
+	};
+	expect(parseSave(JSON.stringify(previous)).ok).toBe(true);
+});

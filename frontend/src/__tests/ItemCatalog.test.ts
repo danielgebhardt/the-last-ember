@@ -30,6 +30,9 @@ describe("Depth-eligible item catalog", () => {
 		{ foundWeight: 0, dropWeight: 0 },
 		{ armor: -1 },
 		{ attackBonus: 1.5 },
+		{ magicResistance: -1 },
+		{ magicResistance: 1.5 },
+		{ magicResistance: 51 },
 	])("rejects unusable item metadata: %j", (overrides) => {
 		expect(() =>
 			validateItemDefinition({

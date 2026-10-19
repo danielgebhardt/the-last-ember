@@ -131,6 +131,8 @@ const CharacterStats = ({
 					</output>
 					<p className={hint}>
 						Base 5% + Intelligence {combat.magicResistanceIntelligenceBonus}%
+						{combat.magicResistanceEquipmentBonus > 0 &&
+							` + equipment ${combat.magicResistanceEquipmentBonus}%`}{" "}
 						(max 50%)
 					</p>
 				</div>

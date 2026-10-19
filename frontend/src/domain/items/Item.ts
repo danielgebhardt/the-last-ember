@@ -1,6 +1,7 @@
 import { MAX_FLOORS } from "../dungeon/RunConfiguration";
 export type ItemDefinition = {
 	specialFindOnly?: boolean;
+	magicResistance?: number;
 	name: string;
 	type:
 		| "potion"
@@ -28,6 +29,34 @@ export type ItemDefinition = {
 	dropWeight: number;
 };
 export const ITEM_DEFINITIONS = {
+	"warding-cloak": {
+		specialFindOnly: true,
+		name: "Warding Cloak",
+		type: "chest-armor",
+		attackBonus: 0,
+		armor: 1,
+		magicResistance: 10,
+		minFloor: 5,
+		maxFloor: 20,
+		foundWeight: 0,
+		dropWeight: 0,
+		description:
+			"A light cloak sewn with warding stars. Chest: 1 armor and +10 percentage points MR against enemy spells/breath, capped at 50% total. Trades physical protection for wards. Does not resist poison, traps, afflictions or your own Fireball. Enchantment adds armor only.",
+	},
+	"spellguard-shield": {
+		specialFindOnly: true,
+		name: "Spellguard Shield",
+		type: "shield",
+		attackBonus: 0,
+		armor: 1,
+		magicResistance: 10,
+		minFloor: 5,
+		maxFloor: 20,
+		foundWeight: 0,
+		dropWeight: 0,
+		description:
+			"A shield bearing a star-shaped ward. Off hand: 1 armor and +10 percentage points MR against enemy spells/breath, capped at 50% total. Trades physical protection for wards. Does not resist poison, traps, afflictions or your own Fireball. Enchantment adds armor only.",
+	},
 	"exit-scroll": {
 		specialFindOnly: true,
 		name: "Town portal scroll",
@@ -709,6 +738,13 @@ export const ITEM_DEFINITIONS = {
 } as const;
 
 export type ItemKind = keyof typeof ITEM_DEFINITIONS;
+export const RARE_EQUIPMENT_KINDS = [
+	"warding-cloak",
+	"spellguard-shield",
+] as const;
+export type RareEquipmentKind = (typeof RARE_EQUIPMENT_KINDS)[number];
+export const isRareEquipmentKind = (kind: string): kind is RareEquipmentKind =>
+	RARE_EQUIPMENT_KINDS.some((k) => k === kind);
 
 // Kind identifies the shared definition; id identifies this particular copy.
 export type ItemInstance = Readonly<{
@@ -720,6 +756,13 @@ export type ItemInstance = Readonly<{
 export type LootSource = "found" | "drop";
 export const validateItemDefinition = (definition: ItemDefinition): void => {
 	const stats = definition.stats ?? {};
+	if (
+		definition.magicResistance !== undefined &&
+		(!Number.isSafeInteger(definition.magicResistance) ||
+			definition.magicResistance < 0 ||
+			definition.magicResistance > 50)
+	)
+		throw new RangeError("Invalid equipment magic resistance.");
 	if (
 		!Object.values(stats).every(
 			(value) => Number.isSafeInteger(value) && value >= 0,

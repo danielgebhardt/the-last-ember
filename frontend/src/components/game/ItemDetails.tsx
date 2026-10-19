@@ -14,6 +14,7 @@ import { ITEM_DEFINITIONS, type ItemInstance } from "../../domain/items/Item";
 import {
 	itemArmor,
 	itemAttackBonus,
+	itemMagicResistance,
 	itemName,
 } from "../../domain/items/ItemValues";
 import {
@@ -141,6 +142,12 @@ const ItemDetails = ({
 				</p>
 			</div>
 
+			{itemMagicResistance(item) > 0 && (
+				<p className="text-xs font-medium">
+					Magic resistance +{itemMagicResistance(item)} percentage points while
+					equipped (50% total cap; unchanged by enchantment).
+				</p>
+			)}
 			{(primaryStat || additionalStats) && (
 				<div className="flex flex-wrap gap-2">
 					{primaryStat && (

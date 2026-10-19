@@ -1,4 +1,15 @@
-import { ITEM_DEFINITIONS, type ItemInstance, type ItemKind } from "./Item";
+import {
+	ITEM_DEFINITIONS,
+	type ItemDefinition,
+	type ItemInstance,
+	type ItemKind,
+} from "./Item";
+export const itemMagicResistance = (
+	item: ItemInstance | null | undefined,
+): number =>
+	item
+		? ((ITEM_DEFINITIONS[item.kind] as ItemDefinition).magicResistance ?? 0)
+		: 0;
 export const MAX_ENCHANTMENT = 3;
 export const isEnchantableKind = (kind: ItemKind): boolean =>
 	["weapon", "shield", "chest-armor", "helmet"].includes(

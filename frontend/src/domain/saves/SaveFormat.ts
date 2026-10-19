@@ -11,6 +11,7 @@ import type { GameState } from "../game/GameState";
 import { permanentAttributeGains } from "../game/PermanentAttributes";
 import { levelForExperience } from "../game/Progression";
 import type { ItemInstance } from "../items/Item";
+import type { RareEquipmentAllocation } from "../items/RareEquipment";
 import { navigationRun } from "../objects/NavigationTerrain";
 import type { SaveDocument } from "./SaveDocument";
 import { validateSaveDocument } from "./SaveValidation";
@@ -35,6 +36,19 @@ const savedItem = (item: ItemInstance) => ({
 	kind: item.kind,
 	...(item.enchantment !== undefined ? { enchantment: item.enchantment } : {}),
 });
+const savedRareEquipment = (
+	allocation: RareEquipmentAllocation,
+): RareEquipmentAllocation => ({
+	kind: allocation.kind,
+	acquired: allocation.acquired,
+	...(allocation.source === "dungeon"
+		? {
+				source: "dungeon",
+				floorNumber: allocation.floorNumber,
+				coordinate: { ...allocation.coordinate },
+			}
+		: { source: "town" }),
+});
 const nullableItem = (item: ItemInstance | null) =>
 	item ? savedItem(item) : null;
 export const createSaveDocument = (
@@ -49,10 +63,20 @@ export const createSaveDocument = (
 	configuration: { ...configuration, difficulty: state.difficulty },
 	fog: { ...fog },
 	state: {
+		...(state.rareEquipment !== undefined
+			? {
+					rareEquipment: state.rareEquipment
+						? savedRareEquipment(state.rareEquipment)
+						: null,
+				}
+			: {}),
 		townPortal: state.townPortal
 			? { ...state.townPortal, coordinate: { ...state.townPortal.coordinate } }
 			: null,
 		townEquipmentStock: state.townEquipmentStock.map(savedItem),
+		...(state.townEquipmentPurchases !== undefined
+			? { townEquipmentPurchases: [...state.townEquipmentPurchases] }
+			: {}),
 		townPotionStock: { ...state.townPotionStock },
 		town: state.town
 			? { ...state.town, coordinate: { ...state.town.coordinate } }

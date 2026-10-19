@@ -4,7 +4,7 @@ import { expect, test } from "@playwright/test";
 for (const store of ["armor", "weapons"]) {
 	for (const width of [390, 1440]) {
 		for (const theme of ["Light", "Dark"]) {
-			test(`${store} store ${width}px ${theme}: compare, confirm, own and restore a finite enchanted copy`, async ({
+			test(`${store} store ${width}px ${theme}: compare, confirm, own and restore a finite plain copy`, async ({
 				page,
 			}, info) => {
 				await page.setViewportSize({
@@ -37,8 +37,7 @@ for (const store of ["armor", "weapons"]) {
 					exact: true,
 				});
 				await expect(dialog).toBeVisible();
-				const itemName =
-					store === "armor" ? "Leather armor +1" : "Iron sword +1";
+				const itemName = store === "armor" ? "Chain armor" : "Steel sword";
 				const card = dialog.getByRole("listitem").filter({
 					has: page.getByRole("heading", { name: itemName, exact: true }),
 				});
@@ -46,7 +45,7 @@ for (const store of ["armor", "weapons"]) {
 					card.getByLabel("Equipment comparison", { exact: true }),
 				).toContainText("Damage");
 				await card
-					.getByRole("button", { name: `Buy ${itemName}`, exact: true })
+					.getByRole("button", { name: new RegExp(`^Buy ${itemName}`) })
 					.click();
 				await dialog
 					.getByRole("button", { name: "Cancel purchase", exact: true })
@@ -55,17 +54,17 @@ for (const store of ["armor", "weapons"]) {
 					dialog.getByText("Gold: 5000", { exact: true }),
 				).toBeVisible();
 				await card
-					.getByRole("button", { name: `Buy ${itemName}`, exact: true })
+					.getByRole("button", { name: new RegExp(`^Buy ${itemName}`) })
 					.click();
 				await dialog
 					.getByRole("button", { name: "Confirm purchase", exact: true })
 					.dblclick();
-				const price = store === "armor" ? 400 : 550;
+				const price = store === "armor" ? 500 : 700;
 				await expect(
 					dialog.getByText(`Gold: ${5000 - price}`, { exact: true }),
 				).toBeVisible();
 				await expect(
-					card.getByRole("button", { name: `Buy ${itemName}`, exact: true }),
+					card.getByRole("button", { name: new RegExp(`^Buy ${itemName}`) }),
 				).toBeDisabled();
 				await card.scrollIntoViewIfNeeded();
 				await page.screenshot({
@@ -88,7 +87,7 @@ for (const store of ["armor", "weapons"]) {
 				const bought = saved.state.bag.items.find((item: { id: string }) =>
 					item.id.startsWith(`town-gear:${store}:`),
 				);
-				expect(bought.enchantment).toBe(1);
+				expect(bought.enchantment).toBeUndefined();
 				expect(
 					saved.state.townEquipmentStock.some(
 						(item: { id: string }) => item.id === bought.id,
@@ -116,7 +115,7 @@ for (const store of ["armor", "weapons"]) {
 				await expect(map).toBeFocused();
 				await page.keyboard.press("e");
 				await expect(
-					card.getByRole("button", { name: `Buy ${itemName}`, exact: true }),
+					card.getByRole("button", { name: new RegExp(`^Buy ${itemName}`) }),
 				).toBeDisabled();
 			});
 		}

@@ -14,6 +14,7 @@ export const deriveCombatStats = (
 ) => {
 	const attributes = deriveAttributes(progression, effects, equipment);
 	const strengthBonus = attributes.strengthModifier;
+	const bonuses = equipmentBonuses(equipment);
 	const weaponBonus = itemAttackBonus(equipment.mainHand);
 	const armor = Object.values(armorContributions(equipment)).reduce<number>(
 		(sum, value) => sum + value,
@@ -22,8 +23,11 @@ export const deriveCombatStats = (
 	return {
 		magicResistance: Math.min(
 			50,
-			5 + Math.max(0, attributes.intelligenceModifier),
+			5 +
+				Math.max(0, attributes.intelligenceModifier) +
+				bonuses.magicResistance,
 		),
+		magicResistanceEquipmentBonus: bonuses.magicResistance,
 		magicResistanceIntelligenceBonus: Math.max(
 			0,
 			attributes.intelligenceModifier,
@@ -32,10 +36,7 @@ export const deriveCombatStats = (
 		weaponBonus,
 		strengthBonus,
 		attack: BASE_PLAYER_ATTACK_DAMAGE + strengthBonus + weaponBonus,
-		armor:
-			armor +
-			playerEffectBonuses(effects).armor +
-			equipmentBonuses(equipment).armor,
+		armor: armor + playerEffectBonuses(effects).armor + bonuses.armor,
 	};
 };
 

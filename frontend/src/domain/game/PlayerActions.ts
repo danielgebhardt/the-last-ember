@@ -29,6 +29,7 @@ import {
 	type HotbarAction,
 	hotbarSlotContents,
 } from "../items/PotionHotbar";
+import { rareEquipmentId } from "../items/RareEquipment";
 import {
 	type BuyAction,
 	buyPotion,
@@ -333,6 +334,11 @@ const resolvePlayerEffect = (
 		return {
 			...state,
 			bag: transfer.bag,
+			...(action.type === "pickup" &&
+			state.rareEquipment &&
+			action.itemId === rareEquipmentId(state.rareEquipment)
+				? { rareEquipment: { ...state.rareEquipment, acquired: true } }
+				: {}),
 			equipment: transfer.equipment ?? state.equipment,
 			...(transfer.equipment
 				? resourcesAfterEquipmentChange(state, transfer.equipment)

@@ -20,6 +20,7 @@ import {
 	ITEM_DEFINITIONS,
 	type ItemDefinition,
 	type ItemKind,
+	isRareEquipmentKind,
 } from "../../domain/items/Item";
 import {
 	MONSTER_DEFINITIONS,
@@ -31,6 +32,7 @@ import {
 	OBJECT_DEFINITIONS,
 	TRAP_DISARM_EXPERIENCE,
 } from "../../domain/objects/DungeonObject";
+import { TOWN_EQUIPMENT_OFFERS } from "../../domain/town/TownEquipmentStock";
 import TileIcon from "../dungeon/TileIcon";
 import { TILE_LABELS, TILE_TERRAIN_CLASSES } from "../dungeon/TileVisuals";
 import ItemIcon from "../items/ItemIcon";
@@ -90,6 +92,9 @@ const itemBonuses = (definition: ItemDefinition) =>
 	[
 		definition.attackBonus ? `Attack +${definition.attackBonus}` : null,
 		definition.armor ? `Armor +${definition.armor}` : null,
+		definition.magicResistance
+			? `Magic resistance +${definition.magicResistance} percentage points (50% total cap; enchantment does not increase MR)`
+			: null,
 		definition.stats?.intelligence
 			? "Intelligence also improves magic resistance (50% cap)"
 			: null,
@@ -288,6 +293,19 @@ const DeveloperCatalog = ({
 										{definition.type}
 									</p>
 									{itemBonuses(definition) && <p>{itemBonuses(definition)}</p>}
+									{isRareEquipmentKind(kind) && (
+										<p>
+											Optional seeded dungeon find. Every adventure's armor
+											store stocks one finite copy for{" "}
+											{
+												Object.values(TOWN_EQUIPMENT_OFFERS).find(
+													(offer) => offer.item.kind === kind,
+												)?.price
+											}{" "}
+											gold, separate from dungeon loot. No ordinary drop rolls.
+											Initial playtest balance.
+										</p>
+									)}
 									<p>
 										Found weight {definition.foundWeight} · Drop weight{" "}
 										{definition.dropWeight}

@@ -56,6 +56,11 @@ describe("Chest loot through E", () => {
 			).toHaveFocus();
 			await user.keyboard("e");
 			await screen.findByRole("dialog", { name: "Pick up items" });
+			await waitFor(() =>
+				expect(
+					screen.getByRole("heading", { name: "Pick up items" }),
+				).toHaveFocus(),
+			);
 			expect(screen.getByLabelText("Turn count")).toHaveTextContent("Turn 1");
 			if (method === "keyboard") await user.keyboard("1");
 			else await user.click(screen.getByRole("button", { name: /^Pick up / }));
