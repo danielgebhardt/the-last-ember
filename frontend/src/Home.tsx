@@ -39,6 +39,7 @@ import { useSpellTargeting } from "./components/game/useSpellTargeting";
 import VictoryDialog from "./components/game/VictoryDialog";
 import MerchantDialog from "./components/merchant/MerchantDialog";
 import ObjectChoiceDialog from "./components/objects/ObjectChoiceDialog";
+import SanctuaryDialog from "./components/town/SanctuaryDialog";
 import TownEquipmentShop from "./components/town/TownEquipmentShop";
 import TownMap from "./components/town/TownMap";
 import TownPotionShop from "./components/town/TownPotionShop";
@@ -62,6 +63,7 @@ import {
 	type RestoredAdventure,
 	type SaveDocument,
 } from "./domain/saves/SaveFormat";
+import { canReachSanctuary } from "./domain/town/Sanctuary";
 import { reachableTownEquipmentStore } from "./domain/town/TownEquipmentStore";
 import { atTownPortal } from "./domain/town/TownPortal";
 import { canReachTownPotionStore } from "./domain/town/TownPotionStore";
@@ -595,18 +597,21 @@ const Home = ({
 										mapRef={mapRef}
 										enabled={gameplayEnabled}
 										interactionLabel={
-											canReachTownPotionStore(game.state)
-												? "Potion store (E)"
-												: reachableTownEquipmentStore(game.state)
-													? "Equipment store (E)"
-													: canReachTownSalvageShop(game.state)
-														? "The Rag & Bone (E)"
-														: "Inspect nearby"
+											canReachSanctuary(game.state)
+												? "Sanctuary (E)"
+												: canReachTownPotionStore(game.state)
+													? "Potion store (E)"
+													: reachableTownEquipmentStore(game.state)
+														? "Equipment store (E)"
+														: canReachTownSalvageShop(game.state)
+															? "The Rag & Bone (E)"
+															: "Inspect nearby"
 										}
 										onAction={(action) => {
 											if (
 												action.type === "inspect" &&
-												(canReachTownPotionStore(game.state) ||
+												(canReachSanctuary(game.state) ||
+													canReachTownPotionStore(game.state) ||
 													reachableTownEquipmentStore(game.state) ||
 													canReachTownSalvageShop(game.state))
 											) {
@@ -787,6 +792,14 @@ const Home = ({
 					if (startRun(run.seed, configuration))
 						mapRef.current?.focus({ preventScroll: true });
 				}}
+				mapRef={mapRef}
+			/>
+			<SanctuaryDialog
+				open={townShopOpen && canPlay}
+				state={game.state}
+				error={game.actionError}
+				onClose={() => setTownShopOpen(false)}
+				onTreat={handleActionRequested}
 				mapRef={mapRef}
 			/>
 			<TownEquipmentShop

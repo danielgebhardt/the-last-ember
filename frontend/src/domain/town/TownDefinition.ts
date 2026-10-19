@@ -34,7 +34,7 @@ const buildings: readonly TownBuilding[] = Object.freeze(
 		{
 			id: "sanctuary",
 			name: "Sanctuary",
-			sign: "Sanctuary — mercy will have a price.",
+			sign: "Sanctuary — mercy has a price. Paid healing and condition treatment.",
 			district: "Quiet Lane",
 			mark: "H",
 			row: 2,
@@ -143,9 +143,13 @@ const buildings: readonly TownBuilding[] = Object.freeze(
 		Object.freeze({
 			...building,
 			entry: Object.freeze(building.entry),
-			status: ["potions", "armor", "weapons", "rag-and-bone"].includes(
-				building.id,
-			)
+			status: [
+				"potions",
+				"armor",
+				"weapons",
+				"rag-and-bone",
+				"sanctuary",
+			].includes(building.id)
 				? ("open" as const)
 				: ("closed" as const),
 		}),

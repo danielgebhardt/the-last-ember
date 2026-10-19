@@ -10,6 +10,13 @@ import type { EffectKind } from "./TimedEffects";
 
 export type ActivityEvent = { turn: number } & (
 	| {
+			type: "sanctuary-treated";
+			service: "health";
+			gold: number;
+			health: number;
+			conditions: readonly string[];
+	  }
+	| {
 			type: "affliction-changed";
 			condition: "disease";
 			change: "applied" | "refreshed" | "rejected" | "cured";
