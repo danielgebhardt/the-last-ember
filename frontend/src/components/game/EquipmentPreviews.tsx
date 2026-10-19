@@ -1,3 +1,4 @@
+
 import { equipmentSlotsFor } from "../../domain/items/Equipment";
 import {
 	compareEquipment,
@@ -7,16 +8,24 @@ import type { ItemInstance } from "../../domain/items/Item";
 import EquipmentComparisonView from "./EquipmentComparisonView";
 
 const EquipmentPreviews = ({
-	item,
-	context,
-}: {
+							   item,
+							   context,
+						   }: {
 	item: ItemInstance;
 	context: EquipmentComparisonContext;
 }) => {
 	const comparisons = equipmentSlotsFor(item)
 		.map((slot) => compareEquipment(item, context, slot))
 		.filter((comparison) => comparison !== null);
+
 	if (!comparisons.length) return null;
+
+	const changesCapacity = comparisons.some(
+		({ before, after }) =>
+			before.maxHealth !== after.maxHealth ||
+			before.maxMana !== after.maxMana,
+	);
+
 	return (
 		<div className="grid gap-2">
 			{comparisons.map((comparison) => (
@@ -25,20 +34,16 @@ const EquipmentPreviews = ({
 					comparison={comparison}
 				/>
 			))}
-			<p className="text-xs text-muted-foreground">
-				The base spell modifier adds to Heal and ordinary spell damage. Heavy
-				attacks add twice this modifier; Renewal and poison add half, rounded
-				down. Control and movement effects do not scale. Spell cards show
-				current amounts; target defenses and area rules still apply.
-				Intelligence also adds modest magic resistance against enemy spells and
-				elemental breath.
-			</p>
-			<p className="text-xs text-muted-foreground">
-				Preview uses current active effects, before monsters act. Capacity gains
-				do not refill health or mana; removing capacity can clamp current
-				resources.
-			</p>
+
+			{changesCapacity && (
+				<p className="text-xs leading-relaxed text-muted-foreground">
+					Equipping items that increase health or mana capacity
+					does not refill those resources. Removing capacity
+					can reduce your current resources to the new maximum.
+				</p>
+			)}
 		</div>
 	);
 };
+
 export default EquipmentPreviews;

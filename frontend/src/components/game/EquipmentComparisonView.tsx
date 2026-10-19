@@ -1,5 +1,8 @@
+
+import { ArrowRight } from "lucide-react";
 import { EQUIPMENT_SLOT_LABELS } from "../../domain/items/Equipment";
 import type { compareEquipment } from "../../domain/items/EquipmentComparison";
+
 export type EquipmentComparison = NonNullable<
 	ReturnType<typeof compareEquipment>
 >;
@@ -22,114 +25,202 @@ export const comparisonStyles = {
 		text: "text-red-700 dark:text-red-400",
 	},
 };
-const difference = (before: number, after: number) => {
-	const delta = after - before;
-	return delta < 0 ? `−${Math.abs(delta)}` : delta > 0 ? `+${delta}` : "0";
-};
+
 const valueStyle = (change: number) =>
 	change > 0
 		? "text-green-700 dark:text-green-400"
 		: change < 0
 			? "text-red-700 dark:text-red-400"
 			: "text-foreground";
+
+type ComparisonRow = {
+	label: string;
+	before: string;
+	after: string;
+	change: number;
+	changed: boolean;
+};
+
 const numericRow = (
 	label: string,
 	before: number,
 	after: number,
 	percent = false,
-) => ({
+): ComparisonRow => ({
 	label,
 	before: `${before}${percent ? "%" : ""}`,
-	after: `${after}${percent ? "%" : ` (${difference(before, after)})`}`,
+	after: `${after}${percent ? "%" : ""}`,
 	change: after - before,
+	changed: before !== after,
 });
-const bonusRow = (label: string, before: number, after: number) => ({
+
+const bonusRow = (
+	label: string,
+	before: number,
+	after: number,
+): ComparisonRow => ({
 	label,
 	before: `${before >= 0 ? "+" : ""}${before}`,
-	after: `${after >= 0 ? "+" : ""}${after} (${difference(before, after)})`,
+	after: `${after >= 0 ? "+" : ""}${after}`,
 	change: after - before,
+	changed: before !== after,
 });
-const comparisonRows = ({ before, after }: EquipmentComparison) => [
+
+const comparisonRows = ({ before, after }: EquipmentComparison): ComparisonRow[] => [
 	numericRow("Maximum health", before.maxHealth, after.maxHealth),
 	numericRow("Maximum mana", before.maxMana, after.maxMana),
 	{
 		label: "Damage",
 		before: `${before.minDamage}–${before.maxDamage}`,
 		after: `${after.minDamage}–${after.maxDamage}`,
-		change: after.maxDamage - before.maxDamage,
+		change:
+			after.minDamage + after.maxDamage -
+			(before.minDamage + before.maxDamage),
+		changed:
+			before.minDamage !== after.minDamage ||
+			before.maxDamage !== after.maxDamage,
 	},
 	bonusRow(
 		"Base spell modifier",
 		before.spellPowerBonus,
 		after.spellPowerBonus,
 	),
-	bonusRow("Heal bonus", before.spellPowerBonus, after.spellPowerBonus),
 	numericRow("Armor", before.armor, after.armor),
-	{
-		...numericRow(
-			"Magic resistance",
-			before.magicResistance,
-			after.magicResistance,
-			true,
-		),
-		after: `${after.magicResistance}% (${difference(before.magicResistance, after.magicResistance)} pp)`,
-	},
+	numericRow(
+		"Magic resistance",
+		before.magicResistance,
+		after.magicResistance,
+		true,
+	),
 	numericRow("Hit chance", before.hitChance, after.hitChance, true),
 	numericRow("Evasion", before.evadeChance, after.evadeChance, true),
 ];
-export const comparisonDescription = (comparison: EquipmentComparison) =>
-	`${comparison.label} · ${EQUIPMENT_SLOT_LABELS[comparison.slot]} · ${comparisonRows(
-		comparison,
-	)
-		.map((row) => `${row.label} ${row.before} → ${row.after}`)
-		.join(
-			" · ",
-		)} · ${(["strength", "dexterity", "intelligence"] as const).map((stat) => `${stat} ${comparison.before[stat]} → ${comparison.after[stat]}`).join(" · ")}`;
-const EquipmentComparisonView = ({
-	comparison,
-}: {
-	comparison: EquipmentComparison;
+
+const attributeRows = (comparison: EquipmentComparison): ComparisonRow[] =>
+	(["strength", "dexterity", "intelligence"] as const).map((stat) =>
+		numericRow(
+			stat[0].toUpperCase() + stat.slice(1),
+			comparison.before[stat],
+			comparison.after[stat],
+		),
+	);
+
+export const comparisonDescription = (
+	comparison: EquipmentComparison,
+) => {
+	const rows = [...comparisonRows(comparison), ...attributeRows(comparison)];
+	const changed = rows.filter((row) => row.changed);
+
+	return `${comparison.label} · ${EQUIPMENT_SLOT_LABELS[comparison.slot]} · ${
+		changed.length
+			? changed
+				.map(
+					(row) =>
+						`${row.label} ${row.before} to ${row.after}`,
+				)
+				.join(" · ")
+			: "No stat changes"
+	}`;
+};
+
+const ComparisonValues = ({
+							  rows,
+						  }: {
+	rows: ComparisonRow[];
 }) => (
-	<div className="@container grid gap-2 rounded-md border bg-background/40 p-3">
-		<output
-			aria-label="Equipment comparison"
-			className="grid gap-2 text-xs tabular-nums"
-		>
-			<span
-				className={`font-semibold ${comparisonStyles[comparison.label].text}`}
+	<div className="grid gap-2">
+		{rows.map((row) => (
+			<div
+				key={row.label}
+				className="flex min-w-0 flex-wrap items-baseline justify-between gap-x-3 gap-y-1"
 			>
-				{comparison.label} · {EQUIPMENT_SLOT_LABELS[comparison.slot]}
-			</span>
-			<span className="grid gap-x-4 gap-y-1 @min-[24rem]:grid-cols-2">
-				{comparisonRows(comparison).map((row) => (
-					<span key={row.label}>
-						{row.label} {row.before} →{" "}
-						<span className={valueStyle(row.change)}>{row.after}</span>
-					</span>
-				))}
-			</span>
-			{comparison.label === "Tradeoff" && (
-				<span className="text-muted-foreground">
-					Gains and losses; choose for your play style.
-				</span>
-			)}
-		</output>
-		<details className="text-xs text-muted-foreground">
-			<summary className="cursor-pointer">Attribute details</summary>
-			{(["strength", "dexterity", "intelligence"] as const).map((stat) => (
-				<p key={stat}>
-					{stat[0].toUpperCase() + stat.slice(1)} {comparison.before[stat]} →{" "}
+				<span className="text-muted-foreground">{row.label}</span>
+				<span className="inline-flex items-center gap-2 tabular-nums">
+					<span>{row.before}</span>
+					<ArrowRight
+						aria-hidden="true"
+						className="size-3 text-muted-foreground"
+					/>
 					<span
-						className={valueStyle(
-							comparison.after[stat] - comparison.before[stat],
-						)}
+						className={
+							row.changed
+								? `font-semibold ${valueStyle(row.change)}`
+								: "text-muted-foreground"
+						}
 					>
-						{comparison.after[stat]} (
-						{difference(comparison.before[stat], comparison.after[stat])})
+						{row.after}
 					</span>
-				</p>
-			))}
-		</details>
+				</span>
+			</div>
+		))}
 	</div>
 );
+
+const EquipmentComparisonView = ({
+									 comparison,
+								 }: {
+	comparison: EquipmentComparison;
+}) => {
+	const combatRows = comparisonRows(comparison);
+	const attributes = attributeRows(comparison);
+	const changed = [...combatRows, ...attributes].filter(
+		(row) => row.changed,
+	);
+
+	return (
+		<section
+			aria-label="Equipment comparison"
+			className="grid gap-3 rounded-md border border-primary/20 bg-background/40 p-3"
+		>
+			<div className="flex flex-wrap items-center justify-between gap-2">
+				<h5 className="text-xs font-semibold">
+					Equipment comparison
+				</h5>
+
+				<span
+					className={`rounded-md border px-2 py-0.5 text-xs font-semibold ${
+						comparisonStyles[comparison.label].border
+					} ${comparisonStyles[comparison.label].text}`}
+				>
+					{comparison.label} ·{" "}
+					{EQUIPMENT_SLOT_LABELS[comparison.slot]}
+				</span>
+			</div>
+
+			{changed.length ? (
+				<div className="text-xs">
+					<ComparisonValues rows={changed} />
+				</div>
+			) : (
+				<p className="text-xs text-muted-foreground">
+					No changes to combat statistics or attributes.
+				</p>
+			)}
+
+			{comparison.label === "Tradeoff" && (
+				<p className="text-xs text-muted-foreground">
+					This equipment offers both gains and losses.
+				</p>
+			)}
+
+			<details className="border-t border-primary/10 pt-2 text-xs text-muted-foreground">
+				<summary className="cursor-pointer">
+					Full stat comparison
+				</summary>
+
+				<div className="grid gap-3 pt-3">
+					<ComparisonValues rows={combatRows} />
+
+					<div className="border-t border-primary/10 pt-2">
+						<p className="mb-2 font-medium text-foreground">
+							Attributes
+						</p>
+						<ComparisonValues rows={attributes} />
+					</div>
+				</div>
+			</details>
+		</section>
+	);
+};
+
 export default EquipmentComparisonView;
