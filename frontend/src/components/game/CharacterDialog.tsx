@@ -7,6 +7,7 @@ import { EmberMenuHeader } from "@/components/ui/EmberMenu";
 import { EmberTab, EmberTabsList } from "@/components/ui/EmberTabs";
 import type { ActivityHistory } from "../../domain/game/ActivityHistory";
 import type { QuestState } from "../../domain/game/Adventure";
+import type { ActiveAffliction } from "../../domain/game/AfflictionDefinitions";
 import type { PlayerAction } from "../../domain/game/PlayerActions";
 import type { PlayerStats } from "../../domain/game/PlayerStats";
 import type { Progression } from "../../domain/game/Progression";
@@ -30,6 +31,7 @@ import QuestStatus from "./QuestStatus";
 import SpellsView from "./SpellsView";
 
 type CharacterDialogProps = {
+	afflictions?: readonly ActiveAffliction[];
 	effects?: readonly TimedEffect[];
 	player: PlayerStats;
 	mana: number;
@@ -54,6 +56,7 @@ type CharacterDialogProps = {
 const CharacterDialog = ({
 	player,
 	effects = [],
+	afflictions = [],
 	mana,
 	knownSpells,
 	spellHotbar,
@@ -77,7 +80,13 @@ const CharacterDialog = ({
 		| { source: "equipment"; slot: EquipmentSlot; id: string }
 		| null
 	>(null);
-	const comparisonContext = { equipment, player, progression, effects };
+	const comparisonContext = {
+		equipment,
+		player,
+		progression,
+		effects,
+		afflictions,
+	};
 	const bagHeadingRef = useRef<HTMLHeadingElement>(null);
 	const equipmentHeadingRef = useRef<HTMLHeadingElement>(null);
 	const selected =

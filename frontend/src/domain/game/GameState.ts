@@ -38,6 +38,7 @@ import {
 	createActivityHistory,
 } from "./ActivityHistory.ts";
 import { createQuest, type QuestState } from "./Adventure";
+import type { ActiveAffliction } from "./AfflictionDefinitions";
 import { assertDifficulty, type Difficulty } from "./Difficulty";
 import type { EscapeState } from "./Escape";
 import { maximumMana } from "./Mana";
@@ -48,6 +49,7 @@ import { createKnownSpells, type SpellKind } from "./Spells";
 import type { TimedEffect } from "./TimedEffects";
 
 export type GameState = {
+	afflictions?: readonly ActiveAffliction[];
 	rareEquipment?: RareEquipmentAllocation | null;
 	townEquipmentPurchases?: readonly string[];
 	townPortal: TownPortal | null;
@@ -126,6 +128,7 @@ export const createGameState = (
 		knownSpells: createKnownSpells(),
 		spellHotbar: createSpellHotbar(createKnownSpells()),
 		effects: [],
+		afflictions: [],
 		mana: maximumMana(createProgression()),
 		quest: createQuest(run),
 		monstersDefeated: 0,

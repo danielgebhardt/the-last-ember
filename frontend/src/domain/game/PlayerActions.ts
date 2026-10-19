@@ -73,6 +73,7 @@ import {
 import { type ActivityEvent, appendActivityEvents } from "./ActivityHistory.ts";
 import { type AttackRollSource, createAttackRolls } from "./CombatRandomness";
 import { deriveCombatStats } from "./CombatStats";
+import { advancePlayerAfflictions } from "./Disease";
 import { activateEscapeFloor } from "./Escape";
 import type { GameState } from "./GameState.ts";
 import { recoverManaAfterTurn } from "./Mana";
@@ -271,7 +272,9 @@ export const resolvePlayerAction = (
 		responseState.quest.victory || responseState.player.health <= 0
 			? responseState
 			: recoverManaAfterTurn(
-					advanceTimedEffects(resolveMonsterPhase(responseState, rollSource)),
+					advancePlayerAfflictions(
+						advanceTimedEffects(resolveMonsterPhase(responseState, rollSource)),
+					),
 				);
 	return {
 		state:

@@ -1,12 +1,10 @@
 import { maximumMana } from "../game/Mana";
-import { DEFAULT_PLAYER_MAX_HEALTH } from "../game/PlayerStats";
-import { HEALTH_PER_LEVEL } from "../game/Progression";
+import { maximumHealth } from "../game/PlayerHealth";
 import {
 	MONSTER_EFFECT_KINDS,
 	PLAYER_EFFECT_KINDS,
 } from "../game/TimedEffects";
-import { equipmentBonuses } from "../items/EquipmentBonuses";
-import { savedLevel, unique } from "./SaveConsistencyHelpers";
+import { unique } from "./SaveConsistencyHelpers";
 import type { SaveDocument } from "./SaveDocument";
 
 export const hasConsistentResources = (document: SaveDocument): boolean => {
@@ -40,7 +38,7 @@ export const hasConsistentResources = (document: SaveDocument): boolean => {
 	)
 		return false;
 
-	const level = savedLevel(document);
+	if (!unique((state.afflictions ?? []).map((a) => a.kind))) return false;
 	const manaLimit = maximumMana(
 		state.progression,
 		state.equipment,
@@ -48,9 +46,7 @@ export const hasConsistentResources = (document: SaveDocument): boolean => {
 	);
 	if (
 		state.player.maxHealth !==
-			DEFAULT_PLAYER_MAX_HEALTH +
-				HEALTH_PER_LEVEL * (level - 1) +
-				equipmentBonuses(state.equipment).health ||
+			maximumHealth(state.progression, state.equipment, state.afflictions) ||
 		state.player.health > state.player.maxHealth ||
 		state.mana > manaLimit ||
 		!unique(state.knownSpells) ||

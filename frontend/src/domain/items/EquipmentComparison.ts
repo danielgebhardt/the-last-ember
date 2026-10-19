@@ -3,6 +3,7 @@ import { deriveCombatStats } from "../game/CombatStats";
 import type { GameState } from "../game/GameState";
 import { maximumMana } from "../game/Mana";
 import { attackProfile, deriveAccuracy } from "../game/MeleeRules";
+import { maximumHealth } from "../game/PlayerHealth";
 import {
 	type Equipment,
 	type EquipmentSlot,
@@ -14,7 +15,7 @@ import type { ItemInstance } from "./Item";
 
 export type EquipmentComparisonContext = Pick<
 	GameState,
-	"equipment" | "player" | "progression" | "effects"
+	"equipment" | "player" | "progression" | "effects" | "afflictions"
 >;
 
 const loadoutStats = (
@@ -27,10 +28,11 @@ const loadoutStats = (
 	const damage = attackProfile(combat.attack, accuracy.playerHitThreshold);
 	const attributes = deriveAttributes(progression, effects, equipment);
 	return {
-		maxHealth:
-			context.player.maxHealth +
-			equipmentBonuses(equipment).health -
-			equipmentBonuses(context.equipment).health,
+		maxHealth: context.afflictions?.length
+			? maximumHealth(progression, equipment, context.afflictions)
+			: context.player.maxHealth +
+				equipmentBonuses(equipment).health -
+				equipmentBonuses(context.equipment).health,
 		maxMana: maximumMana(progression, equipment, effects),
 		spellPowerBonus: attributes.intelligenceModifier,
 		minDamage: damage.minDamage,

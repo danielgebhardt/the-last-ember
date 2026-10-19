@@ -152,6 +152,11 @@ const eventFields = {
 	"gold-collected": { amount: integer(1) },
 	"merchant-bought": { item: itemKind, gold: integer(1) },
 	"merchant-sold": { item: itemKind, gold: integer(1) },
+	"affliction-changed": {
+		condition: oneOf(["disease"]),
+		change: oneOf(["applied", "refreshed", "rejected", "cured"]),
+		source: text,
+	},
 	"player-condition-applied": {
 		condition: oneOf(Object.keys(EFFECT_DEFINITIONS)),
 		duration: integer(1, 100),
@@ -352,6 +357,17 @@ const documentShape = object({
 		radius: integer(FOG_RADIUS_LIMITS.min, FOG_RADIUS_LIMITS.max),
 	}),
 	state: object({
+		afflictions: optional(
+			array(
+				object({
+					kind: oneOf(["disease"]),
+					remaining: (v) => v === null,
+					source: text,
+				}),
+				0,
+				2,
+			),
+		),
 		rareEquipment: optional(
 			nullable(
 				(value) =>

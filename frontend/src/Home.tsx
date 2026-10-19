@@ -384,6 +384,7 @@ const Home = ({
 							Character
 						</Dialog.Trigger>
 						<CharacterDialog
+							afflictions={game.state.afflictions}
 							gold={game.state.gold}
 							effects={game.state.effects}
 							spellHotbar={game.state.spellHotbar}

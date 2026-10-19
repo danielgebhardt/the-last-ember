@@ -32,3 +32,7 @@ Retain v27 with additive, explicitly selected fields: optional `Monster.heroic` 
 Retain v27. MR is immutable item-catalog data, so owned items persist only their ordinary ID, kind and optional enchantment. The optional `rareEquipment` record fixes the seeded dungeon allocation, acquired flag and original location. Previous v27 town allocations remain readable; new town stock is universal and independent of the dungeon roll.
 
 New adventures also save `townEquipmentPurchases`, a per-copy purchase ledger. It prevents purchased/sold copies from reappearing in stock and permits one finite town copy of each MR item alongside the independent dungeon copy. Existing v27 saves without this ledger retain actual played stock/ownership; loading never adds the new universal stock. Three retired +1 store IDs remain recognized solely so existing stock/owned gear stays loadable. They are excluded from active offers and cannot be bought. This is current-v27 validation, with no retired-format migration or regeneration.
+
+## Disease slice (#355 / #356)
+
+Retain v27 with optional `afflictions`, explicitly selected by the writer. Missing means no afflictions; loading adds no conditions, cures or stock. Registered kinds, unique ownership of each condition, valid lifetime/source and derived effective resource bounds are validated. Disease is until-cured and stores a null remaining lifetime. Actual HP and source survive continuation; capacity is validated, never reapplied on load. Existing poison/buff timers remain unchanged. No historical migrations.

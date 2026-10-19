@@ -23,6 +23,7 @@ export type SaveDocument = {
 	fog: FogConfiguration;
 	state: Pick<
 		GameState,
+		| "afflictions"
 		| "rareEquipment"
 		| "townPortal"
 		| "townEquipmentStock"

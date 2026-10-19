@@ -6,10 +6,29 @@ import {
 } from "./Attributes";
 import type { GameState } from "./GameState";
 import { growManaCapacity } from "./Mana";
-import { gainExperience, HEALTH_PER_LEVEL } from "./Progression";
+import { maximumHealth } from "./PlayerHealth";
+import {
+	experienceThreshold,
+	gainExperience,
+	HEALTH_PER_LEVEL,
+} from "./Progression";
 export const experienceReward = (state: GameState, reward: number) => {
 	const turn = state.turn;
 	const gained = gainExperience(state.progression, state.player, reward);
+	if (state.afflictions?.length && gained.levels.length) {
+		const maxHealth = maximumHealth(
+			gained.progression,
+			state.equipment,
+			state.afflictions,
+		);
+		gained.player = {
+			maxHealth,
+			health: Math.min(
+				maxHealth,
+				state.player.health + Math.max(0, maxHealth - state.player.maxHealth),
+			),
+		};
+	}
 	const mana = growManaCapacity(
 		state.mana,
 		state.progression,
@@ -23,7 +42,21 @@ export const experienceReward = (state: GameState, reward: number) => {
 		events.push({
 			type: "level-gained",
 			level,
-			healthGain: HEALTH_PER_LEVEL,
+			healthGain: state.afflictions?.length
+				? maximumHealth(
+						{ ...gained.progression, experience: experienceThreshold(level) },
+						state.equipment,
+						state.afflictions,
+					) -
+					maximumHealth(
+						{
+							...gained.progression,
+							experience: experienceThreshold(level - 1),
+						},
+						state.equipment,
+						state.afflictions,
+					)
+				: HEALTH_PER_LEVEL,
 			turn,
 		});
 		if (strengthAtLevel(level) > strengthAtLevel(level - 1))
