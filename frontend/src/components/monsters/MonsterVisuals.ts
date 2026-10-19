@@ -1,4 +1,4 @@
-import { Bone, Dog, Ghost, Rat, Skull } from "lucide-react";
+import { Rat } from "lucide-react";
 import type { ComponentType, SVGProps } from "react";
 import { MONSTER_DEFINITIONS } from "../../domain/monsters/Monster";
 import type { MonsterKind } from "../../domain/monsters/Monster.ts";
@@ -13,11 +13,15 @@ import GolemIcon from "./GolemIcon";
 import KoboldSlingerIcon from "./KoboldSlingerIcon";
 import NecromancerIcon from "./NecromancerIcon";
 import OgreIcon from "./OgreIcon";
+import OrcIcon from "./OrcIcon";
 import SalamanderIcon from "./SalamanderIcon";
 import SentryIcon from "./SentryIcon";
+import SkeletonIcon from "./SkeletonIcon";
 import SpiderIcon from "./SpiderIcon";
 import TrollIcon from "./TrollIcon";
 import WardenIcon from "./WardenIcon";
+import WolfIcon from "./WolfIcon";
+import WraithIcon from "./WraithIcon";
 import WyvernIcon from "./WyvernIcon";
 import ZombieIcon from "./ZombieIcon";
 
@@ -46,12 +50,12 @@ export const MONSTER_VISUALS: Record<
 	},
 	goblin: {
 		icon: GoblinIcon,
-		color: "text-monster-rose",
+		color: "text-monster-moss",
 		label: MONSTER_DEFINITIONS.goblin.name,
 	},
 	"goblin-archer": {
 		icon: GoblinArcherIcon,
-		color: "text-monster-cyan",
+		color: "text-monster-moss",
 		label: MONSTER_DEFINITIONS["goblin-archer"].name,
 	},
 	"dungeon-brute": {
@@ -65,13 +69,13 @@ export const MONSTER_VISUALS: Record<
 		label: MONSTER_DEFINITIONS["giant-rat"].name,
 	},
 	orc: {
-		icon: Skull,
-		color: "text-monster-ember",
+		icon: OrcIcon,
+		color: "text-monster-ochre",
 		label: MONSTER_DEFINITIONS.orc.name,
 	},
 	skeleton: {
-		icon: Bone,
-		color: "text-monster-teal",
+		icon: SkeletonIcon,
+		color: "text-monster-bone",
 		label: MONSTER_DEFINITIONS.skeleton.name,
 	},
 	zombie: {
@@ -80,8 +84,8 @@ export const MONSTER_VISUALS: Record<
 		label: MONSTER_DEFINITIONS.zombie.name,
 	},
 	wolf: {
-		icon: Dog,
-		color: "text-monster-rust",
+		icon: WolfIcon,
+		color: "text-monster-bone",
 		label: MONSTER_DEFINITIONS.wolf.name,
 	},
 	"kobold-slinger": {
@@ -101,12 +105,12 @@ export const MONSTER_VISUALS: Record<
 	},
 	troll: {
 		icon: TrollIcon,
-		color: "text-monster-rose",
+		color: "text-monster-moss",
 		label: MONSTER_DEFINITIONS.troll.name,
 	},
 	cultist: {
 		icon: CultistIcon,
-		color: "text-monster-fuchsia",
+		color: "text-monster-violet",
 		label: MONSTER_DEFINITIONS.cultist.name,
 	},
 	"stone-golem": {
@@ -115,13 +119,13 @@ export const MONSTER_VISUALS: Record<
 		label: MONSTER_DEFINITIONS["stone-golem"].name,
 	},
 	wraith: {
-		icon: Ghost,
-		color: "text-monster-teal",
+		icon: WraithIcon,
+		color: "text-monster-spectral",
 		label: MONSTER_DEFINITIONS.wraith.name,
 	},
 	wyvern: {
 		icon: WyvernIcon,
-		color: "text-monster-fuchsia",
+		color: "text-monster-violet",
 		label: MONSTER_DEFINITIONS.wyvern.name,
 	},
 	salamander: {
@@ -136,7 +140,7 @@ export const MONSTER_VISUALS: Record<
 	},
 	necromancer: {
 		icon: NecromancerIcon,
-		color: "text-monster-fuchsia",
+		color: "text-monster-violet",
 		label: MONSTER_DEFINITIONS.necromancer.name,
 	},
 	"demon-warden": {

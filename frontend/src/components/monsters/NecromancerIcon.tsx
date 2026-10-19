@@ -7,12 +7,15 @@ const NecromancerIcon = (props: SVGProps<SVGSVGElement>) => (
 		viewBox="0 0 24 24"
 		fill="none"
 		stroke="currentColor"
-		strokeWidth="1.8"
+		strokeWidth="1.65"
 		strokeLinecap="round"
 		strokeLinejoin="round"
 		{...props}
 	>
-		<path d="m12 2-7 9-2 11h18l-2-11ZM8 11h8v5l-2 2h-4l-2-2ZM10 13h.1m4 0h.1M10 17v-2m4 2v-2" />
+		<path d="M12 1 4 11 2 22h20l-2-11L12 1Z" />
+		<path d="M7 12h10v7l-5 3-5-3v-7Z" />
+		<path d="M8 14h3v3H8zm5 0h3v3h-3zM10 19h4M12 5v4" />
 	</svg>
 );
+
 export default NecromancerIcon;

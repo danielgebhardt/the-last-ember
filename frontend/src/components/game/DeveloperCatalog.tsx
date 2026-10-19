@@ -39,7 +39,7 @@ import ItemIcon from "../items/ItemIcon";
 import MonsterIcon from "../monsters/MonsterIcon";
 import DungeonObjectIcon from "../objects/DungeonObjectIcon";
 import TownPreview from "../town/TownPreview";
-import { SPELL_ICONS } from "./SpellHotbarView";
+import { SPELL_ICONS, spellIconColor } from "./SpellVisuals";
 
 const Preview = ({ icon }: { icon: ReactNode }) => (
 	<div className="flex items-end gap-4 rounded-md border bg-background p-3">
@@ -249,7 +249,7 @@ const DeveloperCatalog = ({
 									icon={
 										<Icon
 											aria-hidden="true"
-											className="size-full text-violet-700 dark:text-violet-300"
+											className={`size-full ${spellIconColor(kind)}`}
 										/>
 									}
 								>

@@ -12,8 +12,8 @@ import { SPELL_DEFINITIONS, type SpellKind } from "../../domain/game/Spells";
 import type { TimedEffect } from "../../domain/game/TimedEffects";
 import type { Equipment } from "../../domain/items/Equipment";
 import ManaDisplay from "./ManaDisplay";
-import { SPELL_ICONS } from "./SpellHotbarView";
 import SpellLibraryCard from "./SpellLibraryCard";
+import { SPELL_ICONS, spellIconColor } from "./SpellVisuals";
 
 const SpellsView = ({
 	knownSpells,
@@ -84,10 +84,10 @@ const SpellsView = ({
 								</span>
 
 								<div className="flex min-w-0 flex-1 items-center gap-1.5">
-									{AssignedIcon && (
+									{AssignedIcon && assigned && (
 										<AssignedIcon
 											aria-hidden="true"
-											className="size-4 shrink-0 text-violet-700 dark:text-violet-300"
+											className={`size-4 shrink-0 ${spellIconColor(assigned)}`}
 										/>
 									)}
 

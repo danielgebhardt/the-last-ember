@@ -1,23 +1,3 @@
-import {
-	Bomb,
-	CircleDashed,
-	Flame,
-	Footprints,
-	Ghost,
-	HeartHandshake,
-	HeartPlus,
-	HeartPulse,
-	Moon,
-	Mountain,
-	Move,
-	Orbit,
-	Shield,
-	Snowflake,
-	Sparkles,
-	Swords,
-	Waves,
-	Zap,
-} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
 	SPELL_SLOT_KEYS,
@@ -30,31 +10,8 @@ import {
 	HOTBAR_SLOT_CLASS_NAME,
 	HotbarShortcut,
 } from "./HotbarSlot";
-import PoisonDartIcon from "./PoisonDartIcon";
-import WebIcon from "./WebIcon";
 
-export const SPELL_ICONS = {
-	"magic-missile": Sparkles,
-	heal: HeartPlus,
-	"ember-bolt": Flame,
-	"frost-bolt": Snowflake,
-	shock: Zap,
-	"stone-lance": Mountain,
-	"sonic-spear": Waves,
-	"drain-life": HeartHandshake,
-	web: WebIcon,
-	sleep: Moon,
-	fear: Ghost,
-	"poison-dart": PoisonDartIcon,
-	renewal: HeartPulse,
-	fireball: Bomb,
-	"frost-nova": CircleDashed,
-	blink: Move,
-	"teleport-away": Orbit,
-	protection: Shield,
-	strength: Swords,
-	dexterity: Footprints,
-};
+import { SPELL_ICONS, spellIconColor } from "./SpellVisuals";
 
 const SpellHotbarView = ({
 	knownSpells,
@@ -120,22 +77,12 @@ const SpellHotbarView = ({
 							(targeting !== undefined && definition.mode === "self")
 						}
 						onClick={() => onActivate(spell)}
-						className={`${HOTBAR_SLOT_CLASS_NAME}
-                     border-violet-500/30 bg-background/70
-                     text-violet-700
-                     shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]
-                     hover:border-violet-500/60 hover:bg-violet-500/10
-                     focus-visible:ring-2 focus-visible:ring-ring
-                     dark:border-violet-400/30 dark:bg-background/60
-                     dark:text-violet-300
-                     dark:hover:border-violet-400/60
-                     ${
-												targeting === spell
-													? "ring-2 ring-violet-500 dark:ring-violet-400"
-													: ""
-}`}
+						className={`${HOTBAR_SLOT_CLASS_NAME} border-violet-500/30 bg-background/70 text-violet-700 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] hover:border-violet-500/60 hover:bg-violet-500/10 focus-visible:ring-2 focus-visible:ring-ring dark:border-violet-400/30 dark:bg-background/60 dark:text-violet-300 dark:hover:border-violet-400/60 ${targeting === spell ? "ring-2 ring-violet-500 dark:ring-violet-400" : ""}`}
 					>
-						<Icon aria-hidden="true" className="size-6" />
+						<Icon
+							aria-hidden="true"
+							className={`size-6 ${spellIconColor(spell)}`}
+						/>
 
 						<HotbarShortcut shortcut={shortcut} />
 

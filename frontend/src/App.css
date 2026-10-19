@@ -21,6 +21,30 @@
 	--color-monster-teal: var(--monster-teal);
 	--color-monster-rust: var(--monster-rust);
 	--color-monster-cyan: var(--monster-cyan);
+	--color-spell-frost-bolt: var(--spell-frost-bolt);
+	--color-spell-shock: var(--spell-shock);
+	--color-spell-sonic-spear: var(--spell-sonic-spear);
+	--color-spell-web: var(--spell-web);
+	--color-spell-fear: var(--spell-fear);
+	--color-spell-poison-dart: var(--spell-poison-dart);
+	--color-spell-fire: var(--spell-fire);
+	--color-spell-protection: var(--spell-protection);
+	--color-spell-heal: var(--spell-heal);
+	--color-spell-sleep: var(--spell-sleep);
+	--color-spell-renewal: var(--spell-renewal);
+	--color-spell-frost-nova: var(--spell-frost-nova);
+	--color-spell-blink: var(--spell-blink);
+	--color-spell-strength: var(--spell-strength);
+	--color-spell-dexterity: var(--spell-dexterity);
+	--color-spell-stone-lance: var(--spell-stone-lance);
+	--color-spell-drain-life: var(--spell-drain-life);
+	--color-spell-teleport-away: var(--spell-teleport-away);
+	--color-spell-magic-missile: var(--spell-magic-missile);
+	--color-monster-moss: var(--monster-moss);
+	--color-monster-ochre: var(--monster-ochre);
+	--color-monster-bone: var(--monster-bone);
+	--color-monster-violet: var(--monster-violet);
+	--color-monster-spectral: var(--monster-spectral);
 	--color-map-threat: var(--map-threat);
 	--color-item-cure: var(--item-cure);
 	--color-item-ember: var(--item-ember);
@@ -71,6 +95,30 @@
 }
 
 :root {
+	--spell-frost-bolt: #2185a5;
+	--spell-shock: #997300;
+	--spell-sonic-spear: #684fb7;
+	--spell-web: #756244;
+	--spell-fear: #70518f;
+	--spell-poison-dart: #4c853d;
+	--spell-fire: #c45119;
+	--spell-protection: #9e752b;
+	--spell-heal: #278653;
+	--spell-sleep: #7265a5;
+	--spell-renewal: #33885a;
+	--spell-frost-nova: #218eae;
+	--spell-blink: #7754b7;
+	--spell-strength: #a35b2e;
+	--spell-dexterity: #278d71;
+	--spell-stone-lance: #b97825;
+	--spell-drain-life: #b42342;
+	--spell-teleport-away: #6f57c8;
+	--spell-magic-missile: #7c5ce0;
+	--monster-moss: #4c853d;
+	--monster-ochre: #b77443;
+	--monster-bone: #756244;
+	--monster-violet: #a67ad5;
+	--monster-spectral: #278577;
 	--dungeon-tile-size: 24px;
 	--ember-trim-soft: #a1886140;
 	--ember-frame-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Cpath d='M8 1H92L99 8V92L92 99H8L1 92V8Z' fill='none' stroke='%23b39464' stroke-opacity='.7'/%3E%3C/svg%3E");
@@ -132,6 +180,30 @@
 }
 
 .dark {
+	--spell-frost-bolt: #3caecb;
+	--spell-shock: #d8af37;
+	--spell-sonic-spear: #b29bff;
+	--spell-web: #bdad8c;
+	--spell-fear: #b49acb;
+	--spell-poison-dart: #8ecb77;
+	--spell-fire: #ff9a55;
+	--spell-protection: #e1bc70;
+	--spell-heal: #56ba83;
+	--spell-sleep: #aaa1df;
+	--spell-renewal: #65b88a;
+	--spell-frost-nova: #51bcd9;
+	--spell-blink: #b9a1f0;
+	--spell-strength: #dba275;
+	--spell-dexterity: #69b99a;
+	--spell-stone-lance: #e0b15f;
+	--spell-drain-life: #fb647f;
+	--spell-teleport-away: #b29bff;
+	--spell-magic-missile: #c0adff;
+	--monster-moss: #8ecb77;
+	--monster-ochre: #d99b6c;
+	--monster-bone: #bdad8c;
+	--monster-violet: #c1a0e9;
+	--monster-spectral: #6ed3c1;
 	--ember-trim-soft: #b394644d;
 	--fog-visible: #364152;
 	--fog-unseen: transparent;

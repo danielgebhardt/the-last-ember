@@ -21,3 +21,11 @@ The development server proxies `/initial` to the backend at `http://localhost:80
 See the [repository README](../README.md) for backend setup, controls, configuration, testing conventions, and the project’s development approach.
 
 For browser smoke tests, first run `pnpm exec playwright install chromium`. The suite owns port 4179, uses generated validated saves and fresh storage per test, and retains failure traces/screenshots. See the root README and `docs/ci-browser-review.md`.
+
+## Icon styling
+
+Custom icons use a 24×24 viewBox, `currentColor` strokes and forwarded SVG props. Keep the full stroke inside the viewBox; icons are decorative within controls that supply accessible names. Check silhouettes at both 24px and 48px in Developer Catalog.
+
+`SpellVisuals.ts` owns the complete spell icon/color mappings shared by the hotbar, spell library, slot assignments and Catalog. `MonsterVisuals.ts` owns monster mappings. Add themed color tokens to `App.css` (`@theme inline`, `:root` and `.dark`) rather than inline colors or arbitrary hex utilities. Spell colors supplement the icon shape and visible name; occupied hotbar slots must retain their keyboard labels and mana costs.
+
+The focused `e2e/icon-visuals.spec.ts` check exercises both themes, color consistency between views, SVG bounds and free targeting cancellation.

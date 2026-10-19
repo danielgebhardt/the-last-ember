@@ -18,7 +18,7 @@ import {
 	type TimedEffect,
 } from "../../domain/game/TimedEffects";
 import type { Equipment } from "../../domain/items/Equipment";
-import { SPELL_ICONS } from "./SpellHotbarView";
+import { SPELL_ICONS, spellIconColor } from "./SpellVisuals";
 
 type Props = {
 	spell: SpellKind;
@@ -91,7 +91,7 @@ const SpellLibraryCard = ({
 				<div className="flex size-10 shrink-0 items-center justify-center rounded-lg border border-primary/20 bg-background/60 p-2">
 					<Icon
 						aria-hidden="true"
-						className="size-full text-violet-700 dark:text-violet-300"
+						className={`size-full ${spellIconColor(spell)}`}
 					/>
 				</div>
 

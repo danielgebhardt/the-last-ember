@@ -7,12 +7,15 @@ const WyvernIcon = (props: SVGProps<SVGSVGElement>) => (
 		viewBox="0 0 24 24"
 		fill="none"
 		stroke="currentColor"
-		strokeWidth="1.8"
+		strokeWidth="1.65"
 		strokeLinecap="round"
 		strokeLinejoin="round"
 		{...props}
 	>
-		<path d="M10 8 3 3 1 14l8-3M14 8l7-5 2 11-8-3M9 7l3-5 3 5-1 6-2 3-2-3ZM12 16v5l-4 2m4-2 4 2M11 8h.1m2 0h.1" />
+		<path d="M11 7 3 2 1 15l8-5m4-3 8-5 2 13-8-5" />
+		<path d="M10 8l2-7 3 7-1 7-2 3-2-3V8Z" />
+		<path d="M12 18v4l-3 1m3-1 3 1M10 10h1m3 0h1" />
 	</svg>
 );
+
 export default WyvernIcon;
