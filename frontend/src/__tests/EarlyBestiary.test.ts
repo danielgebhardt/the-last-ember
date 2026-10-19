@@ -11,7 +11,10 @@ import {
 	MONSTER_DEFINITIONS,
 } from "../domain/monsters/Monster";
 import { protectedSpawnLocations } from "../domain/monsters/MonsterLocations";
-import { spawnRunMonsters } from "../domain/monsters/MonsterPlacement";
+import {
+	afflictionSourceKinds,
+	spawnRunMonsters,
+} from "../domain/monsters/MonsterPlacement";
 import { createCorridorEncounter } from "./MonsterEncounterTestHelpers";
 import { COMPACT_TEST_CONFIGURATION } from "./TestRunConfiguration";
 
@@ -82,7 +85,11 @@ it("replays seeded mixtures without occupying protected starts or stairs", () =>
 			expect(
 				protectedSpawnLocations(run, monster.floorNumber),
 			).not.toContainEqual(monster.coordinate);
-			expect(eligibleMonsterKinds(monster.floorNumber)).toContain(monster.kind);
+			// Affliction carriers enter only through their separate sparse budget.
+			expect([
+				...eligibleMonsterKinds(monster.floorNumber),
+				...afflictionSourceKinds(monster.floorNumber),
+			]).toContain(monster.kind);
 		}
 	}
 	for (const { kind } of ranges) expect(seen).toContain(kind);

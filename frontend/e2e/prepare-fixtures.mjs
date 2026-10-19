@@ -20,6 +20,9 @@ export default async function prepareFixtures() {
 			"/src/domain/dungeon/DungeonRun.ts",
 		);
 		const { createGameState } = await load("/src/domain/game/GameState.ts");
+		const { resolvePlayerAction } = await load(
+			"/src/domain/game/PlayerActions.ts",
+		);
 		const { rareEquipmentAdventure } = await load(
 			"/src/__tests/RareEquipmentTestHelpers.ts",
 		);
@@ -96,6 +99,44 @@ export default async function prepareFixtures() {
 			},
 			potionHotbar: ["cure-disease-potion", null, null, null],
 		};
+		// A plague rat beside the player at the first seeded turn whose landed bite infects.
+		const ratTile = [
+			[0, 1],
+			[1, 0],
+			[0, -1],
+			[-1, 0],
+		]
+			.map(([row, col]) => ({
+				row: run.playerCoordinate.row + row,
+				col: run.playerCoordinate.col + col,
+			}))
+			.find(({ row, col }) => run.floors[0].terrain[row]?.[col] === ".");
+		const ratBase = {
+			...diseased,
+			effects: [],
+			afflictions: [],
+			player: { ...fresh.player },
+			monsters: [
+				{
+					id: "1:1",
+					kind: "plague-rat",
+					floorNumber: 1,
+					coordinate: ratTile,
+					health: 4,
+					intent: { type: "idle" },
+					lastDamagedTurn: null,
+				},
+			],
+		};
+		const biteTurn = [...Array(400).keys()].find((turn) => {
+			const after = resolvePlayerAction(
+				{ ...ratBase, turn },
+				{ type: "wait" },
+			).state;
+			return after.player.health > 0 && after.afflictions.length === 1;
+		});
+		if (biteTurn === undefined) throw new Error("Expected an infecting bite");
+		const plagueBite = { ...ratBase, turn: biteTurn };
 		const townDiseased = {
 			...diseased,
 			bag: { items: [] },
@@ -804,6 +845,7 @@ export default async function prepareFixtures() {
 			["poisoned", poisoned, configuration],
 			["diseased", diseased, configuration],
 			["town-diseased", townDiseased, configuration],
+			["plague-bite", plagueBite, configuration],
 			["scrolling", scrolling, configuration],
 			["stacks", stacks, configuration],
 			[

@@ -152,6 +152,7 @@ export const createSaveDocument = (
 				awareness,
 				alarmUsed,
 				heroic,
+				remedyDrop,
 			}) => ({
 				id,
 				kind,
@@ -162,6 +163,7 @@ export const createSaveDocument = (
 				awareness,
 				alarmUsed,
 				...(heroic !== undefined ? { heroic } : {}),
+				...(remedyDrop !== undefined ? { remedyDrop } : {}),
 				intent:
 					intent.type === "idle" || intent.type === "recovering-charge"
 						? { type: intent.type }

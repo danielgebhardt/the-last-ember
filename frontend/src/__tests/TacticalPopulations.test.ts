@@ -24,7 +24,10 @@ import {
 	protectedSpawnLocations,
 } from "../domain/monsters/MonsterLocations";
 import * as MonsterPlacement from "../domain/monsters/MonsterPlacement";
-import { spawnRunMonsters } from "../domain/monsters/MonsterPlacement";
+import {
+	afflictionSourceKinds,
+	spawnRunMonsters,
+} from "../domain/monsters/MonsterPlacement";
 import {
 	createSaveDocument,
 	parseSave,
@@ -83,9 +86,11 @@ describe("Mixed tactical populations", () => {
 			).toEqual(monsters);
 			expect(new Set(monsters.map(({ kind }) => kind)).size).toBeGreaterThan(1);
 			for (const monster of monsters) {
-				expect(eligibleMonsterKinds(monster.floorNumber)).toContain(
-					monster.kind,
-				);
+				// Affliction carriers enter only through their separate sparse budget.
+				expect([
+					...eligibleMonsterKinds(monster.floorNumber),
+					...afflictionSourceKinds(monster.floorNumber),
+				]).toContain(monster.kind);
 				expect(monster.health).toBe(
 					MONSTER_DEFINITIONS[monster.kind].maxHealth,
 				);

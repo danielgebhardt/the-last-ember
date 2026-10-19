@@ -30,6 +30,7 @@ export const hasConsistentActors = (document: SaveDocument): boolean => {
 	);
 	if (
 		!unique(state.monsters.map((entry) => entry.id)) ||
+		state.monsters.filter((entry) => entry.remedyDrop).length > 1 ||
 		!unique(
 			state.monsters.map(
 				(entry) =>
@@ -51,6 +52,10 @@ export const hasConsistentActors = (document: SaveDocument): boolean => {
 							["guardian", "both"].includes(sarcophagusOutcome(run.seed, o)) &&
 							entry.kind === sarcophagusGuardianKind(run.seed, o),
 					)) &&
+				(entry.remedyDrop === undefined ||
+					(entry.remedyDrop === true &&
+						MONSTER_DEFINITIONS[entry.kind].afflictionSource === true &&
+						state.dungeonRemedies === true)) &&
 				walkable(entry.floorNumber, entry.coordinate) &&
 				!protectedLocations
 					.get(entry.floorNumber)

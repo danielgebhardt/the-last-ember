@@ -35,7 +35,13 @@ describe("Archer shot history", () => {
 		const document = savedAdventure();
 		document.state.monsters = document.state.monsters.map((monster) =>
 			monster.floorNumber === 2
-				? { ...monster, kind: "goblin-archer", health: 5 }
+				? // Reassigned kinds cannot keep a carrier's guaranteed-remedy marker.
+					{
+						...monster,
+						kind: "goblin-archer",
+						health: 5,
+						remedyDrop: undefined,
+					}
 				: monster,
 		);
 		expect(

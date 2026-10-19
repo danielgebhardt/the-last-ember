@@ -2,6 +2,10 @@ import { selectWeighted } from "../content/WeightedSelection";
 import type { Coordinate } from "../dungeon/DungeonTypes.ts";
 import { MAX_FLOORS } from "../dungeon/RunConfiguration";
 import {
+	AFFLICTION_DEFINITIONS,
+	type AfflictionKind,
+} from "../game/AfflictionDefinitions";
+import {
 	type AreaElement,
 	DAMAGE_ELEMENTS,
 	type DamageElement,
@@ -42,6 +46,8 @@ export type Monster = {
 	awareness?: MonsterAwareness;
 	alarmUsed?: boolean;
 	heroic?: boolean;
+	// The first affliction source of an adventure guarantees its matching remedy drop.
+	remedyDrop?: boolean;
 };
 
 export type MonsterDefinition = {
@@ -65,6 +71,10 @@ export type MonsterDefinition = {
 	spawnEnabled?: boolean;
 	actionInterval?: number;
 	onHitCondition?: "poisoned";
+	// Rolled once per landed melee hit; magic resistance does not resist afflictions.
+	onHitAffliction?: { kind: AfflictionKind; chance: number };
+	// Spawned only through the shared sparse affliction-source budget.
+	afflictionSource?: boolean;
 	regeneration?: number;
 	enemySpells?: readonly EnemySpellKind[];
 	spellInterval?: number;
@@ -96,6 +106,8 @@ export const validateMonsterDefinition = (
 		preparesAttack,
 		actionInterval,
 		onHitCondition,
+		onHitAffliction,
+		afflictionSource,
 		regeneration,
 		enemySpells,
 		spellInterval,
@@ -182,7 +194,16 @@ export const validateMonsterDefinition = (
 			(!Number.isSafeInteger(rangedAttackRange) || rangedAttackRange < 2)) ||
 		(spawnEnabled !== undefined && typeof spawnEnabled !== "boolean") ||
 		(preparesAttack !== undefined && typeof preparesAttack !== "boolean") ||
-		(preparesAttack === true && rangedAttackRange !== undefined)
+		(preparesAttack === true && rangedAttackRange !== undefined) ||
+		(onHitAffliction !== undefined &&
+			(!Object.hasOwn(AFFLICTION_DEFINITIONS, onHitAffliction.kind) ||
+				!Number.isFinite(onHitAffliction.chance) ||
+				onHitAffliction.chance <= 0 ||
+				onHitAffliction.chance > 1 ||
+				onHitCondition !== undefined ||
+				rangedAttackRange !== undefined)) ||
+		(afflictionSource !== undefined &&
+			(afflictionSource !== true || !onHitAffliction || spawnEnabled !== false))
 	)
 		throw new RangeError(
 			"Invalid monster stats, floor range, or spawn weight.",
@@ -253,6 +274,21 @@ const monsterCatalog = {
 		minFloor: 1,
 		maxFloor: 4,
 		spawnWeight: 2,
+		dropChance: 0.35,
+		lootPreferences: {},
+	},
+	"plague-rat": {
+		name: "plague rat",
+		experienceReward: 3,
+		maxHealth: 4,
+		attackDamage: 1,
+		detectionRadius: 5,
+		minFloor: 2,
+		maxFloor: 6,
+		spawnWeight: 1,
+		spawnEnabled: false,
+		afflictionSource: true,
+		onHitAffliction: { kind: "disease", chance: 0.2 },
 		dropChance: 0.35,
 		lootPreferences: {},
 	},

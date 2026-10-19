@@ -505,6 +505,7 @@ const documentShape = object({
 				awareness: optional(monsterAwareness),
 				alarmUsed: optional(boolean),
 				heroic: optional(boolean),
+				remedyDrop: optional(boolean),
 			}),
 			0,
 			10000,

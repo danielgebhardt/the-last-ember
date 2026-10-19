@@ -6,6 +6,7 @@ import { FLOOR } from "../dungeon/Tiles";
 import {
 	MONSTER_DEFINITIONS,
 	type Monster,
+	type MonsterKind,
 	selectMonsterKind,
 } from "./Monster";
 import {
@@ -31,6 +32,44 @@ export const monsterCountForSpace = (space: number): number => {
 	);
 };
 
+// Shared sparse budget: at most one affliction carrier per eligible floor, replacing an
+// ordinary spawn. Its own seed stream leaves ordinary placement and kinds unchanged.
+export const AFFLICTION_SOURCE_CHANCE = 0.25;
+const AFFLICTION_SOURCE_KINDS = (
+	Object.keys(MONSTER_DEFINITIONS) as MonsterKind[]
+).filter((kind) => MONSTER_DEFINITIONS[kind].afflictionSource);
+export const afflictionSourceKinds = (floor: number): readonly MonsterKind[] =>
+	AFFLICTION_SOURCE_KINDS.filter(
+		(kind) =>
+			floor >= MONSTER_DEFINITIONS[kind].minFloor &&
+			floor <= MONSTER_DEFINITIONS[kind].maxFloor,
+	);
+const assignAfflictionSource = (
+	seed: number,
+	floorNumber: number,
+	floorMonsters: Monster[],
+	remedyDrop: boolean,
+): boolean => {
+	const kinds = afflictionSourceKinds(floorNumber);
+	if (!kinds.length || !floorMonsters.length) return false;
+	const random = createSeededRandom(
+		hashStringToUint32(`${seed}:${floorNumber}:affliction-source`),
+	);
+	if (random() >= AFFLICTION_SOURCE_CHANCE) return false;
+	const kind = kinds[Math.floor(random() * kinds.length)];
+	// Spawn slots are randomly placed; choosing among the guaranteed minimum keeps the slot
+	// independent of floor size, so larger populations preserve their seeded prefix.
+	const index = Math.floor(random() * MONSTER_DENSITY.min);
+	if (index >= floorMonsters.length) return false;
+	floorMonsters[index] = {
+		...floorMonsters[index],
+		kind,
+		health: MONSTER_DEFINITIONS[kind].maxHealth,
+		...(remedyDrop ? { remedyDrop: true } : {}),
+	};
+	return true;
+};
+
 export const spawnRunMonsters = (
 	run: DungeonRun,
 	count?: number,
@@ -39,7 +78,11 @@ export const spawnRunMonsters = (
 		throw new RangeError("Monster count must be a nonnegative whole number");
 	if (count === 0) return [];
 	const monsters: Monster[] = [];
-	for (const floor of run.floors) {
+	let remedyAssigned = false;
+	for (const floor of [...run.floors].sort(
+		(a, b) => a.floorNumber - b.floorNumber,
+	)) {
+		const floorMonsters: Monster[] = [];
 		const protectedLocations = protectedSpawnLocations(run, floor.floorNumber);
 		if (floor.floorNumber === 1)
 			protectedLocations.push(
@@ -78,7 +121,7 @@ export const spawnRunMonsters = (
 				),
 			);
 			if (!kind) break;
-			monsters.push({
+			floorMonsters.push({
 				id: `${floor.floorNumber}:${index}`,
 				kind,
 				floorNumber: floor.floorNumber,
@@ -88,6 +131,16 @@ export const spawnRunMonsters = (
 				lastDamagedTurn: null,
 			});
 		}
+		if (
+			assignAfflictionSource(
+				run.seed,
+				floor.floorNumber,
+				floorMonsters,
+				!remedyAssigned,
+			)
+		)
+			remedyAssigned = true;
+		monsters.push(...floorMonsters);
 	}
 	return monsters;
 };

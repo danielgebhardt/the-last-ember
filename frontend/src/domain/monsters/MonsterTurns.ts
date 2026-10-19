@@ -1,3 +1,5 @@
+import { hashStringToUint32 } from "../dungeon/DungeonRun";
+import { createSeededRandom } from "../dungeon/Seed";
 import {
 	type ActivityEvent,
 	appendActivityEvents,
@@ -7,6 +9,7 @@ import {
 	createAttackRolls,
 } from "../game/CombatRandomness";
 import { deriveCombatStats } from "../game/CombatStats";
+import { applyDisease } from "../game/Disease";
 import type { GameState } from "../game/GameState";
 import {
 	attackProfile,
@@ -47,6 +50,7 @@ export const resolveMonsterPhase = (
 	let monsters = state.monsters;
 	let effects = state.effects;
 	const events: ActivityEvent[] = [];
+	const infections: string[] = [];
 	const { armor } = deriveCombatStats(
 		state.equipment,
 		state.progression,
@@ -407,6 +411,18 @@ export const resolveMonsterPhase = (
 			monster: monster.kind,
 			damage,
 		});
+		// An independent deterministic roll per landed melee hit; misses never infect.
+		if (
+			player.health > 0 &&
+			definition.onHitAffliction &&
+			!shooting &&
+			createSeededRandom(
+				hashStringToUint32(
+					`${state.run.seed}:${state.run.activeFloor}:${state.turn}:${monster.id}:affliction`,
+				),
+			)() < definition.onHitAffliction.chance
+		)
+			infections.push(definition.name);
 		if (player.health > 0 && definition.onHitCondition) {
 			effects = refreshPlayerEffect(effects, definition.onHitCondition);
 			events.push({
@@ -425,12 +441,13 @@ export const resolveMonsterPhase = (
 		objects === state.objects
 	)
 		return state;
-	return {
+	// Applied after the phase's hits so a lethal later hit stops infection and capacity clamps once.
+	return infections.reduce(applyDisease, {
 		...state,
 		player,
 		objects,
 		monsters,
 		effects,
 		activityHistory: appendActivityEvents(state.activityHistory, events),
-	};
+	});
 };

@@ -304,14 +304,15 @@ const DungeonHelp = ({
 						protect against a fresh poison attack.
 					</li>
 					<li>
-						<span className="font-medium text-foreground">Disease.</span>{" "}
-						Disease lowers maximum HP by 20%, rounded down (minimum 1), and
-						lasts until cured; current HP above the new maximum is lost. It does
-						not stack. A Cure Disease potion removes it before monsters act,
-						using one turn; with no Disease it costs nothing. Curing restores
-						maximum HP but not lost HP. Heal, Renewal, rest, town visits and
-						ordinary potions do not cure it. Corridor running stops when Disease
-						begins but may continue afterward.
+						<span className="font-medium text-foreground">Disease.</span> Rare
+						plague rats on floors 2–6 can spread it with a landed bite. Disease
+						lowers maximum HP by 20%, rounded down (minimum 1), and lasts until
+						cured; current HP above the new maximum is lost. It does not stack.
+						A Cure Disease potion removes it before monsters act, using one
+						turn; with no Disease it costs nothing. Curing restores maximum HP
+						but not lost HP. Heal, Renewal, rest, town visits and ordinary
+						potions do not cure it. Corridor running stops when Disease begins
+						but may continue afterward.
 					</li>
 					<li>
 						<span className="font-medium text-foreground">Town.</span> New

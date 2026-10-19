@@ -28,6 +28,7 @@ import {
 	MONSTER_DEFINITIONS,
 	type MonsterKind,
 } from "../../domain/monsters/Monster";
+import { AFFLICTION_SOURCE_CHANCE } from "../../domain/monsters/MonsterPlacement";
 import { monsterTraits } from "../../domain/monsters/MonsterTraits";
 import {
 	type DungeonObjectKind,
@@ -254,9 +255,11 @@ const DeveloperCatalog = ({
 										{definition.attackDamage} · XP {definition.experienceReward}
 									</p>
 									<p>
-										Detection {definition.detectionRadius} · Spawn weight{" "}
-										{definition.spawnWeight} · Drop{" "}
-										{Math.round(definition.dropChance * 100)}%
+										Detection {definition.detectionRadius} ·{" "}
+										{definition.afflictionSource
+											? `Source budget ${Math.round(AFFLICTION_SOURCE_CHANCE * 100)}%/eligible floor`
+											: `Spawn weight ${definition.spawnWeight}`}{" "}
+										· Drop {Math.round(definition.dropChance * 100)}%
 									</p>
 									{monsterTraits(kind).map((trait) => (
 										<p key={trait} className="text-muted-foreground">

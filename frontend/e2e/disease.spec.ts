@@ -146,3 +146,51 @@ for (const width of [390, 1440])
 		).toBeVisible();
 		await expect(turns(page)).toHaveText("Turn 0");
 	});
+
+test("Plague Rat loop: contract Disease, read guidance, cure, then save/load and continue identically", async ({
+	page,
+}) => {
+	await importAdventure(page, "plague-bite");
+	const start = Number((await turns(page).textContent())?.replace("Turn ", ""));
+	await page.keyboard.press("Space");
+	await expect(turns(page)).toHaveText(`Turn ${start + 1}`);
+	await expect(disease(page)).toBeVisible();
+	await expect(health(page)).toContainText("8 / 8");
+	await expect(
+		page.getByRole("log", { name: "Activity log", exact: true }),
+	).toContainText("Disease applied (plague rat)");
+	await disease(page).click();
+	await expect(page.getByRole("dialog", { name: /Disease/ })).toContainText(
+		"Maximum HP 10 → 8 (−2) until cured.",
+	);
+	await page.keyboard.press("Escape");
+	await map(page).click();
+
+	await page.getByRole("button", { name: "Save/Load", exact: true }).click();
+	await saveSheet(page)
+		.getByRole("button", { name: "Save adventure", exact: true })
+		.click();
+	await page.getByRole("button", { name: "Confirm save", exact: true }).click();
+	await saveSheet(page)
+		.getByRole("button", { name: "Close", exact: true })
+		.click();
+	await map(page).click();
+
+	const cure = async () => {
+		await page.keyboard.press("1");
+		await expect(turns(page)).toHaveText(`Turn ${start + 2}`);
+		await expect(disease(page)).toHaveCount(0);
+		return health(page).textContent();
+	};
+	const cured = await cure();
+	expect(cured).toContain("/ 10");
+	await page.getByRole("button", { name: "Save/Load", exact: true }).click();
+	await saveSheet(page)
+		.getByRole("button", { name: "Load adventure", exact: true })
+		.click();
+	await page.getByRole("button", { name: "Confirm load", exact: true }).click();
+	await expect(map(page)).toBeFocused();
+	await expect(turns(page)).toHaveText(`Turn ${start + 1}`);
+	await expect(disease(page)).toBeVisible();
+	expect(await cure()).toBe(cured);
+});

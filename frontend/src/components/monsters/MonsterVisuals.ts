@@ -14,6 +14,7 @@ import KoboldSlingerIcon from "./KoboldSlingerIcon";
 import NecromancerIcon from "./NecromancerIcon";
 import OgreIcon from "./OgreIcon";
 import OrcIcon from "./OrcIcon";
+import PlagueRatIcon from "./PlagueRatIcon";
 import SalamanderIcon from "./SalamanderIcon";
 import SentryIcon from "./SentryIcon";
 import SkeletonIcon from "./SkeletonIcon";
@@ -67,6 +68,11 @@ export const MONSTER_VISUALS: Record<
 		icon: Rat,
 		color: "text-monster-ember",
 		label: MONSTER_DEFINITIONS["giant-rat"].name,
+	},
+	"plague-rat": {
+		icon: PlagueRatIcon,
+		color: "text-monster-fuchsia",
+		label: MONSTER_DEFINITIONS["plague-rat"].name,
 	},
 	orc: {
 		icon: OrcIcon,

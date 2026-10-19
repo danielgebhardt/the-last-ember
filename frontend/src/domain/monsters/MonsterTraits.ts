@@ -33,6 +33,14 @@ export const monsterTraits = (kind: MonsterKind): readonly string[] => {
 		traits.push(
 			"Landed hits poison: 1 damage per phase for 6 phases; refreshes without stacking.",
 		);
+	if (definition.onHitAffliction)
+		traits.push(
+			`Landed melee hits have a ${Math.round(definition.onHitAffliction.chance * 100)}% chance to inflict Disease: maximum HP −20% until cured; does not stack. Misses never infect; magic resistance does not protect. Cure Disease potion or the sanctuary cures it.`,
+		);
+	if (definition.afflictionSource)
+		traits.push(
+			"Sparse: at most one affliction carrier per eligible floor, replacing an ordinary creature. The first carrier of an adventure always drops a Cure Disease potion.",
+		);
 	if (definition.alarmRadius)
 		traits.push(
 			"Alerts up to six nearby creatures within clear wall/door sight using your last seen position. Stays at its post. Prepares one alarm before sounding it on the next active phase. Kill, Sleep or Fear interrupts preparation; rooting does not silence it.",

@@ -38,3 +38,7 @@ New adventures also save `townEquipmentPurchases`, a per-copy purchase ledger. I
 Retain v27 with optional `afflictions`, explicitly selected by the writer. Missing means no afflictions; loading adds no conditions, cures or stock. Registered kinds, unique ownership of each condition, valid lifetime/source and derived effective resource bounds are validated. Disease is until-cured and stores a null remaining lifetime. Actual HP and source survive continuation; capacity is validated, never reapplied on load. Existing poison/buff timers remain unchanged. No historical migrations.
 
 New adventures mark `dungeonRemedies: true` so adding remedy loot cannot reinterpret the reward sequence of an existing v27 chest or monster drop. Absent/false retains the previous loot pool; saved inventory remains authoritative. Sarcophagus reward selection stays unchanged. The marker is explicitly saved and validated; loading does not generate supplies.
+
+## Plague Rat (#365)
+
+Retain v27 with an optional, explicitly written `Monster.remedyDrop` marker for the first carrier's guaranteed Cure Disease drop. It is valid only on an affliction-source kind in a `dungeonRemedies` adventure and at most once. Existing saves keep their saved monsters; loading never adds carriers or remedies.
