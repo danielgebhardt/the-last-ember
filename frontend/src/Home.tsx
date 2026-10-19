@@ -75,6 +75,7 @@ import {
 	configurationDraft,
 	parseRunConfiguration,
 } from "./settings/RunConfigurationDraft.ts";
+import IconComparisonGallery from "@/components/game/IconComparisonGallery.tsx";
 
 const DeveloperCatalog = lazy(
 	() => import("./components/game/DeveloperCatalog"),
@@ -579,135 +580,7 @@ const Home = ({
 					</FantasyRail>
 					<div className="grid min-h-0 flex-1 grid-cols-1 gap-2 lg:grid-cols-[minmax(0,1fr)_18rem] lg:grid-rows-[minmax(0,1fr)_auto] xl:grid-cols-[minmax(0,1fr)_20rem] 2xl:grid-cols-[minmax(0,1fr)_22rem] min-[112.5rem]:grid-cols-[minmax(0,1fr)_26rem]">
 						<div className="flex h-[50dvh] min-h-[23rem] min-w-0 flex-col lg:col-start-1 lg:row-start-1 lg:h-auto lg:min-h-0">
-							<DungeonFrame>
-								{town ? (
-									<TownMap
-										portalFloor={game.state.townPortal?.floorNumber}
-										travelLabel={
-											atTownPortal(game.state)
-												? game.state.townPortal
-													? `Return to floor ${game.state.townPortal.floorNumber}`
-													: "Inspect dormant portal"
-												: "Enter dungeon"
-										}
-										location={town}
-										mapRef={mapRef}
-										enabled={gameplayEnabled}
-										interactionLabel={
-											canReachTownPotionStore(game.state)
-												? "Potion store (E)"
-												: reachableTownEquipmentStore(game.state)
-													? "Equipment store (E)"
-													: canReachTownSalvageShop(game.state)
-														? "The Rag & Bone (E)"
-														: "Inspect nearby"
-										}
-										onAction={(action) => {
-											if (
-												action.type === "inspect" &&
-												(canReachTownPotionStore(game.state) ||
-													reachableTownEquipmentStore(game.state) ||
-													canReachTownSalvageShop(game.state))
-											) {
-												setActionError("");
-												setTownShopOpen(true);
-											} else
-												handleActionRequested(
-													action.type === "inspect"
-														? { type: "inspect-town" }
-														: action,
-												);
-										}}
-										onTravel={
-											atTownGate(game.state) || atTownPortal(game.state)
-												? () =>
-														handleActionRequested(
-															atTownPortal(game.state)
-																? { type: "return-town-portal" }
-																: { type: "travel", destination: "dungeon" },
-														)
-												: undefined
-										}
-										onCharacterRequested={() => {
-											setCharacterOpenedFromMap(true);
-											setCharacterOpen(true);
-										}}
-									/>
-								) : (
-									<DungeonLayout
-										onTravelRequested={
-											atDungeonEntrance(game.state) &&
-											!game.state.quest.cureRecovered
-												? () =>
-														handleActionRequested({
-															type: "travel",
-															destination: "town",
-														})
-												: undefined
-										}
-										onCorridorKey={corridor.handleKey}
-										mapRef={mapRef}
-										onSpellRequested={spells.activate}
-										onSpellSlotRequested={(slot) => {
-											const spell = game.state.spellHotbar[slot - 1];
-											if (spell) spells.activate(spell);
-											else
-												setActionError(
-													`Spell slot ${slot} is empty. Assign a spell in Character.`,
-												);
-										}}
-										onTargetingKey={
-											spells.targeting ? spells.handleKey : undefined
-										}
-										targetIds={spells.targetIds}
-										spellArea={spells.spellArea}
-										selectedTargetId={spells.targeting?.id}
-										onTargetRequested={
-											spells.targeting ? spells.castTarget : undefined
-										}
-										monsters={activeMonsters}
-										floorItems={activeItems}
-										dungeon={activeFloor.terrain}
-										visible={
-											fogConfiguration.enabled ? exploration.visible : undefined
-										}
-										explored={
-											fogConfiguration.enabled
-												? exploration.explored.get(run.activeFloor)
-												: undefined
-										}
-										playerPosition={run.playerCoordinate}
-										upStair={activeFloor.upStair?.coordinate}
-										entrance={
-											run.activeFloor === 1
-												? game.state.quest.entrance
-												: undefined
-										}
-										downStair={activeFloor.downStair?.coordinate}
-										onMoveRequested={(direction) =>
-											handleActionRequested({ type: "move", direction })
-										}
-										onWaitRequested={() =>
-											handleActionRequested({ type: "wait" })
-										}
-										dungeonObjects={activeObjects}
-										onInteractRequested={
-											gameplayEnabled ? handleInteractRequested : undefined
-										}
-										onPickupRequested={handlePickupRequested}
-										onPotionRequested={handlePotionRequested}
-										onCharacterRequested={
-											mapInputAvailable
-												? () => {
-														setCharacterOpenedFromMap(true);
-														setCharacterOpen(true);
-													}
-												: undefined
-										}
-										movementEnabled={gameplayEnabled && !town}
-									/>
-								)}
-							</DungeonFrame>
+							<IconComparisonGallery />
 							<DungeonNotices
 								state={game.state}
 								visible={

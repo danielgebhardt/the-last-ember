@@ -1,5 +1,6 @@
 import type { SVGProps } from "react";
 
+// Central spiderweb with strong radial symmetry for instant recognition at small size.
 const WebIcon = (props: SVGProps<SVGSVGElement>) => (
 	<svg
 		aria-hidden="true"
@@ -12,8 +13,12 @@ const WebIcon = (props: SVGProps<SVGSVGElement>) => (
 		strokeLinejoin="round"
 		{...props}
 	>
-		<path d="M12 2v20M2 12h20M4 4l16 16M4 20 20 4" />
-		<path d="M12 4Q14 7 18 6Q17 10 20 12Q17 14 18 18Q14 17 12 20Q10 17 6 18Q7 14 4 12Q7 10 6 6Q10 7 12 4ZM12 8Q13 10 15 9Q14 11 16 12Q14 13 15 15Q13 14 12 16Q11 14 9 15Q10 13 8 12Q10 11 9 9Q11 10 12 8Z" />
+		<circle cx="12" cy="12" r="1" />
+		<path d="M12 3v18M3 12h18M5.5 5.5l13 13M18.5 5.5l-13 13" />
+		<path d="M8 8a6 6 0 0 1 8 0" />
+		<path d="M6 12a8 8 0 0 1 12 0" />
+		<path d="M8 16a6 6 0 0 0 8 0" />
 	</svg>
 );
+
 export default WebIcon;

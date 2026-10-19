@@ -1,9 +1,7 @@
 import {
-	Bomb,
 	CircleDashed,
 	Flame,
 	Footprints,
-	Ghost,
 	HeartHandshake,
 	HeartPlus,
 	HeartPulse,
@@ -11,12 +9,8 @@ import {
 	Mountain,
 	Move,
 	Orbit,
-	Shield,
-	Snowflake,
 	Sparkles,
 	Swords,
-	Waves,
-	Zap,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -30,39 +24,45 @@ import {
 	HOTBAR_SLOT_CLASS_NAME,
 	HotbarShortcut,
 } from "./HotbarSlot";
+import FearIcon from "./FearIcon";
+import FireballIcon from "./FireballIcon";
+import FrostBoltIcon from "./FrostBoltIcon";
 import PoisonDartIcon from "./PoisonDartIcon";
+import ProtectionIcon from "./ProtectionIcon";
+import ShockIcon from "./ShockIcon";
+import SonicSpearIcon from "./SonicSpearIcon";
 import WebIcon from "./WebIcon";
 
 export const SPELL_ICONS = {
 	"magic-missile": Sparkles,
 	heal: HeartPlus,
 	"ember-bolt": Flame,
-	"frost-bolt": Snowflake,
-	shock: Zap,
+	"frost-bolt": FrostBoltIcon,
+	shock: ShockIcon,
 	"stone-lance": Mountain,
-	"sonic-spear": Waves,
+	"sonic-spear": SonicSpearIcon,
 	"drain-life": HeartHandshake,
 	web: WebIcon,
 	sleep: Moon,
-	fear: Ghost,
+	fear: FearIcon,
 	"poison-dart": PoisonDartIcon,
 	renewal: HeartPulse,
-	fireball: Bomb,
+	fireball: FireballIcon,
 	"frost-nova": CircleDashed,
 	blink: Move,
 	"teleport-away": Orbit,
-	protection: Shield,
+	protection: ProtectionIcon,
 	strength: Swords,
 	dexterity: Footprints,
 };
 
 const SpellHotbarView = ({
-	knownSpells,
-	slots,
-	enabled,
-	targeting,
-	onActivate,
-}: {
+							 knownSpells,
+							 slots,
+							 enabled,
+							 targeting,
+							 onActivate,
+						 }: {
 	knownSpells: readonly SpellKind[];
 	slots: SpellHotbar;
 	enabled: boolean;
@@ -130,10 +130,11 @@ const SpellHotbarView = ({
                      dark:text-violet-300
                      dark:hover:border-violet-400/60
                      ${
-												targeting === spell
-													? "ring-2 ring-violet-500 dark:ring-violet-400"
-													: ""
-}`}
+							targeting === spell
+								? "ring-2 ring-violet-500 dark:ring-violet-400"
+								: ""
+						}
+`}
 					>
 						<Icon aria-hidden="true" className="size-6" />
 

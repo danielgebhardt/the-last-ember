@@ -1,5 +1,6 @@
 import type { SVGProps } from "react";
 
+// Shaggy crown, long nose, and hanging jaw help the troll read as lankier and uglier than the ogre.
 const TrollIcon = (props: SVGProps<SVGSVGElement>) => (
 	<svg
 		aria-hidden="true"
@@ -12,8 +13,14 @@ const TrollIcon = (props: SVGProps<SVGSVGElement>) => (
 		strokeLinejoin="round"
 		{...props}
 	>
-		<path d="m6 7-3-3 1 9 3 2m11-8 3-3-1 9-3 2M7 7l1-5 4 2 4-2 1 5v10l-5 5-5-5Z" />
-		<path d="m8 9 2 1m6-1-2 1M12 10l-2 5h4M9 18h6m-6-1v3m6-3v3" />
+		<path d="m6 7-3-3 1 8 3 2m11-7 3-3-1 8-3 2" />
+		<path d="M7 7 8 3l4 2 4-2 1 4v10l-5 5-5-5Z" />
+		<path d="M9 10h.1M15 10h.1" />
+		<path d="M12 10v5" />
+		<path d="M10 16h4" />
+		<path d="m10 16 1 3m2-3-1 3" />
+		<path d="M8 6h8" />
 	</svg>
 );
+
 export default TrollIcon;

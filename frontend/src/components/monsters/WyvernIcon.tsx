@@ -1,5 +1,6 @@
 import type { SVGProps } from "react";
 
+// Spread wings, horned head, and barbed tail for a clearer draconic profile.
 const WyvernIcon = (props: SVGProps<SVGSVGElement>) => (
 	<svg
 		aria-hidden="true"
@@ -12,7 +13,14 @@ const WyvernIcon = (props: SVGProps<SVGSVGElement>) => (
 		strokeLinejoin="round"
 		{...props}
 	>
-		<path d="M10 8 3 3 1 14l8-3M14 8l7-5 2 11-8-3M9 7l3-5 3 5-1 6-2 3-2-3ZM12 16v5l-4 2m4-2 4 2M11 8h.1m2 0h.1" />
+		<path d="M9 8 3 4 2 13l7-2" />
+		<path d="M15 8l6-4 1 9-7-2" />
+		<path d="M10 8 12 3l2 5-1 5-1 2-1-2Z" />
+		<path d="M11 9h.1M13 9h.1" />
+		<path d="M12 15v4l-3 2" />
+		<path d="M12 19l4 2" />
+		<path d="M12 17c2 0 3 1 4 3" />
 	</svg>
 );
+
 export default WyvernIcon;

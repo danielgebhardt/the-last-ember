@@ -1,6 +1,6 @@
 import type { SVGProps } from "react";
 
-// Pointed ears, a heavy brow, and two small fangs stay legible at tile size.
+// Narrow face, long ears, hooked nose, and tusks for a more mischievous goblin silhouette.
 const GoblinIcon = (props: SVGProps<SVGSVGElement>) => (
 	<svg
 		aria-hidden="true"
@@ -13,9 +13,13 @@ const GoblinIcon = (props: SVGProps<SVGSVGElement>) => (
 		strokeLinejoin="round"
 		{...props}
 	>
-		<path d="M7 7 2 5l2 8 3 1M17 7l5-2-2 8-3 1" />
-		<path d="M7 6q5-3 10 0v9q0 6-5 6t-5-6Z" />
-		<path d="m8 10 3 1m5-1-3 1M9 16h6m-6 0 1 3 1-3m2 0 1 3 1-3" />
+		<path d="M7 8 2 5l2 7 3 1M17 8l5-3-2 7-3 1" />
+		<path d="M7 7q5-4 10 0v8q0 6-5 6t-5-6Z" />
+		<path d="M9 10h.1M15 10h.1" />
+		<path d="M10 13q2-2 4 0" />
+		<path d="M9 16h6" />
+		<path d="m10 16 1 3 1-3m1 0 1 3 1-3" />
+		<path d="M12 8q1 1 0 2" />
 	</svg>
 );
 

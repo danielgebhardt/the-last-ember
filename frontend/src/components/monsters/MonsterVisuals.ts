@@ -1,4 +1,3 @@
-import { Bone, Dog, Ghost, Rat, Skull } from "lucide-react";
 import type { ComponentType, SVGProps } from "react";
 import { MONSTER_DEFINITIONS } from "../../domain/monsters/Monster";
 import type { MonsterKind } from "../../domain/monsters/Monster.ts";
@@ -13,13 +12,18 @@ import GolemIcon from "./GolemIcon";
 import KoboldSlingerIcon from "./KoboldSlingerIcon";
 import NecromancerIcon from "./NecromancerIcon";
 import OgreIcon from "./OgreIcon";
+import OrcIcon from "./OrcIcon";
 import SalamanderIcon from "./SalamanderIcon";
 import SentryIcon from "./SentryIcon";
+import SkeletonIcon from "./SkeletonIcon";
 import SpiderIcon from "./SpiderIcon";
 import TrollIcon from "./TrollIcon";
 import WardenIcon from "./WardenIcon";
+import WolfIcon from "./WolfIcon";
+import WraithIcon from "./WraithIcon";
 import WyvernIcon from "./WyvernIcon";
 import ZombieIcon from "./ZombieIcon";
+import { Rat } from "lucide-react";
 
 export const MONSTER_VISUALS: Record<
 	MonsterKind,
@@ -65,12 +69,12 @@ export const MONSTER_VISUALS: Record<
 		label: MONSTER_DEFINITIONS["giant-rat"].name,
 	},
 	orc: {
-		icon: Skull,
+		icon: OrcIcon,
 		color: "text-monster-ember",
 		label: MONSTER_DEFINITIONS.orc.name,
 	},
 	skeleton: {
-		icon: Bone,
+		icon: SkeletonIcon,
 		color: "text-monster-teal",
 		label: MONSTER_DEFINITIONS.skeleton.name,
 	},
@@ -80,7 +84,7 @@ export const MONSTER_VISUALS: Record<
 		label: MONSTER_DEFINITIONS.zombie.name,
 	},
 	wolf: {
-		icon: Dog,
+		icon: WolfIcon,
 		color: "text-monster-rust",
 		label: MONSTER_DEFINITIONS.wolf.name,
 	},
@@ -115,7 +119,7 @@ export const MONSTER_VISUALS: Record<
 		label: MONSTER_DEFINITIONS["stone-golem"].name,
 	},
 	wraith: {
-		icon: Ghost,
+		icon: WraithIcon,
 		color: "text-monster-teal",
 		label: MONSTER_DEFINITIONS.wraith.name,
 	},

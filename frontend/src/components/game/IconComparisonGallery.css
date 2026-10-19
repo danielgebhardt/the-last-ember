@@ -1,0 +1,26 @@
+/* Uses existing theme tokens; all replacement artwork is true SVG geometry. */
+.comparison-gallery {color:var(--foreground); padding:1rem; font-family:inherit; }
+.comparison-gallery header {margin-bottom:1rem;} .comparison-gallery h2 {font-size:1.4rem;font-weight:700;}
+.comparison-gallery header p {opacity:.7;margin:.4rem 0 .8rem;font-size:.875rem}
+.comparison-toolbar {display:flex;gap:.5rem;flex-wrap:wrap;align-items:center}
+.comparison-toolbar button, .comparison-toolbar input {border:1px solid var(--border);background:var(--background);color:var(--foreground);border-radius:.5rem;padding:.4rem .7rem;}
+.comparison-toolbar button[aria-pressed="true"] {background:var(--accent);font-weight:700}
+.comparison-toolbar input {flex:1;min-width:12rem;}
+.comparison-grid {display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,330px),1fr));gap:.75rem}
+.comparison-card {border:1px solid var(--border);border-radius:.75rem;padding: .8rem;background:var(--card);}
+.comparison-heading {display:flex;align-items:start;justify-content:space-between;gap:.5rem;margin-bottom:.65rem}
+.comparison-heading code {font-size:.7rem;opacity:.6;text-align:right;overflow-wrap:anywhere}
+.comparison-two {display:grid;grid-template-columns:1fr 1fr;gap:.5rem}
+.comparison-preview {border:1px solid var(--border);border-radius:.5rem;background:var(--background);padding:.6rem;text-align:center;}
+.comparison-preview>span {font-size:.7rem;opacity:.7;display:block;margin-bottom:.65rem}
+.comparison-sizes {display:flex;gap:.75rem;align-items:center;justify-content:center;min-height:52px}
+.comparison-sizes .comparison-small {width:24px;height:24px;flex-shrink:0}
+.comparison-sizes .comparison-large {width:48px;height:48px;flex-shrink:0}
+.comparison-sizes>div svg {width:100%;height:100%;display:block}
+.comparison-vector {color:var(--icon-ink);stroke:currentColor;overflow:visible}
+.comparison-vector.rust {--icon-ink:#b77443}.comparison-vector.cyan {--icon-ink:#3caecb}.comparison-vector.ember {--icon-ink:#ed793a}
+.comparison-vector.green {--icon-ink:#6da659}.comparison-vector.amber {--icon-ink:#c89c52}.comparison-vector.bone {--icon-ink:#bdad8c}
+.comparison-vector.rose {--icon-ink:#c96077}.comparison-vector.teal {--icon-ink:#43a99a}.comparison-vector.purple {--icon-ink:#a67ad5}
+.comparison-vector.arcane {--icon-ink:#947be3}.comparison-vector.holy {--icon-ink:#c29b4e}.comparison-vector.gold {--icon-ink:#d8af37}
+.comparison-vector.shadow {--icon-ink:#9175af}
+@media (prefers-color-scheme:light){.comparison-vector.bone {--icon-ink:#756244}.comparison-vector.holy {--icon-ink:#9e752b}.comparison-vector.arcane {--icon-ink:#684fb7}}
