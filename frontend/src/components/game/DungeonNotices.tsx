@@ -1,6 +1,7 @@
 import type { GameState } from "../../domain/game/GameState";
 import { ongoingSpellPotency } from "../../domain/game/OngoingSpellPotency";
 import type { Monster } from "../../domain/monsters/Monster";
+import type { DungeonObject } from "../../domain/objects/DungeonObject";
 import { atDungeonEntrance } from "../../domain/town/TownTravel";
 import ObjectContext from "../objects/ObjectContext";
 import { Button } from "../ui/button";
@@ -16,6 +17,7 @@ type Props = {
 	corridorDescription?: string | null;
 	targeting: boolean;
 	onVictorySummary: () => void;
+	onReviewSarcophagus?: (object: DungeonObject) => void;
 };
 const DungeonNotices = ({
 	state,
@@ -27,6 +29,7 @@ const DungeonNotices = ({
 	corridorDescription,
 	targeting,
 	onVictorySummary,
+	onReviewSarcophagus,
 }: Props) => {
 	const town = state.town;
 	const victory = state.quest.victory;
@@ -93,7 +96,13 @@ const DungeonNotices = ({
 					</p>
 				)}
 
-				{!town && <ObjectContext state={state} visible={visible} />}
+				{!town && (
+					<ObjectContext
+						state={state}
+						visible={visible}
+						onReviewSarcophagus={onReviewSarcophagus}
+					/>
+				)}
 				{atDungeonEntrance(state) &&
 					!state.quest.cureRecovered &&
 					canPlay &&

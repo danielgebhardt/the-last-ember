@@ -34,3 +34,30 @@ it("explains currently visible traits without listing hidden creatures", () => {
 		screen.queryByRole("heading", { name: "necromancer" }),
 	).not.toBeInTheDocument();
 });
+
+it("separates heroic and ordinary creatures of the same kind with correct scaled inspection", () => {
+	render(
+		<ObservedCreatures
+			difficulty={1.25}
+			monsters={[false, true].map((heroic, index) => ({
+				id: `4:${index + 1}`,
+				kind: "skeleton",
+				heroic,
+				floorNumber: 4,
+				coordinate: { row: 4, col: 5 + index },
+				health: 8,
+				intent: { type: "idle" },
+			}))}
+		/>,
+	);
+	expect(
+		screen.getByRole("heading", { name: /^Heroic skeleton$/ }),
+	).toBeVisible();
+	expect(screen.getByRole("heading", { name: /^skeleton$/ })).toBeVisible();
+	expect(screen.getByText(/Maximum health 20/)).toHaveTextContent(
+		"melee damage 9–11",
+	);
+	expect(screen.getByText(/Maximum health 10/)).toHaveTextContent(
+		"melee damage 4–6",
+	);
+});

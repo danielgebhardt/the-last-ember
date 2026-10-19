@@ -11,6 +11,7 @@ import {
 	protectedSpawnLocations,
 } from "../monsters/MonsterLocations";
 import { type DungeonObject, OBJECT_DEFINITIONS } from "./DungeonObject";
+import { placeRareDiscovery } from "./RareDiscoveryPlacement";
 export const spawnRunObjects = (
 	run: DungeonRun,
 	monsters: readonly Monster[],
@@ -130,5 +131,5 @@ export const spawnRunObjects = (
 			}
 		}
 	}
-	return objects;
+	return [...objects, ...placeRareDiscovery(run, monsters, items, objects)];
 };

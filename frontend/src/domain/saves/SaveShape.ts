@@ -128,6 +128,10 @@ const eventFields = {
 		kind: oneOf(Object.keys(OBJECT_DEFINITIONS)),
 		activated: boolean,
 	},
+	"sarcophagus-opened": {
+		outcome: oneOf(["treasure", "guardian", "both", "empty"]),
+		escaped: boolean,
+	},
 	"shrine-offered": { gold: integer(1, 110) },
 	"throne-used": {
 		outcome: oneOf([
@@ -383,6 +387,9 @@ const documentShape = object({
 				floorNumber,
 				coordinate,
 				activated: boolean,
+				sarcophagusOutcome: optional(
+					oneOf(["treasure", "guardian", "both", "empty"]),
+				),
 			}),
 			0,
 			480,
@@ -459,6 +466,7 @@ const documentShape = object({
 				lastDamagedTurn: nullable(natural),
 				awareness: optional(monsterAwareness),
 				alarmUsed: optional(boolean),
+				heroic: optional(boolean),
 			}),
 			0,
 			10000,

@@ -3,6 +3,16 @@ export const TRAP_DISARM_EXPERIENCE = 5;
 
 import type { Coordinate } from "../dungeon/DungeonTypes";
 export const OBJECT_DEFINITIONS = {
+	sarcophagus: {
+		name: "Ancient sarcophagus",
+		freshLabel: "sealed ancient sarcophagus",
+		usedLabel: "opened ancient sarcophagus",
+		minFloor: 2,
+		maxFloor: 20,
+		maxPerFloor: 1,
+		chance: 0.2,
+		placement: "rare-discovery",
+	},
 	merchant: {
 		name: "Wandering potion merchant",
 		freshLabel: "potion merchant",
@@ -121,6 +131,7 @@ export type DungeonObject = Readonly<{
 	floorNumber: number;
 	coordinate: Coordinate;
 	activated: boolean;
+	sarcophagusOutcome?: import("./AncientSarcophagi").SarcophagusOutcome;
 }>;
 export const objectLabel = (
 	object: Pick<DungeonObject, "kind" | "activated">,

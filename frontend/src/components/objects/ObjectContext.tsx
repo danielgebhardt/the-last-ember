@@ -2,15 +2,19 @@ import type { VisibilityGrid } from "../../domain/dungeon/Visibility";
 import type { GameState } from "../../domain/game/GameState";
 import { objectAvailable } from "../../domain/merchant/MerchantAvailability";
 import { orthogonalDistance } from "../../domain/monsters/MonsterLocations";
+import type { DungeonObject } from "../../domain/objects/DungeonObject";
 import { describeObject } from "../../domain/objects/ObjectDescriptions";
+import { Button } from "../ui/button";
 import DungeonObjectIcon from "./DungeonObjectIcon";
 
 const ObjectContext = ({
 	state,
 	visible,
+	onReviewSarcophagus,
 }: {
 	state: GameState;
 	visible?: VisibilityGrid;
+	onReviewSarcophagus?: (object: DungeonObject) => void;
 }) => {
 	const nearby = state.objects.filter(
 		(object) =>
@@ -42,6 +46,18 @@ const ObjectContext = ({
 										: "Nearby: "}
 								</strong>
 								{describeObject(object)}
+								{object.kind === "sarcophagus" &&
+									!object.activated &&
+									onReviewSarcophagus && (
+										<Button
+											variant="outline"
+											size="sm"
+											className="ml-2"
+											onClick={() => onReviewSarcophagus(object)}
+										>
+											Review sarcophagus
+										</Button>
+									)}
 							</span>
 						</li>
 					))}

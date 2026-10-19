@@ -20,6 +20,9 @@ export default async function prepareFixtures() {
 			"/src/domain/dungeon/DungeonRun.ts",
 		);
 		const { createGameState } = await load("/src/domain/game/GameState.ts");
+		const { sarcophagusEncounter } = await load(
+			"/src/__tests/SarcophagusTestHelpers.ts",
+		);
 		const { PLAYER_EFFECT_KINDS } = await load(
 			"/src/domain/game/TimedEffects.ts",
 		);
@@ -736,6 +739,11 @@ export default async function prepareFixtures() {
 			["poisoned", poisoned, configuration],
 			["scrolling", scrolling, configuration],
 			["stacks", stacks, configuration],
+			[
+				"sarcophagus",
+				sarcophagusEncounter("both"),
+				{ ...configuration, rows: 15, cols: 15, difficulty: 1 },
+			],
 			["merchant", merchantState, merchantConfiguration],
 			[
 				"merchant-bulk",

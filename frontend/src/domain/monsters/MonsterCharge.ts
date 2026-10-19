@@ -134,7 +134,11 @@ export const resolveMonsterCharge = (
 		if (orthogonalDistance(point, state.run.playerCoordinate) === 0) {
 			const outcome = resolveMeleeAttack(
 				attackProfile(
-					monsterAttackDamage(monster.kind, monster.floorNumber),
+					monsterAttackDamage(
+						monster.kind,
+						monster.floorNumber,
+						monster.heroic,
+					),
 					deriveAccuracy(state.progression, state.effects, state.equipment)
 						.monsterHitThreshold,
 				),

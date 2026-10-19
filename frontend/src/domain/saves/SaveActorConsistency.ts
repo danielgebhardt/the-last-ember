@@ -6,6 +6,10 @@ import {
 } from "../monsters/MonsterLocations";
 import { maximumMonsterHealth } from "../monsters/MonsterStats";
 import {
+	sarcophagusGuardianKind,
+	sarcophagusOutcome,
+} from "../objects/AncientSarcophagi";
+import {
 	sameCoordinate,
 	savedDifficulty,
 	savedLocations,
@@ -36,6 +40,17 @@ export const hasConsistentActors = (document: SaveDocument): boolean => {
 			(entry) =>
 				/^\d+:[1-9]\d*$/.test(entry.id) &&
 				Number(entry.id.split(":")[0]) === entry.floorNumber &&
+				entry.id.endsWith(":1000001") === (entry.heroic === true) &&
+				(!entry.heroic ||
+					state.objects.some(
+						(o) =>
+							o.kind === "sarcophagus" &&
+							o.activated &&
+							o.floorNumber === entry.floorNumber &&
+							entry.id === `${o.floorNumber}:1000001` &&
+							["guardian", "both"].includes(sarcophagusOutcome(run.seed, o)) &&
+							entry.kind === sarcophagusGuardianKind(run.seed, o),
+					)) &&
 				walkable(entry.floorNumber, entry.coordinate) &&
 				!protectedLocations
 					.get(entry.floorNumber)
@@ -50,6 +65,7 @@ export const hasConsistentActors = (document: SaveDocument): boolean => {
 						entry.kind,
 						savedDifficulty(document),
 						entry.floorNumber,
+						entry.heroic,
 					) &&
 				!(
 					"alarmUsed" in entry &&

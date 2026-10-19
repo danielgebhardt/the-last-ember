@@ -28,6 +28,7 @@ export const chooseEnemySpell = (
 		monster.kind,
 		state.difficulty,
 		monster.floorNumber,
+		monster.heroic,
 	);
 	const interval = definition.spellInterval ?? 3;
 	const index = Number(monster.id.split(":")[1]);

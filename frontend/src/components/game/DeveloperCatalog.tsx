@@ -321,8 +321,22 @@ const DeveloperCatalog = ({
 									<p>
 										Floors {definition.minFloor}–{definition.maxFloor} · Up to{" "}
 										{definition.maxPerFloor}/floor ·{" "}
-										{Math.round(definition.chance * 100)}% placement chance
+										{Math.round(definition.chance * 100)}%{" "}
+										{kind === "sarcophagus"
+											? "shared per-seed selection chance; at most one discovery/dungeon; omitted without safe space"
+											: "placement chance"}
 									</p>
+									{kind === "sarcophagus" && (
+										<p>
+											40% treasure · 25% Heroic guardian · 25% both · 10% empty.
+											Heroic: 2× base HP, attack damage and XP; ordinary
+											difficulty once, abilities, speed, loot and gold.
+											Floor-eligible undead preferred. Stable adjacent/nearest
+											reachable empty room spawn; absent space, guardian
+											escapes. One normal turn and one use; ordinary treasure
+											remains for pickup. Provisional playtest balance.
+										</p>
+									)}
 									<p>{definition.freshLabel}</p>
 									{kind === "trap" && (
 										<p>

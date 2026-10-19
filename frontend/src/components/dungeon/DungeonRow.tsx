@@ -38,6 +38,7 @@ const DungeonCell = memo(function DungeonCell({
 	visibility,
 	playerRef,
 	monsterKind,
+	heroic = false,
 	itemKind,
 	dungeonObject,
 	itemCount = 0,
@@ -56,6 +57,7 @@ const DungeonCell = memo(function DungeonCell({
 	visibility: TileVisibility;
 	playerRef?: PlayerRef;
 	monsterKind?: MonsterKind;
+	heroic?: boolean;
 	itemKind?: ItemKind;
 	dungeonObject?: DungeonObject;
 	itemCount?: number;
@@ -74,7 +76,7 @@ const DungeonCell = memo(function DungeonCell({
 		!monsterKind &&
 		!(dungeonObject && isDoor(dungeonObject));
 	const description = monsterKind
-		? MONSTER_VISUALS[monsterKind].label
+		? `${heroic ? "Heroic " : ""}${MONSTER_VISUALS[monsterKind].label}${heroic ? ". Double base health and attack damage; ordinary abilities and timing." : ""}`
 		: dungeonObject && isDoor(dungeonObject)
 			? objectLabel(dungeonObject)
 			: itemKind
@@ -124,7 +126,7 @@ const DungeonCell = memo(function DungeonCell({
 				targetable && monsterId ? (
 					<button
 						type="button"
-						aria-label={`Target ${MONSTER_VISUALS[monsterKind].label} at row ${rowIndex}, column ${columnIndex}`}
+						aria-label={`Target ${heroic ? "Heroic " : ""}${MONSTER_VISUALS[monsterKind].label} at row ${rowIndex}, column ${columnIndex}`}
 						aria-pressed={selectedTarget}
 						onClick={() => onTargetRequested?.(monsterId)}
 						className={`flex size-full items-center justify-center rounded-sm ring-inset focus-visible:outline-2 focus-visible:outline-amber-500 ${selectedTarget ? "ring-2 ring-violet-600 dark:ring-violet-300 bg-violet-500/25" : "ring-1 ring-violet-500/60"}`}
@@ -288,6 +290,7 @@ const DungeonRow = memo(
 							}
 							itemKind={items?.[0]?.item.kind}
 							itemCount={items?.length}
+							heroic={monster?.heroic}
 							monsterKind={
 								visibility === "visible" &&
 								tile !== PLAYER &&

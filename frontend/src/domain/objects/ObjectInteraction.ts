@@ -2,6 +2,7 @@ import { appendActivityEvents } from "../game/ActivityHistory";
 import type { GameState } from "../game/GameState";
 import { objectAvailable } from "../merchant/MerchantAvailability";
 import { orthogonalDistance } from "../monsters/MonsterLocations";
+import { openSarcophagus } from "./AncientSarcophagi";
 import { drawFountain } from "./DungeonFountains";
 import { isDoor } from "./DungeonObject";
 import { offerAtShrine } from "./DungeonShrines";
@@ -11,6 +12,7 @@ import { describeObject } from "./ObjectDescriptions";
 import { openDiscovery } from "./RareDiscoveries";
 import { openChest } from "./TreasureChests";
 export type ObjectChoice =
+	| "open-sarcophagus"
 	| "sip"
 	| "draw"
 	| "leave"
@@ -75,6 +77,8 @@ export const interactObject = (
 		action.choice !== "open-elite"
 	)
 		return { error: "Review the elite chamber before opening its gate." };
+	if (object.kind === "sarcophagus")
+		return openSarcophagus(state, object, action.choice);
 	if (object.kind === "reliquary" || object.kind === "archive")
 		return openDiscovery(state, object, action.choice);
 	if (object.kind === "shrine")

@@ -720,6 +720,11 @@ const Home = ({
 								corridorDescription={corridor.description}
 								targeting={!!spells.targeting}
 								onVictorySummary={() => setDismissedVictory(null)}
+								onReviewSarcophagus={
+									gameplayEnabled && !spells.targeting
+										? selectInteractionObject
+										: undefined
+								}
 							/>
 						</div>
 						<div className="order-3 flex min-h-0 min-w-0 flex-col lg:col-start-2 lg:row-span-2 lg:row-start-1 [&>*]:flex-1 [&>*]:min-h-0">

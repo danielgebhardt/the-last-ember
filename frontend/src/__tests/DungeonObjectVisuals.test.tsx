@@ -6,6 +6,8 @@ it.each([
 	["chest", false, "Treasure chest"],
 	["chest", true, "Opened treasure chest"],
 	["throne", false, "Ancient throne"],
+	["sarcophagus", false, "Sealed ancient sarcophagus"],
+	["sarcophagus", true, "Opened ancient sarcophagus"],
 ] as const)(
 	"renders the distinct %s visual for activated=%s",
 	(kind, activated, title) => {

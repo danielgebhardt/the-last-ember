@@ -16,6 +16,7 @@ import type {
 } from "../../domain/objects/DungeonObject";
 import FountainIcon from "./FountainIcon";
 import MerchantIcon from "./MerchantIcon";
+import SarcophagusIcon from "./SarcophagusIcon";
 import ThroneIcon from "./ThroneIcon";
 import TreasureChestIcon, {
 	OpenedTreasureChestIcon,
@@ -25,6 +26,7 @@ const icons: Record<
 	Exclude<DungeonObjectKind, "elite-door" | "merchant">,
 	ComponentType<SVGProps<SVGSVGElement>>
 > = {
+	sarcophagus: SarcophagusIcon,
 	door: DoorClosed,
 	reliquary: Gem,
 	archive: LibraryBig,
@@ -37,6 +39,15 @@ const icons: Record<
 };
 const DungeonObjectIcon = ({ object }: { object: DungeonObject }) => {
 	if (!objectAvailable(object)) return null;
+	if (object.kind === "sarcophagus")
+		return (
+			<SarcophagusIcon
+				opened={object.activated}
+				aria-hidden="true"
+				focusable="false"
+				className={`size-full text-object-stone ${object.activated ? "opacity-50" : ""}`}
+			/>
+		);
 	if (object.kind === "merchant") return <MerchantIcon />;
 	if (object.kind === "elite-door") {
 		const Gate = object.activated ? DoorOpen : DoorClosed;

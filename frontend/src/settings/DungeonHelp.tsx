@@ -410,6 +410,31 @@ const DungeonHelp = ({
 				</p>
 			</section>
 			<section
+				aria-label="Ancient sarcophagi"
+				className="grid gap-3 rounded-lg border p-4 text-sm"
+			>
+				<h3 className="font-medium">Ancient sarcophagi</h3>
+				<p>
+					At most one rare discovery is selected in 20% of seeds, on floor 2 or
+					deeper when safe space exists. These are substantially rarer than
+					thrones or fountains. Press E nearby, then choose Open or cancel
+					freely with Escape. Opening spends one normal turn: 40% treasure, 25%
+					Heroic guardian, 25% both, 10% empty. These initial weights are for
+					playtesting.
+				</p>
+				<p>
+					A Heroic guardian is an ordinary floor-relevant enemy, preferring
+					undead, with double base health, attack damage and XP. Difficulty
+					applies once; ordinary abilities, speed and attack timing remain.
+					Enemies respond normally on opening, which can be fatal. If no
+					reachable empty room tile exists, the guardian has escaped;
+					independently selected treasure remains. Use G on the tomb to pick up
+					its ordinary equipment or consumable. The opened tomb remains
+					inspectable. Inspection, cancellation, waiting and reloading cannot
+					change its result or grant a second reward.
+				</p>
+			</section>
+			<section
 				aria-label="Spellcasting"
 				className="grid gap-3 rounded-lg border p-4 text-sm"
 			>

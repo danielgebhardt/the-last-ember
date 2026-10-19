@@ -80,6 +80,7 @@ export const resolveMonsterPhase = (
 					monster.kind,
 					state.difficulty,
 					monster.floorNumber,
+					monster.heroic,
 				) - monster.health,
 			);
 			if (recovered > 0) {
@@ -365,7 +366,7 @@ export const resolveMonsterPhase = (
 		}
 		const outcome = resolveMeleeAttack(
 			attackProfile(
-				monsterAttackDamage(monster.kind, monster.floorNumber),
+				monsterAttackDamage(monster.kind, monster.floorNumber, monster.heroic),
 				monsterHitThreshold,
 			),
 			rollSource({

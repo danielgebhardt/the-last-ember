@@ -9,6 +9,8 @@ import {
 	MERCHANT_OFFERS,
 	type MerchantSupply,
 } from "../merchant/MerchantRules";
+import { sarcophagusOutcome } from "../objects/AncientSarcophagi";
+import { chestReward } from "../objects/TreasureChests";
 import { TOWN_POTION_OFFERS, type TownPotion } from "../town/TownEconomy";
 import { TOWN_EQUIPMENT_OFFERS } from "../town/TownEquipmentStock";
 import { savedLocations, unique } from "./SaveConsistencyHelpers";
@@ -35,6 +37,20 @@ export const hasConsistentInventory = (document: SaveDocument): boolean => {
 	];
 	if (!unique(allItems.map((entry) => entry.id))) return false;
 	for (const item of allItems) {
+		if (item.id.includes(":object:sarcophagus:")) {
+			const owner = state.objects.find(
+				(o) => o.kind === "sarcophagus" && `${o.id}:reward` === item.id,
+			);
+			if (
+				!owner?.activated ||
+				!["treasure", "both"].includes(
+					sarcophagusOutcome(state.run.seed, owner),
+				) ||
+				chestReward(state.run.seed, owner).item.kind !== item.kind
+			)
+				return false;
+		}
+
 		if (!item.id.startsWith("merchant:")) continue;
 		const parts = item.id.split(":"),
 			kind = parts[1],

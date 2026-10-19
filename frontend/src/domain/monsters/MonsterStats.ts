@@ -16,26 +16,31 @@ const championDepth = (kind: MonsterKind, floorNumber: number): number =>
 export const monsterAttackDamage = (
 	kind: MonsterKind,
 	floorNumber = MONSTER_DEFINITIONS[kind].minFloor,
+	heroic = false,
 ): number =>
-	MONSTER_DEFINITIONS[kind].attackDamage + championDepth(kind, floorNumber);
+	(MONSTER_DEFINITIONS[kind].attackDamage + championDepth(kind, floorNumber)) *
+	(heroic ? 2 : 1);
 
 export const maximumMonsterHealth = (
 	kind: MonsterKind,
 	difficulty: Difficulty = 1,
 	floorNumber = MONSTER_DEFINITIONS[kind].minFloor,
+	heroic = false,
 ): number =>
 	scaleEnemyValue(
-		MONSTER_DEFINITIONS[kind].maxHealth +
-			CHAMPION_HEALTH_PER_FLOOR * championDepth(kind, floorNumber),
+		(MONSTER_DEFINITIONS[kind].maxHealth +
+			CHAMPION_HEALTH_PER_FLOOR * championDepth(kind, floorNumber)) *
+			(heroic ? 2 : 1),
 		difficulty,
 	);
 export const monsterDamageRange = (
 	kind: MonsterKind,
 	difficulty: Difficulty = 1,
 	floorNumber = MONSTER_DEFINITIONS[kind].minFloor,
+	heroic = false,
 ) => {
 	const raw = attackProfile(
-		monsterAttackDamage(kind, floorNumber),
+		monsterAttackDamage(kind, floorNumber, heroic),
 		MONSTER_HIT_THRESHOLD,
 	);
 	return {

@@ -10,6 +10,12 @@ import {
 } from "./DungeonObject";
 
 const hints: Record<DungeonObjectKind, { fresh: string; spent: string }> = {
+	sarcophagus: {
+		fresh:
+			"Press E to review opening. May release a stronger floor-relevant Heroic enemy, treasure, both or nothing. Escape cancels freely.",
+		spent:
+			"Opened once; the tomb cannot be rerolled. Any remaining treasure is on the floor for G pickup.",
+	},
 	merchant: {
 		fresh:
 			"Press E within reach to trade. All stalls share finite supplies; successful trades give monsters a turn.",

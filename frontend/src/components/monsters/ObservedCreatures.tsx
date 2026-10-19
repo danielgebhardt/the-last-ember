@@ -4,7 +4,6 @@ import { SPELL_DEFINITIONS } from "../../domain/game/Spells";
 import {
 	MONSTER_DEFINITIONS,
 	type Monster,
-	type MonsterKind,
 } from "../../domain/monsters/Monster";
 import {
 	maximumMonsterHealth,
@@ -28,8 +27,18 @@ const ObservedCreatures = ({
 			(visible === undefined ||
 				visible[actor.coordinate.row]?.[actor.coordinate.col]),
 	);
-	const kinds = [...new Set(observed.map((actor) => actor.kind))].sort((a, b) =>
-		MONSTER_DEFINITIONS[a].name.localeCompare(MONSTER_DEFINITIONS[b].name),
+	const kinds = [
+		...new Map(
+			observed.map((actor) => [
+				`${actor.kind}:${!!actor.heroic}`,
+				{ kind: actor.kind, heroic: !!actor.heroic },
+			]),
+		).values(),
+	].sort(
+		(a, b) =>
+			MONSTER_DEFINITIONS[a.kind].name.localeCompare(
+				MONSTER_DEFINITIONS[b.kind].name,
+			) || Number(a.heroic) - Number(b.heroic),
 	);
 	return (
 		<section
@@ -44,22 +53,26 @@ const ObservedCreatures = ({
 			{kinds.length === 0 ? (
 				<p>No creatures currently in sight.</p>
 			) : (
-				kinds.map((kind: MonsterKind) => {
+				kinds.map(({ kind, heroic }) => {
 					const definition = MONSTER_DEFINITIONS[kind];
 					const floorNumber = observed.find(
-						(actor) => actor.kind === kind,
+						(actor) => actor.kind === kind && !!actor.heroic === heroic,
 					)?.floorNumber;
 					return (
-						<section key={kind} className="grid gap-2 border-t pt-3">
+						<section
+							key={`${kind}:${heroic}`}
+							className="grid gap-2 border-t pt-3"
+						>
 							<h4 className="flex items-center gap-2 font-medium">
 								<span className="size-5">
 									<MonsterIcon kind={kind} />
 								</span>
+								{heroic ? "Heroic " : ""}
 								{definition.name}
 							</h4>
 							<p className="text-xs text-muted-foreground">
 								Maximum health{" "}
-								{maximumMonsterHealth(kind, difficulty, floorNumber)} ·{" "}
+								{maximumMonsterHealth(kind, difficulty, floorNumber, heroic)} ·{" "}
 								{definition.areaAttack
 									? `blast damage ${scaleEnemyValue(definition.areaAttack.minDamage, difficulty)}–${scaleEnemyValue(definition.areaAttack.maxDamage, difficulty)}`
 									: definition.enemySpells
@@ -70,7 +83,7 @@ const ObservedCreatures = ({
 													return `${damage.name} ${scaleEnemyValue(damage.minimumDamage, difficulty)}–${scaleEnemyValue(damage.maximumDamage, difficulty)}`;
 												})
 												.join("; ")}`
-										: `melee damage ${monsterDamageRange(kind, difficulty, floorNumber).minDamage}–${monsterDamageRange(kind, difficulty, floorNumber).maxDamage}`}
+										: `melee damage ${monsterDamageRange(kind, difficulty, floorNumber, heroic).minDamage}–${monsterDamageRange(kind, difficulty, floorNumber, heroic).maxDamage}`}
 							</p>
 							<p className="flex flex-wrap gap-x-3 text-xs text-muted-foreground">
 								{(
@@ -83,6 +96,7 @@ const ObservedCreatures = ({
 									const count = observed.filter(
 										(actor) =>
 											actor.kind === kind &&
+											!!actor.heroic === heroic &&
 											(actor.awareness?.type ?? "idle") === state,
 									).length;
 									return count ? (
@@ -102,15 +116,26 @@ const ObservedCreatures = ({
 										observed.filter(
 											(actor) =>
 												actor.kind === kind &&
+												!!actor.heroic === heroic &&
 												actor.intent.type === "preparing-alarm",
 										).length
 									}{" "}
 									· Alarm spent:{" "}
 									{
 										observed.filter(
-											(actor) => actor.kind === kind && actor.alarmUsed,
+											(actor) =>
+												actor.kind === kind &&
+												!!actor.heroic === heroic &&
+												actor.alarmUsed,
 										).length
 									}
+								</p>
+							)}
+							{heroic && (
+								<p className="text-xs text-muted-foreground">
+									Double base health, attack damage and XP; normal abilities,
+									speed and attack timing. Difficulty applies once. Ordinary
+									loot and gold.
 								</p>
 							)}
 							<ul className="list-disc space-y-1 pl-4 text-xs">

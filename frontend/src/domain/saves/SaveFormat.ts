@@ -62,12 +62,20 @@ export const createSaveDocument = (
 		escape: state.escape,
 		turn: state.turn,
 		objects: state.objects.map(
-			({ id, kind, floorNumber, coordinate, activated }) => ({
+			({
+				id,
+				kind,
+				floorNumber,
+				coordinate,
+				activated,
+				sarcophagusOutcome,
+			}) => ({
 				id,
 				kind,
 				floorNumber,
 				coordinate: { ...coordinate },
 				activated,
+				...(sarcophagusOutcome ? { sarcophagusOutcome } : {}),
 			}),
 		),
 		mana: state.mana,
@@ -107,6 +115,7 @@ export const createSaveDocument = (
 				lastDamagedTurn,
 				awareness,
 				alarmUsed,
+				heroic,
 			}) => ({
 				id,
 				kind,
@@ -116,6 +125,7 @@ export const createSaveDocument = (
 				lastDamagedTurn: lastDamagedTurn ?? null,
 				awareness,
 				alarmUsed,
+				...(heroic !== undefined ? { heroic } : {}),
 				intent:
 					intent.type === "idle" || intent.type === "recovering-charge"
 						? { type: intent.type }

@@ -65,7 +65,9 @@ export const damageMonster = (
 	let progression = state.progression;
 	let mana = state.mana;
 	if (health === 0) {
-		const reward = MONSTER_DEFINITIONS[monster.kind].experienceReward;
+		const reward =
+			MONSTER_DEFINITIONS[monster.kind].experienceReward *
+			(monster.heroic ? 2 : 1);
 		const gained = experienceReward(state, reward);
 		player = gained.player;
 		progression = gained.progression;

@@ -55,6 +55,11 @@ export type ActivityEvent = { turn: number } & (
 			kind: import("../objects/DungeonObject").DungeonObjectKind;
 			activated: boolean;
 	  }
+	| {
+			type: "sarcophagus-opened";
+			outcome: "treasure" | "guardian" | "both" | "empty";
+			escaped: boolean;
+	  }
 	| { type: "shrine-offered"; gold: number }
 	| {
 			type: "throne-used";

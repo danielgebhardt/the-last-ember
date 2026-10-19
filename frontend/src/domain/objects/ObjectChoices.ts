@@ -22,6 +22,15 @@ export const objectChoices = (
 		"player" | "progression" | "equipment" | "effects" | "difficulty"
 	>,
 ): readonly InteractionChoice[] => {
+	if (object.kind === "sarcophagus")
+		return [
+			{
+				value: "open-sarcophagus",
+				label: "Open the sarcophagus",
+				description:
+					"40% treasure, 25% Heroic guardian, 25% both, 10% empty. The guardian is a floor-relevant enemy with double base health and attack damage; normal difficulty, abilities and attack timing apply. Potentially fatal. One turn; monsters respond normally. One use. Treasure stays on the floor for G pickup. Escape leaves it sealed.",
+			},
+		];
 	if (object.kind === "fountain") {
 		const terms = fountainRestoration(
 			state ?? {

@@ -22,3 +22,7 @@ Keep a captured `adventure-v27.json` fixture independent of future writers, curr
 ## When outside players start
 
 Treat v27 as an explicit baseline, not a promise of perpetual compatibility. Before a persisted-contract change, decide whether to retain v27, provide a narrow migration, or deliberately retire it with a visible release note. Capture a representative prior file and test the actual supported transition. Keep older fixtures/adapters only while they serve a declared support policy. Never silently reinterpret an incompatible file as a new adventure.
+
+## Ancient sarcophagi (#350)
+
+Retain v27 with additive, explicitly selected fields: optional `Monster.heroic` and `DungeonObject.sarcophagusOutcome`. Existing v27 saves have neither and continue without regenerating content. New tombs fix their result from the saved seed and stable object identity; opening stores that result and the existing activated flag. Guardian health is saved as played, never rescaled on restore. Validation checks the selected result, guardian identity/kind/health and treasure ownership. No historical migration or save-format bump is introduced.

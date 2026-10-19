@@ -51,6 +51,8 @@ export const formatActivityEvent = (event: ActivityEvent): string => {
 			return `${prefix}You open the ${OBJECT_DEFINITIONS[event.kind].name}.${event.damage ? ` The seal deals ${event.damage} damage.` : ""} ${ITEM_DEFINITIONS[event.item].name} remains on the floor for G pickup.`;
 		case "object-seen":
 			return `${prefix}${describeObject(event)}`;
+		case "sarcophagus-opened":
+			return `${prefix}You open the ancient sarcophagus. ${event.outcome === "empty" ? "The tomb is empty." : `${event.outcome !== "guardian" ? "Treasure waits on the floor. " : ""}${event.outcome !== "treasure" ? (event.escaped ? "The guardian has escaped; no enemy appears." : "A Heroic guardian emerges!") : ""}`}`;
 		case "shrine-offered":
 			return `${prefix}You offer ${event.gold} gold at the shrine of insight. Its blessing is spent.`;
 		case "throne-wound":

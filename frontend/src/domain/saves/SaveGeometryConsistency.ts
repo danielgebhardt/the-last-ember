@@ -1,4 +1,5 @@
 import { protectedFloorLocations } from "../monsters/MonsterLocations";
+import { sarcophagusOutcome } from "../objects/AncientSarcophagi";
 import { isDoor } from "../objects/DungeonObject";
 import {
 	findOptionalEliteRooms,
@@ -79,7 +80,18 @@ export const hasConsistentGeometry = (document: SaveDocument): boolean => {
 		)
 	)
 		return false;
+	if (objects.filter((o) => o.kind === "sarcophagus").length > 1) return false;
 	for (const object of objects) {
+		if (
+			object.kind === "sarcophagus"
+				? object.floorNumber < 2 ||
+					object.floorNumber > 20 ||
+					(object.activated
+						? object.sarcophagusOutcome !== sarcophagusOutcome(run.seed, object)
+						: object.sarcophagusOutcome !== undefined)
+				: object.sarcophagusOutcome !== undefined
+		)
+			return false;
 		if (object.kind === "merchant") {
 			const floor = run.floors[object.floorNumber - 1];
 			if (

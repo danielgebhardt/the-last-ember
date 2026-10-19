@@ -41,6 +41,7 @@ export type Monster = {
 	lastDamagedTurn?: number | null;
 	awareness?: MonsterAwareness;
 	alarmUsed?: boolean;
+	heroic?: boolean;
 };
 
 export type MonsterDefinition = {
