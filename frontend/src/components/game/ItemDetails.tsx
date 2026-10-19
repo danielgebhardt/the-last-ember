@@ -76,11 +76,13 @@ const ItemDetails = ({
 
 	const primaryStat =
 		details.type === "potion"
-			? "cleanses" in details
-				? "Removes poison"
-				: "permanentAttribute" in details
-					? "+1 permanent attribute; each bottle stacks"
-					: `Recovery up to ${details.recovery.amount} ${details.recovery.resource}`
+			? "removesAffliction" in details
+				? "Removes Disease · restores capacity without healing"
+				: "cleanses" in details
+					? "Removes poison"
+					: "permanentAttribute" in details
+						? "+1 permanent attribute; each bottle stacks"
+						: `Recovery up to ${details.recovery.amount} ${details.recovery.resource}`
 			: details.type === "scroll"
 				? "Return to town · costs one scroll and one turn"
 				: details.type === "enchantment"

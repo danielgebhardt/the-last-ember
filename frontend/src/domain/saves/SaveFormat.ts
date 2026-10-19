@@ -63,6 +63,9 @@ export const createSaveDocument = (
 	configuration: { ...configuration, difficulty: state.difficulty },
 	fog: { ...fog },
 	state: {
+		...(state.dungeonRemedies !== undefined
+			? { dungeonRemedies: state.dungeonRemedies }
+			: {}),
 		...(state.afflictions !== undefined
 			? {
 					afflictions: state.afflictions.map((a) => ({

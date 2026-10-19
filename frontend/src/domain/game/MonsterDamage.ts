@@ -74,7 +74,12 @@ export const damageMonster = (
 		mana = gained.mana;
 		events.push(...gained.events);
 
-		const drop = createMonsterDrop(state.run.seed, monster);
+		const drop = createMonsterDrop(
+			state.run.seed,
+			monster,
+			undefined,
+			state.dungeonRemedies,
+		);
 		if (drop && !floorItems.some((entry) => entry.item.id === drop.item.id)) {
 			floorItems = [...floorItems, drop];
 			// Player attacks resolve on a visible target before the monster phase.

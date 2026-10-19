@@ -5,14 +5,24 @@ import type { GameState } from "../game/GameState";
 import type { FloorItem } from "../items/FloorItems";
 import { selectLootKind } from "../items/Loot";
 import type { DungeonObject } from "./DungeonObject";
-export const chestReward = (seed: number, chest: DungeonObject): FloorItem => {
+export const chestReward = (
+	seed: number,
+	chest: DungeonObject,
+	includeDiseaseRemedy = false,
+): FloorItem => {
 	const random = createSeededRandom(
 		hashStringToUint32(
 			`${seed}:${chest.floorNumber}:object:${chest.id}:reward`,
 		),
 	);
 	const kind =
-		selectLootKind(chest.floorNumber, "found", random) ?? "healing-potion";
+		selectLootKind(
+			chest.floorNumber,
+			"found",
+			random,
+			{},
+			includeDiseaseRemedy,
+		) ?? "healing-potion";
 	return {
 		item: { id: `${chest.id}:reward`, kind },
 		floorNumber: chest.floorNumber,
@@ -24,7 +34,7 @@ export const openChest = (
 	chest: DungeonObject,
 ): GameState | { error: string } => {
 	if (chest.activated) return { error: "This chest has already been opened." };
-	const reward = chestReward(state.run.seed, chest);
+	const reward = chestReward(state.run.seed, chest, state.dungeonRemedies);
 	return {
 		...state,
 		objects: state.objects.map((object) =>

@@ -6,5 +6,11 @@ export const selectLootKind = (
 	source: LootSource,
 	random: () => number,
 	preferences: Partial<Record<ItemKind, number>> = {},
+	includeDiseaseRemedy = false,
 ): ItemKind | undefined =>
-	selectWeighted(lootWeights(floor, source, preferences), random);
+	selectWeighted(
+		lootWeights(floor, source, preferences).filter(
+			(entry) => includeDiseaseRemedy || entry.value !== "cure-disease-potion",
+		),
+		random,
+	);

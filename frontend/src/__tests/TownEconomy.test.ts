@@ -17,7 +17,9 @@ it("stocks only supported potions with finite saved ownership separate from wand
 	expect(townPotionKinds).toEqual(
 		expect.arrayContaining(
 			Object.entries(ITEM_DEFINITIONS)
-				.filter(([, d]) => d.type === "potion")
+				.filter(
+					([kind, d]) => d.type === "potion" && kind !== "cure-disease-potion",
+				)
 				.map(([kind]) => kind),
 		),
 	);

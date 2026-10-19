@@ -5,6 +5,8 @@ import {
 	MAX_PERMANENT_ATTRIBUTE_GAIN,
 	permanentAttributeGains,
 } from "../game/PermanentAttributes";
+import { removeAfflictions } from "../game/PlayerAfflictions";
+import { maximumHealth } from "../game/PlayerHealth";
 import type { PlayerStats } from "../game/PlayerStats";
 import type { PlayerEffectKind } from "../game/TimedEffects";
 import { type Bag, removeBagItem } from "./Bag";
@@ -34,11 +36,18 @@ export type ConsumptionEvent =
 export const consumeItem = (
 	state: Pick<
 		GameState,
-		"player" | "mana" | "progression" | "bag" | "equipment" | "effects"
+		| "player"
+		| "mana"
+		| "progression"
+		| "bag"
+		| "equipment"
+		| "effects"
+		| "afflictions"
 	>,
 	action: ConsumeAction,
 ):
 	| {
+			afflictions?: GameState["afflictions"];
 			player: PlayerStats;
 			progression?: GameState["progression"];
 			mana: number;
@@ -55,6 +64,28 @@ export const consumeItem = (
 		return { error: "That item cannot be consumed." };
 	if (player.health <= 0)
 		return { error: "You cannot drink a potion after death." };
+	if ("removesAffliction" in definition) {
+		const active = state.afflictions ?? [];
+		const afflictions = removeAfflictions(active, [
+			definition.removesAffliction,
+		]);
+		if (afflictions === active) return { error: "You do not have Disease." };
+		return {
+			player: {
+				...player,
+				maxHealth: maximumHealth(
+					state.progression,
+					state.equipment,
+					afflictions,
+				),
+			},
+			mana,
+			afflictions,
+			effects: state.effects,
+			bag: removeBagItem(bag, selected.id),
+			event: { type: "item-cleansed", item: selected.kind },
+		};
+	}
 	if ("cleanses" in definition) {
 		const effects = state.effects.filter(
 			(effect) =>

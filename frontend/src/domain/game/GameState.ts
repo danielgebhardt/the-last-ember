@@ -49,6 +49,7 @@ import { createKnownSpells, type SpellKind } from "./Spells";
 import type { TimedEffect } from "./TimedEffects";
 
 export type GameState = {
+	dungeonRemedies?: boolean;
 	afflictions?: readonly ActiveAffliction[];
 	rareEquipment?: RareEquipmentAllocation | null;
 	townEquipmentPurchases?: readonly string[];
@@ -88,7 +89,7 @@ export const createGameState = (
 ): GameState => {
 	assertDifficulty(difficulty);
 	const monsters = spawnRunMonsters(run);
-	const ordinaryLoot = spawnRunItems(run, monsters);
+	const ordinaryLoot = spawnRunItems(run, monsters, undefined, true);
 	const loot = [
 		...ordinaryLoot,
 		...spawnRunQuestItems(run, monsters, ordinaryLoot),
@@ -129,6 +130,7 @@ export const createGameState = (
 		spellHotbar: createSpellHotbar(createKnownSpells()),
 		effects: [],
 		afflictions: [],
+		dungeonRemedies: true,
 		mana: maximumMana(createProgression()),
 		quest: createQuest(run),
 		monstersDefeated: 0,

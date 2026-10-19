@@ -37,6 +37,8 @@ it("places each selected book once within its floor band without changing ordina
 		spawnRunItems(
 			run,
 			state.monsters.filter((actor) => actor.kind !== "iron-champion"),
+			undefined,
+			state.dungeonRemedies,
 		),
 	);
 	expect(eligibleLootKinds(1, "found")).not.toContain("book-ember-bolt");

@@ -357,6 +357,7 @@ const documentShape = object({
 		radius: integer(FOG_RADIUS_LIMITS.min, FOG_RADIUS_LIMITS.max),
 	}),
 	state: object({
+		dungeonRemedies: optional(boolean),
 		afflictions: optional(
 			array(
 				object({

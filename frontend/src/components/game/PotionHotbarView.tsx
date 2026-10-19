@@ -16,6 +16,7 @@ import {
 } from "./HotbarSlot";
 
 const POTION_LABELS: Record<PotionKind, string> = {
+	"cure-disease-potion": "Cure Disease",
 	"strength-potion": "Strength",
 	"dexterity-potion": "Dexterity",
 	"intelligence-potion": "Intellect",

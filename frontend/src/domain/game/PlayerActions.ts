@@ -322,6 +322,9 @@ const resolvePlayerEffect = (
 		return {
 			...state,
 			player: consumed.player,
+			...(consumed.afflictions !== undefined
+				? { afflictions: consumed.afflictions }
+				: {}),
 			progression: consumed.progression ?? state.progression,
 			mana: consumed.mana,
 			bag: consumed.bag,

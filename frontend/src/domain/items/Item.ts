@@ -29,6 +29,19 @@ export type ItemDefinition = {
 	dropWeight: number;
 };
 export const ITEM_DEFINITIONS = {
+	"cure-disease-potion": {
+		name: "Cure Disease potion",
+		type: "potion",
+		attackBonus: 0,
+		armor: 0,
+		removesAffliction: "disease",
+		minFloor: 2,
+		maxFloor: 6,
+		foundWeight: 0.25,
+		dropWeight: 0.25,
+		description:
+			"Removes Disease before the ensuing phase, restoring maximum HP without healing. Does not cure poison or other conditions. One effective use consumes one bottle and one dungeon turn; healthy use is free. Found on floors 2–6 and in matching chests/drops. Cannot be sold, like other potions.",
+	},
 	"warding-cloak": {
 		specialFindOnly: true,
 		name: "Warding Cloak",

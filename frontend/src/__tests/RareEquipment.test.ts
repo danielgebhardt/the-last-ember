@@ -389,7 +389,12 @@ it("keeps actual seeded rare supply sparse, diverse, safe and separate from ordi
 		const state = createGameState(run);
 		const rare = ownsRare(state);
 		expect(rare.length).toBeLessThanOrEqual(1);
-		for (const ordinary of spawnRunItems(run, spawnRunMonsters(run)))
+		for (const ordinary of spawnRunItems(
+			run,
+			spawnRunMonsters(run),
+			undefined,
+			state.dungeonRemedies,
+		))
 			expect(state.floorItems).toContainEqual(ordinary);
 		if (state.rareEquipment) {
 			count++;

@@ -9,6 +9,7 @@ export const createMonsterDrop = (
 	seed: number,
 	monster: Monster,
 	suppliedRandom?: () => number,
+	includeDiseaseRemedy = false,
 ): FloorItem | undefined => {
 	const random =
 		suppliedRandom ??
@@ -27,6 +28,7 @@ export const createMonsterDrop = (
 					"drop",
 					random,
 					definition.lootPreferences,
+					includeDiseaseRemedy,
 				);
 	if (!kind) return undefined;
 	return {

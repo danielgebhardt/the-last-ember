@@ -13,6 +13,7 @@ export const spawnRunItems = (
 	run: DungeonRun,
 	monsters: readonly Monster[],
 	count = DEFAULT_ITEMS_PER_FLOOR,
+	includeDiseaseRemedy = false,
 ): readonly FloorItem[] => {
 	if (!Number.isInteger(count) || count < 0)
 		throw new RangeError("Item count must be a nonnegative whole number.");
@@ -27,7 +28,13 @@ export const spawnRunItems = (
 				Math.floor(random() * candidates.length),
 				1,
 			);
-			const kind = selectLootKind(floor.floorNumber, "found", random);
+			const kind = selectLootKind(
+				floor.floorNumber,
+				"found",
+				random,
+				{},
+				includeDiseaseRemedy,
+			);
 			if (!kind) break;
 			items.push({
 				item: {

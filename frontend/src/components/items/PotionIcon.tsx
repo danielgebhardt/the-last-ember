@@ -1,6 +1,11 @@
 import type { PotionKind } from "../../domain/items/PotionHotbar";
 
 const bottles = {
+	remedy: {
+		color: "text-item-cure",
+		path: "M9 2h6v6l5 4v7l-3 3H7l-3-3v-7l5-4V2Z",
+		liquid: "M12 12v6m-3-3h6",
+	},
 	boost: {
 		color: "text-item-gear",
 		path: "M9 3h6v5l4 4v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7l4-4V3Z",
@@ -23,6 +28,7 @@ const bottles = {
 	},
 } as const;
 const families: Record<PotionKind, keyof typeof bottles> = {
+	"cure-disease-potion": "remedy",
 	"healing-potion": "health",
 	"greater-healing-potion": "health",
 	"mana-potion": "mana",
