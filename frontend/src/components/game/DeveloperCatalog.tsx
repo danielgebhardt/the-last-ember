@@ -15,7 +15,9 @@ import {
 	SheetDescription,
 	SheetTitle,
 } from "@/components/ui/sheet";
+import { AFFLICTION_DEFINITIONS } from "../../domain/game/AfflictionDefinitions";
 import { SPELL_DEFINITIONS, type SpellKind } from "../../domain/game/Spells";
+import { EFFECT_DEFINITIONS } from "../../domain/game/TimedEffects";
 import {
 	ITEM_DEFINITIONS,
 	type ItemDefinition,
@@ -32,6 +34,7 @@ import {
 	OBJECT_DEFINITIONS,
 	TRAP_DISARM_EXPERIENCE,
 } from "../../domain/objects/DungeonObject";
+import { SANCTUARY_CONDITION_FEES } from "../../domain/town/Sanctuary";
 import { TOWN_EQUIPMENT_OFFERS } from "../../domain/town/TownEquipmentStock";
 import TileIcon from "../dungeon/TileIcon";
 import { TILE_LABELS, TILE_TERRAIN_CLASSES } from "../dungeon/TileVisuals";
@@ -40,6 +43,12 @@ import MonsterIcon from "../monsters/MonsterIcon";
 import DungeonObjectIcon from "../objects/DungeonObjectIcon";
 import TownPreview from "../town/TownPreview";
 import { SPELL_ICONS, spellIconColor } from "./SpellVisuals";
+import {
+	AFFLICTION_VISUALS,
+	diseaseDetails,
+	STATUS_VISUALS,
+	type StatusVisual,
+} from "./StatusEffectIcons";
 
 const Preview = ({ icon }: { icon: ReactNode }) => (
 	<div className="flex items-end gap-4 rounded-md border bg-background p-3">
@@ -70,9 +79,38 @@ const CATALOG_SECTIONS = [
 	"Monsters",
 	"Spells",
 	"Items",
+	"Conditions",
 	"Dungeon objects",
 	"Terrain",
 	"Town",
+] as const;
+const ConditionIcon = ({
+	visual: { Icon, className },
+}: {
+	visual: StatusVisual;
+}) => (
+	<span
+		className={`flex size-full items-center justify-center rounded border ${className}`}
+	>
+		<Icon aria-hidden="true" focusable="false" className="size-2/3" />
+	</span>
+);
+const CATALOG_CONDITIONS = [
+	{
+		kind: "poisoned",
+		name: EFFECT_DEFINITIONS.poisoned.name,
+		visual: STATUS_VISUALS.poisoned,
+		facts: `Existing timed effect · 6 phases · ${EFFECT_DEFINITIONS.poisoned.playerDamage} damage after monsters each committed turn · Not in the two-affliction cap`,
+		cures: `Antidote potion (one turn) · Sanctuary ${SANCTUARY_CONDITION_FEES.poisoned} gold`,
+	},
+	{
+		kind: AFFLICTION_DEFINITIONS.disease.kind,
+		name: AFFLICTION_DEFINITIONS.disease.name,
+		visual: AFFLICTION_VISUALS.disease,
+		facts:
+			"Lingering affliction · Until cured · Effective max HP max(1, floor(normal × 0.8)) · No stacking · Counts toward the two-affliction cap",
+		cures: diseaseDetails(),
+	},
 ] as const;
 const Group = ({ name, children }: { name: string; children: ReactNode }) => (
 	<Tabs.Panel value={name} className="min-h-0 flex-1 overflow-y-auto">
@@ -316,6 +354,21 @@ const DeveloperCatalog = ({
 								</Card>
 							);
 						})}
+				</Group>
+				<Group name="Conditions">
+					{CATALOG_CONDITIONS.filter((condition) =>
+						matches(condition.kind, condition.name, condition.facts),
+					).map((condition) => (
+						<Card
+							key={condition.kind}
+							kind={condition.kind}
+							name={condition.name}
+							icon={<ConditionIcon visual={condition.visual} />}
+						>
+							<p>{condition.facts}</p>
+							<p className="text-muted-foreground">{condition.cures}</p>
+						</Card>
+					))}
 				</Group>
 				<Group name="Dungeon objects">
 					{(Object.keys(OBJECT_DEFINITIONS) as DungeonObjectKind[])

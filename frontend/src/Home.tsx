@@ -563,6 +563,7 @@ const Home = ({
 								<PlayerStatus
 									difficulty={game.state.difficulty}
 									effects={game.state.effects}
+									afflictions={game.state.afflictions}
 									gold={game.state.gold}
 									equipment={game.state.equipment}
 									mana={game.state.mana}

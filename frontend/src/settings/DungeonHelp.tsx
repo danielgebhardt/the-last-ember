@@ -34,6 +34,7 @@ import type { Monster } from "../domain/monsters/Monster";
 import { MONSTER_DEFINITIONS } from "../domain/monsters/Monster";
 import { ESCAPE_PURSUIT_RULES } from "../domain/monsters/PursuitRules";
 import { TRAP_DISARM_EXPERIENCE } from "../domain/objects/DungeonObject";
+import { SANCTUARY_CONDITION_FEES } from "../domain/town/Sanctuary";
 
 const Keycap = ({
 	children,
@@ -174,10 +175,10 @@ const DungeonHelp = ({
 						gameplay keys are paused. Corridor running takes one normal turn per
 						step. In a cleared room it follows your chosen direction straight
 						toward the corridor, stopping at walls. In corridors it follows
-						bends and stops before entering another room. Danger, poison,
-						unknown routes, corridor junctions, objects, loot and stairs stop
-						either run. Step off a landmark before starting. Manual input, menus
-						or focus loss cancel it.
+						bends and stops before entering another room. Danger, poison, a
+						newly contracted affliction, unknown routes, corridor junctions,
+						objects, loot and stairs stop either run. Step off a landmark before
+						starting. Manual input, menus or focus loss cancel it.
 					</p>
 				</EmberPanel>
 
@@ -303,6 +304,16 @@ const DungeonHelp = ({
 						protect against a fresh poison attack.
 					</li>
 					<li>
+						<span className="font-medium text-foreground">Disease.</span>{" "}
+						Disease lowers maximum HP by 20%, rounded down (minimum 1), and
+						lasts until cured; current HP above the new maximum is lost. It does
+						not stack. A Cure Disease potion removes it before monsters act,
+						using one turn; with no Disease it costs nothing. Curing restores
+						maximum HP but not lost HP. Heal, Renewal, rest, town visits and
+						ordinary potions do not cure it. Corridor running stops when Disease
+						begins but may continue afterward.
+					</li>
+					<li>
 						<span className="font-medium text-foreground">Town.</span> New
 						adventures begin with {STARTING_GOLD} gold for a modest upgrade or
 						supplies. Use E at a shop doorway to browse. Shops trade in gold;
@@ -326,6 +337,16 @@ const DungeonHelp = ({
 						south gate abandons it and enters floor 1. Ordinary town visits
 						leave the circle dormant. Portals cannot be used while carrying the
 						ember.
+					</li>
+					<li>
+						<span className="font-medium text-foreground">Sanctuary.</span>{" "}
+						Press E at the Quiet Lane doorway for paid treatment: health costs
+						10 gold per missing HP (up to 150), poison{" "}
+						{SANCTUARY_CONDITION_FEES.poisoned} gold, Disease{" "}
+						{SANCTUARY_CONDITION_FEES.disease} gold, or a complete cleanse of
+						both for their combined fee. Every treatment shows its exact price
+						and needs confirmation. Cures keep buffs and restore no HP or mana;
+						buy healing separately. Treatment uses no dungeon turn.
 					</li>
 					<li>
 						<span className="font-medium text-foreground">Mana.</span> Recover 1

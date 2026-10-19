@@ -78,3 +78,34 @@ it("opens poison details with keyboard and pointer and dismisses with Escape", a
 	await user.click(icon);
 	expect(await screen.findByRole("dialog")).toHaveTextContent("Poisoned");
 });
+
+it("shows Disease beside poison as until cured with the exact penalty and both cures", async () => {
+	const user = userEvent.setup();
+	const view = render(
+		<StatusEffectIcons
+			effects={[
+				{
+					actorId: "player",
+					floorNumber: null,
+					kind: "poisoned",
+					remaining: 3,
+				},
+			]}
+			afflictions={[{ kind: "disease", remaining: null, source: "Plague Rat" }]}
+			normalMaxHealth={23}
+			maxHealth={18}
+		/>,
+	);
+	expect(
+		screen.getByRole("button", { name: "Poisoned — 3 phases remaining" }),
+	).toBeVisible();
+	const disease = screen.getByRole("button", { name: "Disease — until cured" });
+	await user.click(disease);
+	const details = await screen.findByRole("dialog");
+	expect(details).toHaveTextContent("Maximum HP 23 → 18 (−5) until cured.");
+	expect(details).toHaveTextContent("Cure Disease potion (one turn)");
+	expect(details).toHaveTextContent("sanctuary Cure Disease (150 gold)");
+	expect(details).toHaveTextContent("not lost HP");
+	view.rerender(<StatusEffectIcons effects={[]} afflictions={[]} />);
+	expect(screen.queryByRole("list")).not.toBeInTheDocument();
+});

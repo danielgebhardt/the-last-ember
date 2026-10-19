@@ -1,8 +1,10 @@
 import { Coins, Droplets, Heart, Sparkles } from "lucide-react";
 import type { ReactNode } from "react";
 import adventurerPortrait from "@/assets/adventurer-portrait.png";
+import type { ActiveAffliction } from "../../domain/game/AfflictionDefinitions";
 import { type Difficulty, difficultyLabel } from "../../domain/game/Difficulty";
 import { maximumMana } from "../../domain/game/Mana";
+import { maximumHealth } from "../../domain/game/PlayerHealth";
 import type { PlayerStats } from "../../domain/game/PlayerStats";
 import {
 	levelForExperience,
@@ -115,6 +117,7 @@ type PlayerStatusProps = {
 	progression: Progression;
 	equipment?: Equipment;
 	effects?: readonly TimedEffect[];
+	afflictions?: readonly ActiveAffliction[];
 };
 
 const PlayerStatus = ({
@@ -126,6 +129,7 @@ const PlayerStatus = ({
 	progression,
 	equipment,
 	effects = [],
+	afflictions = [],
 }: PlayerStatusProps) => {
 	const lowHealth = isLowHealth(player);
 	const level = levelForExperience(progression.experience);
@@ -182,7 +186,14 @@ const PlayerStatus = ({
 
 						{/* Second row: active status effects */}
 						<div className="min-h-6">
-							<StatusEffectIcons effects={effects} />
+							<StatusEffectIcons
+								effects={effects}
+								afflictions={afflictions}
+								maxHealth={player.maxHealth}
+								normalMaxHealth={
+									equipment ? maximumHealth(progression, equipment) : undefined
+								}
+							/>
 						</div>
 					</div>
 				</div>

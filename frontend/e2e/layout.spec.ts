@@ -201,7 +201,7 @@ test("dungeon artwork only loads the active theme image", async ({ page }) => {
 	await expect(map(page)).toBeFocused();
 });
 
-test("all player status icons fit without moving the dungeon when they expire", async ({
+test("all player status icons and Disease fit without moving the dungeon when they expire", async ({
 	page,
 }, testInfo) => {
 	await importAdventure(page, "viewport-status-icons");
@@ -211,10 +211,17 @@ test("all player status icons fit without moving the dungeon when they expire", 
 			name: "Active player conditions",
 			exact: true,
 		});
-		await expect(icons.getByRole("button")).toHaveCount(6);
+		await expect(icons.getByRole("button")).toHaveCount(7);
 		const bounds = await icons.boundingBox();
 		if (!bounds) throw new Error("Expected icons");
+		// One row at every width; overflow scrolls inside the list, harmful conditions first.
+		expect(bounds.height).toBeLessThanOrEqual(32);
+		expect(bounds.x + bounds.width).toBeLessThanOrEqual(width);
+		await expect(icons.getByRole("button").first()).toHaveAccessibleName(
+			"Disease — until cured",
+		);
 		for (const icon of await icons.getByRole("button").all()) {
+			await icon.focus();
 			const box = await icon.boundingBox();
 			if (!box) throw new Error("Expected icon");
 			expect(box.x).toBeGreaterThanOrEqual(0);
@@ -233,11 +240,18 @@ test("all player status icons fit without moving the dungeon when they expire", 
 	await page.setViewportSize({ width: 1280, height: 720 });
 	await map(page).focus();
 	const before = await map(page).boundingBox();
+	expect(before?.height).toBeGreaterThan(0);
 	await page.keyboard.press("Space");
 	await page.keyboard.press("Space");
+	// Timed effects expire; the lingering Disease icon remains alone.
 	await expect(
-		page.getByRole("list", { name: "Active player conditions", exact: true }),
-	).toHaveCount(0);
+		page
+			.getByRole("list", { name: "Active player conditions", exact: true })
+			.getByRole("button"),
+	).toHaveCount(1);
+	await expect(
+		page.getByRole("button", { name: "Disease — until cured", exact: true }),
+	).toBeVisible();
 	expect(await map(page).boundingBox()).toEqual(before);
 	await expect(map(page)).toBeFocused();
 });

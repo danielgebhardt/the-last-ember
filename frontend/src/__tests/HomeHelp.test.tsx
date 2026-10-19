@@ -219,4 +219,12 @@ describe("Home Help menu", () => {
 			"Healing, casting and gear changes use your response",
 		);
 	});
+	it("explains Disease, both cures and the sanctuary fees", async () => {
+		const user = renderHelpRun();
+		const help = await openHelp(user);
+		expect(help).toHaveTextContent("Disease lowers maximum HP by 20%");
+		expect(help).toHaveTextContent("A Cure Disease potion removes it");
+		expect(help).toHaveTextContent("restores maximum HP but not lost HP");
+		expect(help).toHaveTextContent("poison 40 gold, Disease 150 gold");
+	});
 });

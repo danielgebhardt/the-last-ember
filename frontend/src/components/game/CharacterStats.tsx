@@ -1,10 +1,12 @@
 import { Droplets, Heart, Shield, Sparkles, Sword } from "lucide-react";
+import type { ActiveAffliction } from "../../domain/game/AfflictionDefinitions";
 import {
 	armorContributions,
 	deriveCombatStats,
 } from "../../domain/game/CombatStats";
 import { playerEffectBonuses } from "../../domain/game/EffectBonuses";
 import { attackProfile, deriveAccuracy } from "../../domain/game/MeleeRules";
+import { maximumHealth } from "../../domain/game/PlayerHealth";
 import type { PlayerStats } from "../../domain/game/PlayerStats";
 import type { Progression } from "../../domain/game/Progression";
 import type { TimedEffect } from "../../domain/game/TimedEffects";
@@ -19,13 +21,16 @@ const CharacterStats = ({
 	equipment,
 	progression,
 	effects = [],
+	afflictions = [],
 }: {
 	player: PlayerStats;
 	mana: number;
 	equipment: Equipment;
 	progression: Progression;
 	effects?: readonly TimedEffect[];
+	afflictions?: readonly ActiveAffliction[];
 }) => {
+	const normalMaxHealth = maximumHealth(progression, equipment);
 	const combat = deriveCombatStats(equipment, progression, effects);
 	const armor = armorContributions(equipment);
 	const accuracy = deriveAccuracy(progression, effects, equipment);
@@ -47,7 +52,11 @@ const CharacterStats = ({
 						compact
 						className="text-lg font-semibold tabular-nums"
 					/>
-					<p className={hint}>Current / maximum</p>
+					<p className={hint}>
+						Current / maximum
+						{afflictions.some((a) => a.kind === "disease") &&
+							` · Disease −${normalMaxHealth - player.maxHealth} until cured (normal ${normalMaxHealth})`}
+					</p>
 				</div>
 				<div className={card}>
 					<p className="flex items-center gap-2 font-medium">

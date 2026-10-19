@@ -31,6 +31,7 @@ export type CorridorView = Readonly<{
 	health: number;
 	ended: boolean;
 	harmful: boolean;
+	afflictions: readonly string[];
 	damaged: boolean;
 	terrain: readonly (readonly (string | undefined)[])[];
 	objects: readonly Coordinate[];
@@ -90,9 +91,13 @@ export const corridorView = (
 		turn: state.turn,
 		health: state.player.health,
 		ended: state.player.health <= 0 || state.quest.victory !== null,
-		harmful: state.effects.some(
-			(x) => x.actorId === "player" && x.kind === "poisoned" && x.remaining > 0,
-		),
+		// Temporary harm blocks running like poison; lingering afflictions stop it only on onset.
+		harmful:
+			state.effects.some(
+				(x) =>
+					x.actorId === "player" && x.kind === "poisoned" && x.remaining > 0,
+			) || (state.afflictions ?? []).some((a) => a.remaining !== null),
+		afflictions: (state.afflictions ?? []).map((a) => a.kind),
 		damaged: state.activityHistory.entries.some(
 			({ event }) =>
 				event.turn === state.turn &&
@@ -210,7 +215,11 @@ export const corridorStopAfterStep = (
 		(after.turn > before.turn && after.damaged)
 	)
 		return "damage";
-	if (after.harmful) return "condition";
+	if (
+		after.harmful ||
+		after.afflictions.some((kind) => !before.afflictions.includes(kind))
+	)
+		return "condition";
 	if (after.threat) return "threat";
 	if (after.visiblePoints.some((p) => !contains(before.visiblePoints, p)))
 		return "discovery";

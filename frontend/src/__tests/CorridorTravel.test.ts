@@ -352,3 +352,21 @@ it("room running still stops for loot, stairs, enemies, poison and unknown terra
 		stop: "unexplored",
 	});
 });
+it("stops when Disease begins, but an existing lingering Disease does not forbid running", () => {
+	const healthy = quietCorridor();
+	const diseased = {
+		...healthy,
+		afflictions: [
+			{ kind: "disease" as const, remaining: null, source: "test" },
+		],
+	};
+	expect(corridorStopAfterStep(view(healthy), view(diseased))).toBe(
+		"condition",
+	);
+	expect(corridorStep(view(diseased), "right")).toEqual({
+		direction: "right",
+	});
+	expect(
+		corridorStopAfterStep(view(diseased), { ...view(diseased), turn: 1 }),
+	).toBeUndefined();
+});

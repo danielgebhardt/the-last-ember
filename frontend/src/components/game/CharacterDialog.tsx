@@ -197,6 +197,7 @@ const CharacterDialog = ({
 					>
 						<div className="shrink-0 border-b border-primary/20 bg-primary/[0.035] px-4 py-3">
 							<CharacterStats
+								afflictions={afflictions}
 								effects={effects}
 								player={player}
 								mana={mana}

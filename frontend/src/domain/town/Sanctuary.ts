@@ -23,6 +23,7 @@ export const SANCTUARY_SERVICE_NAMES: Record<SanctuaryService, string> = {
 	disease: "Cure Disease",
 	cleanse: "Complete cleanse",
 };
+export const SANCTUARY_CONDITION_FEES = { poisoned: 40, disease: 150 } as const;
 export const SANCTUARY_SERVICES: readonly SanctuaryService[] = [
 	"health",
 	"poison",
@@ -53,14 +54,14 @@ export const sanctuaryQuote = (
 			conditions: [],
 		};
 	}
-	const active = [
+	const active: (keyof typeof SANCTUARY_CONDITION_FEES)[] = [
 		...(state.effects.some(
 			(e) => e.actorId === "player" && e.kind === "poisoned",
 		)
-			? ["poisoned"]
+			? (["poisoned"] as const)
 			: []),
 		...(state.afflictions?.some((a) => a.kind === "disease")
-			? ["disease"]
+			? (["disease"] as const)
 			: []),
 	];
 	const conditions = active.filter(
@@ -69,7 +70,7 @@ export const sanctuaryQuote = (
 			(service === "poison" ? c === "poisoned" : c === "disease"),
 	);
 	const cost = conditions.reduce(
-		(sum, c) => sum + (c === "poisoned" ? 40 : 150),
+		(sum, c) => sum + SANCTUARY_CONDITION_FEES[c],
 		0,
 	);
 	return {

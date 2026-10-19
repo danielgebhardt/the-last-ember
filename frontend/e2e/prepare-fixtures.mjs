@@ -78,6 +78,32 @@ export default async function prepareFixtures() {
 				},
 			],
 		};
+		const diseasedCapacity = Math.max(
+			1,
+			Math.floor(fresh.player.maxHealth * 0.8),
+		);
+		const diseased = {
+			...quiet,
+			floorItems: quiet.floorItems.filter(
+				(entry) => entry.item.kind === "cure",
+			),
+			player: { health: diseasedCapacity, maxHealth: diseasedCapacity },
+			effects: [{ ...poisoned.effects[0], remaining: 5 }],
+			afflictions: [{ kind: "disease", remaining: null, source: "Plague Rat" }],
+			dungeonRemedies: true,
+			bag: {
+				items: [{ id: "smoke:cure-disease", kind: "cure-disease-potion" }],
+			},
+			potionHotbar: ["cure-disease-potion", null, null, null],
+		};
+		const townDiseased = {
+			...diseased,
+			bag: { items: [] },
+			potionHotbar: [null, null, null, null],
+			player: { health: 4, maxHealth: diseasedCapacity },
+			gold: 400,
+			town: { ...createTownLocation(), coordinate: { row: 5, col: 7 } },
+		};
 		// Seed 123 has a room at these explicit coordinates, away from map edges.
 		if (run.floors[0].terrain[8][10] !== ".")
 			throw new Error("Expected the scrolling fixture's room tile");
@@ -564,6 +590,18 @@ export default async function prepareFixtures() {
 						kind,
 						remaining: 2,
 					})),
+					// The worst-case HUD row also carries a lingering affliction.
+					afflictions: [{ kind: "disease", remaining: null, source: "test" }],
+					player: {
+						health: Math.max(
+							1,
+							Math.floor(viewportFeedback.player.maxHealth * 0.8),
+						),
+						maxHealth: Math.max(
+							1,
+							Math.floor(viewportFeedback.player.maxHealth * 0.8),
+						),
+					},
 				},
 				configuration,
 			],
@@ -764,6 +802,8 @@ export default async function prepareFixtures() {
 			],
 			["ready", quiet, configuration],
 			["poisoned", poisoned, configuration],
+			["diseased", diseased, configuration],
+			["town-diseased", townDiseased, configuration],
 			["scrolling", scrolling, configuration],
 			["stacks", stacks, configuration],
 			[
