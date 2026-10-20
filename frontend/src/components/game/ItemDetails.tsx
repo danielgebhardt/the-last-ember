@@ -79,7 +79,7 @@ const ItemDetails = ({
 			? "removesAfflictions" in details
 				? (details.removesAfflictions as readonly string[]).includes("disease")
 					? "Removes Disease · restores capacity without healing"
-					: "Removes Slowed · restores evasion"
+					: "Removes Slowed and Mana Burn · restores evasion and mana recovery"
 				: "cleanses" in details
 					? "Removes poison"
 					: "permanentAttribute" in details

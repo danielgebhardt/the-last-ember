@@ -70,3 +70,7 @@ Retain v27. Offers listed in `LATE_TOWN_EQUIPMENT_OFFERS` (currently the Copper 
 ## Mana Burn (#360)
 
 Retain v27. The optional `afflictions` array accepts `mana-burn` with a numeric remaining lifetime of 1–90, which the existing per-kind lifetime check enforces. No migration.
+
+## Cleansing potion and Mana Burn (#363)
+
+Retain v27. Activity `item-cleansed` accepts an optional `conditions` list of one or two registered afflictions; earlier entries without it remain valid. Cleansing loot floors and weights are unchanged, so saved chest and drop validation is unaffected.

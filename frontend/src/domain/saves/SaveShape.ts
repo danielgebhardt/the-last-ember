@@ -295,7 +295,12 @@ const eventFields = {
 	"item-unequipped": { item: itemKind, slot, replaced: optional(itemKind) },
 	"item-picked-up": { item: itemKind },
 	"item-dropped": { item: itemKind },
-	"item-cleansed": { item: itemKind },
+	"item-cleansed": {
+		item: itemKind,
+		conditions: optional(
+			array(oneOf(Object.keys(AFFLICTION_DEFINITIONS)), 1, 2),
+		),
+	},
 	"equipment-enchanted": { item: itemKind, enchantment: integer(1, 3) },
 	"item-attribute-increased": {
 		item: itemKind,

@@ -30,7 +30,12 @@ export type ConsumptionEvent =
 			condition: PlayerEffectKind;
 			duration: number;
 	  }
-	| { type: "item-cleansed"; item: ItemKind }
+	| {
+			type: "item-cleansed";
+			item: ItemKind;
+			// Afflictions a remedy removed; absent for poison and earlier saved entries.
+			conditions?: readonly AfflictionKind[];
+	  }
 	| {
 			type: "item-consumed";
 			item: ItemKind;
@@ -91,7 +96,13 @@ export const consumeItem = (
 			afflictions,
 			effects: state.effects,
 			bag: removeBagItem(bag, selected.id),
-			event: { type: "item-cleansed", item: selected.kind },
+			event: {
+				type: "item-cleansed",
+				item: selected.kind,
+				conditions: active
+					.filter((a) => !afflictions.includes(a))
+					.map((a) => a.kind),
+			},
 		};
 	}
 	if ("cleanses" in definition) {

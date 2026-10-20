@@ -1,5 +1,6 @@
 // @vitest-environment node
 import { expect, it } from "vitest";
+import { formatActivityEvent } from "../components/game/ActivityMessages";
 import { applyPlayerAffliction } from "../domain/game/Afflictions";
 import { createGameState } from "../domain/game/GameState";
 import { resolvePlayerAction } from "../domain/game/PlayerActions";
@@ -97,7 +98,31 @@ it("costs nothing without Slowed, including while only diseased or poisoned", ()
 		expect(result.state).toBe(state);
 		expect(result.turnAdvanced).toBe(false);
 	}
-	expect(resolvePlayerAction(initial, drink).error).toBe("You are not Slowed.");
+	expect(resolvePlayerAction(initial, drink).error).toBe(
+		"You are not Slowed. You do not have Mana Burn.",
+	);
+});
+
+it("removes Mana Burn too, alone or with Slowed, and names what it removed", () => {
+	const burned = applyPlayerAffliction(adventure(), "mana-burn", "leech");
+	const alone = resolvePlayerAction(burned, drink).state;
+	expect(alone.afflictions).toEqual([]);
+	expect(alone.bag.items).toEqual([]);
+	const both = resolvePlayerAction(
+		applyPlayerAffliction(burned, "slowed", "web"),
+		drink,
+	).state;
+	expect(both.afflictions).toEqual([]);
+	const event = both.activityHistory.entries.at(-1)?.event;
+	expect(event).toMatchObject({
+		type: "item-cleansed",
+		conditions: ["mana-burn", "slowed"],
+	});
+	if (event)
+		expect(formatActivityEvent(event)).toContain(
+			"remove Mana Burn and Slowed. Passive mana recovery resumes. Evasion restored.",
+		);
+	expect(parseSave(serializeSave(tacticalSnapshot(both))).ok).toBe(true);
 });
 
 it("joins loot only on floors 3–12 in adventures marked for it, leaving older pools unchanged", () => {

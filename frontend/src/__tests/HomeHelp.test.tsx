@@ -227,7 +227,7 @@ describe("Home Help menu", () => {
 		expect(help).toHaveTextContent("restores maximum HP but not lost HP");
 		expect(help).toHaveTextContent("poison 40 gold, Disease 150 gold");
 		expect(help).toHaveTextContent("Slowed lowers evasion by 10 points");
-		expect(help).toHaveTextContent("it currently cures only Slowed");
+		expect(help).toHaveTextContent("it also cures Mana Burn");
 		expect(help).toHaveTextContent("Slowed 50 gold");
 	});
 	it("explains the Forgotten Forge's prices, odds and fixed result", async () => {

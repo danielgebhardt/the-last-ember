@@ -321,8 +321,8 @@ const DungeonHelp = ({
 						5%) for 10 committed turns, counting the turn it lands; another web
 						resets the timer without deepening it. Your turns and actions are
 						unchanged. A Cleansing potion removes it before monsters act, using
-						one turn; it currently cures only Slowed. Corridor running stops
-						when Slowed begins and cannot start while it lasts. At most two
+						one turn; it also cures Mana Burn. Corridor running stops when
+						Slowed begins and cannot start while it lasts. At most two
 						afflictions such as Disease and Slowed can be active; poison does
 						not count toward that limit.
 					</li>
