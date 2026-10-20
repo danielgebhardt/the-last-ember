@@ -79,9 +79,19 @@ const compareSlot = (
 	slot: EquipmentSlot,
 ) => {
 	const before = loadoutStats(context, context.equipment);
+	// An item already worn elsewhere (e.g. a sold-out shop copy) moves rather than duplicates.
+	const worn = (Object.keys(context.equipment) as EquipmentSlot[]).find(
+		(other) => other !== slot && context.equipment[other]?.id === item.id,
+	);
 	const after = loadoutStats(
 		context,
-		replaceEquipmentSlot(context.equipment, slot, item),
+		replaceEquipmentSlot(
+			worn
+				? replaceEquipmentSlot(context.equipment, worn, null)
+				: context.equipment,
+			slot,
+			item,
+		),
 	);
 	const gains = comparedStats.some((stat) => after[stat] > before[stat]);
 	const losses = comparedStats.some((stat) => after[stat] < before[stat]);

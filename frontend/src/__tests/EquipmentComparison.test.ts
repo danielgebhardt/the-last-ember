@@ -70,6 +70,20 @@ describe("Comparing gear with its compatible equipped slot", () => {
 			label: "Lower",
 		});
 	});
+	it("previews an equipped ring's own sold-out shop offer without duplicating it across both hands", () => {
+		const ring = {
+			id: "town-gear:armor:copper-ring:0:1",
+			kind: "copper-ring",
+		} as const;
+		const context = createComparisonContext(
+			createEquipment(null, null, null, null, ring),
+		);
+		expect(compareEquipment(ring, context, "rightRing")).toMatchObject({
+			slot: "rightRing",
+			label: "Same",
+		});
+		expect(compareEquipment(ring, context)).toMatchObject({ label: "Same" });
+	});
 	it("treats a useful item for an empty slot as an upgrade over the current loadout", () => {
 		expect(
 			compareEquipment(item("wooden-shield"), createComparisonContext()),
