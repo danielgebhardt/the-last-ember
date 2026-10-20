@@ -11,14 +11,19 @@ import { type DungeonObject, OBJECT_DEFINITIONS } from "./DungeonObject";
 import { navigationRun } from "./NavigationTerrain";
 
 // Future epic children join this pool, never roll a second per-floor budget.
-const pool = [{ value: "sarcophagus" as const, weight: 1 }];
+// At most one discovery per adventure; each kind keeps its own floor band.
+export const RARE_DISCOVERY_CHANCE = 0.4;
+const pool = [
+	{ value: "sarcophagus" as const, weight: 1 },
+	{ value: "forge" as const, weight: 1 },
+];
 export const rareDiscoverySelection = (
 	run: Pick<DungeonRun, "seed" | "floors">,
 ) => {
 	const random = createSeededRandom(
 		hashStringToUint32(`${run.seed}:rare-discovery:selection`),
 	);
-	if (random() >= 0.2) return undefined;
+	if (random() >= RARE_DISCOVERY_CHANCE) return undefined;
 	const kind = selectWeighted(pool, random);
 	if (!kind) return undefined;
 	const definition = OBJECT_DEFINITIONS[kind];

@@ -13,6 +13,16 @@ export const OBJECT_DEFINITIONS = {
 		chance: 0.2,
 		placement: "rare-discovery",
 	},
+	forge: {
+		name: "Forgotten Forge",
+		freshLabel: "smoldering forgotten forge",
+		usedLabel: "cold forgotten forge",
+		minFloor: 6,
+		maxFloor: 20,
+		maxPerFloor: 1,
+		chance: 0.2,
+		placement: "rare-discovery",
+	},
 	merchant: {
 		name: "Wandering potion merchant",
 		freshLabel: "potion merchant",
@@ -132,6 +142,7 @@ export type DungeonObject = Readonly<{
 	coordinate: Coordinate;
 	activated: boolean;
 	sarcophagusOutcome?: import("./AncientSarcophagi").SarcophagusOutcome;
+	forgeResult?: import("./ForgottenForge").ForgeResult;
 }>;
 export const objectLabel = (
 	object: Pick<DungeonObject, "kind" | "activated">,

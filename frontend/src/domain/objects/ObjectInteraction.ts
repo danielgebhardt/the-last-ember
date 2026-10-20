@@ -8,6 +8,7 @@ import { isDoor } from "./DungeonObject";
 import { offerAtShrine } from "./DungeonShrines";
 import { resolveThroneChoice } from "./DungeonThrones";
 import { disarmTrap } from "./DungeonTraps";
+import { operateForge } from "./ForgottenForge";
 import { describeObject } from "./ObjectDescriptions";
 import { openDiscovery } from "./RareDiscoveries";
 import { openChest } from "./TreasureChests";
@@ -21,11 +22,16 @@ export type ObjectChoice =
 	| "offer"
 	| "unseal"
 	| "read"
-	| "open-elite";
+	| "open-elite"
+	| "forge-select"
+	| "forge-reliable"
+	| "forge-risky";
 export type InteractAction = {
 	type: "interact";
 	objectId?: string;
 	choice?: ObjectChoice;
+	// The owned equipment copy a forge works on.
+	itemId?: string;
 };
 export const nearbyInteractionObjects = (state: GameState) => {
 	const nearby = state.objects.filter(
@@ -79,6 +85,8 @@ export const interactObject = (
 		return { error: "Review the elite chamber before opening its gate." };
 	if (object.kind === "sarcophagus")
 		return openSarcophagus(state, object, action.choice);
+	if (object.kind === "forge")
+		return operateForge(state, object, action.choice, action.itemId);
 	if (object.kind === "reliquary" || object.kind === "archive")
 		return openDiscovery(state, object, action.choice);
 	if (object.kind === "shrine")

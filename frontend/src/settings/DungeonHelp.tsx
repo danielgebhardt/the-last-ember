@@ -34,6 +34,7 @@ import type { Monster } from "../domain/monsters/Monster";
 import { MONSTER_DEFINITIONS } from "../domain/monsters/Monster";
 import { ESCAPE_PURSUIT_RULES } from "../domain/monsters/PursuitRules";
 import { TRAP_DISARM_EXPERIENCE } from "../domain/objects/DungeonObject";
+import { FORGE_PRICES } from "../domain/objects/ForgottenForge";
 import { SANCTUARY_CONDITION_FEES } from "../domain/town/Sanctuary";
 
 const Keycap = ({
@@ -474,8 +475,9 @@ const DungeonHelp = ({
 			>
 				<h3 className="font-medium">Ancient sarcophagi</h3>
 				<p>
-					At most one rare discovery is selected in 20% of seeds, on floor 2 or
-					deeper when safe space exists. These are substantially rarer than
+					At most one rare discovery appears in about 40% of new adventures: an
+					ancient sarcophagus (floor 2 or deeper) or a Forgotten Forge (floor 6
+					or deeper), when safe space exists. These are substantially rarer than
 					thrones or fountains. Press E nearby, then choose Open or cancel
 					freely with Escape. Opening spends one normal turn: 40% treasure, 25%
 					Heroic guardian, 25% both, 10% empty. These initial weights are for
@@ -491,6 +493,25 @@ const DungeonHelp = ({
 					its ordinary equipment or consumable. The opened tomb remains
 					inspectable. Inspection, cancellation, waiting and reloading cannot
 					change its result or grant a second reward.
+				</p>
+			</section>
+			<section
+				aria-label="Forgotten Forge"
+				className="grid gap-3 rounded-lg border p-4 text-sm"
+			>
+				<h3 className="font-medium">Forgotten Forge</h3>
+				<p>
+					Press E beside it and pick one ordinary weapon or armor piece below
+					+3, worn or carried; choosing is free. Reliable forging costs{" "}
+					{FORGE_PRICES.reliable} gold for a guaranteed +1. Risky forging costs{" "}
+					{FORGE_PRICES.risky} gold: 50% +1, 35% unchanged, 15% the item is
+					destroyed, even if you are wearing it. Rare magic-resistance finds
+					cannot be forged.
+				</p>
+				<p>
+					Either attempt uses one turn and the forge, whatever the result, and
+					monsters respond normally. Each forge&apos;s risky result is fixed:
+					changing items, cancelling or reloading cannot reroll it.
 				</p>
 			</section>
 			<section

@@ -54,3 +54,7 @@ Retain v27 with an optional, explicitly written `cleansingRemedies` marker. Only
 ## Giant spider web (#366)
 
 Retain v27 with an optional `Monster.webTurn` cooldown (web kinds only, never after the saved turn) and a `preparing-web` intent (web kinds only, a walkable target within range). `remedyDrop` generalizes to one marker per affliction, valid only when that affliction's remedy is enabled. Existing spiders gain the web as catalog behavior from their next action; no migration or regeneration.
+
+## Forgotten Forge (#352)
+
+Retain v27 with an optional, explicitly written `DungeonObject.forgeResult`. Valid only on a spent forge (floor 6+, at most one); a risky result must equal the seed-derived outcome. Raising the shared discovery budget changes only new adventures because saved objects are authoritative.

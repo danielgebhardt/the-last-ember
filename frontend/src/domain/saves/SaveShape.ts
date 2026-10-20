@@ -129,6 +129,13 @@ const eventFields = {
 		kind: oneOf(Object.keys(OBJECT_DEFINITIONS)),
 		activated: boolean,
 	},
+	"forge-used": {
+		service: oneOf(["reliable", "risky"]),
+		outcome: oneOf(["improved", "unchanged", "destroyed"]),
+		item: itemKind,
+		enchantment: integer(0, MAX_ENCHANTMENT),
+		gold: integer(1, 300),
+	},
 	"sarcophagus-opened": {
 		outcome: oneOf(["treasure", "guardian", "both", "empty"]),
 		escaped: boolean,
@@ -434,6 +441,13 @@ const documentShape = object({
 				activated: boolean,
 				sarcophagusOutcome: optional(
 					oneOf(["treasure", "guardian", "both", "empty"]),
+				),
+				forgeResult: optional(
+					object({
+						service: oneOf(["reliable", "risky"]),
+						outcome: oneOf(["improved", "unchanged", "destroyed"]),
+						item: itemKind,
+					}),
 				),
 			}),
 			0,

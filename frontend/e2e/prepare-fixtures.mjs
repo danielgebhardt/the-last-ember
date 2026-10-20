@@ -172,6 +172,41 @@ export default async function prepareFixtures() {
 				},
 			],
 		};
+		// A Forgotten Forge beside the player on floor 6 of a six-floor run.
+		const forgeConfiguration = { ...configuration, floorCount: 6 };
+		const forgeRun = connectDungeonFloors(
+			generateDungeonRun(123, 6, forgeConfiguration),
+		);
+		const forgeRoom = forgeRun.floors[5].rooms[0];
+		const forgeStart = {
+			row: forgeRoom.startRow + 1,
+			col: forgeRoom.startCol + 1,
+		};
+		const forgeBase = createGameState(
+			{ ...forgeRun, activeFloor: 6, playerCoordinate: forgeStart },
+			forgeConfiguration.difficulty,
+		);
+		const forgeState = {
+			...forgeBase,
+			gold: 500,
+			monsters: [],
+			objects: [
+				{
+					id: "floor:6:object:forge:1",
+					kind: "forge",
+					floorNumber: 6,
+					coordinate: { row: forgeStart.row, col: forgeStart.col + 1 },
+					activated: false,
+				},
+			],
+			floorItems: forgeBase.floorItems.filter(
+				(entry) => entry.item.kind === "cure",
+			),
+			equipment: {
+				...forgeBase.equipment,
+				mainHand: { id: "worn:sword", kind: "iron-sword", enchantment: 1 },
+			},
+		};
 		const townDiseased = {
 			...diseased,
 			bag: { items: [] },
@@ -884,6 +919,7 @@ export default async function prepareFixtures() {
 			["diseased", diseased, configuration],
 			["town-diseased", townDiseased, configuration],
 			["plague-bite", plagueBite, configuration],
+			["forge", forgeState, forgeConfiguration],
 			["spider-web", spiderWeb, configuration],
 			["scrolling", scrolling, configuration],
 			["stacks", stacks, configuration],

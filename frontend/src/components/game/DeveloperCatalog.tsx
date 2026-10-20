@@ -35,6 +35,8 @@ import {
 	OBJECT_DEFINITIONS,
 	TRAP_DISARM_EXPERIENCE,
 } from "../../domain/objects/DungeonObject";
+import { FORGE_PRICES } from "../../domain/objects/ForgottenForge";
+import { RARE_DISCOVERY_CHANCE } from "../../domain/objects/RareDiscoveryPlacement";
 import { SANCTUARY_CONDITION_FEES } from "../../domain/town/Sanctuary";
 import { TOWN_EQUIPMENT_OFFERS } from "../../domain/town/TownEquipmentStock";
 import TileIcon from "../dungeon/TileIcon";
@@ -404,11 +406,19 @@ const DeveloperCatalog = ({
 									<p>
 										Floors {definition.minFloor}–{definition.maxFloor} · Up to{" "}
 										{definition.maxPerFloor}/floor ·{" "}
-										{Math.round(definition.chance * 100)}%{" "}
-										{kind === "sarcophagus"
-											? "shared per-seed selection chance; at most one discovery/dungeon; omitted without safe space"
-											: "placement chance"}
+										{definition.placement === "rare-discovery"
+											? `${Math.round(RARE_DISCOVERY_CHANCE * 100)}% shared rare-discovery chance per adventure, equal weight with the other discoveries; at most one discovery/dungeon; omitted without safe space`
+											: `${Math.round(definition.chance * 100)}% placement chance`}
 									</p>
+									{kind === "forge" && (
+										<p>
+											Reliable {FORGE_PRICES.reliable} gold: +1. Risky{" "}
+											{FORGE_PRICES.risky} gold: 50% +1 · 35% unchanged · 15%
+											destroyed (worn or carried). Ordinary weapons/armor below
+											+3; rare MR finds excluded. Outcome fixed per forge by
+											seed; one turn and one use. Provisional playtest balance.
+										</p>
+									)}
 									{kind === "sarcophagus" && (
 										<p>
 											40% treasure · 25% Heroic guardian · 25% both · 10% empty.

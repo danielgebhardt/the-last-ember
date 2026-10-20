@@ -108,6 +108,7 @@ export const createSaveDocument = (
 				coordinate,
 				activated,
 				sarcophagusOutcome,
+				forgeResult,
 			}) => ({
 				id,
 				kind,
@@ -115,6 +116,7 @@ export const createSaveDocument = (
 				coordinate: { ...coordinate },
 				activated,
 				...(sarcophagusOutcome ? { sarcophagusOutcome } : {}),
+				...(forgeResult ? { forgeResult: { ...forgeResult } } : {}),
 			}),
 		),
 		mana: state.mana,

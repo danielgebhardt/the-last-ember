@@ -52,6 +52,8 @@ export const formatActivityEvent = (event: ActivityEvent): string => {
 			return `${prefix}You open the ${OBJECT_DEFINITIONS[event.kind].name}.${event.damage ? ` The seal deals ${event.damage} damage.` : ""} ${ITEM_DEFINITIONS[event.item].name} remains on the floor for G pickup.`;
 		case "object-seen":
 			return `${prefix}${describeObject(event)}`;
+		case "forge-used":
+			return `${prefix}You pay ${event.gold} gold at the Forgotten Forge. ${event.outcome === "improved" ? `Your ${ITEM_DEFINITIONS[event.item].name} is now +${event.enchantment}.` : event.outcome === "unchanged" ? `Your ${ITEM_DEFINITIONS[event.item].name} is unchanged.` : `Your ${ITEM_DEFINITIONS[event.item].name} shatters and is lost.`} The forge goes cold.`;
 		case "sarcophagus-opened":
 			return `${prefix}You open the ancient sarcophagus. ${event.outcome === "empty" ? "The tomb is empty." : `${event.outcome !== "guardian" ? "Treasure waits on the floor. " : ""}${event.outcome !== "treasure" ? (event.escaped ? "The guardian has escaped; no enemy appears." : "A Heroic guardian emerges!") : ""}`}`;
 		case "shrine-offered":

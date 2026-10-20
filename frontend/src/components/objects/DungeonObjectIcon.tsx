@@ -14,6 +14,7 @@ import type {
 	DungeonObject,
 	DungeonObjectKind,
 } from "../../domain/objects/DungeonObject";
+import ForgeIcon from "./ForgeIcon";
 import FountainIcon from "./FountainIcon";
 import MerchantIcon from "./MerchantIcon";
 import SarcophagusIcon from "./SarcophagusIcon";
@@ -27,6 +28,7 @@ const icons: Record<
 	ComponentType<SVGProps<SVGSVGElement>>
 > = {
 	sarcophagus: SarcophagusIcon,
+	forge: ForgeIcon,
 	door: DoorClosed,
 	reliquary: Gem,
 	archive: LibraryBig,
@@ -43,6 +45,15 @@ const DungeonObjectIcon = ({ object }: { object: DungeonObject }) => {
 		return (
 			<SarcophagusIcon
 				opened={object.activated}
+				aria-hidden="true"
+				focusable="false"
+				className={`size-full text-object-stone ${object.activated ? "opacity-50" : ""}`}
+			/>
+		);
+	if (object.kind === "forge")
+		return (
+			<ForgeIcon
+				spent={object.activated}
 				aria-hidden="true"
 				focusable="false"
 				className={`size-full text-object-stone ${object.activated ? "opacity-50" : ""}`}

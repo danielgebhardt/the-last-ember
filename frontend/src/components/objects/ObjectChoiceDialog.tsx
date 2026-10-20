@@ -1,12 +1,15 @@
 import { Dialog } from "@base-ui/react/dialog";
-import { type RefObject, useLayoutEffect, useRef } from "react";
+import { type RefObject, useLayoutEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import type { GameState } from "../../domain/game/GameState";
 import {
 	type DungeonObject,
 	OBJECT_DEFINITIONS,
 } from "../../domain/objects/DungeonObject";
-import { objectChoices } from "../../domain/objects/ObjectChoices";
+import {
+	forgeChoices,
+	objectChoices,
+} from "../../domain/objects/ObjectChoices";
 import { describeObject } from "../../domain/objects/ObjectDescriptions";
 import type { InteractAction } from "../../domain/objects/ObjectInteraction";
 import DungeonObjectIcon from "./DungeonObjectIcon";
@@ -29,22 +32,41 @@ const ObjectChoiceDialog = ({
 	mapRef: RefObject<HTMLElement | null>;
 }) => {
 	const titleRef = useRef<HTMLHeadingElement>(null);
-	const choices = object ? objectChoices(object, state) : [];
+	// The forge picks an owned copy first; choosing it is free and reversible.
+	const [forgeItem, setForgeItem] = useState<string | undefined>();
+	const forge = object?.kind === "forge";
+	const choices = !object
+		? []
+		: forge
+			? forgeChoices(state, forgeItem)
+			: objectChoices(object, state);
 	const count = object ? choices.length : targets.length;
 	useLayoutEffect(() => {
 		if (object) titleRef.current?.focus({ preventScroll: true });
+		else setForgeItem(undefined);
 	}, [object]);
+	const chooseForgeItem = (itemId?: string) => {
+		setForgeItem(itemId);
+		titleRef.current?.focus({ preventScroll: true });
+	};
 	const choose = (index: number) => {
 		if (!object) {
 			if (targets[index]) onSelect?.(targets[index]);
 			return;
 		}
-		if (!choices[index]) return;
+		const choice = choices[index];
+		if (!choice) return;
+		if (choice.value === "forge-select") {
+			chooseForgeItem(choice.itemId);
+			return;
+		}
 		onChoose({
 			type: "interact",
 			objectId: object.id,
-			choice: choices[index].value,
+			choice: choice.value,
+			...(choice.itemId ? { itemId: choice.itemId } : {}),
 		});
+		setForgeItem(undefined);
 		onClose();
 	};
 	return (
@@ -117,7 +139,7 @@ const ObjectChoiceDialog = ({
 						))}
 					{choices.map((choice, index) => (
 						<Button
-							key={choice.value}
+							key={`${choice.value}:${choice.itemId ?? ""}`}
 							variant="outline"
 							className="h-auto justify-start gap-3 whitespace-normal p-3 text-left"
 							onClick={() => choose(index)}
@@ -131,6 +153,19 @@ const ObjectChoiceDialog = ({
 							</span>
 						</Button>
 					))}
+					{forge && !choices.length && (
+						<p role="status" className="text-sm">
+							No owned ordinary weapon or armor piece below +3 can be forged.
+						</p>
+					)}
+					{forge && forgeItem && (
+						<Button
+							variant="outline"
+							onClick={() => chooseForgeItem(undefined)}
+						>
+							Choose different equipment
+						</Button>
+					)}
 					<Dialog.Close render={<Button variant="ghost" />}>
 						Cancel
 					</Dialog.Close>

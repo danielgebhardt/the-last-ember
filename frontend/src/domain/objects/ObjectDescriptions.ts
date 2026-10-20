@@ -16,6 +16,11 @@ const hints: Record<DungeonObjectKind, { fresh: string; spent: string }> = {
 		spent:
 			"Opened once; the tomb cannot be rerolled. Any remaining treasure is on the floor for G pickup.",
 	},
+	forge: {
+		fresh:
+			"Press E to review forging: improve one ordinary weapon or armor piece for gold, reliably or at a risk of destroying it. One use.",
+		spent: "The forge has gone cold; its one attempt is spent.",
+	},
 	merchant: {
 		fresh:
 			"Press E within reach to trade. All stalls share finite supplies; successful trades give monsters a turn.",

@@ -230,3 +230,54 @@ for (const width of [390, 1440])
 			await expect(page.getByRole("log")).toContainText("portal closes");
 		});
 	}
+
+for (const width of [390, 1440])
+	test(`Forgotten Forge ${width}px: choose equipment, back out freely, then forge reliably`, async ({
+		page,
+	}) => {
+		await page.setViewportSize({ width, height: width === 390 ? 740 : 900 });
+		await importAdventure(page, "forge");
+		await page.keyboard.press("e");
+		const dialog = page.getByRole("dialog", {
+			name: "Forgotten Forge",
+			exact: true,
+		});
+		await expect(
+			dialog.getByRole("heading", { name: "Forgotten Forge", exact: true }),
+		).toBeFocused();
+		await dialog
+			.getByRole("button", { name: /Main hand: Iron sword \+1/ })
+			.click();
+		await expect(dialog).toContainText("Reliable forging · 300 gold");
+		await expect(dialog).toContainText(
+			"15%: Iron sword +1 is destroyed, even if worn.",
+		);
+		await dialog
+			.getByRole("button", { name: "Choose different equipment", exact: true })
+			.click();
+		await expect(
+			dialog.getByRole("button", { name: /Main hand: Iron sword \+1/ }),
+		).toBeVisible();
+		await page.keyboard.press("Escape");
+		await expect(map(page)).toBeFocused();
+		await expect(turns(page)).toHaveText("Turn 0");
+
+		await page.keyboard.press("e");
+		await expect(
+			dialog.getByRole("heading", { name: "Forgotten Forge", exact: true }),
+		).toBeFocused();
+		await dialog
+			.getByRole("button", { name: /Main hand: Iron sword \+1/ })
+			.click();
+		await dialog.getByRole("button", { name: /Reliable forging/ }).click();
+		await expect(dialog).toHaveCount(0);
+		await expect(map(page)).toBeFocused();
+		await expect(turns(page)).toHaveText("Turn 1");
+		await expect(page.getByRole("log")).toContainText(
+			"Your Iron sword is now +2.",
+		);
+		// A spent forge offers nothing and costs no turn.
+		await page.keyboard.press("e");
+		await expect(dialog).toHaveCount(0);
+		await expect(turns(page)).toHaveText("Turn 1");
+	});

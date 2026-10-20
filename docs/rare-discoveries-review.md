@@ -21,3 +21,11 @@ Focused coverage includes all four results, inspection/cancel/revisit, determini
 Final verification: 339 frontend test files / 2,509 tests passed with two Vitest workers; strict typechecking, Biome formatting/lint, production build and the targeted Playwright mobile/keyboard check passed. The initial unrestricted worker run hit resource/timeouts; rerunning with bounded concurrency passed without weakening assertions or changing test timeouts. The existing build chunk-size advisory remains. Browser layout was visually inspected at 390×667.
 
 All numerical defaults remain provisional pending developer playtesting. Existing saves retain their played layouts; sarcophagi appear only in newly generated adventures.
+
+## Forgotten Forge (#352) and the wider budget
+
+The shared rare-discovery chance rises from 20% to 40% of new adventures, still at most one discovery per dungeon, with equal weights across the pool (sarcophagus and Forgotten Forge now; Wishing Well follows in #349). Each kind keeps its own floor band. Existing saves keep their placed objects; validation never re-derives the selection.
+
+The Forgotten Forge appears on floors 6–20. E opens a two-step dialog: choose one owned ordinary weapon, shield, chest piece or helmet below +3 (worn or carried; rare MR finds excluded), which is free and reversible, then choose a service. Reliable forging costs 300 gold for a guaranteed +1. Risky forging costs 150 gold: 50% +1, 35% unchanged, 15% destroyed, worn items included (developer decision), and the dialog names the item at risk. The risky result is fixed by seed and forge identity (`seed:object:forge:outcome`), so item choice, bag order, cancel and reload cannot reroll it. Either attempt spends the gold, one normal turn and the forge; destroyed copies leave bag and equipment, and capacity is rederived before monsters respond. Insufficient gold, capped, rare or unknown items reject free.
+
+Save format stays v27 with an optional object `forgeResult` (service, outcome, item kind). Validation allows one forge, only from floor 6, requires a result exactly when spent, and requires the risky outcome to match the seed. Prices and odds are provisional playtest values.

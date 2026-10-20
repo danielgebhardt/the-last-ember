@@ -1,6 +1,7 @@
 import { protectedFloorLocations } from "../monsters/MonsterLocations";
 import { sarcophagusOutcome } from "../objects/AncientSarcophagi";
 import { isDoor } from "../objects/DungeonObject";
+import { forgeRiskyOutcome } from "../objects/ForgottenForge";
 import {
 	findOptionalEliteRooms,
 	sealedEliteTiles,
@@ -81,6 +82,21 @@ export const hasConsistentGeometry = (document: SaveDocument): boolean => {
 	)
 		return false;
 	if (objects.filter((o) => o.kind === "sarcophagus").length > 1) return false;
+	if (objects.filter((o) => o.kind === "forge").length > 1) return false;
+	for (const object of objects)
+		if (
+			object.kind === "forge"
+				? object.floorNumber < 6 ||
+					(object.activated
+						? !object.forgeResult ||
+							object.forgeResult.outcome !==
+								(object.forgeResult.service === "reliable"
+									? "improved"
+									: forgeRiskyOutcome(run.seed, object))
+						: object.forgeResult !== undefined)
+				: object.forgeResult !== undefined
+		)
+			return false;
 	for (const object of objects) {
 		if (
 			object.kind === "sarcophagus"

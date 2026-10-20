@@ -2,6 +2,7 @@ import type { GameState } from "../game/GameState";
 import { createPlayerStats } from "../game/PlayerStats";
 import { createProgression } from "../game/Progression";
 import { createStartingEquipment } from "../items/Equipment";
+import { itemName } from "../items/ItemValues";
 import {
 	maximumMonsterHealth,
 	monsterDamageRange,
@@ -9,19 +10,68 @@ import {
 import { fountainRestoration } from "./DungeonFountains";
 import { type DungeonObject, RELIQUARY_HEALTH_COST } from "./DungeonObject";
 import { shrineTerms } from "./DungeonShrines";
+import { FORGE_PRICES, forgeTargets } from "./ForgottenForge";
 import type { ObjectChoice } from "./ObjectInteraction";
 export type InteractionChoice = Readonly<{
 	value: ObjectChoice;
 	label: string;
 	description: string;
+	itemId?: string;
 }>;
+const forgeServiceChoices = (
+	gold: number | undefined,
+	item?: { id: string; name: string; next: number },
+): readonly InteractionChoice[] => {
+	const afford = (price: number) =>
+		gold !== undefined && gold < price ? " Not enough gold." : "";
+	const name = item?.name ?? "the chosen item";
+	return [
+		{
+			value: "forge-reliable",
+			itemId: item?.id,
+			label: `Reliable forging · ${FORGE_PRICES.reliable} gold`,
+			description: `Guaranteed: ${name} becomes +${item?.next ?? "1 higher"}. One turn; spends the forge.${afford(FORGE_PRICES.reliable)}`,
+		},
+		{
+			value: "forge-risky",
+			itemId: item?.id,
+			label: `Risky forging · ${FORGE_PRICES.risky} gold`,
+			description: `50%: ${name} becomes +${item?.next ?? "1 higher"}. 35%: unchanged. 15%: ${name} is destroyed, even if worn. One turn; spends the forge whatever happens.${afford(FORGE_PRICES.risky)}`,
+		},
+	];
+};
+// Step one lists eligible copies; step two (with itemId) offers the priced services.
+export const forgeChoices = (
+	state: Pick<GameState, "equipment" | "bag" | "gold">,
+	itemId?: string,
+): readonly InteractionChoice[] => {
+	const targets = forgeTargets(state);
+	const target = targets.find(({ item }) => item.id === itemId);
+	if (target)
+		return forgeServiceChoices(state.gold, {
+			id: target.item.id,
+			name: itemName(target.item),
+			next: (target.item.enchantment ?? 0) + 1,
+		});
+	return targets.map(({ item, location }) => ({
+		value: "forge-select",
+		itemId: item.id,
+		label: `${location}: ${itemName(item)}`,
+		description: `Choose to see reliable and risky forging to +${(item.enchantment ?? 0) + 1}. Choosing is free.`,
+	}));
+};
 export const objectChoices = (
 	object: DungeonObject,
 	state?: Pick<
 		GameState,
 		"player" | "progression" | "equipment" | "effects" | "difficulty"
-	>,
+	> &
+		Partial<Pick<GameState, "bag" | "gold">>,
 ): readonly InteractionChoice[] => {
+	if (object.kind === "forge")
+		return state?.bag
+			? forgeChoices({ ...state, bag: state.bag, gold: state.gold ?? 0 })
+			: forgeServiceChoices(undefined);
 	if (object.kind === "sarcophagus")
 		return [
 			{

@@ -70,6 +70,14 @@ export type ActivityEvent = { turn: number } & (
 			activated: boolean;
 	  }
 	| {
+			type: "forge-used";
+			service: "reliable" | "risky";
+			outcome: "improved" | "unchanged" | "destroyed";
+			item: ItemKind;
+			enchantment: number;
+			gold: number;
+	  }
+	| {
 			type: "sarcophagus-opened";
 			outcome: "treasure" | "guardian" | "both" | "empty";
 			escaped: boolean;
