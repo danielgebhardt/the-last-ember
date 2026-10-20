@@ -11,6 +11,7 @@ import GoblinArcherIcon from "./GoblinArcherIcon";
 import GoblinIcon from "./GoblinIcon.tsx";
 import GolemIcon from "./GolemIcon";
 import KoboldSlingerIcon from "./KoboldSlingerIcon";
+import ManaLeechIcon from "./ManaLeechIcon";
 import NecromancerIcon from "./NecromancerIcon";
 import OgreIcon from "./OgreIcon";
 import OrcIcon from "./OrcIcon";
@@ -68,6 +69,11 @@ export const MONSTER_VISUALS: Record<
 		icon: Rat,
 		color: "text-monster-ember",
 		label: MONSTER_DEFINITIONS["giant-rat"].name,
+	},
+	"mana-leech": {
+		icon: ManaLeechIcon,
+		color: "text-monster-azure",
+		label: MONSTER_DEFINITIONS["mana-leech"].name,
 	},
 	"plague-rat": {
 		icon: PlagueRatIcon,

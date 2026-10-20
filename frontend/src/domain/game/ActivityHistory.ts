@@ -172,6 +172,7 @@ export type ActivityEvent = { turn: number } & (
 			element: AreaElement;
 	  }
 	| { type: "door-changed"; opened: boolean }
+	| { type: "player-mana-drained"; monster: MonsterKind; mana: number }
 	| { type: "spell-healed"; spell: SpellKind; recovered: number }
 	| {
 			type:

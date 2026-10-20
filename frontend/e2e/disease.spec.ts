@@ -226,3 +226,32 @@ test("Spider web loop: see the marked tile, get Slowed, read guidance and drink 
 	expect(await mapGeometry(page)).toEqual(frame);
 	await expect(map(page)).toBeFocused();
 });
+
+test("Mana leech: a landed hit drains mana and burns; a Cleansing potion cures it", async ({
+	page,
+}) => {
+	await importAdventure(page, "leech-bite");
+	const frame = await mapGeometry(page);
+	const mana = page.getByLabel("Player mana", { exact: true });
+	const before = await mana.textContent();
+	await page.keyboard.press("Space");
+	const log = page.getByRole("log", { name: "Activity log", exact: true });
+	await expect(log).toContainText(/The mana leech drains [234] mana\./);
+	await expect(log).toContainText("Mana Burn applied (mana leech)");
+	expect(await mana.textContent()).not.toBe(before);
+	const burn = page.getByRole("button", {
+		name: "Mana Burn — 89 phases remaining",
+		exact: true,
+	});
+	await expect(burn).toBeVisible();
+	await burn.click();
+	await expect(page.getByRole("dialog", { name: /Mana Burn/ })).toContainText(
+		"sanctuary Cure Mana Burn (75 gold)",
+	);
+	await page.keyboard.press("Escape");
+	await map(page).click();
+	await page.keyboard.press("1");
+	await expect(page.getByRole("button", { name: /^Mana Burn/ })).toHaveCount(0);
+	await expect(log).toContainText("Cleansing potion and remove Mana Burn");
+	expect(await mapGeometry(page)).toEqual(frame);
+});

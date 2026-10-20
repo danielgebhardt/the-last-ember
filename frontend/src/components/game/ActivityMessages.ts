@@ -168,6 +168,8 @@ export const formatActivityEvent = (event: ActivityEvent): string => {
 			return `${prefix}You hit the ${MONSTER_DEFINITIONS[event.monster].name} for ${event.damage} damage.`;
 		case "monster-hit":
 			return `${prefix}The ${MONSTER_DEFINITIONS[event.monster].name} hits you for ${event.damage} damage.`;
+		case "player-mana-drained":
+			return `${prefix}The ${MONSTER_DEFINITIONS[event.monster].name} drains ${event.mana} mana.`;
 		case "monster-died":
 			return `${prefix}The ${MONSTER_DEFINITIONS[event.monster].name} dies.`;
 		case "player-died":

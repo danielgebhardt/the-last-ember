@@ -45,6 +45,7 @@
 	--color-monster-bone: var(--monster-bone);
 	--color-monster-violet: var(--monster-violet);
 	--color-monster-spectral: var(--monster-spectral);
+	--color-monster-azure: var(--monster-azure);
 	--color-map-threat: var(--map-threat);
 	--color-item-cure: var(--item-cure);
 	--color-item-ember: var(--item-ember);
@@ -120,6 +121,7 @@
 	--monster-bone: #756244;
 	--monster-violet: #a67ad5;
 	--monster-spectral: #278577;
+	--monster-azure: #218eae;
 	--dungeon-tile-size: 24px;
 	--ember-trim-soft: #a1886140;
 	--ember-frame-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Cpath d='M8 1H92L99 8V92L92 99H8L1 92V8Z' fill='none' stroke='%23b39464' stroke-opacity='.7'/%3E%3C/svg%3E");
@@ -206,6 +208,7 @@
 	--monster-bone: #bdad8c;
 	--monster-violet: #c1a0e9;
 	--monster-spectral: #6ed3c1;
+	--monster-azure: #51bcd9;
 	--ember-trim-soft: #b394644d;
 	--fog-visible: #364152;
 	--fog-unseen: transparent;

@@ -49,6 +49,7 @@ export const resolveMonsterPhase = (
 	let navigation = navigationRun(state);
 	const pursuitRules = pursuitRulesFor(state);
 	let player = state.player;
+	let mana = state.mana;
 	let monsters = state.monsters;
 	let effects = state.effects;
 	const events: ActivityEvent[] = [];
@@ -423,6 +424,34 @@ export const resolveMonsterPhase = (
 			monster: monster.kind,
 			damage,
 		});
+		// Every landed melee hit burns mana on its own stream; it never goes below zero.
+		if (
+			player.health > 0 &&
+			definition.onHitManaDrain &&
+			!shooting &&
+			mana > 0
+		) {
+			const { min, max } = definition.onHitManaDrain;
+			const drained = Math.min(
+				mana,
+				min +
+					Math.floor(
+						createSeededRandom(
+							hashStringToUint32(
+								`${state.run.seed}:${state.run.activeFloor}:${state.turn}:${monster.id}:mana-drain`,
+							),
+						)() *
+							(max - min + 1),
+					),
+			);
+			mana -= drained;
+			events.push({
+				type: "player-mana-drained",
+				monster: monster.kind,
+				mana: drained,
+				turn: state.turn,
+			});
+		}
 		// An independent deterministic roll per landed melee hit; misses never infect.
 		if (
 			player.health > 0 &&
@@ -462,6 +491,7 @@ export const resolveMonsterPhase = (
 		{
 			...state,
 			player,
+			mana,
 			objects,
 			monsters,
 			effects,

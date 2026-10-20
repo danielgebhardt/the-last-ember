@@ -78,3 +78,7 @@ Retain v27. Activity `item-cleansed` accepts an optional `conditions` list of on
 ## Sanctuary Mana Burn (#364)
 
 Retain v27. `sanctuary-treated` Activity entries accept the `mana-burn` service and condition. No migration.
+
+## Mana Leech (#369)
+
+Retain v27. `mana-leech` is a new monster kind; its `remedyDrop` marker uses the existing per-affliction rule and needs `cleansingRemedies`. Activity adds `player-mana-drained` (`monster`, `mana` 1–100). Existing saves are unchanged on load. No migration.

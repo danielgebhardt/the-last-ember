@@ -327,13 +327,14 @@ const DungeonHelp = ({
 						not count toward that limit.
 					</li>
 					<li>
-						<span className="font-medium text-foreground">Mana Burn.</span>{" "}
-						Stops passive mana recovery for 90 committed turns, counting the
-						turn it lands, so you miss three recovery ticks. Another burn resets
-						the timer. Mana potions and affordable spells still work, and no
-						recovery is made up afterward. A Cleansing potion or the sanctuary
-						removes it. Corridor running stops when it begins but may continue
-						afterward.
+						<span className="font-medium text-foreground">Mana Burn.</span> Rare
+						mana leeches on floors 9–16 drain 2–4 mana with every landed hit,
+						and one hit in five also burns. Mana Burn stops passive mana
+						recovery for 90 committed turns, counting the turn it lands, so you
+						miss three recovery ticks. Another burn resets the timer. Mana
+						potions and affordable spells still work, and no recovery is made up
+						afterward. A Cleansing potion or the sanctuary removes it. Corridor
+						running stops when it begins but may continue afterward.
 					</li>
 					<li>
 						<span className="font-medium text-foreground">Town.</span> New

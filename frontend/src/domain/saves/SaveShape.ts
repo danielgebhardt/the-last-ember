@@ -259,6 +259,7 @@ const eventFields = {
 	"spell-healed": { spell: spellKind, recovered: natural },
 	"player-hit": { monster: monsterKind, damage: natural },
 	"monster-hit": { monster: monsterKind, damage: natural },
+	"player-mana-drained": { monster: monsterKind, mana: integer(1, 100) },
 	"monster-shot-hit": { monster: monsterKind, damage: natural },
 	"monster-shot-missed": { monster: monsterKind },
 	"monster-prepared": { monster: monsterKind, target: coordinate },

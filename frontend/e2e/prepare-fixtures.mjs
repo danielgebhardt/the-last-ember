@@ -172,6 +172,42 @@ export default async function prepareFixtures() {
 				},
 			],
 		};
+		// A mana leech beside the player at the first seeded turn whose landed hit also burns.
+		const leechBase = {
+			...spiderWeb,
+			monsters: [
+				{
+					id: "1:1",
+					kind: "mana-leech",
+					floorNumber: 1,
+					coordinate: ratTile,
+					health: 16,
+					intent: { type: "idle" },
+					lastDamagedTurn: null,
+				},
+			],
+		};
+		// The drink turn must also leave a level-1 hero alive beside this floor-9 creature.
+		const leechTurn = [...Array(400).keys()].find((turn) => {
+			const after = resolvePlayerAction(
+				{ ...leechBase, turn },
+				{ type: "wait" },
+			).state;
+			const cured = resolvePlayerAction(after, {
+				type: "consume",
+				itemId: "smoke:cleansing",
+			}).state;
+			return (
+				after.player.health > 0 &&
+				after.mana < leechBase.mana &&
+				after.afflictions.some((a) => a.kind === "mana-burn") &&
+				cured.player.health > 0 &&
+				cured.afflictions.length === 0
+			);
+		});
+		if (leechTurn === undefined)
+			throw new Error("Expected a burning leech hit");
+		const leechBite = { ...leechBase, turn: leechTurn };
 		// A Forgotten Forge beside the player on floor 6 of a six-floor run.
 		const forgeConfiguration = { ...configuration, floorCount: 6 };
 		const forgeRun = connectDungeonFloors(
@@ -931,6 +967,7 @@ export default async function prepareFixtures() {
 			["diseased", diseased, configuration],
 			["town-diseased", townDiseased, configuration],
 			["plague-bite", plagueBite, configuration],
+			["leech-bite", leechBite, configuration],
 			["forge", forgeState, forgeConfiguration],
 			["well", wellState, forgeConfiguration],
 			["spider-web", spiderWeb, configuration],

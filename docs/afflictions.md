@@ -93,3 +93,11 @@ The sanctuary adds "Cure Mana Burn" at 75 gold (developer decision). It comes af
 ## Mana Burn visibility (#372, Mana Burn portion)
 
 Mana Burn shows as a sky-blue crossed-lightning icon, "Mana Burn — N phases remaining". Its popover gives the recovery rule (1 mana every 30 turns), the three lost ticks, that potions and spells still work, and both cures. Character's mana card adds "Mana Burn: no passive recovery for N phases". Help and the Developer Catalog describe it. Running now asks each definition's `blocksRunning`: Slowed still blocks running while it lasts, but Mana Burn, like Disease, only stops a run when it begins, because a 90-phase recovery penalty does not endanger travel. With the two-affliction cap the status row's worst case is still 8 icons. #372 remains open for later conditions.
+
+## Mana Leech (#369)
+
+Developer decisions: every landed melee hit also **drains 2–4 mana** (uniform, never below 0), which supersedes the backlog's "avoid an additional mana-steal" line, so the leech is noticed even without the affliction. A separate 20% roll applies Mana Burn. Stats: floors 9–16, 16 HP, attack 6, 20 XP, detection 6, drop 55%, no loot preference. It uses a new azure monster colour (`--monster-azure`) and the developer's SVG.
+
+The drain and the burn each roll on their own deterministic stream per landed hit (`seed:floor:turn:monster:mana-drain`, then the existing `…:affliction`). Misses and fatal hits do neither. A drain against empty mana logs nothing. Activity records `player-mana-drained` ("The mana leech drains 3 mana.") between the hit and any Mana Burn entry. Magic resistance does not protect.
+
+The leech is `spawnEnabled: false` and uses the shared sparse affliction-source budget. Floors 9–16 have no other source kind, so about a quarter of those floors carry one leech, replacing an ordinary spawn. The shallowest leech of a new adventure saves `remedyDrop` and always drops a Cleansing potion; that marker is keyed by affliction, so it is independent of the first spider's. Bestiary traits now describe each source's affliction and cure from its definition. Existing v27 saves keep their monsters, so loading never adds leeches.

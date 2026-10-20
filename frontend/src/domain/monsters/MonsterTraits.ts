@@ -1,5 +1,19 @@
+import {
+	AFFLICTION_DEFINITIONS,
+	type AfflictionKind,
+} from "../game/AfflictionDefinitions";
 import { SPELL_DEFINITIONS } from "../game/Spells";
+import { ITEM_DEFINITIONS } from "../items/Item";
 import { MONSTER_DEFINITIONS, type MonsterKind } from "./Monster";
+
+const ON_HIT_AFFLICTION_TEXT: Record<AfflictionKind, string> = {
+	disease:
+		"Disease: maximum HP −20% until cured; does not stack. Misses never infect; magic resistance does not protect. Cure Disease potion or the sanctuary cures it.",
+	slowed:
+		"Slowed: evasion −10 for 10 phases; refreshes without stacking. Cleansing potion or the sanctuary cures it.",
+	"mana-burn":
+		"Mana Burn: no passive mana recovery for 90 phases; refreshes without stacking. Misses never burn; magic resistance does not protect. Cleansing potion or the sanctuary cures it.",
+};
 export const monsterTraits = (kind: MonsterKind): readonly string[] => {
 	const definition = MONSTER_DEFINITIONS[kind];
 	const traits: string[] = [];
@@ -37,13 +51,17 @@ export const monsterTraits = (kind: MonsterKind): readonly string[] => {
 		traits.push(
 			`Web: marks your tile within ${definition.webAttack.range} tiles instead of attacking, then resolves on its next action. Step off the marked tile to avoid it; staying applies Slowed (evasion −10 for 10 phases, refreshes without stacking). No damage; magic resistance does not protect. At least ${definition.webAttack.cooldown} phases between webs. Sleep or Fear cancels it. Cleansing potion or the sanctuary cures Slowed; the first spider of an adventure always drops a Cleansing potion.`,
 		);
+	if (definition.onHitManaDrain)
+		traits.push(
+			`Every landed melee hit also drains ${definition.onHitManaDrain.min}–${definition.onHitManaDrain.max} mana (never below 0). Misses drain nothing.`,
+		);
 	if (definition.onHitAffliction)
 		traits.push(
-			`Landed melee hits have a ${Math.round(definition.onHitAffliction.chance * 100)}% chance to inflict Disease: maximum HP −20% until cured; does not stack. Misses never infect; magic resistance does not protect. Cure Disease potion or the sanctuary cures it.`,
+			`Landed melee hits have a ${Math.round(definition.onHitAffliction.chance * 100)}% chance to inflict ${ON_HIT_AFFLICTION_TEXT[definition.onHitAffliction.kind]}`,
 		);
-	if (definition.afflictionSource)
+	if (definition.afflictionSource && definition.onHitAffliction)
 		traits.push(
-			"Sparse: at most one affliction carrier per eligible floor, replacing an ordinary creature. The first carrier of an adventure always drops a Cure Disease potion.",
+			`Sparse: at most one affliction carrier per eligible floor, replacing an ordinary creature. The first ${definition.name} of an adventure always drops a ${ITEM_DEFINITIONS[AFFLICTION_DEFINITIONS[definition.onHitAffliction.kind].cure].name}.`,
 		);
 	if (definition.alarmRadius)
 		traits.push(

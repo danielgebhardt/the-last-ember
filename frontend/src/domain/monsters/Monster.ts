@@ -76,6 +76,8 @@ export type MonsterDefinition = {
 	onHitCondition?: "poisoned";
 	// Rolled once per landed melee hit; magic resistance does not resist afflictions.
 	onHitAffliction?: { kind: AfflictionKind; chance: number };
+	// Mana burned by every landed melee hit, rolled uniformly between min and max.
+	onHitManaDrain?: { min: number; max: number };
 	// Telegraphed tile web that applies Slowed instead of that phase's attack.
 	webAttack?: { range: number; cooldown: number };
 	// Spawned only through the shared sparse affliction-source budget.
@@ -112,6 +114,7 @@ export const validateMonsterDefinition = (
 		actionInterval,
 		onHitCondition,
 		onHitAffliction,
+		onHitManaDrain,
 		afflictionSource,
 		webAttack,
 		regeneration,
@@ -218,6 +221,12 @@ export const validateMonsterDefinition = (
 				definition.chargeRange !== undefined ||
 				areaAttack ||
 				enemySpells)) ||
+		(onHitManaDrain !== undefined &&
+			(!Number.isSafeInteger(onHitManaDrain.min) ||
+				!Number.isSafeInteger(onHitManaDrain.max) ||
+				onHitManaDrain.min < 1 ||
+				onHitManaDrain.max < onHitManaDrain.min ||
+				rangedAttackRange !== undefined)) ||
 		(afflictionSource !== undefined &&
 			(afflictionSource !== true || !onHitAffliction || spawnEnabled !== false))
 	)
@@ -306,6 +315,22 @@ const monsterCatalog = {
 		afflictionSource: true,
 		onHitAffliction: { kind: "disease", chance: 0.2 },
 		dropChance: 0.35,
+		lootPreferences: {},
+	},
+	"mana-leech": {
+		name: "mana leech",
+		experienceReward: 20,
+		maxHealth: 16,
+		attackDamage: 6,
+		detectionRadius: 6,
+		minFloor: 9,
+		maxFloor: 16,
+		spawnWeight: 1,
+		spawnEnabled: false,
+		afflictionSource: true,
+		onHitAffliction: { kind: "mana-burn", chance: 0.2 },
+		onHitManaDrain: { min: 2, max: 4 },
+		dropChance: 0.55,
 		lootPreferences: {},
 	},
 	orc: {
