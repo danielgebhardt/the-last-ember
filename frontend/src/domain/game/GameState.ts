@@ -14,6 +14,7 @@ import {
 	allocateRunRareEquipment,
 	type RareEquipmentAllocation,
 } from "../items/RareEquipment";
+import { REMEDY_KINDS } from "../items/Remedies";
 import { spawnRunSpellbooks } from "../items/SpellbookPlacement";
 import { placeMerchants } from "../merchant/MerchantPlacement";
 import {
@@ -50,6 +51,8 @@ import type { TimedEffect } from "./TimedEffects";
 
 export type GameState = {
 	dungeonRemedies?: boolean;
+	// Marks adventures whose loot pools include the Cleansing potion (#363).
+	cleansingRemedies?: boolean;
 	afflictions?: readonly ActiveAffliction[];
 	rareEquipment?: RareEquipmentAllocation | null;
 	townEquipmentPurchases?: readonly string[];
@@ -89,7 +92,7 @@ export const createGameState = (
 ): GameState => {
 	assertDifficulty(difficulty);
 	const monsters = spawnRunMonsters(run);
-	const ordinaryLoot = spawnRunItems(run, monsters, undefined, true);
+	const ordinaryLoot = spawnRunItems(run, monsters, undefined, REMEDY_KINDS);
 	const loot = [
 		...ordinaryLoot,
 		...spawnRunQuestItems(run, monsters, ordinaryLoot),
@@ -131,6 +134,7 @@ export const createGameState = (
 		effects: [],
 		afflictions: [],
 		dungeonRemedies: true,
+		cleansingRemedies: true,
 		mana: maximumMana(createProgression()),
 		quest: createQuest(run),
 		monstersDefeated: 0,

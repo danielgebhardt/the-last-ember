@@ -1,4 +1,5 @@
 import { createMonsterDrop } from "../items/MonsterDrops";
+import { enabledRemedies } from "../items/Remedies";
 import { MONSTER_DEFINITIONS, type Monster } from "../monsters/Monster";
 import { resistedDamage } from "../monsters/MonsterResistance";
 import { goldAmount } from "../objects/Gold";
@@ -78,7 +79,7 @@ export const damageMonster = (
 			state.run.seed,
 			monster,
 			undefined,
-			state.dungeonRemedies,
+			enabledRemedies(state),
 		);
 		if (drop && !floorItems.some((entry) => entry.item.id === drop.item.id)) {
 			floorItems = [...floorItems, drop];

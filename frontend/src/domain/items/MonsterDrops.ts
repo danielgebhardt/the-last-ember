@@ -3,13 +3,14 @@ import { createSeededRandom } from "../dungeon/Seed";
 import { MONSTER_DEFINITIONS, type Monster } from "../monsters/Monster";
 import { selectEliteReward } from "./EliteRewards";
 import type { FloorItem } from "./FloorItems";
+import type { ItemKind } from "./Item";
 import { selectLootKind } from "./Loot";
 
 export const createMonsterDrop = (
 	seed: number,
 	monster: Monster,
 	suppliedRandom?: () => number,
-	includeDiseaseRemedy = false,
+	remedies: readonly ItemKind[] = [],
 ): FloorItem | undefined => {
 	const random =
 		suppliedRandom ??
@@ -35,7 +36,7 @@ export const createMonsterDrop = (
 					"drop",
 					random,
 					definition.lootPreferences,
-					includeDiseaseRemedy,
+					remedies,
 				);
 	if (!kind) return undefined;
 	return {

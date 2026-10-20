@@ -12,6 +12,8 @@ export type AfflictionDefinition<K extends string = string> = Readonly<{
 	// Activity wording after application and after cure/expiry restores the modifier.
 	appliedText: string;
 	removedText: string;
+	// Shown when a remedy is used without the condition; it costs nothing.
+	absentText: string;
 }>;
 export type PlayerAffliction<K extends string = string> = Readonly<{
 	kind: K;

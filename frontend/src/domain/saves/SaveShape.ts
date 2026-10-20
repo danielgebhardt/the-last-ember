@@ -365,6 +365,7 @@ const documentShape = object({
 	}),
 	state: object({
 		dungeonRemedies: optional(boolean),
+		cleansingRemedies: optional(boolean),
 		afflictions: optional(
 			array(
 				object({

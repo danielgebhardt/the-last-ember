@@ -18,7 +18,8 @@ it("stocks only supported potions with finite saved ownership separate from wand
 		expect.arrayContaining(
 			Object.entries(ITEM_DEFINITIONS)
 				.filter(
-					([kind, d]) => d.type === "potion" && kind !== "cure-disease-potion",
+					// Portable affliction remedies have no town stock in this slice.
+					([, d]) => d.type === "potion" && !("removesAfflictions" in d),
 				)
 				.map(([kind]) => kind),
 		),

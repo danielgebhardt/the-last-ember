@@ -15,6 +15,7 @@ export const AFFLICTION_DEFINITIONS = {
 		appliedText:
 			"Maximum HP reduced by 20% until cured. Use Cure Disease potion or sanctuary treatment.",
 		removedText: "Maximum HP restored without healing.",
+		absentText: "You do not have Disease.",
 	},
 	slowed: {
 		kind: "slowed",
@@ -28,6 +29,7 @@ export const AFFLICTION_DEFINITIONS = {
 		appliedText:
 			"Evasion −10 for 10 phases. Use a Cleansing potion or sanctuary treatment.",
 		removedText: "Evasion restored.",
+		absentText: "You are not Slowed.",
 	},
 } as const satisfies Record<string, AfflictionDefinition>;
 export type AfflictionKind = keyof typeof AFFLICTION_DEFINITIONS;

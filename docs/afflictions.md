@@ -51,3 +51,9 @@ Second registered affliction, separate from the existing 3-phase monster `slowed
 Shared affliction state (`Afflictions.ts`) now owns apply, cure and expiry for every registered kind: capacity is rederived, HP clamps but is never healed, and Activity logs application, refresh, cap rejection, cure and a single expiry. Disease keeps its wrappers. Disease and Slowed together are the first real two-condition cap; poison stays outside it.
 
 Save format stays v27. The optional `afflictions` array now accepts registered kinds with a lifetime matching their definition: Disease `null`, Slowed 1–10. Activity entries accept the new `expired` change.
+
+## Cleansing potion (#363, Slowed portion)
+
+A teal round-flask bottle that currently removes **Slowed only**; Blinded and Mana Burn coverage arrives with those conditions. An effective drink removes Slowed before monsters act, restoring evasion for that same phase, and spends one bottle and one turn. Without Slowed (including while only diseased or poisoned) it costs nothing and reports "You are not Slowed." Poison and Disease remain. Unsellable; no town stock; no hotbar slots added.
+
+Remedy items now share one loot rule: a potion that removes afflictions joins floor/chest/drop pools only when the adventure's saved marker enables it. New adventures save `cleansingRemedies: true` beside `dungeonRemedies: true`; Cleansing has weight 0.25 on floors 3–12 (the giant spider band). Adventures created during the Disease slice have only `dungeonRemedies`, so their chest and drop rolls are unchanged. The first spider's guaranteed Cleansing drop follows in #366. #363 stays open for later conditions.

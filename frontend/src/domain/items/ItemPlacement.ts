@@ -6,6 +6,7 @@ import { FLOOR } from "../dungeon/Tiles";
 import type { Monster } from "../monsters/Monster";
 import { protectedSpawnLocations } from "../monsters/MonsterLocations";
 import type { FloorItem } from "./FloorItems";
+import type { ItemKind } from "./Item";
 import { selectLootKind } from "./Loot";
 
 export const DEFAULT_ITEMS_PER_FLOOR = 2;
@@ -13,7 +14,7 @@ export const spawnRunItems = (
 	run: DungeonRun,
 	monsters: readonly Monster[],
 	count = DEFAULT_ITEMS_PER_FLOOR,
-	includeDiseaseRemedy = false,
+	remedies: readonly ItemKind[] = [],
 ): readonly FloorItem[] => {
 	if (!Number.isInteger(count) || count < 0)
 		throw new RangeError("Item count must be a nonnegative whole number.");
@@ -33,7 +34,7 @@ export const spawnRunItems = (
 				"found",
 				random,
 				{},
-				includeDiseaseRemedy,
+				remedies,
 			);
 			if (!kind) break;
 			items.push({

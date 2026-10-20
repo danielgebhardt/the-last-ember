@@ -46,3 +46,7 @@ Retain v27 with an optional, explicitly written `Monster.remedyDrop` marker for 
 ## Slowed (#358)
 
 Retain v27. The optional `afflictions` array accepts Slowed with a numeric remaining lifetime; consistency requires each kind's lifetime to match its definition (Disease `null`, Slowed 1–10). Activity `affliction-changed` adds `expired`. No migration.
+
+## Cleansing potion (#363)
+
+Retain v27 with an optional, explicitly written `cleansingRemedies` marker. Only marked adventures add the Cleansing potion to chest/drop/floor selection; Disease-era saves with only `dungeonRemedies` keep their earlier reward sequences. Loading never generates supplies.

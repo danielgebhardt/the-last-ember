@@ -25,6 +25,7 @@ import {
 	rareEquipmentId,
 	selectRunRareEquipment,
 } from "../domain/items/RareEquipment";
+import { enabledRemedies } from "../domain/items/Remedies";
 import { sellCarriedEquipment } from "../domain/merchant/EquipmentSales";
 import { lowerEquipmentSale } from "../domain/merchant/LowerEquipmentSales";
 import { chooseEnemySpell } from "../domain/monsters/EnemyCasting";
@@ -393,7 +394,7 @@ it("keeps actual seeded rare supply sparse, diverse, safe and separate from ordi
 			run,
 			spawnRunMonsters(run),
 			undefined,
-			state.dungeonRemedies,
+			enabledRemedies(state),
 		))
 			expect(state.floorItems).toContainEqual(ordinary);
 		if (state.rareEquipment) {

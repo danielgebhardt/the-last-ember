@@ -195,7 +195,7 @@ it("the first carrier drops one Cure Disease potion; later carriers use ordinary
 			123,
 			{ ...marked.monsters[0], id: `2:${index + 1}`, floorNumber: 2 },
 			undefined,
-			true,
+			["cure-disease-potion"],
 		),
 	);
 	expect(drops.some((drop) => drop === undefined)).toBe(true);

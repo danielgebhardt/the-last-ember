@@ -75,8 +75,8 @@ it("offers low-weight remedies only in the source band and preserves old chest r
 	} as const;
 	let count = 0;
 	for (let seed = 0; seed < 256; seed++) {
-		const reward = chestReward(seed, chest, true);
-		expect(reward).toEqual(chestReward(seed, chest, true));
+		const reward = chestReward(seed, chest, ["cure-disease-potion"]);
+		expect(reward).toEqual(chestReward(seed, chest, ["cure-disease-potion"]));
 		if (reward.item.kind === "cure-disease-potion") count++;
 		expect(chestReward(seed, chest).item.kind).not.toBe("cure-disease-potion");
 	}

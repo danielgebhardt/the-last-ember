@@ -21,6 +21,12 @@ const bottles = {
 		path: "M10 2h4v6l3 3v9a1 1 0 0 1-1 1H8a1 1 0 0 1-1-1v-9l3-3V2Z",
 		liquid: "M7 15h10",
 	},
+	// Wide round flask with a rising swirl, distinct from the cross-marked remedy.
+	cleansing: {
+		color: "text-item-cleansing",
+		path: "M10 2h4v5a7 7 0 1 1-4 0V2Z",
+		liquid: "M8.5 15.5c1.5-1.5 2.5 1 4 0s1.5-2 3-1M9.5 18.5c1.5-1 3 .5 5-.5",
+	},
 	antidote: {
 		color: "text-item-antidote",
 		path: "M10 3h4v6l6 10a1.3 1.3 0 0 1-1 2H5a1.3 1.3 0 0 1-1-2l6-10V3Z",
@@ -29,6 +35,7 @@ const bottles = {
 } as const;
 const families: Record<PotionKind, keyof typeof bottles> = {
 	"cure-disease-potion": "remedy",
+	"cleansing-potion": "cleansing",
 	"healing-potion": "health",
 	"greater-healing-potion": "health",
 	"mana-potion": "mana",

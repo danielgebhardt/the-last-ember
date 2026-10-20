@@ -24,6 +24,7 @@ export type SaveDocument = {
 	state: Pick<
 		GameState,
 		| "dungeonRemedies"
+		| "cleansingRemedies"
 		| "afflictions"
 		| "rareEquipment"
 		| "townPortal"

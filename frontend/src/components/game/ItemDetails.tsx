@@ -76,8 +76,10 @@ const ItemDetails = ({
 
 	const primaryStat =
 		details.type === "potion"
-			? "removesAffliction" in details
-				? "Removes Disease · restores capacity without healing"
+			? "removesAfflictions" in details
+				? (details.removesAfflictions as readonly string[]).includes("disease")
+					? "Removes Disease · restores capacity without healing"
+					: "Removes Slowed · restores evasion"
 				: "cleanses" in details
 					? "Removes poison"
 					: "permanentAttribute" in details

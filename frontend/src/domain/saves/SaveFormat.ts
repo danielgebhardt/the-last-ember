@@ -66,6 +66,9 @@ export const createSaveDocument = (
 		...(state.dungeonRemedies !== undefined
 			? { dungeonRemedies: state.dungeonRemedies }
 			: {}),
+		...(state.cleansingRemedies !== undefined
+			? { cleansingRemedies: state.cleansingRemedies }
+			: {}),
 		...(state.afflictions !== undefined
 			? {
 					afflictions: state.afflictions.map((a) => ({

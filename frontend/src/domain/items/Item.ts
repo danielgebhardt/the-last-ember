@@ -34,13 +34,27 @@ export const ITEM_DEFINITIONS = {
 		type: "potion",
 		attackBonus: 0,
 		armor: 0,
-		removesAffliction: "disease",
+		removesAfflictions: ["disease"],
 		minFloor: 2,
 		maxFloor: 6,
 		foundWeight: 0.25,
 		dropWeight: 0.25,
 		description:
 			"Removes Disease before the ensuing phase, restoring maximum HP without healing. Does not cure poison or other conditions. One effective use consumes one bottle and one dungeon turn; healthy use is free. Found on floors 2–6 and in matching chests/drops. Cannot be sold, like other potions.",
+	},
+	"cleansing-potion": {
+		name: "Cleansing potion",
+		type: "potion",
+		attackBonus: 0,
+		armor: 0,
+		// Later slices extend coverage; it never implies an all-condition cure.
+		removesAfflictions: ["slowed"],
+		minFloor: 3,
+		maxFloor: 12,
+		foundWeight: 0.25,
+		dropWeight: 0.25,
+		description:
+			"Removes Slowed before the ensuing phase, restoring evasion. Does not cure poison, Disease or other conditions. One effective use consumes one bottle and one dungeon turn; unaffected use is free. Found on floors 3–12 and in matching chests/drops. Cannot be sold, like other potions.",
 	},
 	"warding-cloak": {
 		specialFindOnly: true,

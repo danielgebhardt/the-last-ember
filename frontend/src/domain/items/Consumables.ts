@@ -1,3 +1,7 @@
+import {
+	AFFLICTION_DEFINITIONS,
+	type AfflictionKind,
+} from "../game/AfflictionDefinitions";
 import type { GameState } from "../game/GameState";
 import { maximumMana } from "../game/Mana";
 import {
@@ -64,12 +68,16 @@ export const consumeItem = (
 		return { error: "That item cannot be consumed." };
 	if (player.health <= 0)
 		return { error: "You cannot drink a potion after death." };
-	if ("removesAffliction" in definition) {
+	if ("removesAfflictions" in definition) {
+		const covered: readonly AfflictionKind[] = definition.removesAfflictions;
 		const active = state.afflictions ?? [];
-		const afflictions = removeAfflictions(active, [
-			definition.removesAffliction,
-		]);
-		if (afflictions === active) return { error: "You do not have Disease." };
+		const afflictions = removeAfflictions(active, covered);
+		if (afflictions === active)
+			return {
+				error: covered
+					.map((kind) => AFFLICTION_DEFINITIONS[kind].absentText)
+					.join(" "),
+			};
 		return {
 			player: {
 				...player,
