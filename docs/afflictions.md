@@ -75,3 +75,9 @@ The bite is unchanged (6-phase poison). When a detecting spider is idle, within 
 Initial availability: at adventure creation the shallowest spider (lowest floor, then spawn index) saves `remedyDrop` and always drops one Cleansing potion. `remedyDrop` now means "drops the cure for this monster's affliction" (Cure Disease for plague rats, Cleansing for spiders); validation allows at most one per affliction, only when that remedy is enabled for the adventure.
 
 Existing v27 saves keep their spiders without a remedy guarantee; because the web is catalog behavior, loaded spiders may web from their next action. Saved web intents and cooldowns are validated.
+
+## Mana Burn (#360)
+
+Third registered affliction, a temporary anti-caster condition. Developer decision: 90 committed phases instead of the backlog's 10, because passive recovery is only 1 mana every 30 turns and 10 phases usually blocked nothing. While it is active, passive recovery (`recoverManaAfterTurn`) is skipped. Suppression is judged before that phase's expiry, so the burn covers its whole lifetime including its final phase: any 90 consecutive phases contain exactly three 30-turn ticks, so three mana are lost. Nothing is stored for afterward; the next ordinary tick restores one point. Mana potions, spell costs and other mana sources are unchanged. Refresh resets the duration. It counts toward the two-affliction cap. Basic sky-blue status icon; full guidance follows in #372.
+
+Save format stays v27: the `afflictions` array accepts `mana-burn` with a remaining lifetime of 1–90.

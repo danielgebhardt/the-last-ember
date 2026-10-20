@@ -31,6 +31,21 @@ export const AFFLICTION_DEFINITIONS = {
 		removedText: "Evasion restored.",
 		absentText: "You are not Slowed.",
 	},
+	"mana-burn": {
+		kind: "mana-burn",
+		target: "player",
+		name: "Mana Burn",
+		// 90 consecutive phases always contain exactly three 30-turn recovery ticks.
+		lifetime: { type: "phases", duration: 90 },
+		modifiers: { suppressesManaRecovery: true },
+		cure: "cleansing-potion",
+		guidance:
+			"Passive mana recovery stops for 90 committed phases, including the phase it lands, so three recovery ticks are lost. Refreshing resets the duration. Mana potions and affordable spells still work, and no recovery is stored for later. Cleansing potion or sanctuary treatment removes it.",
+		appliedText:
+			"Passive mana recovery stops for 90 phases. Use a Cleansing potion or sanctuary treatment.",
+		removedText: "Passive mana recovery resumes.",
+		absentText: "You do not have Mana Burn.",
+	},
 } as const satisfies Record<string, AfflictionDefinition>;
 export type AfflictionKind = keyof typeof AFFLICTION_DEFINITIONS;
 export type ActiveAffliction = PlayerAffliction<AfflictionKind>;
@@ -44,4 +59,10 @@ export const afflictionEvasionSteps = (
 	afflictions.reduce(
 		(steps, a) => steps + -(afflictionModifiers(a.kind).evasion ?? 0) / 5,
 		0,
+	);
+export const suppressesManaRecovery = (
+	afflictions: readonly ActiveAffliction[] = [],
+): boolean =>
+	afflictions.some(
+		(a) => afflictionModifiers(a.kind).suppressesManaRecovery === true,
 	);

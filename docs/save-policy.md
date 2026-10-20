@@ -66,3 +66,7 @@ Retain v27 with an optional `DungeonObject.wellResult` (offering, outcome) that 
 ## Late town offers
 
 Retain v27. Offers listed in `LATE_TOWN_EQUIPMENT_OFFERS` (currently the Copper ring) may be absent from a saved adventure's stock and purchase ledger, because older adventures never stocked them; every other offer must still be in stock or purchased. Loading never adds stock.
+
+## Mana Burn (#360)
+
+Retain v27. The optional `afflictions` array accepts `mana-burn` with a numeric remaining lifetime of 1–90, which the existing per-kind lifetime check enforces. No migration.

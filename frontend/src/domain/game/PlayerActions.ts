@@ -72,6 +72,7 @@ import {
 	travelBetweenTownAndDungeon,
 } from "../town/TownTravel";
 import { type ActivityEvent, appendActivityEvents } from "./ActivityHistory.ts";
+import { suppressesManaRecovery } from "./AfflictionDefinitions";
 import { type AttackRollSource, createAttackRolls } from "./CombatRandomness";
 import { deriveCombatStats } from "./CombatStats";
 import { advancePlayerAfflictions } from "./Disease";
@@ -274,14 +275,16 @@ export const resolvePlayerAction = (
 	// A scroll's committed response happens on the originating floor before town freezes it.
 	const responseState =
 		action.type === "exit-dungeon" ? { ...result, town: null } : result;
-	const resolved =
+	const monsterPhase =
 		responseState.quest.victory || responseState.player.health <= 0
-			? responseState
-			: recoverManaAfterTurn(
-					advancePlayerAfflictions(
-						advanceTimedEffects(resolveMonsterPhase(responseState, rollSource)),
-					),
-				);
+			? undefined
+			: advanceTimedEffects(resolveMonsterPhase(responseState, rollSource));
+	const resolved = monsterPhase
+		? recoverManaAfterTurn(
+				advancePlayerAfflictions(monsterPhase),
+				suppressesManaRecovery(monsterPhase.afflictions),
+			)
+		: responseState;
 	return {
 		state:
 			action.type === "exit-dungeon"

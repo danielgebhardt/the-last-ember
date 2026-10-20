@@ -8,6 +8,7 @@ import {
 	Shield,
 	Skull,
 	Snail,
+	ZapOff,
 } from "lucide-react";
 import {
 	type ComponentType,
@@ -21,6 +22,7 @@ import {
 	AFFLICTION_DEFINITIONS,
 	type AfflictionKind,
 } from "../../domain/game/AfflictionDefinitions";
+import { MANA_RECOVERY_INTERVAL } from "../../domain/game/Mana";
 import {
 	EFFECT_DEFINITIONS,
 	PLAYER_EFFECT_KINDS,
@@ -89,6 +91,14 @@ export const AFFLICTION_VISUALS: Record<AfflictionKind, StatusVisual> = {
          dark:border-rose-400/70 dark:bg-rose-950/50 dark:text-rose-300
       `,
 	},
+	"mana-burn": {
+		Icon: ZapOff,
+		className: `
+         border-sky-600/70 bg-sky-500/10 text-sky-800
+         shadow-[0_0_8px_rgba(2,132,199,0.22)]
+         dark:border-sky-400/70 dark:bg-sky-950/50 dark:text-sky-300
+      `,
+	},
 	slowed: {
 		Icon: Snail,
 		className: `
@@ -114,6 +124,9 @@ export const slowedDetails = (normalEvade?: number, evade?: number) =>
 			: "Evasion reduced by 10 percentage points (minimum 5%) while it lasts."
 	} Lasts 10 committed phases including the one it lands; refreshing resets the duration without deepening it. Cure with a Cleansing potion (one turn) or sanctuary Cure Slowed (${SANCTUARY_CONDITION_FEES.slowed} gold). Your actions and turns are unchanged.`;
 
+export const manaBurnDetails = () =>
+	`Passive mana recovery (1 mana every ${MANA_RECOVERY_INTERVAL} turns) stops while it lasts. Lasts 90 committed phases including the one it lands, so three recovery ticks are lost; refreshing resets the duration. Mana potions and affordable spells still work, and nothing is recovered afterward to make up for it. Cure with a Cleansing potion (one turn) or sanctuary treatment.`;
+
 type AfflictionContext = {
 	normalMaxHealth?: number;
 	maxHealth?: number;
@@ -125,6 +138,7 @@ const AFFLICTION_DETAILS: Record<
 	(context: AfflictionContext) => string
 > = {
 	disease: (c) => diseaseDetails(c.normalMaxHealth, c.maxHealth),
+	"mana-burn": manaBurnDetails,
 	slowed: (c) => slowedDetails(c.normalEvade, c.evade),
 };
 

@@ -26,8 +26,14 @@ export const growManaCapacity = (
 	mana + maximumMana(after, equipment) - maximumMana(before, equipment);
 
 export const MANA_RECOVERY_INTERVAL = 30;
-export const recoverManaAfterTurn = (state: GameState): GameState => {
+// Suppression is judged before this phase's affliction expiry, so Mana Burn covers its
+// whole lifetime, including its final phase. Nothing is stored for after it ends.
+export const recoverManaAfterTurn = (
+	state: GameState,
+	suppressed = false,
+): GameState => {
 	if (
+		suppressed ||
 		state.player.health <= 0 ||
 		state.quest.victory ||
 		state.turn === 0 ||

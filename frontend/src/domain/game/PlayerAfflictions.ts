@@ -6,7 +6,11 @@ export type AfflictionDefinition<K extends string = string> = Readonly<{
 	name: string;
 	lifetime: { type: "until-cured" } | { type: "phases"; duration: number };
 	// Evasion is in percentage points; one d20 threshold step is 5 points.
-	modifiers: Readonly<{ maximumHealthMultiplier?: number; evasion?: number }>;
+	modifiers: Readonly<{
+		maximumHealthMultiplier?: number;
+		evasion?: number;
+		suppressesManaRecovery?: boolean;
+	}>;
 	cure: string;
 	guidance: string;
 	// Activity wording after application and after cure/expiry restores the modifier.
