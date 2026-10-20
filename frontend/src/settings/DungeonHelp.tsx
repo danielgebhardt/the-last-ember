@@ -339,6 +339,14 @@ const DungeonHelp = ({
 						running stops when it begins but may continue afterward.
 					</li>
 					<li>
+						<span className="font-medium text-foreground">Curse.</span> Lowers
+						melee to-hit by 10 points and melee damage by 1 (never below 1)
+						until lifted. Spells and evasion are unaffected, and it does not
+						stack. A Remove Curse scroll lifts it before monsters act, using one
+						turn; healing, rest and Cleansing potions do not. Corridor running
+						stops when it begins but may continue afterward.
+					</li>
+					<li>
 						<span className="font-medium text-foreground">Town.</span> New
 						adventures begin with {STARTING_GOLD} gold for a modest upgrade or
 						supplies. Use E at a shop doorway to browse. Shops trade in gold;

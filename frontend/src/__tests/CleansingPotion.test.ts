@@ -159,9 +159,12 @@ it("joins loot only on floors 3–12 in adventures marked for it, leaving older 
 	expect(enabledRemedies(fresh)).toEqual([
 		"cure-disease-potion",
 		"cleansing-potion",
+		"remove-curse-scroll",
 	]);
 	const legacy = savedAdventure();
+	// A Disease-era adventure predates both later markers.
 	delete legacy.state.cleansingRemedies;
+	delete legacy.state.curseRemedies;
 	const parsed = parseSave(serializeSave(legacy));
 	if (!parsed.ok) throw new Error(parsed.error);
 	expect(enabledRemedies(restoreSave(parsed.value).state)).toEqual([

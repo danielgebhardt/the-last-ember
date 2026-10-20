@@ -199,7 +199,7 @@ export const formatActivityEvent = (event: ActivityEvent): string => {
 			return `${prefix}The ${MONSTER_DEFINITIONS[event.monster].name} drops ${ITEM_DEFINITIONS[event.item].name}.`;
 		case "item-cleansed":
 			if (event.conditions?.length && event.item !== "cure-disease-potion")
-				return `${prefix}You drink ${ITEM_DEFINITIONS[event.item].name} and remove ${event.conditions.map((c) => AFFLICTION_DEFINITIONS[c].name).join(" and ")}. ${event.conditions.map((c) => AFFLICTION_DEFINITIONS[c].removedText).join(" ")}`;
+				return `${prefix}You ${ITEM_DEFINITIONS[event.item].type === "scroll" ? "read" : "drink"} ${ITEM_DEFINITIONS[event.item].name} and remove ${event.conditions.map((c) => AFFLICTION_DEFINITIONS[c].name).join(" and ")}. ${event.conditions.map((c) => AFFLICTION_DEFINITIONS[c].removedText).join(" ")}`;
 			return `${prefix}You drink ${ITEM_DEFINITIONS[event.item].name} and remove ${event.item === "cure-disease-potion" ? "Disease, restoring maximum HP without healing" : event.item === "cleansing-potion" ? "Slowed, restoring evasion" : "poison"}.`;
 		case "item-consumed": {
 			const item = ITEM_DEFINITIONS[event.item];

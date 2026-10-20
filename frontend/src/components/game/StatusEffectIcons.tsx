@@ -3,6 +3,7 @@ import {
 	Biohazard,
 	Brain,
 	Dumbbell,
+	Eclipse,
 	Footprints,
 	HeartPulse,
 	Shield,
@@ -91,6 +92,14 @@ export const AFFLICTION_VISUALS: Record<AfflictionKind, StatusVisual> = {
          dark:border-rose-400/70 dark:bg-rose-950/50 dark:text-rose-300
       `,
 	},
+	curse: {
+		Icon: Eclipse,
+		className: `
+         border-purple-700/70 bg-purple-500/10 text-purple-800
+         shadow-[0_0_8px_rgba(126,34,206,0.22)]
+         dark:border-purple-400/70 dark:bg-purple-950/50 dark:text-purple-300
+      `,
+	},
 	"mana-burn": {
 		Icon: ZapOff,
 		className: `
@@ -124,6 +133,13 @@ export const slowedDetails = (normalEvade?: number, evade?: number) =>
 			: "Evasion reduced by 10 percentage points (minimum 5%) while it lasts."
 	} Lasts 10 committed phases including the one it lands; refreshing resets the duration without deepening it. Cure with a Cleansing potion (one turn) or sanctuary Cure Slowed (${SANCTUARY_CONDITION_FEES.slowed} gold). Your actions and turns are unchanged.`;
 
+export const curseDetails = (normalHit?: number, hit?: number) =>
+	`${
+		normalHit !== undefined && hit !== undefined && normalHit !== hit
+			? `Hit ${normalHit}% → ${hit}% (−${normalHit - hit}) and melee damage −1 (minimum 1)`
+			: "Melee to-hit −10 percentage points and melee damage −1 (minimum 1)"
+	} until cured. Spells, evasion and equipment are unaffected. Cure with a Remove Curse scroll (one turn) or sanctuary treatment. Healing, rest and Cleansing potions do not lift it.`;
+
 export const manaBurnDetails = () =>
 	`Passive mana recovery (1 mana every ${MANA_RECOVERY_INTERVAL} turns) stops while it lasts. Lasts 90 committed phases including the one it lands, so three recovery ticks are lost; refreshing resets the duration. Mana potions and affordable spells still work, and nothing is recovered afterward to make up for it. Cure with a Cleansing potion (one turn) or sanctuary Cure Mana Burn (${SANCTUARY_CONDITION_FEES["mana-burn"]} gold); curing restores no mana.`;
 
@@ -132,12 +148,15 @@ type AfflictionContext = {
 	maxHealth?: number;
 	normalEvade?: number;
 	evade?: number;
+	normalHit?: number;
+	hit?: number;
 };
 const AFFLICTION_DETAILS: Record<
 	AfflictionKind,
 	(context: AfflictionContext) => string
 > = {
 	disease: (c) => diseaseDetails(c.normalMaxHealth, c.maxHealth),
+	curse: (c) => curseDetails(c.normalHit, c.hit),
 	"mana-burn": manaBurnDetails,
 	slowed: (c) => slowedDetails(c.normalEvade, c.evade),
 };

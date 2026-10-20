@@ -86,7 +86,9 @@ const ItemDetails = ({
 						? "+1 permanent attribute; each bottle stacks"
 						: `Recovery up to ${details.recovery.amount} ${details.recovery.resource}`
 			: details.type === "scroll"
-				? "Return to town · costs one scroll and one turn"
+				? "removesAfflictions" in details
+					? "Removes Curse · restores melee accuracy and damage"
+					: "Return to town · costs one scroll and one turn"
 				: details.type === "enchantment"
 					? "Guaranteed +1 · maximum +3 per item"
 					: details.type === "weapon"
@@ -210,7 +212,17 @@ const ItemDetails = ({
 							</Button>
 						))}
 
-						{details.type === "scroll" && (
+						{details.type === "scroll" && "removesAfflictions" in details && (
+							<Button
+								type="button"
+								disabled={!alive}
+								onClick={() => act({ type: "consume", itemId: item.id })}
+							>
+								Read {details.name}
+							</Button>
+						)}
+
+						{item.kind === "exit-scroll" && (
 							<Button
 								type="button"
 								disabled={!alive || carryingEmber}
@@ -258,7 +270,7 @@ const ItemDetails = ({
 				)}
 			</div>
 
-			{details.type === "scroll" && carryingEmber && (
+			{item.kind === "exit-scroll" && carryingEmber && (
 				<p id={exitRestrictionId} className="text-sm text-muted-foreground">
 					{EXIT_SCROLL_EMBER_RESTRICTION}
 				</p>

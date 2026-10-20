@@ -27,7 +27,10 @@ describe("Developer catalog", () => {
 			["Monsters", MONSTER_DEFINITIONS],
 			["Spells", SPELL_DEFINITIONS],
 			["Items", ITEM_DEFINITIONS],
-			["Conditions", { poisoned: 1, disease: 1, slowed: 1, "mana-burn": 1 }],
+			[
+				"Conditions",
+				{ poisoned: 1, disease: 1, slowed: 1, "mana-burn": 1, curse: 1 },
+			],
 			["Dungeon objects", OBJECT_DEFINITIONS],
 			["Terrain", TILE_LABELS],
 		] as const) {

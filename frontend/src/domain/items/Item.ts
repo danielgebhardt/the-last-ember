@@ -97,6 +97,19 @@ export const ITEM_DEFINITIONS = {
 		foundWeight: 0,
 		dropWeight: 0,
 	},
+	"remove-curse-scroll": {
+		name: "Remove Curse scroll",
+		type: "scroll",
+		attackBonus: 0,
+		armor: 0,
+		removesAfflictions: ["curse"],
+		minFloor: 6,
+		maxFloor: 14,
+		foundWeight: 0.25,
+		dropWeight: 0.25,
+		description:
+			"Lifts a Curse before the ensuing phase, restoring melee accuracy and damage. Does not cure other conditions. One effective reading consumes one scroll and one dungeon turn; reading it uncursed is free. Found on floors 6–14 and in matching chests/drops.",
+	},
 	"enchantment-scroll": {
 		name: "Enchantment scroll",
 		type: "enchantment",

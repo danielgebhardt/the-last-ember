@@ -201,6 +201,14 @@ const PlayerStatus = ({
 									deriveAccuracy(progression, effects, equipment, afflictions)
 										.evadeChance
 								}
+								normalHit={
+									deriveAccuracy(progression, effects, equipment)
+										.playerHitChance
+								}
+								hit={
+									deriveAccuracy(progression, effects, equipment, afflictions)
+										.playerHitChance
+								}
 							/>
 						</div>
 					</div>

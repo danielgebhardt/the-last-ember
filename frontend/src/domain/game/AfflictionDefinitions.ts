@@ -50,6 +50,21 @@ export const AFFLICTION_DEFINITIONS = {
 		removedText: "Passive mana recovery resumes.",
 		absentText: "You do not have Mana Burn.",
 	},
+	curse: {
+		kind: "curse",
+		target: "player",
+		name: "Curse",
+		lifetime: { type: "until-cured" },
+		modifiers: { accuracy: -10, meleeDamage: -1 },
+		blocksRunning: false,
+		cure: "remove-curse-scroll",
+		guidance:
+			"Melee to-hit −10 percentage points and melee damage −1 (minimum 1) until cured by a Remove Curse scroll or sanctuary treatment. Spells, evasion and equipment are unaffected. Healing, rest and Cleansing potions do not lift it.",
+		appliedText:
+			"Melee to-hit −10 and damage −1 until cured. Read a Remove Curse scroll or visit the sanctuary.",
+		removedText: "Melee accuracy and damage restored.",
+		absentText: "You are not cursed.",
+	},
 } as const satisfies Record<string, AfflictionDefinition>;
 export type AfflictionKind = keyof typeof AFFLICTION_DEFINITIONS;
 export type ActiveAffliction = PlayerAffliction<AfflictionKind>;
@@ -63,6 +78,26 @@ export const afflictionEvasionSteps = (
 	afflictions.reduce(
 		(steps, a) => steps + -(afflictionModifiers(a.kind).evasion ?? 0) / 5,
 		0,
+	);
+// Whole d20 threshold steps removed from player melee accuracy.
+export const afflictionAccuracySteps = (
+	afflictions: readonly ActiveAffliction[] = [],
+): number =>
+	afflictions.reduce(
+		(steps, a) => steps + -(afflictionModifiers(a.kind).accuracy ?? 0) / 5,
+		0,
+	);
+// Nominal melee damage after affliction penalties; a hit always deals at least 1.
+export const afflictedMeleeAttack = (
+	attack: number,
+	afflictions: readonly ActiveAffliction[] = [],
+): number =>
+	Math.max(
+		1,
+		afflictions.reduce(
+			(total, a) => total + (afflictionModifiers(a.kind).meleeDamage ?? 0),
+			attack,
+		),
 	);
 export const suppressesManaRecovery = (
 	afflictions: readonly ActiveAffliction[] = [],

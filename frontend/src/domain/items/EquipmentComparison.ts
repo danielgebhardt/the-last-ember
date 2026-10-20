@@ -1,3 +1,4 @@
+import { afflictedMeleeAttack } from "../game/AfflictionDefinitions";
 import { deriveAttributes } from "../game/Attributes";
 import { deriveCombatStats } from "../game/CombatStats";
 import type { GameState } from "../game/GameState";
@@ -30,7 +31,10 @@ const loadoutStats = (
 		equipment,
 		context.afflictions,
 	);
-	const damage = attackProfile(combat.attack, accuracy.playerHitThreshold);
+	const damage = attackProfile(
+		afflictedMeleeAttack(combat.attack, context.afflictions),
+		accuracy.playerHitThreshold,
+	);
 	const attributes = deriveAttributes(progression, effects, equipment);
 	return {
 		maxHealth: context.afflictions?.length

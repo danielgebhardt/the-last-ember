@@ -232,6 +232,7 @@ describe("Home Help menu", () => {
 		expect(help).toHaveTextContent("so you miss three recovery ticks");
 		expect(help).toHaveTextContent("drain 2–4 mana with every landed hit");
 		expect(help).toHaveTextContent("Mana Burn 75 gold");
+		expect(help).toHaveTextContent("A Remove Curse scroll lifts it");
 	});
 	it("explains the Forgotten Forge's prices, odds and fixed result", async () => {
 		const user = renderHelpRun();

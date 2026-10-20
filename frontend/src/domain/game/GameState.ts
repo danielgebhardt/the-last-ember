@@ -56,6 +56,8 @@ export type GameState = {
 	dungeonRemedies?: boolean;
 	// Marks adventures whose loot pools include the Cleansing potion (#363).
 	cleansingRemedies?: boolean;
+	// Marks adventures whose loot pools include the Remove Curse scroll (#363).
+	curseRemedies?: boolean;
 	afflictions?: readonly ActiveAffliction[];
 	rareEquipment?: RareEquipmentAllocation | null;
 	townEquipmentPurchases?: readonly string[];
@@ -138,6 +140,7 @@ export const createGameState = (
 		afflictions: [],
 		dungeonRemedies: true,
 		cleansingRemedies: true,
+		curseRemedies: true,
 		mana: maximumMana(createProgression()),
 		quest: createQuest(run),
 		monstersDefeated: 0,

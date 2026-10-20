@@ -49,6 +49,7 @@ import TownPreview from "../town/TownPreview";
 import { SPELL_ICONS, spellIconColor } from "./SpellVisuals";
 import {
 	AFFLICTION_VISUALS,
+	curseDetails,
 	diseaseDetails,
 	manaBurnDetails,
 	STATUS_VISUALS,
@@ -132,6 +133,14 @@ const CATALOG_CONDITIONS = [
 		facts:
 			"Temporary affliction · 90 phases including application · No passive mana recovery (exactly three 30-turn ticks lost) · No stored catch-up · Potions and spells unchanged · Refreshes without stacking · Counts toward the two-affliction cap",
 		cures: manaBurnDetails(),
+	},
+	{
+		kind: AFFLICTION_DEFINITIONS.curse.kind,
+		name: AFFLICTION_DEFINITIONS.curse.name,
+		visual: AFFLICTION_VISUALS.curse,
+		facts:
+			"Lingering affliction · Until cured · Melee to-hit −10 points and damage −1 (minimum 1) · Spells unaffected · No stacking · Counts toward the two-affliction cap",
+		cures: curseDetails(),
 	},
 ] as const;
 const Group = ({ name, children }: { name: string; children: ReactNode }) => (

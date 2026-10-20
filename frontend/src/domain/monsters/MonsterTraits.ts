@@ -11,6 +11,8 @@ const ON_HIT_AFFLICTION_TEXT: Record<AfflictionKind, string> = {
 		"Disease: maximum HP −20% until cured; does not stack. Misses never infect; magic resistance does not protect. Cure Disease potion or the sanctuary cures it.",
 	slowed:
 		"Slowed: evasion −10 for 10 phases; refreshes without stacking. Cleansing potion or the sanctuary cures it.",
+	curse:
+		"Curse: melee to-hit −10 and damage −1 until cured; does not stack. Remove Curse scroll or the sanctuary cures it.",
 	"mana-burn":
 		"Mana Burn: no passive mana recovery for 90 phases; refreshes without stacking. Misses never burn; magic resistance does not protect. Cleansing potion or the sanctuary cures it.",
 };

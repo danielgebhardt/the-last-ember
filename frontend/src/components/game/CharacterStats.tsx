@@ -1,5 +1,8 @@
 import { Droplets, Heart, Shield, Sparkles, Sword } from "lucide-react";
-import type { ActiveAffliction } from "../../domain/game/AfflictionDefinitions";
+import {
+	type ActiveAffliction,
+	afflictedMeleeAttack,
+} from "../../domain/game/AfflictionDefinitions";
 import {
 	armorContributions,
 	deriveCombatStats,
@@ -39,7 +42,16 @@ const CharacterStats = ({
 		effects,
 		equipment,
 	).evadeChance;
-	const profile = attackProfile(combat.attack, accuracy.playerHitThreshold);
+	const profile = attackProfile(
+		afflictedMeleeAttack(combat.attack, afflictions),
+		accuracy.playerHitThreshold,
+	);
+	const normalHit = deriveAccuracy(
+		progression,
+		effects,
+		equipment,
+	).playerHitChance;
+	const cursed = afflictions.some((a) => a.kind === "curse");
 	const manaBurn = afflictions.find((a) => a.kind === "mana-burn");
 	const card = "min-w-0 rounded-lg border border-border bg-card/60 p-3";
 	const value = "mt-1 text-lg font-semibold leading-tight tabular-nums";
@@ -100,12 +112,15 @@ const CharacterStats = ({
 					<p className={hint}>
 						Base {combat.baseAttack} + Strength {combat.strengthBonus} + weapon{" "}
 						{combat.weaponBonus}
+						{cursed && " · Curse −1"}
 					</p>
 					<output
 						aria-label="Character hit chance"
 						className="text-xs text-muted-foreground"
 					>
 						Hit {accuracy.playerHitChance}%
+						{normalHit !== accuracy.playerHitChance &&
+							` (Curse −${normalHit - accuracy.playerHitChance})`}
 					</output>
 				</div>
 				<div className={card}>

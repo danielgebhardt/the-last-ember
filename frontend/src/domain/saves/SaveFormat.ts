@@ -69,6 +69,9 @@ export const createSaveDocument = (
 		...(state.cleansingRemedies !== undefined
 			? { cleansingRemedies: state.cleansingRemedies }
 			: {}),
+		...(state.curseRemedies !== undefined
+			? { curseRemedies: state.curseRemedies }
+			: {}),
 		...(state.afflictions !== undefined
 			? {
 					afflictions: state.afflictions.map((a) => ({

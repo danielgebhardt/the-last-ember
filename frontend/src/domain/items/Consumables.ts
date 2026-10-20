@@ -69,7 +69,7 @@ export const consumeItem = (
 	const selected = bag.items.find((item) => item.id === action.itemId);
 	if (!selected) return { error: "That item is no longer in your bag." };
 	const definition = ITEM_DEFINITIONS[selected.kind];
-	if (definition.type !== "potion")
+	if (definition.type !== "potion" && !("removesAfflictions" in definition))
 		return { error: "That item cannot be consumed." };
 	if (player.health <= 0)
 		return { error: "You cannot drink a potion after death." };

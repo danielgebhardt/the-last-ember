@@ -86,3 +86,7 @@ Retain v27. `mana-leech` is a new monster kind; its `remedyDrop` marker uses the
 ## Town forge and library (#338, #336)
 
 Retain v27. Activity adds `town-forged` (item, enchantment 1–3, gold) and `library-learned` (spell, gold). Reforged items reuse existing enchantment validation. Library offers are recomputed from the seed, and purchases are ordinary `knownSpells`, so no other state is added. No migration.
+
+## Curse (#357, #363)
+
+Retain v27. `afflictions` accepts `curse` (lifetime `null`). New adventures save `curseRemedies: true`, which enables Remove Curse scroll loot; adventures without it keep their earlier loot pools. No migration.

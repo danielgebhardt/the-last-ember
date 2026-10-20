@@ -74,7 +74,10 @@ import {
 	travelBetweenTownAndDungeon,
 } from "../town/TownTravel";
 import { type ActivityEvent, appendActivityEvents } from "./ActivityHistory.ts";
-import { suppressesManaRecovery } from "./AfflictionDefinitions";
+import {
+	afflictedMeleeAttack,
+	suppressesManaRecovery,
+} from "./AfflictionDefinitions";
 import { type AttackRollSource, createAttackRolls } from "./CombatRandomness";
 import { deriveCombatStats } from "./CombatStats";
 import { advancePlayerAfflictions } from "./Disease";
@@ -519,10 +522,17 @@ const resolveAttack = (
 
 	const outcome = resolveMeleeAttack(
 		attackProfile(
-			deriveCombatStats(state.equipment, state.progression, state.effects)
-				.attack,
-			deriveAccuracy(state.progression, state.effects, state.equipment)
-				.playerHitThreshold,
+			afflictedMeleeAttack(
+				deriveCombatStats(state.equipment, state.progression, state.effects)
+					.attack,
+				state.afflictions,
+			),
+			deriveAccuracy(
+				state.progression,
+				state.effects,
+				state.equipment,
+				state.afflictions,
+			).playerHitThreshold,
 		),
 		rollSource({
 			seed: state.run.seed,

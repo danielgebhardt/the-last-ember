@@ -25,6 +25,7 @@ export type SaveDocument = {
 		GameState,
 		| "dungeonRemedies"
 		| "cleansingRemedies"
+		| "curseRemedies"
 		| "afflictions"
 		| "rareEquipment"
 		| "townPortal"

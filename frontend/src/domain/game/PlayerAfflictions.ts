@@ -10,6 +10,9 @@ export type AfflictionDefinition<K extends string = string> = Readonly<{
 		maximumHealthMultiplier?: number;
 		evasion?: number;
 		suppressesManaRecovery?: boolean;
+		// Melee to-hit in percentage points (one d20 step is 5) and flat melee damage.
+		accuracy?: number;
+		meleeDamage?: number;
 	}>;
 	// Whether corridor running refuses to start while it lasts; onset always stops a run.
 	blocksRunning: boolean;
