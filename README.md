@@ -2,7 +2,7 @@
 
 A deterministic dungeon crawler inspired by **Larn**, built with React/TypeScript. Your settlement’s beacon is dying: descend into the ruins, recover the last ember, then survive the awakened keepers on the way home.
 
-The game runs entirely in the browser. The Spring Boot backend is a connectivity scaffold and is not required to play. GitHub issues track the backlog; [ROADMAP.md](ROADMAP.md) records development history and planned work.
+The game runs entirely in the browser. The Spring Boot backend is a connectivity scaffold and is not required to play. GitHub issues and the project board track the backlog and each story's decisions.
 
 ## Run locally
 
@@ -33,7 +33,7 @@ Seed replay is deterministic for the same rules version, configuration and actio
 
 ## Saves and release compatibility
 
-**Only save format v27 is supported.** Pre-public-release formats v1–v26 are retired by an explicit developer decision. Unsupported saves produce an error; loading never regenerates or silently resets them. A rejected import does not replace the current adventure or browser save.
+**Only the current save format (v28) is supported.** Before public release, breaking changes bump the version instead of carrying compatibility code. Unsupported saves produce an error; loading never regenerates or silently resets them. A rejected import does not replace the current adventure or browser save.
 
 Browser Save/Load and file import/export persist the actual dungeon, discovery, actors, inventory, stock, conditions, permanent attributes and portal anchor. They validate shape, bounded input and cross-field consistency before restoring. Reading the browser slot does not rewrite it. The historical storage key `larn:adventure-save` and internal item keys remain stable.
 
@@ -75,4 +75,4 @@ For a focused change, run the relevant test files first. The normal commit hook 
 
 Test pure rules at the domain boundary. Retain page/browser tests for focus, controls, layout and integrated behavior; avoid repeating a domain input matrix through an expensive full page. Shared save fixtures are built once per test module and deep-cloned so tests cannot share mutations.
 
-See [the documentation index](docs/README.md), [working agreement](docs/ai-working-agreement.md), [Definition of Done](docs/definition-of-done.md), and [the October 18 review](docs/codebase-review-2026-10-18.md).
+See [the documentation index](docs/README.md), [working agreement](docs/ai-working-agreement.md), [Definition of Done](docs/definition-of-done.md).

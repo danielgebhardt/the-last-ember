@@ -20,7 +20,7 @@ The development server proxies `/initial` to the backend at `http://localhost:80
 
 See the [repository README](../README.md) for backend setup, controls, configuration, testing conventions, and the project’s development approach.
 
-For browser smoke tests, first run `pnpm exec playwright install chromium`. The suite owns port 4179, uses generated validated saves and fresh storage per test, and retains failure traces/screenshots. See the root README and `docs/ci-browser-review.md`.
+For browser smoke tests, first run `pnpm exec playwright install chromium`. The suite owns port 4179, uses generated validated saves and fresh storage per test, and retains failure traces/screenshots. See the root README.
 
 ## Icon styling
 

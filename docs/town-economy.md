@@ -1,69 +1,41 @@
-# Town economy — #331
+# Town economy
 
-The potion store owns a finite stock separate from the existing campaign-wide wandering-merchant stock. A new adventure creates it once. There is no restock: visits, turns, buying elsewhere, re-entry, save/load, death inspection and real time cannot refill it. Replay creates a new adventure, not a carry-over account. Sold bottles remain depleted after being drunk or dropped.
+Current reference for town services. Prices are a playtesting baseline that the developer owns. Each story's history lives in its GitHub issue.
 
-| Existing potion | Gold | Initial town copies |
-| --- | ---: | ---: |
-| Healing (up to 5 HP) | 150 | 4 |
-| Mana (up to 5 MP) | 200 | 4 |
-| Greater healing (up to 15 HP) | 450 | 4 |
-| Greater mana (up to 12 MP) | 600 | 4 |
-| Antidote (removes current poison) | 125 | 4 |
-| Strength (+1 permanently) | 1,500 | 2 |
-| Dexterity (+1 permanently) | 1,500 | 2 |
-| Intelligence (+1 permanently) | 1,500 | 2 |
+## Shared rules
 
-Core prices match wandering merchants. The Rag & Bone buys carried equipment using the wandering merchants' existing sale rules; neither buyer accepts potions. There is no resale loop. Town trades are free of dungeon time and change only gold, actual bottle ownership, stock, hotbar assignment and the purchase log. No healing, effects or combat occur during purchase. Drinking remains a dungeon action; town is not free recovery.
+- **No dungeon time.** Every town transaction is free of turns, effects and recovery. Drinking, equipping and casting stay dungeon actions; town is not free recovery.
+- **Deliberate and atomic.** Each purchase, reforge or treatment needs a quote and a confirmation. A stale quote, missing gold, a full bag, an ended run, carrying the ember (for services that require it) or standing away from the doorway rejects the action free and changes nothing.
+- **Finite, authored stock.** Stock is created once per adventure and never restocks: visits, turns, sales, save/load and real time cannot refill it. Each copy has a stable `town-gear:` / `town-potion:` ID. Saves store what actually remains (see [save policy](save-policy.md)).
+- **Starting gold.** New adventures start with 300 gold. Loading and travel never grant more.
+- **One frame.** All service dialogs share `TownServiceDialog`: title with gold top-right, description, content, confirmation panel and Leave button. `reachableTownService` picks the service for the E key.
 
-Stock is authored and identical across seeds, like the town. No generator calls or seed streams are introduced. If a later story varies stock, use a dedicated `seed:town:service:stock` namespace and persist the selected actual stock once; never derive remaining stock again on visit or load. Current saves own actual depletion and item identities. Duplicate/stale purchase confirmations, full bags and physical-copy limits reject atomically. Each displayed purchase requires a deliberate confirmation against the quoted remaining stock.
+## Services
 
-## Bounded budget review
+| Service | Building | What it does | Prices |
+|---|---|---|---|
+| Potion store | Market Street | Finite bottles | Healing 150, Mana 200, Greater healing 450, Greater mana 600, Antidote 125 (4 each); Strength/Dexterity/Intelligence 1,500 (2 each) |
+| Armor store | Market Street | Tabs: Body armor, Helmets, Shields, Rings; fixed height | 100–650 ordinary; Copper ring 150; Warding Cloak and Spellguard Shield 900 each |
+| Weapon store | Market Street | Iron swords (two copies), steel sword, battle axe | 250–1,100 |
+| The Rag & Bone | Southeast | Buys bag equipment at dungeon-merchant resale values; Sell all Lower keeps Same/Better/Tradeoff gear | Resale value |
+| Sanctuary | Quiet Lane | Restore health; cure any affliction; complete cleanse | 10 gold/HP (max 150); each affliction's `sanctuaryFee`; cleanse min(600, total) |
+| Forge | Forge Court | +1 (to +3) on an owned ordinary weapon or armor piece; tabs Equipped · Weapons · Body armor · Helmets · Shields | Tier base × the level being bought (below) |
+| Library | Quiet Lane | Three seeded spellbooks the dungeon never offers; buying teaches the spell | 1,000 each |
 
-The existing `review-merchant.mjs` generated six Normal 40×40×20 adventures (seeds 0, 1, 2, 3, 123, 987). Potential ordinary gold through floor 5 was 788–841 and across the full descent 8,371–8,588. These assume collecting every ordinary monster/loose-gold source; elites, return waves, equipment sales and spending are excluded. Town’s potion stock now costs 15,100, including 9,000 for its six permanent stat potions; wandering potion stock costs 14,000, for 29,100 combined. Greater bottles consolidate recovery into one drinking turn at a higher price; they do not guarantee better restoration per gold. Limited supply preserves choices.
+Purchases go to the bag and are never auto-equipped. Equipment cards compare against the whole loadout. Town stores don't buy; only the Rag & Bone does, and nothing it buys refills a store.
 
-Human review scenarios: at 0 gold, browse freely but buy nothing; at 200, choose one mana or healing bottle rather than both; at 500, choose one greater healing bottle; at 1,500, choose a permanent attribute point versus several recovery supplies; a full bag can add an existing potion stack, but cannot add a new kind; returning with partial HP/MP and poison retains those exact values until an explicit dungeon action. Check early backtracking burden and whether a permanent point feels worth 1,500 gold. Prices are a provisional implementation baseline, not a simulated win-rate or a guarantee of human affordability; developer playtesting owns final balance.
+### Forge pricing
 
-## Armor and weapons — #333 / #334
+Tier is the item's base armor, or the weapon's attack ÷ 2 rounded up, capped at 4. Tier bases are 150 / 300 / 600 / 1,000 gold. Buying +N costs base × N, so +0→+3 costs six bases: 900 for leather armor, 6,000 for dragon mail or a star-forged blade. Rare finds and rings are excluded. The dungeon's Forgotten Forge (300 flat) stays the cheaper, rarer option.
 
-Both counters now open at their fixed Market Street entrances. Stock is authored and identical across seeds and player levels. Each copy has its own stable `town-gear:` ID; the two plain iron swords remain distinct. Disabled buy buttons include their blocking reason, such as “Buy Chain armor (Not enough gold)”; affordable buttons simply say “Buy Chain armor.” Prices have no redundant Available label. The catalog and prices live in `frontend/src/domain/town/TownEquipmentStock.ts`. Armor offers leather/chain/robe choices, caps/helmets and shields (100–650 gold), plus one Warding Cloak and one Spellguard Shield at 900 gold each on every new seed. Weapons offer plain iron swords, steel swords and a battle axe (250–1,100 gold). Neither store sells enchanted equipment. Optional seeded dungeon MR finds remain separate and retain their existing seeds/locations. Endgame weapons and other rare finds remain dungeon discoveries. New adventures start with 300 gold: enough for an ordinary iron sword (250), leather armor (150), a leather cap (100), or two healing potions (150 each). Mana potions cost 200. Stronger equipment and permanent stat potions require earned gold. The grant is part of fresh game creation, including replay; loading and town travel preserve the current balance and never grant more. Existing saves keep their gold, including zero.
+### Library selection
 
-Prices exceed wandering-merchant resale values. The Rag & Bone buys equipment at those same resale values; sales never replenish town stock. Purchases require a separate confirmation and a free bag slot, remove one specific copy from stock and transfer it into the bag. They never auto-equip, discard worn gear, consume a dungeon turn, tick effects or restore resources. Equip separately in the dungeon. Comparisons reuse the existing whole-loadout rules, including enchantments, current attributes/effects, health/mana capacity, armor, damage, accuracy and evasion.
+The candidates are every spellbook that is not in `selectedRunSpellbooks(run)` (every book the dungeon and its archives can offer) and that teaches no starting spell. That leaves 12–15 books, and three are drawn on `seed:library:selection`. Offers are recomputed from the seed, never stored. A known spell's offer shows "Already known".
 
-Save format v27 stores the actual remaining copies and potion depletion. Older formats are retired; see [save policy](save-policy.md). Current imports reject duplicate/forged stock, stock items simultaneously claimed as owned, and mismatched copy kinds or downgraded enchantments. Later enchanting, equipping, dropping and selling owned copies do not refill the store. These prices and fixed selections are a playtesting baseline; later seed variation remains a separate story.
+### Permanent stat potions
 
+Each bottle grants one permanent point and uses one dungeon turn when drunk. Points stack without a cap and are saved apart from level growth, gear and timed effects. Usual two-point modifier thresholds apply.
 
-## Permanent stat potions — #297
+## Budget notes
 
-Each Strength, Dexterity or Intelligence bottle grants one permanent point, consumes one actual bottle and uses one normal dungeon turn. Doses stack without a gameplay cap; imported values retain safe-integer bounds. Gains are saved separately from level growth, gear and temporary spells. Existing two-point modifier thresholds still apply: a first point can improve an attribute without changing damage or mana capacity; a second crosses the usual threshold. Capacity gains leave current HP/MP unchanged; normal committed-turn recovery still applies. Town drinking remains unavailable.
-
-An audit of eight Normal 40×40×20 seeds (0, 1, 2, 3, 7, 123, 987, 1140572734) found 1–10 potential stat bottles per full descent, counting authored floor items and every initial monster’s seeded drop; 0–2 were available through floor 5. This assumes all initial monsters killed and all drops collected. Return waves and unopened object rewards are excluded, so this is a bounded supply check, not a win-rate or total possible supply estimate. Town sells two of each at 1,500 gold each; two points in one attribute cost 3,000. Drop weights and difficulty scaling are unchanged.
-
-Save format v27 records permanent contributions explicitly. Active temporary effects retain their saved countdowns; they are never converted into permanent points. Older save formats are unsupported. Previously purchased bottles and depleted town stock remain as saved; future purchases use the new price. Fresh and replayed adventures start with zero permanent gains.
-
-## The Rag & Bone — #346
-
-The former southeastern Reserved expansion plot is now an open equipment buyer, with the same footprint and doorway at row 18, column 20. Its map mark is R. Press E or tap the doorway from within one orthogonal step to open the shared merchant Sell interface. There is no Buy tab, buyback or purchase hotkey. Weapons, armor, shields and rings in the bag use the same price and comparison rules as dungeon merchants; worn equipment must be unequipped in the dungeon first. Potions, scrolls, spellbooks and the ember are never accepted. Sold slots remain stable while the menu is open; confirmed Sell all Lower items protects Same, Better and Tradeoff gear.
-
-Town sales mutate only owned bag copies, gold and sale history. They do not tick turns, monsters, effects or recovery, or restock any shop. Missing copies, duplicate sales, invalid locations, ended adventures and gold overflow reject atomically. Dungeon merchant sales retain their normal one-turn cost and monster response. Gold and removed ownership already use the existing save schema; the town geometry and layout identity are unchanged, so current v27 saves retain the same geometry and ownership contract.
-
-The sanctuary uses the existing doorway in Quiet Lane. Its health service restores missing effective HP at 10 gold per HP, capped at 150 gold per treatment; full health costs nothing. It requires an explicit quote/confirmation and never refills mana or advances dungeon time. Entering town, walking and inspection provide no passive treatment.
-
-Sanctuary cures share that same service: poison 40 gold, Disease 150 gold, or complete cleanse for the sum of currently supported active fees capped at 600 gold. Cleanse preserves buffs and restores no HP/mana. Disease removal restores maximum HP without healing; a later health purchase quotes the newly missing amount. No condition means no charge.
-
-## Compact store layouts and the copper ring
-
-The armor store groups stock into Body armor, Helmets, Shields and Rings tabs and keeps a fixed dialog height so switching tabs never resizes it. Equipment cards show the price in a badge beside the name (enchantment appears in the name) and drop the slot/tier line; comparisons still carry the effect. Gold sits top-right in every store and the sanctuary. The sanctuary lists one compact row per service with its exact effect and price; the confirmation keeps the full quote. Shop potion copy omits dungeon-use mechanics (turn cost, stacking) that item details still explain.
-
-The armor store adds one Copper ring (+1 armor, either ring slot) at 150 gold. It is a late offer: v27 adventures created before it never stocked it, so validation permits its absence and loading never adds it. New adventures stock it.
-
-## Town forge — #338
-
-The Forge Court forge is open. It adds +1, up to the existing +3 cap, to one owned ordinary weapon, shield, body armor or helmet, worn or in the bag. The same item ID stays in the same slot or bag position. Developer-approved pricing is tier base × the level being bought, with tier bases 150 / 300 / 600 / 1000. Tier is the item's base armor, or ⌈weapon attack ÷ 2⌉. A full +0→+3 costs six bases: 900 for leather armor, 6000 for a star-forged blade or dragon mail. The dungeon's Forgotten Forge (300 flat) stays the cheaper, rarer option; the enchantment scroll is free but random.
-
-Rare finds (Warding Cloak, Spellguard Shield) and rings are excluded. The dialog uses the armor shop's fixed-height tabs: Equipped (default, worn pieces) · Weapons · Body armor · Helmets · Shields (bag only). Each reforge needs confirmation and uses no dungeon turn. The action carries the quoted enchantment and price, so a quote that has gone stale is rejected free. Refused also: away from the forge, ended runs and carrying the ember. v27: the only new persisted shape is the `town-forged` Activity event; reforged town gear is still valid because saves accept town gear enchanted above its offer.
-
-## Library — #336
-
-The Quiet Lane library is open with three spellbooks per adventure at 1000 gold each (developer decision), at any depth. Candidates are every spellbook that is not in `selectedRunSpellbooks(run)` (which is every book the dungeon and its archives can offer) and does not teach a starting spell. So the shelf never duplicates a dungeon book, by construction; with 18 books and 3–6 in the dungeon, 12–15 candidates always remain. Three are drawn on `seed:library:selection`.
-
-Offers are derived from the seed and never stored. A purchase teaches the spell at once, like a found book, and adds it to `knownSpells`. It needs no bag space and no dungeon turn. A known spell's offer shows "Already known", so each book can be bought once. Unstocked books, missing gold, ended runs and being away from the library are rejected free. Learned spells follow the normal hotbar assignment. v27: the only new persisted shape is the `library-learned` Activity event.
+A six-seed review (Medium 40×40×20, Normal) found 788–841 ordinary gold reachable through floor 5, and 8,371–8,588 across the full descent, before spending or equipment sales. Town potion stock totals 15,100 gold, 9,000 of it for permanent stat potions. The forge and library are deliberate late-game sinks. Check affordability in playtests before tuning.
