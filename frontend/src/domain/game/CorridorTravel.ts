@@ -6,6 +6,7 @@ import type { Coordinate } from "../dungeon/DungeonTypes";
 import type { ExplorationState } from "../dungeon/Exploration";
 import { FLOOR, WALL } from "../dungeon/Tiles";
 import { navigationRun } from "../objects/NavigationTerrain";
+import { AFFLICTION_DEFINITIONS } from "./AfflictionDefinitions";
 import type { GameState } from "./GameState";
 
 export const CORRIDOR_STOP_TEXT = {
@@ -91,12 +92,15 @@ export const corridorView = (
 		turn: state.turn,
 		health: state.player.health,
 		ended: state.player.health <= 0 || state.quest.victory !== null,
-		// Temporary harm blocks running like poison; lingering afflictions stop it only on onset.
+		// Combat-weakening harm blocks running like poison; other afflictions stop it only on onset.
 		harmful:
 			state.effects.some(
 				(x) =>
 					x.actorId === "player" && x.kind === "poisoned" && x.remaining > 0,
-			) || (state.afflictions ?? []).some((a) => a.remaining !== null),
+			) ||
+			(state.afflictions ?? []).some(
+				(a) => AFFLICTION_DEFINITIONS[a.kind].blocksRunning,
+			),
 		afflictions: (state.afflictions ?? []).map((a) => a.kind),
 		damaged: state.activityHistory.entries.some(
 			({ event }) =>

@@ -66,3 +66,26 @@ it("shows Slowed's evasion loss against the normal figure", () => {
 		"Slowed",
 	);
 });
+
+it("notes Mana Burn's stopped recovery on the mana card", () => {
+	const { state } = savedAdventure();
+	const props = {
+		player: state.player,
+		mana: state.mana,
+		equipment: state.equipment,
+		progression: state.progression,
+	};
+	const view = render(
+		<CharacterStats
+			{...props}
+			afflictions={[{ kind: "mana-burn", remaining: 42, source: "leech" }]}
+		/>,
+	);
+	expect(screen.getByLabelText("Character stats")).toHaveTextContent(
+		"Mana Burn: no passive recovery for 42 phases",
+	);
+	view.rerender(<CharacterStats {...props} />);
+	expect(screen.getByLabelText("Character stats")).not.toHaveTextContent(
+		"Mana Burn",
+	);
+});

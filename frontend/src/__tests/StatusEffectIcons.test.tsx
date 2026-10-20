@@ -133,3 +133,23 @@ it("shows Slowed's remaining phases, exact evasion change and both cures beside 
 	expect(details).toHaveTextContent("Cleansing potion (one turn)");
 	expect(details).toHaveTextContent("sanctuary Cure Slowed (50 gold)");
 });
+
+it("shows Mana Burn's remaining phases, lost recovery and both cures", async () => {
+	const user = userEvent.setup();
+	render(
+		<StatusEffectIcons
+			effects={[]}
+			afflictions={[{ kind: "mana-burn", remaining: 89, source: "leech" }]}
+		/>,
+	);
+	await user.click(
+		screen.getByRole("button", { name: "Mana Burn — 89 phases remaining" }),
+	);
+	const details = await screen.findByRole("dialog");
+	expect(details).toHaveTextContent("1 mana every 30 turns");
+	expect(details).toHaveTextContent("three recovery ticks are lost");
+	expect(details).toHaveTextContent(
+		"Mana potions and affordable spells still work",
+	);
+	expect(details).toHaveTextContent("sanctuary Cure Mana Burn (75 gold)");
+});

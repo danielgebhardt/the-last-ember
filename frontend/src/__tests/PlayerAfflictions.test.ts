@@ -16,6 +16,7 @@ const definition = (kind: string, temporary = false): AfflictionDefinition => ({
 		? { type: "phases", duration: 10 }
 		: { type: "until-cured" },
 	modifiers: {},
+	blocksRunning: temporary,
 	cure: "test remedy",
 	guidance: "Test treatment",
 	appliedText: "Test applied",

@@ -229,6 +229,8 @@ describe("Home Help menu", () => {
 		expect(help).toHaveTextContent("Slowed lowers evasion by 10 points");
 		expect(help).toHaveTextContent("it also cures Mana Burn");
 		expect(help).toHaveTextContent("Slowed 50 gold");
+		expect(help).toHaveTextContent("so you miss three recovery ticks");
+		expect(help).toHaveTextContent("Mana Burn 75 gold");
 	});
 	it("explains the Forgotten Forge's prices, odds and fixed result", async () => {
 		const user = renderHelpRun();

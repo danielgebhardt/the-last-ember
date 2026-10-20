@@ -9,6 +9,7 @@ export const AFFLICTION_DEFINITIONS = {
 		name: "Disease",
 		lifetime: { type: "until-cured" },
 		modifiers: { maximumHealthMultiplier: 0.8 },
+		blocksRunning: false,
 		cure: "cure-disease-potion",
 		guidance:
 			"Maximum HP reduced by 20%, rounded down (minimum 1). Until cured by Cure Disease potion or sanctuary treatment. Curing restores capacity, not HP. Heal, Renewal, rest and ordinary potions do not cure Disease.",
@@ -23,6 +24,7 @@ export const AFFLICTION_DEFINITIONS = {
 		name: "Slowed",
 		lifetime: { type: "phases", duration: 10 },
 		modifiers: { evasion: -10 },
+		blocksRunning: true,
 		cure: "cleansing-potion",
 		guidance:
 			"Evasion reduced by 10 percentage points (minimum 5%) for 10 committed phases, including the phase it lands. Refreshing resets the duration without deepening the penalty. Cleansing potion or sanctuary treatment removes it. Your actions and turns are unchanged.",
@@ -38,6 +40,8 @@ export const AFFLICTION_DEFINITIONS = {
 		// 90 consecutive phases always contain exactly three 30-turn recovery ticks.
 		lifetime: { type: "phases", duration: 90 },
 		modifiers: { suppressesManaRecovery: true },
+		// A 90-phase recovery penalty does not endanger travel; only its onset stops a run.
+		blocksRunning: false,
 		cure: "cleansing-potion",
 		guidance:
 			"Passive mana recovery stops for 90 committed phases, including the phase it lands, so three recovery ticks are lost. Refreshing resets the duration. Mana potions and affordable spells still work, and no recovery is stored for later. Cleansing potion or sanctuary treatment removes it.",

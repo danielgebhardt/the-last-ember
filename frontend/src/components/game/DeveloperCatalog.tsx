@@ -50,6 +50,7 @@ import { SPELL_ICONS, spellIconColor } from "./SpellVisuals";
 import {
 	AFFLICTION_VISUALS,
 	diseaseDetails,
+	manaBurnDetails,
 	STATUS_VISUALS,
 	type StatusVisual,
 	slowedDetails,
@@ -123,6 +124,14 @@ const CATALOG_CONDITIONS = [
 		facts:
 			"Temporary affliction · 10 phases including application · Evasion −10 points (minimum 5%) · Refreshes without stacking · Counts toward the two-affliction cap · Distinct from the 3-phase monster Slowed spell effect",
 		cures: slowedDetails(),
+	},
+	{
+		kind: AFFLICTION_DEFINITIONS["mana-burn"].kind,
+		name: AFFLICTION_DEFINITIONS["mana-burn"].name,
+		visual: AFFLICTION_VISUALS["mana-burn"],
+		facts:
+			"Temporary affliction · 90 phases including application · No passive mana recovery (exactly three 30-turn ticks lost) · No stored catch-up · Potions and spells unchanged · Refreshes without stacking · Counts toward the two-affliction cap",
+		cures: manaBurnDetails(),
 	},
 ] as const;
 const Group = ({ name, children }: { name: string; children: ReactNode }) => (

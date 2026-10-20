@@ -327,6 +327,15 @@ const DungeonHelp = ({
 						not count toward that limit.
 					</li>
 					<li>
+						<span className="font-medium text-foreground">Mana Burn.</span>{" "}
+						Stops passive mana recovery for 90 committed turns, counting the
+						turn it lands, so you miss three recovery ticks. Another burn resets
+						the timer. Mana potions and affordable spells still work, and no
+						recovery is made up afterward. A Cleansing potion or the sanctuary
+						removes it. Corridor running stops when it begins but may continue
+						afterward.
+					</li>
+					<li>
 						<span className="font-medium text-foreground">Town.</span> New
 						adventures begin with {STARTING_GOLD} gold for a modest upgrade or
 						supplies. Use E at a shop doorway to browse. Shops trade in gold;

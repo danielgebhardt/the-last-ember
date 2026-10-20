@@ -89,3 +89,7 @@ The Cleansing potion now removes Slowed and Mana Burn, together when both are ac
 ## Sanctuary Mana Burn cure (#364, Mana Burn portion)
 
 The sanctuary adds "Cure Mana Burn" at 75 gold (developer decision). It comes after Slowed in the stable fee order: poison, Disease, Slowed, Mana Burn. Curing restores passive recovery but no mana, HP or dungeon phase. Complete cleanse stays `min(600, sum of active fees)`; with the two-affliction cap the most it can cost is 40 + 150 + 75 = 265. #364 stays open for later conditions.
+
+## Mana Burn visibility (#372, Mana Burn portion)
+
+Mana Burn shows as a sky-blue crossed-lightning icon, "Mana Burn — N phases remaining". Its popover gives the recovery rule (1 mana every 30 turns), the three lost ticks, that potions and spells still work, and both cures. Character's mana card adds "Mana Burn: no passive recovery for N phases". Help and the Developer Catalog describe it. Running now asks each definition's `blocksRunning`: Slowed still blocks running while it lasts, but Mana Burn, like Disease, only stops a run when it begins, because a 90-phase recovery penalty does not endanger travel. With the two-affliction cap the status row's worst case is still 8 icons. #372 remains open for later conditions.

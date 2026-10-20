@@ -11,6 +11,8 @@ export type AfflictionDefinition<K extends string = string> = Readonly<{
 		evasion?: number;
 		suppressesManaRecovery?: boolean;
 	}>;
+	// Whether corridor running refuses to start while it lasts; onset always stops a run.
+	blocksRunning: boolean;
 	cure: string;
 	guidance: string;
 	// Activity wording after application and after cure/expiry restores the modifier.

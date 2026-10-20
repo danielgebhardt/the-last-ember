@@ -379,3 +379,14 @@ it("stops when Slowed begins and refuses to start while it lasts", () => {
 	expect(corridorStopAfterStep(view(healthy), view(slowed))).toBe("condition");
 	expect(corridorStep(view(slowed), "right")).toEqual({ stop: "condition" });
 });
+it("stops when Mana Burn begins but may run while it lasts", () => {
+	const healthy = quietCorridor();
+	const burned = {
+		...healthy,
+		afflictions: [
+			{ kind: "mana-burn" as const, remaining: 80, source: "leech" },
+		],
+	};
+	expect(corridorStopAfterStep(view(healthy), view(burned))).toBe("condition");
+	expect(corridorStep(view(burned), "right")).toEqual({ direction: "right" });
+});

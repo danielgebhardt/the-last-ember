@@ -40,6 +40,7 @@ const CharacterStats = ({
 		equipment,
 	).evadeChance;
 	const profile = attackProfile(combat.attack, accuracy.playerHitThreshold);
+	const manaBurn = afflictions.find((a) => a.kind === "mana-burn");
 	const card = "min-w-0 rounded-lg border border-border bg-card/60 p-3";
 	const value = "mt-1 text-lg font-semibold leading-tight tabular-nums";
 	const hint = "mt-1 text-xs leading-relaxed text-muted-foreground";
@@ -81,7 +82,11 @@ const CharacterStats = ({
 							compact
 						/>
 					</div>
-					<p className={hint}>Current / maximum</p>
+					<p className={hint}>
+						Current / maximum
+						{manaBurn &&
+							` · Mana Burn: no passive recovery for ${manaBurn.remaining} ${manaBurn.remaining === 1 ? "phase" : "phases"}`}
+					</p>
 				</div>
 				<div className={card}>
 					<p className="flex items-center gap-2 font-medium">
