@@ -230,7 +230,7 @@ const TownMap = ({
 				Enter.
 			</p>
 			<div
-				className={`m-auto grid min-w-0 max-w-full items-center justify-items-center gap-5 ${preview ? "w-fit" : "w-full @min-[58rem]/town:w-fit @min-[58rem]/town:grid-cols-[500px_380px]"}`}
+				className={`m-auto grid min-w-0 max-w-full items-center justify-items-center gap-5 ${preview ? "w-fit" : "w-full @min-[63rem]/town:w-fit @min-[63rem]/town:grid-cols-[500px_480px]"}`}
 			>
 				<section
 					ref={viewport}
@@ -387,7 +387,7 @@ const TownMap = ({
 					</table>
 				</section>
 				{!preview && (
-					<div className="w-full min-w-0 max-w-[380px]">
+					<div className="w-full min-w-0 max-w-[480px]">
 						<TownWelcome
 							portalNotice={townPortalMessage(
 								portalFloor

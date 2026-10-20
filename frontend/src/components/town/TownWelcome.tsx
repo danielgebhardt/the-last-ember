@@ -149,7 +149,7 @@ const TownWelcome = ({
 				disabled={!enabled}
 				onClick={onDirectoryRequested}
 				className="
-            mt-3 h-11 w-full
+            mt-3 h-11 w-full scroll-mb-4
             border-amber-800/50
             bg-gradient-to-b from-amber-100/60 to-muted/50
             text-foreground
@@ -191,10 +191,6 @@ const TownWelcome = ({
 						: "\u00A0"}
 				</p>
 			</div>
-
-			<p className="mt-2 text-center text-[10px] text-muted-foreground">
-				C for Character · ? for Directory
-			</p>
 		</aside>
 	);
 };
