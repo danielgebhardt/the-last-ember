@@ -54,6 +54,8 @@ export const formatActivityEvent = (event: ActivityEvent): string => {
 			return `${prefix}${describeObject(event)}`;
 		case "well-offered":
 			return `${prefix}You offer ${event.gold} gold to the Wishing Well. ${event.outcome === "positive" ? (event.attribute ? `A blessing: +1 permanent ${event.attribute}.` : event.item ? `${ITEM_DEFINITIONS[event.item].name} rises from the water; it is on the floor for G pickup.` : "Something glimmers, then fades.") : event.outcome === "neutral" ? "Nothing happens." : event.escaped ? "Something stirs below, but no creature can emerge." : "A hostile creature climbs out of the well!"} The well falls still.`;
+		case "town-forged":
+			return `${prefix}The town forge reforges your ${ITEM_DEFINITIONS[event.item].name} to +${event.enchantment} for ${event.gold} gold.`;
 		case "forge-used":
 			return `${prefix}You pay ${event.gold} gold at the Forgotten Forge. ${event.outcome === "improved" ? `Your ${ITEM_DEFINITIONS[event.item].name} is now +${event.enchantment}.` : event.outcome === "unchanged" ? `Your ${ITEM_DEFINITIONS[event.item].name} is unchanged.` : `Your ${ITEM_DEFINITIONS[event.item].name} shatters and is lost.`} The forge goes cold.`;
 		case "sarcophagus-opened":

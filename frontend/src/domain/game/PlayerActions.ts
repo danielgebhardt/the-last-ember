@@ -54,6 +54,7 @@ import {
 	type BuyTownEquipmentAction,
 	buyTownEquipment,
 } from "../town/TownEquipmentStore";
+import { reforgeAtTown, type TownForgeAction } from "../town/TownForge";
 import {
 	type ReturnTownPortalAction,
 	returnThroughTownPortal,
@@ -96,6 +97,7 @@ import { advanceTimedEffects } from "./TimedEffects";
 
 export type PlayerAction =
 	| SanctuaryAction
+	| TownForgeAction
 	| ReturnTownPortalAction
 	| TownSellAction
 	| BuyTownEquipmentAction
@@ -141,7 +143,8 @@ export const resolvePlayerAction = (
 			action.type === "buy-town-equipment" ||
 			action.type === "sell-town-equipment" ||
 			action.type === "sell-town-lower" ||
-			action.type === "sanctuary-treatment"
+			action.type === "sanctuary-treatment" ||
+			action.type === "town-forge"
 				? { error: "The adventure is complete." }
 				: {}),
 		};
@@ -184,7 +187,8 @@ export const resolvePlayerAction = (
 						action.type === "buy-town-equipment" ||
 						action.type === "sell-town-equipment" ||
 						action.type === "sell-town-lower" ||
-						action.type === "sanctuary-treatment"
+						action.type === "sanctuary-treatment" ||
+						action.type === "town-forge"
 					? { error: "This adventure has ended." }
 					: {}),
 		};
@@ -202,6 +206,7 @@ export const resolvePlayerAction = (
 	if (action.type === "buy-town-potion") return buyTownPotion(state, action);
 	if (action.type === "sanctuary-treatment")
 		return treatAtSanctuary(state, action);
+	if (action.type === "town-forge") return reforgeAtTown(state, action);
 	if (state.town) {
 		if (action.type === "wait") return { state, turnAdvanced: false };
 		if (action.type !== "move" && action.type !== "inspect-town")
@@ -304,6 +309,7 @@ const resolvePlayerEffect = (
 	action: Exclude<
 		PlayerAction,
 		| SanctuaryAction
+		| TownForgeAction
 		| HotbarAction
 		| SpellAssignmentAction
 		| TownTravelAction

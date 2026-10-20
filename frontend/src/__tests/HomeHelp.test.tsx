@@ -243,6 +243,12 @@ describe("Home Help menu", () => {
 		);
 		expect(help).toHaveTextContent("cannot reroll it");
 	});
+	it("explains the town forge's tier pricing and limits", async () => {
+		const user = renderHelpRun();
+		const help = await openHelp(user);
+		expect(help).toHaveTextContent("tier base (150, 300, 600, 1000 gold)");
+		expect(help).toHaveTextContent("Rare finds and rings cannot be reforged");
+	});
 	it("explains Wishing Well offerings, odds and the fixed result", async () => {
 		const user = renderHelpRun();
 		const help = await openHelp(user);

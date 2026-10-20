@@ -16,7 +16,7 @@ it("offers a named SVG landmark directory without moving or opening services, an
 	expect(
 		directory.getByRole("heading", { name: "Potion store" }),
 	).toBeVisible();
-	expect(directory.getAllByText(/Closed/)).toHaveLength(5);
+	expect(directory.getAllByText(/Closed/)).toHaveLength(4);
 	expect(
 		directory.getByRole("heading", { name: "The Rag & Bone" }).closest("li"),
 	).toHaveTextContent("Open");

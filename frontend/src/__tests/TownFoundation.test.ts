@@ -43,9 +43,14 @@ describe("fixed level-zero town", () => {
 		expect(TOWN.buildings).toHaveLength(10);
 		for (const building of TOWN.buildings) {
 			expect(building.status).toBe(
-				["potions", "armor", "weapons", "rag-and-bone", "sanctuary"].includes(
-					building.id,
-				)
+				[
+					"potions",
+					"armor",
+					"weapons",
+					"rag-and-bone",
+					"sanctuary",
+					"forge",
+				].includes(building.id)
 					? "open"
 					: "closed",
 			);

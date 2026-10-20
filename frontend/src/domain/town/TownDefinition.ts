@@ -58,7 +58,7 @@ const buildings: readonly TownBuilding[] = Object.freeze(
 		{
 			id: "forge",
 			name: "Forge",
-			sign: "Forge — currently less useful than its chimney.",
+			sign: "Forge — the smith improves what you own, never what you hope to own. Paid reforging.",
 			district: "Forge Court",
 			mark: "F",
 			row: 2,
@@ -149,6 +149,7 @@ const buildings: readonly TownBuilding[] = Object.freeze(
 				"weapons",
 				"rag-and-bone",
 				"sanctuary",
+				"forge",
 			].includes(building.id)
 				? ("open" as const)
 				: ("closed" as const),

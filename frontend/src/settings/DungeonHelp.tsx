@@ -36,6 +36,7 @@ import { ESCAPE_PURSUIT_RULES } from "../domain/monsters/PursuitRules";
 import { TRAP_DISARM_EXPERIENCE } from "../domain/objects/DungeonObject";
 import { FORGE_PRICES } from "../domain/objects/ForgottenForge";
 import { SANCTUARY_CONDITION_FEES } from "../domain/town/Sanctuary";
+import { FORGE_TIER_PRICES } from "../domain/town/TownForge";
 
 const Keycap = ({
 	children,
@@ -373,6 +374,16 @@ const DungeonHelp = ({
 						Every treatment shows its exact price and needs confirmation. Cures
 						keep buffs and restore no HP or mana; buy healing separately.
 						Treatment uses no dungeon turn.
+					</li>
+					<li>
+						<span className="font-medium text-foreground">Town forge.</span>{" "}
+						Press E at the Forge Court doorway to add +1 (up to +3) to an
+						ordinary weapon or armor piece, worn or in your bag. The price is
+						the item&apos;s tier base ({FORGE_TIER_PRICES.join(", ")} gold)
+						times the level being bought, so +0 to +3 costs six times the base.
+						Tier comes from the base armor, or half the weapon&apos;s attack
+						rounded up. Rare finds and rings cannot be reforged. Each reforge
+						needs confirmation and uses no dungeon turn.
 					</li>
 					<li>
 						<span className="font-medium text-foreground">Mana.</span> Recover 1

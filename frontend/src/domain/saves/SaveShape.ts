@@ -136,6 +136,11 @@ const eventFields = {
 		attribute: optional(oneOf(["strength", "dexterity", "intelligence"])),
 		escaped: boolean,
 	},
+	"town-forged": {
+		item: itemKind,
+		enchantment: integer(1, MAX_ENCHANTMENT),
+		gold: integer(1, 3000),
+	},
 	"forge-used": {
 		service: oneOf(["reliable", "risky"]),
 		outcome: oneOf(["improved", "unchanged", "destroyed"]),

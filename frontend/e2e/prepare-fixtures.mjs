@@ -270,6 +270,12 @@ export default async function prepareFixtures() {
 			gold: 400,
 			town: { ...createTownLocation(), coordinate: { row: 5, col: 7 } },
 		};
+		// Beside the Forge Court doorway with the starting sword and shield.
+		const townForge = {
+			...fresh,
+			gold: 500,
+			town: { ...createTownLocation(), coordinate: { row: 5, col: 20 } },
+		};
 		// Seed 123 has a room at these explicit coordinates, away from map edges.
 		if (run.floors[0].terrain[8][10] !== ".")
 			throw new Error("Expected the scrolling fixture's room tile");
@@ -973,6 +979,7 @@ export default async function prepareFixtures() {
 			["poisoned", poisoned, configuration],
 			["diseased", diseased, configuration],
 			["town-diseased", townDiseased, configuration],
+			["town-forge", townForge, configuration],
 			["plague-bite", plagueBite, configuration],
 			["leech-bite", leechBite, configuration],
 			["forge", forgeState, forgeConfiguration],

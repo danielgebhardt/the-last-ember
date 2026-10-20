@@ -84,6 +84,12 @@ export type ActivityEvent = { turn: number } & (
 			escaped: boolean;
 	  }
 	| {
+			type: "town-forged";
+			item: ItemKind;
+			enchantment: number;
+			gold: number;
+	  }
+	| {
 			type: "forge-used";
 			service: "reliable" | "risky";
 			outcome: "improved" | "unchanged" | "destroyed";
