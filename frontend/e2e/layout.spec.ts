@@ -201,7 +201,7 @@ test("dungeon artwork only loads the active theme image", async ({ page }) => {
 	await expect(map(page)).toBeFocused();
 });
 
-test("all player status icons and Disease fit without moving the dungeon when they expire", async ({
+test("all player status icons and afflictions fit without moving the dungeon when they expire", async ({
 	page,
 }, testInfo) => {
 	await importAdventure(page, "viewport-status-icons");
@@ -211,7 +211,8 @@ test("all player status icons and Disease fit without moving the dungeon when th
 			name: "Active player conditions",
 			exact: true,
 		});
-		await expect(icons.getByRole("button")).toHaveCount(7);
+		// Worst case today: six timed effects plus both registered afflictions.
+		await expect(icons.getByRole("button")).toHaveCount(8);
 		const bounds = await icons.boundingBox();
 		if (!bounds) throw new Error("Expected icons");
 		// One row at every width; overflow scrolls inside the list, harmful conditions first.
@@ -243,12 +244,18 @@ test("all player status icons and Disease fit without moving the dungeon when th
 	expect(before?.height).toBeGreaterThan(0);
 	await page.keyboard.press("Space");
 	await page.keyboard.press("Space");
-	// Timed effects expire; the lingering Disease icon remains alone.
+	// Timed effects expire; Disease and the longer Slowed remain.
 	await expect(
 		page
 			.getByRole("list", { name: "Active player conditions", exact: true })
 			.getByRole("button"),
-	).toHaveCount(1);
+	).toHaveCount(2);
+	await expect(
+		page.getByRole("button", {
+			name: "Slowed — 8 phases remaining",
+			exact: true,
+		}),
+	).toBeVisible();
 	await expect(
 		page.getByRole("button", { name: "Disease — until cured", exact: true }),
 	).toBeVisible();

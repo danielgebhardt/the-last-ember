@@ -370,3 +370,12 @@ it("stops when Disease begins, but an existing lingering Disease does not forbid
 		corridorStopAfterStep(view(diseased), { ...view(diseased), turn: 1 }),
 	).toBeUndefined();
 });
+it("stops when Slowed begins and refuses to start while it lasts", () => {
+	const healthy = quietCorridor();
+	const slowed = {
+		...healthy,
+		afflictions: [{ kind: "slowed" as const, remaining: 9, source: "web" }],
+	};
+	expect(corridorStopAfterStep(view(healthy), view(slowed))).toBe("condition");
+	expect(corridorStep(view(slowed), "right")).toEqual({ stop: "condition" });
+});

@@ -33,7 +33,12 @@ const CharacterStats = ({
 	const normalMaxHealth = maximumHealth(progression, equipment);
 	const combat = deriveCombatStats(equipment, progression, effects);
 	const armor = armorContributions(equipment);
-	const accuracy = deriveAccuracy(progression, effects, equipment);
+	const accuracy = deriveAccuracy(progression, effects, equipment, afflictions);
+	const normalEvade = deriveAccuracy(
+		progression,
+		effects,
+		equipment,
+	).evadeChance;
 	const profile = attackProfile(combat.attack, accuracy.playerHitThreshold);
 	const card = "min-w-0 rounded-lg border border-border bg-card/60 p-3";
 	const value = "mt-1 text-lg font-semibold leading-tight tabular-nums";
@@ -121,6 +126,8 @@ const CharacterStats = ({
 						className="text-xs text-muted-foreground"
 					>
 						Evade {accuracy.evadeChance}%
+						{normalEvade !== accuracy.evadeChance &&
+							` (Slowed −${normalEvade - accuracy.evadeChance})`}
 					</output>
 				</div>
 				<div className={card}>

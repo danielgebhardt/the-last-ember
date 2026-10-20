@@ -109,3 +109,27 @@ it("shows Disease beside poison as until cured with the exact penalty and both c
 	view.rerender(<StatusEffectIcons effects={[]} afflictions={[]} />);
 	expect(screen.queryByRole("list")).not.toBeInTheDocument();
 });
+
+it("shows Slowed's remaining phases, exact evasion change and both cures beside Disease", async () => {
+	const user = userEvent.setup();
+	render(
+		<StatusEffectIcons
+			effects={[]}
+			afflictions={[
+				{ kind: "disease", remaining: null, source: "rat" },
+				{ kind: "slowed", remaining: 9, source: "web" },
+			]}
+			normalEvade={25}
+			evade={15}
+		/>,
+	);
+	const icons = screen.getByRole("list", { name: "Active player conditions" });
+	expect(within(icons).getAllByRole("button")).toHaveLength(2);
+	await user.click(
+		screen.getByRole("button", { name: "Slowed — 9 phases remaining" }),
+	);
+	const details = await screen.findByRole("dialog");
+	expect(details).toHaveTextContent("Evade 25% → 15% (−10) while it lasts.");
+	expect(details).toHaveTextContent("Cleansing potion (one turn)");
+	expect(details).toHaveTextContent("sanctuary Cure Slowed (50 gold)");
+});

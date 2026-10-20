@@ -1,4 +1,5 @@
 import { Brain, Sparkles, Sword, Zap } from "lucide-react";
+import type { ActiveAffliction } from "../../domain/game/AfflictionDefinitions";
 import { deriveAttributes } from "../../domain/game/Attributes";
 import { deriveAccuracy } from "../../domain/game/MeleeRules";
 import { permanentAttributeGains } from "../../domain/game/PermanentAttributes";
@@ -17,15 +18,17 @@ const ProgressionView = ({
 	progression,
 	equipment,
 	effects = [],
+	afflictions = [],
 }: {
 	progression: Progression;
 	equipment?: Equipment;
 	effects?: readonly TimedEffect[];
+	afflictions?: readonly ActiveAffliction[];
 }) => {
 	const level = levelForExperience(progression.experience);
 	const attributes = deriveAttributes(progression, effects, equipment);
 	const permanent = permanentAttributeGains(progression);
-	const accuracy = deriveAccuracy(progression, effects, equipment);
+	const accuracy = deriveAccuracy(progression, effects, equipment, afflictions);
 
 	const temporary = effects.some(
 		(effect) =>

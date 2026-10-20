@@ -39,3 +39,30 @@ it("explains the current Disease capacity penalty against normal maximum HP", ()
 		"Disease",
 	);
 });
+
+it("shows Slowed's evasion loss against the normal figure", () => {
+	const { state } = savedAdventure();
+	const props = {
+		player: state.player,
+		mana: state.mana,
+		equipment: state.equipment,
+		progression: state.progression,
+	};
+	const view = render(
+		<CharacterStats
+			{...props}
+			afflictions={[{ kind: "slowed", remaining: 5, source: "web" }]}
+		/>,
+	);
+	const evasion = screen.getByLabelText("Character evasion");
+	const normal =
+		Number(/Evade (\d+)%/.exec(evasion.textContent ?? "")?.[1]) + 10;
+	expect(evasion).toHaveTextContent(`Evade ${normal - 10}% (Slowed −10)`);
+	view.rerender(<CharacterStats {...props} />);
+	expect(screen.getByLabelText("Character evasion")).toHaveTextContent(
+		`Evade ${normal}%`,
+	);
+	expect(screen.getByLabelText("Character evasion")).not.toHaveTextContent(
+		"Slowed",
+	);
+});

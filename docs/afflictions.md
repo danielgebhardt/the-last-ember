@@ -61,3 +61,7 @@ Remedy items now share one loot rule: a potion that removes afflictions joins fl
 ## Sanctuary Slowed cure (#364, Slowed portion)
 
 The sanctuary adds "Cure Slowed" at 50 gold. Quotes list conditions in a stable fee order (poison, Disease, Slowed) and state the resulting maximum HP after only the quoted removals. Complete cleanse costs `min(600, sum of active fees)`: 240 for all three. Cures restore evasion and capacity, never HP, mana or a dungeon phase; buffs remain. A quote that changes before confirmation (for example Slowed expiring) is rejected atomically. Activity names conditions in plain words. #364 stays open for later conditions.
+
+## Slowed visibility (#372, Slowed portion)
+
+Slowed shows as an amber snail icon, "Slowed — N phases remaining", whose popover gives the exact evasion change (normal → effective, with the loss), the 10-phase rule and both cures (Cleansing potion for one turn; sanctuary 50 gold). Character's evasion line and the progression panel show the effective figure with a "(Slowed −10)" note. Help explains Slowed, the Cleansing potion's current Slowed-only coverage and the two-affliction cap; the Developer Catalog lists player Slowed separately from the monster spell effect. Corridor running stops when Slowed begins and cannot start while it lasts. The worst-case status row (six timed effects plus Disease and Slowed, 8 icons) stays one fixed-height line at 320–1920 px. #372 remains open for later conditions.

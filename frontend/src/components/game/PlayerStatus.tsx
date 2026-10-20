@@ -4,6 +4,7 @@ import adventurerPortrait from "@/assets/adventurer-portrait.png";
 import type { ActiveAffliction } from "../../domain/game/AfflictionDefinitions";
 import { type Difficulty, difficultyLabel } from "../../domain/game/Difficulty";
 import { maximumMana } from "../../domain/game/Mana";
+import { deriveAccuracy } from "../../domain/game/MeleeRules";
 import { maximumHealth } from "../../domain/game/PlayerHealth";
 import type { PlayerStats } from "../../domain/game/PlayerStats";
 import {
@@ -192,6 +193,13 @@ const PlayerStatus = ({
 								maxHealth={player.maxHealth}
 								normalMaxHealth={
 									equipment ? maximumHealth(progression, equipment) : undefined
+								}
+								normalEvade={
+									deriveAccuracy(progression, effects, equipment).evadeChance
+								}
+								evade={
+									deriveAccuracy(progression, effects, equipment, afflictions)
+										.evadeChance
 								}
 							/>
 						</div>

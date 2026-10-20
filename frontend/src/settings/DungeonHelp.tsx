@@ -315,6 +315,17 @@ const DungeonHelp = ({
 						but may continue afterward.
 					</li>
 					<li>
+						<span className="font-medium text-foreground">Slowed.</span> Giant
+						spiders can web you. Slowed lowers evasion by 10 points (never below
+						5%) for 10 committed turns, counting the turn it lands; another web
+						resets the timer without deepening it. Your turns and actions are
+						unchanged. A Cleansing potion removes it before monsters act, using
+						one turn; it currently cures only Slowed. Corridor running stops
+						when Slowed begins and cannot start while it lasts. At most two
+						afflictions such as Disease and Slowed can be active; poison does
+						not count toward that limit.
+					</li>
+					<li>
 						<span className="font-medium text-foreground">Town.</span> New
 						adventures begin with {STARTING_GOLD} gold for a modest upgrade or
 						supplies. Use E at a shop doorway to browse. Shops trade in gold;

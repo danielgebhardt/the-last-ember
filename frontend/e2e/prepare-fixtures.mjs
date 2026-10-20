@@ -632,7 +632,10 @@ export default async function prepareFixtures() {
 						remaining: 2,
 					})),
 					// The worst-case HUD row also carries a lingering affliction.
-					afflictions: [{ kind: "disease", remaining: null, source: "test" }],
+					afflictions: [
+						{ kind: "disease", remaining: null, source: "test" },
+						{ kind: "slowed", remaining: 10, source: "test" },
+					],
 					player: {
 						health: Math.max(
 							1,

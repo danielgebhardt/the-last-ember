@@ -107,12 +107,25 @@ export const diseaseDetails = (normalMaxHealth?: number, maxHealth?: number) =>
 			: "Maximum HP reduced by 20%, rounded down (minimum 1), until cured."
 	} Cure with a Cure Disease potion (one turn) or sanctuary Cure Disease (${SANCTUARY_CONDITION_FEES.disease} gold). Curing restores maximum HP, not lost HP. Heal, Renewal, rest and ordinary potions do not cure it.`;
 
+export const slowedDetails = (normalEvade?: number, evade?: number) =>
+	`${
+		normalEvade !== undefined && evade !== undefined
+			? `Evade ${normalEvade}% → ${evade}% (−${normalEvade - evade}) while it lasts.`
+			: "Evasion reduced by 10 percentage points (minimum 5%) while it lasts."
+	} Lasts 10 committed phases including the one it lands; refreshing resets the duration without deepening it. Cure with a Cleansing potion (one turn) or sanctuary Cure Slowed (${SANCTUARY_CONDITION_FEES.slowed} gold). Your actions and turns are unchanged.`;
+
+type AfflictionContext = {
+	normalMaxHealth?: number;
+	maxHealth?: number;
+	normalEvade?: number;
+	evade?: number;
+};
 const AFFLICTION_DETAILS: Record<
 	AfflictionKind,
-	(normalMaxHealth?: number, maxHealth?: number) => string
+	(context: AfflictionContext) => string
 > = {
-	disease: diseaseDetails,
-	slowed: () => AFFLICTION_DEFINITIONS.slowed.guidance,
+	disease: (c) => diseaseDetails(c.normalMaxHealth, c.maxHealth),
+	slowed: (c) => slowedDetails(c.normalEvade, c.evade),
 };
 
 const triggerClassName =
@@ -163,12 +176,12 @@ const StatusEffectIcons = ({
 	afflictions = [],
 	normalMaxHealth,
 	maxHealth,
+	normalEvade,
+	evade,
 }: {
 	effects: readonly TimedEffect[];
 	afflictions?: readonly ActiveAffliction[];
-	normalMaxHealth?: number;
-	maxHealth?: number;
-}) => {
+} & AfflictionContext) => {
 	const playerEffects = effects.flatMap((effect) => {
 		if (effect.actorId !== "player" || effect.remaining <= 0) return [];
 
@@ -216,7 +229,12 @@ const StatusEffectIcons = ({
 					key={kind}
 					visual={AFFLICTION_VISUALS[kind]}
 					description={`${AFFLICTION_DEFINITIONS[kind].name} — ${remaining === null ? "until cured" : `${remaining} ${remaining === 1 ? "phase" : "phases"} remaining`}`}
-					details={AFFLICTION_DETAILS[kind](normalMaxHealth, maxHealth)}
+					details={AFFLICTION_DETAILS[kind]({
+						normalMaxHealth,
+						maxHealth,
+						normalEvade,
+						evade,
+					})}
 				/>
 			))}
 			{playerEffects.map(({ kind, remaining }) => {

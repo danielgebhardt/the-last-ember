@@ -49,6 +49,7 @@ import {
 	diseaseDetails,
 	STATUS_VISUALS,
 	type StatusVisual,
+	slowedDetails,
 } from "./StatusEffectIcons";
 
 const Preview = ({ icon }: { icon: ReactNode }) => (
@@ -111,6 +112,14 @@ const CATALOG_CONDITIONS = [
 		facts:
 			"Lingering affliction · Until cured · Effective max HP max(1, floor(normal × 0.8)) · No stacking · Counts toward the two-affliction cap",
 		cures: diseaseDetails(),
+	},
+	{
+		kind: AFFLICTION_DEFINITIONS.slowed.kind,
+		name: `${AFFLICTION_DEFINITIONS.slowed.name} (player)`,
+		visual: AFFLICTION_VISUALS.slowed,
+		facts:
+			"Temporary affliction · 10 phases including application · Evasion −10 points (minimum 5%) · Refreshes without stacking · Counts toward the two-affliction cap · Distinct from the 3-phase monster Slowed spell effect",
+		cures: slowedDetails(),
 	},
 ] as const;
 const Group = ({ name, children }: { name: string; children: ReactNode }) => (
