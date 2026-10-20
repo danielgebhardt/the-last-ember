@@ -14,7 +14,7 @@ import type {
 import type { Room } from "../domain/dungeon/Room.ts";
 import type { DungeonConfig } from "../domain/dungeon/RunConfiguration.ts";
 import { FLOOR, WALL } from "../domain/dungeon/Tiles.ts";
-import { makeLocationSelectionSource } from "./testhelpers.ts";
+import { makeLocationSelectionSource, rect } from "./testhelpers.ts";
 
 describe("Dungeon location selection", () => {
 	describe("Player safe start tests", () => {
@@ -34,12 +34,7 @@ describe("Dungeon location selection", () => {
 		});
 
 		it("should handle an offset room correctly", () => {
-			const room: Room = {
-				startRow: 5,
-				endRow: 9,
-				startCol: 10,
-				endCol: 14,
-			};
+			const room: Room = rect([5, 9, 10, 14]);
 
 			const dungeon = makeLocationSelectionSource([room]);
 
@@ -50,24 +45,9 @@ describe("Dungeon location selection", () => {
 
 		it("should handle even-sized rooms deterministically", () => {
 			const rooms: Room[] = [
-				{
-					startRow: 5,
-					endRow: 8,
-					startCol: 10,
-					endCol: 14,
-				},
-				{
-					startRow: 5,
-					endRow: 9,
-					startCol: 10,
-					endCol: 13,
-				},
-				{
-					startRow: 5,
-					endRow: 8,
-					startCol: 10,
-					endCol: 13,
-				},
+				rect([5, 8, 10, 14]),
+				rect([5, 9, 10, 13]),
+				rect([5, 8, 10, 13]),
 			];
 
 			const expectedStarts: Coordinate[] = [
@@ -84,19 +64,9 @@ describe("Dungeon location selection", () => {
 		});
 
 		it("should select from the intended room when multiple rooms exist", () => {
-			const room1: Room = {
-				startRow: 1,
-				endRow: 3,
-				startCol: 1,
-				endCol: 5,
-			};
+			const room1: Room = rect([1, 3, 1, 5]);
 
-			const room2: Room = {
-				startRow: 5,
-				endRow: 7,
-				startCol: 1,
-				endCol: 5,
-			};
+			const room2: Room = rect([5, 7, 1, 5]);
 
 			const dungeon = makeLocationSelectionSource([room1, room2]);
 
@@ -169,19 +139,9 @@ describe("Dungeon location selection", () => {
 
 	describe("Stair location tests", () => {
 		it("should select the center of a different room when one is available", () => {
-			const room1: Room = {
-				startRow: 1,
-				endRow: 3,
-				startCol: 1,
-				endCol: 3,
-			};
+			const room1: Room = rect([1, 3, 1, 3]);
 
-			const room2: Room = {
-				startRow: 1,
-				endRow: 3,
-				startCol: 5,
-				endCol: 7,
-			};
+			const room2: Room = rect([1, 3, 5, 7]);
 
 			const terrain: Dungeon = [
 				[WALL, WALL, WALL, WALL, WALL, WALL, WALL, WALL, WALL],
@@ -205,26 +165,11 @@ describe("Dungeon location selection", () => {
 		});
 
 		it("should select the last eligible different room when multiple rooms exist", () => {
-			const room1: Room = {
-				startRow: 1,
-				endRow: 3,
-				startCol: 1,
-				endCol: 3,
-			};
+			const room1: Room = rect([1, 3, 1, 3]);
 
-			const room2: Room = {
-				startRow: 1,
-				endRow: 3,
-				startCol: 5,
-				endCol: 7,
-			};
+			const room2: Room = rect([1, 3, 5, 7]);
 
-			const room3: Room = {
-				startRow: 5,
-				endRow: 7,
-				startCol: 5,
-				endCol: 7,
-			};
+			const room3: Room = rect([5, 7, 5, 7]);
 
 			const terrain: Dungeon = [
 				[WALL, WALL, WALL, WALL, WALL, WALL, WALL, WALL, WALL],
@@ -252,26 +197,11 @@ describe("Dungeon location selection", () => {
 		});
 
 		it("should select the last eligible different room when multiple rooms exist and starting room is not first room", () => {
-			const room1: Room = {
-				startRow: 1,
-				endRow: 3,
-				startCol: 1,
-				endCol: 3,
-			};
+			const room1: Room = rect([1, 3, 1, 3]);
 
-			const room2: Room = {
-				startRow: 1,
-				endRow: 3,
-				startCol: 5,
-				endCol: 7,
-			};
+			const room2: Room = rect([1, 3, 5, 7]);
 
-			const room3: Room = {
-				startRow: 5,
-				endRow: 7,
-				startCol: 5,
-				endCol: 7,
-			};
+			const room3: Room = rect([5, 7, 5, 7]);
 
 			const terrain: Dungeon = [
 				[WALL, WALL, WALL, WALL, WALL, WALL, WALL, WALL, WALL],
@@ -299,19 +229,9 @@ describe("Dungeon location selection", () => {
 		});
 
 		it("should select deterministically when called repeatedly with the same dungeon and entry", () => {
-			const room1: Room = {
-				startRow: 1,
-				endRow: 3,
-				startCol: 1,
-				endCol: 3,
-			};
+			const room1: Room = rect([1, 3, 1, 3]);
 
-			const room2: Room = {
-				startRow: 1,
-				endRow: 3,
-				startCol: 5,
-				endCol: 7,
-			};
+			const room2: Room = rect([1, 3, 5, 7]);
 
 			const terrain: Dungeon = [
 				[WALL, WALL, WALL, WALL, WALL, WALL, WALL, WALL, WALL],
@@ -335,12 +255,7 @@ describe("Dungeon location selection", () => {
 		});
 
 		it("should use another floor coordinate in the entry room when only one room exists", () => {
-			const room: Room = {
-				startRow: 1,
-				endRow: 3,
-				startCol: 1,
-				endCol: 3,
-			};
+			const room: Room = rect([1, 3, 1, 3]);
 
 			const dungeon = makeLocationSelectionSource([room]);
 			const entry: Coordinate = { row: 2, col: 2 };
@@ -352,12 +267,7 @@ describe("Dungeon location selection", () => {
 		});
 
 		it("should never select the entry coordinate as the stair location", () => {
-			const room: Room = {
-				startRow: 1,
-				endRow: 3,
-				startCol: 1,
-				endCol: 3,
-			};
+			const room: Room = rect([1, 3, 1, 3]);
 
 			const dungeon = makeLocationSelectionSource([room]);
 			const entry: Coordinate = { row: 1, col: 1 };
@@ -388,19 +298,9 @@ describe("Dungeon location selection", () => {
 		});
 
 		it("should correctly select the center of an offset rectangular room", () => {
-			const entryRoom: Room = {
-				startRow: 1,
-				endRow: 3,
-				startCol: 1,
-				endCol: 3,
-			};
+			const entryRoom: Room = rect([1, 3, 1, 3]);
 
-			const stairRoom: Room = {
-				startRow: 5,
-				endRow: 7,
-				startCol: 8,
-				endCol: 14,
-			};
+			const stairRoom: Room = rect([5, 7, 8, 14]);
 
 			const terrain: string[][] = Array.from({ length: 9 }, () =>
 				Array.from({ length: 16 }, () => WALL),
@@ -436,19 +336,9 @@ describe("Dungeon location selection", () => {
 		});
 
 		it("should handle an even-sized destination room deterministically", () => {
-			const entryRoom: Room = {
-				startRow: 1,
-				endRow: 3,
-				startCol: 1,
-				endCol: 3,
-			};
+			const entryRoom: Room = rect([1, 3, 1, 3]);
 
-			const stairRoom: Room = {
-				startRow: 5,
-				endRow: 8,
-				startCol: 10,
-				endCol: 13,
-			};
+			const stairRoom: Room = rect([5, 8, 10, 13]);
 
 			const terrain: string[][] = Array.from({ length: 10 }, () =>
 				Array.from({ length: 15 }, () => WALL),
@@ -476,12 +366,7 @@ describe("Dungeon location selection", () => {
 		});
 
 		it("should throw when the entry is outside the dungeon bounds", () => {
-			const room: Room = {
-				startRow: 1,
-				endRow: 2,
-				startCol: 1,
-				endCol: 2,
-			};
+			const room: Room = rect([1, 2, 1, 2]);
 
 			const dungeon = makeLocationSelectionSource([room]);
 
@@ -495,12 +380,7 @@ describe("Dungeon location selection", () => {
 		});
 
 		it("should throw when the entry coordinate is not floor", () => {
-			const room: Room = {
-				startRow: 1,
-				endRow: 2,
-				startCol: 1,
-				endCol: 2,
-			};
+			const room: Room = rect([1, 2, 1, 2]);
 
 			const dungeon = makeLocationSelectionSource([room]);
 
@@ -510,12 +390,7 @@ describe("Dungeon location selection", () => {
 		});
 
 		it("should throw when there is no valid distinct floor coordinate", () => {
-			const room: Room = {
-				startRow: 1,
-				endRow: 1,
-				startCol: 1,
-				endCol: 1,
-			};
+			const room: Room = rect([1, 1, 1, 1]);
 
 			const dungeon = makeLocationSelectionSource([room]);
 			const entry: Coordinate = { row: 1, col: 1 };
@@ -526,19 +401,9 @@ describe("Dungeon location selection", () => {
 		});
 
 		it("should throw when the entry is floor but does not belong to a room", () => {
-			const room1: Room = {
-				startRow: 1,
-				endRow: 2,
-				startCol: 1,
-				endCol: 2,
-			};
+			const room1: Room = rect([1, 2, 1, 2]);
 
-			const room2: Room = {
-				startRow: 1,
-				endRow: 2,
-				startCol: 4,
-				endCol: 5,
-			};
+			const room2: Room = rect([1, 2, 4, 5]);
 
 			const terrain: Dungeon = [
 				[WALL, WALL, WALL, WALL, WALL, WALL, WALL],

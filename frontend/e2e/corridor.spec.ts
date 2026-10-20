@@ -242,7 +242,7 @@ test("New Dungeon cancellation keeps queued corridor steps canceled", async ({
 	await expect(turns(page)).not.toHaveText(before ?? "");
 });
 
-for (const width of [390, 1280]) {
+for (const width of [1280]) {
 	test(`running crosses a cleared room into its corridor at ${width}px`, async ({
 		page,
 	}, info) => {

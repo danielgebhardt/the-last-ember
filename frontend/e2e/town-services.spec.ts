@@ -1,25 +1,12 @@
-import { fileURLToPath } from "node:url";
-import { expect, type Page, test } from "@playwright/test";
-import { saveSheet, turns } from "./adventure-helpers.js";
+import { expect, test } from "@playwright/test";
+import { importAdventure, saveSheet, turns } from "./adventure-helpers.js";
 
-const importAdventure = async (page: Page, name: string) => {
-	await page.goto("/");
-	await page
-		.getByRole("button", { name: "Load an existing save", exact: true })
-		.click();
-	await page
-		.getByLabel("Import adventure file")
-		.setInputFiles(
-			fileURLToPath(new URL(`.generated/${name}.json`, import.meta.url)),
-		);
-	await expect(page.getByLabel("Town map", { exact: true })).toBeFocused();
-};
-
-for (const width of [390, 1440])
+for (const width of [1280, 1440])
 	test(`Town forge ${width}px: reforge the worn sword, keep the dialog still, save and load`, async ({
 		page,
 	}) => {
-		await page.setViewportSize({ width, height: width === 390 ? 740 : 900 });
+		await page.setViewportSize({ width, height: width === 1280 ? 800 : 900 });
+		await page.goto("/");
 		await importAdventure(page, "town-forge");
 		const townMap = page.getByLabel("Town map", { exact: true });
 		await page.keyboard.press("e");
@@ -81,6 +68,7 @@ for (const width of [390, 1440])
 test("Town library: learn one seeded book for 1000 gold, then save/load keeps it known", async ({
 	page,
 }) => {
+	await page.goto("/");
 	await importAdventure(page, "town-library");
 	const townMap = page.getByLabel("Town map", { exact: true });
 	await page.keyboard.press("e");

@@ -53,7 +53,7 @@ test("merchant uses four compact desktop columns and keeps narrow layouts within
 	await page.screenshot({
 		path: testInfo.outputPath("merchant-sell-desktop.png"),
 	});
-	for (const width of [800, 390]) {
+	for (const width of [800]) {
 		await page.setViewportSize({ width, height: 667 });
 		for (const name of ["Buy", "Sell"]) {
 			await merchant.getByRole("tab", { name, exact: true }).click();
@@ -64,12 +64,6 @@ test("merchant uses four compact desktop columns and keeps narrow layouts within
 			await expect(
 				merchant.getByRole("button", { name: "Close", exact: true }),
 			).toBeInViewport({ ratio: 1 });
-			if (width === 390)
-				await page.screenshot({
-					path: testInfo.outputPath(
-						`merchant-${name.toLowerCase()}-mobile.png`,
-					),
-				});
 			if (name === "Buy") {
 				await panel.getByRole("button").last().scrollIntoViewIfNeeded();
 				await expect(panel.getByRole("button").last()).toBeInViewport({

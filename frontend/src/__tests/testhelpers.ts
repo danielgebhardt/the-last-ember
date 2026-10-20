@@ -13,6 +13,19 @@ import type { PartitionNode, Region } from "../domain/dungeon/Partitioning.ts";
 import type { Room } from "../domain/dungeon/Room.ts";
 import { FLOOR, WALL } from "../domain/dungeon/Tiles.ts";
 
+// Compact region literal for tests: [startRow, endRow, startCol, endCol], all inclusive.
+export const rect = ([
+	startRow,
+	endRow,
+	startCol,
+	endCol,
+]: readonly number[]): Region => ({
+	startRow,
+	endRow,
+	startCol,
+	endCol,
+});
+
 export const getTerminalRegions = (node: PartitionNode): Region[] => {
 	if (!node.children) {
 		return [node.region];

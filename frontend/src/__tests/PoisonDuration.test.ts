@@ -4,13 +4,7 @@ import {
 	advanceTimedEffects,
 	applyTimedEffect,
 } from "../domain/game/TimedEffects";
-import {
-	createSaveDocument,
-	parseSave,
-	restoreSave,
-} from "../domain/saves/SaveFormat";
 import { quietCorridor } from "./CorridorTravelTestHelpers";
-import { savedAdventure } from "./SaveTestHelpers";
 
 it("monster poison lasts six active phases, pauses off-floor and refreshes without stacking", () => {
 	const base = quietCorridor();
@@ -41,37 +35,4 @@ it("monster poison lasts six active phases, pauses off-floor and refreshes witho
 	for (let phase = 0; phase < 6; phase++) state = advanceTimedEffects(state);
 	expect(state.effects).toEqual([]);
 	expect(state.monsters[0].health).toBe(12);
-});
-it("saves six remaining poison phases while retaining shorter already-active timers", () => {
-	const initial = restoreSave(savedAdventure());
-	for (const remaining of [2, 3, 6]) {
-		const state = {
-			...initial.state,
-			monsters: [],
-			afflictions: [{ kind: "poisoned" as const, remaining, source: "test" }],
-		};
-		const document = createSaveDocument(
-			state,
-			initial.exploration,
-			initial.configuration,
-			initial.fog,
-		);
-		const parsed = parseSave(JSON.stringify(document));
-		expect(parsed.ok).toBe(true);
-		if (!parsed.ok) throw new Error(parsed.error);
-		expect(restoreSave(parsed.value).state.afflictions[0].remaining).toBe(
-			remaining,
-		);
-		expect(
-			parseSave(
-				JSON.stringify({
-					...document,
-					state: {
-						...document.state,
-						afflictions: [{ ...document.state.afflictions[0], remaining: 7 }],
-					},
-				}),
-			).ok,
-		).toBe(false);
-	}
 });

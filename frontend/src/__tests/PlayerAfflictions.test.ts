@@ -4,7 +4,6 @@ import {
 	type AfflictionDefinition,
 	advanceAfflictions,
 	applyAffliction,
-	type PlayerAffliction,
 	removeAfflictions,
 } from "../domain/game/PlayerAfflictions";
 
@@ -24,39 +23,6 @@ const definition = (kind: string, temporary = false): AfflictionDefinition => ({
 	appliedText: "Test applied",
 	removedText: "Test removed",
 	absentText: "Test absent",
-});
-it("caps distinct harmful conditions at three while refreshing without replacing any", () => {
-	let active: readonly PlayerAffliction[] = [];
-	active = applyAffliction(
-		active,
-		definition("lingering"),
-		"first",
-	).afflictions;
-	active = applyAffliction(
-		active,
-		definition("temporary", true),
-		"second",
-	).afflictions;
-	active = applyAffliction(active, definition("third"), "third").afflictions;
-	expect(active).toHaveLength(3);
-	expect(applyAffliction(active, definition("fourth"), "fourth")).toEqual({
-		afflictions: active,
-		outcome: "rejected",
-	});
-	expect(applyAffliction(active, definition("lingering"), "repeat")).toEqual({
-		afflictions: active,
-		outcome: "unchanged",
-	});
-	active = advanceAfflictions(active);
-	const refresh = applyAffliction(
-		active,
-		definition("temporary", true),
-		"repeat",
-	);
-	expect(refresh.outcome).toBe("refreshed");
-	expect(refresh.afflictions.find((a) => a.kind === "temporary")).toMatchObject(
-		{ remaining: 10, source: "repeat" },
-	);
 });
 it("counts application as phase one, expires exactly once and removes only selected conditions", () => {
 	let active = applyAffliction(

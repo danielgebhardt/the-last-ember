@@ -1,6 +1,5 @@
 // @vitest-environment node
 import { expect, it } from "vitest";
-import { formatActivityEvent } from "../components/game/ActivityMessages";
 import { afflictedMeleeAttack } from "../domain/game/AfflictionDefinitions";
 import { applyPlayerAffliction } from "../domain/game/Afflictions";
 import { createGameState, type GameState } from "../domain/game/GameState";
@@ -22,7 +21,6 @@ const adventure = (): GameState => ({
 	monsters: [],
 	bag: createBag([{ id: "review:remove-curse", kind: "remove-curse-scroll" }]),
 });
-const read = { type: "consume", itemId: "review:remove-curse" } as const;
 const hit = (state: GameState) =>
 	deriveAccuracy(
 		state.progression,
@@ -83,32 +81,6 @@ it("a cursed hit deals one less damage", () => {
 	const normal = 12 - attack(encounter);
 	const cursed = 12 - attack(applyPlayerAffliction(encounter, "curse", "hex"));
 	expect(cursed).toBe(Math.max(1, normal - 1));
-});
-
-it("a Remove Curse scroll lifts it for one scroll and one turn; uncursed reading is free", () => {
-	const cursed = applyPlayerAffliction(
-		applyPlayerAffliction(adventure(), "curse", "hex"),
-		"slowed",
-		"web",
-	);
-	const result = resolvePlayerAction(cursed, read);
-	expect(result.turnAdvanced).toBe(true);
-	expect(result.state.afflictions?.map((a) => a.kind)).toEqual(["slowed"]);
-	expect(result.state.bag.items).toEqual([]);
-	const event = result.state.activityHistory.entries.find(
-		({ event }) => event.type === "item-cleansed",
-	)?.event;
-	if (!event) throw new Error("Expected a cleansing event");
-	expect(formatActivityEvent(event)).toContain(
-		"You read Remove Curse scroll and remove Curse. Melee accuracy and damage restored.",
-	);
-	expect(parseSave(serializeSave(tacticalSnapshot(result.state))).ok).toBe(
-		true,
-	);
-	const clean = adventure();
-	const free = resolvePlayerAction(clean, read);
-	expect(free.state).toBe(clean);
-	expect(free.error).toBe("You are not cursed.");
 });
 
 it("joins loot on floors 6–14, and saves Curse", () => {

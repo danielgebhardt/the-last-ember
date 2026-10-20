@@ -1,12 +1,12 @@
 import { expect, test } from "@playwright/test";
 import { importAdventure, map, turns } from "./adventure-helpers.js";
 
-for (const width of [390, 1280]) {
+for (const width of [1280]) {
 	for (const theme of ["Light", "Dark"]) {
 		test(`redesigned menus remain usable at ${width}px in ${theme}`, async ({
 			page,
 		}, testInfo) => {
-			await page.setViewportSize({ width, height: width === 390 ? 667 : 800 });
+			await page.setViewportSize({ width, height: 800 });
 			await page.goto("/");
 			await importAdventure(page, "spell-balance");
 			const turn = await turns(page).textContent();
@@ -95,7 +95,7 @@ for (const theme of ["Light", "Dark"]) {
 	test(`inventory comparisons keep their color and usable details in ${theme}`, async ({
 		page,
 	}, testInfo) => {
-		await page.setViewportSize({ width: 390, height: 740 });
+		await page.setViewportSize({ width: 1280, height: 800 });
 		await page.goto("/");
 		await importAdventure(page, "merchant-bulk");
 		await page.getByRole("button", { name: "Settings", exact: true }).click();

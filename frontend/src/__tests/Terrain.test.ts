@@ -20,7 +20,7 @@ import {
 	makeDungeon,
 } from "../domain/dungeon/Terrain.ts";
 import { FLOOR, WALL } from "../domain/dungeon/Tiles.ts";
-import { fixedDungeon } from "./testhelpers.ts";
+import { fixedDungeon, rect } from "./testhelpers.ts";
 
 describe("Terrain creation and carving", () => {
 	it("should return a # for WALL values in dungeon map", () => {
@@ -92,9 +92,7 @@ describe("Terrain creation and carving", () => {
 			throw new Error("Expected dungeon to be created");
 		}
 
-		const carved = carveRooms(dungeon, [
-			{ startRow: 0, endRow: 0, startCol: 0, endCol: 0 },
-		]);
+		const carved = carveRooms(dungeon, [rect([0, 0, 0, 0])]);
 
 		expect(carved[0][0]).toBe(FLOOR);
 		expect(carved[1][0]).toBe(WALL);
@@ -123,12 +121,7 @@ describe("Terrain creation and carving", () => {
 		it("should carve every tile inside a hand-built multi-tile room", () => {
 			const testDungeon = makeDungeon(5, 6);
 
-			const testRoom: Room = {
-				startRow: 1,
-				endRow: 3,
-				startCol: 2,
-				endCol: 4,
-			};
+			const testRoom: Room = rect([1, 3, 2, 4]);
 
 			const carvedDungeon = carveRooms(testDungeon, [testRoom]);
 
@@ -146,33 +139,13 @@ describe("Terrain creation and carving", () => {
 		it("should throw RangeError when any room is outside the dungeon bounds", () => {
 			const testDungeon = makeDungeon(2, 3);
 
-			const testRoomOutsideRows: Room = {
-				startRow: 1,
-				endRow: 3,
-				startCol: 0,
-				endCol: 1,
-			};
+			const testRoomOutsideRows: Room = rect([1, 3, 0, 1]);
 
-			const testRoomOutsideCols: Room = {
-				startRow: 0,
-				endRow: 1,
-				startCol: 1,
-				endCol: 4,
-			};
+			const testRoomOutsideCols: Room = rect([0, 1, 1, 4]);
 
-			const testRoomOutsideBoth: Room = {
-				startRow: 2,
-				endRow: 4,
-				startCol: 1,
-				endCol: 5,
-			};
+			const testRoomOutsideBoth: Room = rect([2, 4, 1, 5]);
 
-			const testRoomOutsideNegativeCoordinates: Room = {
-				startRow: -1,
-				endRow: 1,
-				startCol: 0,
-				endCol: 1,
-			};
+			const testRoomOutsideNegativeCoordinates: Room = rect([-1, 1, 0, 1]);
 
 			for (const invalidRoom of [
 				testRoomOutsideRows,
@@ -189,20 +162,7 @@ describe("Terrain creation and carving", () => {
 		it("should carve multiple separated rooms while leaving walls between them", () => {
 			const testDungeon = makeDungeon(5, 9);
 
-			const rooms: Room[] = [
-				{
-					startRow: 1,
-					endRow: 3,
-					startCol: 1,
-					endCol: 2,
-				},
-				{
-					startRow: 1,
-					endRow: 3,
-					startCol: 6,
-					endCol: 7,
-				},
-			];
+			const rooms: Room[] = [rect([1, 3, 1, 2]), rect([1, 3, 6, 7])];
 
 			const carvedDungeon = carveRooms(testDungeon, rooms);
 
@@ -219,14 +179,7 @@ describe("Terrain creation and carving", () => {
 
 		it("should not modify the original dungeon", () => {
 			const testDungeon = makeDungeon(5, 9);
-			const rooms: Room[] = [
-				{
-					startRow: 1,
-					endRow: 3,
-					startCol: 1,
-					endCol: 2,
-				},
-			];
+			const rooms: Room[] = [rect([1, 3, 1, 2])];
 
 			const originalDungeon = structuredClone(testDungeon);
 
@@ -242,14 +195,7 @@ describe("Terrain creation and carving", () => {
 
 		it("should not modify the supplied rooms", () => {
 			const testDungeon = makeDungeon(5, 9);
-			const rooms: Room[] = [
-				{
-					startRow: 1,
-					endRow: 3,
-					startCol: 1,
-					endCol: 2,
-				},
-			];
+			const rooms: Room[] = [rect([1, 3, 1, 2])];
 
 			const originalRooms = structuredClone(rooms);
 			const originalRoomReference = rooms[0];
@@ -264,19 +210,9 @@ describe("Terrain creation and carving", () => {
 			const testDungeon = makeDungeon(2, 3);
 			const originalDungeon = structuredClone(testDungeon);
 
-			const validRoom: Room = {
-				startRow: 0,
-				endRow: 0,
-				startCol: 0,
-				endCol: 1,
-			};
+			const validRoom: Room = rect([0, 0, 0, 1]);
 
-			const roomOutsideDungeon: Room = {
-				startRow: 1,
-				endRow: 3,
-				startCol: 0,
-				endCol: 1,
-			};
+			const roomOutsideDungeon: Room = rect([1, 3, 0, 1]);
 
 			expect(() =>
 				carveRooms(testDungeon, [validRoom, roomOutsideDungeon]),
@@ -328,19 +264,9 @@ describe("Terrain creation and carving", () => {
 		it("should preserve room floors when carving a connecting corridor", () => {
 			const dungeon = makeDungeon(4, 7);
 
-			const room1: Room = {
-				startRow: 1,
-				endRow: 2,
-				startCol: 1,
-				endCol: 2,
-			};
+			const room1: Room = rect([1, 2, 1, 2]);
 
-			const room2: Room = {
-				startRow: 1,
-				endRow: 2,
-				startCol: 4,
-				endCol: 5,
-			};
+			const room2: Room = rect([1, 2, 4, 5]);
 
 			const dungeonWithRooms = carveRooms(dungeon, [room1, room2]);
 			const corridor = createCorridor(room1, room2);

@@ -7,312 +7,40 @@ import {
 	splitRegion,
 } from "../domain/dungeon/Partitioning.ts";
 import { createSeededRandom } from "../domain/dungeon/Seed.ts";
-import { getRegionArea, getTerminalRegions } from "./testhelpers.ts";
+import { getRegionArea, getTerminalRegions, rect } from "./testhelpers.ts";
 
 describe("Seeded region splitting", () => {
-	it("creates the earliest valid vertical split when random returns zero", () => {
-		const testRegion: Region = {
-			startRow: 0,
-			endRow: 5,
-			startCol: 0,
-			endCol: 5,
-		};
-
-		const expectedChild1: Region = {
-			startRow: 0,
-			endRow: 5,
-			startCol: 0,
-			endCol: 1,
-		};
-
-		const expectedChild2: Region = {
-			startRow: 0,
-			endRow: 5,
-			startCol: 2,
-			endCol: 5,
-		};
-
-		const random = () => 0;
-
-		const childRegions = splitRegion(testRegion, "vertical", 2, random);
-
-		expect(childRegions?.[0]).toStrictEqual(expectedChild1);
-		expect(childRegions?.[1]).toStrictEqual(expectedChild2);
-	});
-
-	it("creates the latest valid vertical split when random returns 0.99", () => {
-		const testRegion: Region = {
-			startRow: 0,
-			endRow: 5,
-			startCol: 0,
-			endCol: 5,
-		};
-
-		const expectedChild1: Region = {
-			startRow: 0,
-			endRow: 5,
-			startCol: 0,
-			endCol: 3,
-		};
-
-		const expectedChild2: Region = {
-			startRow: 0,
-			endRow: 5,
-			startCol: 4,
-			endCol: 5,
-		};
-
-		const random = () => 0.99;
-
-		const childRegions = splitRegion(testRegion, "vertical", 2, random);
-
-		expect(childRegions?.[0]).toStrictEqual(expectedChild1);
-		expect(childRegions?.[1]).toStrictEqual(expectedChild2);
-	});
-
-	it("creates an intermediate valid vertical split when random returns 0.5", () => {
-		const testRegion: Region = {
-			startRow: 0,
-			endRow: 5,
-			startCol: 0,
-			endCol: 5,
-		};
-
-		const expectedChild1: Region = {
-			startRow: 0,
-			endRow: 5,
-			startCol: 0,
-			endCol: 2,
-		};
-
-		const expectedChild2: Region = {
-			startRow: 0,
-			endRow: 5,
-			startCol: 3,
-			endCol: 5,
-		};
-
-		const random = () => 0.5;
-
-		const childRegions = splitRegion(testRegion, "vertical", 2, random);
-
-		expect(childRegions?.[0]).toStrictEqual(expectedChild1);
-		expect(childRegions?.[1]).toStrictEqual(expectedChild2);
-	});
-
-	it("creates an intermediate valid vertical split on an offset region when random returns 0.5", () => {
-		const testRegion: Region = {
-			startRow: 2,
-			endRow: 7,
-			startCol: 2,
-			endCol: 7,
-		};
-
-		const expectedChild1: Region = {
-			startRow: 2,
-			endRow: 7,
-			startCol: 2,
-			endCol: 4,
-		};
-
-		const expectedChild2: Region = {
-			startRow: 2,
-			endRow: 7,
-			startCol: 5,
-			endCol: 7,
-		};
-
-		const random = () => 0.5;
-
-		const childRegions = splitRegion(testRegion, "vertical", 2, random);
-
-		expect(childRegions?.[0]).toStrictEqual(expectedChild1);
-		expect(childRegions?.[1]).toStrictEqual(expectedChild2);
-	});
-
-	it.each([0, 0.25, 0.5, 0.75, 0.99])(
-		"creates the only valid vertical split on an offset region regardless of what the value of random returns",
-		(value: number) => {
-			const testRegion: Region = {
-				startRow: 2,
-				endRow: 7,
-				startCol: 2,
-				endCol: 7,
-			};
-
-			const expectedChild1: Region = {
-				startRow: 2,
-				endRow: 7,
-				startCol: 2,
-				endCol: 4,
-			};
-
-			const expectedChild2: Region = {
-				startRow: 2,
-				endRow: 7,
-				startCol: 5,
-				endCol: 7,
-			};
-
-			const random = () => value;
-
-			const childRegions = splitRegion(testRegion, "vertical", 3, random);
-
-			expect(childRegions?.[0]).toStrictEqual(expectedChild1);
-			expect(childRegions?.[1]).toStrictEqual(expectedChild2);
+	// Random picks the split column/row among the valid positions, earliest to latest.
+	it.each([
+		["vertical", [0, 5, 0, 5], 0, 2, [0, 5, 0, 1], [0, 5, 2, 5]],
+		["vertical", [0, 5, 0, 5], 0.99, 2, [0, 5, 0, 3], [0, 5, 4, 5]],
+		["vertical", [0, 5, 0, 5], 0.5, 2, [0, 5, 0, 2], [0, 5, 3, 5]],
+		["vertical", [2, 7, 2, 7], 0.5, 2, [2, 7, 2, 4], [2, 7, 5, 7]],
+		["horizontal", [0, 5, 0, 5], 0, 2, [0, 1, 0, 5], [2, 5, 0, 5]],
+		["horizontal", [0, 5, 0, 5], 0.99, 2, [0, 3, 0, 5], [4, 5, 0, 5]],
+		["horizontal", [0, 5, 0, 5], 0.5, 2, [0, 2, 0, 5], [3, 5, 0, 5]],
+		["horizontal", [2, 7, 2, 7], 0.5, 2, [2, 4, 2, 7], [5, 7, 2, 7]],
+	] as const)(
+		"splits %s %j at random %s (minimum %s)",
+		(direction, parent, value, minimum, first, second) => {
+			expect(
+				splitRegion(rect([...parent]), direction, minimum, () => value),
+			).toStrictEqual([rect([...first]), rect([...second])]);
 		},
 	);
 
-	it("creates the earliest valid horizontal split when random returns zero", () => {
-		const testRegion: Region = {
-			startRow: 0,
-			endRow: 5,
-			startCol: 0,
-			endCol: 5,
-		};
-
-		const expectedChild1: Region = {
-			startRow: 0,
-			endRow: 1,
-			startCol: 0,
-			endCol: 5,
-		};
-
-		const expectedChild2: Region = {
-			startRow: 2,
-			endRow: 5,
-			startCol: 0,
-			endCol: 5,
-		};
-
-		const random = () => 0;
-
-		const childRegions = splitRegion(testRegion, "horizontal", 2, random);
-
-		expect(childRegions?.[0]).toStrictEqual(expectedChild1);
-		expect(childRegions?.[1]).toStrictEqual(expectedChild2);
-	});
-
-	it("creates the latest valid horizontal split when random returns 0.99", () => {
-		const testRegion: Region = {
-			startRow: 0,
-			endRow: 5,
-			startCol: 0,
-			endCol: 5,
-		};
-
-		const expectedChild1: Region = {
-			startRow: 0,
-			endRow: 3,
-			startCol: 0,
-			endCol: 5,
-		};
-
-		const expectedChild2: Region = {
-			startRow: 4,
-			endRow: 5,
-			startCol: 0,
-			endCol: 5,
-		};
-
-		const random = () => 0.99;
-
-		const childRegions = splitRegion(testRegion, "horizontal", 2, random);
-
-		expect(childRegions?.[0]).toStrictEqual(expectedChild1);
-		expect(childRegions?.[1]).toStrictEqual(expectedChild2);
-	});
-
-	it("creates an intermediate valid horizontal split when random returns 0.5", () => {
-		const testRegion: Region = {
-			startRow: 0,
-			endRow: 5,
-			startCol: 0,
-			endCol: 5,
-		};
-
-		const expectedChild1: Region = {
-			startRow: 0,
-			endRow: 2,
-			startCol: 0,
-			endCol: 5,
-		};
-
-		const expectedChild2: Region = {
-			startRow: 3,
-			endRow: 5,
-			startCol: 0,
-			endCol: 5,
-		};
-
-		const random = () => 0.5;
-
-		const childRegions = splitRegion(testRegion, "horizontal", 2, random);
-
-		expect(childRegions?.[0]).toStrictEqual(expectedChild1);
-		expect(childRegions?.[1]).toStrictEqual(expectedChild2);
-	});
-
-	it("creates an intermediate valid horizontal split on an offset region when random returns 0.5", () => {
-		const testRegion: Region = {
-			startRow: 2,
-			endRow: 7,
-			startCol: 2,
-			endCol: 7,
-		};
-
-		const expectedChild1: Region = {
-			startRow: 2,
-			endRow: 4,
-			startCol: 2,
-			endCol: 7,
-		};
-
-		const expectedChild2: Region = {
-			startRow: 5,
-			endRow: 7,
-			startCol: 2,
-			endCol: 7,
-		};
-
-		const random = () => 0.5;
-
-		const childRegions = splitRegion(testRegion, "horizontal", 2, random);
-
-		expect(childRegions?.[0]).toStrictEqual(expectedChild1);
-		expect(childRegions?.[1]).toStrictEqual(expectedChild2);
-	});
-
 	it.each([0, 0.25, 0.5, 0.75, 0.99])(
-		"creates the only valid horizontal split on an offset region regardless of what the value of random returns",
-		(value: number) => {
-			const testRegion: Region = {
-				startRow: 2,
-				endRow: 7,
-				startCol: 2,
-				endCol: 7,
-			};
-
-			const expectedChild1: Region = {
-				startRow: 2,
-				endRow: 4,
-				startCol: 2,
-				endCol: 7,
-			};
-
-			const expectedChild2: Region = {
-				startRow: 5,
-				endRow: 7,
-				startCol: 2,
-				endCol: 7,
-			};
-
-			const random = () => value;
-
-			const childRegions = splitRegion(testRegion, "horizontal", 3, random);
-
-			expect(childRegions?.[0]).toStrictEqual(expectedChild1);
-			expect(childRegions?.[1]).toStrictEqual(expectedChild2);
+		"uses the only valid split regardless of random %s",
+		(value) => {
+			const parent = rect([2, 7, 2, 7]);
+			expect(splitRegion(parent, "vertical", 3, () => value)).toStrictEqual([
+				rect([2, 7, 2, 4]),
+				rect([2, 7, 5, 7]),
+			]);
+			expect(splitRegion(parent, "horizontal", 3, () => value)).toStrictEqual([
+				rect([2, 4, 2, 7]),
+				rect([5, 7, 2, 7]),
+			]);
 		},
 	);
 

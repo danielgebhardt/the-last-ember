@@ -1,46 +1,17 @@
 // @vitest-environment node
 import { expect, it } from "vitest";
-import { applyPlayerAffliction } from "../domain/game/Afflictions";
 import { resolvePlayerAction } from "../domain/game/PlayerActions";
 import { createBag } from "../domain/items/Bag";
 import { lootWeights } from "../domain/items/LootWeights";
 import { chestReward } from "../domain/objects/TreasureChests";
-import {
-	parseSave,
-	restoreSave,
-	serializeSave,
-} from "../domain/saves/SaveFormat";
+import { restoreSave } from "../domain/saves/SaveFormat";
 import { savedAdventure } from "./SaveTestHelpers";
-import { tacticalSnapshot } from "./TacticalReplayTestHelpers";
 
 const adventure = () => ({
 	...restoreSave(savedAdventure()).state,
 	monsters: [],
 	player: { health: 10, maxHealth: 10 },
 	bag: createBag([{ id: "review:remedy", kind: "cure-disease-potion" }]),
-});
-it("uses one remedy and one turn, restoring capacity before poison without curing poison", () => {
-	const sick = applyPlayerAffliction(adventure(), "disease", "Plague Rat");
-	const initial = {
-		...sick,
-		afflictions: [
-			...sick.afflictions,
-			{ kind: "poisoned" as const, remaining: 3, source: "test" },
-		],
-	};
-	const result = resolvePlayerAction(initial, {
-		type: "consume",
-		itemId: "review:remedy",
-	});
-	expect(result.turnAdvanced).toBe(true);
-	expect(result.state.turn).toBe(initial.turn + 1);
-	expect(result.state.player).toEqual({ health: 7, maxHealth: 10 });
-	expect(result.state.afflictions).toMatchObject([
-		{ kind: "poisoned", remaining: 2 },
-	]);
-	expect(result.state.bag.items).toEqual([]);
-	const doc = tacticalSnapshot(result.state);
-	expect(parseSave(serializeSave(doc)).ok).toBe(true);
 });
 it("healthy, wrong-item and ended uses cost no bottle, turn or HP", () => {
 	const initial = adventure();

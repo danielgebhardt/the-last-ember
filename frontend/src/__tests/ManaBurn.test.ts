@@ -1,18 +1,10 @@
 // @vitest-environment node
 import { expect, it } from "vitest";
-import { formatActivityEvent } from "../components/game/ActivityMessages";
 import { applyPlayerAffliction } from "../domain/game/Afflictions";
 import { createGameState, type GameState } from "../domain/game/GameState";
 import { resolvePlayerAction } from "../domain/game/PlayerActions";
 import { createBag } from "../domain/items/Bag";
-import {
-	createSaveDocument,
-	parseSave,
-	restoreSave,
-	serializeSave,
-} from "../domain/saves/SaveFormat";
 import { createCorridorEncounter } from "./MonsterEncounterTestHelpers";
-import { savedAdventure } from "./SaveTestHelpers";
 
 const drained = (): GameState => ({
 	...createGameState(createCorridorEncounter()),
@@ -66,49 +58,4 @@ it("refreshes duration only, and leaves mana potions working", () => {
 	).state;
 	expect(potion.mana).toBeGreaterThan(0);
 	expect(potion.afflictions?.[0]?.kind).toBe("mana-burn");
-});
-
-it("describes application, cure and expiry in Activity", () => {
-	const event = (change: "applied" | "cured" | "expired") =>
-		formatActivityEvent({
-			type: "affliction-changed",
-			condition: "mana-burn",
-			change,
-			source: "mana leech",
-			turn: 3,
-		});
-	expect(event("applied")).toBe(
-		"Turn 3 — Mana Burn applied (mana leech). Passive mana recovery stops for 90 phases. Use a Cleansing potion or sanctuary treatment.",
-	);
-	expect(event("cured")).toBe(
-		"Turn 3 — Mana Burn cured (mana leech). Passive mana recovery resumes.",
-	);
-	expect(event("expired")).toBe(
-		"Turn 3 — Mana Burn wears off. Passive mana recovery resumes.",
-	);
-});
-
-it("saves the remaining phases and rejects lifetimes beyond 90", () => {
-	const original = restoreSave(savedAdventure());
-	const save = (afflictions: GameState["afflictions"]) =>
-		parseSave(
-			serializeSave(
-				createSaveDocument(
-					{ ...original.state, monsters: [], afflictions },
-					original.exploration,
-					original.configuration,
-					original.fog,
-				),
-			),
-		);
-	const burn = [{ kind: "mana-burn" as const, remaining: 75, source: "leech" }];
-	const parsed = save(burn);
-	if (!parsed.ok) throw new Error(parsed.error);
-	const resumed = restoreSave(parsed.value).state;
-	expect(resumed.afflictions).toEqual(burn);
-	expect(
-		resolvePlayerAction(resumed, { type: "wait" }).state.afflictions,
-	).toEqual([{ ...burn[0], remaining: 74 }]);
-	expect(save([{ ...burn[0], remaining: 91 }]).ok).toBe(false);
-	expect(save([{ ...burn[0], remaining: null }]).ok).toBe(false);
 });

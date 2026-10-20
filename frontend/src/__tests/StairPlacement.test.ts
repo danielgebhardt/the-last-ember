@@ -25,13 +25,10 @@ import { FLOOR } from "../domain/dungeon/Tiles.ts";
 import {
 	createTestDungeonFloor,
 	expectAllFloorTilesReachable,
+	rect,
 } from "./testhelpers.ts";
 
-const rooms = [
-	{ startRow: 1, endRow: 3, startCol: 1, endCol: 3 },
-	{ startRow: 1, endRow: 3, startCol: 5, endCol: 7 },
-	{ startRow: 1, endRow: 5, startCol: 9, endCol: 13 },
-];
+const rooms = [rect([1, 3, 1, 3]), rect([1, 3, 5, 7]), rect([1, 5, 9, 13])];
 
 const makeSource = () => ({
 	rooms: structuredClone(rooms),
@@ -166,7 +163,7 @@ describe("Seeded stair links", () => {
 				floorNumber,
 				rows: 3,
 				cols: 4,
-				room: { startRow: 1, endRow: 1, startCol: 1, endCol: 2 },
+				room: rect([1, 1, 1, 2]),
 			}),
 		);
 		const baseline = connectDungeonFloors(createDungeonRun(0, floors));
@@ -310,7 +307,7 @@ describe("Random stair selection", () => {
 	});
 
 	it("uses the only distinct room tile on a constrained floor", () => {
-		const room = { startRow: 1, endRow: 1, startCol: 1, endCol: 2 };
+		const room = rect([1, 1, 1, 2]);
 		const source = {
 			rooms: [room],
 			terrain: carveRooms(makeDungeon(3, 4), [room]),
@@ -321,7 +318,7 @@ describe("Random stair selection", () => {
 	});
 
 	it("fails clearly when there is no distinct stair tile", () => {
-		const room = { startRow: 1, endRow: 1, startCol: 1, endCol: 1 };
+		const room = rect([1, 1, 1, 1]);
 		const source = {
 			rooms: [room],
 			terrain: carveRooms(makeDungeon(3, 3), [room]),
@@ -404,7 +401,7 @@ describe("Stairs leave corridor entrances clear", () => {
 	});
 
 	it("skips a room whose only tile is a corridor entrance when another room is clear", () => {
-		const narrowRoom = { startRow: 1, endRow: 1, startCol: 9, endCol: 9 };
+		const narrowRoom = rect([1, 1, 9, 9]);
 		const source = {
 			rooms: [rooms[0], rooms[1], narrowRoom],
 			terrain: carveRooms(makeDungeon(5, 11), [
@@ -422,7 +419,7 @@ describe("Stairs leave corridor entrances clear", () => {
 	});
 
 	it("still links a tiny authored room when its only distinct tile is an entrance", () => {
-		const room = { startRow: 1, endRow: 1, startCol: 1, endCol: 2 };
+		const room = rect([1, 1, 1, 2]);
 		const source = {
 			rooms: [room],
 			terrain: carveRooms(makeDungeon(3, 4), [room]).map((row) => [...row]),

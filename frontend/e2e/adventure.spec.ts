@@ -30,7 +30,7 @@ test("The Last Ember introduces its quest and presents the historical quest item
 		opening.getByRole("button", { name: "Load an existing save", exact: true }),
 	).toBeInViewport({ ratio: 1 });
 	await page.screenshot({ path: testInfo.outputPath("opening.png") });
-	await page.setViewportSize({ width: 390, height: 667 });
+	await page.setViewportSize({ width: 1280, height: 800 });
 	await opening
 		.getByRole("button", { name: "Begin Adventure", exact: true })
 		.scrollIntoViewIfNeeded();

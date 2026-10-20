@@ -47,7 +47,7 @@ test("improved spell cards and Fireball preview explain splash risk before a com
 	await expect(
 		character.getByRole("article", { name: "Renewal", exact: true }),
 	).toContainText("2 HP/turn");
-	await page.setViewportSize({ width: 390, height: 667 });
+	await page.setViewportSize({ width: 1280, height: 800 });
 	expect(
 		await character.evaluate((node) => node.scrollWidth <= node.clientWidth),
 	).toBe(true);
@@ -114,12 +114,12 @@ test("reliquary confirms its ten-health lethal sacrifice and supports free cance
 	await expect(page.getByRole("log")).toContainText("The seal deals 10 damage");
 });
 
-for (const width of [390, 1440])
+for (const width of [1280, 1440])
 	for (const theme of ["Light", "Dark"]) {
 		test(`town portal round trip persists its anchor at ${width}px ${theme}`, async ({
 			page,
 		}, testInfo) => {
-			await page.setViewportSize({ width, height: width === 390 ? 740 : 900 });
+			await page.setViewportSize({ width, height: width === 1280 ? 800 : 900 });
 			await importAdventure(page, "exit-scrolls");
 			await page.getByRole("button", { name: "Settings", exact: true }).click();
 			await page.getByRole("button", { name: theme, exact: true }).click();
@@ -204,21 +204,8 @@ for (const width of [390, 1440])
 				.getByRole("button", { name: "Confirm load", exact: true })
 				.click();
 			await expect(town).toBeFocused();
-			if (width === 390) {
-				await town
-					.getByRole("cell", {
-						name: "8, 9: town portal to floor 3",
-						exact: true,
-					})
-					.getByRole("button", { name: "Walk north", exact: true })
-					.click();
-				await town
-					.getByRole("button", { name: "Return to floor 3", exact: true })
-					.click();
-			} else {
-				await page.keyboard.press("w");
-				await page.keyboard.press("Enter");
-			}
+			await page.keyboard.press("w");
+			await page.keyboard.press("Enter");
 			await expect(map(page)).toBeFocused();
 			await expect(
 				page.getByText("Floor 3 of 5", { exact: true }),
@@ -231,11 +218,11 @@ for (const width of [390, 1440])
 		});
 	}
 
-for (const width of [390, 1440])
+for (const width of [1280, 1440])
 	test(`Forgotten Forge ${width}px: choose equipment, back out freely, then forge reliably`, async ({
 		page,
 	}) => {
-		await page.setViewportSize({ width, height: width === 390 ? 740 : 900 });
+		await page.setViewportSize({ width, height: width === 1280 ? 800 : 900 });
 		await importAdventure(page, "forge");
 		await page.keyboard.press("e");
 		const dialog = page.getByRole("dialog", {

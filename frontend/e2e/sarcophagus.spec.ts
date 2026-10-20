@@ -22,7 +22,7 @@ test("sarcophagus risk dialog cancels freely, opens once with keyboard/mobile co
 		"clientHeight",
 		Math.round(dimensions?.height ?? 0),
 	);
-	await page.setViewportSize({ width: 390, height: 667 });
+	await page.setViewportSize({ width: 1280, height: 800 });
 	await page
 		.getByRole("button", { name: "Review sarcophagus", exact: true })
 		.click();

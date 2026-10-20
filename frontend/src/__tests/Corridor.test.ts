@@ -16,41 +16,22 @@ import {
 	getTerminalRooms,
 	type Room,
 } from "../domain/dungeon/Room.ts";
+import { rect } from "./testhelpers";
 
 describe("Corridor tests", () => {
 	it("should select an endpoint inside each room", () => {
-		const room1: Room = {
-			startRow: 1,
-			endRow: 2,
-			startCol: 1,
-			endCol: 2,
-		};
+		const room1: Room = rect([1, 2, 1, 2]);
 
-		const room2: Room = {
-			startRow: 1,
-			endRow: 2,
-			startCol: 4,
-			endCol: 5,
-		};
+		const room2: Room = rect([1, 2, 4, 5]);
 
 		expect(getRoomEndpoint(room1)).toStrictEqual({ row: 1, col: 1 });
 		expect(getRoomEndpoint(room2)).toStrictEqual({ row: 1, col: 4 });
 	});
 
 	it("should create a straight horizontal line corridor between aligned rooms", () => {
-		const room1: Room = {
-			startRow: 1,
-			endRow: 2,
-			startCol: 1,
-			endCol: 2,
-		};
+		const room1: Room = rect([1, 2, 1, 2]);
 
-		const room2: Room = {
-			startRow: 1,
-			endRow: 2,
-			startCol: 4,
-			endCol: 5,
-		};
+		const room2: Room = rect([1, 2, 4, 5]);
 
 		const corridor: Corridor = createCorridor(room1, room2);
 		expect(corridor).toStrictEqual([
@@ -62,19 +43,9 @@ describe("Corridor tests", () => {
 	});
 
 	it("should create a straight vertical line corridor between aligned rooms", () => {
-		const room1: Room = {
-			startRow: 1,
-			endRow: 2,
-			startCol: 1,
-			endCol: 2,
-		};
+		const room1: Room = rect([1, 2, 1, 2]);
 
-		const room2: Room = {
-			startRow: 4,
-			endRow: 5,
-			startCol: 1,
-			endCol: 2,
-		};
+		const room2: Room = rect([4, 5, 1, 2]);
 
 		const corridor: Corridor = createCorridor(room1, room2);
 		expect(corridor).toStrictEqual([
@@ -86,19 +57,9 @@ describe("Corridor tests", () => {
 	});
 
 	it("should create a horizontal corridor when the second room is left of the first room", () => {
-		const room1: Room = {
-			startRow: 1,
-			endRow: 2,
-			startCol: 1,
-			endCol: 2,
-		};
+		const room1: Room = rect([1, 2, 1, 2]);
 
-		const room2: Room = {
-			startRow: 1,
-			endRow: 2,
-			startCol: 4,
-			endCol: 5,
-		};
+		const room2: Room = rect([1, 2, 4, 5]);
 
 		const corridor: Corridor = createCorridor(room2, room1);
 		expect(corridor).toStrictEqual([
@@ -110,19 +71,9 @@ describe("Corridor tests", () => {
 	});
 
 	it("should create a vertical corridor when the second room is above the first room", () => {
-		const room1: Room = {
-			startRow: 1,
-			endRow: 2,
-			startCol: 1,
-			endCol: 2,
-		};
+		const room1: Room = rect([1, 2, 1, 2]);
 
-		const room2: Room = {
-			startRow: 4,
-			endRow: 5,
-			startCol: 1,
-			endCol: 2,
-		};
+		const room2: Room = rect([4, 5, 1, 2]);
 
 		const corridor: Corridor = createCorridor(room2, room1);
 		expect(corridor).toStrictEqual([
@@ -134,19 +85,9 @@ describe("Corridor tests", () => {
 	});
 
 	it("should create a corridor with one right-angle bend between offset rooms", () => {
-		const room1: Room = {
-			startRow: 1,
-			endRow: 2,
-			startCol: 1,
-			endCol: 2,
-		};
+		const room1: Room = rect([1, 2, 1, 2]);
 
-		const room2: Room = {
-			startRow: 4,
-			endRow: 5,
-			startCol: 4,
-			endCol: 5,
-		};
+		const room2: Room = rect([4, 5, 4, 5]);
 
 		const corridor: Corridor = createCorridor(room1, room2);
 
@@ -162,19 +103,9 @@ describe("Corridor tests", () => {
 	});
 
 	it("should include both room endpoints", () => {
-		const room1: Room = {
-			startRow: 1,
-			endRow: 2,
-			startCol: 1,
-			endCol: 2,
-		};
+		const room1: Room = rect([1, 2, 1, 2]);
 
-		const room2: Room = {
-			startRow: 1,
-			endRow: 2,
-			startCol: 4,
-			endCol: 5,
-		};
+		const room2: Room = rect([1, 2, 4, 5]);
 
 		const corridor: Corridor = createCorridor(room1, room2);
 		expect(corridor).toContainEqual({ row: 1, col: 1 });
@@ -182,19 +113,9 @@ describe("Corridor tests", () => {
 	});
 
 	it("should produce only cardinally adjacent consecutive coordinates (no diagonal)", () => {
-		const room1: Room = {
-			startRow: 5,
-			endRow: 6,
-			startCol: 5,
-			endCol: 6,
-		};
+		const room1: Room = rect([5, 6, 5, 6]);
 
-		const room2: Room = {
-			startRow: 1,
-			endRow: 2,
-			startCol: 1,
-			endCol: 2,
-		};
+		const room2: Room = rect([1, 2, 1, 2]);
 
 		const corridor = createCorridor(room1, room2);
 
@@ -211,19 +132,9 @@ describe("Corridor tests", () => {
 	});
 
 	it("should not modify the rooms when creating a corridor", () => {
-		const room1: Room = {
-			startRow: 1,
-			endRow: 2,
-			startCol: 1,
-			endCol: 2,
-		};
+		const room1: Room = rect([1, 2, 1, 2]);
 
-		const room2: Room = {
-			startRow: 4,
-			endRow: 5,
-			startCol: 4,
-			endCol: 5,
-		};
+		const room2: Room = rect([4, 5, 4, 5]);
 
 		const originalRoom1 = structuredClone(room1);
 		const originalRoom2 = structuredClone(room2);
@@ -236,12 +147,7 @@ describe("Corridor tests", () => {
 
 	describe("connectPartitionRooms tests", () => {
 		it("should return no corridors for a terminal partition", () => {
-			const region: Region = {
-				startRow: 0,
-				endRow: 3,
-				startCol: 0,
-				endCol: 3,
-			};
+			const region: Region = rect([0, 3, 0, 3]);
 
 			const partition = assignRoomsToPartition(
 				recursivePartition(region, 4),
@@ -252,12 +158,7 @@ describe("Corridor tests", () => {
 		});
 
 		it("should create one corridor between two terminal child rooms", () => {
-			const region: Region = {
-				startRow: 0,
-				endRow: 2,
-				startCol: 0,
-				endCol: 5,
-			};
+			const region: Region = rect([0, 2, 0, 5]);
 
 			const partition = assignRoomsToPartition(
 				recursivePartition(region, 3),
@@ -277,12 +178,7 @@ describe("Corridor tests", () => {
 		});
 
 		it("should recursively create corridors for a multi-level partition tree", () => {
-			const region: Region = {
-				startRow: 0,
-				endRow: 5,
-				startCol: 0,
-				endCol: 5,
-			};
+			const region: Region = rect([0, 5, 0, 5]);
 
 			const partition = assignRoomsToPartition(
 				recursivePartition(region, 3),
@@ -314,12 +210,7 @@ describe("Corridor tests", () => {
 		});
 
 		it("should create one fewer corridor than the number of terminal rooms", () => {
-			const region: Region = {
-				startRow: 0,
-				endRow: 11,
-				startCol: 0,
-				endCol: 11,
-			};
+			const region: Region = rect([0, 11, 0, 11]);
 
 			const partition = assignRoomsToPartition(
 				recursivePartition(region, 3),
@@ -333,12 +224,7 @@ describe("Corridor tests", () => {
 		});
 
 		it("should include every terminal room in the corridor network", () => {
-			const region: Region = {
-				startRow: 0,
-				endRow: 5,
-				startCol: 0,
-				endCol: 5,
-			};
+			const region: Region = rect([0, 5, 0, 5]);
 
 			const partition = assignRoomsToPartition(
 				recursivePartition(region, 3),
@@ -361,12 +247,7 @@ describe("Corridor tests", () => {
 		});
 
 		it("should throw when a required terminal partition has no room", () => {
-			const region: Region = {
-				startRow: 0,
-				endRow: 2,
-				startCol: 0,
-				endCol: 5,
-			};
+			const region: Region = rect([0, 2, 0, 5]);
 
 			const partitionWithoutRooms = recursivePartition(region, 3);
 
@@ -376,12 +257,7 @@ describe("Corridor tests", () => {
 		});
 
 		it("should not modify the partition tree or its rooms", () => {
-			const region: Region = {
-				startRow: 0,
-				endRow: 5,
-				startCol: 0,
-				endCol: 5,
-			};
+			const region: Region = rect([0, 5, 0, 5]);
 
 			const partition = assignRoomsToPartition(
 				recursivePartition(region, 3),

@@ -1,19 +1,6 @@
-import { fileURLToPath } from "node:url";
 import { expect, type Page, test } from "@playwright/test";
-import { map, saveSheet, turns } from "./adventure-helpers.js";
+import { importAdventure, map, saveSheet, turns } from "./adventure-helpers.js";
 
-const importAdventure = async (page: Page, name: string) => {
-	await page.goto("/");
-	await page
-		.getByRole("button", { name: "Load an existing save", exact: true })
-		.click();
-	await page
-		.getByLabel("Import adventure file")
-		.setInputFiles(
-			fileURLToPath(new URL(`.generated/${name}.json`, import.meta.url)),
-		);
-	await expect(page.getByLabel(/^(Town|Dungeon) map$/)).toBeFocused();
-};
 const conditions = (page: Page) =>
 	page.getByRole("list", { name: "Active player conditions", exact: true });
 const health = (page: Page) =>
@@ -33,11 +20,12 @@ const mapGeometry = (page: Page) =>
 const disease = (page: Page) =>
 	page.getByRole("button", { name: "Disease — until cured", exact: true });
 
-for (const width of [390, 1440])
+for (const width of [1280, 1440])
 	test(`Disease ${width}px: inspect, cure with a potion, save/load and continue identically`, async ({
 		page,
 	}) => {
-		await page.setViewportSize({ width, height: width === 390 ? 740 : 900 });
+		await page.setViewportSize({ width, height: width === 1280 ? 800 : 900 });
+		await page.goto("/");
 		await importAdventure(page, "diseased");
 		const frame = await mapGeometry(page);
 		await expect(
@@ -97,11 +85,12 @@ for (const width of [390, 1440])
 		await drinkCure();
 	});
 
-for (const width of [390, 1440])
+for (const width of [1280, 1440])
 	test(`sanctuary ${width}px: cancel, then confirm a Disease cure without healing or a turn`, async ({
 		page,
 	}) => {
-		await page.setViewportSize({ width, height: width === 390 ? 740 : 900 });
+		await page.setViewportSize({ width, height: width === 1280 ? 800 : 900 });
+		await page.goto("/");
 		await importAdventure(page, "town-diseased");
 		const townMap = page.getByLabel("Town map", { exact: true });
 		await page.keyboard.press("e");
@@ -153,6 +142,7 @@ for (const width of [390, 1440])
 test("Plague Rat loop: contract Disease, read guidance, cure, then save/load and continue identically", async ({
 	page,
 }) => {
+	await page.goto("/");
 	await importAdventure(page, "plague-bite");
 	const start = Number((await turns(page).textContent())?.replace("Turn ", ""));
 	await page.keyboard.press("Space");
@@ -201,6 +191,7 @@ test("Plague Rat loop: contract Disease, read guidance, cure, then save/load and
 test("Spider web loop: see the marked tile, get Slowed, read guidance and drink Cleansing", async ({
 	page,
 }) => {
+	await page.goto("/");
 	await importAdventure(page, "spider-web");
 	const frame = await mapGeometry(page);
 	await page.keyboard.press("Space");
@@ -230,6 +221,7 @@ test("Spider web loop: see the marked tile, get Slowed, read guidance and drink 
 test("Mana leech: a landed hit drains mana and burns; a Cleansing potion cures it", async ({
 	page,
 }) => {
+	await page.goto("/");
 	await importAdventure(page, "leech-bite");
 	const frame = await mapGeometry(page);
 	const mana = page.getByLabel("Player mana", { exact: true });
@@ -259,6 +251,7 @@ test("Mana leech: a landed hit drains mana and burns; a Cleansing potion cures i
 test("Hexweaver: a telegraphed hex curses; a Remove Curse scroll lifts it", async ({
 	page,
 }) => {
+	await page.goto("/");
 	await importAdventure(page, "hexweaver-sight");
 	const frame = await mapGeometry(page);
 	const log = page.getByRole("log", { name: "Activity log", exact: true });

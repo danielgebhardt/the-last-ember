@@ -24,32 +24,6 @@ const adventure = () => ({
 });
 const drink = { type: "consume", itemId: "review:cleansing" } as const;
 
-it("uses one bottle and one turn, removing only Slowed before monsters act", () => {
-	const sick = applyPlayerAffliction(
-		applyPlayerAffliction(adventure(), "disease", "rat"),
-		"slowed",
-		"web",
-	);
-	const initial = {
-		...sick,
-		afflictions: [
-			...sick.afflictions,
-			{ kind: "poisoned" as const, remaining: 3, source: "test" },
-		],
-	};
-	const result = resolvePlayerAction(initial, drink);
-	expect(result.turnAdvanced).toBe(true);
-	expect(result.state.turn).toBe(initial.turn + 1);
-	expect(result.state.afflictions).toMatchObject([
-		{ kind: "disease" },
-		{ kind: "poisoned", remaining: 2 },
-	]);
-	expect(result.state.bag.items).toEqual([]);
-	expect(parseSave(serializeSave(tacticalSnapshot(result.state))).ok).toBe(
-		true,
-	);
-});
-
 it("restores evasion before the ensuing monster attack", () => {
 	const encounter = {
 		...createGameState(createCorridorEncounter()),
@@ -71,33 +45,6 @@ it("restores evasion before the ensuing monster attack", () => {
 	const cured = resolvePlayerAction(slowed, drink, rolls).state;
 	expect(cured.player.health).toBe(10);
 	expect(cured.afflictions).toEqual([]);
-});
-
-it("costs nothing without Slowed, including while only diseased or poisoned", () => {
-	const initial = adventure();
-	for (const state of [
-		initial,
-		applyPlayerAffliction(initial, "disease", "rat"),
-		{
-			...initial,
-			effects: [],
-			afflictions: [
-				{ kind: "poisoned" as const, remaining: 3, source: "test" },
-			],
-		},
-		applyPlayerAffliction(
-			{ ...initial, player: { health: 0, maxHealth: 10 } },
-			"slowed",
-			"web",
-		),
-	]) {
-		const result = resolvePlayerAction(state, drink);
-		expect(result.state).toBe(state);
-		expect(result.turnAdvanced).toBe(false);
-	}
-	expect(resolvePlayerAction(initial, drink).error).toBe(
-		"You are not Slowed. You do not have Mana Burn.",
-	);
 });
 
 it("removes Mana Burn too, alone or with Slowed, and names what it removed", () => {

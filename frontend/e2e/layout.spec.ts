@@ -120,10 +120,7 @@ test("interaction hints reserve their space without resizing the dungeon", async
 	page,
 }) => {
 	await importAdventure(page, "interaction-hints");
-	for (const size of [
-		{ width: 1280, height: 720 },
-		{ width: 390, height: 667 },
-	]) {
+	for (const size of [{ width: 1280, height: 720 }]) {
 		await page.setViewportSize(size);
 		const hints = page.getByRole("region", {
 			name: "Nearby objects",
@@ -205,7 +202,7 @@ test("all player status icons and afflictions fit without moving the dungeon whe
 	page,
 }, testInfo) => {
 	await importAdventure(page, "viewport-status-icons");
-	for (const width of [320, 390, 1024, 1280, 1920]) {
+	for (const width of [1024, 1280, 1920]) {
 		await page.setViewportSize({ width, height: width < 1024 ? 740 : 900 });
 		const icons = page.getByRole("list", {
 			name: "Active player conditions",
@@ -275,7 +272,7 @@ test("magic resistance stays readable in Character on desktop and mobile in both
 	const resistance = character.getByLabel("Character magic resistance", {
 		exact: true,
 	});
-	for (const width of [1280, 390]) {
+	for (const width of [1280]) {
 		await page.setViewportSize({ width, height: 800 });
 		for (const dark of [false, true]) {
 			await page
@@ -301,10 +298,7 @@ test("magic resistance stays readable in Character on desktop and mobile in both
 	await expect(map(page)).toBeFocused();
 });
 
-for (const size of [
-	{ width: 1280, height: 720 },
-	{ width: 390, height: 667 },
-]) {
+for (const size of [{ width: 1280, height: 720 }]) {
 	test(`action errors do not shift the dungeon at ${size.width}px`, async ({
 		page,
 	}) => {

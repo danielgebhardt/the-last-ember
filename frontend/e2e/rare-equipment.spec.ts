@@ -3,13 +3,13 @@ import { expect, test } from "@playwright/test";
 import { turns } from "./adventure-helpers.js";
 
 for (const [fixture, name, other, slot, width] of [
-	["rare-cloak", "Warding Cloak", "Spellguard Shield", "chest", 390],
+	["rare-cloak", "Warding Cloak", "Spellguard Shield", "chest", 1280],
 	["rare-shield", "Spellguard Shield", "Warding Cloak", "off hand", 1280],
 ] as const) {
 	test(`${name}: compare, cancel, buy, equip and retain finite ownership at ${width}px`, async ({
 		page,
 	}, info) => {
-		await page.setViewportSize({ width, height: width === 390 ? 740 : 900 });
+		await page.setViewportSize({ width, height: width === 1280 ? 800 : 900 });
 		await page.goto("/");
 		await page
 			.getByRole("button", { name: "Load an existing save", exact: true })

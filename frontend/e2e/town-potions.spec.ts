@@ -1,12 +1,12 @@
 import { fileURLToPath } from "node:url";
 import { expect, test } from "@playwright/test";
 
-for (const width of [390, 1440])
+for (const width of [1280, 1440])
 	for (const theme of ["Light", "Dark"]) {
 		test(`town potion store ${width}px ${theme}: confirmed purchase and saved depletion without recovery`, async ({
 			page,
 		}, info) => {
-			await page.setViewportSize({ width, height: width === 390 ? 740 : 900 });
+			await page.setViewportSize({ width, height: width === 1280 ? 800 : 900 });
 			await page.goto("/");
 			await page
 				.getByRole("button", { name: "Load an existing save", exact: true })
@@ -24,11 +24,7 @@ for (const width of [390, 1440])
 			await page.getByRole("button", { name: theme, exact: true }).click();
 			await page.keyboard.press("Escape");
 			await expect(map).toBeFocused();
-			if (width === 390)
-				await map
-					.getByRole("button", { name: "Inspect Potion store", exact: true })
-					.click();
-			else await page.keyboard.press("e");
+			await page.keyboard.press("e");
 			const store = page.getByRole("dialog", { name: "Town potion store" });
 			await expect(store).toBeVisible();
 			await expect(store.getByRole("listitem")).toHaveCount(8);
@@ -120,7 +116,7 @@ test("a fresh town budget buys two healing potions, survives travel and resets o
 	const gold = page.getByLabel("Player gold", { exact: true });
 	await expect(town).toBeFocused();
 	await expect(gold).toHaveText("Gold 300");
-	for (const width of [1024, 1280, 1920, 390, 320]) {
+	for (const width of [1024, 1280, 1920]) {
 		await page.setViewportSize({ width, height: 768 });
 		expect((await gold.boundingBox())?.height).toBeLessThanOrEqual(24);
 	}

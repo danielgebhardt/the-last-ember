@@ -2,7 +2,7 @@ import { expect, test } from "@playwright/test";
 import { importAdventure, map, turns } from "./adventure-helpers.js";
 
 for (const [theme, width] of [
-	["Light", 390],
+	["Light", 1440],
 	["Dark", 1280],
 ] as const) {
 	test(`spell and monster icons retain themed colors and shortcut labels at ${width}px ${theme}`, async ({

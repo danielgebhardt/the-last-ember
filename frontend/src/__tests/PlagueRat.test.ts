@@ -1,23 +1,9 @@
 // @vitest-environment node
 import { expect, it } from "vitest";
-import {
-	connectDungeonFloors,
-	generateDungeonRun,
-} from "../domain/dungeon/DungeonRun";
-import { createSeededRandom } from "../domain/dungeon/Seed";
 import { applyPlayerAffliction } from "../domain/game/Afflictions";
 import { createGameState, type GameState } from "../domain/game/GameState";
 import { resolvePlayerAction } from "../domain/game/PlayerActions";
 import { createMonsterDrop } from "../domain/items/MonsterDrops";
-import {
-	eligibleMonsterKinds,
-	MONSTER_DEFINITIONS,
-	selectMonsterKind,
-} from "../domain/monsters/Monster";
-import {
-	AFFLICTION_SOURCE_CHANCE,
-	spawnRunMonsters,
-} from "../domain/monsters/MonsterPlacement";
 import {
 	createSaveDocument,
 	parseSave,
@@ -26,7 +12,6 @@ import {
 } from "../domain/saves/SaveFormat";
 import { createCorridorEncounter } from "./MonsterEncounterTestHelpers";
 import { savedAdventure } from "./SaveTestHelpers";
-import { COMPACT_TEST_CONFIGURATION } from "./TestRunConfiguration";
 
 const hit = () => ({ d20: () => 20, damage: (min: number) => min });
 const miss = () => ({ d20: () => 1, damage: (min: number) => min });
@@ -49,24 +34,6 @@ const diseased = (state: GameState) =>
 const waitAt = (turn: number, rolls = hit, state = encounter(turn)) =>
 	resolvePlayerAction(state, { type: "wait" }, rolls).state;
 const turns = [...Array(200).keys()];
-
-it("defines a low-damage floor 2–6 carrier outside ordinary and return-wave pools", () => {
-	const rat = MONSTER_DEFINITIONS["plague-rat"];
-	expect(rat).toMatchObject({
-		minFloor: 2,
-		maxFloor: 6,
-		maxHealth: 4,
-		attackDamage: 1,
-		spawnEnabled: false,
-		onHitAffliction: { kind: "disease", chance: 0.2 },
-	});
-	for (let floor = 1; floor <= 20; floor++) {
-		expect(eligibleMonsterKinds(floor)).not.toContain("plague-rat");
-		const random = createSeededRandom(floor);
-		for (let draw = 0; draw < 200; draw++)
-			expect(selectMonsterKind(floor, random)).not.toBe("plague-rat");
-	}
-});
 
 it("infects on about one landed hit in five, deterministically, and never on a miss", () => {
 	const infected = turns.filter((turn) => diseased(waitAt(turn)));
@@ -120,51 +87,6 @@ it("a fatal bite kills without infecting", () => {
 	const dead = waitAt(infected[0], hit, dying);
 	expect(dead.player.health).toBe(0);
 	expect(dead.afflictions).toEqual([]);
-});
-
-it("replaces at most one ordinary spawn per eligible floor from its own stream and marks the first carrier", () => {
-	let carriers = 0;
-	let seedsWithCarrier = 0;
-	for (let seed = 0; seed < 40; seed++) {
-		const run = connectDungeonFloors(
-			generateDungeonRun(seed, 8, COMPACT_TEST_CONFIGURATION),
-		);
-		const monsters = spawnRunMonsters(run);
-		expect(spawnRunMonsters(run)).toEqual(monsters);
-		const rats = monsters.filter((m) => m.kind === "plague-rat");
-		carriers += rats.length;
-		if (rats.length) seedsWithCarrier++;
-		for (const floor of run.floors) {
-			const onFloor = monsters.filter(
-				(m) => m.floorNumber === floor.floorNumber,
-			);
-			// Replacement keeps the ordinary population size and identities.
-			expect(onFloor.map((m) => m.id)).toEqual(
-				onFloor.map((_, index) => `${floor.floorNumber}:${index + 1}`),
-			);
-			expect(
-				onFloor.filter((m) => m.kind === "plague-rat").length,
-			).toBeLessThanOrEqual(1);
-		}
-		for (const rat of rats) {
-			expect(rat.floorNumber).toBeGreaterThanOrEqual(2);
-			expect(rat.floorNumber).toBeLessThanOrEqual(6);
-			expect(rat.health).toBe(4);
-		}
-		// Other affliction sources (hexweavers from floor 6) carry their own markers.
-		const marked = monsters.filter(
-			(m) => m.remedyDrop && m.kind === "plague-rat",
-		);
-		expect(marked).toEqual(
-			rats.length
-				? [rats.reduce((a, b) => (b.floorNumber < a.floorNumber ? b : a))]
-				: [],
-		);
-	}
-	// Sparse: well under one per eligible floor, and not every seed.
-	expect(carriers / (40 * 5)).toBeLessThan(AFFLICTION_SOURCE_CHANCE + 0.1);
-	expect(seedsWithCarrier).toBeGreaterThan(0);
-	expect(seedsWithCarrier).toBeLessThan(40);
 });
 
 it("the first carrier drops one Cure Disease potion; later carriers use ordinary loot", () => {

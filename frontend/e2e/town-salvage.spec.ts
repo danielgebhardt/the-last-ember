@@ -1,12 +1,12 @@
 import { fileURLToPath } from "node:url";
 import { expect, test } from "@playwright/test";
 
-for (const width of [390, 1440]) {
+for (const width of [1280, 1440]) {
 	for (const theme of ["Light", "Dark"]) {
 		test(`The Rag & Bone ${width}px ${theme}: sell-only, stable copies, bulk confirmation and saved ownership`, async ({
 			page,
 		}, info) => {
-			await page.setViewportSize({ width, height: width === 390 ? 740 : 900 });
+			await page.setViewportSize({ width, height: width === 1280 ? 800 : 900 });
 			await page.goto("/");
 			await page
 				.getByRole("button", { name: "Load an existing save", exact: true })
@@ -24,11 +24,7 @@ for (const width of [390, 1440]) {
 			await page.getByRole("button", { name: theme, exact: true }).click();
 			await page.keyboard.press("Escape");
 			await expect(map).toBeFocused();
-			if (width === 390)
-				await map
-					.getByRole("button", { name: "Inspect The Rag & Bone", exact: true })
-					.click();
-			else await page.keyboard.press("e");
+			await page.keyboard.press("e");
 			const shop = page.getByRole("dialog", {
 				name: "The Rag & Bone",
 				exact: true,

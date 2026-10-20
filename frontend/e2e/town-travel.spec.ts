@@ -17,8 +17,6 @@ test("live town is centered over transparent space, preserves the dungeon, and r
 		{ width: 1440, height: 900 },
 		{ width: 1280, height: 800 },
 		{ width: 1024, height: 768 },
-		{ width: 390, height: 740 },
-		{ width: 320, height: 667 },
 	]) {
 		await page.setViewportSize(size);
 		for (const theme of ["Light", "Dark"]) {

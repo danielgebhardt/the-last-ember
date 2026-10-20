@@ -194,12 +194,12 @@ for (const dismiss of ["Escape", "Close"]) {
 	});
 }
 
-for (const width of [390, 1280])
+for (const width of [1280])
 	for (const theme of ["Light", "Dark"]) {
 		test(`New Dungeon requires confirmation and restores map focus at ${width}px ${theme}`, async ({
 			page,
 		}, testInfo) => {
-			await page.setViewportSize({ width, height: width === 390 ? 740 : 720 });
+			await page.setViewportSize({ width, height: 720 });
 			await importAdventure(page, "corridor-large");
 			await page.getByRole("button", { name: "Settings", exact: true }).click();
 			await page.getByRole("button", { name: theme, exact: true }).click();

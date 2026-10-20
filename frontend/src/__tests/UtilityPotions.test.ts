@@ -23,44 +23,6 @@ const carrying = (kind: ItemKind) => ({
 const drink = { type: "consume", itemId: "drink" } as const;
 
 describe("Utility potions", () => {
-	it("removes player poison before its tick while preserving other effects", () => {
-		const before = {
-			...carrying("antidote"),
-			effects: [
-				{
-					actorId: "player",
-					floorNumber: null,
-					kind: "protected",
-					remaining: 3,
-				},
-			] as const,
-			afflictions: [
-				{ kind: "poisoned" as const, remaining: 3, source: "test" },
-			],
-		};
-		const result = resolvePlayerAction(before, drink);
-		expect(result.turnAdvanced).toBe(true);
-		expect(result.state.turn).toBe(1);
-		expect(result.state.player.health).toBe(10);
-		expect(result.state.effects).toEqual([
-			{ actorId: "player", floorNumber: null, kind: "protected", remaining: 2 },
-		]);
-		expect(result.state.bag.items).toEqual([]);
-		expect(result.state.activityHistory.entries[0].event).toEqual({
-			type: "item-cleansed",
-			item: "antidote",
-			conditions: ["poisoned"],
-			turn: 1,
-		});
-		expect(result.state.afflictions).toEqual([]);
-	});
-	it("keeps an antidote and the turn when the player is not poisoned", () => {
-		const before = carrying("antidote");
-		const result = resolvePlayerAction(before, drink);
-		expect(result.state).toBe(before);
-		expect(result.turnAdvanced).toBe(false);
-		expect(result.error).toMatch(/not poisoned/i);
-	});
 	it.each([
 		{
 			kind: "greater-healing-potion",

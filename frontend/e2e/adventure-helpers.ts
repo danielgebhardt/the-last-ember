@@ -25,5 +25,6 @@ export const importAdventure = async (page: Page, name = "ready") => {
 	await expect(
 		page.getByRole("dialog", { name: "Load adventure", exact: true }),
 	).toBeHidden();
-	await expect(map(page)).toBeFocused();
+	// Town saves focus the town map; dungeon saves the dungeon map.
+	await expect(page.getByLabel(/^(Town|Dungeon) map$/)).toBeFocused();
 };

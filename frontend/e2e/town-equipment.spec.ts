@@ -2,14 +2,14 @@ import { fileURLToPath } from "node:url";
 import { expect, test } from "@playwright/test";
 
 for (const store of ["armor", "weapons"]) {
-	for (const width of [390, 1440]) {
+	for (const width of [1280, 1440]) {
 		for (const theme of ["Light", "Dark"]) {
 			test(`${store} store ${width}px ${theme}: compare, confirm, own and restore a finite plain copy`, async ({
 				page,
 			}, info) => {
 				await page.setViewportSize({
 					width,
-					height: width === 390 ? 740 : 900,
+					height: width === 1280 ? 800 : 900,
 				});
 				await page.goto("/");
 				await page

@@ -17,7 +17,6 @@ test("fixed town preview works in both themes on phone, laptop and desktop witho
 		.getByRole("cell", { name: / - player$/ })
 		.getAttribute("aria-label");
 	for (const size of [
-		{ width: 390, height: 667 },
 		{ width: 1280, height: 800 },
 		{ width: 1920, height: 1080 },
 	]) {

@@ -14,78 +14,39 @@ import {
 	type Room,
 } from "../domain/dungeon/Room.ts";
 import { createSeededRandom } from "../domain/dungeon/Seed.ts";
+import { rect } from "./testhelpers";
 
 describe("Room Tests", () => {
 	describe("createRoom tests", () => {
 		it("should create a room that fills a region when padding is zero", () => {
-			const testRegion: Region = {
-				startRow: 0,
-				endRow: 5,
-				startCol: 0,
-				endCol: 5,
-			};
+			const testRegion: Region = rect([0, 5, 0, 5]);
 
-			const expectedRoom: Room = {
-				startRow: 0,
-				endRow: 5,
-				startCol: 0,
-				endCol: 5,
-			};
+			const expectedRoom: Room = rect([0, 5, 0, 5]);
 
 			expect(createRoom(testRegion, 0)).toStrictEqual(expectedRoom);
 		});
 
 		it("should inset the room from every partition edge by the configured padding", () => {
-			const testRegion: Region = {
-				startRow: 0,
-				endRow: 9,
-				startCol: 0,
-				endCol: 12,
-			};
+			const testRegion: Region = rect([0, 9, 0, 12]);
 
-			const expectedRoomPadding1: Room = {
-				startRow: 1,
-				endRow: 8,
-				startCol: 1,
-				endCol: 11,
-			};
+			const expectedRoomPadding1: Room = rect([1, 8, 1, 11]);
 
-			const expectedRoomPadding3: Room = {
-				startRow: 3,
-				endRow: 6,
-				startCol: 3,
-				endCol: 9,
-			};
+			const expectedRoomPadding3: Room = rect([3, 6, 3, 9]);
 
 			expect(createRoom(testRegion, 1)).toStrictEqual(expectedRoomPadding1);
 			expect(createRoom(testRegion, 3)).toStrictEqual(expectedRoomPadding3);
 		});
 
 		it("should create a room within an offset region", () => {
-			const testRegion: Region = {
-				startRow: 3,
-				endRow: 9,
-				startCol: 2,
-				endCol: 12,
-			};
+			const testRegion: Region = rect([3, 9, 2, 12]);
 
-			const expectedRoomPadding1: Room = {
-				startRow: 4,
-				endRow: 8,
-				startCol: 3,
-				endCol: 11,
-			};
+			const expectedRoomPadding1: Room = rect([4, 8, 3, 11]);
 
 			expect(createRoom(testRegion, 1)).toStrictEqual(expectedRoomPadding1);
 		});
 
 		it("should throw RangeError when padding is negative or not a whole number", () => {
-			const testRegion: Region = {
-				startRow: 0,
-				endRow: 3,
-				startCol: 0,
-				endCol: 7,
-			};
+			const testRegion: Region = rect([0, 3, 0, 7]);
 
 			for (const invalidSize of [-1, 1.5]) {
 				expect(() => createRoom(testRegion, invalidSize)).toThrow(
@@ -95,12 +56,7 @@ describe("Room Tests", () => {
 		});
 
 		it("should throw RangeError when the region is too small for the configured padding", () => {
-			const testRegion: Region = {
-				startRow: 0,
-				endRow: 3,
-				startCol: 0,
-				endCol: 3,
-			};
+			const testRegion: Region = rect([0, 3, 0, 3]);
 
 			expect(() => createRoom(testRegion, 5)).toThrow(
 				new RangeError("region is too small for the configured padding"),
@@ -111,107 +67,53 @@ describe("Room Tests", () => {
 		});
 
 		it("should not modify the original region", () => {
-			const testRegion: Region = {
-				startRow: 3,
-				endRow: 9,
-				startCol: 2,
-				endCol: 12,
-			};
+			const testRegion: Region = rect([3, 9, 2, 12]);
 
-			const expectedRegion: Region = {
-				startRow: 3,
-				endRow: 9,
-				startCol: 2,
-				endCol: 12,
-			};
+			const expectedRegion: Region = rect([3, 9, 2, 12]);
 
-			const expectedRoomPadding1: Room = {
-				startRow: 4,
-				endRow: 8,
-				startCol: 3,
-				endCol: 11,
-			};
+			const expectedRoomPadding1: Room = rect([4, 8, 3, 11]);
 
 			expect(createRoom(testRegion, 1)).toStrictEqual(expectedRoomPadding1);
 			expect(expectedRegion).toStrictEqual(testRegion);
 		});
 
 		it("should create a one-by-one room from the smallest eligible region", () => {
-			const testRegion: Region = {
-				startRow: 0,
-				endRow: 2,
-				startCol: 0,
-				endCol: 2,
-			};
+			const testRegion: Region = rect([0, 2, 0, 2]);
 
-			const expectedRoomPadding1: Room = {
-				startRow: 1,
-				endRow: 1,
-				startCol: 1,
-				endCol: 1,
-			};
+			const expectedRoomPadding1: Room = rect([1, 1, 1, 1]);
 
 			expect(createRoom(testRegion, 1)).toStrictEqual(expectedRoomPadding1);
 		});
 
 		it("creates the smallest room at the padded origin when random choices are zero", () => {
-			const region: Region = {
-				startRow: 10,
-				endRow: 19,
-				startCol: 20,
-				endCol: 31,
-			};
+			const region: Region = rect([10, 19, 20, 31]);
 			const random = () => 0;
 
-			expect(createRoom(region, 1, random)).toStrictEqual({
-				startRow: 11,
-				endRow: 13,
-				startCol: 21,
-				endCol: 23,
-			});
+			expect(createRoom(region, 1, random)).toStrictEqual(
+				rect([11, 13, 21, 23]),
+			);
 		});
 
 		it("creates the largest room at the padded origin when random choices are 0.99", () => {
-			const region: Region = {
-				startRow: 10,
-				endRow: 19,
-				startCol: 20,
-				endCol: 31,
-			};
+			const region: Region = rect([10, 19, 20, 31]);
 			const random = () => 0.99;
 
-			expect(createRoom(region, 1, random)).toStrictEqual({
-				startRow: 11,
-				endRow: 18,
-				startCol: 21,
-				endCol: 30,
-			});
+			expect(createRoom(region, 1, random)).toStrictEqual(
+				rect([11, 18, 21, 30]),
+			);
 		});
 
 		it("creates an intermediate-sized room offset within the padded region", () => {
-			const region: Region = {
-				startRow: 10,
-				endRow: 19,
-				startCol: 20,
-				endCol: 31,
-			};
+			const region: Region = rect([10, 19, 20, 31]);
 			const random = () => 0.5;
 
-			expect(createRoom(region, 1, random)).toStrictEqual({
-				startRow: 12,
-				endRow: 17,
-				startCol: 23,
-				endCol: 29,
-			});
+			expect(createRoom(region, 1, random)).toStrictEqual(
+				rect([12, 17, 23, 29]),
+			);
 		});
 
 		it("places the smallest room at the bottom-right of the padded region", () => {
-			const region: Region = {
-				startRow: 10,
-				endRow: 19,
-				startCol: 20,
-				endCol: 31,
-			};
+			const region: Region = rect([10, 19, 20, 31]);
 			const random = vi
 				.fn()
 				.mockReturnValueOnce(0)
@@ -219,42 +121,26 @@ describe("Room Tests", () => {
 				.mockReturnValueOnce(0.99)
 				.mockReturnValueOnce(0.99);
 
-			expect(createRoom(region, 1, random)).toStrictEqual({
-				startRow: 16,
-				endRow: 18,
-				startCol: 28,
-				endCol: 30,
-			});
+			expect(createRoom(region, 1, random)).toStrictEqual(
+				rect([16, 18, 28, 30]),
+			);
 		});
 
 		it.each([0, 0.5, 0.99])(
 			"creates the only valid room when random returns %s",
 			(value) => {
-				const region: Region = {
-					startRow: 10,
-					endRow: 12,
-					startCol: 20,
-					endCol: 22,
-				};
+				const region: Region = rect([10, 12, 20, 22]);
 
-				expect(createRoom(region, 1, () => value)).toStrictEqual({
-					startRow: 11,
-					endRow: 11,
-					startCol: 21,
-					endCol: 21,
-				});
+				expect(createRoom(region, 1, () => value)).toStrictEqual(
+					rect([11, 11, 21, 21]),
+				);
 			},
 		);
 
 		it.each([0, 0.25, 0.5, 0.75, 0.99])(
 			"creates a nonempty integer room within the padded bounds when random returns %s",
 			(value) => {
-				const region: Region = {
-					startRow: 10,
-					endRow: 19,
-					startCol: 20,
-					endCol: 31,
-				};
+				const region: Region = rect([10, 19, 20, 31]);
 
 				const room = createRoom(region, 1, () => value);
 
@@ -275,24 +161,14 @@ describe("Room Tests", () => {
 		it.each([0, 0.5, 0.99])(
 			"rejects a region too small for padding when random returns %s",
 			(value) => {
-				const region: Region = {
-					startRow: 10,
-					endRow: 11,
-					startCol: 20,
-					endCol: 23,
-				};
+				const region: Region = rect([10, 11, 20, 23]);
 
 				expect(() => createRoom(region, 1, () => value)).toThrow(RangeError);
 			},
 		);
 
 		it("does not modify the region when creating a varied room", () => {
-			const region: Region = {
-				startRow: 10,
-				endRow: 19,
-				startCol: 20,
-				endCol: 31,
-			};
+			const region: Region = rect([10, 19, 20, 31]);
 			const original = { ...region };
 
 			createRoom(region, 1, () => 0.5);
@@ -301,12 +177,7 @@ describe("Room Tests", () => {
 		});
 
 		it("creates identical room geometry from the same seed", () => {
-			const region: Region = {
-				startRow: 10,
-				endRow: 19,
-				startCol: 20,
-				endCol: 31,
-			};
+			const region: Region = rect([10, 19, 20, 31]);
 
 			const first = createRoom(region, 1, createSeededRandom(123));
 			const second = createRoom(region, 1, createSeededRandom(123));
@@ -315,12 +186,7 @@ describe("Room Tests", () => {
 		});
 
 		it("can create different room geometry across seeds", () => {
-			const region: Region = {
-				startRow: 10,
-				endRow: 19,
-				startCol: 20,
-				endCol: 31,
-			};
+			const region: Region = rect([10, 19, 20, 31]);
 
 			const rooms = Array.from({ length: 20 }, (_, seed) =>
 				createRoom(region, 1, createSeededRandom(seed)),
@@ -333,19 +199,9 @@ describe("Room Tests", () => {
 
 	describe("assignRoomsToPartition tests", () => {
 		it("should add a room to a terminal partition using the configured padding", () => {
-			const terminalRegion: Region = {
-				startRow: 0,
-				endRow: 5,
-				startCol: 0,
-				endCol: 5,
-			};
+			const terminalRegion: Region = rect([0, 5, 0, 5]);
 
-			const expectedRoom: Room = {
-				startRow: 2,
-				endRow: 3,
-				startCol: 2,
-				endCol: 3,
-			};
+			const expectedRoom: Room = rect([2, 3, 2, 3]);
 
 			const minChildSize = 4;
 
@@ -362,12 +218,7 @@ describe("Room Tests", () => {
 		});
 
 		it("should not add a room to an internal partition", () => {
-			const tallRegion: Region = {
-				startRow: 0,
-				endRow: 7,
-				startCol: 0,
-				endCol: 3,
-			};
+			const tallRegion: Region = rect([0, 7, 0, 3]);
 
 			const partitionTree = recursivePartition(tallRegion, 4);
 			const partitionWithRooms = assignRoomsToPartition(partitionTree, 1);
@@ -376,12 +227,7 @@ describe("Room Tests", () => {
 		});
 
 		it("should recursively add rooms to a partition tree through multiple levels", () => {
-			const rootRegion: Region = {
-				startRow: 0,
-				endRow: 7,
-				startCol: 0,
-				endCol: 7,
-			};
+			const rootRegion: Region = rect([0, 7, 0, 7]);
 
 			const partitionTree = recursivePartition(rootRegion, 4);
 			const partitionWithRooms = assignRoomsToPartition(partitionTree, 1);
@@ -390,40 +236,15 @@ describe("Room Tests", () => {
 
 			expect(terminalRooms).toHaveLength(4);
 			expect(terminalRooms).toStrictEqual([
-				{
-					startRow: 1,
-					endRow: 2,
-					startCol: 1,
-					endCol: 2,
-				},
-				{
-					startRow: 5,
-					endRow: 6,
-					startCol: 1,
-					endCol: 2,
-				},
-				{
-					startRow: 1,
-					endRow: 2,
-					startCol: 5,
-					endCol: 6,
-				},
-				{
-					startRow: 5,
-					endRow: 6,
-					startCol: 5,
-					endCol: 6,
-				},
+				rect([1, 2, 1, 2]),
+				rect([5, 6, 1, 2]),
+				rect([1, 2, 5, 6]),
+				rect([5, 6, 5, 6]),
 			]);
 		});
 
 		it("should not modify the original partition tree", () => {
-			const rootRegion: Region = {
-				startRow: 0,
-				endRow: 7,
-				startCol: 0,
-				endCol: 7,
-			};
+			const rootRegion: Region = rect([0, 7, 0, 7]);
 
 			const partitionTree = recursivePartition(rootRegion, 4);
 			const originalPartitionTree = structuredClone(partitionTree);
@@ -441,12 +262,7 @@ describe("Room Tests", () => {
 		});
 
 		it("should throw RangeError when a terminal partition is too small for the configured padding", () => {
-			const smallRegion: Region = {
-				startRow: 0,
-				endRow: 1,
-				startCol: 0,
-				endCol: 1,
-			};
+			const smallRegion: Region = rect([0, 1, 0, 1]);
 
 			const partitionTree = recursivePartition(smallRegion, 2);
 
@@ -457,28 +273,13 @@ describe("Room Tests", () => {
 
 		it("assigns minimum-sized rooms to every terminal partition using the supplied random source", () => {
 			const partition: PartitionNode = {
-				region: {
-					startRow: 0,
-					endRow: 4,
-					startCol: 0,
-					endCol: 9,
-				},
+				region: rect([0, 4, 0, 9]),
 				children: [
 					{
-						region: {
-							startRow: 0,
-							endRow: 4,
-							startCol: 0,
-							endCol: 4,
-						},
+						region: rect([0, 4, 0, 4]),
 					},
 					{
-						region: {
-							startRow: 0,
-							endRow: 4,
-							startCol: 5,
-							endCol: 9,
-						},
+						region: rect([0, 4, 5, 9]),
 					},
 				],
 			};
@@ -497,18 +298,8 @@ describe("Room Tests", () => {
 			const result = assignRoomsToPartition(partition, 1, random);
 
 			expect(getTerminalRooms(result)).toStrictEqual([
-				{
-					startRow: 1,
-					endRow: 3,
-					startCol: 1,
-					endCol: 3,
-				},
-				{
-					startRow: 1,
-					endRow: 3,
-					startCol: 6,
-					endCol: 8,
-				},
+				rect([1, 3, 1, 3]),
+				rect([1, 3, 6, 8]),
 			]);
 			expect(partition).toStrictEqual(original);
 		});
@@ -516,18 +307,8 @@ describe("Room Tests", () => {
 
 	describe("getRepresentativeRoom tests", () => {
 		it("should return the room attached to a terminal partition", () => {
-			const region: Region = {
-				startRow: 0,
-				endRow: 3,
-				startCol: 0,
-				endCol: 3,
-			};
-			const room: Room = {
-				startRow: 1,
-				endRow: 2,
-				startCol: 1,
-				endCol: 2,
-			};
+			const region: Region = rect([0, 3, 0, 3]);
+			const room: Room = rect([1, 2, 1, 2]);
 
 			const partition: PartitionNode = {
 				region: region,
@@ -540,40 +321,15 @@ describe("Room Tests", () => {
 		});
 
 		it("should select the representative room from the first child subtree", () => {
-			const regionRoot: Region = {
-				startRow: 0,
-				endRow: 5,
-				startCol: 0,
-				endCol: 5,
-			};
+			const regionRoot: Region = rect([0, 5, 0, 5]);
 
-			const region1: Region = {
-				startRow: 0,
-				endRow: 5,
-				startCol: 0,
-				endCol: 2,
-			};
+			const region1: Region = rect([0, 5, 0, 2]);
 
-			const region2: Region = {
-				startRow: 0,
-				endRow: 5,
-				startCol: 3,
-				endCol: 5,
-			};
+			const region2: Region = rect([0, 5, 3, 5]);
 
-			const room1: Room = {
-				startRow: 1,
-				endRow: 4,
-				startCol: 1,
-				endCol: 1,
-			};
+			const room1: Room = rect([1, 4, 1, 1]);
 
-			const room2: Room = {
-				startRow: 1,
-				endRow: 4,
-				startCol: 4,
-				endCol: 4,
-			};
+			const room2: Room = rect([1, 4, 4, 4]);
 
 			const child1: PartitionNode = {
 				region: region1,
@@ -594,12 +350,7 @@ describe("Room Tests", () => {
 		});
 
 		it("should throw Error when the selected terminal partition has no room", () => {
-			const regionRoot: Region = {
-				startRow: 0,
-				endRow: 5,
-				startCol: 0,
-				endCol: 5,
-			};
+			const regionRoot: Region = rect([0, 5, 0, 5]);
 
 			const partitionRoot: PartitionNode = {
 				region: regionRoot,
@@ -611,12 +362,7 @@ describe("Room Tests", () => {
 		});
 
 		it("should select a representative room through multiple partition levels", () => {
-			const region: Region = {
-				startRow: 0,
-				endRow: 7,
-				startCol: 0,
-				endCol: 7,
-			};
+			const region: Region = rect([0, 7, 0, 7]);
 
 			const partition = assignRoomsToPartition(
 				recursivePartition(region, 2),
@@ -630,12 +376,7 @@ describe("Room Tests", () => {
 		});
 
 		it("should not modify the partition tree when selecting a representative room", () => {
-			const region: Region = {
-				startRow: 0,
-				endRow: 7,
-				startCol: 0,
-				endCol: 7,
-			};
+			const region: Region = rect([0, 7, 0, 7]);
 
 			const partition = assignRoomsToPartition(
 				recursivePartition(region, 2),

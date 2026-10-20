@@ -1,27 +1,13 @@
-import { fileURLToPath } from "node:url";
-import { expect, type Page, test } from "@playwright/test";
+import { expect, test } from "@playwright/test";
+import { importAdventure } from "./adventure-helpers.js";
 
-const importAdventure = async (page: Page, name: string) => {
-	await page.goto("/");
-	await page
-		.getByRole("button", { name: "Load an existing save", exact: true })
-		.click();
-	await page
-		.getByLabel("Import adventure file")
-		.setInputFiles(
-			fileURLToPath(new URL(`.generated/${name}.json`, import.meta.url)),
-		);
-	await expect(
-		page.getByRole("dialog", { name: "Load adventure", exact: true }),
-	).toHaveCount(0);
-	await expect(page.getByLabel(/^(Town|Dungeon) map$/)).toBeFocused();
-};
-for (const width of [390, 1440])
+for (const width of [1280, 1440])
 	for (const theme of ["Light", "Dark"]) {
 		test(`permanent potion gains ${width}px ${theme}: stack, save and retain without refilling`, async ({
 			page,
 		}, info) => {
-			await page.setViewportSize({ width, height: width === 390 ? 740 : 900 });
+			await page.setViewportSize({ width, height: width === 1280 ? 800 : 900 });
+			await page.goto("/");
 			await importAdventure(page, "permanent-potions");
 			const map = page.getByLabel("Dungeon map", { exact: true });
 			await page.getByRole("button", { name: "Settings", exact: true }).click();
@@ -92,6 +78,7 @@ for (const width of [390, 1440])
 test("town stat potions cost 1,500 gold and buying grants a bottle rather than an immediate stat gain", async ({
 	page,
 }) => {
+	await page.goto("/");
 	await importAdventure(page, "town-permanent-potions");
 	await page.keyboard.press("e");
 	const store = page.getByRole("dialog", {
