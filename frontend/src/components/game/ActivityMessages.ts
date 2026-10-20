@@ -107,7 +107,7 @@ export const formatActivityEvent = (event: ActivityEvent): string => {
 		case "player-missed":
 			return `${prefix}You miss the ${MONSTER_DEFINITIONS[event.monster].name}.`;
 		case "sanctuary-treated":
-			return `${prefix}Sanctuary treatment costs ${event.gold} gold: restores ${event.health} HP${event.conditions.length ? `; removes ${event.conditions.join(" and ")}` : ""}. Mana unchanged.`;
+			return `${prefix}Sanctuary treatment costs ${event.gold} gold: restores ${event.health} HP${event.conditions.length ? `; removes ${event.conditions.map((c) => (c === "poisoned" ? "poison" : AFFLICTION_DEFINITIONS[c as keyof typeof AFFLICTION_DEFINITIONS].name)).join(" and ")}` : ""}. Mana unchanged.`;
 		case "affliction-changed": {
 			const definition = AFFLICTION_DEFINITIONS[event.condition];
 			if (event.change === "expired")

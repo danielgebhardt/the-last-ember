@@ -15,6 +15,7 @@ import { Button } from "../ui/button";
 const CONDITION_NAMES: Record<string, string> = {
 	poisoned: "poison",
 	disease: "Disease",
+	slowed: "Slowed",
 };
 const quoteDetails = (quote: SanctuaryQuote) =>
 	`${quote.health ? `Restore ${quote.health} HP` : "Restore no HP"}; maximum HP ${quote.maximumHealth}. ${quote.conditions.length ? `Remove ${quote.conditions.map((c) => CONDITION_NAMES[c] ?? c).join(" and ")}. ` : ""}Mana is unchanged. ${quote.cost} gold.`;

@@ -1,11 +1,17 @@
 import { appendActivityEvents } from "../game/ActivityHistory";
-import { removeDisease } from "../game/Disease";
+import type { AfflictionKind } from "../game/AfflictionDefinitions";
+import { removePlayerAfflictions } from "../game/Afflictions";
 import type { GameState } from "../game/GameState";
 import { maximumHealth } from "../game/PlayerHealth";
 import { TOWN } from "./TownDefinition";
 import { isTownLocation } from "./TownLocation";
 
-export type SanctuaryService = "health" | "poison" | "disease" | "cleanse";
+export type SanctuaryService =
+	| "health"
+	| "poison"
+	| "disease"
+	| "slowed"
+	| "cleanse";
 export type SanctuaryQuote = Readonly<{
 	service: SanctuaryService;
 	cost: number;
@@ -21,13 +27,22 @@ export const SANCTUARY_SERVICE_NAMES: Record<SanctuaryService, string> = {
 	health: "Restore health",
 	poison: "Cure poison",
 	disease: "Cure Disease",
+	slowed: "Cure Slowed",
 	cleanse: "Complete cleanse",
 };
-export const SANCTUARY_CONDITION_FEES = { poisoned: 40, disease: 150 } as const;
+export const SANCTUARY_CONDITION_FEES = {
+	poisoned: 40,
+	disease: 150,
+	slowed: 50,
+} as const;
+type SanctuaryCondition = keyof typeof SANCTUARY_CONDITION_FEES;
+const SERVICE_CONDITION: Partial<Record<SanctuaryService, SanctuaryCondition>> =
+	{ poison: "poisoned", disease: "disease", slowed: "slowed" };
 export const SANCTUARY_SERVICES: readonly SanctuaryService[] = [
 	"health",
 	"poison",
 	"disease",
+	"slowed",
 	"cleanse",
 ];
 export const canReachSanctuary = (state: GameState): boolean => {
@@ -54,20 +69,21 @@ export const sanctuaryQuote = (
 			conditions: [],
 		};
 	}
-	const active: (keyof typeof SANCTUARY_CONDITION_FEES)[] = [
-		...(state.effects.some(
-			(e) => e.actorId === "player" && e.kind === "poisoned",
-		)
-			? (["poisoned"] as const)
-			: []),
-		...(state.afflictions?.some((a) => a.kind === "disease")
-			? (["disease"] as const)
-			: []),
-	];
+	// Stable fee order keeps quotes comparable across confirmations.
+	const active = (
+		Object.keys(SANCTUARY_CONDITION_FEES) as SanctuaryCondition[]
+	).filter((c) =>
+		c === "poisoned"
+			? state.effects.some(
+					(e) => e.actorId === "player" && e.kind === "poisoned",
+				)
+			: state.afflictions?.some((a) => a.kind === c),
+	);
 	const conditions = active.filter(
-		(c) =>
-			service === "cleanse" ||
-			(service === "poison" ? c === "poisoned" : c === "disease"),
+		(c) => service === "cleanse" || SERVICE_CONDITION[service] === c,
+	);
+	const remaining = (state.afflictions ?? []).filter(
+		(a) => !(conditions as readonly string[]).includes(a.kind),
 	);
 	const cost = conditions.reduce(
 		(sum, c) => sum + SANCTUARY_CONDITION_FEES[c],
@@ -77,9 +93,7 @@ export const sanctuaryQuote = (
 		service,
 		cost: Math.min(600, cost),
 		health: 0,
-		maximumHealth: conditions.includes("disease")
-			? maximumHealth(state.progression, state.equipment, [])
-			: state.player.maxHealth,
+		maximumHealth: maximumHealth(state.progression, state.equipment, remaining),
 		conditions,
 	};
 };
@@ -117,9 +131,11 @@ export const treatAtSanctuary = (state: GameState, action: SanctuaryAction) => {
 	if (!quote.cost) return reject("No treatment is needed.");
 	if (!Number.isSafeInteger(state.gold) || state.gold < quote.cost)
 		return reject("You do not have enough gold.");
-	let treated = quote.conditions.includes("disease")
-		? removeDisease(state, "Sanctuary")
-		: state;
+	let treated = removePlayerAfflictions(
+		state,
+		quote.conditions.filter((c): c is AfflictionKind => c !== "poisoned"),
+		"Sanctuary",
+	);
 	if (quote.conditions.includes("poisoned"))
 		treated = {
 			...treated,

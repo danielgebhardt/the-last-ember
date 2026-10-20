@@ -154,10 +154,10 @@ const eventFields = {
 	"merchant-bought": { item: itemKind, gold: integer(1) },
 	"merchant-sold": { item: itemKind, gold: integer(1) },
 	"sanctuary-treated": {
-		service: oneOf(["health", "poison", "disease", "cleanse"]),
+		service: oneOf(["health", "poison", "disease", "slowed", "cleanse"]),
 		gold: integer(1, 600),
 		health: natural,
-		conditions: array(oneOf(["poisoned", "disease"]), 0, 2),
+		conditions: array(oneOf(["poisoned", "disease", "slowed"]), 0, 3),
 	},
 	"affliction-changed": {
 		condition: oneOf(Object.keys(AFFLICTION_DEFINITIONS)),
