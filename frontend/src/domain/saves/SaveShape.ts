@@ -22,6 +22,7 @@ import { isEnchantableKind, MAX_ENCHANTMENT } from "../items/ItemValues";
 import { isMerchantStock } from "../merchant/MerchantRules";
 import { MONSTER_DEFINITIONS } from "../monsters/Monster";
 import { OBJECT_DEFINITIONS } from "../objects/DungeonObject";
+import { SANCTUARY_CONDITIONS, SANCTUARY_SERVICES } from "../town/Sanctuary";
 import { isTownPotionStock } from "../town/TownEconomy";
 import { isTownEquipmentStock } from "../town/TownEquipmentStock";
 import { isTownLocation } from "../town/TownLocation";
@@ -175,22 +176,13 @@ const eventFields = {
 	"merchant-bought": { item: itemKind, gold: integer(1) },
 	"merchant-sold": { item: itemKind, gold: integer(1) },
 	"sanctuary-treated": {
-		service: oneOf([
-			"health",
-			"poison",
-			"disease",
-			"slowed",
-			"mana-burn",
-			"curse",
-			"cleanse",
-		]),
+		service: oneOf(SANCTUARY_SERVICES),
 		gold: integer(1, 600),
 		health: natural,
-		// At most two afflictions plus poison.
 		conditions: array(
-			oneOf(["poisoned", "disease", "slowed", "mana-burn", "curse"]),
+			oneOf(SANCTUARY_CONDITIONS),
 			0,
-			3,
+			SANCTUARY_CONDITIONS.length,
 		),
 	},
 	"affliction-changed": {

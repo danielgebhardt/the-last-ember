@@ -1,7 +1,11 @@
 import { Droplets, Heart, Shield, Sparkles, Sword } from "lucide-react";
 import {
 	type ActiveAffliction,
+	AFFLICTION_DEFINITIONS,
+	type AfflictionModifier,
 	afflictedMeleeAttack,
+	afflictionModifiers,
+	afflictionNamesWith,
 } from "../../domain/game/AfflictionDefinitions";
 import {
 	armorContributions,
@@ -51,8 +55,11 @@ const CharacterStats = ({
 		effects,
 		equipment,
 	).playerHitChance;
-	const cursed = afflictions.some((a) => a.kind === "curse");
-	const manaBurn = afflictions.find((a) => a.kind === "mana-burn");
+	const by = (modifier: AfflictionModifier) =>
+		afflictionNamesWith(afflictions, modifier);
+	const manaBlock = afflictions.find(
+		(a) => afflictionModifiers(a.kind).suppressesManaRecovery,
+	);
 	const card = "min-w-0 rounded-lg border border-border bg-card/60 p-3";
 	const value = "mt-1 text-lg font-semibold leading-tight tabular-nums";
 	const hint = "mt-1 text-xs leading-relaxed text-muted-foreground";
@@ -72,8 +79,8 @@ const CharacterStats = ({
 					/>
 					<p className={hint}>
 						Current / maximum
-						{afflictions.some((a) => a.kind === "disease") &&
-							` · Disease −${normalMaxHealth - player.maxHealth} until cured (normal ${normalMaxHealth})`}
+						{by("maximumHealthMultiplier") &&
+							` · ${by("maximumHealthMultiplier")} −${normalMaxHealth - player.maxHealth} (normal ${normalMaxHealth})`}
 					</p>
 				</div>
 				<div className={card}>
@@ -96,8 +103,8 @@ const CharacterStats = ({
 					</div>
 					<p className={hint}>
 						Current / maximum
-						{manaBurn &&
-							` · Mana Burn: no passive recovery for ${manaBurn.remaining} ${manaBurn.remaining === 1 ? "phase" : "phases"}`}
+						{manaBlock &&
+							` · ${AFFLICTION_DEFINITIONS[manaBlock.kind].name}: no passive recovery${manaBlock.remaining === null ? "" : ` for ${manaBlock.remaining} ${manaBlock.remaining === 1 ? "phase" : "phases"}`}`}
 					</p>
 				</div>
 				<div className={card}>
@@ -112,7 +119,7 @@ const CharacterStats = ({
 					<p className={hint}>
 						Base {combat.baseAttack} + Strength {combat.strengthBonus} + weapon{" "}
 						{combat.weaponBonus}
-						{cursed && " · Curse −1"}
+						{by("meleeDamage") && ` · ${by("meleeDamage")} −1`}
 					</p>
 					<output
 						aria-label="Character hit chance"
@@ -120,7 +127,7 @@ const CharacterStats = ({
 					>
 						Hit {accuracy.playerHitChance}%
 						{normalHit !== accuracy.playerHitChance &&
-							` (Curse −${normalHit - accuracy.playerHitChance})`}
+							` (${by("accuracy")} −${normalHit - accuracy.playerHitChance})`}
 					</output>
 				</div>
 				<div className={card}>
@@ -147,7 +154,7 @@ const CharacterStats = ({
 					>
 						Evade {accuracy.evadeChance}%
 						{normalEvade !== accuracy.evadeChance &&
-							` (Slowed −${normalEvade - accuracy.evadeChance})`}
+							` (${by("evasion")} −${normalEvade - accuracy.evadeChance})`}
 					</output>
 				</div>
 				<div className={card}>

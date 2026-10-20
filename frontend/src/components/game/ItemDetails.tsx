@@ -1,5 +1,9 @@
 import { useId } from "react";
 import { Button } from "@/components/ui/button";
+import {
+	AFFLICTION_DEFINITIONS,
+	type AfflictionKind,
+} from "../../domain/game/AfflictionDefinitions";
 import type { PlayerAction } from "../../domain/game/PlayerActions";
 import type { Bag } from "../../domain/items/Bag";
 import {
@@ -37,6 +41,10 @@ const labels = {
 	"chest-armor": "Chest armor",
 	helmet: "Helmet",
 };
+
+// Remedies name exactly what they cure, from the affliction definitions.
+const remedyStat = (kinds: readonly AfflictionKind[]) =>
+	`Removes ${kinds.map((kind) => AFFLICTION_DEFINITIONS[kind].name).join(" and ")} · one use, one turn`;
 
 const ItemDetails = ({
 	item,
@@ -77,9 +85,7 @@ const ItemDetails = ({
 	const primaryStat =
 		details.type === "potion"
 			? "removesAfflictions" in details
-				? (details.removesAfflictions as readonly string[]).includes("disease")
-					? "Removes Disease · restores capacity without healing"
-					: "Removes Slowed and Mana Burn · restores evasion and mana recovery"
+				? remedyStat(details.removesAfflictions)
 				: "cleanses" in details
 					? "Removes poison"
 					: "permanentAttribute" in details
@@ -87,7 +93,7 @@ const ItemDetails = ({
 						: `Recovery up to ${details.recovery.amount} ${details.recovery.resource}`
 			: details.type === "scroll"
 				? "removesAfflictions" in details
-					? "Removes Curse · restores melee accuracy and damage"
+					? remedyStat(details.removesAfflictions)
 					: "Return to town · costs one scroll and one turn"
 				: details.type === "enchantment"
 					? "Guaranteed +1 · maximum +3 per item"

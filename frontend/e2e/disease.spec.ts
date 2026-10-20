@@ -49,7 +49,7 @@ for (const width of [390, 1440])
 		await disease(page).focus();
 		await page.keyboard.press("Enter");
 		const details = page.getByRole("dialog", { name: /Disease/ });
-		await expect(details).toContainText("Maximum HP 10 → 8 (−2) until cured.");
+		await expect(details).toContainText("Maximum HP 10 → 8 (−2).");
 		await expect(details).toContainText("sanctuary Cure Disease (150 gold)");
 		await page.keyboard.press("Escape");
 		await expect(details).toBeHidden();
@@ -164,7 +164,7 @@ test("Plague Rat loop: contract Disease, read guidance, cure, then save/load and
 	).toContainText("Disease applied (plague rat)");
 	await disease(page).click();
 	await expect(page.getByRole("dialog", { name: /Disease/ })).toContainText(
-		"Maximum HP 10 → 8 (−2) until cured.",
+		"Maximum HP 10 → 8 (−2).",
 	);
 	await page.keyboard.press("Escape");
 	await map(page).click();
@@ -215,7 +215,7 @@ test("Spider web loop: see the marked tile, get Slowed, read guidance and drink 
 	await expect(slowed).toBeVisible();
 	await slowed.click();
 	await expect(page.getByRole("dialog", { name: /Slowed/ })).toContainText(
-		"Evade 20% → 10% (−10) while it lasts.",
+		"Evade 20% → 10% (−10).",
 	);
 	await page.keyboard.press("Escape");
 	await map(page).click();

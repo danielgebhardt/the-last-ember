@@ -25,7 +25,7 @@ it("explains the current Disease capacity penalty against normal maximum HP", ()
 		/>,
 	);
 	expect(screen.getByLabelText("Character stats")).toHaveTextContent(
-		`Disease −${normal - reduced} until cured (normal ${normal})`,
+		`Disease −${normal - reduced} (normal ${normal})`,
 	);
 	view.rerender(
 		<CharacterStats

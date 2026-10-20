@@ -8,19 +8,13 @@ import {
 	type SanctuaryAction,
 	type SanctuaryQuote,
 	sameSanctuaryQuote,
+	sanctuaryConditionName,
 	sanctuaryQuote,
 } from "../../domain/town/Sanctuary";
 import { Button } from "../ui/button";
 
-const CONDITION_NAMES: Record<string, string> = {
-	poisoned: "poison",
-	disease: "Disease",
-	slowed: "Slowed",
-	"mana-burn": "Mana Burn",
-	curse: "Curse",
-};
 const quoteDetails = (quote: SanctuaryQuote) =>
-	`${quote.health ? `Restore ${quote.health} HP` : "Restore no HP"}; maximum HP ${quote.maximumHealth}. ${quote.conditions.length ? `Remove ${quote.conditions.map((c) => CONDITION_NAMES[c] ?? c).join(" and ")}. ` : ""}Mana is unchanged. ${quote.cost} gold.`;
+	`${quote.health ? `Restore ${quote.health} HP` : "Restore no HP"}; maximum HP ${quote.maximumHealth}. ${quote.conditions.length ? `Remove ${quote.conditions.map((c) => sanctuaryConditionName(c)).join(" and ")}. ` : ""}Mana is unchanged. ${quote.cost} gold.`;
 // One compact line per service; the confirmation keeps the full quote wording.
 const rowDetails = (
 	quote: SanctuaryQuote,
@@ -35,7 +29,7 @@ const rowDetails = (
 		quote.maximumHealth !== player.maxHealth
 			? ` · max HP ${player.maxHealth} → ${quote.maximumHealth}`
 			: "";
-	return `Removes ${quote.conditions.map((c) => CONDITION_NAMES[c] ?? c).join(" and ")}${capacity}`;
+	return `Removes ${quote.conditions.map((c) => sanctuaryConditionName(c)).join(" and ")}${capacity}`;
 };
 const SanctuaryDialog = ({
 	open,

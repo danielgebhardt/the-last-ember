@@ -4,6 +4,7 @@ import type { EquipmentChangeEvent } from "../items/EquipmentChanges";
 import type { FloorItemEvent } from "../items/FloorItems";
 import type { ItemKind } from "../items/Item";
 import type { MonsterKind } from "../monsters/Monster.ts";
+import type { SanctuaryCondition, SanctuaryService } from "../town/Sanctuary";
 import type { AfflictionKind } from "./AfflictionDefinitions";
 import type { AreaElement, DamageElement } from "./DamageElements";
 import type { SpellKind } from "./Spells";
@@ -12,17 +13,10 @@ import type { EffectKind } from "./TimedEffects";
 export type ActivityEvent = { turn: number } & (
 	| {
 			type: "sanctuary-treated";
-			service:
-				| "health"
-				| "poison"
-				| "disease"
-				| "slowed"
-				| "mana-burn"
-				| "curse"
-				| "cleanse";
+			service: SanctuaryService;
 			gold: number;
 			health: number;
-			conditions: readonly string[];
+			conditions: readonly SanctuaryCondition[];
 	  }
 	| {
 			type: "affliction-changed";

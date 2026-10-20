@@ -15,7 +15,14 @@ import {
 	SheetDescription,
 	SheetTitle,
 } from "@/components/ui/sheet";
-import { AFFLICTION_DEFINITIONS } from "../../domain/game/AfflictionDefinitions";
+import {
+	AFFLICTION_DEFINITIONS,
+	type AfflictionKind,
+} from "../../domain/game/AfflictionDefinitions";
+import {
+	afflictionDetails,
+	afflictionFacts,
+} from "../../domain/game/AfflictionText";
 import { SPELL_DEFINITIONS, type SpellKind } from "../../domain/game/Spells";
 import { EFFECT_DEFINITIONS } from "../../domain/game/TimedEffects";
 import {
@@ -49,12 +56,8 @@ import TownPreview from "../town/TownPreview";
 import { SPELL_ICONS, spellIconColor } from "./SpellVisuals";
 import {
 	AFFLICTION_VISUALS,
-	curseDetails,
-	diseaseDetails,
-	manaBurnDetails,
 	STATUS_VISUALS,
 	type StatusVisual,
-	slowedDetails,
 } from "./StatusEffectIcons";
 
 const Preview = ({ icon }: { icon: ReactNode }) => (
@@ -110,39 +113,14 @@ const CATALOG_CONDITIONS = [
 		facts: `Existing timed effect · 6 phases · ${EFFECT_DEFINITIONS.poisoned.playerDamage} damage after monsters each committed turn · Not in the two-affliction cap`,
 		cures: `Antidote potion (one turn) · Sanctuary ${SANCTUARY_CONDITION_FEES.poisoned} gold`,
 	},
-	{
-		kind: AFFLICTION_DEFINITIONS.disease.kind,
-		name: AFFLICTION_DEFINITIONS.disease.name,
-		visual: AFFLICTION_VISUALS.disease,
-		facts:
-			"Lingering affliction · Until cured · Effective max HP max(1, floor(normal × 0.8)) · No stacking · Counts toward the two-affliction cap",
-		cures: diseaseDetails(),
-	},
-	{
-		kind: AFFLICTION_DEFINITIONS.slowed.kind,
-		name: `${AFFLICTION_DEFINITIONS.slowed.name} (player)`,
-		visual: AFFLICTION_VISUALS.slowed,
-		facts:
-			"Temporary affliction · 10 phases including application · Evasion −10 points (minimum 5%) · Refreshes without stacking · Counts toward the two-affliction cap · Distinct from the 3-phase monster Slowed spell effect",
-		cures: slowedDetails(),
-	},
-	{
-		kind: AFFLICTION_DEFINITIONS["mana-burn"].kind,
-		name: AFFLICTION_DEFINITIONS["mana-burn"].name,
-		visual: AFFLICTION_VISUALS["mana-burn"],
-		facts:
-			"Temporary affliction · 90 phases including application · No passive mana recovery (exactly three 30-turn ticks lost) · No stored catch-up · Potions and spells unchanged · Refreshes without stacking · Counts toward the two-affliction cap",
-		cures: manaBurnDetails(),
-	},
-	{
-		kind: AFFLICTION_DEFINITIONS.curse.kind,
-		name: AFFLICTION_DEFINITIONS.curse.name,
-		visual: AFFLICTION_VISUALS.curse,
-		facts:
-			"Lingering affliction · Until cured · Melee to-hit −10 points and damage −1 (minimum 1) · Spells unaffected · No stacking · Counts toward the two-affliction cap",
-		cures: curseDetails(),
-	},
-] as const;
+	...(Object.keys(AFFLICTION_DEFINITIONS) as AfflictionKind[]).map((kind) => ({
+		kind,
+		name: AFFLICTION_DEFINITIONS[kind].name,
+		visual: AFFLICTION_VISUALS[kind],
+		facts: afflictionFacts(kind),
+		cures: afflictionDetails(kind),
+	})),
+];
 const Group = ({ name, children }: { name: string; children: ReactNode }) => (
 	<Tabs.Panel value={name} className="min-h-0 flex-1 overflow-y-auto">
 		<div className="grid gap-3">

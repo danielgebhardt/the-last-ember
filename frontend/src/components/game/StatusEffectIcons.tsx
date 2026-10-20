@@ -23,14 +23,16 @@ import {
 	AFFLICTION_DEFINITIONS,
 	type AfflictionKind,
 } from "../../domain/game/AfflictionDefinitions";
-import { MANA_RECOVERY_INTERVAL } from "../../domain/game/Mana";
+import {
+	type AfflictionImpact,
+	afflictionDetails,
+} from "../../domain/game/AfflictionText";
 import {
 	EFFECT_DEFINITIONS,
 	PLAYER_EFFECT_KINDS,
 	type PlayerEffectKind,
 	type TimedEffect,
 } from "../../domain/game/TimedEffects";
-import { SANCTUARY_CONDITION_FEES } from "../../domain/town/Sanctuary";
 
 export type StatusVisual = {
 	Icon: ComponentType<SVGProps<SVGSVGElement>>;
@@ -118,49 +120,6 @@ export const AFFLICTION_VISUALS: Record<AfflictionKind, StatusVisual> = {
 	},
 };
 
-// Exact current penalty when capacity is known; the definition remains the fallback guidance.
-export const diseaseDetails = (normalMaxHealth?: number, maxHealth?: number) =>
-	`${
-		normalMaxHealth !== undefined && maxHealth !== undefined
-			? `Maximum HP ${normalMaxHealth} → ${maxHealth} (−${normalMaxHealth - maxHealth}) until cured.`
-			: "Maximum HP reduced by 20%, rounded down (minimum 1), until cured."
-	} Cure with a Cure Disease potion (one turn) or sanctuary Cure Disease (${SANCTUARY_CONDITION_FEES.disease} gold). Curing restores maximum HP, not lost HP. Heal, Renewal, rest and ordinary potions do not cure it.`;
-
-export const slowedDetails = (normalEvade?: number, evade?: number) =>
-	`${
-		normalEvade !== undefined && evade !== undefined
-			? `Evade ${normalEvade}% → ${evade}% (−${normalEvade - evade}) while it lasts.`
-			: "Evasion reduced by 10 percentage points (minimum 5%) while it lasts."
-	} Lasts 10 committed phases including the one it lands; refreshing resets the duration without deepening it. Cure with a Cleansing potion (one turn) or sanctuary Cure Slowed (${SANCTUARY_CONDITION_FEES.slowed} gold). Your actions and turns are unchanged.`;
-
-export const curseDetails = (normalHit?: number, hit?: number) =>
-	`${
-		normalHit !== undefined && hit !== undefined && normalHit !== hit
-			? `Hit ${normalHit}% → ${hit}% (−${normalHit - hit}) and melee damage −1 (minimum 1)`
-			: "Melee to-hit −10 percentage points and melee damage −1 (minimum 1)"
-	} until cured. Spells, evasion and equipment are unaffected. Cure with a Remove Curse scroll (one turn) or sanctuary Cure Curse (${SANCTUARY_CONDITION_FEES.curse} gold). Healing, rest and Cleansing potions do not lift it.`;
-
-export const manaBurnDetails = () =>
-	`Passive mana recovery (1 mana every ${MANA_RECOVERY_INTERVAL} turns) stops while it lasts. Lasts 90 committed phases including the one it lands, so three recovery ticks are lost; refreshing resets the duration. Mana potions and affordable spells still work, and nothing is recovered afterward to make up for it. Cure with a Cleansing potion (one turn) or sanctuary Cure Mana Burn (${SANCTUARY_CONDITION_FEES["mana-burn"]} gold); curing restores no mana.`;
-
-type AfflictionContext = {
-	normalMaxHealth?: number;
-	maxHealth?: number;
-	normalEvade?: number;
-	evade?: number;
-	normalHit?: number;
-	hit?: number;
-};
-const AFFLICTION_DETAILS: Record<
-	AfflictionKind,
-	(context: AfflictionContext) => string
-> = {
-	disease: (c) => diseaseDetails(c.normalMaxHealth, c.maxHealth),
-	curse: (c) => curseDetails(c.normalHit, c.hit),
-	"mana-burn": manaBurnDetails,
-	slowed: (c) => slowedDetails(c.normalEvade, c.evade),
-};
-
 const triggerClassName =
 	"relative flex size-6 shrink-0 cursor-help lg:max-xl:size-5 items-center justify-center rounded border focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring";
 
@@ -207,14 +166,13 @@ const StatusIcon = ({
 const StatusEffectIcons = ({
 	effects,
 	afflictions = [],
-	normalMaxHealth,
-	maxHealth,
-	normalEvade,
-	evade,
+	impact,
 }: {
 	effects: readonly TimedEffect[];
 	afflictions?: readonly ActiveAffliction[];
-} & AfflictionContext) => {
+	// Normal versus effective stats, for exact penalties in each popover.
+	impact?: AfflictionImpact;
+}) => {
 	const playerEffects = effects.flatMap((effect) => {
 		if (effect.actorId !== "player" || effect.remaining <= 0) return [];
 
@@ -262,12 +220,7 @@ const StatusEffectIcons = ({
 					key={kind}
 					visual={AFFLICTION_VISUALS[kind]}
 					description={`${AFFLICTION_DEFINITIONS[kind].name} — ${remaining === null ? "until cured" : `${remaining} ${remaining === 1 ? "phase" : "phases"} remaining`}`}
-					details={AFFLICTION_DETAILS[kind]({
-						normalMaxHealth,
-						maxHealth,
-						normalEvade,
-						evade,
-					})}
+					details={afflictionDetails(kind, impact)}
 				/>
 			))}
 			{playerEffects.map(({ kind, remaining }) => {

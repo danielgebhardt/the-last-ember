@@ -92,8 +92,11 @@ it("shows Disease beside poison as until cured with the exact penalty and both c
 				},
 			]}
 			afflictions={[{ kind: "disease", remaining: null, source: "Plague Rat" }]}
-			normalMaxHealth={23}
-			maxHealth={18}
+			impact={{
+				maxHealth: { normal: 23, effective: 18 },
+				evade: { normal: 25, effective: 15 },
+				hit: { normal: 80, effective: 80 },
+			}}
 		/>,
 	);
 	expect(
@@ -102,10 +105,10 @@ it("shows Disease beside poison as until cured with the exact penalty and both c
 	const disease = screen.getByRole("button", { name: "Disease — until cured" });
 	await user.click(disease);
 	const details = await screen.findByRole("dialog");
-	expect(details).toHaveTextContent("Maximum HP 23 → 18 (−5) until cured.");
+	expect(details).toHaveTextContent("Maximum HP 23 → 18 (−5).");
 	expect(details).toHaveTextContent("Cure Disease potion (one turn)");
 	expect(details).toHaveTextContent("sanctuary Cure Disease (150 gold)");
-	expect(details).toHaveTextContent("not lost HP");
+	expect(details).toHaveTextContent("restores capacity, not HP");
 	view.rerender(<StatusEffectIcons effects={[]} afflictions={[]} />);
 	expect(screen.queryByRole("list")).not.toBeInTheDocument();
 });
@@ -119,8 +122,11 @@ it("shows Slowed's remaining phases, exact evasion change and both cures beside 
 				{ kind: "disease", remaining: null, source: "rat" },
 				{ kind: "slowed", remaining: 9, source: "web" },
 			]}
-			normalEvade={25}
-			evade={15}
+			impact={{
+				maxHealth: { normal: 23, effective: 18 },
+				evade: { normal: 25, effective: 15 },
+				hit: { normal: 80, effective: 80 },
+			}}
 		/>,
 	);
 	const icons = screen.getByRole("list", { name: "Active player conditions" });
@@ -129,7 +135,7 @@ it("shows Slowed's remaining phases, exact evasion change and both cures beside 
 		screen.getByRole("button", { name: "Slowed — 9 phases remaining" }),
 	);
 	const details = await screen.findByRole("dialog");
-	expect(details).toHaveTextContent("Evade 25% → 15% (−10) while it lasts.");
+	expect(details).toHaveTextContent("Evade 25% → 15% (−10).");
 	expect(details).toHaveTextContent("Cleansing potion (one turn)");
 	expect(details).toHaveTextContent("sanctuary Cure Slowed (50 gold)");
 });
@@ -146,7 +152,6 @@ it("shows Mana Burn's remaining phases, lost recovery and both cures", async () 
 		screen.getByRole("button", { name: "Mana Burn — 89 phases remaining" }),
 	);
 	const details = await screen.findByRole("dialog");
-	expect(details).toHaveTextContent("1 mana every 30 turns");
 	expect(details).toHaveTextContent("three recovery ticks are lost");
 	expect(details).toHaveTextContent(
 		"Mana potions and affordable spells still work",

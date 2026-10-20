@@ -18,6 +18,8 @@ const definition = (kind: string, temporary = false): AfflictionDefinition => ({
 	modifiers: {},
 	blocksRunning: temporary,
 	cure: "test remedy",
+	sanctuaryFee: 10,
+	summary: "test effect",
 	guidance: "Test treatment",
 	appliedText: "Test applied",
 	removedText: "Test removed",

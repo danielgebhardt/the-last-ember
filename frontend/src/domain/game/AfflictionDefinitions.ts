@@ -5,6 +5,8 @@ import type {
 export const AFFLICTION_DEFINITIONS = {
 	disease: {
 		kind: "disease",
+		sanctuaryFee: 150,
+		summary: "maximum HP −20% (minimum 1) until cured",
 		target: "player",
 		name: "Disease",
 		lifetime: { type: "until-cured" },
@@ -20,6 +22,8 @@ export const AFFLICTION_DEFINITIONS = {
 	},
 	slowed: {
 		kind: "slowed",
+		sanctuaryFee: 50,
+		summary: "evasion −10 points (minimum 5%) for 10 phases",
 		target: "player",
 		name: "Slowed",
 		lifetime: { type: "phases", duration: 10 },
@@ -35,6 +39,8 @@ export const AFFLICTION_DEFINITIONS = {
 	},
 	"mana-burn": {
 		kind: "mana-burn",
+		sanctuaryFee: 75,
+		summary: "no passive mana recovery for 90 phases (three lost ticks)",
 		target: "player",
 		name: "Mana Burn",
 		// 90 consecutive phases always contain exactly three 30-turn recovery ticks.
@@ -52,6 +58,8 @@ export const AFFLICTION_DEFINITIONS = {
 	},
 	curse: {
 		kind: "curse",
+		sanctuaryFee: 250,
+		summary: "melee to-hit −10 and damage −1 (minimum 1) until cured",
 		target: "player",
 		name: "Curse",
 		lifetime: { type: "until-cured" },
@@ -68,9 +76,19 @@ export const AFFLICTION_DEFINITIONS = {
 } as const satisfies Record<string, AfflictionDefinition>;
 export type AfflictionKind = keyof typeof AFFLICTION_DEFINITIONS;
 export type ActiveAffliction = PlayerAffliction<AfflictionKind>;
+export type AfflictionModifier = keyof AfflictionDefinition["modifiers"];
 export const afflictionModifiers = (
 	kind: AfflictionKind,
 ): AfflictionDefinition["modifiers"] => AFFLICTION_DEFINITIONS[kind].modifiers;
+// Names of active afflictions that change a stat, for effective-value notes.
+export const afflictionNamesWith = (
+	afflictions: readonly ActiveAffliction[],
+	modifier: AfflictionModifier,
+): string =>
+	afflictions
+		.filter((a) => afflictionModifiers(a.kind)[modifier] !== undefined)
+		.map((a) => AFFLICTION_DEFINITIONS[a.kind].name)
+		.join(", ");
 // Whole d20 threshold steps removed from player evasion by active afflictions.
 export const afflictionEvasionSteps = (
 	afflictions: readonly ActiveAffliction[] = [],

@@ -1,74 +1,75 @@
 import { appendActivityEvents } from "../game/ActivityHistory";
-import type { AfflictionKind } from "../game/AfflictionDefinitions";
+import {
+	AFFLICTION_DEFINITIONS,
+	type AfflictionKind,
+} from "../game/AfflictionDefinitions";
 import { removePlayerAfflictions } from "../game/Afflictions";
 import type { GameState } from "../game/GameState";
 import { maximumHealth } from "../game/PlayerHealth";
-import { TOWN } from "./TownDefinition";
-import { isTownLocation } from "./TownLocation";
+import { canReachOpenBuilding } from "./TownServices";
 
-export type SanctuaryService =
-	| "health"
-	| "poison"
-	| "disease"
-	| "slowed"
-	| "mana-burn"
-	| "curse"
-	| "cleanse";
+const AFFLICTION_KINDS = Object.keys(
+	AFFLICTION_DEFINITIONS,
+) as AfflictionKind[];
+export type SanctuaryCondition = "poisoned" | AfflictionKind;
+export type SanctuaryService = "health" | "poison" | AfflictionKind | "cleanse";
 export type SanctuaryQuote = Readonly<{
 	service: SanctuaryService;
 	cost: number;
 	health: number;
 	maximumHealth: number;
-	conditions: readonly string[];
+	conditions: readonly SanctuaryCondition[];
 }>;
 export type SanctuaryAction = {
 	type: "sanctuary-treatment";
 	quote: SanctuaryQuote;
 };
-export const SANCTUARY_SERVICE_NAMES: Record<SanctuaryService, string> = {
-	health: "Restore health",
-	poison: "Cure poison",
-	disease: "Cure Disease",
-	slowed: "Cure Slowed",
-	"mana-burn": "Cure Mana Burn",
-	curse: "Cure Curse",
-	cleanse: "Complete cleanse",
-};
-export const SANCTUARY_CONDITION_FEES = {
+// Fees and their stable order come from the affliction definitions.
+export const SANCTUARY_CONDITION_FEES: Readonly<
+	Record<SanctuaryCondition, number>
+> = {
 	poisoned: 40,
-	disease: 150,
-	slowed: 50,
-	"mana-burn": 75,
-	curse: 250,
-} as const;
-type SanctuaryCondition = keyof typeof SANCTUARY_CONDITION_FEES;
-const SERVICE_CONDITION: Partial<Record<SanctuaryService, SanctuaryCondition>> =
-	{
-		poison: "poisoned",
-		disease: "disease",
-		slowed: "slowed",
-		"mana-burn": "mana-burn",
-		curse: "curse",
-	};
+	...(Object.fromEntries(
+		AFFLICTION_KINDS.map((kind) => [
+			kind,
+			AFFLICTION_DEFINITIONS[kind].sanctuaryFee,
+		]),
+	) as Record<AfflictionKind, number>),
+};
+export const SANCTUARY_CONDITIONS = Object.keys(
+	SANCTUARY_CONDITION_FEES,
+) as SanctuaryCondition[];
+export const sanctuaryConditionName = (condition: SanctuaryCondition) =>
+	condition === "poisoned" ? "poison" : AFFLICTION_DEFINITIONS[condition].name;
+const serviceCondition = (
+	service: SanctuaryService,
+): SanctuaryCondition | undefined =>
+	service === "poison"
+		? "poisoned"
+		: service === "health" || service === "cleanse"
+			? undefined
+			: service;
 export const SANCTUARY_SERVICES: readonly SanctuaryService[] = [
 	"health",
 	"poison",
-	"disease",
-	"slowed",
-	"mana-burn",
-	"curse",
+	...AFFLICTION_KINDS,
 	"cleanse",
 ];
-export const canReachSanctuary = (state: GameState): boolean => {
-	const building = TOWN.buildings.find((b) => b.id === "sanctuary");
-	return (
-		building?.status === "open" &&
-		isTownLocation(state.town) &&
-		Math.abs(state.town.coordinate.row - building.entry.row) +
-			Math.abs(state.town.coordinate.col - building.entry.col) <=
-			1
-	);
-};
+export const SANCTUARY_SERVICE_NAMES = Object.fromEntries(
+	SANCTUARY_SERVICES.map((service) => {
+		const condition = serviceCondition(service);
+		return [
+			service,
+			service === "health"
+				? "Restore health"
+				: service === "cleanse"
+					? "Complete cleanse"
+					: `Cure ${condition ? sanctuaryConditionName(condition) : service}`,
+		];
+	}),
+) as Record<SanctuaryService, string>;
+export const canReachSanctuary = (state: GameState): boolean =>
+	canReachOpenBuilding(state, "sanctuary");
 export const sanctuaryQuote = (
 	state: GameState,
 	service: SanctuaryService,
@@ -84,9 +85,7 @@ export const sanctuaryQuote = (
 		};
 	}
 	// Stable fee order keeps quotes comparable across confirmations.
-	const active = (
-		Object.keys(SANCTUARY_CONDITION_FEES) as SanctuaryCondition[]
-	).filter((c) =>
+	const active = SANCTUARY_CONDITIONS.filter((c) =>
 		c === "poisoned"
 			? state.effects.some(
 					(e) => e.actorId === "player" && e.kind === "poisoned",
@@ -94,7 +93,7 @@ export const sanctuaryQuote = (
 			: state.afflictions.some((a) => a.kind === c),
 	);
 	const conditions = active.filter(
-		(c) => service === "cleanse" || SERVICE_CONDITION[service] === c,
+		(c) => service === "cleanse" || serviceCondition(service) === c,
 	);
 	const remaining = state.afflictions.filter(
 		(a) => !(conditions as readonly string[]).includes(a.kind),

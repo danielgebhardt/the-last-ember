@@ -17,6 +17,10 @@ export type AfflictionDefinition<K extends string = string> = Readonly<{
 	// Whether corridor running refuses to start while it lasts; onset always stops a run.
 	blocksRunning: boolean;
 	cure: string;
+	// Sanctuary "Cure <name>" price; services and fee order follow the definition order.
+	sanctuaryFee: number;
+	// One-line mechanic for bestiary traits and catalog facts.
+	summary: string;
 	guidance: string;
 	// Activity wording after application and after cure/expiry restores the modifier.
 	appliedText: string;
