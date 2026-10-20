@@ -199,7 +199,7 @@ it("rejects absent merchants, empty eligibility and gold overflow without a part
 	expect(rejected.error).toBe("You cannot carry more gold.");
 });
 
-it("retains completed bulk sales in a v20 save and preserves the next ordinary turn", () => {
+it("retains completed bulk sales in a save and preserves the next ordinary turn", () => {
 	const saved = restoreSave(savedAdventure());
 	const sold = resolvePlayerAction(shop(), sale).state;
 	const state = { ...sold, objects: [] };
@@ -211,7 +211,7 @@ it("retains completed bulk sales in a v20 save and preserves the next ordinary t
 	);
 	const parsed = parseSave(serializeSave(document));
 	if (!parsed.ok) throw new Error(parsed.error);
-	expect(parsed.value.version).toBe(27);
+	expect(parsed.value.version).toBe(28);
 	const loaded = restoreSave(parsed.value).state;
 	expect(loaded).toEqual(state);
 	expect(resolvePlayerAction(loaded, { type: "wait" })).toEqual(

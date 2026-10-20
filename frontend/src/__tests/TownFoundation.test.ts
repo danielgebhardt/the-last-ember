@@ -8,8 +8,6 @@ import {
 	createTownLocation,
 	dungeonLocation,
 	isAdventureLocation,
-	restoreTownLocation,
-	snapshotTownLocation,
 } from "../domain/town/TownLocation";
 
 const neighbors = (row: number, col: number) => [
@@ -171,40 +169,4 @@ describe("fixed level-zero town", () => {
 		const invalid = { ...createTownLocation(), coordinate: { row: 0, col: 0 } };
 		expect(resolveTownAction(invalid, { type: "inspect" }).error).toBeDefined();
 	});
-	it("round trips exact town location and layout identity without sharing mutable snapshot objects", () => {
-		const location = resolveTownAction(createTownLocation(), {
-			type: "move",
-			direction: "left",
-		}).location;
-		if (location.kind !== "town") throw new Error("Expected town");
-		const snapshot = snapshotTownLocation(location);
-		expect(restoreTownLocation(JSON.parse(JSON.stringify(snapshot)))).toEqual(
-			location,
-		);
-		snapshot.location.coordinate.col = 1;
-		expect(location.coordinate.col).toBe(11);
-	});
-	it.each([
-		null,
-		{},
-		{ version: 2, location: createTownLocation() },
-		{ version: 1, location: { ...createTownLocation(), layoutId: "obsolete" } },
-		{
-			version: 1,
-			location: {
-				kind: "dungeon",
-				floorNumber: 0,
-				coordinate: { row: 17, col: 12 },
-			},
-		},
-		{
-			version: 1,
-			location: { ...createTownLocation(), coordinate: { row: 0, col: 0 } },
-		},
-	])(
-		"rejects malformed snapshots without silently relocating %j",
-		(snapshot) => {
-			expect(restoreTownLocation(snapshot)).toBeNull();
-		},
-	);
 });

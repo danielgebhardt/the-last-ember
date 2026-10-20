@@ -78,9 +78,9 @@ import {
 	afflictedMeleeAttack,
 	suppressesManaRecovery,
 } from "./AfflictionDefinitions";
+import { advancePlayerAfflictions } from "./Afflictions";
 import { type AttackRollSource, createAttackRolls } from "./CombatRandomness";
 import { deriveCombatStats } from "./CombatStats";
-import { advancePlayerAfflictions } from "./Disease";
 import { activateEscapeFloor } from "./Escape";
 import type { GameState } from "./GameState.ts";
 import { recoverManaAfterTurn } from "./Mana";

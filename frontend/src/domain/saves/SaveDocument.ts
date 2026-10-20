@@ -9,13 +9,13 @@ import type { GameState } from "../game/GameState";
 import type { PermanentAttributes } from "../game/PermanentAttributes";
 
 // Explicit persisted fields keep incidental UI/runtime additions out of the format.
-// v27 is the pre-public-release compatibility baseline; older formats are retired.
+// Pre-release: only the current format loads. Breaking changes bump the version.
 type SavedFloor = Pick<
 	DungeonFloor,
 	"floorNumber" | "partitions" | "rooms" | "corridors" | "upStair" | "downStair"
 > & { terrain: string[] };
 export type SaveDocument = {
-	version: 27;
+	version: 28;
 	savedAt: string;
 	configuration: RunConfiguration & {
 		difficulty: Difficulty;
@@ -23,9 +23,6 @@ export type SaveDocument = {
 	fog: FogConfiguration;
 	state: Pick<
 		GameState,
-		| "dungeonRemedies"
-		| "cleansingRemedies"
-		| "curseRemedies"
 		| "afflictions"
 		| "rareEquipment"
 		| "townPortal"

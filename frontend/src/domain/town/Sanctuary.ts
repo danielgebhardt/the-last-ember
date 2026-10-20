@@ -91,12 +91,12 @@ export const sanctuaryQuote = (
 			? state.effects.some(
 					(e) => e.actorId === "player" && e.kind === "poisoned",
 				)
-			: state.afflictions?.some((a) => a.kind === c),
+			: state.afflictions.some((a) => a.kind === c),
 	);
 	const conditions = active.filter(
 		(c) => service === "cleanse" || SERVICE_CONDITION[service] === c,
 	);
-	const remaining = (state.afflictions ?? []).filter(
+	const remaining = state.afflictions.filter(
 		(a) => !(conditions as readonly string[]).includes(a.kind),
 	);
 	const cost = conditions.reduce(

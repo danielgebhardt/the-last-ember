@@ -29,7 +29,7 @@ it("round-trips friendly fire and twenty-turn buffs, then continues deterministi
 	const parsed = parseSave(serializeSave(source));
 	if (!parsed.ok) throw new Error(parsed.error);
 	expect(parsed.value).toEqual(source);
-	expect(parsed.value.version).toBe(27);
+	expect(parsed.value.version).toBe(28);
 	expect(
 		resolvePlayerAction(restoreSave(parsed.value).state, { type: "wait" }),
 	).toEqual(resolvePlayerAction(restoreSave(source).state, { type: "wait" }));

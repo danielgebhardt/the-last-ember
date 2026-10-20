@@ -5,7 +5,7 @@ import {
 	generateDungeonRun,
 } from "../domain/dungeon/DungeonRun";
 import { createSeededRandom } from "../domain/dungeon/Seed";
-import { applyDisease } from "../domain/game/Disease";
+import { applyPlayerAffliction } from "../domain/game/Afflictions";
 import { createGameState, type GameState } from "../domain/game/GameState";
 import { resolvePlayerAction } from "../domain/game/PlayerActions";
 import { createMonsterDrop } from "../domain/items/MonsterDrops";
@@ -194,12 +194,11 @@ it("the first carrier drops one Cure Disease potion; later carriers use ordinary
 	]);
 	// Unmarked carriers keep the ordinary seeded drop chance and loot pool.
 	const drops = [...Array(60).keys()].map((index) =>
-		createMonsterDrop(
-			123,
-			{ ...marked.monsters[0], id: `2:${index + 1}`, floorNumber: 2 },
-			undefined,
-			["cure-disease-potion"],
-		),
+		createMonsterDrop(123, {
+			...marked.monsters[0],
+			id: `2:${index + 1}`,
+			floorNumber: 2,
+		}),
 	);
 	expect(drops.some((drop) => drop === undefined)).toBe(true);
 	expect(
@@ -261,9 +260,12 @@ it("saves the carrier marker and continues an infection identically after load",
 			),
 		}).ok,
 	).toBe(false);
-	expect(save({ ...withCarrier, dungeonRemedies: undefined }).ok).toBe(false);
 
-	const live = applyDisease({ ...original.state, monsters: [] }, "plague rat");
+	const live = applyPlayerAffliction(
+		{ ...original.state, monsters: [] },
+		"disease",
+		"plague rat",
+	);
 	const sickSave = save(live);
 	if (!sickSave.ok) throw new Error(sickSave.error);
 	const resumed = restoreSave(sickSave.value).state;

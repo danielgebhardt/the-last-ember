@@ -157,9 +157,7 @@ it("spawns sparsely on floors 6–12 and the first hexweaver guarantees a Remove
 	expect(found).toBeGreaterThan(0);
 	const hexweaver = encounter().monsters[0];
 	expect(
-		createMonsterDrop(1, { ...hexweaver, remedyDrop: true }, undefined, [
-			"remove-curse-scroll",
-		])?.item,
+		createMonsterDrop(1, { ...hexweaver, remedyDrop: true })?.item,
 	).toEqual({ id: "monster:1:1:loot", kind: "remove-curse-scroll" });
 });
 

@@ -1,6 +1,9 @@
 // @vitest-environment node
 import { expect, it } from "vitest";
-import { applyDisease, removeDisease } from "../domain/game/Disease";
+import {
+	applyPlayerAffliction,
+	removePlayerAfflictions,
+} from "../domain/game/Afflictions";
 import { awardExperience } from "../domain/game/ExperienceRewards";
 import { resolvePlayerAction } from "../domain/game/PlayerActions";
 import { createBag } from "../domain/items/Bag";
@@ -22,19 +25,23 @@ const adventure = () => ({
 });
 it("reduces capacity once, clamps HP, persists until cured and never heals on cure", () => {
 	const initial = adventure();
-	const diseased = applyDisease(initial, "Plague Rat");
+	const diseased = applyPlayerAffliction(initial, "disease", "Plague Rat");
 	expect(diseased.player).toEqual({ health: 8, maxHealth: 8 });
-	expect(applyDisease(diseased, "Plague Rat")).toBe(diseased);
+	expect(applyPlayerAffliction(diseased, "disease", "Plague Rat")).toBe(
+		diseased,
+	);
 	let next = diseased;
 	for (let i = 0; i < 12; i++)
 		next = resolvePlayerAction(next, { type: "wait" }).state;
 	expect(next.afflictions).toEqual(diseased.afflictions);
-	const cured = removeDisease(next, "test treatment");
+	const cured = removePlayerAfflictions(next, ["disease"], "test treatment");
 	expect(cured.player).toEqual({ health: 8, maxHealth: 10 });
-	expect(removeDisease(cured, "test treatment")).toBe(cured);
+	expect(removePlayerAfflictions(cured, ["disease"], "test treatment")).toBe(
+		cured,
+	);
 });
 it("recomputes equipment previews, swaps and level capacity without compounding", () => {
-	let state = applyDisease(adventure(), "Plague Rat");
+	let state = applyPlayerAffliction(adventure(), "disease", "Plague Rat");
 	const ring = { id: "review:ring", kind: "ring-vitality" } as const;
 	expect(compareEquipment(ring, state)?.after.maxHealth).toBe(11);
 	const equipped = { ...state.equipment, leftRing: ring };
@@ -46,13 +53,13 @@ it("recomputes equipment previews, swaps and level capacity without compounding"
 	expect(state.player).toEqual({ health: 8, maxHealth: 11 });
 	state = awardExperience(state, 10);
 	expect(state.player).toEqual({ health: 9, maxHealth: 12 });
-	expect(removeDisease(state, "test").player).toEqual({
+	expect(removePlayerAfflictions(state, ["disease"], "test").player).toEqual({
 		health: 9,
 		maxHealth: 16,
 	});
 });
 it("ordinary healing and poison preserve Disease, and lethal poison cannot be reversed by Renewal", () => {
-	let state = applyDisease(adventure(), "Plague Rat");
+	let state = applyPlayerAffliction(adventure(), "disease", "Plague Rat");
 	state = {
 		...state,
 		player: { health: 1, maxHealth: 8 },
@@ -87,7 +94,7 @@ it("ordinary healing and poison preserve Disease, and lethal poison cannot be re
 	expect(lethal.player.health).toBe(0);
 });
 it("round trips actual Disease and rejects unsupported, duplicate and impossible saved effects", () => {
-	const state = applyDisease(adventure(), "Plague Rat");
+	const state = applyPlayerAffliction(adventure(), "disease", "Plague Rat");
 	const doc = tacticalSnapshot(state);
 	const parsed = parseSave(serializeSave(doc));
 	expect(parsed.ok).toBe(true);

@@ -11,6 +11,7 @@ import { AFFLICTION_DEFINITIONS } from "../game/AfflictionDefinitions";
 import { DAMAGE_ELEMENTS } from "../game/DamageElements";
 import { isDifficulty } from "../game/Difficulty";
 import { isPermanentAttributes } from "../game/PermanentAttributes";
+import { PLAYER_AFFLICTION_LIMIT } from "../game/PlayerAfflictions";
 import { MAX_PLAYER_LEVEL } from "../game/Progression";
 import { SPELL_DEFINITIONS } from "../game/Spells";
 import { EFFECT_DEFINITIONS } from "../game/TimedEffects";
@@ -400,7 +401,7 @@ const monsterAwareness: Schema = (value) =>
 			(value.type !== "pursuing" || integer(0, 100)(value.blocked))));
 
 const documentShape = object({
-	version: oneOf([27]),
+	version: oneOf([28]),
 	savedAt: (value) =>
 		text(value) &&
 		typeof value === "string" &&
@@ -411,40 +412,33 @@ const documentShape = object({
 		radius: integer(FOG_RADIUS_LIMITS.min, FOG_RADIUS_LIMITS.max),
 	}),
 	state: object({
-		dungeonRemedies: optional(boolean),
-		cleansingRemedies: optional(boolean),
-		curseRemedies: optional(boolean),
-		afflictions: optional(
-			array(
-				object({
-					kind: oneOf(Object.keys(AFFLICTION_DEFINITIONS)),
-					// Lifetime agreement with each kind's definition is a consistency rule.
-					remaining: (v) => v === null || integer(1, 100)(v),
-					source: text,
-				}),
-				0,
-				2,
-			),
+		afflictions: array(
+			object({
+				kind: oneOf(Object.keys(AFFLICTION_DEFINITIONS)),
+				// Lifetime agreement with each kind's definition is a consistency rule.
+				remaining: (v) => v === null || integer(1, 100)(v),
+				source: text,
+			}),
+			0,
+			PLAYER_AFFLICTION_LIMIT,
 		),
-		rareEquipment: optional(
-			nullable(
-				(value) =>
-					record(value) &&
-					object({
-						kind: oneOf(RARE_EQUIPMENT_KINDS),
-						source: oneOf(["dungeon", "town"]),
-						acquired: boolean,
-					})(value) &&
-					(value.source === "town"
-						? value.floorNumber === undefined && value.coordinate === undefined
-						: object({ floorNumber: integer(5, 20), coordinate })(value)),
-			),
+		rareEquipment: nullable(
+			(value) =>
+				record(value) &&
+				object({
+					kind: oneOf(RARE_EQUIPMENT_KINDS),
+					source: oneOf(["dungeon", "town"]),
+					acquired: boolean,
+				})(value) &&
+				(value.source === "town"
+					? value.floorNumber === undefined && value.coordinate === undefined
+					: object({ floorNumber: integer(5, 20), coordinate })(value)),
 		),
 		townPortal: nullable(object({ floorNumber, coordinate })),
 		town: nullable(isTownLocation),
 		townPotionStock: isTownPotionStock,
 		townEquipmentStock: isTownEquipmentStock,
-		townEquipmentPurchases: optional(array(text)),
+		townEquipmentPurchases: array(text),
 		merchantStock: isMerchantStock,
 		gold: natural,
 		escape: nullable(

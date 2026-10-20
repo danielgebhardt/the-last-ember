@@ -125,7 +125,7 @@ describe("Complete adventure save format", () => {
 		[
 			"unsupported version",
 			(d: ReturnType<typeof savedAdventure>) => {
-				d.version = 999 as 27;
+				d.version = 999 as 28;
 			},
 		],
 		[

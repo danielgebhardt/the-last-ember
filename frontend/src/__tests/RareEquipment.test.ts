@@ -25,7 +25,6 @@ import {
 	rareEquipmentId,
 	selectRunRareEquipment,
 } from "../domain/items/RareEquipment";
-import { enabledRemedies } from "../domain/items/Remedies";
 import { sellCarriedEquipment } from "../domain/merchant/EquipmentSales";
 import { lowerEquipmentSale } from "../domain/merchant/LowerEquipmentSales";
 import { chooseEnemySpell } from "../domain/monsters/EnemyCasting";
@@ -390,12 +389,7 @@ it("keeps actual seeded rare supply sparse, diverse, safe and separate from ordi
 		const state = createGameState(run);
 		const rare = ownsRare(state);
 		expect(rare.length).toBeLessThanOrEqual(1);
-		for (const ordinary of spawnRunItems(
-			run,
-			spawnRunMonsters(run),
-			undefined,
-			enabledRemedies(state),
-		))
+		for (const ordinary of spawnRunItems(run, spawnRunMonsters(run)))
 			expect(state.floorItems).toContainEqual(ordinary);
 		if (state.rareEquipment) {
 			count++;

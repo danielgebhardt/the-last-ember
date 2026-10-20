@@ -93,7 +93,6 @@ export default async function prepareFixtures() {
 			player: { health: diseasedCapacity, maxHealth: diseasedCapacity },
 			effects: [{ ...poisoned.effects[0], remaining: 5 }],
 			afflictions: [{ kind: "disease", remaining: null, source: "Plague Rat" }],
-			dungeonRemedies: true,
 			bag: {
 				items: [{ id: "smoke:cure-disease", kind: "cure-disease-potion" }],
 			},

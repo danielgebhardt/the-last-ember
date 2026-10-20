@@ -159,7 +159,7 @@ it("keeps partial drops in place, compacts final removal, and appends a newly re
 	]);
 });
 
-it("retains the promoted stack order and deterministic next enchantment through a v20 save", () => {
+it("retains the promoted stack order and deterministic next enchantment through a save", () => {
 	const saved = restoreSave(savedAdventure());
 	const initial = {
 		...saved.state,
@@ -186,7 +186,7 @@ it("retains the promoted stack order and deterministic next enchantment through 
 	);
 	const parsed = parseSave(serializeSave(document));
 	if (!parsed.ok) throw new Error(parsed.error);
-	expect(parsed.value.version).toBe(27);
+	expect(parsed.value.version).toBe(28);
 	const loaded = restoreSave(parsed.value).state;
 	expect(loaded).toEqual(state);
 	expect(bagSlots(loaded.bag).map(({ item }) => item.id)).toEqual([

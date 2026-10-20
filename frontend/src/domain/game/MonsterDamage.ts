@@ -1,5 +1,4 @@
 import { createMonsterDrop } from "../items/MonsterDrops";
-import { enabledRemedies } from "../items/Remedies";
 import { MONSTER_DEFINITIONS, type Monster } from "../monsters/Monster";
 import { resistedDamage } from "../monsters/MonsterResistance";
 import { goldAmount } from "../objects/Gold";
@@ -75,12 +74,7 @@ export const damageMonster = (
 		mana = gained.mana;
 		events.push(...gained.events);
 
-		const drop = createMonsterDrop(
-			state.run.seed,
-			monster,
-			undefined,
-			enabledRemedies(state),
-		);
+		const drop = createMonsterDrop(state.run.seed, monster);
 		if (drop && !floorItems.some((entry) => entry.item.id === drop.item.id)) {
 			floorItems = [...floorItems, drop];
 			// Player attacks resolve on a visible target before the monster phase.

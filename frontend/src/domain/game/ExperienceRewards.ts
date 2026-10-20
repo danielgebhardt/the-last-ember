@@ -15,7 +15,7 @@ import {
 export const experienceReward = (state: GameState, reward: number) => {
 	const turn = state.turn;
 	const gained = gainExperience(state.progression, state.player, reward);
-	if (state.afflictions?.length && gained.levels.length) {
+	if (state.afflictions.length && gained.levels.length) {
 		const maxHealth = maximumHealth(
 			gained.progression,
 			state.equipment,
@@ -42,7 +42,7 @@ export const experienceReward = (state: GameState, reward: number) => {
 		events.push({
 			type: "level-gained",
 			level,
-			healthGain: state.afflictions?.length
+			healthGain: state.afflictions.length
 				? maximumHealth(
 						{ ...gained.progression, experience: experienceThreshold(level) },
 						state.equipment,

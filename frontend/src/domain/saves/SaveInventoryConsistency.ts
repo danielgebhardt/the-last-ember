@@ -13,11 +13,7 @@ import { sarcophagusOutcome } from "../objects/AncientSarcophagi";
 import { chestReward } from "../objects/TreasureChests";
 import { wellReward } from "../objects/WishingWell";
 import { TOWN_POTION_OFFERS, type TownPotion } from "../town/TownEconomy";
-import {
-	LATE_TOWN_EQUIPMENT_OFFERS,
-	SAVED_TOWN_EQUIPMENT_OFFERS,
-	TOWN_EQUIPMENT_OFFERS,
-} from "../town/TownEquipmentStock";
+import { TOWN_EQUIPMENT_OFFERS } from "../town/TownEquipmentStock";
 import { savedLocations, unique } from "./SaveConsistencyHelpers";
 import type { SaveDocument } from "./SaveDocument";
 import { hasConsistentRareEquipment } from "./SaveRareEquipmentConsistency";
@@ -44,32 +40,29 @@ export const hasConsistentInventory = (document: SaveDocument): boolean => {
 	if (!unique(allItems.map((entry) => entry.id))) return false;
 	if (!hasConsistentRareEquipment(document)) return false;
 	const purchased = state.townEquipmentPurchases;
-	if (purchased !== undefined) {
-		if (
-			!unique(purchased) ||
-			purchased.some(
-				(id) =>
-					!Object.hasOwn(SAVED_TOWN_EQUIPMENT_OFFERS, id) ||
-					state.townEquipmentStock.some((i) => i.id === id),
-			)
+	if (
+		!unique(purchased) ||
+		purchased.some(
+			(id) =>
+				!Object.hasOwn(TOWN_EQUIPMENT_OFFERS, id) ||
+				state.townEquipmentStock.some((i) => i.id === id),
 		)
-			return false;
-		if (
-			allItems.some(
-				(i) => i.id.startsWith("town-gear:") && !purchased.includes(i.id),
-			)
+	)
+		return false;
+	if (
+		allItems.some(
+			(i) => i.id.startsWith("town-gear:") && !purchased.includes(i.id),
 		)
-			return false;
-		if (
-			Object.keys(TOWN_EQUIPMENT_OFFERS).some(
-				(id) =>
-					!LATE_TOWN_EQUIPMENT_OFFERS.has(id) &&
-					!purchased.includes(id) &&
-					!state.townEquipmentStock.some((i) => i.id === id),
-			)
+	)
+		return false;
+	if (
+		Object.keys(TOWN_EQUIPMENT_OFFERS).some(
+			(id) =>
+				!purchased.includes(id) &&
+				!state.townEquipmentStock.some((i) => i.id === id),
 		)
-			return false;
-	}
+	)
+		return false;
 
 	for (const item of allItems) {
 		if (item.id.includes(":object:sarcophagus:")) {
@@ -137,8 +130,8 @@ export const hasConsistentInventory = (document: SaveDocument): boolean => {
 
 	for (const item of allItems) {
 		if (!item.id.startsWith("town-gear:")) continue;
-		if (!Object.hasOwn(SAVED_TOWN_EQUIPMENT_OFFERS, item.id)) return false;
-		const offer = SAVED_TOWN_EQUIPMENT_OFFERS[item.id];
+		if (!Object.hasOwn(TOWN_EQUIPMENT_OFFERS, item.id)) return false;
+		const offer = TOWN_EQUIPMENT_OFFERS[item.id];
 		if (
 			item.kind !== offer.item.kind ||
 			("enchantment" in item && typeof item.enchantment === "number"

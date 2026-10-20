@@ -1,6 +1,6 @@
 // @vitest-environment node
 import { expect, it } from "vitest";
-import { applyDisease } from "../domain/game/Disease";
+import { applyPlayerAffliction } from "../domain/game/Afflictions";
 import { resolvePlayerAction } from "../domain/game/PlayerActions";
 import { createBag } from "../domain/items/Bag";
 import { lootWeights } from "../domain/items/LootWeights";
@@ -21,7 +21,7 @@ const adventure = () => ({
 });
 it("uses one remedy and one turn, restoring capacity before poison without curing poison", () => {
 	const initial = {
-		...applyDisease(adventure(), "Plague Rat"),
+		...applyPlayerAffliction(adventure(), "disease", "Plague Rat"),
 		effects: [
 			{ actorId: "player", floorNumber: null, kind: "poisoned", remaining: 3 },
 		] as const,
@@ -75,10 +75,9 @@ it("offers low-weight remedies only in the source band and preserves old chest r
 	} as const;
 	let count = 0;
 	for (let seed = 0; seed < 256; seed++) {
-		const reward = chestReward(seed, chest, ["cure-disease-potion"]);
-		expect(reward).toEqual(chestReward(seed, chest, ["cure-disease-potion"]));
+		const reward = chestReward(seed, chest);
+		expect(reward).toEqual(chestReward(seed, chest));
 		if (reward.item.kind === "cure-disease-potion") count++;
-		expect(chestReward(seed, chest).item.kind).not.toBe("cure-disease-potion");
 	}
 	expect(count).toBeGreaterThan(0);
 	expect(count).toBeLessThan(20);

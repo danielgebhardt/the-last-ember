@@ -18,4 +18,8 @@ Efficiency must preserve correctness, deterministic gameplay, save ownership, ke
 
 ## Save compatibility
 
-The pre-public-release baseline supports **v27 only**; the developer explicitly retired v1–v26 and older town layouts. Follow `docs/save-policy.md`. Do not recreate historical migrations or version-by-version test matrices unless the developer changes that policy. Preserve current-format validation, ownership/corruption checks and deterministic save/load continuation. Once outside players join, make the compatibility decision explicit before changing the persisted contract.
+Pre-public-release, the developer is the only player. Only the **current** save version loads (v28); older saves are rejected with the unsupported-version message. On a breaking persisted-state change, bump `SAVE_FORMAT_VERSION` and refresh the captured fixture instead of adding optional legacy fields, marker flags, retired-data tables or migrations. Keep current-format validation, ownership/corruption checks and deterministic save/load continuation. Follow `docs/save-policy.md`. Once outside players join, decide the compatibility policy explicitly before changing the persisted contract.
+
+## Supported screens
+
+Target laptops and larger monitors, with an iPad as the smallest: it must look right on a 13" MacBook (about 1470×830 browser area) and on large displays. Phones are not a target, so don't add phone-specific layouts or 390px browser variants.

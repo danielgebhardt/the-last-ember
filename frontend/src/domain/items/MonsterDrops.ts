@@ -8,14 +8,12 @@ import {
 } from "../monsters/Monster";
 import { selectEliteReward } from "./EliteRewards";
 import type { FloorItem } from "./FloorItems";
-import type { ItemKind } from "./Item";
 import { selectLootKind } from "./Loot";
 
 export const createMonsterDrop = (
 	seed: number,
 	monster: Monster,
 	suppliedRandom?: () => number,
-	remedies: readonly ItemKind[] = [],
 ): FloorItem | undefined => {
 	const random =
 		suppliedRandom ??
@@ -45,7 +43,6 @@ export const createMonsterDrop = (
 					"drop",
 					random,
 					definition.lootPreferences,
-					remedies,
 				);
 	if (!kind) return undefined;
 	return {

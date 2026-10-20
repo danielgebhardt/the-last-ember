@@ -98,10 +98,10 @@ export const corridorView = (
 				(x) =>
 					x.actorId === "player" && x.kind === "poisoned" && x.remaining > 0,
 			) ||
-			(state.afflictions ?? []).some(
+			state.afflictions.some(
 				(a) => AFFLICTION_DEFINITIONS[a.kind].blocksRunning,
 			),
-		afflictions: (state.afflictions ?? []).map((a) => a.kind),
+		afflictions: state.afflictions.map((a) => a.kind),
 		damaged: state.activityHistory.entries.some(
 			({ event }) =>
 				event.turn === state.turn &&

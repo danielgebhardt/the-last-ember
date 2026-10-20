@@ -160,11 +160,7 @@ it("spawns sparsely on floors 9–16 and the first leech guarantees a Cleansing 
 	expect(leeches).toBeLessThan(12 * 8 * 0.4);
 
 	const leech = encounter().monsters[0];
-	expect(
-		createMonsterDrop(1, { ...leech, remedyDrop: true }, undefined, [
-			"cleansing-potion",
-		]),
-	).toEqual({
+	expect(createMonsterDrop(1, { ...leech, remedyDrop: true })).toEqual({
 		item: { id: "monster:1:1:loot", kind: "cleansing-potion" },
 		floorNumber: 1,
 		coordinate: { row: 1, col: 2 },
@@ -236,6 +232,4 @@ it("saves the leech and its remedy marker, then continues a drain identically", 
 	expect(restoreSave(loggedSave.value).state.activityHistory).toEqual(
 		logged.activityHistory,
 	);
-	// A leech marker needs the Cleansing remedy enabled for the adventure.
-	expect(save({ ...withLeech, cleansingRemedies: undefined }).ok).toBe(false);
 });

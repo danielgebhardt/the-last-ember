@@ -1,6 +1,6 @@
 // @vitest-environment node
 import { expect, it } from "vitest";
-import { applyDisease } from "../domain/game/Disease";
+import { applyPlayerAffliction } from "../domain/game/Afflictions";
 import { resolvePlayerAction } from "../domain/game/PlayerActions";
 import {
 	parseSave,
@@ -64,7 +64,7 @@ it("rejects healthy, unaffordable, stale, distant and ended transactions without
 });
 it("heals only to diseased capacity and does not cleanse poison or Disease", () => {
 	const state = {
-		...applyDisease(adventure(), "Plague Rat"),
+		...applyPlayerAffliction(adventure(), "disease", "Plague Rat"),
 		effects: [
 			{ actorId: "player", floorNumber: null, kind: "poisoned", remaining: 3 },
 		] as const,

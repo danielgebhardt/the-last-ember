@@ -14,7 +14,6 @@ import {
 	allocateRunRareEquipment,
 	type RareEquipmentAllocation,
 } from "../items/RareEquipment";
-import { REMEDY_KINDS } from "../items/Remedies";
 import { spawnRunSpellbooks } from "../items/SpellbookPlacement";
 import { placeMerchants } from "../merchant/MerchantPlacement";
 import {
@@ -53,14 +52,9 @@ import { createKnownSpells, type SpellKind } from "./Spells";
 import type { TimedEffect } from "./TimedEffects";
 
 export type GameState = {
-	dungeonRemedies?: boolean;
-	// Marks adventures whose loot pools include the Cleansing potion (#363).
-	cleansingRemedies?: boolean;
-	// Marks adventures whose loot pools include the Remove Curse scroll (#363).
-	curseRemedies?: boolean;
-	afflictions?: readonly ActiveAffliction[];
-	rareEquipment?: RareEquipmentAllocation | null;
-	townEquipmentPurchases?: readonly string[];
+	afflictions: readonly ActiveAffliction[];
+	rareEquipment: RareEquipmentAllocation | null;
+	townEquipmentPurchases: readonly string[];
 	townPortal: TownPortal | null;
 	townEquipmentStock: readonly ItemInstance[];
 	townPotionStock: TownPotionStock;
@@ -97,7 +91,7 @@ export const createGameState = (
 ): GameState => {
 	assertDifficulty(difficulty);
 	const monsters = spawnRunMonsters(run);
-	const ordinaryLoot = spawnRunItems(run, monsters, undefined, REMEDY_KINDS);
+	const ordinaryLoot = spawnRunItems(run, monsters);
 	const loot = [
 		...ordinaryLoot,
 		...spawnRunQuestItems(run, monsters, ordinaryLoot),
@@ -138,9 +132,6 @@ export const createGameState = (
 		spellHotbar: createSpellHotbar(createKnownSpells()),
 		effects: [],
 		afflictions: [],
-		dungeonRemedies: true,
-		cleansingRemedies: true,
-		curseRemedies: true,
 		mana: maximumMana(createProgression()),
 		quest: createQuest(run),
 		monstersDefeated: 0,

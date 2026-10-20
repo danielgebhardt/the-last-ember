@@ -1,6 +1,6 @@
 // @vitest-environment node
 import { expect, it } from "vitest";
-import { applyDisease } from "../domain/game/Disease";
+import { applyPlayerAffliction } from "../domain/game/Afflictions";
 import { resolvePlayerAction } from "../domain/game/PlayerActions";
 import {
 	parseSave,
@@ -13,7 +13,7 @@ import { savedAdventure } from "./SaveTestHelpers";
 import { tacticalSnapshot } from "./TacticalReplayTestHelpers";
 
 const adventure = () =>
-	applyDisease(
+	applyPlayerAffliction(
 		{
 			...restoreSave(savedAdventure()).state,
 			gold: 1000,
@@ -35,6 +35,7 @@ const adventure = () =>
 				},
 			],
 		},
+		"disease",
 		"Plague Rat",
 	);
 it("quotes independent cure fees and complete cleansing without bundling health or mana", () => {

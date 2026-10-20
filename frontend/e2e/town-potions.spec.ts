@@ -74,7 +74,7 @@ for (const width of [390, 1440])
 			const saved = await page.evaluate(() =>
 				JSON.parse(localStorage.getItem("larn:adventure-save") ?? "null"),
 			);
-			expect(saved.version).toBe(27);
+			expect(saved.version).toBe(28);
 			expect(saved.state.townPotionStock["healing-potion"]).toBe(3);
 			expect(saved.state.gold).toBe(850);
 			expect(saved.state.turn).toBe(0);

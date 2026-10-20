@@ -8,7 +8,6 @@ import { DEFAULT_RUN_CONFIGURATION } from "../domain/dungeon/RunConfiguration";
 import { createGameState } from "../domain/game/GameState";
 import { eligibleLootKinds, ITEM_DEFINITIONS } from "../domain/items/Item";
 import { spawnRunItems } from "../domain/items/ItemPlacement";
-import { enabledRemedies } from "../domain/items/Remedies";
 import { protectedSpawnLocations } from "../domain/monsters/MonsterLocations";
 
 it("places each selected book once within its floor band without changing ordinary generation", () => {
@@ -38,8 +37,6 @@ it("places each selected book once within its floor band without changing ordina
 		spawnRunItems(
 			run,
 			state.monsters.filter((actor) => actor.kind !== "iron-champion"),
-			undefined,
-			enabledRemedies(state),
 		),
 	);
 	expect(eligibleLootKinds(1, "found")).not.toContain("book-ember-bolt");

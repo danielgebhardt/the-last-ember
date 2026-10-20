@@ -32,7 +32,7 @@ export const applyPlayerAffliction = (
 ): GameState => {
 	if (state.player.health <= 0) return state;
 	const result = applyAffliction(
-		state.afflictions ?? [],
+		state.afflictions,
 		AFFLICTION_DEFINITIONS[kind],
 		source,
 	);
@@ -62,7 +62,7 @@ export const removePlayerAfflictions = (
 	kinds: readonly AfflictionKind[],
 	source: string,
 ): GameState => {
-	const active = state.afflictions ?? [];
+	const active = state.afflictions;
 	const afflictions = removeAfflictions(active, kinds);
 	if (afflictions === active) return state;
 	return {

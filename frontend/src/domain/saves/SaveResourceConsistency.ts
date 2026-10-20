@@ -40,9 +40,9 @@ export const hasConsistentResources = (document: SaveDocument): boolean => {
 		return false;
 
 	if (
-		!unique((state.afflictions ?? []).map((a) => a.kind)) ||
+		!unique(state.afflictions.map((a) => a.kind)) ||
 		// Each saved lifetime must match its kind: null until cured, else 1..duration.
-		!(state.afflictions ?? []).every(({ kind, remaining }) => {
+		!state.afflictions.every(({ kind, remaining }) => {
 			const lifetime = AFFLICTION_DEFINITIONS[kind].lifetime;
 			return lifetime.type === "until-cured"
 				? remaining === null

@@ -75,7 +75,7 @@ export const consumeItem = (
 		return { error: "You cannot drink a potion after death." };
 	if ("removesAfflictions" in definition) {
 		const covered: readonly AfflictionKind[] = definition.removesAfflictions;
-		const active = state.afflictions ?? [];
+		const active = state.afflictions;
 		const afflictions = removeAfflictions(active, covered);
 		if (afflictions === active)
 			return {

@@ -9,5 +9,6 @@ export const createComparisonContext = (
 	player: { health: 7, maxHealth: 10 },
 	progression: { experience: 0 },
 	effects: [],
+	afflictions: [],
 	...overrides,
 });

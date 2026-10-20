@@ -69,24 +69,3 @@ export const dungeonLocation = (run: DungeonRun): DungeonLocation => {
 		throw new RangeError("Invalid dungeon location");
 	return location;
 };
-
-export type TownLocationSnapshot = { version: 1; location: TownLocation };
-const copyTownLocation = (location: TownLocation): TownLocation => ({
-	kind: "town",
-	layoutId: location.layoutId,
-	coordinate: { ...location.coordinate },
-});
-// This contract is ready for live travel persistence; the Catalog owns only its preview.
-export const snapshotTownLocation = (
-	location: TownLocation,
-): TownLocationSnapshot => {
-	if (!isTownLocation(location)) throw new RangeError("Invalid town location");
-	return { version: 1, location: copyTownLocation(location) };
-};
-
-export const restoreTownLocation = (snapshot: unknown): TownLocation | null => {
-	if (!record(snapshot) || snapshot.version !== 1) return null;
-	return isTownLocation(snapshot.location)
-		? copyTownLocation(snapshot.location)
-		: null;
-};

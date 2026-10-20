@@ -6,18 +6,18 @@ import {
 	restoreSave,
 	serializeSave,
 } from "../domain/saves/SaveFormat";
-import version27File from "./fixtures/adventure-v27.json?raw";
+import capturedFile from "./fixtures/adventure-v28.json?raw";
 
-// Captured v27 baseline. Keep this file independent of future writer changes.
-const loadVersion27 = () => {
-	const parsed = parseSave(version27File);
+// Captured current-format baseline. Keep this file independent of writer changes.
+const loadCaptured = () => {
+	const parsed = parseSave(capturedFile);
 	if (!parsed.ok) throw new Error(parsed.error);
 	return { document: parsed.value, adventure: restoreSave(parsed.value) };
 };
 
-describe("Version-27 save baseline", () => {
+describe("Current save baseline", () => {
 	it("does not implicitly add new top-level game state to the current format", () => {
-		const { document, adventure } = loadVersion27();
+		const { document, adventure } = loadCaptured();
 		const extendedState = { ...adventure.state, uiSelectedItem: "bag:sword" };
 		const written = createSaveDocument(
 			extendedState,
@@ -29,7 +29,7 @@ describe("Version-27 save baseline", () => {
 		expect(written.state).not.toHaveProperty("uiSelectedItem");
 	});
 	it("does not implicitly add new monster state to the current format", () => {
-		const { adventure } = loadVersion27();
+		const { adventure } = loadCaptured();
 		const extendedState = {
 			...adventure.state,
 			monsters: adventure.state.monsters.map((monster) => ({
@@ -47,7 +47,7 @@ describe("Version-27 save baseline", () => {
 		expect(written.state.monsters[0]).not.toHaveProperty("debugLabel");
 	});
 	it("distinguishes unsupported versions, missing fields and inconsistent resources", () => {
-		const { document } = loadVersion27();
+		const { document } = loadCaptured();
 		expect(parseSave(JSON.stringify({ ...document, version: 999 }))).toEqual({
 			ok: false,
 			error: "This save uses an unsupported format version.",
@@ -64,21 +64,4 @@ describe("Version-27 save baseline", () => {
 			error: "This save contains inconsistent adventure data.",
 		});
 	});
-});
-
-it("retains existing v27 enchanted equipment without offering retired stock for purchase", () => {
-	const { document } = loadVersion27();
-	const id = "town-gear:armor:leather-armor:1:1";
-	const item = { id, kind: "leather-armor", enchantment: 1 };
-	const previous = {
-		...document,
-		state: {
-			...document.state,
-			townEquipmentStock: document.state.townEquipmentStock.filter(
-				(i) => i.id !== id,
-			),
-			bag: { items: [...document.state.bag.items, item] },
-		},
-	};
-	expect(parseSave(JSON.stringify(previous)).ok).toBe(true);
 });

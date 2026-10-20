@@ -8,7 +8,6 @@ import { accuracyThresholds, deriveAccuracy } from "../domain/game/MeleeRules";
 import { resolvePlayerAction } from "../domain/game/PlayerActions";
 import { createBag } from "../domain/items/Bag";
 import { lootWeights } from "../domain/items/LootWeights";
-import { enabledRemedies } from "../domain/items/Remedies";
 import {
 	parseSave,
 	restoreSave,
@@ -112,7 +111,7 @@ it("a Remove Curse scroll lifts it for one scroll and one turn; uncursed reading
 	expect(free.error).toBe("You are not cursed.");
 });
 
-it("joins loot on floors 6–14 only in adventures marked for it, and saves Curse", () => {
+it("joins loot on floors 6–14, and saves Curse", () => {
 	expect(
 		lootWeights(8, "found").find((e) => e.value === "remove-curse-scroll")
 			?.weight,
@@ -123,16 +122,6 @@ it("joins loot on floors 6–14 only in adventures marked for it, and saves Curs
 				(e) => e.value === "remove-curse-scroll",
 			),
 		).toBe(false);
-	expect(enabledRemedies(createGameState(createCorridorEncounter()))).toContain(
-		"remove-curse-scroll",
-	);
-	const legacy = savedAdventure();
-	delete legacy.state.curseRemedies;
-	const parsed = parseSave(serializeSave(legacy));
-	if (!parsed.ok) throw new Error(parsed.error);
-	expect(enabledRemedies(restoreSave(parsed.value).state)).not.toContain(
-		"remove-curse-scroll",
-	);
 
 	const cursed = applyPlayerAffliction(
 		{ ...restoreSave(savedAdventure()).state, monsters: [] },

@@ -6,7 +6,6 @@ import { createGameState } from "../domain/game/GameState";
 import { resolvePlayerAction } from "../domain/game/PlayerActions";
 import { createBag } from "../domain/items/Bag";
 import { lootWeights } from "../domain/items/LootWeights";
-import { enabledRemedies } from "../domain/items/Remedies";
 import { chestReward } from "../domain/objects/TreasureChests";
 import {
 	parseSave,
@@ -125,7 +124,7 @@ it("removes Mana Burn too, alone or with Slowed, and names what it removed", () 
 	expect(parseSave(serializeSave(tacticalSnapshot(both))).ok).toBe(true);
 });
 
-it("joins loot only on floors 3–12 in adventures marked for it, leaving older pools unchanged", () => {
+it("joins floor, chest and drop loot on floors 3–12", () => {
 	for (const floor of [2, 13])
 		expect(
 			lootWeights(floor, "found").find((e) => e.value === "cleansing-potion"),
@@ -141,33 +140,8 @@ it("joins loot only on floors 3–12 in adventures marked for it, leaving older 
 		activated: false,
 	} as const;
 	let found = 0;
-	for (let seed = 0; seed < 512; seed++) {
-		const both = chestReward(seed, chest, [
-			"cure-disease-potion",
-			"cleansing-potion",
-		]);
-		if (both.item.kind === "cleansing-potion") found++;
-		// A Disease-era adventure keeps exactly its earlier reward.
-		expect(
-			chestReward(seed, chest, ["cure-disease-potion"]).item.kind,
-		).not.toBe("cleansing-potion");
-	}
+	for (let seed = 0; seed < 512; seed++)
+		if (chestReward(seed, chest).item.kind === "cleansing-potion") found++;
 	expect(found).toBeGreaterThan(0);
 	expect(found).toBeLessThan(40);
-
-	const fresh = createGameState(createCorridorEncounter());
-	expect(enabledRemedies(fresh)).toEqual([
-		"cure-disease-potion",
-		"cleansing-potion",
-		"remove-curse-scroll",
-	]);
-	const legacy = savedAdventure();
-	// A Disease-era adventure predates both later markers.
-	delete legacy.state.cleansingRemedies;
-	delete legacy.state.curseRemedies;
-	const parsed = parseSave(serializeSave(legacy));
-	if (!parsed.ok) throw new Error(parsed.error);
-	expect(enabledRemedies(restoreSave(parsed.value).state)).toEqual([
-		"cure-disease-potion",
-	]);
 });

@@ -16,7 +16,7 @@ import { navigationRun } from "../objects/NavigationTerrain";
 import type { SaveDocument } from "./SaveDocument";
 import { validateSaveDocument } from "./SaveValidation";
 
-export const SAVE_FORMAT_VERSION = 27;
+export const SAVE_FORMAT_VERSION = 28;
 // Bound imported input before parsing. A maximum-size snapshot is measured in the review.
 export const MAX_SAVE_BYTES = 4 * 1024 * 1024;
 
@@ -63,38 +63,19 @@ export const createSaveDocument = (
 	configuration: { ...configuration, difficulty: state.difficulty },
 	fog: { ...fog },
 	state: {
-		...(state.dungeonRemedies !== undefined
-			? { dungeonRemedies: state.dungeonRemedies }
-			: {}),
-		...(state.cleansingRemedies !== undefined
-			? { cleansingRemedies: state.cleansingRemedies }
-			: {}),
-		...(state.curseRemedies !== undefined
-			? { curseRemedies: state.curseRemedies }
-			: {}),
-		...(state.afflictions !== undefined
-			? {
-					afflictions: state.afflictions.map((a) => ({
-						kind: a.kind,
-						remaining: a.remaining,
-						source: a.source,
-					})),
-				}
-			: {}),
-		...(state.rareEquipment !== undefined
-			? {
-					rareEquipment: state.rareEquipment
-						? savedRareEquipment(state.rareEquipment)
-						: null,
-				}
-			: {}),
+		afflictions: state.afflictions.map((a) => ({
+			kind: a.kind,
+			remaining: a.remaining,
+			source: a.source,
+		})),
+		rareEquipment: state.rareEquipment
+			? savedRareEquipment(state.rareEquipment)
+			: null,
 		townPortal: state.townPortal
 			? { ...state.townPortal, coordinate: { ...state.townPortal.coordinate } }
 			: null,
 		townEquipmentStock: state.townEquipmentStock.map(savedItem),
-		...(state.townEquipmentPurchases !== undefined
-			? { townEquipmentPurchases: [...state.townEquipmentPurchases] }
-			: {}),
+		townEquipmentPurchases: [...state.townEquipmentPurchases],
 		townPotionStock: { ...state.townPotionStock },
 		town: state.town
 			? { ...state.town, coordinate: { ...state.town.coordinate } }

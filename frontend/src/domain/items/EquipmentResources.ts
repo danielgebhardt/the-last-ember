@@ -11,7 +11,7 @@ export const resourcesAfterEquipmentChange = (
 	const healthDelta =
 		equipmentBonuses(equipment).health -
 		equipmentBonuses(state.equipment).health;
-	const maxHealth = state.afflictions?.length
+	const maxHealth = state.afflictions.length
 		? maximumHealth(state.progression, equipment, state.afflictions)
 		: state.player.maxHealth + healthDelta;
 	return {

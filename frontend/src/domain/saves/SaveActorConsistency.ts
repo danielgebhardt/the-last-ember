@@ -1,6 +1,4 @@
 import { hasLineOfSight } from "../dungeon/Visibility";
-import { AFFLICTION_DEFINITIONS } from "../game/AfflictionDefinitions";
-import { enabledRemedies } from "../items/Remedies";
 import { MONSTER_DEFINITIONS, monsterAffliction } from "../monsters/Monster";
 import {
 	orthogonalDistance,
@@ -72,15 +70,7 @@ export const hasConsistentActors = (document: SaveDocument): boolean => {
 					)) &&
 				(entry.remedyDrop === undefined ||
 					(entry.remedyDrop === true &&
-						(() => {
-							const affliction = monsterAffliction(entry.kind);
-							return (
-								affliction !== undefined &&
-								enabledRemedies(state).includes(
-									AFFLICTION_DEFINITIONS[affliction].cure,
-								)
-							);
-						})())) &&
+						monsterAffliction(entry.kind) !== undefined)) &&
 				(entry.webTurn === undefined ||
 					(!!MONSTER_DEFINITIONS[entry.kind].webAttack &&
 						entry.webTurn <= state.turn)) &&
