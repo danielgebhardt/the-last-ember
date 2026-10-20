@@ -5,7 +5,6 @@ import {
 	PLAYER,
 	STAIRS_DOWN,
 	STAIRS_UP,
-	WALL,
 } from "../../domain/dungeon/Tiles.ts";
 import type { FloorItem } from "../../domain/items/FloorItems";
 import { ITEM_DEFINITIONS, type ItemKind } from "../../domain/items/Item";
@@ -88,21 +87,25 @@ const DungeonCell = memo(function DungeonCell({
 						: TILE_LABELS[tile];
 	const label =
 		visibility === "remembered" ? `remembered ${description}` : description;
+	const texture = tile === undefined ? undefined : TILE_TERRAIN_CLASSES[tile];
+	// Remembered terrain keeps its texture under fog; undiscovered stays transparent.
 	const background =
 		visibility === "unknown"
 			? "bg-fog-unseen"
 			: visibility === "remembered"
-				? "bg-fog-remembered"
+				? texture
+					? ""
+					: "bg-fog-remembered"
 				: tile === undefined
 					? ""
 					: (TILE_BACKGROUNDS[tile] ?? "bg-fog-visible");
 
 	const terrainClass =
-		visibility === "visible" && tile !== undefined
-			? (TILE_TERRAIN_CLASSES[tile] ?? "")
-			: visibility === "remembered" && tile === WALL
-				? "dungeon-remembered-wall"
-				: "";
+		visibility === "unknown" || !texture
+			? ""
+			: visibility === "remembered"
+				? `${texture} dungeon-remembered`
+				: texture;
 
 	return (
 		<td

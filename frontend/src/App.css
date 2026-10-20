@@ -275,7 +275,8 @@
 	}
 }
 
-[data-visibility="remembered"] svg {
+/* Textured remembered tiles already fade their contents; other remembered tiles fade icons. */
+[data-visibility="remembered"]:not(.dungeon-remembered) svg {
 	opacity: var(--remembered-icon-opacity);
 }
 

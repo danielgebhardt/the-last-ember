@@ -34,7 +34,7 @@ const fogEntries = [
 	},
 	{
 		label: "Remembered",
-		className: "bg-fog-remembered",
+		className: "dungeon-flagstone dungeon-remembered",
 		description: "Explored before, but outside current sight.",
 	},
 	{

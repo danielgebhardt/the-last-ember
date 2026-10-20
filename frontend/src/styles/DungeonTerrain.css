@@ -4,9 +4,10 @@
    ========================================== */
 
 /*
-   Textures apply only to visible dungeon terrain.
-   Remembered and unexplored fog retain their
-   existing backgrounds.
+   Visible and remembered terrain share these textures.
+   Remembered tiles are drawn through fog (see the end
+   of this file); undiscovered tiles stay transparent so
+   the backdrop art shows through.
 */
 
 /* Light-mode palette */
@@ -18,6 +19,10 @@
 	--dungeon-floor-face: #bcb5a8;
 	--dungeon-floor-light: #e4ded3;
 	--dungeon-floor-dark: #898276;
+
+	/* Remembered fog: solid, desaturated terrain under a pale veil */
+	--remembered-tile-filter: saturate(0.3) contrast(0.85);
+	--remembered-fog: rgb(236 231 222 / 55%);
 }
 
 /* Dark-mode palette */
@@ -29,6 +34,9 @@
 	--dungeon-floor-face: #303a42;
 	--dungeon-floor-light: #4d555b;
 	--dungeon-floor-dark: #1b252e;
+
+	--remembered-tile-filter: saturate(0.4) contrast(0.9);
+	--remembered-fog: rgb(12 16 23 / 55%);
 }
 
 /* ==========================================
@@ -132,10 +140,33 @@
 	}
 }
 
-/* Remembered walls retain geometry without repainting them as currently visible. */
-.dungeon-remembered-wall {
-	box-shadow:
-		inset 0 0 0 2px var(--dungeon-wall-dark),
-		inset 3px 3px 0 rgb(255 255 255 / 12%);
-	background-image: linear-gradient(135deg, transparent 60%, rgb(0 0 0 / 20%));
+/* ==========================================
+   REMEMBERED FOG
+   Same geometry and texture as visible terrain,
+   kept opaque (the backdrop stays hidden) and
+   veiled so it never reads as currently seen.
+   ========================================== */
+
+.dungeon-remembered {
+	filter: var(--remembered-tile-filter);
+}
+
+/* The veil also mutes remembered icons such as doors and stairs. */
+.dungeon-remembered::after {
+	content: "";
+	position: absolute;
+	inset: 0;
+	z-index: 2;
+	pointer-events: none;
+	background: var(--remembered-fog);
+}
+
+@media (forced-colors: active) {
+	.dungeon-remembered {
+		filter: none;
+		border: 1px dashed CanvasText;
+	}
+	.dungeon-remembered::after {
+		content: none;
+	}
 }
