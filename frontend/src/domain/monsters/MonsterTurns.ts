@@ -32,8 +32,45 @@ import { orthogonalDistance } from "./MonsterLocations";
 import { detectsPlayer, selectPursuitStep, sensesCure } from "./MonsterPursuit";
 import { selectRetreatStep } from "./MonsterRetreat";
 import { maximumMonsterHealth, monsterAttackDamage } from "./MonsterStats";
+import type { SpecialActionOutcome } from "./MonsterTelegraphs";
 import { resolveMonsterWeb } from "./MonsterWeb";
 import { type PursuitRules, pursuitRulesFor } from "./PursuitRules";
+
+type SpecialActionContext = Readonly<{
+	state: GameState;
+	// The state with doors opened earlier this phase, for line and area checks.
+	scene: GameState;
+	monster: Monster;
+	monsters: readonly Monster[];
+	rollSource: AttackRollSource;
+	rules: Readonly<PursuitRules>;
+	detected: boolean;
+}>;
+// Prepare-then-act behaviors in resolution order; the first that acts takes the
+// monster's phase. Order is part of seeded outcomes.
+const SPECIAL_ACTIONS: readonly ((
+	context: SpecialActionContext,
+) => SpecialActionOutcome | undefined)[] = [
+	(c) => resolveMonsterAlarm(c.state, c.monster, c.detected),
+	(c) =>
+		resolveMonsterCharge(
+			c.scene,
+			c.monster,
+			c.monsters,
+			c.rollSource,
+			c.detected,
+		),
+	(c) => resolveMonsterArea(c.scene, c.monster, c.rollSource, c.rules),
+	(c) => resolveMonsterHex(c.state, c.monster, c.detected),
+	(c) => resolveMonsterWeb(c.state, c.monster, c.detected),
+];
+const resolveSpecialAction = (context: SpecialActionContext) => {
+	for (const resolve of SPECIAL_ACTIONS) {
+		const outcome = resolve(context);
+		if (outcome) return outcome;
+	}
+	return undefined;
+};
 
 // A step splits the phase: listed strikers act from the player's original tile
 // first, then everyone else acts after the step lands.
@@ -66,18 +103,21 @@ const strikesBeforeStep = (
 		return false;
 	const navigation = navigationRun(state);
 	if (!detectsPlayer(navigation, monster, rules)) return false;
-	const scene = { ...state, run: navigation };
 	return (
 		!(
 			!hasMonsterEffect(state, monster, "rooted") &&
 			!definition.stationary &&
 			monsterDoorToOpen(state, monster, state.monsters)
 		) &&
-		!resolveMonsterAlarm(state, monster, true) &&
-		!resolveMonsterCharge(scene, monster, state.monsters, rollSource, true) &&
-		!resolveMonsterArea(scene, monster, rollSource, rules) &&
-		!resolveMonsterHex(state, monster, true) &&
-		!resolveMonsterWeb(state, monster, true)
+		!resolveSpecialAction({
+			state,
+			scene: { ...state, run: navigation },
+			monster,
+			monsters: state.monsters,
+			rollSource,
+			rules,
+			detected: true,
+		})
 	);
 };
 export const withdrawalStrikers = (
@@ -267,93 +307,40 @@ export const resolveMonsterPhase = (
 				);
 			continue;
 		}
-		const alarm = resolveMonsterAlarm(state, monster, detected);
-		if (alarm) {
+		const special = resolveSpecialAction({
+			state,
+			scene: { ...state, run: navigation },
+			monster,
+			monsters,
+			rollSource,
+			rules: pursuitRules,
+			detected,
+		});
+		if (special) {
 			monsters = monsters.map((actor) =>
-				actor.id === monster.id ? alarm.monster : actor,
+				actor.id === monster.id ? special.monster : actor,
 			);
-			events.push(...alarm.events);
-			const signal = alarm.events.find(
+			events.push(...special.events);
+			const signal = special.events.find(
 				(event) => event.type === "monster-alarm-sounded",
 			);
 			if (signal?.type === "monster-alarm-sounded")
 				monsters = alertNearbyMonsters(
 					{ ...state, run: navigation },
-					alarm.monster,
+					special.monster,
 					monsters,
 					signal.target,
 				);
-			continue;
-		}
-
-		const charge = resolveMonsterCharge(
-			{ ...state, run: navigation },
-			monster,
-			monsters,
-			rollSource,
-			detected,
-		);
-		if (charge) {
-			monsters = monsters.map((actor) =>
-				actor.id === monster.id ? charge.monster : actor,
-			);
-			events.push(...charge.events);
-			if (charge.damage !== undefined) {
+			if (special.damage !== undefined) {
 				player = {
 					...player,
-					health: Math.max(0, player.health - charge.damage),
+					health: Math.max(0, player.health - special.damage),
 				};
 				if (player.health === 0)
 					events.push({ type: "player-died", turn: state.turn });
 			}
-			continue;
-		}
-
-		const area = resolveMonsterArea(
-			{ ...state, run: navigation },
-			monster,
-			rollSource,
-			pursuitRules,
-		);
-		if (area) {
-			monsters = monsters.map((actor) =>
-				actor.id === monster.id ? area.monster : actor,
-			);
-			events.push(...area.events);
-			if (area.damage !== undefined) {
-				player = {
-					...player,
-					health: Math.max(0, player.health - area.damage),
-				};
-				if (player.health === 0)
-					events.push({ type: "player-died", turn: state.turn });
-			}
-			continue;
-		}
-		const hex = resolveMonsterHex(state, monster, detected);
-		if (hex) {
-			monsters = monsters.map((actor) =>
-				actor.id === monster.id ? hex.monster : actor,
-			);
-			events.push(...hex.events);
-			if (hex.damage !== undefined) {
-				player = {
-					...player,
-					health: Math.max(0, player.health - hex.damage),
-				};
-				if (player.health === 0)
-					events.push({ type: "player-died", turn: state.turn });
-				else infections.push({ kind: "curse", source: profile.name });
-			}
-			continue;
-		}
-		const web = resolveMonsterWeb(state, monster, detected);
-		if (web) {
-			monsters = monsters.map((actor) =>
-				actor.id === monster.id ? web.monster : actor,
-			);
-			events.push(...web.events);
-			if (web.slowed) infections.push({ kind: "slowed", source: profile.name });
+			if (special.affliction && player.health > 0)
+				infections.push({ kind: special.affliction, source: profile.name });
 			continue;
 		}
 		// Both attack range and prepared-target adjacency use Manhattan distance.

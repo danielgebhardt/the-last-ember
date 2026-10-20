@@ -23,7 +23,7 @@ const encounter = () => ({
 			health: 8,
 			intent: { type: "idle" as const },
 			// Web on cooldown: these cases isolate the poison bite (webs: SpiderWeb.test).
-			webTurn: 0,
+			telegraphTurn: { web: 0 },
 		},
 	],
 });

@@ -1,4 +1,3 @@
-import type { ActivityEvent } from "../game/ActivityHistory";
 import {
 	deriveCombatStats,
 	resolveIncomingMagicDamage,
@@ -7,6 +6,11 @@ import { scaleEnemyValue } from "../game/Difficulty";
 import type { GameState } from "../game/GameState";
 import { MONSTER_DEFINITIONS, type Monster } from "./Monster";
 import { orthogonalDistance } from "./MonsterLocations";
+import {
+	resolvedTelegraph,
+	type SpecialActionOutcome,
+	telegraphReady,
+} from "./MonsterTelegraphs";
 
 // A hex replaces that phase's attack: prepare while it sees you, then resolve next action.
 // Breaking its sight or leaving range avoids it; landing deals arcane damage and Curse.
@@ -14,9 +18,7 @@ export const resolveMonsterHex = (
 	state: GameState,
 	monster: Monster,
 	detected: boolean,
-):
-	| { monster: Monster; events: ActivityEvent[]; damage?: number }
-	| undefined => {
+): SpecialActionOutcome | undefined => {
 	const hex = MONSTER_DEFINITIONS[monster.kind].hexAttack;
 	if (!hex) return undefined;
 	const turn = state.turn;
@@ -25,11 +27,7 @@ export const resolveMonsterHex = (
 		orthogonalDistance(monster.coordinate, state.run.playerCoordinate) <=
 			hex.range;
 	if (monster.intent.type === "preparing-hex") {
-		const resolved = {
-			...monster,
-			intent: { type: "idle" as const },
-			hexTurn: turn,
-		};
+		const resolved = resolvedTelegraph(monster, "hex", turn);
 		if (!inReach)
 			return {
 				monster: resolved,
@@ -46,12 +44,13 @@ export const resolveMonsterHex = (
 				{ type: "monster-hex-hit", monster: monster.kind, damage, turn },
 			],
 			damage,
+			affliction: "curse",
 		};
 	}
 	if (
 		monster.intent.type !== "idle" ||
 		!inReach ||
-		(monster.hexTurn !== undefined && turn - monster.hexTurn <= hex.cooldown)
+		!telegraphReady(monster, "hex", turn)
 	)
 		return undefined;
 	const target = { ...state.run.playerCoordinate };

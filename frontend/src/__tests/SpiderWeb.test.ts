@@ -58,7 +58,7 @@ it("telegraphs a web at the seen tile, then Slows a player who stays, without da
 	expect(caught.effects).toEqual([]);
 	expect(caught.monsters[0]).toMatchObject({
 		intent: { type: "idle" },
-		webTurn: caught.turn,
+		telegraphTurn: { web: caught.turn },
 	});
 });
 
@@ -97,7 +97,7 @@ it("refreshes Slowed on a second web, ignores magic resistance, and Sleep cancel
 		wait({
 			...caught,
 			afflictions: [{ kind: "slowed", remaining: 4, source: "giant spider" }],
-			monsters: [{ ...caught.monsters[0], webTurn: -10 }],
+			monsters: [{ ...caught.monsters[0], telegraphTurn: { web: -10 } }],
 		}),
 	);
 	expect(again.afflictions).toEqual([
@@ -129,7 +129,7 @@ it("saves a prepared web and cooldown, continuing identically, and rejects impos
 		lastDamagedTurn: null,
 		kind: "spider" as const,
 		health: 8,
-		webTurn: original.state.turn,
+		telegraphTurn: { web: original.state.turn },
 		intent: {
 			type: "preparing-web" as const,
 			target: original.state.run.playerCoordinate,
@@ -155,9 +155,14 @@ it("saves a prepared web and cooldown, continuing identically, and rejects impos
 	if (!parsed.ok) throw new Error(parsed.error);
 	expect(
 		restoreSave(parsed.value).state.monsters.find((m) => m.id === first.id),
-	).toMatchObject({ webTurn: spider.webTurn, intent: spider.intent });
+	).toMatchObject({
+		telegraphTurn: spider.telegraphTurn,
+		intent: spider.intent,
+	});
 	expect(save({ ...spider, kind: "goblin", health: 4 }).ok).toBe(false);
-	expect(save({ ...spider, webTurn: original.state.turn + 1 }).ok).toBe(false);
+	expect(
+		save({ ...spider, telegraphTurn: { web: original.state.turn + 1 } }).ok,
+	).toBe(false);
 });
 
 it("marks the shallowest spider of a new adventure to drop one Cleansing potion", () => {

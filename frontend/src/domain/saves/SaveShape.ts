@@ -21,6 +21,10 @@ import { ITEM_DEFINITIONS, RARE_EQUIPMENT_KINDS } from "../items/Item";
 import { isEnchantableKind, MAX_ENCHANTMENT } from "../items/ItemValues";
 import { isMerchantStock } from "../merchant/MerchantRules";
 import { MONSTER_DEFINITIONS } from "../monsters/Monster";
+import {
+	isTargetTelegraph,
+	TELEGRAPH_COOLDOWNS,
+} from "../monsters/MonsterTelegraphs";
 import { OBJECT_DEFINITIONS } from "../objects/DungeonObject";
 import { SANCTUARY_CONDITIONS, SANCTUARY_SERVICES } from "../town/Sanctuary";
 import { isTownPotionStock } from "../town/TownEconomy";
@@ -366,12 +370,6 @@ const monsterIntent: Schema = (value) => {
 		case "idle":
 		case "recovering-charge":
 			return Object.keys(value).length === 1;
-		case "preparing-attack":
-		case "preparing-web":
-		case "preparing-hex":
-		case "preparing-charge":
-		case "preparing-alarm":
-			return Object.keys(value).length === 2 && coordinate(value.target);
 		case "preparing-area":
 			return (
 				Object.keys(value).length === 5 &&
@@ -384,7 +382,12 @@ const monsterIntent: Schema = (value) => {
 				Number(value.remaining) <= Number(value.radius) + 1
 			);
 		default:
-			return false;
+			return (
+				typeof value.type === "string" &&
+				isTargetTelegraph(value.type) &&
+				Object.keys(value).length === 2 &&
+				coordinate(value.target)
+			);
 	}
 };
 const monsterAwareness: Schema = (value) =>
@@ -395,7 +398,7 @@ const monsterAwareness: Schema = (value) =>
 			(value.type !== "pursuing" || integer(0, 100)(value.blocked))));
 
 const documentShape = object({
-	version: oneOf([28]),
+	version: oneOf([29]),
 	savedAt: (value) =>
 		text(value) &&
 		typeof value === "string" &&
@@ -558,8 +561,16 @@ const documentShape = object({
 				alarmUsed: optional(boolean),
 				heroic: optional(boolean),
 				remedyDrop: optional(boolean),
-				webTurn: optional(natural),
-				hexTurn: optional(natural),
+				// Which kinds a monster may hold is a consistency rule.
+				telegraphTurn: optional(
+					(value) =>
+						record(value) &&
+						Object.keys(value).length > 0 &&
+						Object.entries(value).every(
+							([kind, turn]) =>
+								Object.hasOwn(TELEGRAPH_COOLDOWNS, kind) && natural(turn),
+						),
+				),
 			}),
 			0,
 			10000,

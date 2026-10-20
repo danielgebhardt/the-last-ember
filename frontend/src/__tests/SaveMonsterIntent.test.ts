@@ -27,8 +27,11 @@ const preparedAdventure = () => {
 		{ row, col: col + 1 },
 	].find((point) => floor.terrain[point.row]?.[point.col] === ".");
 	if (!target) throw new Error("Fixture requires an adjacent walkable target");
+	// Only monsters that prepare heavy attacks may save that intent.
 	const preparing = {
 		...monster,
+		kind: "dungeon-brute" as const,
+		health: 1,
 		intent: { type: "preparing-attack" as const, target },
 	};
 	document.state.monsters = [preparing];
@@ -50,7 +53,7 @@ describe("Monster intent and versioned saves", () => {
 		const parsed = parseSave(serializeSave(document));
 		if (!parsed.ok) throw new Error(parsed.error);
 		const restored = restoreSave(parsed.value);
-		expect(parsed.value.version).toBe(28);
+		expect(parsed.value.version).toBe(29);
 		expect(restored.state.monsters).toEqual([preparing]);
 		const written = createSaveDocument(
 			restored.state,

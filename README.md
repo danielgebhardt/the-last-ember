@@ -33,7 +33,7 @@ Seed replay is deterministic for the same rules version, configuration and actio
 
 ## Saves and release compatibility
 
-**Only the current save format (v28) is supported.** Before public release, breaking changes bump the version instead of carrying compatibility code. Unsupported saves produce an error; loading never regenerates or silently resets them. A rejected import does not replace the current adventure or browser save.
+**Only the current save format (v29) is supported.** Before public release, breaking changes bump the version instead of carrying compatibility code. Unsupported saves produce an error; loading never regenerates or silently resets them. A rejected import does not replace the current adventure or browser save.
 
 Browser Save/Load and file import/export persist the actual dungeon, discovery, actors, inventory, stock, conditions, permanent attributes and portal anchor. They validate shape, bounded input and cross-field consistency before restoring. Reading the browser slot does not rewrite it. The historical storage key `larn:adventure-save` and internal item keys remain stable.
 

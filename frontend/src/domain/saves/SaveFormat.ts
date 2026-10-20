@@ -16,7 +16,7 @@ import { navigationRun } from "../objects/NavigationTerrain";
 import type { SaveDocument } from "./SaveDocument";
 import { validateSaveDocument } from "./SaveValidation";
 
-export const SAVE_FORMAT_VERSION = 28;
+export const SAVE_FORMAT_VERSION = 29;
 // Bound imported input before parsing. A maximum-size snapshot is measured in the review.
 export const MAX_SAVE_BYTES = 4 * 1024 * 1024;
 
@@ -144,8 +144,7 @@ export const createSaveDocument = (
 				alarmUsed,
 				heroic,
 				remedyDrop,
-				webTurn,
-				hexTurn,
+				telegraphTurn,
 			}) => ({
 				id,
 				kind,
@@ -157,26 +156,21 @@ export const createSaveDocument = (
 				alarmUsed,
 				...(heroic !== undefined ? { heroic } : {}),
 				...(remedyDrop !== undefined ? { remedyDrop } : {}),
-				...(webTurn !== undefined ? { webTurn } : {}),
-				...(hexTurn !== undefined ? { hexTurn } : {}),
+				...(telegraphTurn !== undefined
+					? { telegraphTurn: { ...telegraphTurn } }
+					: {}),
 				intent:
 					intent.type === "idle" || intent.type === "recovering-charge"
 						? { type: intent.type }
-						: intent.type === "preparing-charge" ||
-								intent.type === "preparing-alarm"
-							? { type: intent.type, target: { ...intent.target } }
-							: intent.type === "preparing-area"
-								? {
-										type: "preparing-area",
-										target: { ...intent.target },
-										radius: intent.radius,
-										element: intent.element,
-										remaining: intent.remaining,
-									}
-								: {
-										type: intent.type,
-										target: { ...intent.target },
-									},
+						: intent.type === "preparing-area"
+							? {
+									type: "preparing-area",
+									target: { ...intent.target },
+									radius: intent.radius,
+									element: intent.element,
+									remaining: intent.remaining,
+								}
+							: { type: intent.type, target: { ...intent.target } },
 			}),
 		),
 		activityHistory: state.activityHistory,

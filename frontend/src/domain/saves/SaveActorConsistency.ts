@@ -6,6 +6,11 @@ import {
 } from "../monsters/MonsterLocations";
 import { maximumMonsterHealth } from "../monsters/MonsterStats";
 import {
+	TARGET_TELEGRAPHS,
+	TELEGRAPH_COOLDOWNS,
+	type TelegraphCooldown,
+} from "../monsters/MonsterTelegraphs";
+import {
 	sarcophagusGuardianKind,
 	sarcophagusOutcome,
 } from "../objects/AncientSarcophagi";
@@ -71,12 +76,12 @@ export const hasConsistentActors = (document: SaveDocument): boolean => {
 				(entry.remedyDrop === undefined ||
 					(entry.remedyDrop === true &&
 						monsterAffliction(entry.kind) !== undefined)) &&
-				(entry.webTurn === undefined ||
-					(!!MONSTER_DEFINITIONS[entry.kind].webAttack &&
-						entry.webTurn <= state.turn)) &&
-				(entry.hexTurn === undefined ||
-					(!!MONSTER_DEFINITIONS[entry.kind].hexAttack &&
-						entry.hexTurn <= state.turn)) &&
+				Object.entries(entry.telegraphTurn ?? {}).every(
+					([kind, turn]) =>
+						TELEGRAPH_COOLDOWNS[kind as TelegraphCooldown](
+							MONSTER_DEFINITIONS[entry.kind],
+						) !== undefined && turn <= state.turn,
+				) &&
 				walkable(entry.floorNumber, entry.coordinate) &&
 				!protectedLocations
 					.get(entry.floorNumber)
@@ -109,65 +114,35 @@ export const hasConsistentActors = (document: SaveDocument): boolean => {
 		!document.state.monsters.every(
 			(monster) =>
 				monster.intent.type === "idle" ||
-				(monster.intent.type === "preparing-alarm"
-					? !!MONSTER_DEFINITIONS[monster.kind].alarmRadius &&
-						!("alarmUsed" in monster && monster.alarmUsed === true) &&
-						walkable(monster.floorNumber, monster.intent.target) &&
-						orthogonalDistance(monster.coordinate, monster.intent.target) > 0 &&
-						Math.hypot(
-							monster.coordinate.row - monster.intent.target.row,
-							monster.coordinate.col - monster.intent.target.col,
-						) <=
-							MONSTER_DEFINITIONS[monster.kind].detectionRadius + 2
-					: monster.intent.type === "recovering-charge"
-						? !!MONSTER_DEFINITIONS[monster.kind].chargeRange
-						: monster.intent.type === "preparing-charge"
-							? !!MONSTER_DEFINITIONS[monster.kind].chargeRange &&
-								walkable(monster.floorNumber, monster.intent.target) &&
-								(monster.coordinate.row === monster.intent.target.row ||
-									monster.coordinate.col === monster.intent.target.col) &&
-								orthogonalDistance(monster.coordinate, monster.intent.target) >=
-									2 &&
-								orthogonalDistance(monster.coordinate, monster.intent.target) <=
-									(MONSTER_DEFINITIONS[monster.kind].chargeRange ?? 0)
-							: monster.intent.type === "preparing-area"
-								? (() => {
-										const profile =
-											MONSTER_DEFINITIONS[monster.kind].areaAttack;
-										const intent = monster.intent;
-										return (
-											!!profile &&
-											intent.radius === profile.radius &&
-											intent.element === profile.element &&
-											intent.remaining <= profile.radius + 1 &&
-											walkable(monster.floorNumber, intent.target) &&
-											orthogonalDistance(monster.coordinate, intent.target) <=
-												profile.range &&
-											hasLineOfSight(
-												floorAt(monster.floorNumber).terrain.map((row) => [
-													...row,
-												]),
-												monster.coordinate,
-												intent.target,
-											)
-										);
-									})()
-								: monster.intent.type === "preparing-web" ||
-										monster.intent.type === "preparing-hex"
-									? walkable(monster.floorNumber, monster.intent.target) &&
-										orthogonalDistance(
-											monster.coordinate,
-											monster.intent.target,
-										) <=
-											((monster.intent.type === "preparing-web"
-												? MONSTER_DEFINITIONS[monster.kind].webAttack?.range
-												: MONSTER_DEFINITIONS[monster.kind].hexAttack?.range) ??
-												0)
-									: walkable(monster.floorNumber, monster.intent.target) &&
-										orthogonalDistance(
-											monster.coordinate,
-											monster.intent.target,
-										) === 1),
+				(monster.intent.type === "recovering-charge"
+					? !!MONSTER_DEFINITIONS[monster.kind].chargeRange
+					: monster.intent.type === "preparing-area"
+						? (() => {
+								const profile = MONSTER_DEFINITIONS[monster.kind].areaAttack;
+								const intent = monster.intent;
+								return (
+									!!profile &&
+									intent.radius === profile.radius &&
+									intent.element === profile.element &&
+									intent.remaining <= profile.radius + 1 &&
+									walkable(monster.floorNumber, intent.target) &&
+									orthogonalDistance(monster.coordinate, intent.target) <=
+										profile.range &&
+									hasLineOfSight(
+										floorAt(monster.floorNumber).terrain.map((row) => [...row]),
+										monster.coordinate,
+										intent.target,
+									)
+								);
+							})()
+						: TARGET_TELEGRAPHS[monster.intent.type].owns(
+								MONSTER_DEFINITIONS[monster.kind],
+							) &&
+							walkable(monster.floorNumber, monster.intent.target) &&
+							TARGET_TELEGRAPHS[monster.intent.type].reaches(
+								monster,
+								monster.intent.target,
+							)),
 		)
 	)
 		return false;

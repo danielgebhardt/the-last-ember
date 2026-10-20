@@ -52,7 +52,7 @@ it("prepares a hex in sight, then lands damage and Curse on its next action", ()
 	]);
 	expect(hexed.monsters[0]).toMatchObject({
 		intent: { type: "idle" },
-		hexTurn: hexed.turn,
+		telegraphTurn: { hex: hexed.turn },
 	});
 	expect(types(hexed)).toEqual([
 		"monster-hex-prepared",
@@ -126,13 +126,16 @@ it("saves a prepared hex and its cooldown, and rejects them on other kinds", () 
 		);
 	const preparing = withHex({
 		intent: { type: "preparing-hex", target: { ...first.coordinate } },
-		hexTurn: 0,
+		telegraphTurn: { hex: 0 },
 	});
 	const parsed = save(preparing);
 	if (!parsed.ok) throw new Error(parsed.error);
 	expect(
 		restoreSave(parsed.value).state.monsters.find((m) => m.id === first.id),
-	).toMatchObject({ intent: { type: "preparing-hex" }, hexTurn: 0 });
+	).toMatchObject({
+		intent: { type: "preparing-hex" },
+		telegraphTurn: { hex: 0 },
+	});
 	expect(
 		save({
 			...preparing,

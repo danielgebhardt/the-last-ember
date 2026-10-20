@@ -432,7 +432,7 @@ it("mitigates breath once while leaving physical hits, poison application/ticks 
 		health: 8,
 		intent: { type: "idle" as const },
 		// Web on cooldown so this phase isolates the poison bite.
-		webTurn: state.turn,
+		telegraphTurn: { web: state.turn },
 	};
 	const ordinaryHit = resolvePlayerAction(
 		{ ...state, equipment: ordinary, monsters: [actor] },

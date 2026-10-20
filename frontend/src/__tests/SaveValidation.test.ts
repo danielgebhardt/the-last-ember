@@ -10,7 +10,7 @@ describe("Current save validation", () => {
 		const result = validateSaveDocument(source);
 		expect(result.ok).toBe(true);
 		if (!result.ok) throw new Error(result.error);
-		expect(result.value.version).toBe(28);
+		expect(result.value.version).toBe(29);
 		expect(result.value.state.turn).toBe(source.state.turn);
 		expect(result.value.state.run).toEqual(source.state.run);
 		expect(source).toEqual(before);
@@ -65,7 +65,7 @@ describe("Current save validation", () => {
 			error: "This save contains inconsistent adventure data.",
 		});
 	});
-	it.each([undefined, null, [], "save", { version: 28 }])(
+	it.each([undefined, null, [], "save", { version: 29 }])(
 		"reports malformed adventure data for %j",
 		(source) => {
 			expect(validateSaveDocument(source)).toEqual({
@@ -77,8 +77,8 @@ describe("Current save validation", () => {
 	it.each([
 		{},
 		{ version: 0 },
-		{ version: 27 },
-		{ version: 29 },
+		{ version: 28 },
+		{ version: 30 },
 		{ version: "19" },
 		{ version: "toString" },
 	])("reports unsupported versions for %j", (source) => {

@@ -18,7 +18,7 @@ Efficiency must preserve correctness, deterministic gameplay, save ownership, ke
 
 ## Save compatibility
 
-Pre-public-release, the developer is the only player. Only the **current** save version loads (v28); older saves are rejected with the unsupported-version message. On a breaking persisted-state change, bump `SAVE_FORMAT_VERSION` and refresh the captured fixture instead of adding optional legacy fields, marker flags, retired-data tables or migrations. Keep current-format validation, ownership/corruption checks and deterministic save/load continuation. Follow `docs/save-policy.md`. Once outside players join, decide the compatibility policy explicitly before changing the persisted contract.
+Pre-public-release, the developer is the only player. Only the **current** save version loads (v29); older saves are rejected with the unsupported-version message. On a breaking persisted-state change, bump `SAVE_FORMAT_VERSION` and refresh the captured fixture instead of adding optional legacy fields, marker flags, retired-data tables or migrations. Keep current-format validation, ownership/corruption checks and deterministic save/load continuation. Follow `docs/save-policy.md`. Once outside players join, decide the compatibility policy explicitly before changing the persisted contract.
 
 ## Supported screens
 

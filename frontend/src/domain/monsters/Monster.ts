@@ -11,6 +11,7 @@ import {
 	type DamageElement,
 } from "../game/DamageElements";
 import type { ItemKind } from "../items/Item";
+import type { TelegraphCooldown } from "./MonsterTelegraphs";
 
 export type EnemySpellKind = "ember-bolt" | "shock" | "heal";
 export type MonsterKind = keyof typeof monsterCatalog;
@@ -50,10 +51,8 @@ export type Monster = {
 	heroic?: boolean;
 	// The first affliction source of an adventure guarantees its matching remedy drop.
 	remedyDrop?: boolean;
-	// Turn its last web resolved; starts the web cooldown.
-	webTurn?: number;
-	// Turn of the last resolved hex; another needs more than its cooldown.
-	hexTurn?: number;
+	// Turn each cooldown telegraph last resolved; another needs more than its cooldown.
+	telegraphTurn?: Partial<Record<TelegraphCooldown, number>>;
 };
 
 export type MonsterDefinition = {
