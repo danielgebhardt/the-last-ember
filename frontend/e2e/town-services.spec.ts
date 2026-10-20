@@ -77,3 +77,48 @@ for (const width of [390, 1440])
 		await expect(forge).toContainText("Gold: 350");
 		await expect(forge).toContainText("Short sword +1");
 	});
+
+test("Town library: learn one seeded book for 1000 gold, then save/load keeps it known", async ({
+	page,
+}) => {
+	await importAdventure(page, "town-library");
+	const townMap = page.getByLabel("Town map", { exact: true });
+	await page.keyboard.press("e");
+	const library = page.getByRole("dialog", { name: "Library" });
+	await expect(library).toContainText("Gold: 1200");
+	await expect(library.getByRole("listitem")).toHaveCount(3);
+	const learn = library.getByRole("button", { name: /^Learn / }).first();
+	const spell = (await learn.textContent())?.replace("Learn ", "") ?? "";
+	await learn.click();
+	const confirm = library.getByRole("group", {
+		name: "Confirm spellbook purchase",
+	});
+	await expect(confirm).toBeFocused();
+	await confirm
+		.getByRole("button", { name: "Confirm purchase", exact: true })
+		.click();
+	await expect(library).toContainText("Gold: 200");
+	await expect(
+		library.getByRole("button", { name: `${spell} (Already known)` }),
+	).toBeDisabled();
+	await library
+		.getByRole("button", { name: "Leave library", exact: true })
+		.click();
+	await expect(townMap).toBeFocused();
+	await expect(turns(page)).toHaveText("Turn 0");
+
+	await page.getByRole("button", { name: "Save/Load", exact: true }).click();
+	await saveSheet(page)
+		.getByRole("button", { name: "Save adventure", exact: true })
+		.click();
+	await page.getByRole("button", { name: "Confirm save", exact: true }).click();
+	await saveSheet(page)
+		.getByRole("button", { name: "Load adventure", exact: true })
+		.click();
+	await page.getByRole("button", { name: "Confirm load", exact: true }).click();
+	await expect(townMap).toBeFocused();
+	await page.keyboard.press("e");
+	await expect(
+		library.getByRole("button", { name: `${spell} (Already known)` }),
+	).toBeDisabled();
+});

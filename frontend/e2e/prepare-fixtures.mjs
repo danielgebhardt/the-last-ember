@@ -270,6 +270,12 @@ export default async function prepareFixtures() {
 			gold: 400,
 			town: { ...createTownLocation(), coordinate: { row: 5, col: 7 } },
 		};
+		// Beside the Quiet Lane library with enough gold for one book.
+		const townLibrary = {
+			...fresh,
+			gold: 1200,
+			town: { ...createTownLocation(), coordinate: { row: 5, col: 3 } },
+		};
 		// Beside the Forge Court doorway with the starting sword and shield.
 		const townForge = {
 			...fresh,
@@ -980,6 +986,7 @@ export default async function prepareFixtures() {
 			["diseased", diseased, configuration],
 			["town-diseased", townDiseased, configuration],
 			["town-forge", townForge, configuration],
+			["town-library", townLibrary, configuration],
 			["plague-bite", plagueBite, configuration],
 			["leech-bite", leechBite, configuration],
 			["forge", forgeState, forgeConfiguration],

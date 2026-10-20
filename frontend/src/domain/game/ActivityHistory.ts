@@ -83,6 +83,7 @@ export type ActivityEvent = { turn: number } & (
 			attribute?: "strength" | "dexterity" | "intelligence";
 			escaped: boolean;
 	  }
+	| { type: "library-learned"; spell: SpellKind; gold: number }
 	| {
 			type: "town-forged";
 			item: ItemKind;

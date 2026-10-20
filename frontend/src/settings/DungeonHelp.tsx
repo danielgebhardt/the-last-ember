@@ -37,6 +37,7 @@ import { TRAP_DISARM_EXPERIENCE } from "../domain/objects/DungeonObject";
 import { FORGE_PRICES } from "../domain/objects/ForgottenForge";
 import { SANCTUARY_CONDITION_FEES } from "../domain/town/Sanctuary";
 import { FORGE_TIER_PRICES } from "../domain/town/TownForge";
+import { LIBRARY_PRICE } from "../domain/town/TownLibrary";
 
 const Keycap = ({
 	children,
@@ -374,6 +375,13 @@ const DungeonHelp = ({
 						Every treatment shows its exact price and needs confirmation. Cures
 						keep buffs and restore no HP or mana; buy healing separately.
 						Treatment uses no dungeon turn.
+					</li>
+					<li>
+						<span className="font-medium text-foreground">Library.</span> Press
+						E at the Quiet Lane library doorway to browse three rare spellbooks,
+						fixed for each adventure and never ones its dungeon holds. Each
+						costs {LIBRARY_PRICE} gold and teaches its spell at once, with no
+						bag space or dungeon turn. Known spells cannot be bought again.
 					</li>
 					<li>
 						<span className="font-medium text-foreground">Town forge.</span>{" "}

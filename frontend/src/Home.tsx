@@ -42,6 +42,7 @@ import ObjectChoiceDialog from "./components/objects/ObjectChoiceDialog";
 import SanctuaryDialog from "./components/town/SanctuaryDialog";
 import TownEquipmentShop from "./components/town/TownEquipmentShop";
 import TownForgeDialog from "./components/town/TownForgeDialog";
+import TownLibraryDialog from "./components/town/TownLibraryDialog";
 import TownMap from "./components/town/TownMap";
 import TownPotionShop from "./components/town/TownPotionShop";
 import {
@@ -67,6 +68,7 @@ import {
 import { canReachSanctuary } from "./domain/town/Sanctuary";
 import { reachableTownEquipmentStore } from "./domain/town/TownEquipmentStore";
 import { canReachTownForge } from "./domain/town/TownForge";
+import { canReachTownLibrary } from "./domain/town/TownLibrary";
 import { atTownPortal } from "./domain/town/TownPortal";
 import { canReachTownPotionStore } from "./domain/town/TownPotionStore";
 import { canReachTownSalvageShop } from "./domain/town/TownSalvageShop";
@@ -604,19 +606,22 @@ const Home = ({
 												? "Sanctuary (E)"
 												: canReachTownForge(game.state)
 													? "Forge (E)"
-													: canReachTownPotionStore(game.state)
-														? "Potion store (E)"
-														: reachableTownEquipmentStore(game.state)
-															? "Equipment store (E)"
-															: canReachTownSalvageShop(game.state)
-																? "The Rag & Bone (E)"
-																: "Inspect nearby"
+													: canReachTownLibrary(game.state)
+														? "Library (E)"
+														: canReachTownPotionStore(game.state)
+															? "Potion store (E)"
+															: reachableTownEquipmentStore(game.state)
+																? "Equipment store (E)"
+																: canReachTownSalvageShop(game.state)
+																	? "The Rag & Bone (E)"
+																	: "Inspect nearby"
 										}
 										onAction={(action) => {
 											if (
 												action.type === "inspect" &&
 												(canReachSanctuary(game.state) ||
 													canReachTownForge(game.state) ||
+													canReachTownLibrary(game.state) ||
 													canReachTownPotionStore(game.state) ||
 													reachableTownEquipmentStore(game.state) ||
 													canReachTownSalvageShop(game.state))
@@ -806,6 +811,14 @@ const Home = ({
 				error={game.actionError}
 				onClose={() => setTownShopOpen(false)}
 				onTreat={handleActionRequested}
+				mapRef={mapRef}
+			/>
+			<TownLibraryDialog
+				open={townShopOpen && canPlay}
+				state={game.state}
+				error={game.actionError}
+				onClose={() => setTownShopOpen(false)}
+				onLearn={handleActionRequested}
 				mapRef={mapRef}
 			/>
 			<TownForgeDialog

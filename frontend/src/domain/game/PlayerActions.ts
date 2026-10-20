@@ -55,6 +55,7 @@ import {
 	buyTownEquipment,
 } from "../town/TownEquipmentStore";
 import { reforgeAtTown, type TownForgeAction } from "../town/TownForge";
+import { type LibraryLearnAction, learnAtLibrary } from "../town/TownLibrary";
 import {
 	type ReturnTownPortalAction,
 	returnThroughTownPortal,
@@ -98,6 +99,7 @@ import { advanceTimedEffects } from "./TimedEffects";
 export type PlayerAction =
 	| SanctuaryAction
 	| TownForgeAction
+	| LibraryLearnAction
 	| ReturnTownPortalAction
 	| TownSellAction
 	| BuyTownEquipmentAction
@@ -144,7 +146,8 @@ export const resolvePlayerAction = (
 			action.type === "sell-town-equipment" ||
 			action.type === "sell-town-lower" ||
 			action.type === "sanctuary-treatment" ||
-			action.type === "town-forge"
+			action.type === "town-forge" ||
+			action.type === "library-learn"
 				? { error: "The adventure is complete." }
 				: {}),
 		};
@@ -188,7 +191,8 @@ export const resolvePlayerAction = (
 						action.type === "sell-town-equipment" ||
 						action.type === "sell-town-lower" ||
 						action.type === "sanctuary-treatment" ||
-						action.type === "town-forge"
+						action.type === "town-forge" ||
+						action.type === "library-learn"
 					? { error: "This adventure has ended." }
 					: {}),
 		};
@@ -207,6 +211,7 @@ export const resolvePlayerAction = (
 	if (action.type === "sanctuary-treatment")
 		return treatAtSanctuary(state, action);
 	if (action.type === "town-forge") return reforgeAtTown(state, action);
+	if (action.type === "library-learn") return learnAtLibrary(state, action);
 	if (state.town) {
 		if (action.type === "wait") return { state, turnAdvanced: false };
 		if (action.type !== "move" && action.type !== "inspect-town")
@@ -310,6 +315,7 @@ const resolvePlayerEffect = (
 		PlayerAction,
 		| SanctuaryAction
 		| TownForgeAction
+		| LibraryLearnAction
 		| HotbarAction
 		| SpellAssignmentAction
 		| TownTravelAction

@@ -136,6 +136,7 @@ const eventFields = {
 		attribute: optional(oneOf(["strength", "dexterity", "intelligence"])),
 		escaped: boolean,
 	},
+	"library-learned": { spell: spellKind, gold: integer(1, 10000) },
 	"town-forged": {
 		item: itemKind,
 		enchantment: integer(1, MAX_ENCHANTMENT),

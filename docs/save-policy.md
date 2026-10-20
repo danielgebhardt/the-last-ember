@@ -82,3 +82,7 @@ Retain v27. `sanctuary-treated` Activity entries accept the `mana-burn` service 
 ## Mana Leech (#369)
 
 Retain v27. `mana-leech` is a new monster kind; its `remedyDrop` marker uses the existing per-affliction rule and needs `cleansingRemedies`. Activity adds `player-mana-drained` (`monster`, `mana` 1–100). Existing saves are unchanged on load. No migration.
+
+## Town forge and library (#338, #336)
+
+Retain v27. Activity adds `town-forged` (item, enchantment 1–3, gold) and `library-learned` (spell, gold). Reforged items reuse existing enchantment validation. Library offers are recomputed from the seed, and purchases are ordinary `knownSpells`, so no other state is added. No migration.

@@ -248,6 +248,7 @@ describe("Home Help menu", () => {
 		const help = await openHelp(user);
 		expect(help).toHaveTextContent("tier base (150, 300, 600, 1000 gold)");
 		expect(help).toHaveTextContent("Rare finds and rings cannot be reforged");
+		expect(help).toHaveTextContent("never ones its dungeon holds");
 	});
 	it("explains Wishing Well offerings, odds and the fixed result", async () => {
 		const user = renderHelpRun();
