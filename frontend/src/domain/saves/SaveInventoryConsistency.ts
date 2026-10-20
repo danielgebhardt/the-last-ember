@@ -14,6 +14,7 @@ import { chestReward } from "../objects/TreasureChests";
 import { wellReward } from "../objects/WishingWell";
 import { TOWN_POTION_OFFERS, type TownPotion } from "../town/TownEconomy";
 import {
+	LATE_TOWN_EQUIPMENT_OFFERS,
 	SAVED_TOWN_EQUIPMENT_OFFERS,
 	TOWN_EQUIPMENT_OFFERS,
 } from "../town/TownEquipmentStock";
@@ -62,6 +63,7 @@ export const hasConsistentInventory = (document: SaveDocument): boolean => {
 		if (
 			Object.keys(TOWN_EQUIPMENT_OFFERS).some(
 				(id) =>
+					!LATE_TOWN_EQUIPMENT_OFFERS.has(id) &&
 					!purchased.includes(id) &&
 					!state.townEquipmentStock.some((i) => i.id === id),
 			)

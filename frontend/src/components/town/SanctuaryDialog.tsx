@@ -19,6 +19,22 @@ const CONDITION_NAMES: Record<string, string> = {
 };
 const quoteDetails = (quote: SanctuaryQuote) =>
 	`${quote.health ? `Restore ${quote.health} HP` : "Restore no HP"}; maximum HP ${quote.maximumHealth}. ${quote.conditions.length ? `Remove ${quote.conditions.map((c) => CONDITION_NAMES[c] ?? c).join(" and ")}. ` : ""}Mana is unchanged. ${quote.cost} gold.`;
+// One compact line per service; the confirmation keeps the full quote wording.
+const rowDetails = (
+	quote: SanctuaryQuote,
+	player: { health: number; maxHealth: number },
+) => {
+	if (quote.service === "health")
+		return quote.health
+			? `+${quote.health} HP (${player.health} → ${player.health + quote.health})`
+			: "Already at full health";
+	if (!quote.conditions.length) return "Nothing to treat";
+	const capacity =
+		quote.maximumHealth !== player.maxHealth
+			? ` · max HP ${player.maxHealth} → ${quote.maximumHealth}`
+			: "";
+	return `Removes ${quote.conditions.map((c) => CONDITION_NAMES[c] ?? c).join(" and ")}${capacity}`;
+};
 const SanctuaryDialog = ({
 	open,
 	state,
@@ -71,22 +87,27 @@ const SanctuaryDialog = ({
 						if (e.repeat && ["Enter", " "].includes(e.key)) e.preventDefault();
 					}}
 				>
-					<Dialog.Title
-						ref={title}
-						tabIndex={-1}
-						className="text-xl font-semibold outline-none"
-					>
-						Sanctuary
-					</Dialog.Title>
+					<div className="flex flex-wrap items-baseline justify-between gap-x-4">
+						<Dialog.Title
+							ref={title}
+							tabIndex={-1}
+							className="text-xl font-semibold outline-none"
+						>
+							Sanctuary
+						</Dialog.Title>
+						<p className="flex items-baseline gap-3">
+							<span className="text-sm text-muted-foreground">
+								HP {state.player.health} / {state.player.maxHealth}
+							</span>
+							<span className="font-semibold">Gold: {state.gold}</span>
+						</p>
+					</div>
 					<Dialog.Description className="text-sm text-muted-foreground">
 						Mercy has a price. Only a confirmed paid treatment changes your
-						condition. Town treatments use no dungeon time.
+						condition. Town treatments use no dungeon time and never restore
+						mana.
 					</Dialog.Description>
-					<p>
-						Gold: {state.gold} · HP {state.player.health} /{" "}
-						{state.player.maxHealth}
-					</p>
-					<ul className="grid gap-3">
+					<ul className="grid divide-y rounded-lg border">
 						{SANCTUARY_SERVICES.map((service) => {
 							const quote = sanctuaryQuote(state, service);
 							const reason = !quote.cost
@@ -94,20 +115,33 @@ const SanctuaryDialog = ({
 								: state.gold < quote.cost
 									? "Not enough gold"
 									: null;
+							const nameId = `sanctuary-${service}-name`,
+								priceId = `sanctuary-${service}-price`;
 							return (
-								<li key={service} className="grid gap-2 rounded-lg border p-3">
-									<h3 className="font-semibold">
-										{SANCTUARY_SERVICE_NAMES[service]}
-									</h3>
-									<p>{quoteDetails(quote)}</p>
+								<li
+									key={service}
+									className={`flex flex-wrap items-center justify-between gap-x-3 gap-y-1 px-3 py-2 ${reason === "Not needed" ? "text-muted-foreground" : ""}`}
+								>
+									<span className="min-w-0">
+										<span id={nameId} className="font-semibold">
+											{SANCTUARY_SERVICE_NAMES[service]}
+										</span>{" "}
+										<span className="text-sm text-muted-foreground">
+											{rowDetails(quote, state.player)}
+										</span>
+									</span>
 									<Button
 										variant="outline"
-										className="min-h-11 whitespace-normal"
+										aria-labelledby={`${nameId} ${priceId}`}
+										className="min-h-11 shrink-0 tabular-nums"
 										disabled={pending !== null || reason !== null}
 										onClick={() => setPending(quote)}
 									>
-										{SANCTUARY_SERVICE_NAMES[service]}
-										{reason ? ` (${reason})` : ""}
+										<span id={priceId}>
+											{reason === "Not needed"
+												? "Not needed"
+												: `${quote.cost} gold${reason ? ` (${reason})` : ""}`}
+										</span>
 									</Button>
 								</li>
 							);

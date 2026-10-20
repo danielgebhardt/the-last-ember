@@ -30,19 +30,25 @@ it("opens the existing sanctuary, cancels freely, confirms health once and resto
 	const dialog = within(
 		await screen.findByRole("dialog", { name: "Sanctuary" }),
 	);
-	await user.click(dialog.getByRole("button", { name: "Restore health" }));
-	expect(dialog.getByText("Gold: 300 · HP 4 / 10")).toBeVisible();
+	await user.click(
+		dialog.getByRole("button", { name: /^Restore health \d+ gold$/ }),
+	);
+	expect(dialog.getByText("Gold: 300")).toBeVisible();
+	expect(dialog.getByText("HP 4 / 10")).toBeVisible();
 	await user.click(dialog.getByRole("button", { name: "Cancel treatment" }));
 	expect(
 		dialog.queryByRole("button", { name: "Confirm treatment" }),
 	).not.toBeInTheDocument();
-	await user.click(dialog.getByRole("button", { name: "Restore health" }));
+	await user.click(
+		dialog.getByRole("button", { name: /^Restore health \d+ gold$/ }),
+	);
 	await user.dblClick(
 		dialog.getByRole("button", { name: "Confirm treatment" }),
 	);
-	expect(dialog.getByText("Gold: 240 · HP 10 / 10")).toBeVisible();
+	expect(dialog.getByText("Gold: 240")).toBeVisible();
+	expect(dialog.getByText("HP 10 / 10")).toBeVisible();
 	expect(
-		dialog.getByRole("button", { name: "Restore health (Not needed)" }),
+		dialog.getByRole("button", { name: "Restore health Not needed" }),
 	).toBeDisabled();
 	expect(screen.getByLabelText("Turn count")).toHaveTextContent("Turn 0");
 	await user.keyboard("{Escape}");

@@ -106,9 +106,10 @@ for (const width of [390, 1440])
 		const townMap = page.getByLabel("Town map", { exact: true });
 		await page.keyboard.press("e");
 		const sanctuary = page.getByRole("dialog", { name: "Sanctuary" });
-		await expect(sanctuary).toContainText("Gold: 400 · HP 4 / 8");
+		await expect(sanctuary).toContainText("Gold: 400");
+		await expect(sanctuary).toContainText("HP 4 / 8");
 		await sanctuary
-			.getByRole("button", { name: "Cure Disease", exact: true })
+			.getByRole("button", { name: "Cure Disease 150 gold", exact: true })
 			.click();
 		const confirm = sanctuary.getByRole("group", {
 			name: "Confirm sanctuary treatment",
@@ -120,17 +121,19 @@ for (const width of [390, 1440])
 		await confirm
 			.getByRole("button", { name: "Cancel treatment", exact: true })
 			.click();
-		await expect(sanctuary).toContainText("Gold: 400 · HP 4 / 8");
+		await expect(sanctuary).toContainText("Gold: 400");
+		await expect(sanctuary).toContainText("HP 4 / 8");
 		await sanctuary
-			.getByRole("button", { name: "Cure Disease", exact: true })
+			.getByRole("button", { name: "Cure Disease 150 gold", exact: true })
 			.click();
 		await confirm
 			.getByRole("button", { name: "Confirm treatment", exact: true })
 			.click();
-		await expect(sanctuary).toContainText("Gold: 250 · HP 4 / 10");
+		await expect(sanctuary).toContainText("Gold: 250");
+		await expect(sanctuary).toContainText("HP 4 / 10");
 		await expect(
 			sanctuary.getByRole("button", {
-				name: "Cure Disease (Not needed)",
+				name: "Cure Disease Not needed",
 				exact: true,
 			}),
 		).toBeDisabled();

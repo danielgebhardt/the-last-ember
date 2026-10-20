@@ -1,13 +1,11 @@
 import { Dialog } from "@base-ui/react/dialog";
+import { Tabs } from "@base-ui/react/tabs";
 import { type RefObject, useLayoutEffect, useRef, useState } from "react";
 import type { GameState } from "../../domain/game/GameState";
 import { canAddToBag } from "../../domain/items/Bag";
-import {
-	EQUIPMENT_SLOT_LABELS,
-	equipmentSlotFor,
-} from "../../domain/items/Equipment";
 import { compareEquipment } from "../../domain/items/EquipmentComparison";
-import { ITEM_DEFINITIONS } from "../../domain/items/Item";
+import { ITEM_DEFINITIONS, type ItemInstance } from "../../domain/items/Item";
+import { itemName } from "../../domain/items/ItemValues";
 import {
 	TOWN_EQUIPMENT_OFFERS,
 	townEquipmentOffers,
@@ -19,6 +17,16 @@ import {
 import EquipmentComparisonView from "../game/EquipmentComparisonView";
 import ItemIcon from "../items/ItemIcon";
 import { Button } from "../ui/button";
+import { EmberTab, EmberTabsList } from "../ui/EmberTabs";
+
+// Armor splits by slot so each tab fits without scrolling; weapons stay one list.
+const ARMOR_TABS = [
+	{ value: "chest-armor", label: "Body armor" },
+	{ value: "helmet", label: "Helmets" },
+	{ value: "shield", label: "Shields" },
+	{ value: "ring", label: "Rings" },
+] as const;
+type ArmorTab = (typeof ARMOR_TABS)[number]["value"];
 
 const TownEquipmentShop = ({
 	open,
@@ -39,6 +47,7 @@ const TownEquipmentShop = ({
 	const title = useRef<HTMLHeadingElement>(null),
 		confirmation = useRef<HTMLFieldSetElement>(null);
 	const [pending, setPending] = useState<string | null>(null);
+	const [tab, setTab] = useState<ArmorTab>("chest-armor");
 	useLayoutEffect(() => {
 		if (!open) setPending(null);
 	}, [open]);
@@ -59,6 +68,51 @@ const TownEquipmentShop = ({
 	};
 	const selected = pending ? TOWN_EQUIPMENT_OFFERS[pending] : null;
 	const name = store === "armor" ? "armor" : "weapon";
+	const offerList = (include: (item: ItemInstance) => boolean) => (
+		<ul className="grid gap-3 sm:grid-cols-2">
+			{townEquipmentOffers()
+				.filter((offer) => offer.store === store && include(offer.item))
+				.map(({ item, price }) => {
+					const comparison = compareEquipment(item, state);
+					const reason = unavailable(item.id);
+					return (
+						<li
+							key={item.id}
+							className="flex flex-col gap-2 rounded-lg border bg-muted/20 p-3 text-sm"
+						>
+							<div className="flex items-start justify-between gap-3">
+								<h3 className="flex items-center gap-2 font-semibold">
+									<span className="size-6 shrink-0">
+										<ItemIcon kind={item.kind} />
+									</span>
+									{itemName(item)}
+								</h3>
+								<span
+									className={`shrink-0 rounded-md border border-amber-700/50 bg-amber-500/10 px-2 py-0.5 font-semibold tabular-nums text-amber-800 dark:text-amber-300 ${reason === "Not enough gold" ? "opacity-60" : ""}`}
+								>
+									{price} gold
+								</span>
+							</div>
+							<p className="text-muted-foreground">
+								{ITEM_DEFINITIONS[item.kind].description}
+							</p>
+							{comparison && (
+								<EquipmentComparisonView comparison={comparison} />
+							)}
+							<Button
+								variant="outline"
+								className="mt-auto min-h-11 whitespace-normal"
+								disabled={pending !== null || reason !== null}
+								onClick={() => setPending(item.id)}
+							>
+								Buy {itemName(item)}
+								{reason ? ` (${reason})` : ""}
+							</Button>
+						</li>
+					);
+				})}
+		</ul>
+	);
 	return (
 		<Dialog.Root
 			open={open && store !== null}
@@ -71,75 +125,67 @@ const TownEquipmentShop = ({
 				<Dialog.Popup
 					initialFocus={title}
 					finalFocus={mapRef}
-					className="fixed left-1/2 top-1/2 z-50 flex max-h-[calc(100dvh-2rem)] w-[min(64rem,calc(100vw-2rem))] -translate-x-1/2 -translate-y-1/2 flex-col gap-3 overflow-hidden rounded-xl border bg-card p-4 shadow-xl"
+					// Tabs swap content of different heights; a fixed armor-store height keeps the
+					// dialog still while switching. Weapons stay content-sized.
+					className={`fixed left-1/2 top-1/2 z-50 flex max-h-[calc(100dvh-2rem)] w-[min(64rem,calc(100vw-2rem))] -translate-x-1/2 -translate-y-1/2 flex-col gap-3 overflow-hidden rounded-xl border bg-card p-4 shadow-xl ${store === "armor" ? "h-[min(56rem,calc(100dvh-2rem))]" : ""}`}
 					onKeyDown={(event) => {
 						if (event.repeat && ["Enter", " "].includes(event.key))
 							event.preventDefault();
 					}}
 				>
-					<Dialog.Title
-						ref={title}
-						tabIndex={-1}
-						className="shrink-0 text-xl font-semibold outline-none"
-					>
-						Town {name} store
-					</Dialog.Title>
+					<div className="flex shrink-0 flex-wrap items-baseline justify-between gap-x-4">
+						<Dialog.Title
+							ref={title}
+							tabIndex={-1}
+							className="text-xl font-semibold outline-none"
+						>
+							Town {name} store
+						</Dialog.Title>
+						<p className="font-semibold">Gold: {state.gold}</p>
+					</div>
 					<Dialog.Description className="shrink-0 text-sm text-muted-foreground">
 						{store === "armor"
 							? "Protection sold separately from confidence."
 							: "Every edge has a price."}{" "}
 						Finite stock. Purchases go into your bag; nothing is automatically
-						equipped. Town stores do not buy items.
+						equipped. Compare your whole loadout before buying; equip or sell in
+						the dungeon. Town stores do not buy items.
 					</Dialog.Description>
-					<p className="shrink-0 font-semibold">Gold: {state.gold}</p>
-					<ul className="grid min-h-0 gap-3 overflow-y-auto sm:grid-cols-2">
-						{townEquipmentOffers()
-							.filter((offer) => offer.store === store)
-							.map(({ item, price }) => {
-								const definition = ITEM_DEFINITIONS[item.kind],
-									comparison = compareEquipment(item, state),
-									slot = equipmentSlotFor(item);
-								return (
-									<li
-										key={item.id}
-										className="flex flex-col gap-2 rounded-lg border bg-muted/20 p-3 text-sm"
-									>
-										<h3 className="flex items-center gap-2 font-semibold">
-											<span className="size-6 shrink-0">
-												<ItemIcon kind={item.kind} />
-											</span>
-											{definition.name}
-											{item.enchantment ? ` +${item.enchantment}` : ""}
-										</h3>
-										<p className="text-muted-foreground">
-											{definition.description}
-										</p>
-										<p>
-											{slot ? EQUIPMENT_SLOT_LABELS[slot] : "Equipment"} ·
-											Dungeon tier {definition.minFloor} · Enchantment +
-											{item.enchantment ?? 0}
-										</p>
-										<p>{price} gold</p>
-										{comparison && (
-											<EquipmentComparisonView comparison={comparison} />
-										)}
-										<Button
-											variant="outline"
-											className="mt-auto min-h-11 whitespace-normal"
-											disabled={
-												pending !== null || unavailable(item.id) !== null
-											}
-											onClick={() => setPending(item.id)}
-										>
-											Buy {definition.name}
-											{item.enchantment ? ` +${item.enchantment}` : ""}
-											{unavailable(item.id) ? ` (${unavailable(item.id)})` : ""}
-										</Button>
-									</li>
-								);
-							})}
-					</ul>
-					<div className="min-h-28 shrink-0 border-t pt-3">
+					{store === "armor" ? (
+						<Tabs.Root
+							value={tab}
+							onValueChange={(value) => setTab(value as ArmorTab)}
+							className="flex min-h-0 flex-1 flex-col gap-3"
+						>
+							<EmberTabsList aria-label="Armor categories" className="shrink-0">
+								{ARMOR_TABS.map(({ value, label }) => (
+									<EmberTab key={value} value={value}>
+										{label}
+									</EmberTab>
+								))}
+							</EmberTabsList>
+							{ARMOR_TABS.map(({ value, label }) => (
+								<Tabs.Panel
+									key={value}
+									value={value}
+									aria-label={label}
+									className="min-h-0 overflow-y-auto"
+								>
+									{offerList(
+										(item) => ITEM_DEFINITIONS[item.kind].type === value,
+									)}
+								</Tabs.Panel>
+							))}
+						</Tabs.Root>
+					) : (
+						<div className="min-h-0 overflow-y-auto">
+							{offerList(() => true)}
+						</div>
+					)}
+					{/* The confirmation area takes space only while it has something to show. */}
+					<div
+						className={`shrink-0 ${pending || error ? "border-t pt-3" : ""}`}
+					>
 						{selected && pending ? (
 							<fieldset
 								ref={confirmation}
@@ -148,11 +194,7 @@ const TownEquipmentShop = ({
 								className="space-y-2 outline-none"
 							>
 								<legend className="font-semibold">
-									Buy {ITEM_DEFINITIONS[selected.item.kind].name}
-									{selected.item.enchantment
-										? ` +${selected.item.enchantment}`
-										: ""}{" "}
-									for {selected.price} gold?
+									Buy {itemName(selected.item)} for {selected.price} gold?
 								</legend>
 								<p className="text-sm">
 									One specific copy, placed in your bag. No dungeon turn. Your
@@ -173,16 +215,10 @@ const TownEquipmentShop = ({
 									</Button>
 								</div>
 							</fieldset>
-						) : (
-							<p className="text-sm text-muted-foreground">
-								Compare your whole loadout before buying. Equip or sell
-								separately in the dungeon; wandering merchants retain their
-								existing sale rules.
-							</p>
-						)}
+						) : null}
 						<p
 							role="status"
-							className="min-h-6 pt-2 text-sm text-muted-foreground"
+							className={`text-sm text-muted-foreground ${error ? "pt-2" : ""}`}
 						>
 							{error}
 						</p>

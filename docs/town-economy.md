@@ -49,3 +49,9 @@ Town sales mutate only owned bag copies, gold and sale history. They do not tick
 The sanctuary uses the existing doorway in Quiet Lane. Its health service restores missing effective HP at 10 gold per HP, capped at 150 gold per treatment; full health costs nothing. It requires an explicit quote/confirmation and never refills mana or advances dungeon time. Entering town, walking and inspection provide no passive treatment.
 
 Sanctuary cures share that same service: poison 40 gold, Disease 150 gold, or complete cleanse for the sum of currently supported active fees capped at 600 gold. Cleanse preserves buffs and restores no HP/mana. Disease removal restores maximum HP without healing; a later health purchase quotes the newly missing amount. No condition means no charge.
+
+## Compact store layouts and the copper ring
+
+The armor store groups stock into Body armor, Helmets, Shields and Rings tabs and keeps a fixed dialog height so switching tabs never resizes it. Equipment cards show the price in a badge beside the name (enchantment appears in the name) and drop the slot/tier line; comparisons still carry the effect. Gold sits top-right in every store and the sanctuary. The sanctuary lists one compact row per service with its exact effect and price; the confirmation keeps the full quote. Shop potion copy omits dungeon-use mechanics (turn cost, stacking) that item details still explain.
+
+The armor store adds one Copper ring (+1 armor, either ring slot) at 150 gold. It is a late offer: v27 adventures created before it never stocked it, so validation permits its absence and loading never adds it. New adventures stock it.

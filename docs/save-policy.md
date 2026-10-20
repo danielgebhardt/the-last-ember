@@ -62,3 +62,7 @@ Retain v27 with an optional, explicitly written `DungeonObject.forgeResult`. Val
 ## Wishing Well (#349)
 
 Retain v27 with an optional `DungeonObject.wellResult` (offering, outcome) that must match the seed. Reward gear and the reserved `floor:1000002` hostile creature are validated against their spent well. No migration; only new adventures can contain wells.
+
+## Late town offers
+
+Retain v27. Offers listed in `LATE_TOWN_EQUIPMENT_OFFERS` (currently the Copper ring) may be absent from a saved adventure's stock and purchase ledger, because older adventures never stocked them; every other offer must still be in stock or purchased. Loading never adds stock.

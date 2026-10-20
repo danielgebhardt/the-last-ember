@@ -27,9 +27,17 @@ for (const [fixture, name, other, slot, width] of [
 			exact: true,
 		});
 		await expect(shop).toBeVisible();
+		// Armor is grouped by slot: each rare item lives on its own tab.
+		const tabFor = (item: string) =>
+			shop.getByRole("tab", {
+				name: item === "Warding Cloak" ? "Body armor" : "Shields",
+				exact: true,
+			});
+		await tabFor(other).click();
 		await expect(
 			shop.getByRole("heading", { name: other, exact: true }),
 		).toBeVisible();
+		await tabFor(name).click();
 		const card = shop
 			.getByRole("listitem")
 			.filter({ has: page.getByRole("heading", { name, exact: true }) });
@@ -77,6 +85,7 @@ for (const [fixture, name, other, slot, width] of [
 		await expect(map).toBeFocused();
 		await page.keyboard.press("e");
 		await expect(shop).toBeVisible();
+		await tabFor(name).click();
 		await expect(buy).toBeDisabled();
 		await page.keyboard.press("Escape");
 		await expect(map).toBeFocused();

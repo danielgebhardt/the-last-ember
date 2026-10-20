@@ -6,6 +6,7 @@ import {
 	createSaveDocument,
 	parseSave,
 	restoreSave,
+	serializeSave,
 } from "../domain/saves/SaveFormat";
 import {
 	createTownEquipmentStock,
@@ -144,6 +145,8 @@ describe.each(["armor", "weapons"] as const)("town %s store", (store) => {
 				});
 				expect(comparison).not.toBeNull();
 				if (!comparison) throw new Error("Expected equipment comparison");
+				// Rings have two slots and cannot be enchanted, so a worn +3 copy is not stronger.
+				if (offer.item.kind === "copper-ring") continue;
 				const stronger = compareEquipment(offer.item, {
 					...state,
 					progression: { ...state.progression, experience },
@@ -228,4 +231,29 @@ it("rejects duplicate, unknown and modified unsold stock copies", () => {
 			).ok,
 		).toBe(false);
 	}
+});
+
+it("lets older adventures without the late copper ring offer load unchanged", () => {
+	const ring = "town-gear:armor:copper-ring:0:1";
+	const document = savedAdventure();
+	expect(document.state.townEquipmentStock.some((i) => i.id === ring)).toBe(
+		true,
+	);
+	const older = structuredClone(document);
+	older.state.townEquipmentStock = older.state.townEquipmentStock.filter(
+		(i) => i.id !== ring,
+	);
+	const parsed = parseSave(serializeSave(older));
+	if (!parsed.ok) throw new Error(parsed.error);
+	expect(
+		restoreSave(parsed.value).state.townEquipmentStock.some(
+			(i) => i.id === ring,
+		),
+	).toBe(false);
+	const missingOriginal = structuredClone(document);
+	missingOriginal.state.townEquipmentStock =
+		missingOriginal.state.townEquipmentStock.filter(
+			(i) => i.id !== "town-gear:armor:leather-cap:0:1",
+		);
+	expect(parseSave(serializeSave(missingOriginal)).ok).toBe(false);
 });

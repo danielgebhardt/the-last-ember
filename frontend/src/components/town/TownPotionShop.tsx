@@ -75,19 +75,21 @@ const TownPotionShop = ({
 							event.preventDefault();
 					}}
 				>
-					<Dialog.Title
-						ref={title}
-						tabIndex={-1}
-						className="shrink-0 text-xl font-semibold outline-none"
-					>
-						Town potion store
-					</Dialog.Title>
+					<div className="flex shrink-0 flex-wrap items-baseline justify-between gap-x-4">
+						<Dialog.Title
+							ref={title}
+							tabIndex={-1}
+							className="text-xl font-semibold outline-none"
+						>
+							Town potion store
+						</Dialog.Title>
+						<p className="font-semibold">Gold: {state.gold}</p>
+					</div>
 					<Dialog.Description className="shrink-0 text-sm text-muted-foreground">
 						Bottles sealed. Prices less comforting. Finite town stock; no
 						restocking. Buying is free of dungeon time and never restores
 						resources by itself.
 					</Dialog.Description>
-					<p className="shrink-0 font-semibold">Gold: {state.gold}</p>
 					<ul className="grid min-h-0 gap-3 overflow-y-auto sm:grid-cols-2 lg:grid-cols-4">
 						{townPotionKinds.map((kind) => (
 							<li
@@ -126,7 +128,7 @@ const TownPotionShop = ({
 							</li>
 						))}
 					</ul>
-					<div className="min-h-28 shrink-0 border-t pt-3">
+					<div className="shrink-0 border-t pt-3">
 						{pending ? (
 							<fieldset
 								ref={confirmation}
@@ -176,7 +178,7 @@ const TownPotionShop = ({
 						)}
 						<p
 							role="status"
-							className="min-h-6 pt-2 text-sm text-muted-foreground"
+							className={`text-sm text-muted-foreground ${error ? "pt-2" : ""}`}
 						>
 							{error}
 						</p>

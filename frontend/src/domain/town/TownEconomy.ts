@@ -44,5 +44,14 @@ export const isTownPotionStock = (value: unknown): value is TownPotionStock => {
 		)
 	);
 };
+// Shop copy keeps the effect and drops dungeon-use mechanics (turn cost, stacking rules)
+// that the bag, item details and Catalog still explain in full.
 export const townPotionDescription = (kind: TownPotion): string =>
-	ITEM_DEFINITIONS[kind].description;
+	ITEM_DEFINITIONS[kind].description
+		.replace(
+			" Each bottle stacks with previous gains, separately from level, gear and temporary buffs.",
+			"",
+		)
+		.replace("Drinking uses one turn; it does not", "It does not")
+		.replace(/ (Drinking uses|Uses) one turn\./, "")
+		.trim();

@@ -33,12 +33,18 @@ export const TOWN_EQUIPMENT_OFFERS: Readonly<Record<string, Offer>> =
 			offer("armor", "iron-shield", 450),
 			offer("armor", "warding-cloak", 900),
 			offer("armor", "spellguard-shield", 900),
+			offer("armor", "copper-ring", 150),
 			offer("weapons", "iron-sword", 250),
 			offer("weapons", "iron-sword", 250, 2),
 			offer("weapons", "steel-sword", 700),
 			offer("weapons", "battle-axe", 1100),
 		].map((entry) => [entry.item.id, entry]),
 	);
+// Offers added after adventures already existed. Older v27 stock never contained them,
+// so validation permits their absence; loading never adds stock.
+export const LATE_TOWN_EQUIPMENT_OFFERS: ReadonlySet<string> = new Set([
+	"town-gear:armor:copper-ring:0:1",
+]);
 // v27 recognition only: existing enchanted copies remain valid, but are not offers.
 const retiredOffers = [
 	offer("armor", "leather-armor", 400, 1, 1),
