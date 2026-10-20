@@ -125,7 +125,7 @@ export const slowedDetails = (normalEvade?: number, evade?: number) =>
 	} Lasts 10 committed phases including the one it lands; refreshing resets the duration without deepening it. Cure with a Cleansing potion (one turn) or sanctuary Cure Slowed (${SANCTUARY_CONDITION_FEES.slowed} gold). Your actions and turns are unchanged.`;
 
 export const manaBurnDetails = () =>
-	`Passive mana recovery (1 mana every ${MANA_RECOVERY_INTERVAL} turns) stops while it lasts. Lasts 90 committed phases including the one it lands, so three recovery ticks are lost; refreshing resets the duration. Mana potions and affordable spells still work, and nothing is recovered afterward to make up for it. Cure with a Cleansing potion (one turn) or sanctuary treatment.`;
+	`Passive mana recovery (1 mana every ${MANA_RECOVERY_INTERVAL} turns) stops while it lasts. Lasts 90 committed phases including the one it lands, so three recovery ticks are lost; refreshing resets the duration. Mana potions and affordable spells still work, and nothing is recovered afterward to make up for it. Cure with a Cleansing potion (one turn) or sanctuary Cure Mana Burn (${SANCTUARY_CONDITION_FEES["mana-burn"]} gold); curing restores no mana.`;
 
 type AfflictionContext = {
 	normalMaxHealth?: number;

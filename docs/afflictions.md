@@ -85,3 +85,7 @@ Save format stays v27: the `afflictions` array accepts `mana-burn` with a remain
 ## Cleansing potion (#363, Mana Burn portion)
 
 The Cleansing potion now removes Slowed and Mana Burn, together when both are active, for one bottle and one turn. With neither active it is free and reports both absences. Activity's `item-cleansed` entry can record which afflictions were removed (`conditions`, optional), so it names them exactly. Cleansing loot keeps floors 3–12 under the existing `cleansingRemedies` marker. Widening it would change chest and drop rolls that existing saves already validate. Deeper Mana Burn exposure is covered by the first Mana Leech's guaranteed drop (#369) and the sanctuary. #363 stays open for Blinded.
+
+## Sanctuary Mana Burn cure (#364, Mana Burn portion)
+
+The sanctuary adds "Cure Mana Burn" at 75 gold (developer decision). It comes after Slowed in the stable fee order: poison, Disease, Slowed, Mana Burn. Curing restores passive recovery but no mana, HP or dungeon phase. Complete cleanse stays `min(600, sum of active fees)`; with the two-affliction cap the most it can cost is 40 + 150 + 75 = 265. #364 stays open for later conditions.

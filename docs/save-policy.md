@@ -74,3 +74,7 @@ Retain v27. The optional `afflictions` array accepts `mana-burn` with a numeric 
 ## Cleansing potion and Mana Burn (#363)
 
 Retain v27. Activity `item-cleansed` accepts an optional `conditions` list of one or two registered afflictions; earlier entries without it remain valid. Cleansing loot floors and weights are unchanged, so saved chest and drop validation is unaffected.
+
+## Sanctuary Mana Burn (#364)
+
+Retain v27. `sanctuary-treated` Activity entries accept the `mana-burn` service and condition. No migration.

@@ -357,11 +357,12 @@ const DungeonHelp = ({
 						10 gold per missing HP (up to 150), poison{" "}
 						{SANCTUARY_CONDITION_FEES.poisoned} gold, Disease{" "}
 						{SANCTUARY_CONDITION_FEES.disease} gold, Slowed{" "}
-						{SANCTUARY_CONDITION_FEES.slowed} gold, or a complete cleanse of
-						every active condition for their combined fee (at most 600). Every
-						treatment shows its exact price and needs confirmation. Cures keep
-						buffs and restore no HP or mana; buy healing separately. Treatment
-						uses no dungeon turn.
+						{SANCTUARY_CONDITION_FEES.slowed} gold, Mana Burn{" "}
+						{SANCTUARY_CONDITION_FEES["mana-burn"]} gold, or a complete cleanse
+						of every active condition for their combined fee (at most 600).
+						Every treatment shows its exact price and needs confirmation. Cures
+						keep buffs and restore no HP or mana; buy healing separately.
+						Treatment uses no dungeon turn.
 					</li>
 					<li>
 						<span className="font-medium text-foreground">Mana.</span> Recover 1
