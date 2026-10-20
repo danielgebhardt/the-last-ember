@@ -11,6 +11,7 @@ import {
 	sarcophagusGuardianKind,
 	sarcophagusOutcome,
 } from "../objects/AncientSarcophagi";
+import { WELL_SPAWN_ID, wellHostileKind } from "../objects/WishingWell";
 import {
 	sameCoordinate,
 	savedDifficulty,
@@ -49,6 +50,16 @@ export const hasConsistentActors = (document: SaveDocument): boolean => {
 				/^\d+:[1-9]\d*$/.test(entry.id) &&
 				Number(entry.id.split(":")[0]) === entry.floorNumber &&
 				entry.id.endsWith(":1000001") === (entry.heroic === true) &&
+				// A well's hostile result owns this reserved identity.
+				(!entry.id.endsWith(`:${WELL_SPAWN_ID}`) ||
+					state.objects.some(
+						(o) =>
+							o.kind === "well" &&
+							o.activated &&
+							o.floorNumber === entry.floorNumber &&
+							o.wellResult?.outcome === "negative" &&
+							entry.kind === wellHostileKind(run.seed, o),
+					)) &&
 				(!entry.heroic ||
 					state.objects.some(
 						(o) =>

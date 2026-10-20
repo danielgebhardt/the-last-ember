@@ -207,6 +207,18 @@ export default async function prepareFixtures() {
 				mainHand: { id: "worn:sword", kind: "iron-sword", enchantment: 1 },
 			},
 		};
+		const wellState = {
+			...forgeState,
+			objects: [
+				{
+					id: "floor:6:object:well:1",
+					kind: "well",
+					floorNumber: 6,
+					coordinate: { row: forgeStart.row, col: forgeStart.col + 1 },
+					activated: false,
+				},
+			],
+		};
 		const townDiseased = {
 			...diseased,
 			bag: { items: [] },
@@ -920,6 +932,7 @@ export default async function prepareFixtures() {
 			["town-diseased", townDiseased, configuration],
 			["plague-bite", plagueBite, configuration],
 			["forge", forgeState, forgeConfiguration],
+			["well", wellState, forgeConfiguration],
 			["spider-web", spiderWeb, configuration],
 			["scrolling", scrolling, configuration],
 			["stacks", stacks, configuration],

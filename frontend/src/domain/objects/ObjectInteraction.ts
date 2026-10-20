@@ -12,6 +12,7 @@ import { operateForge } from "./ForgottenForge";
 import { describeObject } from "./ObjectDescriptions";
 import { openDiscovery } from "./RareDiscoveries";
 import { openChest } from "./TreasureChests";
+import { offerAtWell } from "./WishingWell";
 export type ObjectChoice =
 	| "open-sarcophagus"
 	| "sip"
@@ -25,7 +26,10 @@ export type ObjectChoice =
 	| "open-elite"
 	| "forge-select"
 	| "forge-reliable"
-	| "forge-risky";
+	| "forge-risky"
+	| "offer-50"
+	| "offer-100"
+	| "offer-250";
 export type InteractAction = {
 	type: "interact";
 	objectId?: string;
@@ -85,6 +89,7 @@ export const interactObject = (
 		return { error: "Review the elite chamber before opening its gate." };
 	if (object.kind === "sarcophagus")
 		return openSarcophagus(state, object, action.choice);
+	if (object.kind === "well") return offerAtWell(state, object, action.choice);
 	if (object.kind === "forge")
 		return operateForge(state, object, action.choice, action.itemId);
 	if (object.kind === "reliquary" || object.kind === "archive")

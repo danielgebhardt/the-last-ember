@@ -58,3 +58,7 @@ Retain v27 with an optional `Monster.webTurn` cooldown (web kinds only, never af
 ## Forgotten Forge (#352)
 
 Retain v27 with an optional, explicitly written `DungeonObject.forgeResult`. Valid only on a spent forge (floor 6+, at most one); a risky result must equal the seed-derived outcome. Raising the shared discovery budget changes only new adventures because saved objects are authoritative.
+
+## Wishing Well (#349)
+
+Retain v27 with an optional `DungeonObject.wellResult` (offering, outcome) that must match the seed. Reward gear and the reserved `floor:1000002` hostile creature are validated against their spent well. No migration; only new adventures can contain wells.

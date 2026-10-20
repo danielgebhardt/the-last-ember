@@ -16,6 +16,12 @@ const hints: Record<DungeonObjectKind, { fresh: string; spent: string }> = {
 		spent:
 			"Opened once; the tomb cannot be rerolled. Any remaining treasure is on the floor for G pickup.",
 	},
+	well: {
+		fresh:
+			"Press E to review offerings: 50, 100 or 250 gold for a known chance of gear or a blessing, nothing, or a hostile creature. One offering.",
+		spent:
+			"The well has taken its offering; any gear it gave is on the floor for G pickup.",
+	},
 	forge: {
 		fresh:
 			"Press E to review forging: improve one ordinary weapon or armor piece for gold, reliably or at a risk of destroying it. One use.",

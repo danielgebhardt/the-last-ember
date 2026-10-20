@@ -6,6 +6,7 @@ import {
 	findOptionalEliteRooms,
 	sealedEliteTiles,
 } from "../objects/OptionalEliteRooms";
+import { wellOutcome } from "../objects/WishingWell";
 import {
 	sameCoordinate,
 	savedLocations,
@@ -83,6 +84,19 @@ export const hasConsistentGeometry = (document: SaveDocument): boolean => {
 		return false;
 	if (objects.filter((o) => o.kind === "sarcophagus").length > 1) return false;
 	if (objects.filter((o) => o.kind === "forge").length > 1) return false;
+	if (objects.filter((o) => o.kind === "well").length > 1) return false;
+	for (const object of objects)
+		if (
+			object.kind === "well"
+				? object.floorNumber < 3 ||
+					(object.activated
+						? !object.wellResult ||
+							object.wellResult.outcome !==
+								wellOutcome(run.seed, object, object.wellResult.offering)
+						: object.wellResult !== undefined)
+				: object.wellResult !== undefined
+		)
+			return false;
 	for (const object of objects)
 		if (
 			object.kind === "forge"

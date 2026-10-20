@@ -11,6 +11,7 @@ import {
 } from "../merchant/MerchantRules";
 import { sarcophagusOutcome } from "../objects/AncientSarcophagi";
 import { chestReward } from "../objects/TreasureChests";
+import { wellReward } from "../objects/WishingWell";
 import { TOWN_POTION_OFFERS, type TownPotion } from "../town/TownEconomy";
 import {
 	SAVED_TOWN_EQUIPMENT_OFFERS,
@@ -79,6 +80,20 @@ export const hasConsistentInventory = (document: SaveDocument): boolean => {
 					sarcophagusOutcome(state.run.seed, owner),
 				) ||
 				chestReward(state.run.seed, owner).item.kind !== item.kind
+			)
+				return false;
+		}
+
+		if (item.id.includes(":object:well:")) {
+			const owner = state.objects.find(
+				(o) => o.kind === "well" && `${o.id}:reward` === item.id,
+			);
+			const reward = owner && wellReward(state.run.seed, owner);
+			if (
+				!owner?.activated ||
+				owner.wellResult?.outcome !== "positive" ||
+				reward?.type !== "gear" ||
+				reward.kind !== item.kind
 			)
 				return false;
 		}

@@ -240,4 +240,11 @@ describe("Home Help menu", () => {
 		);
 		expect(help).toHaveTextContent("cannot reroll it");
 	});
+	it("explains Wishing Well offerings, odds and the fixed result", async () => {
+		const user = renderHelpRun();
+		const help = await openHelp(user);
+		expect(help).toHaveTextContent("one offering of 50, 100 or 250 gold");
+		expect(help).toHaveTextContent("reward chance (40%, 55%, 70%)");
+		expect(help).toHaveTextContent("a larger offering can only improve it");
+	});
 });

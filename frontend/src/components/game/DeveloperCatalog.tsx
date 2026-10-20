@@ -37,6 +37,7 @@ import {
 } from "../../domain/objects/DungeonObject";
 import { FORGE_PRICES } from "../../domain/objects/ForgottenForge";
 import { RARE_DISCOVERY_CHANCE } from "../../domain/objects/RareDiscoveryPlacement";
+import { WELL_ODDS, WELL_OFFERINGS } from "../../domain/objects/WishingWell";
 import { SANCTUARY_CONDITION_FEES } from "../../domain/town/Sanctuary";
 import { TOWN_EQUIPMENT_OFFERS } from "../../domain/town/TownEquipmentStock";
 import TileIcon from "../dungeon/TileIcon";
@@ -410,6 +411,19 @@ const DeveloperCatalog = ({
 											? `${Math.round(RARE_DISCOVERY_CHANCE * 100)}% shared rare-discovery chance per adventure, equal weight with the other discoveries; at most one discovery/dungeon; omitted without safe space`
 											: `${Math.round(definition.chance * 100)}% placement chance`}
 									</p>
+									{kind === "well" && (
+										<p>
+											{WELL_OFFERINGS.map(
+												(o) =>
+													`${o} gold: ${Math.round(WELL_ODDS[o].positive * 100)}% reward (+${WELL_ODDS[o].enchantment} gear) / ${Math.round((1 - WELL_ODDS[o].positive - WELL_ODDS[o].negative) * 100)}% nothing / ${Math.round(WELL_ODDS[o].negative * 100)}% hostile`,
+											).join(" · ")}
+											. One seeded roll per well with nested thresholds; 10% of
+											rewards are a permanent +1 attribute. Hostile: one
+											floor-eligible ordinary enemy at the nearest free room
+											tile, none without space. One turn and one use.
+											Provisional playtest balance.
+										</p>
+									)}
 									{kind === "forge" && (
 										<p>
 											Reliable {FORGE_PRICES.reliable} gold: +1. Risky{" "}

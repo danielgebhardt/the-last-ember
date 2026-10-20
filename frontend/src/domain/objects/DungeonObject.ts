@@ -23,6 +23,16 @@ export const OBJECT_DEFINITIONS = {
 		chance: 0.2,
 		placement: "rare-discovery",
 	},
+	well: {
+		name: "Wishing Well",
+		freshLabel: "wishing well",
+		usedLabel: "spent wishing well",
+		minFloor: 3,
+		maxFloor: 20,
+		maxPerFloor: 1,
+		chance: 0.2,
+		placement: "rare-discovery",
+	},
 	merchant: {
 		name: "Wandering potion merchant",
 		freshLabel: "potion merchant",
@@ -143,6 +153,7 @@ export type DungeonObject = Readonly<{
 	activated: boolean;
 	sarcophagusOutcome?: import("./AncientSarcophagi").SarcophagusOutcome;
 	forgeResult?: import("./ForgottenForge").ForgeResult;
+	wellResult?: import("./WishingWell").WellResult;
 }>;
 export const objectLabel = (
 	object: Pick<DungeonObject, "kind" | "activated">,

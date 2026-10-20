@@ -12,6 +12,7 @@ import { type DungeonObject, RELIQUARY_HEALTH_COST } from "./DungeonObject";
 import { shrineTerms } from "./DungeonShrines";
 import { FORGE_PRICES, forgeTargets } from "./ForgottenForge";
 import type { ObjectChoice } from "./ObjectInteraction";
+import { WELL_ODDS, WELL_OFFERINGS } from "./WishingWell";
 export type InteractionChoice = Readonly<{
 	value: ObjectChoice;
 	label: string;
@@ -68,6 +69,16 @@ export const objectChoices = (
 	> &
 		Partial<Pick<GameState, "bag" | "gold">>,
 ): readonly InteractionChoice[] => {
+	if (object.kind === "well")
+		return WELL_OFFERINGS.map((offering) => {
+			const odds = WELL_ODDS[offering];
+			const neutral = Math.round((1 - odds.positive - odds.negative) * 100);
+			return {
+				value: `offer-${offering}` as ObjectChoice,
+				label: `Offer ${offering} gold`,
+				description: `${Math.round(odds.positive * 100)}% reward: ordinary weapon or armor +${odds.enchantment} from this floor (or, 1 in 10 rewards, a permanent +1 attribute). ${neutral}% nothing. ${Math.round(odds.negative * 100)}% a hostile floor creature emerges nearby. The gold, one turn and the well are spent whatever happens.${state?.gold !== undefined && state.gold < offering ? " Not enough gold." : ""}`,
+			};
+		});
 	if (object.kind === "forge")
 		return state?.bag
 			? forgeChoices({ ...state, bag: state.bag, gold: state.gold ?? 0 })

@@ -129,6 +129,13 @@ const eventFields = {
 		kind: oneOf(Object.keys(OBJECT_DEFINITIONS)),
 		activated: boolean,
 	},
+	"well-offered": {
+		gold: oneOf([50, 100, 250]),
+		outcome: oneOf(["positive", "neutral", "negative"]),
+		item: optional(itemKind),
+		attribute: optional(oneOf(["strength", "dexterity", "intelligence"])),
+		escaped: boolean,
+	},
 	"forge-used": {
 		service: oneOf(["reliable", "risky"]),
 		outcome: oneOf(["improved", "unchanged", "destroyed"]),
@@ -441,6 +448,12 @@ const documentShape = object({
 				activated: boolean,
 				sarcophagusOutcome: optional(
 					oneOf(["treasure", "guardian", "both", "empty"]),
+				),
+				wellResult: optional(
+					object({
+						offering: oneOf([50, 100, 250]),
+						outcome: oneOf(["positive", "neutral", "negative"]),
+					}),
 				),
 				forgeResult: optional(
 					object({

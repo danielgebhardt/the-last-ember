@@ -70,6 +70,14 @@ export type ActivityEvent = { turn: number } & (
 			activated: boolean;
 	  }
 	| {
+			type: "well-offered";
+			gold: 50 | 100 | 250;
+			outcome: "positive" | "neutral" | "negative";
+			item?: ItemKind;
+			attribute?: "strength" | "dexterity" | "intelligence";
+			escaped: boolean;
+	  }
+	| {
 			type: "forge-used";
 			service: "reliable" | "risky";
 			outcome: "improved" | "unchanged" | "destroyed";

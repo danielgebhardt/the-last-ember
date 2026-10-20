@@ -281,3 +281,41 @@ for (const width of [390, 1440])
 		await expect(dialog).toHaveCount(0);
 		await expect(turns(page)).toHaveText("Turn 1");
 	});
+
+test("Wishing Well shows every offering's odds, cancels freely and takes one offering", async ({
+	page,
+}) => {
+	await importAdventure(page, "well");
+	await page.keyboard.press("e");
+	const dialog = page.getByRole("dialog", {
+		name: "Wishing Well",
+		exact: true,
+	});
+	await expect(
+		dialog.getByRole("heading", { name: "Wishing Well", exact: true }),
+	).toBeFocused();
+	for (const text of [
+		"Offer 50 gold",
+		"40% reward",
+		"Offer 100 gold",
+		"55% reward",
+		"Offer 250 gold",
+		"15% a hostile floor creature",
+	])
+		await expect(dialog).toContainText(text);
+	await page.keyboard.press("Escape");
+	await expect(map(page)).toBeFocused();
+	await expect(turns(page)).toHaveText("Turn 0");
+	await page.keyboard.press("e");
+	await expect(
+		dialog.getByRole("heading", { name: "Wishing Well", exact: true }),
+	).toBeFocused();
+	await page.keyboard.press("1");
+	await expect(dialog).toHaveCount(0);
+	await expect(turns(page)).toHaveText("Turn 1");
+	await expect(page.getByRole("log")).toContainText(
+		"You offer 50 gold to the Wishing Well.",
+	);
+	await page.keyboard.press("e");
+	await expect(dialog).toHaveCount(0);
+});

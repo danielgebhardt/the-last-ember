@@ -22,6 +22,7 @@ import ThroneIcon from "./ThroneIcon";
 import TreasureChestIcon, {
 	OpenedTreasureChestIcon,
 } from "./TreasureChestIcon";
+import WellIcon from "./WellIcon";
 
 const icons: Record<
 	Exclude<DungeonObjectKind, "elite-door" | "merchant">,
@@ -29,6 +30,7 @@ const icons: Record<
 > = {
 	sarcophagus: SarcophagusIcon,
 	forge: ForgeIcon,
+	well: WellIcon,
 	door: DoorClosed,
 	reliquary: Gem,
 	archive: LibraryBig,
@@ -45,6 +47,15 @@ const DungeonObjectIcon = ({ object }: { object: DungeonObject }) => {
 		return (
 			<SarcophagusIcon
 				opened={object.activated}
+				aria-hidden="true"
+				focusable="false"
+				className={`size-full text-object-stone ${object.activated ? "opacity-50" : ""}`}
+			/>
+		);
+	if (object.kind === "well")
+		return (
+			<WellIcon
+				spent={object.activated}
 				aria-hidden="true"
 				focusable="false"
 				className={`size-full text-object-stone ${object.activated ? "opacity-50" : ""}`}

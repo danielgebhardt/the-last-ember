@@ -109,6 +109,7 @@ export const createSaveDocument = (
 				activated,
 				sarcophagusOutcome,
 				forgeResult,
+				wellResult,
 			}) => ({
 				id,
 				kind,
@@ -117,6 +118,7 @@ export const createSaveDocument = (
 				activated,
 				...(sarcophagusOutcome ? { sarcophagusOutcome } : {}),
 				...(forgeResult ? { forgeResult: { ...forgeResult } } : {}),
+				...(wellResult ? { wellResult: { ...wellResult } } : {}),
 			}),
 		),
 		mana: state.mana,
