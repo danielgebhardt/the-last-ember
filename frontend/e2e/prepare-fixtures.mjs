@@ -172,9 +172,23 @@ export default async function prepareFixtures() {
 				},
 			],
 		};
-		// A mana leech beside the player at the first seeded turn whose landed hit also burns.
+		// A level-7 hero, typical on the leech's floors, beside a mana leech at the first
+		// seeded turn whose landed hit also burns.
+		const { experienceThreshold } = await load(
+			"/src/domain/game/Progression.ts",
+		);
+		const { maximumHealth } = await load("/src/domain/game/PlayerHealth.ts");
+		const { maximumMana } = await load("/src/domain/game/Mana.ts");
+		const veteran = {
+			...spiderWeb.progression,
+			experience: experienceThreshold(7),
+		};
+		const veteranHealth = maximumHealth(veteran, spiderWeb.equipment);
 		const leechBase = {
 			...spiderWeb,
+			progression: veteran,
+			player: { health: veteranHealth, maxHealth: veteranHealth },
+			mana: maximumMana(veteran, spiderWeb.equipment),
 			monsters: [
 				{
 					id: "1:1",
@@ -187,22 +201,15 @@ export default async function prepareFixtures() {
 				},
 			],
 		};
-		// The drink turn must also leave a level-1 hero alive beside this floor-9 creature.
 		const leechTurn = [...Array(400).keys()].find((turn) => {
 			const after = resolvePlayerAction(
 				{ ...leechBase, turn },
 				{ type: "wait" },
 			).state;
-			const cured = resolvePlayerAction(after, {
-				type: "consume",
-				itemId: "smoke:cleansing",
-			}).state;
 			return (
 				after.player.health > 0 &&
 				after.mana < leechBase.mana &&
-				after.afflictions.some((a) => a.kind === "mana-burn") &&
-				cured.player.health > 0 &&
-				cured.afflictions.length === 0
+				after.afflictions.some((a) => a.kind === "mana-burn")
 			);
 		});
 		if (leechTurn === undefined)
