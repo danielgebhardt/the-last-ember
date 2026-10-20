@@ -42,6 +42,13 @@ describe("Developer catalog", () => {
 			expect(within(region).getAllByRole("listitem")).toHaveLength(
 				Object.keys(definitions).length,
 			);
+			// Items group by type first; every other section reads alphabetically.
+			if (label !== "Items") {
+				const names = within(region)
+					.getAllByRole("heading", { level: 4 })
+					.map((heading) => heading.textContent ?? "");
+				expect(names).toEqual([...names].sort((a, b) => a.localeCompare(b)));
+			}
 		}
 		expect(sheet.querySelector(".dungeon-stone-wall")).toBeInTheDocument();
 		expect(sheet.querySelector(".dungeon-flagstone svg")).toBeInTheDocument();

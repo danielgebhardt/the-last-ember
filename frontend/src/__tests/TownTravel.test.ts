@@ -5,6 +5,7 @@ import { generateDungeonRun } from "../domain/dungeon/DungeonRun";
 import { DEFAULT_FOG_CONFIGURATION } from "../domain/dungeon/RunConfiguration";
 import { createGameState } from "../domain/game/GameState";
 import { resolvePlayerAction } from "../domain/game/PlayerActions";
+import { createBag } from "../domain/items/Bag";
 import {
 	createSaveDocument,
 	parseSave,
@@ -104,6 +105,42 @@ describe("deliberate town travel", () => {
 				itemId: "anything",
 			}).error,
 		).toBeDefined();
+	});
+	it("equips gear and drinks potions in town without spending a turn", () => {
+		const base = dungeonState();
+		const state = {
+			...base,
+			town: createTownLocation(),
+			turn: 29,
+			bag: createBag([
+				{ id: "sword", kind: "iron-sword" },
+				{ id: "wits", kind: "intelligence-potion" },
+			]),
+		};
+		const equipped = resolvePlayerAction(state, {
+			type: "equip",
+			itemId: "sword",
+			slot: "mainHand",
+		});
+		expect(equipped.error).toBeUndefined();
+		expect(equipped.turnAdvanced).toBe(false);
+		expect(equipped.state.equipment.mainHand?.id).toBe("sword");
+		const drunk = resolvePlayerAction(equipped.state, {
+			type: "consume",
+			itemId: "wits",
+		});
+		expect(drunk.error).toBeUndefined();
+		expect(drunk.turnAdvanced).toBe(false);
+		expect(drunk.state.progression.permanentAttributes?.intelligence).toBe(1);
+		expect(drunk.state.bag.items.map((item) => item.id)).not.toContain("wits");
+		const unequipped = resolvePlayerAction(drunk.state, {
+			type: "unequip",
+			slot: "mainHand",
+		});
+		expect(unequipped.state.equipment.mainHand).toBeNull();
+		expect(unequipped.state.turn).toBe(29);
+		expect(unequipped.state.monsters).toBe(state.monsters);
+		expect(unequipped.state.town).toBe(state.town);
 	});
 	it("rejects wrong floors, distant entrances, ended games, ember carriers and occupied/blocked arrivals", () => {
 		const state = dungeonState();

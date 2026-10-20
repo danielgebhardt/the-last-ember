@@ -215,37 +215,6 @@ export const resolvePlayerAction = (
 		return treatAtSanctuary(state, action);
 	if (action.type === "town-forge") return reforgeAtTown(state, action);
 	if (action.type === "library-learn") return learnAtLibrary(state, action);
-	if (state.town) {
-		if (action.type === "wait") return { state, turnAdvanced: false };
-		if (action.type !== "move" && action.type !== "inspect-town")
-			return {
-				state,
-				turnAdvanced: false,
-				error: "Enter the dungeon before using items, equipment or spells.",
-			};
-		const result = resolveTownAction(
-			state.town,
-			action.type === "move" ? action : { type: "inspect" },
-			"Dungeon entrance — stand on the gate and press Enter to descend.",
-			townPortalMessage(state.townPortal),
-		);
-		if (result.location.kind !== "town" || result.error)
-			return {
-				state,
-				turnAdvanced: false,
-				error: result.error ?? "Invalid town location.",
-			};
-		return {
-			state:
-				result.location === state.town
-					? state
-					: { ...state, town: result.location },
-			turnAdvanced: false,
-			message: result.message,
-		};
-	}
-	if (action.type === "inspect-town")
-		return { state, turnAdvanced: false, error: "You are not in town." };
 	if (action.type === "use-hotbar") {
 		if (!HOTBAR_SLOTS.includes(action.slot))
 			return {
@@ -272,6 +241,48 @@ export const resolvePlayerAction = (
 			rollSource,
 		);
 	}
+	if (state.town) {
+		if (action.type === "wait") return { state, turnAdvanced: false };
+		// Town pauses turns, so gear changes and potions apply without a monster phase.
+		if (
+			action.type === "equip" ||
+			action.type === "unequip" ||
+			action.type === "consume"
+		) {
+			const result = resolvePlayerEffect(state, action, rollSource);
+			return result && "error" in result
+				? { state, turnAdvanced: false, error: result.error }
+				: { state: result ?? state, turnAdvanced: false };
+		}
+		if (action.type !== "move" && action.type !== "inspect-town")
+			return {
+				state,
+				turnAdvanced: false,
+				error: "That can only be done in the dungeon.",
+			};
+		const result = resolveTownAction(
+			state.town,
+			action.type === "move" ? action : { type: "inspect" },
+			"Dungeon entrance — stand on the gate and press Enter to descend.",
+			townPortalMessage(state.townPortal),
+		);
+		if (result.location.kind !== "town" || result.error)
+			return {
+				state,
+				turnAdvanced: false,
+				error: result.error ?? "Invalid town location.",
+			};
+		return {
+			state:
+				result.location === state.town
+					? state
+					: { ...state, town: result.location },
+			turnAdvanced: false,
+			message: result.message,
+		};
+	}
+	if (action.type === "inspect-town")
+		return { state, turnAdvanced: false, error: "You are not in town." };
 	// Effects receive the committed turn; only this boundary advances it.
 	const committed = { ...state, turn: state.turn + 1 };
 	const effect = resolvePlayerEffect(committed, action, rollSource);

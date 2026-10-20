@@ -4,7 +4,7 @@ Current reference for town services. Prices are a playtesting baseline that the 
 
 ## Shared rules
 
-- **No dungeon time.** Every town transaction is free of turns, effects and recovery. Drinking, equipping and casting stay dungeon actions; town is not free recovery.
+- **No dungeon time.** Every town transaction is free of turns, effects and recovery. Drinking potions and changing equipment also take no turn in town; casting and other item use stay dungeon actions. Town itself never restores resources.
 - **Deliberate and atomic.** Each purchase, reforge or treatment needs a quote and a confirmation. A stale quote, missing gold, a full bag, an ended run, carrying the ember (for services that require it) or standing away from the doorway rejects the action free and changes nothing.
 - **Finite, authored stock.** Stock is created once per adventure and never restocks: visits, turns, sales, save/load and real time cannot refill it. Each copy has a stable `town-gear:` / `town-potion:` ID. Saves store what actually remains (see [save policy](save-policy.md)).
 - **Starting gold.** New adventures start with 300 gold. Loading and travel never grant more.

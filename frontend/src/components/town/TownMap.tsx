@@ -9,6 +9,7 @@ import {
 	useState,
 } from "react";
 import type { MovementDirection } from "../../domain/dungeon/DungeonRun";
+import { HOTBAR_SLOTS, type HotbarSlot } from "../../domain/items/PotionHotbar";
 import type { TownAction } from "../../domain/town/TownActions";
 import {
 	isTownWalkable,
@@ -98,6 +99,7 @@ type TownMapProps = {
 	portalFloor?: number;
 	interactionLabel?: string;
 	onCharacterRequested?: () => void;
+	onPotionRequested?: (slot: HotbarSlot) => void;
 };
 
 const TownTileContent = ({
@@ -176,6 +178,7 @@ const TownMap = ({
 	portalFloor,
 	interactionLabel = "Inspect nearby",
 	onCharacterRequested,
+	onPotionRequested,
 }: TownMapProps) => {
 	const instructionsId = useId();
 	const [directoryOpen, setDirectoryOpen] = useState(false);
@@ -224,10 +227,10 @@ const TownMap = ({
 			<p id={instructionsId} className="sr-only">
 				Use arrows or WASD to walk, or tap neighboring tiles. E or tapping your
 				character inspects signs. Tap a nearby doorway to browse. Stand on the
-				dungeon gate and press Enter or tap your character to descend. Press
-				question mark for the town directory. The portal circle west of the
-				beacon returns you to the dungeon when active; stand on it and press
-				Enter.
+				dungeon gate and press Enter or tap your character to descend. Press 1
+				to 4 to drink quick-slot potions. Press question mark for the town
+				directory. The portal circle west of the beacon returns you to the
+				dungeon when active; stand on it and press Enter.
 			</p>
 			<div
 				className={`m-auto grid min-w-0 max-w-full items-center justify-items-center gap-5 ${preview ? "w-fit" : "w-full @min-[63rem]/town:w-fit @min-[63rem]/town:grid-cols-[500px_480px]"}`}
@@ -256,6 +259,9 @@ const TownMap = ({
 						const direction = Object.hasOwn(KEY_DIRECTION, key)
 							? KEY_DIRECTION[key]
 							: undefined;
+						const potionSlot = HOTBAR_SLOTS.find(
+							(slot) => key === String(slot),
+						);
 						if (direction) {
 							event.preventDefault();
 							event.stopPropagation();
@@ -264,6 +270,10 @@ const TownMap = ({
 							event.preventDefault();
 							event.stopPropagation();
 							onTravel();
+						} else if (potionSlot && onPotionRequested) {
+							event.preventDefault();
+							event.stopPropagation();
+							if (!event.repeat) onPotionRequested(potionSlot);
 						} else if (key === "c" && onCharacterRequested && !event.repeat) {
 							event.preventDefault();
 							event.stopPropagation();

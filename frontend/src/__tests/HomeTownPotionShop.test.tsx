@@ -3,6 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { afterEach, expect, it } from "vitest";
 import { createAdventureSession } from "../components/game/useAdventureSession";
 import { DEFAULT_FOG_CONFIGURATION } from "../domain/dungeon/RunConfiguration";
+import { createBag } from "../domain/items/Bag";
 import { createTownLocation } from "../domain/town/TownLocation";
 import Home from "../Home";
 import { ThemeProvider } from "../settings/ThemeProvider";
@@ -50,5 +51,33 @@ it("browses freely, confirms one real purchase, prevents repeat buying, and rest
 			name: /Potion slot 1: Healing potion, 2 carried/,
 		}),
 	).toBeVisible();
+	expect(screen.getByLabelText("Turn count")).toHaveTextContent("Turn 0");
+});
+it("drinks a quick-slot potion from the town map without spending a turn", async () => {
+	const initial = createAdventureSession(
+		123,
+		config,
+		DEFAULT_FOG_CONFIGURATION,
+	);
+	const state = {
+		...initial.state,
+		town: createTownLocation(),
+		player: { ...initial.state.player, health: 1 },
+		bag: createBag([
+			{ id: "heal-1", kind: "healing-potion" },
+			{ id: "heal-2", kind: "healing-potion" },
+		]),
+	};
+	render(<Home initialAdventure={{ ...initial, state }} />, {
+		wrapper: ThemeProvider,
+	});
+	const user = userEvent.setup();
+	screen.getByLabelText("Town map", { exact: true }).focus();
+	await user.keyboard("1");
+	expect(
+		screen.getByRole("button", {
+			name: /Potion slot 1: Healing potion, 1 carried/,
+		}),
+	).toBeEnabled();
 	expect(screen.getByLabelText("Turn count")).toHaveTextContent("Turn 0");
 });

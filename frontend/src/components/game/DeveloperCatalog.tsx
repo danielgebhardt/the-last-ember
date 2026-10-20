@@ -79,6 +79,9 @@ const Card = ({
 		<div className="grid gap-1 text-xs leading-relaxed">{children}</div>
 	</li>
 );
+// Entries read alphabetically unless a section has a more useful grouping.
+const byName = <T,>(entries: readonly T[], name: (entry: T) => string) =>
+	[...entries].sort((a, b) => name(a).localeCompare(name(b)));
 const CATALOG_SECTIONS = [
 	"Monsters",
 	"Spells",
@@ -99,15 +102,16 @@ const ConditionIcon = ({
 		<Icon aria-hidden="true" focusable="false" className="size-2/3" />
 	</span>
 );
-const CATALOG_CONDITIONS = [
-	...(Object.keys(AFFLICTION_DEFINITIONS) as AfflictionKind[]).map((kind) => ({
+const CATALOG_CONDITIONS = byName(
+	(Object.keys(AFFLICTION_DEFINITIONS) as AfflictionKind[]).map((kind) => ({
 		kind,
 		name: AFFLICTION_DEFINITIONS[kind].name,
 		visual: AFFLICTION_VISUALS[kind],
 		facts: afflictionFacts(kind),
 		cures: afflictionDetails(kind),
 	})),
-];
+	(condition) => condition.name,
+);
 const Group = ({ name, children }: { name: string; children: ReactNode }) => (
 	<Tabs.Panel value={name} className="min-h-0 flex-1 overflow-y-auto">
 		<div className="grid gap-3">
@@ -152,10 +156,29 @@ const itemTypeOrder: Record<ItemDefinition["type"], number> = {
 	spellbook: 8,
 	quest: 9,
 };
-const catalogItems = (Object.keys(ITEM_DEFINITIONS) as ItemKind[]).sort(
+const catalogItems = byName(
+	Object.keys(ITEM_DEFINITIONS) as ItemKind[],
+	(kind) => ITEM_DEFINITIONS[kind].name,
+).sort(
 	(a, b) =>
 		itemTypeOrder[ITEM_DEFINITIONS[a].type] -
 		itemTypeOrder[ITEM_DEFINITIONS[b].type],
+);
+const catalogMonsters = byName(
+	Object.keys(MONSTER_DEFINITIONS) as MonsterKind[],
+	(kind) => MONSTER_DEFINITIONS[kind].name,
+);
+const catalogSpells = byName(
+	Object.keys(SPELL_DEFINITIONS) as SpellKind[],
+	(kind) => SPELL_DEFINITIONS[kind].name,
+);
+const catalogObjects = byName(
+	Object.keys(OBJECT_DEFINITIONS) as DungeonObjectKind[],
+	(kind) => OBJECT_DEFINITIONS[kind].name,
+);
+const catalogTerrain = byName(
+	Object.entries(TILE_LABELS),
+	([kind, name]) => name ?? kind,
 );
 
 const DeveloperCatalog = ({
@@ -225,7 +248,7 @@ const DeveloperCatalog = ({
 					</label>
 				)}
 				<Group name="Monsters">
-					{(Object.keys(MONSTER_DEFINITIONS) as MonsterKind[])
+					{catalogMonsters
 						.filter((kind) =>
 							matches(
 								kind,
@@ -266,7 +289,7 @@ const DeveloperCatalog = ({
 						})}
 				</Group>
 				<Group name="Spells">
-					{(Object.keys(SPELL_DEFINITIONS) as SpellKind[])
+					{catalogSpells
 						.filter((kind) =>
 							matches(
 								kind,
@@ -369,7 +392,7 @@ const DeveloperCatalog = ({
 					))}
 				</Group>
 				<Group name="Dungeon objects">
-					{(Object.keys(OBJECT_DEFINITIONS) as DungeonObjectKind[])
+					{catalogObjects
 						.filter((kind) => matches(kind, OBJECT_DEFINITIONS[kind].name))
 						.map((kind) => {
 							const definition = OBJECT_DEFINITIONS[kind];
@@ -447,7 +470,7 @@ const DeveloperCatalog = ({
 						})}
 				</Group>
 				<Group name="Terrain">
-					{Object.entries(TILE_LABELS)
+					{catalogTerrain
 						.filter(([kind, name]) => matches(kind, name ?? kind))
 						.map(([kind, name]) => {
 							return (

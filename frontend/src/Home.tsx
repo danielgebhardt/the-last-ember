@@ -628,6 +628,7 @@ const Home = ({
 											setCharacterOpenedFromMap(true);
 											setCharacterOpen(true);
 										}}
+										onPotionRequested={handlePotionRequested}
 									/>
 								) : (
 									<DungeonLayout
@@ -743,7 +744,7 @@ const Home = ({
 									<PotionHotbarView
 										bag={game.state.bag}
 										potionHotbar={game.state.potionHotbar}
-										alive={gameplayEnabled && !town && !spells.targeting}
+										alive={gameplayEnabled && !spells.targeting}
 										onActivate={handlePotionRequested}
 									/>
 

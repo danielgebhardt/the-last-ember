@@ -127,7 +127,7 @@ const TownEquipmentShop = ({
 			leaveLabel={`Leave ${name} store`}
 			// Armor tabs swap content of different heights; a fixed height keeps the dialog still.
 			className={`w-[min(64rem,calc(100vw-2rem))] ${store === "armor" ? "h-[min(56rem,calc(100dvh-2rem))]" : ""}`}
-			description={`${store === "armor" ? "Protection sold separately from confidence." : "Every edge has a price."} Finite stock. Purchases go into your bag; nothing is automatically equipped. Compare your whole loadout before buying; equip or sell in the dungeon. Town stores do not buy items.`}
+			description={`${store === "armor" ? "Protection sold separately from confidence." : "Every edge has a price."} Finite stock. Purchases go into your bag; nothing is automatically equipped. Compare your whole loadout before buying; equip from your bag at any time. Town stores do not buy items.`}
 		>
 			{store === "armor" ? (
 				<Tabs.Root

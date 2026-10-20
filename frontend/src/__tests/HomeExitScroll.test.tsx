@@ -71,7 +71,9 @@ it("opens a one-use town portal, preserves the scroll stack and returns with Ent
 	await user.click(
 		screen.getByRole("button", { name: "Read town portal scroll" }),
 	);
-	expect(screen.getByRole("alert")).toHaveTextContent("Enter the dungeon");
+	expect(screen.getByRole("alert")).toHaveTextContent(
+		"That can only be done in the dungeon.",
+	);
 	expect(screen.getByLabelText("Turn count")).toHaveTextContent("Turn 29");
 	expect(
 		screen.getByRole("dialog", { name: "The Adventurer's Ledger" }),

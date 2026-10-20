@@ -12,9 +12,9 @@
 
 /* Light-mode palette */
 :root {
-	--dungeon-wall-face: #919ba7;
-	--dungeon-wall-light: #d5d9dd;
-	--dungeon-wall-dark: #606b79;
+	--dungeon-wall-face: #7a8592;
+	--dungeon-wall-light: #b9c0c7;
+	--dungeon-wall-dark: #4d5866;
 
 	--dungeon-floor-face: #bcb5a8;
 	--dungeon-floor-light: #e4ded3;
@@ -31,9 +31,9 @@
 	--dungeon-wall-light: #77899d;
 	--dungeon-wall-dark: #202c3a;
 
-	--dungeon-floor-face: #303a42;
-	--dungeon-floor-light: #4d555b;
-	--dungeon-floor-dark: #1b252e;
+	--dungeon-floor-face: #4a545b;
+	--dungeon-floor-light: #677075;
+	--dungeon-floor-dark: #2f3941;
 
 	--remembered-tile-filter: saturate(0.4) contrast(0.9);
 	--remembered-fog: rgb(12 16 23 / 55%);
@@ -159,6 +159,18 @@
 	z-index: 2;
 	pointer-events: none;
 	background: var(--remembered-fog);
+}
+
+/* Veil walls and floors unevenly so remembered rooms stay readable against
+   their walls; the pale light veil otherwise lifts walls toward the floor. */
+.dungeon-stone-wall {
+	--remembered-fog: rgb(236 231 222 / 40%);
+}
+.dark .dungeon-stone-wall {
+	--remembered-fog: rgb(12 16 23 / 78%);
+}
+.dark .dungeon-flagstone {
+	--remembered-fog: rgb(12 16 23 / 25%);
 }
 
 @media (forced-colors: active) {

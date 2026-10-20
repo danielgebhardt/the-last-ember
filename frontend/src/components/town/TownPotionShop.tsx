@@ -131,8 +131,9 @@ const TownPotionShop = ({
 				</ConfirmPanel>
 			) : (
 				<p className="shrink-0 border-t pt-3 text-sm text-muted-foreground">
-					Choose a bottle to review its purchase. Potions are used from your
-					inventory in the dungeon; the town does not buy items.
+					Choose a bottle to review its purchase. Drink potions from your
+					inventory or quick slots, in town or the dungeon; the town does not
+					buy items.
 				</p>
 			)}
 		</TownServiceDialog>
