@@ -180,13 +180,14 @@ const eventFields = {
 			"disease",
 			"slowed",
 			"mana-burn",
+			"curse",
 			"cleanse",
 		]),
 		gold: integer(1, 600),
 		health: natural,
 		// At most two afflictions plus poison.
 		conditions: array(
-			oneOf(["poisoned", "disease", "slowed", "mana-burn"]),
+			oneOf(["poisoned", "disease", "slowed", "mana-burn", "curse"]),
 			0,
 			3,
 		),

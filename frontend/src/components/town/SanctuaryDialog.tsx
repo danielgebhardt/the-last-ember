@@ -17,6 +17,7 @@ const CONDITION_NAMES: Record<string, string> = {
 	disease: "Disease",
 	slowed: "Slowed",
 	"mana-burn": "Mana Burn",
+	curse: "Curse",
 };
 const quoteDetails = (quote: SanctuaryQuote) =>
 	`${quote.health ? `Restore ${quote.health} HP` : "Restore no HP"}; maximum HP ${quote.maximumHealth}. ${quote.conditions.length ? `Remove ${quote.conditions.map((c) => CONDITION_NAMES[c] ?? c).join(" and ")}. ` : ""}Mana is unchanged. ${quote.cost} gold.`;

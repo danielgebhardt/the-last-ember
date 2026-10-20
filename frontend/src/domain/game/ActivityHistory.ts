@@ -18,6 +18,7 @@ export type ActivityEvent = { turn: number } & (
 				| "disease"
 				| "slowed"
 				| "mana-burn"
+				| "curse"
 				| "cleanse";
 			gold: number;
 			health: number;

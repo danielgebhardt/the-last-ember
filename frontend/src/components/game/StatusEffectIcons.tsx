@@ -138,7 +138,7 @@ export const curseDetails = (normalHit?: number, hit?: number) =>
 		normalHit !== undefined && hit !== undefined && normalHit !== hit
 			? `Hit ${normalHit}% → ${hit}% (−${normalHit - hit}) and melee damage −1 (minimum 1)`
 			: "Melee to-hit −10 percentage points and melee damage −1 (minimum 1)"
-	} until cured. Spells, evasion and equipment are unaffected. Cure with a Remove Curse scroll (one turn) or sanctuary treatment. Healing, rest and Cleansing potions do not lift it.`;
+	} until cured. Spells, evasion and equipment are unaffected. Cure with a Remove Curse scroll (one turn) or sanctuary Cure Curse (${SANCTUARY_CONDITION_FEES.curse} gold). Healing, rest and Cleansing potions do not lift it.`;
 
 export const manaBurnDetails = () =>
 	`Passive mana recovery (1 mana every ${MANA_RECOVERY_INTERVAL} turns) stops while it lasts. Lasts 90 committed phases including the one it lands, so three recovery ticks are lost; refreshing resets the duration. Mana potions and affordable spells still work, and nothing is recovered afterward to make up for it. Cure with a Cleansing potion (one turn) or sanctuary Cure Mana Burn (${SANCTUARY_CONDITION_FEES["mana-burn"]} gold); curing restores no mana.`;

@@ -109,3 +109,7 @@ Fourth registered affliction, lingering until cured (developer decision: −10 a
 The **Remove Curse scroll** is the portable cure: a stackable scroll read from the bag for one scroll and one turn, lifting Curse before monsters act. Reading it uncursed is free ("You are not cursed."). It joins floor, chest and drop loot on floors 6–14 at weight 0.25, but only in adventures with the new `curseRemedies` marker, so existing adventures keep their reward rolls. Activity says "You read … and remove Curse." The first Hexweaver's guaranteed drop follows in #367; the sanctuary fee in #364. Enchantment scrolls stay dungeon-only (#335).
 
 Save format stays v27: `afflictions` accepts `curse` with `remaining: null`; optional `curseRemedies`.
+
+## Sanctuary Curse cure (#364, Curse portion)
+
+"Cure Curse" costs 250 gold and comes after Mana Burn in the fee order: poison, Disease, Slowed, Mana Burn, Curse. It restores melee accuracy and damage but no HP, mana or turn. Complete cleanse stays `min(600, sum of active fees)`.

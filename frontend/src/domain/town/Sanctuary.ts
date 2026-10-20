@@ -12,6 +12,7 @@ export type SanctuaryService =
 	| "disease"
 	| "slowed"
 	| "mana-burn"
+	| "curse"
 	| "cleanse";
 export type SanctuaryQuote = Readonly<{
 	service: SanctuaryService;
@@ -30,6 +31,7 @@ export const SANCTUARY_SERVICE_NAMES: Record<SanctuaryService, string> = {
 	disease: "Cure Disease",
 	slowed: "Cure Slowed",
 	"mana-burn": "Cure Mana Burn",
+	curse: "Cure Curse",
 	cleanse: "Complete cleanse",
 };
 export const SANCTUARY_CONDITION_FEES = {
@@ -37,6 +39,7 @@ export const SANCTUARY_CONDITION_FEES = {
 	disease: 150,
 	slowed: 50,
 	"mana-burn": 75,
+	curse: 250,
 } as const;
 type SanctuaryCondition = keyof typeof SANCTUARY_CONDITION_FEES;
 const SERVICE_CONDITION: Partial<Record<SanctuaryService, SanctuaryCondition>> =
@@ -45,6 +48,7 @@ const SERVICE_CONDITION: Partial<Record<SanctuaryService, SanctuaryCondition>> =
 		disease: "disease",
 		slowed: "slowed",
 		"mana-burn": "mana-burn",
+		curse: "curse",
 	};
 export const SANCTUARY_SERVICES: readonly SanctuaryService[] = [
 	"health",
@@ -52,6 +56,7 @@ export const SANCTUARY_SERVICES: readonly SanctuaryService[] = [
 	"disease",
 	"slowed",
 	"mana-burn",
+	"curse",
 	"cleanse",
 ];
 export const canReachSanctuary = (state: GameState): boolean => {
