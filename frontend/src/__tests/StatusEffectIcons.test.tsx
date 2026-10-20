@@ -30,7 +30,9 @@ it("shows every active player condition, excludes monster and expired effects, a
 		/>,
 	);
 	const icons = screen.getByRole("list", { name: "Active player conditions" });
-	expect(within(icons).getAllByRole("button")).toHaveLength(6);
+	expect(within(icons).getAllByRole("button")).toHaveLength(
+		PLAYER_EFFECT_KINDS.length,
+	);
 	for (const kind of PLAYER_EFFECT_KINDS)
 		expect(
 			within(icons).getByRole("button", {
@@ -51,47 +53,37 @@ it("opens poison details with keyboard and pointer and dismisses with Escape", a
 	const user = userEvent.setup();
 	render(
 		<StatusEffectIcons
-			effects={[
-				{
-					actorId: "player",
-					floorNumber: null,
-					kind: "poisoned",
-					remaining: 5,
-				},
+			effects={[]}
+			afflictions={[
+				{ kind: "poisoned" as const, remaining: 5, source: "test" },
 			]}
 		/>,
 	);
 	const icon = screen.getByRole("button", {
-		name: "Poisoned — 5 phases remaining",
+		name: "Poison — 5 phases remaining",
 	});
 	await user.tab();
 	expect(icon).toHaveFocus();
 	await user.keyboard("{Enter}");
 	const details = await screen.findByRole("dialog");
-	expect(details).toHaveTextContent("up to 5 damage remaining");
-	expect(details).toHaveTextContent(
-		"Antidote removes current poison before that tick.",
-	);
+	expect(details).toHaveTextContent("Up to 5 damage remaining");
+	expect(details).toHaveTextContent("Cure: Antidote (one turn)");
 	await user.keyboard("{Escape}");
 	expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
 	expect(icon).toHaveFocus();
 	await user.click(icon);
-	expect(await screen.findByRole("dialog")).toHaveTextContent("Poisoned");
+	expect(await screen.findByRole("dialog")).toHaveTextContent("Poison");
 });
 
 it("shows Disease beside poison as until cured with the exact penalty and both cures", async () => {
 	const user = userEvent.setup();
 	const view = render(
 		<StatusEffectIcons
-			effects={[
-				{
-					actorId: "player",
-					floorNumber: null,
-					kind: "poisoned",
-					remaining: 3,
-				},
+			effects={[]}
+			afflictions={[
+				{ kind: "poisoned" as const, remaining: 3, source: "test" },
+				{ kind: "disease", remaining: null, source: "Plague Rat" },
 			]}
-			afflictions={[{ kind: "disease", remaining: null, source: "Plague Rat" }]}
 			impact={{
 				maxHealth: { normal: 23, effective: 18 },
 				evade: { normal: 25, effective: 15 },
@@ -100,7 +92,7 @@ it("shows Disease beside poison as until cured with the exact penalty and both c
 		/>,
 	);
 	expect(
-		screen.getByRole("button", { name: "Poisoned — 3 phases remaining" }),
+		screen.getByRole("button", { name: "Poison — 3 phases remaining" }),
 	).toBeVisible();
 	const disease = screen.getByRole("button", { name: "Disease — until cured" });
 	await user.click(disease);

@@ -3,6 +3,23 @@ import type {
 	PlayerAffliction,
 } from "./PlayerAfflictions";
 export const AFFLICTION_DEFINITIONS = {
+	poisoned: {
+		kind: "poisoned",
+		sanctuaryFee: 40,
+		summary: "1 damage after monsters act each phase for 6 phases",
+		target: "player",
+		name: "Poison",
+		lifetime: { type: "phases", duration: 6 },
+		modifiers: { damagePerPhase: 1 },
+		blocksRunning: true,
+		cure: "antidote",
+		guidance:
+			"Deals 1 damage after monsters act in each of 6 committed phases, including the phase it lands; it can kill. Another dose resets the duration without stacking damage. An Antidote or sanctuary treatment removes it.",
+		appliedText:
+			"1 damage per phase for 6 phases. Drink an Antidote or visit the sanctuary.",
+		removedText: "The poison is gone.",
+		absentText: "You are not poisoned.",
+	},
 	disease: {
 		kind: "disease",
 		sanctuaryFee: 150,

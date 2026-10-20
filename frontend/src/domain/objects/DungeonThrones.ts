@@ -1,10 +1,10 @@
 import { hashStringToUint32 } from "../dungeon/DungeonRun";
 import { createSeededRandom } from "../dungeon/Seed";
 import { appendActivityEvents } from "../game/ActivityHistory";
+import { applyPlayerAffliction } from "../game/Afflictions";
 import { awardExperience } from "../game/ExperienceRewards";
 import type { GameState } from "../game/GameState";
 import { maximumMana } from "../game/Mana";
-import { applyPlayerEffect } from "../game/TimedEffects";
 import { availableItemLocations } from "../items/ItemPlacement";
 import { coordinateKey } from "../monsters/MonsterLocations";
 import { sealedEliteTiles } from "../objects/OptionalEliteRooms";
@@ -75,7 +75,8 @@ export const resolveThroneChoice = (
 			damage: 2,
 			turn: state.turn,
 		});
-		if (next.player.health > 0) next = applyPlayerEffect(next, "poisoned");
+		if (next.player.health > 0)
+			next = applyPlayerAffliction(next, "poisoned", "throne");
 	} else {
 		outcome = "relocation";
 		const floor = state.run.floors[state.run.activeFloor - 1];

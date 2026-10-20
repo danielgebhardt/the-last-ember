@@ -20,11 +20,13 @@ const adventure = () => ({
 	bag: createBag([{ id: "review:remedy", kind: "cure-disease-potion" }]),
 });
 it("uses one remedy and one turn, restoring capacity before poison without curing poison", () => {
+	const sick = applyPlayerAffliction(adventure(), "disease", "Plague Rat");
 	const initial = {
-		...applyPlayerAffliction(adventure(), "disease", "Plague Rat"),
-		effects: [
-			{ actorId: "player", floorNumber: null, kind: "poisoned", remaining: 3 },
-		] as const,
+		...sick,
+		afflictions: [
+			...sick.afflictions,
+			{ kind: "poisoned" as const, remaining: 3, source: "test" },
+		],
 	};
 	const result = resolvePlayerAction(initial, {
 		type: "consume",
@@ -33,8 +35,7 @@ it("uses one remedy and one turn, restoring capacity before poison without curin
 	expect(result.turnAdvanced).toBe(true);
 	expect(result.state.turn).toBe(initial.turn + 1);
 	expect(result.state.player).toEqual({ health: 7, maxHealth: 10 });
-	expect(result.state.afflictions).toEqual([]);
-	expect(result.state.effects).toMatchObject([
+	expect(result.state.afflictions).toMatchObject([
 		{ kind: "poisoned", remaining: 2 },
 	]);
 	expect(result.state.bag.items).toEqual([]);

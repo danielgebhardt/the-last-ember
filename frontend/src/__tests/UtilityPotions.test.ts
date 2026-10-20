@@ -30,16 +30,13 @@ describe("Utility potions", () => {
 				{
 					actorId: "player",
 					floorNumber: null,
-					kind: "poisoned",
-					remaining: 3,
-				},
-				{
-					actorId: "player",
-					floorNumber: null,
 					kind: "protected",
 					remaining: 3,
 				},
 			] as const,
+			afflictions: [
+				{ kind: "poisoned" as const, remaining: 3, source: "test" },
+			],
 		};
 		const result = resolvePlayerAction(before, drink);
 		expect(result.turnAdvanced).toBe(true);
@@ -52,9 +49,10 @@ describe("Utility potions", () => {
 		expect(result.state.activityHistory.entries[0].event).toEqual({
 			type: "item-cleansed",
 			item: "antidote",
+			conditions: ["poisoned"],
 			turn: 1,
 		});
-		expect(before.effects[0].remaining).toBe(3);
+		expect(result.state.afflictions).toEqual([]);
 	});
 	it("keeps an antidote and the turn when the player is not poisoned", () => {
 		const before = carrying("antidote");
@@ -114,13 +112,9 @@ describe("Utility potions", () => {
 				{ id: "greater", kind: "greater-mana-potion" },
 			]),
 			potionHotbar: ["antidote", "greater-mana-potion", null, null],
-			effects: [
-				{
-					actorId: "player",
-					floorNumber: null,
-					kind: "poisoned",
-					remaining: 3,
-				},
+			effects: [],
+			afflictions: [
+				{ kind: "poisoned" as const, remaining: 3, source: "test" },
 			],
 		};
 		adventure.state = resolvePlayerAction(adventure.state, drink).state;

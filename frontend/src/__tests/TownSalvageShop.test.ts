@@ -18,9 +18,8 @@ const shop = (): GameState => ({
 	gold: 100,
 	turn: 29,
 	mana: 2,
-	effects: [
-		{ kind: "poisoned", actorId: "player", floorNumber: null, remaining: 3 },
-	],
+	effects: [],
+	afflictions: [{ kind: "poisoned" as const, remaining: 3, source: "test" }],
 	equipment: createEquipment(
 		{ id: "worn:sword", kind: "iron-sword", enchantment: 1 },
 		{ id: "worn:shield", kind: "wooden-shield" },

@@ -72,14 +72,7 @@ export default async function prepareFixtures() {
 		};
 		const poisoned = {
 			...quiet,
-			effects: [
-				{
-					actorId: "player",
-					floorNumber: null,
-					kind: "poisoned",
-					remaining: 1,
-				},
-			],
+			afflictions: [{ kind: "poisoned", remaining: 1, source: "fixture" }],
 		};
 		const diseasedCapacity = Math.max(
 			1,
@@ -91,8 +84,11 @@ export default async function prepareFixtures() {
 				(entry) => entry.item.kind === "cure",
 			),
 			player: { health: diseasedCapacity, maxHealth: diseasedCapacity },
-			effects: [{ ...poisoned.effects[0], remaining: 5 }],
-			afflictions: [{ kind: "disease", remaining: null, source: "Plague Rat" }],
+			effects: [],
+			afflictions: [
+				{ kind: "disease", remaining: null, source: "Plague Rat" },
+				{ kind: "poisoned", remaining: 5, source: "fixture" },
+			],
 			bag: {
 				items: [{ id: "smoke:cure-disease", kind: "cure-disease-potion" }],
 			},
@@ -821,9 +817,10 @@ export default async function prepareFixtures() {
 						kind,
 						remaining: 2,
 					})),
-					// The worst-case HUD row also carries a lingering affliction.
+					// The worst-case HUD row also carries the full three-affliction cap.
 					afflictions: [
 						{ kind: "disease", remaining: null, source: "test" },
+						{ kind: "poisoned", remaining: 2, source: "test" },
 						{ kind: "slowed", remaining: 10, source: "test" },
 					],
 					player: {
@@ -845,14 +842,7 @@ export default async function prepareFixtures() {
 				"viewport-poison",
 				{
 					...viewportFeedback,
-					effects: [
-						{
-							actorId: "player",
-							floorNumber: null,
-							kind: "poisoned",
-							remaining: 1,
-						},
-					],
+					afflictions: [{ kind: "poisoned", remaining: 1, source: "fixture" }],
 				},
 				configuration,
 			],
@@ -990,14 +980,7 @@ export default async function prepareFixtures() {
 					...quiet,
 					gold: 1000,
 					town: { ...createTownLocation(), coordinate: { row: 13, col: 3 } },
-					effects: [
-						{
-							actorId: "player",
-							floorNumber: null,
-							kind: "poisoned",
-							remaining: 3,
-						},
-					],
+					afflictions: [{ kind: "poisoned", remaining: 3, source: "fixture" }],
 				},
 				configuration,
 			],
@@ -1008,14 +991,7 @@ export default async function prepareFixtures() {
 					town: { ...createTownLocation(), coordinate: { row: 17, col: 20 } },
 					gold: 700,
 					mana: 2,
-					effects: [
-						{
-							actorId: "player",
-							floorNumber: null,
-							kind: "poisoned",
-							remaining: 3,
-						},
-					],
+					afflictions: [{ kind: "poisoned", remaining: 3, source: "fixture" }],
 					equipment: {
 						...quiet.equipment,
 						mainHand: { id: "rag:worn", kind: "iron-sword", enchantment: 1 },

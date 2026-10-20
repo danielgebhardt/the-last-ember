@@ -25,7 +25,7 @@ const definition = (kind: string, temporary = false): AfflictionDefinition => ({
 	removedText: "Test removed",
 	absentText: "Test absent",
 });
-it("caps distinct harmful conditions at two while refreshing without replacing either", () => {
+it("caps distinct harmful conditions at three while refreshing without replacing any", () => {
 	let active: readonly PlayerAffliction[] = [];
 	active = applyAffliction(
 		active,
@@ -37,7 +37,9 @@ it("caps distinct harmful conditions at two while refreshing without replacing e
 		definition("temporary", true),
 		"second",
 	).afflictions;
-	expect(applyAffliction(active, definition("third"), "third")).toEqual({
+	active = applyAffliction(active, definition("third"), "third").afflictions;
+	expect(active).toHaveLength(3);
+	expect(applyAffliction(active, definition("fourth"), "fourth")).toEqual({
 		afflictions: active,
 		outcome: "rejected",
 	});

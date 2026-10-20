@@ -211,7 +211,7 @@ test("all player status icons and afflictions fit without moving the dungeon whe
 			name: "Active player conditions",
 			exact: true,
 		});
-		// Worst case today: six timed effects plus both registered afflictions.
+		// Worst case today: five timed effects plus the three-affliction cap.
 		await expect(icons.getByRole("button")).toHaveCount(8);
 		const bounds = await icons.boundingBox();
 		if (!bounds) throw new Error("Expected icons");
@@ -244,7 +244,7 @@ test("all player status icons and afflictions fit without moving the dungeon whe
 	expect(before?.height).toBeGreaterThan(0);
 	await page.keyboard.press("Space");
 	await page.keyboard.press("Space");
-	// Timed effects expire; Disease and the longer Slowed remain.
+	// Timed effects and poison expire; Disease and the longer Slowed remain.
 	await expect(
 		page
 			.getByRole("list", { name: "Active player conditions", exact: true })
@@ -375,7 +375,7 @@ for (const size of [
 			exact: true,
 		});
 		const poison = conditions.getByRole("button", {
-			name: "Poisoned — 1 phase remaining",
+			name: "Poison — 1 phase remaining",
 		});
 		await expect(poison).toBeVisible();
 		await page.keyboard.press("g");
@@ -384,7 +384,7 @@ for (const size of [
 			exact: true,
 		});
 		await expect(notices).toContainText("No items on this tile.");
-		await expect(notices).not.toContainText("Poisoned");
+		await expect(notices).not.toContainText("Poison");
 		for (const theme of ["Light", "Dark"]) {
 			await page.getByRole("button", { name: "Settings", exact: true }).click();
 			await page.getByRole("button", { name: theme, exact: true }).click();
@@ -392,7 +392,7 @@ for (const size of [
 			await expect(map(page)).toBeFocused();
 			await poison.click();
 			const details = page.getByRole("dialog");
-			await expect(details).toContainText("Antidote removes current poison");
+			await expect(details).toContainText("Cure: Antidote (one turn)");
 			await expect(details).toBeInViewport({ ratio: 1 });
 			await page.screenshot({
 				path: testInfo.outputPath(`poison-icon-${theme}.png`),

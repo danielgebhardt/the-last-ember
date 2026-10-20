@@ -269,9 +269,9 @@ export const ITEM_DEFINITIONS = {
 		type: "potion",
 		attackBonus: 0,
 		armor: 0,
-		cleanses: "poisoned",
+		removesAfflictions: ["poisoned"],
 		description:
-			"Removes current poison before its next tick. Drinking uses one turn; it does not prevent a fresh poison attack.",
+			"Removes poison before its next tick. Drinking uses one turn; it does not prevent a fresh poison attack.",
 		minFloor: 2,
 		maxFloor: MAX_FLOORS,
 		foundWeight: 2,

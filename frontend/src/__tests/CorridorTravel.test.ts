@@ -168,13 +168,9 @@ it("denies harmful conditions and ended adventures, and sees no hidden monster o
 		corridorStep(
 			view({
 				...state,
-				effects: [
-					{
-						actorId: "player",
-						floorNumber: null,
-						kind: "poisoned",
-						remaining: 3,
-					},
+				effects: [],
+				afflictions: [
+					{ kind: "poisoned" as const, remaining: 3, source: "test" },
 				],
 			}),
 			"right",
@@ -255,14 +251,8 @@ it("resolves every allowed step through the normal turn boundary; denial resolve
 	expect(state.mana).toBeGreaterThan(0);
 	const poisoned = {
 		...state,
-		effects: [
-			{
-				actorId: "player",
-				floorNumber: null,
-				kind: "poisoned" as const,
-				remaining: 3,
-			},
-		],
+		effects: [],
+		afflictions: [{ kind: "poisoned" as const, remaining: 3, source: "test" }],
 	};
 	expect(corridorStep(view(poisoned), "right")).toEqual({ stop: "condition" });
 	expect(poisoned.turn).toBe(31);

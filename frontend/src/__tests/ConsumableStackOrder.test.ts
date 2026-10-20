@@ -77,14 +77,10 @@ it.each(potionKinds)(
 			objects: [],
 			mana: 0,
 			player: { ...fresh.player, health: 4 },
-			effects: [
-				{
-					actorId: "player",
-					floorNumber: null,
-					kind: "poisoned",
-					remaining: 3,
-				},
-			] as const,
+			effects: [] as const,
+			afflictions: [
+				{ kind: "poisoned" as const, remaining: 3, source: "test" },
+			],
 			potionHotbar: [kind, null, null, null] as const,
 			bag: createBag([
 				{ id: "potion:1", kind },

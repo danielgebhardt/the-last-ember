@@ -301,10 +301,12 @@ const DungeonHelp = ({
 					<li>
 						<span className="font-medium text-foreground">Status effects.</span>{" "}
 						Select a status icon in the player bar for its remaining duration
-						and effect. The Activity log records changes. Poison lasts six
-						active phases on players and monsters, ticking after monsters act.
-						Antidote removes current poison before that tick; it does not
-						protect against a fresh poison attack.
+						and effect. The Activity log records changes. Poison deals 1 damage
+						after monsters act for six phases; another dose resets the timer. An
+						Antidote removes it before that tick but does not protect against a
+						fresh dose. At most three harmful conditions (poison, Disease,
+						Slowed, Mana Burn, Curse) can be active at once; a fourth is
+						rejected.
 					</li>
 					<li>
 						<span className="font-medium text-foreground">Disease.</span> Rare
@@ -324,9 +326,7 @@ const DungeonHelp = ({
 						resets the timer without deepening it. Your turns and actions are
 						unchanged. A Cleansing potion removes it before monsters act, using
 						one turn; it also cures Mana Burn. Corridor running stops when
-						Slowed begins and cannot start while it lasts. At most two
-						afflictions such as Disease and Slowed can be active; poison does
-						not count toward that limit.
+						Slowed begins and cannot start while it lasts.
 					</li>
 					<li>
 						<span className="font-medium text-foreground">Mana Burn.</span> Rare

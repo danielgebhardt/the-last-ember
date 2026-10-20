@@ -1,6 +1,7 @@
 import type { ActivityEvent } from "../../domain/game/ActivityHistory.ts";
 import { ADVENTURE_STORY } from "../../domain/game/AdventureStory";
 import { AFFLICTION_DEFINITIONS } from "../../domain/game/AfflictionDefinitions";
+import { PLAYER_AFFLICTION_LIMIT } from "../../domain/game/PlayerAfflictions";
 import { SPELL_DEFINITIONS } from "../../domain/game/Spells";
 import { EFFECT_DEFINITIONS } from "../../domain/game/TimedEffects";
 import { equipmentPlacementLabel } from "../../domain/items/Equipment";
@@ -134,14 +135,12 @@ export const formatActivityEvent = (event: ActivityEvent): string => {
 			if (event.change === "expired")
 				return `${prefix}${definition.name} wears off. ${definition.removedText}`;
 			if (event.change === "rejected")
-				return `${prefix}${definition.name} rejected: two afflictions are already active (${event.source}).`;
+				return `${prefix}${definition.name} rejected: ${PLAYER_AFFLICTION_LIMIT} conditions are already active (${event.source}).`;
 			return `${prefix}${definition.name} ${event.change} (${event.source}). ${event.change === "cured" ? definition.removedText : definition.appliedText}`;
 		}
 		case "player-condition-hit":
-			return `${prefix}${EFFECT_DEFINITIONS[event.condition].name} deals ${event.damage} damage to you.`;
+			return `${prefix}${AFFLICTION_DEFINITIONS[event.condition].name} deals ${event.damage} damage to you.`;
 		case "player-condition-applied":
-			if (event.condition === "poisoned")
-				return `${prefix}You are poisoned for ${event.duration} committed turns.`;
 			return `${prefix}You gain ${EFFECT_DEFINITIONS[event.condition].name} for ${event.duration} committed turns.`;
 		case "condition-hit":
 			return `${prefix}${EFFECT_DEFINITIONS[event.condition].name} deals ${event.damage} damage to the ${MONSTER_DEFINITIONS[event.monster].name}.`;
@@ -210,7 +209,7 @@ export const formatActivityEvent = (event: ActivityEvent): string => {
 			const removed = event.conditions ?? [];
 			return removed.length
 				? `${prefix}You ${verb} ${ITEM_DEFINITIONS[event.item].name} and remove ${removed.map((c) => AFFLICTION_DEFINITIONS[c].name).join(" and ")}. ${removed.map((c) => AFFLICTION_DEFINITIONS[c].removedText).join(" ")}`
-				: `${prefix}You ${verb} ${ITEM_DEFINITIONS[event.item].name} and remove poison.`;
+				: `${prefix}You ${verb} ${ITEM_DEFINITIONS[event.item].name}.`;
 		}
 		case "item-consumed": {
 			const item = ITEM_DEFINITIONS[event.item];

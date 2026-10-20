@@ -445,8 +445,8 @@ it("mitigates breath once while leaving physical hits, poison application/ticks 
 		predictableAttackRolls,
 	).state;
 	expect(rareHit.player).toEqual(ordinaryHit.player);
-	expect(rareHit.effects).toEqual(ordinaryHit.effects);
-	expect(rareHit.effects.some((e) => e.kind === "poisoned")).toBe(true);
+	expect(rareHit.afflictions).toEqual(ordinaryHit.afflictions);
+	expect(rareHit.afflictions.some((a) => a.kind === "poisoned")).toBe(true);
 	expect(
 		resolvePlayerAction({ ...rareHit, monsters: [] }, { type: "wait" }).state
 			.player,

@@ -11,12 +11,8 @@ export const EFFECT_DEFINITIONS = {
 	rooted: { name: "Webbed", duration: 3 },
 	asleep: { name: "Asleep", duration: 3 },
 	afraid: { name: "Afraid", duration: 3 },
-	poisoned: {
-		name: "Poisoned",
-		duration: 6,
-		monsterDamage: 4,
-		playerDamage: 1,
-	},
+	// Monster-only: player poison is an affliction.
+	poisoned: { name: "Poisoned", duration: 6, monsterDamage: 4 },
 	renewing: { name: "Renewal", duration: 4 },
 	protected: { name: "Protection", duration: 20 },
 	strengthened: { name: "Strength", duration: 20 },
@@ -28,7 +24,6 @@ export const PLAYER_EFFECT_KINDS = [
 	"strengthened",
 	"nimble",
 	"enlightened",
-	"poisoned",
 ] as const;
 export const MONSTER_EFFECT_KINDS = [
 	"slowed",
@@ -129,28 +124,6 @@ export const advanceTimedEffects = (state: GameState): GameState => {
 				type: "condition-hit",
 				condition: "poisoned",
 			});
-		if (next.player.health > 0 && isPlayer && effect.kind === "poisoned") {
-			const damage = Math.min(
-				next.player.health,
-				EFFECT_DEFINITIONS.poisoned.playerDamage,
-			);
-			const health = next.player.health - damage;
-			next = {
-				...next,
-				player: { ...next.player, health },
-				activityHistory: appendActivityEvents(next.activityHistory, [
-					{
-						type: "player-condition-hit",
-						condition: "poisoned",
-						damage,
-						turn: next.turn,
-					},
-					...(health === 0
-						? [{ type: "player-died" as const, turn: next.turn }]
-						: []),
-				]),
-			};
-		}
 		if (next.player.health > 0 && isPlayer && effect.kind === "renewing") {
 			const recovered = Math.min(
 				ongoing.renewalHealing,

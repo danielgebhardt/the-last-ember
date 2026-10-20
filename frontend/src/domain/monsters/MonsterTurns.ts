@@ -17,12 +17,7 @@ import {
 	deriveAccuracy,
 	resolveMeleeAttack,
 } from "../game/MeleeRules";
-import {
-	EFFECT_DEFINITIONS,
-	hasMonsterEffect,
-	monsterSkipsAction,
-	refreshPlayerEffect,
-} from "../game/TimedEffects";
+import { hasMonsterEffect, monsterSkipsAction } from "../game/TimedEffects";
 import { navigationRun } from "../objects/NavigationTerrain";
 import { alertNearbyMonsters } from "./AlarmAlerts";
 import { chooseEnemySpell } from "./EnemyCasting";
@@ -52,7 +47,7 @@ export const resolveMonsterPhase = (
 	let player = state.player;
 	let mana = state.mana;
 	let monsters = state.monsters;
-	let effects = state.effects;
+	const effects = state.effects;
 	const events: ActivityEvent[] = [];
 	const infections: { kind: AfflictionKind; source: string }[] = [];
 	const { armor } = deriveCombatStats(
@@ -485,15 +480,11 @@ export const resolveMonsterPhase = (
 				kind: definition.onHitAffliction.kind,
 				source: definition.name,
 			});
-		if (player.health > 0 && definition.onHitCondition) {
-			effects = refreshPlayerEffect(effects, definition.onHitCondition);
-			events.push({
-				type: "player-condition-applied",
-				condition: definition.onHitCondition,
-				duration: EFFECT_DEFINITIONS[definition.onHitCondition].duration,
-				turn: state.turn,
+		if (player.health > 0 && definition.onHitCondition)
+			infections.push({
+				kind: definition.onHitCondition,
+				source: definition.name,
 			});
-		}
 		if (player.health === 0)
 			events.push({ type: "player-died", turn: state.turn });
 	}

@@ -37,36 +37,20 @@ describe("Actionable visible threats", () => {
 		).not.toBeInTheDocument();
 	});
 	it("moves player conditions into the HUD without duplicating dungeon notices", () => {
-		render(
-			<VisibleEffects
-				effects={[
-					{
-						actorId: "player",
-						floorNumber: null,
-						kind: "poisoned",
-						remaining: 2,
-					},
-				]}
-				monsters={[]}
-			/>,
-		);
+		render(<VisibleEffects effects={[]} monsters={[]} />);
 		expect(
 			screen.queryByRole("list", { name: "Your conditions" }),
 		).not.toBeInTheDocument();
 		render(
 			<StatusEffectIcons
-				effects={[
-					{
-						actorId: "player",
-						floorNumber: null,
-						kind: "poisoned",
-						remaining: 2,
-					},
+				effects={[]}
+				afflictions={[
+					{ kind: "poisoned" as const, remaining: 2, source: "test" },
 				]}
 			/>,
 		);
 		expect(
-			screen.getByRole("button", { name: "Poisoned — 2 phases remaining" }),
+			screen.getByRole("button", { name: "Poison — 2 phases remaining" }),
 		).toHaveAccessibleDescription(/1 damage after monsters.*Antidote/i);
 	});
 	it("explains ranged cover and prepared-attack interruption without new rules", () => {

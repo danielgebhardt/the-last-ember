@@ -86,11 +86,9 @@ const ItemDetails = ({
 		details.type === "potion"
 			? "removesAfflictions" in details
 				? remedyStat(details.removesAfflictions)
-				: "cleanses" in details
-					? "Removes poison"
-					: "permanentAttribute" in details
-						? "+1 permanent attribute; each bottle stacks"
-						: `Recovery up to ${details.recovery.amount} ${details.recovery.resource}`
+				: "permanentAttribute" in details
+					? "+1 permanent attribute; each bottle stacks"
+					: `Recovery up to ${details.recovery.amount} ${details.recovery.resource}`
 			: details.type === "scroll"
 				? "removesAfflictions" in details
 					? remedyStat(details.removesAfflictions)

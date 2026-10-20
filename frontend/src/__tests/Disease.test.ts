@@ -78,15 +78,13 @@ it("ordinary healing and poison preserve Disease, and lethal poison cannot be re
 				{
 					actorId: "player",
 					floorNumber: null,
-					kind: "poisoned",
-					remaining: 2,
-				},
-				{
-					actorId: "player",
-					floorNumber: null,
 					kind: "renewing",
 					remaining: 2,
 				},
+			],
+			afflictions: [
+				...state.afflictions,
+				{ kind: "poisoned" as const, remaining: 2, source: "test" },
 			],
 		},
 		{ type: "wait" },

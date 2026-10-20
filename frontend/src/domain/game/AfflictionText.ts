@@ -53,6 +53,7 @@ const change = (label: string, { normal, effective }: Change, unit = "") =>
 export const afflictionDetails = (
 	kind: AfflictionKind,
 	impact?: AfflictionImpact,
+	remaining?: number | null,
 ): string => {
 	const definition = AFFLICTION_DEFINITIONS[kind];
 	const modifiers: AfflictionDefinition["modifiers"] = definition.modifiers;
@@ -64,6 +65,10 @@ export const afflictionDetails = (
 				modifiers.accuracy && change("Hit", impact.hit, "%"),
 			].filter(Boolean)
 		: [];
+	if (modifiers.damagePerPhase && remaining)
+		exact.push(
+			`Up to ${remaining * modifiers.damagePerPhase} damage remaining.`,
+		);
 	return [
 		...exact,
 		definition.guidance,

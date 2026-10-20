@@ -25,21 +25,23 @@ const adventure = () => ({
 const drink = { type: "consume", itemId: "review:cleansing" } as const;
 
 it("uses one bottle and one turn, removing only Slowed before monsters act", () => {
+	const sick = applyPlayerAffliction(
+		applyPlayerAffliction(adventure(), "disease", "rat"),
+		"slowed",
+		"web",
+	);
 	const initial = {
-		...applyPlayerAffliction(
-			applyPlayerAffliction(adventure(), "disease", "rat"),
-			"slowed",
-			"web",
-		),
-		effects: [
-			{ actorId: "player", floorNumber: null, kind: "poisoned", remaining: 3 },
-		] as const,
+		...sick,
+		afflictions: [
+			...sick.afflictions,
+			{ kind: "poisoned" as const, remaining: 3, source: "test" },
+		],
 	};
 	const result = resolvePlayerAction(initial, drink);
 	expect(result.turnAdvanced).toBe(true);
 	expect(result.state.turn).toBe(initial.turn + 1);
-	expect(result.state.afflictions?.map((a) => a.kind)).toEqual(["disease"]);
-	expect(result.state.effects).toMatchObject([
+	expect(result.state.afflictions).toMatchObject([
+		{ kind: "disease" },
 		{ kind: "poisoned", remaining: 2 },
 	]);
 	expect(result.state.bag.items).toEqual([]);
@@ -78,13 +80,9 @@ it("costs nothing without Slowed, including while only diseased or poisoned", ()
 		applyPlayerAffliction(initial, "disease", "rat"),
 		{
 			...initial,
-			effects: [
-				{
-					actorId: "player",
-					floorNumber: null,
-					kind: "poisoned",
-					remaining: 3,
-				} as const,
+			effects: [],
+			afflictions: [
+				{ kind: "poisoned" as const, remaining: 3, source: "test" },
 			],
 		},
 		applyPlayerAffliction(

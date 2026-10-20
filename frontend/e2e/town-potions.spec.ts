@@ -79,13 +79,8 @@ for (const width of [390, 1440])
 			expect(saved.state.gold).toBe(850);
 			expect(saved.state.turn).toBe(0);
 			expect(saved.state.player.health).toBe(1);
-			expect(saved.state.effects).toEqual([
-				{
-					actorId: "player",
-					floorNumber: null,
-					kind: "poisoned",
-					remaining: 3,
-				},
+			expect(saved.state.afflictions).toMatchObject([
+				{ kind: "poisoned", remaining: 3 },
 			]);
 			expect(saved.state.bag.items).toEqual([
 				{ id: "town-potion:healing-potion:1", kind: "healing-potion" },

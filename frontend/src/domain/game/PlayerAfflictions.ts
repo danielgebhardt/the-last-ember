@@ -1,5 +1,5 @@
 // Harmful non-poison conditions have their own budget; existing timed effects keep their semantics.
-export const PLAYER_AFFLICTION_LIMIT = 2;
+export const PLAYER_AFFLICTION_LIMIT = 3;
 export type AfflictionDefinition<K extends string = string> = Readonly<{
 	kind: K;
 	target: "player";
@@ -13,6 +13,8 @@ export type AfflictionDefinition<K extends string = string> = Readonly<{
 		// Melee to-hit in percentage points (one d20 step is 5) and flat melee damage.
 		accuracy?: number;
 		meleeDamage?: number;
+		// Damage dealt after monsters act in each committed phase it is active.
+		damagePerPhase?: number;
 	}>;
 	// Whether corridor running refuses to start while it lasts; onset always stops a run.
 	blocksRunning: boolean;

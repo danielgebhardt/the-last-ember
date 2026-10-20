@@ -236,20 +236,14 @@ it("ticks poison/recovery once on departure; fatal poison consumes the scroll bu
 	const state = {
 		...base,
 		turn: 29,
-		effects: [
-			{
-				actorId: "player",
-				floorNumber: null,
-				kind: "poisoned" as const,
-				remaining: 2,
-			},
-		],
+		effects: [],
+		afflictions: [{ kind: "poisoned" as const, remaining: 2, source: "test" }],
 	};
 	const result = read(state);
 	expect(result.state.player.health).toBe(state.player.health - 1);
 	expect(result.state.mana).toBe(1);
-	expect(result.state.effects[0].remaining).toBe(1);
-	expect(back(result.state).state.effects).toBe(result.state.effects);
+	expect(result.state.afflictions[0].remaining).toBe(1);
+	expect(back(result.state).state.afflictions).toBe(result.state.afflictions);
 	const fatal = read({ ...state, player: { ...state.player, health: 1 } });
 	expect(fatal.state.player.health).toBe(0);
 	expect(fatal.state.town).toBeNull();

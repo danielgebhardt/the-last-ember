@@ -48,14 +48,7 @@ it("saves six remaining poison phases while retaining shorter already-active tim
 		const state = {
 			...initial.state,
 			monsters: [],
-			effects: [
-				{
-					actorId: "player",
-					floorNumber: null,
-					kind: "poisoned" as const,
-					remaining,
-				},
-			],
+			afflictions: [{ kind: "poisoned" as const, remaining, source: "test" }],
 		};
 		const document = createSaveDocument(
 			state,
@@ -66,7 +59,7 @@ it("saves six remaining poison phases while retaining shorter already-active tim
 		const parsed = parseSave(JSON.stringify(document));
 		expect(parsed.ok).toBe(true);
 		if (!parsed.ok) throw new Error(parsed.error);
-		expect(restoreSave(parsed.value).state.effects[0].remaining).toBe(
+		expect(restoreSave(parsed.value).state.afflictions[0].remaining).toBe(
 			remaining,
 		);
 		expect(
@@ -75,7 +68,7 @@ it("saves six remaining poison phases while retaining shorter already-active tim
 					...document,
 					state: {
 						...document.state,
-						effects: [{ ...document.state.effects[0], remaining: 7 }],
+						afflictions: [{ ...document.state.afflictions[0], remaining: 7 }],
 					},
 				}),
 			).ok,

@@ -65,9 +65,8 @@ it("rejects healthy, unaffordable, stale, distant and ended transactions without
 it("heals only to diseased capacity and does not cleanse poison or Disease", () => {
 	const state = {
 		...applyPlayerAffliction(adventure(), "disease", "Plague Rat"),
-		effects: [
-			{ actorId: "player", floorNumber: null, kind: "poisoned", remaining: 3 },
-		] as const,
+		effects: [] as const,
+		afflictions: [{ kind: "poisoned" as const, remaining: 3, source: "test" }],
 	};
 	const quote = sanctuaryQuote(state, "health");
 	expect(quote).toMatchObject({ cost: 40, health: 4, maximumHealth: 8 });

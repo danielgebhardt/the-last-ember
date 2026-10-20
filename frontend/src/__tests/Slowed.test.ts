@@ -77,13 +77,9 @@ it("coexists with Disease and poison, and only its own cure removes it", () => {
 		applyPlayerAffliction(
 			{
 				...quiet(),
-				effects: [
-					{
-						actorId: "player",
-						floorNumber: null,
-						kind: "poisoned",
-						remaining: 4,
-					},
+				effects: [],
+				afflictions: [
+					{ kind: "poisoned" as const, remaining: 4, source: "test" },
 				],
 			},
 			"disease",
@@ -92,13 +88,16 @@ it("coexists with Disease and poison, and only its own cure removes it", () => {
 		"slowed",
 		"web",
 	);
-	expect(both.afflictions?.map((a) => a.kind)).toEqual(["disease", "slowed"]);
+	expect(both.afflictions.map((a) => a.kind)).toEqual([
+		"disease",
+		"poisoned",
+		"slowed",
+	]);
 	expect(both.player.maxHealth).toBe(8);
 	expect(evade(both)).toBe(10);
 	const cured = removePlayerAfflictions(both, ["slowed"], "test");
-	expect(cured.afflictions?.map((a) => a.kind)).toEqual(["disease"]);
+	expect(cured.afflictions.map((a) => a.kind)).toEqual(["disease", "poisoned"]);
 	expect(cured.player).toEqual(both.player);
-	expect(cured.effects).toEqual(both.effects);
 	expect(evade(cured)).toBe(20);
 });
 

@@ -1,5 +1,6 @@
 // @vitest-environment node
 import { expect, it } from "vitest";
+import { tickAfflictionDamage } from "../domain/game/Afflictions";
 import { createGameState } from "../domain/game/GameState";
 import { resolvePlayerAction } from "../domain/game/PlayerActions";
 import { experienceThreshold } from "../domain/game/Progression";
@@ -163,20 +164,18 @@ it.each([
 					remaining: 4,
 				},
 				{
-					actorId: "player",
-					floorNumber: null,
-					kind: "poisoned" as const,
-					remaining: 3,
-				},
-				{
 					actorId: "1:1",
 					floorNumber: 1,
 					kind: "poisoned" as const,
 					remaining: 3,
 				},
 			],
+			afflictions: [
+				{ kind: "poisoned" as const, remaining: 3, source: "test" },
+			],
 		};
-		const next = advanceTimedEffects(state);
+		// Player poison ticks first (as an affliction), then Renewal and monster poison.
+		const next = advanceTimedEffects(tickAfflictionDamage(state));
 		expect(next.monsters[0].health).toBe(100 - poison);
 		expect(next.player.health).toBe(9 + healing);
 	},

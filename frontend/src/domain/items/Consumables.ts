@@ -105,21 +105,6 @@ export const consumeItem = (
 			},
 		};
 	}
-	if ("cleanses" in definition) {
-		const effects = state.effects.filter(
-			(effect) =>
-				effect.actorId !== "player" || effect.kind !== definition.cleanses,
-		);
-		if (effects.length === state.effects.length)
-			return { error: "You are not poisoned." };
-		return {
-			player,
-			mana,
-			effects,
-			bag: removeBagItem(bag, selected.id),
-			event: { type: "item-cleansed", item: selected.kind },
-		};
-	}
 	if ("permanentAttribute" in definition) {
 		const attribute = definition.permanentAttribute,
 			gains = permanentAttributeGains(state.progression);

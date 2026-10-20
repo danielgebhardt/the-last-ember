@@ -40,14 +40,6 @@ export type StatusVisual = {
 };
 
 export const STATUS_VISUALS: Record<PlayerEffectKind, StatusVisual> = {
-	poisoned: {
-		Icon: Skull,
-		className: `
-         border-lime-600/70 bg-lime-500/10 text-lime-800
-         shadow-[0_0_8px_rgba(132,204,22,0.24)]
-         dark:border-lime-400/70 dark:bg-lime-950/50 dark:text-lime-400
-      `,
-	},
 	renewing: {
 		Icon: HeartPulse,
 		className: `
@@ -86,6 +78,14 @@ export const STATUS_VISUALS: Record<PlayerEffectKind, StatusVisual> = {
 };
 
 export const AFFLICTION_VISUALS: Record<AfflictionKind, StatusVisual> = {
+	poisoned: {
+		Icon: Skull,
+		className: `
+         border-lime-600/70 bg-lime-500/10 text-lime-800
+         shadow-[0_0_8px_rgba(132,204,22,0.24)]
+         dark:border-lime-400/70 dark:bg-lime-950/50 dark:text-lime-400
+      `,
+	},
 	disease: {
 		Icon: Biohazard,
 		className: `
@@ -182,10 +182,6 @@ const StatusEffectIcons = ({
 
 		return kind ? [{ kind, remaining: effect.remaining }] : [];
 	});
-	// Harmful conditions lead so they stay visible when the single row overflows.
-	playerEffects.sort(
-		(a, b) => Number(b.kind === "poisoned") - Number(a.kind === "poisoned"),
-	);
 	const count = playerEffects.length + afflictions.length;
 	const list = useRef<HTMLUListElement>(null);
 	const [overflowing, setOverflowing] = useState(false);
@@ -215,12 +211,13 @@ const StatusEffectIcons = ({
 					: ""
 			}`}
 		>
+			{/* Harmful afflictions lead so they stay visible when the single row overflows. */}
 			{afflictions.map(({ kind, remaining }) => (
 				<StatusIcon
 					key={kind}
 					visual={AFFLICTION_VISUALS[kind]}
 					description={`${AFFLICTION_DEFINITIONS[kind].name} — ${remaining === null ? "until cured" : `${remaining} ${remaining === 1 ? "phase" : "phases"} remaining`}`}
-					details={afflictionDetails(kind, impact)}
+					details={afflictionDetails(kind, impact, remaining)}
 				/>
 			))}
 			{playerEffects.map(({ kind, remaining }) => {
@@ -230,11 +227,7 @@ const StatusEffectIcons = ({
 						key={kind}
 						visual={STATUS_VISUALS[kind]}
 						description={`${name} — ${remaining} ${remaining === 1 ? "phase" : "phases"} remaining`}
-						details={
-							kind === "poisoned"
-								? `${EFFECT_DEFINITIONS.poisoned.playerDamage} damage after monsters each committed turn; up to ${remaining * EFFECT_DEFINITIONS.poisoned.playerDamage} damage remaining. Antidote removes current poison before that tick.`
-								: "Each committed turn advances this effect by one phase."
-						}
+						details="Each committed turn advances this effect by one phase."
 					/>
 				);
 			})}

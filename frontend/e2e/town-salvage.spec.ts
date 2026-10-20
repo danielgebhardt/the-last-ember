@@ -118,7 +118,7 @@ for (const width of [390, 1440]) {
 			expect(saved.state.turn).toBe(0);
 			expect(saved.state.mana).toBe(2);
 			expect(saved.state.player.health).toBe(1);
-			expect(saved.state.effects[0].remaining).toBe(3);
+			expect(saved.state.afflictions[0].remaining).toBe(3);
 			expect(
 				saved.state.bag.items.map((item: { id: string }) => item.id),
 			).toEqual(["rag:same", "rag:better", "rag:tradeoff", "rag:potion"]);

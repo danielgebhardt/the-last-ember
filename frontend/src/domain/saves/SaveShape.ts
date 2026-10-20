@@ -14,7 +14,7 @@ import { isPermanentAttributes } from "../game/PermanentAttributes";
 import { PLAYER_AFFLICTION_LIMIT } from "../game/PlayerAfflictions";
 import { MAX_PLAYER_LEVEL } from "../game/Progression";
 import { SPELL_DEFINITIONS } from "../game/Spells";
-import { EFFECT_DEFINITIONS } from "../game/TimedEffects";
+import { EFFECT_DEFINITIONS, PLAYER_EFFECT_KINDS } from "../game/TimedEffects";
 import { MAX_BAG_ITEMS } from "../items/Bag";
 import { EQUIPMENT_SLOT_LABELS } from "../items/Equipment";
 import { ITEM_DEFINITIONS, RARE_EQUIPMENT_KINDS } from "../items/Item";
@@ -191,7 +191,7 @@ const eventFields = {
 		source: text,
 	},
 	"player-condition-applied": {
-		condition: oneOf(Object.keys(EFFECT_DEFINITIONS)),
+		condition: oneOf(PLAYER_EFFECT_KINDS),
 		duration: integer(1, 100),
 	},
 	"condition-hit": {
@@ -207,7 +207,7 @@ const eventFields = {
 	"spell-hit": { spell: spellKind, monster: monsterKind, damage: natural },
 	"spell-repositioned": { spell: spellKind, monster: optional(monsterKind) },
 	"player-condition-hit": {
-		condition: oneOf(Object.keys(EFFECT_DEFINITIONS)),
+		condition: oneOf(Object.keys(AFFLICTION_DEFINITIONS)),
 		damage: natural,
 	},
 	"monster-awareness-changed": {

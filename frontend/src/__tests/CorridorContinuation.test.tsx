@@ -348,13 +348,9 @@ it.each(["door", "trap", "loot", "stairs", "junction", "poison"] as const)(
 		if (kind === "poison")
 			state = {
 				...state,
-				effects: [
-					{
-						actorId: "player",
-						floorNumber: null,
-						kind: "poisoned",
-						remaining: 3,
-					},
+				effects: [],
+				afflictions: [
+					{ kind: "poisoned" as const, remaining: 3, source: "test" },
 				],
 			};
 		const initial = {

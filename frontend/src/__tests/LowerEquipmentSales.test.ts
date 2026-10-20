@@ -119,14 +119,15 @@ it("advances effects and normal mana recovery once for the whole sale", () => {
 	const before = shop();
 	before.turn = 29;
 	before.mana = 0;
-	before.effects = [
-		{ actorId: "player", floorNumber: null, kind: "poisoned", remaining: 3 },
+	before.effects = [];
+	before.afflictions = [
+		{ kind: "poisoned" as const, remaining: 3, source: "test" },
 	];
 	const sold = resolvePlayerAction(before, sale).state;
 	expect(sold.turn).toBe(30);
 	expect(sold.mana).toBe(1);
 	expect(sold.player.health).toBe(before.player.health - 1);
-	expect(sold.effects[0].remaining).toBe(2);
+	expect(sold.afflictions[0].remaining).toBe(2);
 	expect(sold.gold).toBe(145);
 });
 
@@ -173,8 +174,9 @@ it("allows one adjacent monster response after both items have been sold", () =>
 it("retains all completed sales after a fatal response and refuses further actions", () => {
 	const before = shop();
 	before.player = { ...before.player, health: 1 };
-	before.effects = [
-		{ actorId: "player", floorNumber: null, kind: "poisoned", remaining: 3 },
+	before.effects = [];
+	before.afflictions = [
+		{ kind: "poisoned" as const, remaining: 3, source: "test" },
 	];
 	const sold = resolvePlayerAction(before, sale).state;
 	expect(sold.player.health).toBe(0);

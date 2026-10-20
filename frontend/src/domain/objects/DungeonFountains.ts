@@ -1,9 +1,9 @@
 import { hashStringToUint32 } from "../dungeon/DungeonRun";
 import { createSeededRandom } from "../dungeon/Seed";
 import { appendActivityEvents } from "../game/ActivityHistory";
+import { applyPlayerAffliction } from "../game/Afflictions";
 import type { GameState } from "../game/GameState";
 import { maximumMana } from "../game/Mana";
-import { applyPlayerEffect } from "../game/TimedEffects";
 import type { DungeonObject } from "./DungeonObject";
 import { objectDamage, spendObject } from "./ObjectEffects";
 import type { ObjectChoice } from "./ObjectInteraction";
@@ -48,7 +48,9 @@ export const drawFountain = (
 			damage: 3,
 			turn: state.turn,
 		});
-		return hurt.player.health > 0 ? applyPlayerEffect(hurt, "poisoned") : hurt;
+		return hurt.player.health > 0
+			? applyPlayerAffliction(hurt, "poisoned", "fountain")
+			: hurt;
 	}
 	const health = Math.min(
 		fountainRestoration(state)[choice].health,

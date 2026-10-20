@@ -93,14 +93,9 @@ export const corridorView = (
 		health: state.player.health,
 		ended: state.player.health <= 0 || state.quest.victory !== null,
 		// Combat-weakening harm blocks running like poison; other afflictions stop it only on onset.
-		harmful:
-			state.effects.some(
-				(x) =>
-					x.actorId === "player" && x.kind === "poisoned" && x.remaining > 0,
-			) ||
-			state.afflictions.some(
-				(a) => AFFLICTION_DEFINITIONS[a.kind].blocksRunning,
-			),
+		harmful: state.afflictions.some(
+			(a) => AFFLICTION_DEFINITIONS[a.kind].blocksRunning,
+		),
 		afflictions: state.afflictions.map((a) => a.kind),
 		damaged: state.activityHistory.entries.some(
 			({ event }) =>

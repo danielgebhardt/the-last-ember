@@ -42,7 +42,7 @@ for (const width of [390, 1440])
 		const frame = await mapGeometry(page);
 		await expect(
 			conditions(page).getByRole("button", {
-				name: "Poisoned — 5 phases remaining",
+				name: "Poison — 5 phases remaining",
 			}),
 		).toBeVisible();
 		await expect(health(page)).toContainText("8 / 8");
@@ -74,7 +74,7 @@ for (const width of [390, 1440])
 			// Capacity returns without healing; poison still ticks after monsters.
 			await expect(health(page)).toContainText("7 / 10");
 			await expect(
-				conditions(page).getByRole("button", { name: /^Poisoned/ }),
+				conditions(page).getByRole("button", { name: /^Poison/ }),
 			).toBeVisible();
 			expect(await mapGeometry(page)).toEqual(frame);
 			await expect(map(page)).toBeFocused();
@@ -144,7 +144,7 @@ for (const width of [390, 1440])
 		await expect(disease(page)).toHaveCount(0);
 		await expect(
 			conditions(page).getByRole("button", {
-				name: "Poisoned — 5 phases remaining",
+				name: "Poison — 5 phases remaining",
 			}),
 		).toBeVisible();
 		await expect(turns(page)).toHaveText("Turn 0");

@@ -63,7 +63,7 @@ it("risky draws can restore or poison with identity-fixed outcomes, never reroll
 		expect(result.mana).toBe(replay.mana);
 		expect(result.objects[0].activated).toBe(true);
 		outcomes.add(
-			result.effects.some((effect) => effect.kind === "poisoned")
+			result.afflictions.some((a) => a.kind === "poisoned")
 				? "poison"
 				: "restore",
 		);

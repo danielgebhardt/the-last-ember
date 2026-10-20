@@ -31,12 +31,12 @@ it("a landed spider bite poisons the player, ticks after retaliation and refresh
 	const initial = encounter();
 	const first = resolvePlayerAction(initial, { type: "wait" }, hit).state;
 	expect(first.player.health).toBe(8);
-	expect(first.effects).toEqual([
-		{ actorId: "player", floorNumber: null, kind: "poisoned", remaining: 5 },
+	expect(first.afflictions).toEqual([
+		{ kind: "poisoned", remaining: 5, source: "giant spider" },
 	]);
 	const again = resolvePlayerAction(first, { type: "wait" }, hit).state;
-	expect(again.effects).toHaveLength(1);
-	expect(again.effects[0].remaining).toBe(5);
+	expect(again.afflictions).toHaveLength(1);
+	expect(again.afflictions[0].remaining).toBe(5);
 	expect(again.player.health).toBe(6);
 });
 it("missed bites and free blocked actions do not add or tick poison", () => {
@@ -45,7 +45,7 @@ it("missed bites and free blocked actions do not add or tick poison", () => {
 		resolvePlayerAction(initial, { type: "wait" }, () => ({
 			d20: () => 1,
 			damage: (min) => min,
-		})).state.effects,
+		})).state.afflictions,
 	).toEqual([]);
 	const poisoned = resolvePlayerAction(initial, { type: "wait" }, hit).state;
 	const blocked = resolvePlayerAction(
@@ -70,11 +70,11 @@ it("poison follows the player, expires after six committed phases, and cannot be
 	expect(second.player.health).toBe(7);
 	let last = resolvePlayerAction(second, { type: "wait" }, hit).state;
 	expect(last.player.health).toBe(6);
-	expect(last.effects[0].remaining).toBe(3);
+	expect(last.afflictions[0].remaining).toBe(3);
 	for (let phase = 4; phase <= 6; phase++)
 		last = resolvePlayerAction(last, { type: "wait" }, hit).state;
 	expect(last.player.health).toBe(3);
-	expect(last.effects).toEqual([]);
+	expect(last.afflictions).toEqual([]);
 	const fatal = {
 		...away,
 		player: { health: 1, maxHealth: 10 },
@@ -104,14 +104,8 @@ it("resumes a saved player poison timer without replaying the bite or refilling 
 		...original.state,
 		monsters: [],
 		player: { health: 3, maxHealth: 10 },
-		effects: [
-			{
-				actorId: "player",
-				floorNumber: null,
-				kind: "poisoned" as const,
-				remaining: 2,
-			},
-		],
+		effects: [],
+		afflictions: [{ kind: "poisoned" as const, remaining: 2, source: "test" }],
 	};
 	const parsed = parseSave(
 		serializeSave(
@@ -131,7 +125,7 @@ it("resumes a saved player poison timer without replaying the bite or refilling 
 		hit,
 	).state;
 	expect(resumed.player.health).toBe(2);
-	expect(resumed.effects[0].remaining).toBe(1);
+	expect(resumed.afflictions[0].remaining).toBe(1);
 	expect(
 		resumed.activityHistory.entries.filter(
 			(entry) => entry.event.type === "player-condition-applied",

@@ -78,7 +78,7 @@ import {
 	afflictedMeleeAttack,
 	suppressesManaRecovery,
 } from "./AfflictionDefinitions";
-import { advancePlayerAfflictions } from "./Afflictions";
+import { advancePlayerAfflictions, tickAfflictionDamage } from "./Afflictions";
 import { type AttackRollSource, createAttackRolls } from "./CombatRandomness";
 import { deriveCombatStats } from "./CombatStats";
 import { activateEscapeFloor } from "./Escape";
@@ -291,7 +291,9 @@ export const resolvePlayerAction = (
 	const monsterPhase =
 		responseState.quest.victory || responseState.player.health <= 0
 			? undefined
-			: advanceTimedEffects(resolveMonsterPhase(responseState, rollSource));
+			: advanceTimedEffects(
+					tickAfflictionDamage(resolveMonsterPhase(responseState, rollSource)),
+				);
 	const resolved = monsterPhase
 		? recoverManaAfterTurn(
 				advancePlayerAfflictions(monsterPhase),
