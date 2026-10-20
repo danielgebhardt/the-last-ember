@@ -42,7 +42,9 @@ it("opens on Equipped, lists bag items by tab, confirms one reforge and restores
 	);
 	const equipped = within(dialog.getByRole("tabpanel", { name: "Equipped" }));
 	expect(equipped.getByText("Main hand")).toBeVisible();
-	expect(equipped.getByText("+1: Attack bonus +1 → +2")).toBeVisible();
+	expect(equipped.getByText(/^\+1: Attack 1 →/)).toHaveTextContent(
+		"+1: Attack 1 → 2",
+	);
 
 	await user.click(dialog.getByRole("tab", { name: "Body armor" }));
 	const body = within(dialog.getByRole("tabpanel", { name: "Body armor" }));

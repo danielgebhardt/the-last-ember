@@ -41,11 +41,21 @@ const FORGE_TABS = [
 ] as const;
 type ForgeTab = (typeof FORGE_TABS)[number]["value"];
 
+// The raised value uses the equipment comparison's improvement green.
 const statChange = (item: ItemInstance) => {
 	const next = { ...item, enchantment: (item.enchantment ?? 0) + 1 };
-	return ITEM_DEFINITIONS[item.kind].type === "weapon"
-		? `Attack bonus +${itemAttackBonus(item)} → +${itemAttackBonus(next)}`
-		: `Armor ${itemArmor(item)} → ${itemArmor(next)}`;
+	const [label, value] =
+		ITEM_DEFINITIONS[item.kind].type === "weapon"
+			? ["Attack", itemAttackBonus]
+			: ["Armor", itemArmor];
+	return (
+		<>
+			{label} {value(item)} →{" "}
+			<span className="font-semibold text-green-700 dark:text-green-400">
+				{value(next)}
+			</span>
+		</>
+	);
 };
 
 const TownForgeDialog = ({
@@ -120,7 +130,7 @@ const TownForgeDialog = ({
 					)}
 				</div>
 				<p className="text-muted-foreground">
-					{capped ? reason : `+1: ${statChange(item)}`}
+					{capped ? reason : <>+1: {statChange(item)}</>}
 				</p>
 				<Button
 					variant="outline"
