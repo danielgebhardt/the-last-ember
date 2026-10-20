@@ -137,6 +137,41 @@ export default async function prepareFixtures() {
 		});
 		if (biteTurn === undefined) throw new Error("Expected an infecting bite");
 		const plagueBite = { ...ratBase, turn: biteTurn };
+		// A giant spider two tiles away with a Cleansing potion on key 1.
+		const webTile = [
+			[0, 2],
+			[2, 0],
+			[0, -2],
+			[-2, 0],
+		]
+			.map(([row, col]) => ({
+				row: run.playerCoordinate.row + row,
+				col: run.playerCoordinate.col + col,
+			}))
+			.find(
+				({ row, col }) =>
+					run.floors[0].terrain[row]?.[col] === "." &&
+					run.floors[0].terrain[(row + run.playerCoordinate.row) / 2]?.[
+						(col + run.playerCoordinate.col) / 2
+					] === ".",
+			);
+		if (!webTile) throw new Error("Expected a clear web tile");
+		const spiderWeb = {
+			...ratBase,
+			bag: { items: [{ id: "smoke:cleansing", kind: "cleansing-potion" }] },
+			potionHotbar: ["cleansing-potion", null, null, null],
+			monsters: [
+				{
+					id: "1:1",
+					kind: "spider",
+					floorNumber: 1,
+					coordinate: webTile,
+					health: 8,
+					intent: { type: "idle" },
+					lastDamagedTurn: null,
+				},
+			],
+		};
 		const townDiseased = {
 			...diseased,
 			bag: { items: [] },
@@ -849,6 +884,7 @@ export default async function prepareFixtures() {
 			["diseased", diseased, configuration],
 			["town-diseased", townDiseased, configuration],
 			["plague-bite", plagueBite, configuration],
+			["spider-web", spiderWeb, configuration],
 			["scrolling", scrolling, configuration],
 			["stacks", stacks, configuration],
 			[

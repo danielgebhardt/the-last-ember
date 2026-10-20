@@ -18,6 +18,8 @@ const intentAdvice = (actor: Monster): string | null => {
 			return "Recovering: its next action is spent recovering. Use the opening.";
 		case "preparing-attack":
 			return "Move off the marked tile before its next action; Sleep or Fear cancels the heavy strike.";
+		case "preparing-web":
+			return "Move off the marked tile before its next action to avoid Slowed; Sleep or Fear cancels the web.";
 		case "preparing-alarm":
 			return "Alarm on its next action: kill it or use Sleep or Fear. Web does not silence it.";
 		default:

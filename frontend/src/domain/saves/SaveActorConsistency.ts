@@ -1,5 +1,7 @@
 import { hasLineOfSight } from "../dungeon/Visibility";
-import { MONSTER_DEFINITIONS } from "../monsters/Monster";
+import { AFFLICTION_DEFINITIONS } from "../game/AfflictionDefinitions";
+import { enabledRemedies } from "../items/Remedies";
+import { MONSTER_DEFINITIONS, monsterAffliction } from "../monsters/Monster";
 import {
 	orthogonalDistance,
 	protectedFloorLocations,
@@ -30,7 +32,12 @@ export const hasConsistentActors = (document: SaveDocument): boolean => {
 	);
 	if (
 		!unique(state.monsters.map((entry) => entry.id)) ||
-		state.monsters.filter((entry) => entry.remedyDrop).length > 1 ||
+		// At most one guaranteed remedy per affliction, matching an enabled remedy.
+		!unique(
+			state.monsters.flatMap((entry) =>
+				entry.remedyDrop ? [monsterAffliction(entry.kind) ?? entry.id] : [],
+			),
+		) ||
 		!unique(
 			state.monsters.map(
 				(entry) =>
@@ -54,8 +61,18 @@ export const hasConsistentActors = (document: SaveDocument): boolean => {
 					)) &&
 				(entry.remedyDrop === undefined ||
 					(entry.remedyDrop === true &&
-						MONSTER_DEFINITIONS[entry.kind].afflictionSource === true &&
-						state.dungeonRemedies === true)) &&
+						(() => {
+							const affliction = monsterAffliction(entry.kind);
+							return (
+								affliction !== undefined &&
+								enabledRemedies(state).includes(
+									AFFLICTION_DEFINITIONS[affliction].cure,
+								)
+							);
+						})())) &&
+				(entry.webTurn === undefined ||
+					(!!MONSTER_DEFINITIONS[entry.kind].webAttack &&
+						entry.webTurn <= state.turn)) &&
 				walkable(entry.floorNumber, entry.coordinate) &&
 				!protectedLocations
 					.get(entry.floorNumber)
@@ -131,11 +148,18 @@ export const hasConsistentActors = (document: SaveDocument): boolean => {
 											)
 										);
 									})()
-								: walkable(monster.floorNumber, monster.intent.target) &&
-									orthogonalDistance(
-										monster.coordinate,
-										monster.intent.target,
-									) === 1),
+								: monster.intent.type === "preparing-web"
+									? walkable(monster.floorNumber, monster.intent.target) &&
+										orthogonalDistance(
+											monster.coordinate,
+											monster.intent.target,
+										) <=
+											(MONSTER_DEFINITIONS[monster.kind].webAttack?.range ?? 0)
+									: walkable(monster.floorNumber, monster.intent.target) &&
+										orthogonalDistance(
+											monster.coordinate,
+											monster.intent.target,
+										) === 1),
 		)
 	)
 		return false;

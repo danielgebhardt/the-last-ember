@@ -4,12 +4,13 @@ import {
 	type ActivityEvent,
 	appendActivityEvents,
 } from "../game/ActivityHistory";
+import type { AfflictionKind } from "../game/AfflictionDefinitions";
+import { applyPlayerAffliction } from "../game/Afflictions";
 import {
 	type AttackRollSource,
 	createAttackRolls,
 } from "../game/CombatRandomness";
 import { deriveCombatStats } from "../game/CombatStats";
-import { applyDisease } from "../game/Disease";
 import type { GameState } from "../game/GameState";
 import {
 	attackProfile,
@@ -35,6 +36,7 @@ import { orthogonalDistance } from "./MonsterLocations";
 import { detectsPlayer, selectPursuitStep, sensesCure } from "./MonsterPursuit";
 import { selectRetreatStep } from "./MonsterRetreat";
 import { maximumMonsterHealth, monsterAttackDamage } from "./MonsterStats";
+import { resolveMonsterWeb } from "./MonsterWeb";
 import { pursuitRulesFor } from "./PursuitRules";
 
 // The player phase has already chosen the active floor and turn number.
@@ -50,7 +52,7 @@ export const resolveMonsterPhase = (
 	let monsters = state.monsters;
 	let effects = state.effects;
 	const events: ActivityEvent[] = [];
-	const infections: string[] = [];
+	const infections: { kind: AfflictionKind; source: string }[] = [];
 	const { armor } = deriveCombatStats(
 		state.equipment,
 		state.progression,
@@ -270,6 +272,15 @@ export const resolveMonsterPhase = (
 			}
 			continue;
 		}
+		const web = resolveMonsterWeb(state, monster, detected);
+		if (web) {
+			monsters = monsters.map((actor) =>
+				actor.id === monster.id ? web.monster : actor,
+			);
+			events.push(...web.events);
+			if (web.slowed) infections.push({ kind: "slowed", source: profile.name });
+			continue;
+		}
 		// Both attack range and prepared-target adjacency use Manhattan distance.
 		const distance = orthogonalDistance(
 			monster.coordinate,
@@ -423,7 +434,10 @@ export const resolveMonsterPhase = (
 				),
 			)() < definition.onHitAffliction.chance
 		)
-			infections.push(definition.name);
+			infections.push({
+				kind: definition.onHitAffliction.kind,
+				source: definition.name,
+			});
 		if (player.health > 0 && definition.onHitCondition) {
 			effects = refreshPlayerEffect(effects, definition.onHitCondition);
 			events.push({
@@ -443,12 +457,15 @@ export const resolveMonsterPhase = (
 	)
 		return state;
 	// Applied after the phase's hits so a lethal later hit stops infection and capacity clamps once.
-	return infections.reduce(applyDisease, {
-		...state,
-		player,
-		objects,
-		monsters,
-		effects,
-		activityHistory: appendActivityEvents(state.activityHistory, events),
-	});
+	return infections.reduce(
+		(next, { kind, source }) => applyPlayerAffliction(next, kind, source),
+		{
+			...state,
+			player,
+			objects,
+			monsters,
+			effects,
+			activityHistory: appendActivityEvents(state.activityHistory, events),
+		},
+	);
 };

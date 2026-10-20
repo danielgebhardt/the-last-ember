@@ -1,6 +1,11 @@
 import { hashStringToUint32 } from "../dungeon/DungeonRun";
 import { createSeededRandom } from "../dungeon/Seed";
-import { MONSTER_DEFINITIONS, type Monster } from "../monsters/Monster";
+import { AFFLICTION_DEFINITIONS } from "../game/AfflictionDefinitions";
+import {
+	MONSTER_DEFINITIONS,
+	type Monster,
+	monsterAffliction,
+} from "../monsters/Monster";
 import { selectEliteReward } from "./EliteRewards";
 import type { FloorItem } from "./FloorItems";
 import type { ItemKind } from "./Item";
@@ -21,9 +26,13 @@ export const createMonsterDrop = (
 		);
 	const definition = MONSTER_DEFINITIONS[monster.kind];
 	// Initial availability protection; the item ID keeps it a one-use drop.
-	if (monster.remedyDrop)
+	const affliction = monsterAffliction(monster.kind);
+	if (monster.remedyDrop && affliction)
 		return {
-			item: { id: `monster:${monster.id}:loot`, kind: "cure-disease-potion" },
+			item: {
+				id: `monster:${monster.id}:loot`,
+				kind: AFFLICTION_DEFINITIONS[affliction].cure,
+			},
 			floorNumber: monster.floorNumber,
 			coordinate: { ...monster.coordinate },
 		};

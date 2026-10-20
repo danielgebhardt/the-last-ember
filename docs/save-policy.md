@@ -50,3 +50,7 @@ Retain v27. The optional `afflictions` array accepts Slowed with a numeric remai
 ## Cleansing potion (#363)
 
 Retain v27 with an optional, explicitly written `cleansingRemedies` marker. Only marked adventures add the Cleansing potion to chest/drop/floor selection; Disease-era saves with only `dungeonRemedies` keep their earlier reward sequences. Loading never generates supplies.
+
+## Giant spider web (#366)
+
+Retain v27 with an optional `Monster.webTurn` cooldown (web kinds only, never after the saved turn) and a `preparing-web` intent (web kinds only, a walkable target within range). `remedyDrop` generalizes to one marker per affliction, valid only when that affliction's remedy is enabled. Existing spiders gain the web as catalog behavior from their next action; no migration or regeneration.

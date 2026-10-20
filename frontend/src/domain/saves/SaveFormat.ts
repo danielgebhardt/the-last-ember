@@ -156,6 +156,7 @@ export const createSaveDocument = (
 				alarmUsed,
 				heroic,
 				remedyDrop,
+				webTurn,
 			}) => ({
 				id,
 				kind,
@@ -167,6 +168,7 @@ export const createSaveDocument = (
 				alarmUsed,
 				...(heroic !== undefined ? { heroic } : {}),
 				...(remedyDrop !== undefined ? { remedyDrop } : {}),
+				...(webTurn !== undefined ? { webTurn } : {}),
 				intent:
 					intent.type === "idle" || intent.type === "recovering-charge"
 						? { type: intent.type }
@@ -181,7 +183,10 @@ export const createSaveDocument = (
 										element: intent.element,
 										remaining: intent.remaining,
 									}
-								: { type: "preparing-attack", target: { ...intent.target } },
+								: {
+										type: intent.type,
+										target: { ...intent.target },
+									},
 			}),
 		),
 		activityHistory: state.activityHistory,

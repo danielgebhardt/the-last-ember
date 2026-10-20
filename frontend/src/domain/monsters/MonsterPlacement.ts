@@ -7,6 +7,7 @@ import {
 	MONSTER_DEFINITIONS,
 	type Monster,
 	type MonsterKind,
+	monsterAffliction,
 	selectMonsterKind,
 } from "./Monster";
 import {
@@ -143,4 +144,27 @@ export const spawnRunMonsters = (
 		monsters.push(...floorMonsters);
 	}
 	return monsters;
+};
+
+// Initial availability protection: the shallowest source of each affliction (lowest floor,
+// then spawn index) guarantees its remedy. Applied once at adventure creation and saved.
+export const markFirstRemedySources = (
+	monsters: readonly Monster[],
+): readonly Monster[] => {
+	const first = new Map<string, Monster>();
+	for (const monster of [...monsters].sort(
+		(a, b) =>
+			a.floorNumber - b.floorNumber ||
+			Number(a.id.split(":")[1]) - Number(b.id.split(":")[1]),
+	)) {
+		const affliction = monsterAffliction(monster.kind);
+		if (!affliction || monster.heroic) continue;
+		const marked = first.get(affliction);
+		if (!marked || (monster.remedyDrop && !marked.remedyDrop))
+			first.set(affliction, monster);
+	}
+	const chosen = new Set([...first.values()].map((m) => m.id));
+	return monsters.map((m) =>
+		chosen.has(m.id) && !m.remedyDrop ? { ...m, remedyDrop: true } : m,
+	);
 };

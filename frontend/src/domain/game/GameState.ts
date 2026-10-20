@@ -22,7 +22,10 @@ import {
 	type MerchantStock,
 } from "../merchant/MerchantRules";
 import type { Monster } from "../monsters/Monster.ts";
-import { spawnRunMonsters } from "../monsters/MonsterPlacement.ts";
+import {
+	markFirstRemedySources,
+	spawnRunMonsters,
+} from "../monsters/MonsterPlacement.ts";
 import { maximumMonsterHealth } from "../monsters/MonsterStats";
 import type { DungeonObject } from "../objects/DungeonObject";
 import { spawnRunObjects } from "../objects/ObjectPlacement";
@@ -146,8 +149,8 @@ export const createGameState = (
 		floorItems: [...floorItems, ...rare.items],
 		monsters:
 			difficulty === 1
-				? encounters.monsters
-				: encounters.monsters.map((monster) => ({
+				? markFirstRemedySources(encounters.monsters)
+				: markFirstRemedySources(encounters.monsters).map((monster) => ({
 						...monster,
 						health: maximumMonsterHealth(
 							monster.kind,

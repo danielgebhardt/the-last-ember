@@ -96,6 +96,12 @@ export const formatActivityEvent = (event: ActivityEvent): string => {
 			return `${prefix}The ${MONSTER_DEFINITIONS[event.monster].name}'s shot misses you.`;
 		case "monster-shot-hit":
 			return `${prefix}The ${MONSTER_DEFINITIONS[event.monster].name} shoots you for ${event.damage} damage.`;
+		case "monster-web-prepared":
+			return `${prefix}The ${MONSTER_DEFINITIONS[event.monster].name} readies a web at your tile. Move off it to avoid being Slowed.`;
+		case "monster-web-hit":
+			return `${prefix}The ${MONSTER_DEFINITIONS[event.monster].name}'s web catches you.`;
+		case "monster-web-avoided":
+			return `${prefix}You avoid the ${MONSTER_DEFINITIONS[event.monster].name}'s web.`;
 		case "monster-prepared":
 			return `${prefix}The ${MONSTER_DEFINITIONS[event.monster].name} prepares a heavy attack at your tile. Move away to dodge.`;
 		case "monster-heavy-hit":

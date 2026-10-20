@@ -33,6 +33,10 @@ export const monsterTraits = (kind: MonsterKind): readonly string[] => {
 		traits.push(
 			"Landed hits poison: 1 damage per phase for 6 phases; refreshes without stacking.",
 		);
+	if (definition.webAttack)
+		traits.push(
+			`Web: marks your tile within ${definition.webAttack.range} tiles instead of attacking, then resolves on its next action. Step off the marked tile to avoid it; staying applies Slowed (evasion −10 for 10 phases, refreshes without stacking). No damage; magic resistance does not protect. At least ${definition.webAttack.cooldown} phases between webs. Sleep or Fear cancels it. Cleansing potion or the sanctuary cures Slowed; the first spider of an adventure always drops a Cleansing potion.`,
+		);
 	if (definition.onHitAffliction)
 		traits.push(
 			`Landed melee hits have a ${Math.round(definition.onHitAffliction.chance * 100)}% chance to inflict Disease: maximum HP −20% until cured; does not stack. Misses never infect; magic resistance does not protect. Cure Disease potion or the sanctuary cures it.`,

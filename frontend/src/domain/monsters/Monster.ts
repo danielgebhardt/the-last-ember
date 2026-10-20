@@ -21,6 +21,7 @@ export type MonsterIntent =
 	| { type: "preparing-charge"; target: Coordinate }
 	| { type: "recovering-charge" }
 	| { type: "preparing-attack"; target: Coordinate }
+	| { type: "preparing-web"; target: Coordinate }
 	| {
 			type: "preparing-area";
 			target: Coordinate;
@@ -48,6 +49,8 @@ export type Monster = {
 	heroic?: boolean;
 	// The first affliction source of an adventure guarantees its matching remedy drop.
 	remedyDrop?: boolean;
+	// Turn its last web resolved; starts the web cooldown.
+	webTurn?: number;
 };
 
 export type MonsterDefinition = {
@@ -73,6 +76,8 @@ export type MonsterDefinition = {
 	onHitCondition?: "poisoned";
 	// Rolled once per landed melee hit; magic resistance does not resist afflictions.
 	onHitAffliction?: { kind: AfflictionKind; chance: number };
+	// Telegraphed tile web that applies Slowed instead of that phase's attack.
+	webAttack?: { range: number; cooldown: number };
 	// Spawned only through the shared sparse affliction-source budget.
 	afflictionSource?: boolean;
 	regeneration?: number;
@@ -108,6 +113,7 @@ export const validateMonsterDefinition = (
 		onHitCondition,
 		onHitAffliction,
 		afflictionSource,
+		webAttack,
 		regeneration,
 		enemySpells,
 		spellInterval,
@@ -202,6 +208,16 @@ export const validateMonsterDefinition = (
 				onHitAffliction.chance > 1 ||
 				onHitCondition !== undefined ||
 				rangedAttackRange !== undefined)) ||
+		(webAttack !== undefined &&
+			(!Number.isSafeInteger(webAttack.range) ||
+				webAttack.range < 1 ||
+				webAttack.range > 6 ||
+				!Number.isSafeInteger(webAttack.cooldown) ||
+				webAttack.cooldown < 3 ||
+				preparesAttack ||
+				definition.chargeRange !== undefined ||
+				areaAttack ||
+				enemySpells)) ||
 		(afflictionSource !== undefined &&
 			(afflictionSource !== true || !onHitAffliction || spawnEnabled !== false))
 	)
@@ -393,6 +409,7 @@ const monsterCatalog = {
 		spawnWeight: 1,
 		dropChance: 0.45,
 		onHitCondition: "poisoned",
+		webAttack: { range: 3, cooldown: 3 },
 		lootPreferences: {},
 	},
 	ogre: {
@@ -579,3 +596,10 @@ export const selectMonsterKind = (
 		})),
 		random,
 	);
+
+// The affliction a monster can inflict, used for its matching remedy guarantee.
+export const monsterAffliction = (
+	kind: MonsterKind,
+): AfflictionKind | undefined =>
+	MONSTER_DEFINITIONS[kind].onHitAffliction?.kind ??
+	(MONSTER_DEFINITIONS[kind].webAttack ? "slowed" : undefined);

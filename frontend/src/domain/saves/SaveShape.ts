@@ -236,6 +236,9 @@ const eventFields = {
 	"monster-shot-hit": { monster: monsterKind, damage: natural },
 	"monster-shot-missed": { monster: monsterKind },
 	"monster-prepared": { monster: monsterKind, target: coordinate },
+	"monster-web-prepared": { monster: monsterKind, target: coordinate },
+	"monster-web-hit": { monster: monsterKind },
+	"monster-web-avoided": { monster: monsterKind },
 	"monster-heavy-hit": { monster: monsterKind, damage: natural },
 	"monster-heavy-missed": { monster: monsterKind },
 	"monster-heavy-avoided": { monster: monsterKind },
@@ -327,6 +330,7 @@ const monsterIntent: Schema = (value) => {
 		case "recovering-charge":
 			return Object.keys(value).length === 1;
 		case "preparing-attack":
+		case "preparing-web":
 		case "preparing-charge":
 		case "preparing-alarm":
 			return Object.keys(value).length === 2 && coordinate(value.target);
@@ -509,6 +513,7 @@ const documentShape = object({
 				alarmUsed: optional(boolean),
 				heroic: optional(boolean),
 				remedyDrop: optional(boolean),
+				webTurn: optional(natural),
 			}),
 			0,
 			10000,

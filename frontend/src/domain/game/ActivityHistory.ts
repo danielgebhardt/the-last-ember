@@ -160,11 +160,17 @@ export type ActivityEvent = { turn: number } & (
 			monster: MonsterKind;
 			damage: number;
 	  }
-	| { type: "monster-prepared"; monster: MonsterKind; target: Coordinate }
+	| {
+			type: "monster-prepared" | "monster-web-prepared";
+			monster: MonsterKind;
+			target: Coordinate;
+	  }
 	| {
 			type:
 				| "monster-heavy-missed"
 				| "monster-heavy-avoided"
+				| "monster-web-hit"
+				| "monster-web-avoided"
 				| "monster-shot-missed"
 				| "player-missed"
 				| "monster-missed";

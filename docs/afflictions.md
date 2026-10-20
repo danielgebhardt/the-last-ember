@@ -65,3 +65,13 @@ The sanctuary adds "Cure Slowed" at 50 gold. Quotes list conditions in a stable 
 ## Slowed visibility (#372, Slowed portion)
 
 Slowed shows as an amber snail icon, "Slowed — N phases remaining", whose popover gives the exact evasion change (normal → effective, with the loss), the 10-phase rule and both cures (Cleansing potion for one turn; sanctuary 50 gold). Character's evasion line and the progression panel show the effective figure with a "(Slowed −10)" note. Help explains Slowed, the Cleansing potion's current Slowed-only coverage and the two-affliction cap; the Developer Catalog lists player Slowed separately from the monster spell effect. Corridor running stops when Slowed begins and cannot start while it lasts. The worst-case status row (six timed effects plus Disease and Slowed, 8 icons) stays one fixed-height line at 320–1920 px. #372 remains open for later conditions.
+
+## Giant spider web (#366)
+
+Developer decision: extend the existing giant spider (floors 3–12) instead of adding a species, and give **every** spider the web. This is an explicit exception to the sparse shared affliction-source budget; Slowed exposure follows ordinary spider frequency and should be reviewed in playtesting. The budget still governs other new sources (Plague Rat).
+
+The bite is unchanged (6-phase poison). When a detecting spider is idle, within 3 tiles (Manhattan) and off cooldown, it spends that action marking your current tile (`preparing-web`, shown with the single-tile threat marker and map advice). On its next action the web resolves at that tile: if you are still there you are Slowed (refresh rules apply), otherwise you avoid it. The web never damages, rolls to hit or checks magic resistance, and it replaces that phase's bite. A saved `webTurn` starts a cooldown: another web needs more than 3 turns after the last resolved one. Sleep or Fear cancels preparation like other telegraphs.
+
+Initial availability: at adventure creation the shallowest spider (lowest floor, then spawn index) saves `remedyDrop` and always drops one Cleansing potion. `remedyDrop` now means "drops the cure for this monster's affliction" (Cure Disease for plague rats, Cleansing for spiders); validation allows at most one per affliction, only when that remedy is enabled for the adventure.
+
+Existing v27 saves keep their spiders without a remedy guarantee; because the web is catalog behavior, loaded spiders may web from their next action. Saved web intents and cooldowns are validated.

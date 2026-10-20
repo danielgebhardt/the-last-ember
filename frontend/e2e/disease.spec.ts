@@ -194,3 +194,32 @@ test("Plague Rat loop: contract Disease, read guidance, cure, then save/load and
 	await expect(disease(page)).toBeVisible();
 	expect(await cure()).toBe(cured);
 });
+
+test("Spider web loop: see the marked tile, get Slowed, read guidance and drink Cleansing", async ({
+	page,
+}) => {
+	await importAdventure(page, "spider-web");
+	const frame = await mapGeometry(page);
+	await page.keyboard.press("Space");
+	const log = page.getByRole("log", { name: "Activity log", exact: true });
+	await expect(log).toContainText("readies a web at your tile");
+	await page.keyboard.press("Space");
+	await expect(log).toContainText("web catches you");
+	const slowed = page.getByRole("button", {
+		name: "Slowed — 9 phases remaining",
+		exact: true,
+	});
+	await expect(slowed).toBeVisible();
+	await slowed.click();
+	await expect(page.getByRole("dialog", { name: /Slowed/ })).toContainText(
+		"Evade 20% → 10% (−10) while it lasts.",
+	);
+	await page.keyboard.press("Escape");
+	await map(page).click();
+	await page.keyboard.press("1");
+	await expect(slowed).toHaveCount(0);
+	await expect(page.getByRole("button", { name: /^Slowed/ })).toHaveCount(0);
+	await expect(log).toContainText("Cleansing potion and remove Slowed");
+	expect(await mapGeometry(page)).toEqual(frame);
+	await expect(map(page)).toBeFocused();
+});
