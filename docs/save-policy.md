@@ -42,3 +42,7 @@ New adventures mark `dungeonRemedies: true` so adding remedy loot cannot reinter
 ## Plague Rat (#365)
 
 Retain v27 with an optional, explicitly written `Monster.remedyDrop` marker for the first carrier's guaranteed Cure Disease drop. It is valid only on an affliction-source kind in a `dungeonRemedies` adventure and at most once. Existing saves keep their saved monsters; loading never adds carriers or remedies.
+
+## Slowed (#358)
+
+Retain v27. The optional `afflictions` array accepts Slowed with a numeric remaining lifetime; consistency requires each kind's lifetime to match its definition (Disease `null`, Slowed 1–10). Activity `affliction-changed` adds `expired`. No migration.

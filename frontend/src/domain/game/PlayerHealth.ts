@@ -2,7 +2,7 @@ import type { Equipment } from "../items/Equipment";
 import { equipmentBonuses } from "../items/EquipmentBonuses";
 import {
 	type ActiveAffliction,
-	AFFLICTION_DEFINITIONS,
+	afflictionModifiers,
 } from "./AfflictionDefinitions";
 import { DEFAULT_PLAYER_MAX_HEALTH } from "./PlayerStats";
 import {
@@ -19,13 +19,10 @@ export const maximumHealth = (
 		DEFAULT_PLAYER_MAX_HEALTH +
 		HEALTH_PER_LEVEL * (levelForExperience(progression.experience) - 1) +
 		equipmentBonuses(equipment).health;
-	return Math.max(
+	const multiplier = afflictions.reduce(
+		(product, a) =>
+			product * (afflictionModifiers(a.kind).maximumHealthMultiplier ?? 1),
 		1,
-		Math.floor(
-			normal *
-				(afflictions.some((a) => a.kind === "disease")
-					? AFFLICTION_DEFINITIONS.disease.modifiers.maximumHealthMultiplier
-					: 1),
-		),
 	);
+	return Math.max(1, Math.floor(normal * multiplier));
 };

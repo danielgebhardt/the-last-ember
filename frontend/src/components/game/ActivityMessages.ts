@@ -1,5 +1,6 @@
 import type { ActivityEvent } from "../../domain/game/ActivityHistory.ts";
 import { ADVENTURE_STORY } from "../../domain/game/AdventureStory";
+import { AFFLICTION_DEFINITIONS } from "../../domain/game/AfflictionDefinitions";
 import { SPELL_DEFINITIONS } from "../../domain/game/Spells";
 import { EFFECT_DEFINITIONS } from "../../domain/game/TimedEffects";
 import { equipmentPlacementLabel } from "../../domain/items/Equipment";
@@ -107,8 +108,14 @@ export const formatActivityEvent = (event: ActivityEvent): string => {
 			return `${prefix}You miss the ${MONSTER_DEFINITIONS[event.monster].name}.`;
 		case "sanctuary-treated":
 			return `${prefix}Sanctuary treatment costs ${event.gold} gold: restores ${event.health} HP${event.conditions.length ? `; removes ${event.conditions.join(" and ")}` : ""}. Mana unchanged.`;
-		case "affliction-changed":
-			return `${prefix}${event.change === "cured" ? "Disease cured" : event.change === "rejected" ? "Disease rejected: two afflictions are already active" : event.change === "refreshed" ? "Disease refreshed" : "Disease applied"} (${event.source}). ${event.change === "cured" ? "Maximum HP restored without healing." : "Maximum HP reduced by 20% until cured. Use Cure Disease potion or sanctuary treatment."}`;
+		case "affliction-changed": {
+			const definition = AFFLICTION_DEFINITIONS[event.condition];
+			if (event.change === "expired")
+				return `${prefix}${definition.name} wears off. ${definition.removedText}`;
+			if (event.change === "rejected")
+				return `${prefix}${definition.name} rejected: two afflictions are already active (${event.source}).`;
+			return `${prefix}${definition.name} ${event.change} (${event.source}). ${event.change === "cured" ? definition.removedText : definition.appliedText}`;
+		}
 		case "player-condition-hit":
 			return `${prefix}${EFFECT_DEFINITIONS[event.condition].name} deals ${event.damage} damage to you.`;
 		case "player-condition-applied":

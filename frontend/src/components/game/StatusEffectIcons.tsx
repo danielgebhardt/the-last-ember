@@ -7,6 +7,7 @@ import {
 	HeartPulse,
 	Shield,
 	Skull,
+	Snail,
 } from "lucide-react";
 import {
 	type ComponentType,
@@ -88,6 +89,14 @@ export const AFFLICTION_VISUALS: Record<AfflictionKind, StatusVisual> = {
          dark:border-rose-400/70 dark:bg-rose-950/50 dark:text-rose-300
       `,
 	},
+	slowed: {
+		Icon: Snail,
+		className: `
+         border-amber-600/70 bg-amber-500/10 text-amber-800
+         shadow-[0_0_8px_rgba(217,119,6,0.22)]
+         dark:border-amber-400/70 dark:bg-amber-950/50 dark:text-amber-300
+      `,
+	},
 };
 
 // Exact current penalty when capacity is known; the definition remains the fallback guidance.
@@ -101,7 +110,10 @@ export const diseaseDetails = (normalMaxHealth?: number, maxHealth?: number) =>
 const AFFLICTION_DETAILS: Record<
 	AfflictionKind,
 	(normalMaxHealth?: number, maxHealth?: number) => string
-> = { disease: diseaseDetails };
+> = {
+	disease: diseaseDetails,
+	slowed: () => AFFLICTION_DEFINITIONS.slowed.guidance,
+};
 
 const triggerClassName =
 	"relative flex size-6 shrink-0 cursor-help lg:max-xl:size-5 items-center justify-center rounded border focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring";

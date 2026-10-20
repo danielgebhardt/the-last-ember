@@ -43,3 +43,11 @@ Each landed melee hit rolls once on its own deterministic stream (`seed:floor:tu
 Rats are `spawnEnabled: false`, so ordinary floor selection, hunted-return waves and sarcophagus guardians never draw them. A shared sparse affliction-source budget (`seed:floor:affliction-source`) gives each eligible floor a 25% chance to replace one of its first two ordinary spawn slots, keeping population size, identities, coordinates and the remaining seeded prefix. At most one carrier per floor. The lowest-floor carrier of a new adventure saves `remedyDrop: true` and always drops one Cure Disease potion as its ordinary one-use `monster:<id>:loot` item; later carriers use the ordinary drop roll and low-weight remedy loot. These defaults (25%, 20%, stats) are provisional playtest values.
 
 Save format stays v27: `remedyDrop` is an optional, explicitly written monster field. Validation allows it only on an affliction-source kind in a `dungeonRemedies` adventure, and only once. Existing v27 saves keep their saved monsters, so loading never adds rats or remedies.
+
+## Slowed (#358)
+
+Second registered affliction, separate from the existing 3-phase monster `slowed` timed effect (unchanged). Player Slowed lasts 10 committed phases, counting the phase it lands, so the HUD shows 9 afterward. It removes two d20 evasion steps (−10 percentage points) after Dexterity growth and inside the existing clamp (5% minimum); expiry or cure restores the exact prior value, and comparisons use the effective figure. Refresh resets the duration without deepening the penalty; an application at full duration is a silent no-op. Actions and turn order are unchanged.
+
+Shared affliction state (`Afflictions.ts`) now owns apply, cure and expiry for every registered kind: capacity is rederived, HP clamps but is never healed, and Activity logs application, refresh, cap rejection, cure and a single expiry. Disease keeps its wrappers. Disease and Slowed together are the first real two-condition cap; poison stays outside it.
+
+Save format stays v27. The optional `afflictions` array now accepts registered kinds with a lifetime matching their definition: Disease `null`, Slowed 1–10. Activity entries accept the new `expired` change.

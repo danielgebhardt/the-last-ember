@@ -24,7 +24,12 @@ const loadoutStats = (
 ) => {
 	const { progression, effects } = context;
 	const combat = deriveCombatStats(equipment, progression, effects);
-	const accuracy = deriveAccuracy(progression, effects, equipment);
+	const accuracy = deriveAccuracy(
+		progression,
+		effects,
+		equipment,
+		context.afflictions,
+	);
 	const damage = attackProfile(combat.attack, accuracy.playerHitThreshold);
 	const attributes = deriveAttributes(progression, effects, equipment);
 	return {

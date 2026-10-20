@@ -60,6 +60,7 @@ export const resolveMonsterPhase = (
 		state.progression,
 		state.effects,
 		state.equipment,
+		state.afflictions,
 	);
 	// IDs encode floor:spawnIndex; sort numeric indices, not incidental storage order.
 	const active = state.monsters

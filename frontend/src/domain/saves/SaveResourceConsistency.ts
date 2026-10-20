@@ -1,3 +1,4 @@
+import { AFFLICTION_DEFINITIONS } from "../game/AfflictionDefinitions";
 import { maximumMana } from "../game/Mana";
 import { maximumHealth } from "../game/PlayerHealth";
 import {
@@ -38,7 +39,17 @@ export const hasConsistentResources = (document: SaveDocument): boolean => {
 	)
 		return false;
 
-	if (!unique((state.afflictions ?? []).map((a) => a.kind))) return false;
+	if (
+		!unique((state.afflictions ?? []).map((a) => a.kind)) ||
+		// Each saved lifetime must match its kind: null until cured, else 1..duration.
+		!(state.afflictions ?? []).every(({ kind, remaining }) => {
+			const lifetime = AFFLICTION_DEFINITIONS[kind].lifetime;
+			return lifetime.type === "until-cured"
+				? remaining === null
+				: remaining !== null && remaining <= lifetime.duration;
+		})
+	)
+		return false;
 	const manaLimit = maximumMana(
 		state.progression,
 		state.equipment,

@@ -18,6 +18,8 @@ const definition = (kind: string, temporary = false): AfflictionDefinition => ({
 	modifiers: {},
 	cure: "test remedy",
 	guidance: "Test treatment",
+	appliedText: "Test applied",
+	removedText: "Test removed",
 });
 it("caps distinct harmful conditions at two while refreshing without replacing either", () => {
 	let active: readonly PlayerAffliction[] = [];

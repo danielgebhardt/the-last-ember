@@ -7,6 +7,7 @@ import {
 	ACTIVITY_LOG_LIMIT,
 	type ActivityEvent,
 } from "../game/ActivityHistory";
+import { AFFLICTION_DEFINITIONS } from "../game/AfflictionDefinitions";
 import { DAMAGE_ELEMENTS } from "../game/DamageElements";
 import { isDifficulty } from "../game/Difficulty";
 import { isPermanentAttributes } from "../game/PermanentAttributes";
@@ -159,8 +160,8 @@ const eventFields = {
 		conditions: array(oneOf(["poisoned", "disease"]), 0, 2),
 	},
 	"affliction-changed": {
-		condition: oneOf(["disease"]),
-		change: oneOf(["applied", "refreshed", "rejected", "cured"]),
+		condition: oneOf(Object.keys(AFFLICTION_DEFINITIONS)),
+		change: oneOf(["applied", "refreshed", "rejected", "cured", "expired"]),
 		source: text,
 	},
 	"player-condition-applied": {
@@ -367,8 +368,9 @@ const documentShape = object({
 		afflictions: optional(
 			array(
 				object({
-					kind: oneOf(["disease"]),
-					remaining: (v) => v === null,
+					kind: oneOf(Object.keys(AFFLICTION_DEFINITIONS)),
+					// Lifetime agreement with each kind's definition is a consistency rule.
+					remaining: (v) => v === null || integer(1, 100)(v),
 					source: text,
 				}),
 				0,

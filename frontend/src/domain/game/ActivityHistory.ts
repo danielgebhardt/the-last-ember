@@ -4,6 +4,7 @@ import type { EquipmentChangeEvent } from "../items/EquipmentChanges";
 import type { FloorItemEvent } from "../items/FloorItems";
 import type { ItemKind } from "../items/Item";
 import type { MonsterKind } from "../monsters/Monster.ts";
+import type { AfflictionKind } from "./AfflictionDefinitions";
 import type { AreaElement, DamageElement } from "./DamageElements";
 import type { SpellKind } from "./Spells";
 import type { EffectKind } from "./TimedEffects";
@@ -18,8 +19,8 @@ export type ActivityEvent = { turn: number } & (
 	  }
 	| {
 			type: "affliction-changed";
-			condition: "disease";
-			change: "applied" | "refreshed" | "rejected" | "cured";
+			condition: AfflictionKind;
+			change: "applied" | "refreshed" | "rejected" | "cured" | "expired";
 			source: string;
 	  }
 	| { type: "player-spell-hit"; spell: SpellKind; damage: number }

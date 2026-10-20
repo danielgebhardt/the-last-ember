@@ -1,4 +1,8 @@
 import type { Equipment } from "../items/Equipment";
+import {
+	type ActiveAffliction,
+	afflictionEvasionSteps,
+} from "./AfflictionDefinitions";
 import { deriveAttributes } from "./Attributes";
 import { resolveIncomingDamage } from "./CombatStats";
 import { assertDifficulty, scaleEnemyValue } from "./Difficulty";
@@ -9,8 +13,8 @@ export const PLAYER_HIT_THRESHOLD = 4;
 export const MONSTER_HIT_THRESHOLD = 5;
 export const PLAYER_HIT_CHANCE = (21 - PLAYER_HIT_THRESHOLD) * 5;
 export const MONSTER_HIT_CHANCE = (21 - MONSTER_HIT_THRESHOLD) * 5;
-export const accuracyThresholds = (modifier: number) => {
-	if (!Number.isSafeInteger(modifier))
+export const accuracyThresholds = (modifier: number, evasionPenalty = 0) => {
+	if (!Number.isSafeInteger(modifier) || !Number.isSafeInteger(evasionPenalty))
 		throw new RangeError("Accuracy modifiers must be safe whole numbers.");
 	const clamp = (threshold: number) => Math.max(2, Math.min(20, threshold));
 	// Full evasion growth through Dexterity 20, then one step per four Dexterity.
@@ -18,16 +22,21 @@ export const accuracyThresholds = (modifier: number) => {
 		Math.min(modifier, 5) + Math.floor(Math.max(0, modifier - 5) / 2);
 	return {
 		playerHitThreshold: clamp(PLAYER_HIT_THRESHOLD - modifier),
-		monsterHitThreshold: clamp(MONSTER_HIT_THRESHOLD + evasionModifier),
+		// Penalties apply after Dexterity growth, then share the usual clamp.
+		monsterHitThreshold: clamp(
+			MONSTER_HIT_THRESHOLD + evasionModifier - evasionPenalty,
+		),
 	};
 };
 export const deriveAccuracy = (
 	progression: Progression,
 	effects: readonly TimedEffect[] = [],
 	equipment?: Partial<Equipment>,
+	afflictions: readonly ActiveAffliction[] = [],
 ) => {
 	const thresholds = accuracyThresholds(
 		deriveAttributes(progression, effects, equipment).dexterityModifier,
+		afflictionEvasionSteps(afflictions),
 	);
 	return {
 		...thresholds,

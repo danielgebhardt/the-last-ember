@@ -139,8 +139,12 @@ export const resolveMonsterCharge = (
 						monster.floorNumber,
 						monster.heroic,
 					),
-					deriveAccuracy(state.progression, state.effects, state.equipment)
-						.monsterHitThreshold,
+					deriveAccuracy(
+						state.progression,
+						state.effects,
+						state.equipment,
+						state.afflictions,
+					).monsterHitThreshold,
 				),
 				rolls({
 					seed: state.run.seed,
