@@ -65,13 +65,9 @@ import {
 	type RestoredAdventure,
 	type SaveDocument,
 } from "./domain/saves/SaveFormat";
-import { canReachSanctuary } from "./domain/town/Sanctuary";
-import { reachableTownEquipmentStore } from "./domain/town/TownEquipmentStore";
-import { canReachTownForge } from "./domain/town/TownForge";
-import { canReachTownLibrary } from "./domain/town/TownLibrary";
 import { atTownPortal } from "./domain/town/TownPortal";
-import { canReachTownPotionStore } from "./domain/town/TownPotionStore";
 import { canReachTownSalvageShop } from "./domain/town/TownSalvageShop";
+import { reachableTownService } from "./domain/town/TownServices";
 import { atDungeonEntrance, atTownGate } from "./domain/town/TownTravel";
 import Header from "./Header.tsx";
 import DungeonSettings from "./settings/DungeonSettings.tsx";
@@ -127,6 +123,7 @@ const Home = ({
 	const deathOpen = player.health === 0 && !dismissedDeath;
 	const victory = game.state.quest.victory;
 	const victoryOpen = victory !== null && dismissedVictory !== victory;
+	const townService = reachableTownService(game.state);
 	const canPlay = player.health > 0 && victory === null;
 	const { exploration } = game;
 	const [configDraft, setConfigDraft] = useState(() =>
@@ -602,30 +599,12 @@ const Home = ({
 										mapRef={mapRef}
 										enabled={gameplayEnabled}
 										interactionLabel={
-											canReachSanctuary(game.state)
-												? "Sanctuary (E)"
-												: canReachTownForge(game.state)
-													? "Forge (E)"
-													: canReachTownLibrary(game.state)
-														? "Library (E)"
-														: canReachTownPotionStore(game.state)
-															? "Potion store (E)"
-															: reachableTownEquipmentStore(game.state)
-																? "Equipment store (E)"
-																: canReachTownSalvageShop(game.state)
-																	? "The Rag & Bone (E)"
-																	: "Inspect nearby"
+											townService
+												? `${townService.label} (E)`
+												: "Inspect nearby"
 										}
 										onAction={(action) => {
-											if (
-												action.type === "inspect" &&
-												(canReachSanctuary(game.state) ||
-													canReachTownForge(game.state) ||
-													canReachTownLibrary(game.state) ||
-													canReachTownPotionStore(game.state) ||
-													reachableTownEquipmentStore(game.state) ||
-													canReachTownSalvageShop(game.state))
-											) {
+											if (action.type === "inspect" && townService) {
 												setActionError("");
 												setTownShopOpen(true);
 											} else

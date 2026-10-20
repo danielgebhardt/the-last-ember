@@ -1,4 +1,3 @@
-import { Dialog } from "@base-ui/react/dialog";
 import { Tabs } from "@base-ui/react/tabs";
 import { type RefObject, useLayoutEffect, useRef, useState } from "react";
 import type { GameState } from "../../domain/game/GameState";
@@ -18,6 +17,10 @@ import EquipmentComparisonView from "../game/EquipmentComparisonView";
 import ItemIcon from "../items/ItemIcon";
 import { Button } from "../ui/button";
 import { EmberTab, EmberTabsList } from "../ui/EmberTabs";
+import TownServiceDialog, {
+	ConfirmPanel,
+	PriceBadge,
+} from "./TownServiceDialog";
 
 // Armor splits by slot so each tab fits without scrolling; weapons stay one list.
 const ARMOR_TABS = [
@@ -87,11 +90,10 @@ const TownEquipmentShop = ({
 									</span>
 									{itemName(item)}
 								</h3>
-								<span
-									className={`shrink-0 rounded-md border border-amber-700/50 bg-amber-500/10 px-2 py-0.5 font-semibold tabular-nums text-amber-800 dark:text-amber-300 ${reason === "Not enough gold" ? "opacity-60" : ""}`}
-								>
-									{price} gold
-								</span>
+								<PriceBadge
+									price={price}
+									dimmed={reason === "Not enough gold"}
+								/>
 							</div>
 							<p className="text-muted-foreground">
 								{ITEM_DEFINITIONS[item.kind].description}
@@ -114,125 +116,65 @@ const TownEquipmentShop = ({
 		</ul>
 	);
 	return (
-		<Dialog.Root
+		<TownServiceDialog
 			open={open && store !== null}
-			onOpenChange={(value) => {
-				if (!value) onClose();
-			}}
+			onClose={onClose}
+			title={`Town ${name} store`}
+			titleRef={title}
+			mapRef={mapRef}
+			gold={state.gold}
+			error={error}
+			leaveLabel={`Leave ${name} store`}
+			// Armor tabs swap content of different heights; a fixed height keeps the dialog still.
+			className={`w-[min(64rem,calc(100vw-2rem))] ${store === "armor" ? "h-[min(56rem,calc(100dvh-2rem))]" : ""}`}
+			description={`${store === "armor" ? "Protection sold separately from confidence." : "Every edge has a price."} Finite stock. Purchases go into your bag; nothing is automatically equipped. Compare your whole loadout before buying; equip or sell in the dungeon. Town stores do not buy items.`}
 		>
-			<Dialog.Portal>
-				<Dialog.Backdrop className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs" />
-				<Dialog.Popup
-					initialFocus={title}
-					finalFocus={mapRef}
-					// Tabs swap content of different heights; a fixed armor-store height keeps the
-					// dialog still while switching. Weapons stay content-sized.
-					className={`fixed left-1/2 top-1/2 z-50 flex max-h-[calc(100dvh-2rem)] w-[min(64rem,calc(100vw-2rem))] -translate-x-1/2 -translate-y-1/2 flex-col gap-3 overflow-hidden rounded-xl border bg-card p-4 shadow-xl ${store === "armor" ? "h-[min(56rem,calc(100dvh-2rem))]" : ""}`}
-					onKeyDown={(event) => {
-						if (event.repeat && ["Enter", " "].includes(event.key))
-							event.preventDefault();
+			{store === "armor" ? (
+				<Tabs.Root
+					value={tab}
+					onValueChange={(value) => setTab(value as ArmorTab)}
+					className="flex min-h-0 flex-1 flex-col gap-3"
+				>
+					<EmberTabsList aria-label="Armor categories" className="shrink-0">
+						{ARMOR_TABS.map(({ value, label }) => (
+							<EmberTab key={value} value={value}>
+								{label}
+							</EmberTab>
+						))}
+					</EmberTabsList>
+					{ARMOR_TABS.map(({ value, label }) => (
+						<Tabs.Panel
+							key={value}
+							value={value}
+							aria-label={label}
+							className="min-h-0 overflow-y-auto"
+						>
+							{offerList((item) => ITEM_DEFINITIONS[item.kind].type === value)}
+						</Tabs.Panel>
+					))}
+				</Tabs.Root>
+			) : (
+				<div className="min-h-0 overflow-y-auto">{offerList(() => true)}</div>
+			)}
+			{selected && pending && (
+				<ConfirmPanel
+					panelRef={confirmation}
+					label="Confirm equipment purchase"
+					legend={`Buy ${itemName(selected.item)} for ${selected.price} gold?`}
+					cancelLabel="Cancel purchase"
+					confirmLabel="Confirm purchase"
+					disabled={unavailable(pending) !== null}
+					onCancel={finish}
+					onConfirm={() => {
+						onBuy({ type: "buy-town-equipment", offerId: pending });
+						finish();
 					}}
 				>
-					<div className="flex shrink-0 flex-wrap items-baseline justify-between gap-x-4">
-						<Dialog.Title
-							ref={title}
-							tabIndex={-1}
-							className="text-xl font-semibold outline-none"
-						>
-							Town {name} store
-						</Dialog.Title>
-						<p className="font-semibold">Gold: {state.gold}</p>
-					</div>
-					<Dialog.Description className="shrink-0 text-sm text-muted-foreground">
-						{store === "armor"
-							? "Protection sold separately from confidence."
-							: "Every edge has a price."}{" "}
-						Finite stock. Purchases go into your bag; nothing is automatically
-						equipped. Compare your whole loadout before buying; equip or sell in
-						the dungeon. Town stores do not buy items.
-					</Dialog.Description>
-					{store === "armor" ? (
-						<Tabs.Root
-							value={tab}
-							onValueChange={(value) => setTab(value as ArmorTab)}
-							className="flex min-h-0 flex-1 flex-col gap-3"
-						>
-							<EmberTabsList aria-label="Armor categories" className="shrink-0">
-								{ARMOR_TABS.map(({ value, label }) => (
-									<EmberTab key={value} value={value}>
-										{label}
-									</EmberTab>
-								))}
-							</EmberTabsList>
-							{ARMOR_TABS.map(({ value, label }) => (
-								<Tabs.Panel
-									key={value}
-									value={value}
-									aria-label={label}
-									className="min-h-0 overflow-y-auto"
-								>
-									{offerList(
-										(item) => ITEM_DEFINITIONS[item.kind].type === value,
-									)}
-								</Tabs.Panel>
-							))}
-						</Tabs.Root>
-					) : (
-						<div className="min-h-0 overflow-y-auto">
-							{offerList(() => true)}
-						</div>
-					)}
-					{/* The confirmation area takes space only while it has something to show. */}
-					<div
-						className={`shrink-0 ${pending || error ? "border-t pt-3" : ""}`}
-					>
-						{selected && pending ? (
-							<fieldset
-								ref={confirmation}
-								tabIndex={-1}
-								aria-label="Confirm equipment purchase"
-								className="space-y-2 outline-none"
-							>
-								<legend className="font-semibold">
-									Buy {itemName(selected.item)} for {selected.price} gold?
-								</legend>
-								<p className="text-sm">
-									One specific copy, placed in your bag. No dungeon turn. Your
-									worn equipment stays yours.
-								</p>
-								<div className="flex flex-wrap gap-2">
-									<Button variant="outline" onClick={finish}>
-										Cancel purchase
-									</Button>
-									<Button
-										disabled={unavailable(pending) !== null}
-										onClick={() => {
-											onBuy({ type: "buy-town-equipment", offerId: pending });
-											finish();
-										}}
-									>
-										Confirm purchase
-									</Button>
-								</div>
-							</fieldset>
-						) : null}
-						<p
-							role="status"
-							className={`text-sm text-muted-foreground ${error ? "pt-2" : ""}`}
-						>
-							{error}
-						</p>
-					</div>
-					<Button
-						variant="outline"
-						className="min-h-11 shrink-0 self-end"
-						onClick={onClose}
-					>
-						Leave {name} store
-					</Button>
-				</Dialog.Popup>
-			</Dialog.Portal>
-		</Dialog.Root>
+					One specific copy, placed in your bag. No dungeon turn. Your worn
+					equipment stays yours.
+				</ConfirmPanel>
+			)}
+		</TownServiceDialog>
 	);
 };
 export default TownEquipmentShop;

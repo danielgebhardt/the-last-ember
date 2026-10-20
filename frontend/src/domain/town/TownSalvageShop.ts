@@ -3,25 +3,14 @@ import {
 	sellCarriedEquipment,
 	sellLowerCarriedEquipment,
 } from "../merchant/EquipmentSales";
-import { TOWN } from "./TownDefinition";
-import { isTownLocation } from "./TownLocation";
+import { canReachOpenBuilding } from "./TownServices";
 
 export type TownSellAction =
 	| { type: "sell-town-equipment"; itemId: string }
 	| { type: "sell-town-lower" };
 
-export const canReachTownSalvageShop = (state: GameState): boolean => {
-	if (!isTownLocation(state.town)) return false;
-	const entry = TOWN.buildings.find(
-		(building) => building.id === "rag-and-bone" && building.status === "open",
-	)?.entry;
-	return (
-		!!entry &&
-		Math.abs(state.town.coordinate.row - entry.row) +
-			Math.abs(state.town.coordinate.col - entry.col) <=
-			1
-	);
-};
+export const canReachTownSalvageShop = (state: GameState): boolean =>
+	canReachOpenBuilding(state, "rag-and-bone");
 
 export const sellAtTownSalvageShop = (
 	state: GameState,

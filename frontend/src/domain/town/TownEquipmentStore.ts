@@ -2,35 +2,21 @@ import { appendActivityEvents } from "../game/ActivityHistory";
 import type { GameState } from "../game/GameState";
 import { canAddToBag, createBag } from "../items/Bag";
 import { rareEquipmentId } from "../items/RareEquipment";
-import { TOWN } from "./TownDefinition";
 import {
 	TOWN_EQUIPMENT_OFFERS,
 	type TownEquipmentStore,
 } from "./TownEquipmentStock";
-import { isTownLocation } from "./TownLocation";
+import { canReachOpenBuilding } from "./TownServices";
 export type BuyTownEquipmentAction = {
 	type: "buy-town-equipment";
 	offerId: string;
 };
 export const reachableTownEquipmentStore = (
 	state: GameState,
-): TownEquipmentStore | null => {
-	if (!isTownLocation(state.town)) return null;
-	const coordinate = state.town.coordinate;
-	for (const id of ["armor", "weapons"] as const) {
-		const entry = TOWN.buildings.find(
-			(building) => building.id === id && building.status === "open",
-		)?.entry;
-		if (
-			entry &&
-			Math.abs(coordinate.row - entry.row) +
-				Math.abs(coordinate.col - entry.col) <=
-				1
-		)
-			return id;
-	}
-	return null;
-};
+): TownEquipmentStore | null =>
+	(["armor", "weapons"] as const).find((id) =>
+		canReachOpenBuilding(state, id),
+	) ?? null;
 export const buyTownEquipment = (
 	state: GameState,
 	action: BuyTownEquipmentAction,

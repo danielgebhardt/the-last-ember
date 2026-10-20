@@ -2,26 +2,15 @@ import { appendActivityEvents } from "../game/ActivityHistory";
 import type { GameState } from "../game/GameState";
 import { canAddToBag, createBag } from "../items/Bag";
 import { assignPickedUpPotion } from "../items/PotionHotbar";
-import { TOWN } from "./TownDefinition";
 import { TOWN_POTION_OFFERS, type TownPotion } from "./TownEconomy";
-import { isTownLocation } from "./TownLocation";
+import { canReachOpenBuilding } from "./TownServices";
 export type BuyTownPotionAction = {
 	type: "buy-town-potion";
 	kind: TownPotion;
 	expectedStock: number;
 };
-export const canReachTownPotionStore = (state: GameState): boolean => {
-	const store = TOWN.buildings.find((building) => building.id === "potions");
-	const entry = store?.entry;
-	return (
-		store?.status === "open" &&
-		isTownLocation(state.town) &&
-		entry !== undefined &&
-		Math.abs(state.town.coordinate.row - entry.row) +
-			Math.abs(state.town.coordinate.col - entry.col) <=
-			1
-	);
-};
+export const canReachTownPotionStore = (state: GameState): boolean =>
+	canReachOpenBuilding(state, "potions");
 export const buyTownPotion = (
 	state: GameState,
 	action: BuyTownPotionAction,
