@@ -22,6 +22,7 @@ export type MonsterIntent =
 	| { type: "recovering-charge" }
 	| { type: "preparing-attack"; target: Coordinate }
 	| { type: "preparing-web"; target: Coordinate }
+	| { type: "preparing-hex"; target: Coordinate }
 	| {
 			type: "preparing-area";
 			target: Coordinate;
@@ -51,6 +52,8 @@ export type Monster = {
 	remedyDrop?: boolean;
 	// Turn its last web resolved; starts the web cooldown.
 	webTurn?: number;
+	// Turn of the last resolved hex; another needs more than its cooldown.
+	hexTurn?: number;
 };
 
 export type MonsterDefinition = {
@@ -80,6 +83,9 @@ export type MonsterDefinition = {
 	onHitManaDrain?: { min: number; max: number };
 	// Telegraphed tile web that applies Slowed instead of that phase's attack.
 	webAttack?: { range: number; cooldown: number };
+	// Telegraphed ranged hex: prepared in sight, resolved next action if still in sight and
+	// range. Base arcane damage (magic resistance applies) plus Curse.
+	hexAttack?: { range: number; cooldown: number; damage: number };
 	// Spawned only through the shared sparse affliction-source budget.
 	afflictionSource?: boolean;
 	regeneration?: number;
@@ -117,6 +123,7 @@ export const validateMonsterDefinition = (
 		onHitManaDrain,
 		afflictionSource,
 		webAttack,
+		hexAttack,
 		regeneration,
 		enemySpells,
 		spellInterval,
@@ -221,6 +228,17 @@ export const validateMonsterDefinition = (
 				definition.chargeRange !== undefined ||
 				areaAttack ||
 				enemySpells)) ||
+		(hexAttack !== undefined &&
+			(!Number.isSafeInteger(hexAttack.range) ||
+				hexAttack.range < 2 ||
+				hexAttack.range > 8 ||
+				!Number.isSafeInteger(hexAttack.cooldown) ||
+				hexAttack.cooldown < 3 ||
+				!Number.isSafeInteger(hexAttack.damage) ||
+				hexAttack.damage < 0 ||
+				webAttack !== undefined ||
+				onHitAffliction !== undefined ||
+				rangedAttackRange !== undefined)) ||
 		(onHitManaDrain !== undefined &&
 			(!Number.isSafeInteger(onHitManaDrain.min) ||
 				!Number.isSafeInteger(onHitManaDrain.max) ||
@@ -228,7 +246,9 @@ export const validateMonsterDefinition = (
 				onHitManaDrain.max < onHitManaDrain.min ||
 				rangedAttackRange !== undefined)) ||
 		(afflictionSource !== undefined &&
-			(afflictionSource !== true || !onHitAffliction || spawnEnabled !== false))
+			(afflictionSource !== true ||
+				(!onHitAffliction && !hexAttack) ||
+				spawnEnabled !== false))
 	)
 		throw new RangeError(
 			"Invalid monster stats, floor range, or spawn weight.",
@@ -315,6 +335,21 @@ const monsterCatalog = {
 		afflictionSource: true,
 		onHitAffliction: { kind: "disease", chance: 0.2 },
 		dropChance: 0.35,
+		lootPreferences: {},
+	},
+	hexweaver: {
+		name: "hexweaver",
+		experienceReward: 14,
+		maxHealth: 12,
+		attackDamage: 4,
+		detectionRadius: 6,
+		minFloor: 6,
+		maxFloor: 12,
+		spawnWeight: 1,
+		spawnEnabled: false,
+		afflictionSource: true,
+		hexAttack: { range: 5, cooldown: 3, damage: 2 },
+		dropChance: 0.55,
 		lootPreferences: {},
 	},
 	"mana-leech": {
@@ -627,4 +662,8 @@ export const monsterAffliction = (
 	kind: MonsterKind,
 ): AfflictionKind | undefined =>
 	MONSTER_DEFINITIONS[kind].onHitAffliction?.kind ??
-	(MONSTER_DEFINITIONS[kind].webAttack ? "slowed" : undefined);
+	(MONSTER_DEFINITIONS[kind].webAttack
+		? "slowed"
+		: MONSTER_DEFINITIONS[kind].hexAttack
+			? "curse"
+			: undefined);

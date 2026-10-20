@@ -10,6 +10,7 @@ import FrostGiantIcon from "./FrostGiantIcon";
 import GoblinArcherIcon from "./GoblinArcherIcon";
 import GoblinIcon from "./GoblinIcon.tsx";
 import GolemIcon from "./GolemIcon";
+import HexweaverIcon from "./HexweaverIcon";
 import KoboldSlingerIcon from "./KoboldSlingerIcon";
 import ManaLeechIcon from "./ManaLeechIcon";
 import NecromancerIcon from "./NecromancerIcon";
@@ -69,6 +70,11 @@ export const MONSTER_VISUALS: Record<
 		icon: Rat,
 		color: "text-monster-ember",
 		label: MONSTER_DEFINITIONS["giant-rat"].name,
+	},
+	hexweaver: {
+		icon: HexweaverIcon,
+		color: "text-monster-hex",
+		label: MONSTER_DEFINITIONS.hexweaver.name,
 	},
 	"mana-leech": {
 		icon: ManaLeechIcon,

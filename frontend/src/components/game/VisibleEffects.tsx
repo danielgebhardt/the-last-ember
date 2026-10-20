@@ -20,6 +20,8 @@ const intentAdvice = (actor: Monster): string | null => {
 			return "Move off the marked tile before its next action; Sleep or Fear cancels the heavy strike.";
 		case "preparing-web":
 			return "Move off the marked tile before its next action to avoid Slowed; Sleep or Fear cancels the web.";
+		case "preparing-hex":
+			return "Hex on its next action: break its line of sight, get out of range, or use Sleep or Fear to avoid Curse.";
 		case "preparing-alarm":
 			return "Alarm on its next action: kill it or use Sleep or Fear. Web does not silence it.";
 		default:

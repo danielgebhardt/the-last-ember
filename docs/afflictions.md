@@ -113,3 +113,11 @@ Save format stays v27: `afflictions` accepts `curse` with `remaining: null`; opt
 ## Sanctuary Curse cure (#364, Curse portion)
 
 "Cure Curse" costs 250 gold and comes after Mana Burn in the fee order: poison, Disease, Slowed, Mana Burn, Curse. It restores melee accuracy and damage but no HP, mana or turn. Complete cleanse stays `min(600, sum of active fees)`.
+
+## Hexweaver (#367)
+
+A floor 6–12 Curse source: 12 HP, attack 4, 14 XP, detection 6, drop 55%, with the developer's SVG and a new magenta `--monster-hex` colour. It is `spawnEnabled: false` and uses the shared sparse affliction-source budget (now also open to sources without an on-hit affliction).
+
+**Hex** (`hexAttack: { range: 5, cooldown: 3, damage: 2 }`): when idle, detecting you (sight through walls and doors is required) within 5 tiles Manhattan and off cooldown, it spends its action preparing (`preparing-hex`, threat advice and Activity "begins a hex"). On its next action the hex resolves if it still detects you within range. It deals 2 arcane damage, scaled by difficulty and reduced by magic resistance, then applies Curse unless the damage was lethal. Otherwise it fizzles. Sleep or Fear cancels preparation through the existing intent reset. A saved `hexTurn` enforces more than 3 phases between hexes. It otherwise fights in melee; there is no on-hit Curse proc.
+
+The shallowest Hexweaver of a new adventure saves `remedyDrop` and drops a Remove Curse scroll. `monsterAffliction` now covers hex sources, and bestiary source text is derived from it. v27 accepts the `preparing-hex` intent (target within hex range), `hexTurn` (only on hex kinds, not in the future) and three hex Activity events. Existing saves keep their monsters.

@@ -104,6 +104,12 @@ export const formatActivityEvent = (event: ActivityEvent): string => {
 			return `${prefix}The ${MONSTER_DEFINITIONS[event.monster].name}'s shot misses you.`;
 		case "monster-shot-hit":
 			return `${prefix}The ${MONSTER_DEFINITIONS[event.monster].name} shoots you for ${event.damage} damage.`;
+		case "monster-hex-prepared":
+			return `${prefix}The ${MONSTER_DEFINITIONS[event.monster].name} begins a hex. Break its line of sight or get out of range before it acts again.`;
+		case "monster-hex-hit":
+			return `${prefix}The ${MONSTER_DEFINITIONS[event.monster].name}'s hex strikes you for ${event.damage} damage.`;
+		case "monster-hex-avoided":
+			return `${prefix}The ${MONSTER_DEFINITIONS[event.monster].name}'s hex fizzles.`;
 		case "monster-web-prepared":
 			return `${prefix}The ${MONSTER_DEFINITIONS[event.monster].name} readies a web at your tile. Move off it to avoid being Slowed.`;
 		case "monster-web-hit":

@@ -84,6 +84,9 @@ export const hasConsistentActors = (document: SaveDocument): boolean => {
 				(entry.webTurn === undefined ||
 					(!!MONSTER_DEFINITIONS[entry.kind].webAttack &&
 						entry.webTurn <= state.turn)) &&
+				(entry.hexTurn === undefined ||
+					(!!MONSTER_DEFINITIONS[entry.kind].hexAttack &&
+						entry.hexTurn <= state.turn)) &&
 				walkable(entry.floorNumber, entry.coordinate) &&
 				!protectedLocations
 					.get(entry.floorNumber)
@@ -159,13 +162,17 @@ export const hasConsistentActors = (document: SaveDocument): boolean => {
 											)
 										);
 									})()
-								: monster.intent.type === "preparing-web"
+								: monster.intent.type === "preparing-web" ||
+										monster.intent.type === "preparing-hex"
 									? walkable(monster.floorNumber, monster.intent.target) &&
 										orthogonalDistance(
 											monster.coordinate,
 											monster.intent.target,
 										) <=
-											(MONSTER_DEFINITIONS[monster.kind].webAttack?.range ?? 0)
+											((monster.intent.type === "preparing-web"
+												? MONSTER_DEFINITIONS[monster.kind].webAttack?.range
+												: MONSTER_DEFINITIONS[monster.kind].hexAttack?.range) ??
+												0)
 									: walkable(monster.floorNumber, monster.intent.target) &&
 										orthogonalDistance(
 											monster.coordinate,

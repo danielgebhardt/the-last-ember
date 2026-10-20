@@ -339,12 +339,15 @@ const DungeonHelp = ({
 						running stops when it begins but may continue afterward.
 					</li>
 					<li>
-						<span className="font-medium text-foreground">Curse.</span> Lowers
-						melee to-hit by 10 points and melee damage by 1 (never below 1)
-						until lifted. Spells and evasion are unaffected, and it does not
-						stack. A Remove Curse scroll lifts it before monsters act, using one
-						turn; healing, rest and Cleansing potions do not. Corridor running
-						stops when it begins but may continue afterward.
+						<span className="font-medium text-foreground">Curse.</span> Rare
+						hexweavers on floors 6–12 prepare a hex while they can see you, then
+						cast it on their next action unless you break their line of sight or
+						get out of range. Curse lowers melee to-hit by 10 points and melee
+						damage by 1 (never below 1) until lifted. Spells and evasion are
+						unaffected, and it does not stack. A Remove Curse scroll lifts it
+						before monsters act, using one turn; healing, rest and Cleansing
+						potions do not. Corridor running stops when it begins but may
+						continue afterward.
 					</li>
 					<li>
 						<span className="font-medium text-foreground">Town.</span> New

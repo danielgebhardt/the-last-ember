@@ -255,3 +255,43 @@ test("Mana leech: a landed hit drains mana and burns; a Cleansing potion cures i
 	await expect(log).toContainText("Cleansing potion and remove Mana Burn");
 	expect(await mapGeometry(page)).toEqual(frame);
 });
+
+test("Hexweaver: a telegraphed hex curses; a Remove Curse scroll lifts it", async ({
+	page,
+}) => {
+	await importAdventure(page, "hexweaver-sight");
+	const frame = await mapGeometry(page);
+	const log = page.getByRole("log", { name: "Activity log", exact: true });
+	await page.keyboard.press("Space");
+	await expect(log).toContainText("The hexweaver begins a hex.");
+	await page.keyboard.press("Space");
+	await expect(log).toContainText("The hexweaver's hex strikes you for");
+	await expect(log).toContainText("Curse applied (hexweaver)");
+	const curse = page.getByRole("button", {
+		name: "Curse — until cured",
+		exact: true,
+	});
+	await expect(curse).toBeVisible();
+	await curse.click();
+	await expect(page.getByRole("dialog", { name: /Curse/ })).toContainText(
+		"sanctuary Cure Curse (250 gold)",
+	);
+	await page.keyboard.press("Escape");
+	await map(page).click();
+	await page.keyboard.press("i");
+	const character = page.getByRole("dialog", {
+		name: "The Adventurer's Ledger",
+		exact: true,
+	});
+	await character
+		.getByRole("button", { name: "Remove Curse scroll, slot 1", exact: true })
+		.click();
+	await character
+		.getByRole("button", { name: "Read Remove Curse scroll", exact: true })
+		.click();
+	await expect(page.getByRole("button", { name: /^Curse/ })).toHaveCount(0);
+	await expect(log).toContainText(
+		"You read Remove Curse scroll and remove Curse.",
+	);
+	expect(await mapGeometry(page)).toEqual(frame);
+});

@@ -32,6 +32,7 @@ import { resolveMonsterArea } from "./MonsterAreaAttack";
 import { advanceUnseenPursuit } from "./MonsterAwareness";
 import { resolveMonsterCharge } from "./MonsterCharge";
 import { doorPlanningRun, monsterDoorToOpen } from "./MonsterDoors";
+import { resolveMonsterHex } from "./MonsterHex";
 import { orthogonalDistance } from "./MonsterLocations";
 import { detectsPlayer, selectPursuitStep, sensesCure } from "./MonsterPursuit";
 import { selectRetreatStep } from "./MonsterRetreat";
@@ -270,6 +271,23 @@ export const resolveMonsterPhase = (
 				};
 				if (player.health === 0)
 					events.push({ type: "player-died", turn: state.turn });
+			}
+			continue;
+		}
+		const hex = resolveMonsterHex(state, monster, detected);
+		if (hex) {
+			monsters = monsters.map((actor) =>
+				actor.id === monster.id ? hex.monster : actor,
+			);
+			events.push(...hex.events);
+			if (hex.damage !== undefined) {
+				player = {
+					...player,
+					health: Math.max(0, player.health - hex.damage),
+				};
+				if (player.health === 0)
+					events.push({ type: "player-died", turn: state.turn });
+				else infections.push({ kind: "curse", source: profile.name });
 			}
 			continue;
 		}

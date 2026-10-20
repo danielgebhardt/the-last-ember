@@ -215,6 +215,60 @@ export default async function prepareFixtures() {
 		if (leechTurn === undefined)
 			throw new Error("Expected a burning leech hit");
 		const leechBite = { ...leechBase, turn: leechTurn };
+		// A hexweaver in sight whose prepared hex lands on the second wait, and a scroll.
+		const hexBase = {
+			...spiderWeb,
+			bag: {
+				items: [{ id: "smoke:remove-curse", kind: "remove-curse-scroll" }],
+			},
+			potionHotbar: [null, null, null, null],
+		};
+		const hexTile = run.floors[0].terrain
+			.flatMap((tiles, row) => tiles.map((tile, col) => ({ row, col, tile })))
+			.filter(({ row, col, tile }) => {
+				const distance =
+					Math.abs(row - run.playerCoordinate.row) +
+					Math.abs(col - run.playerCoordinate.col);
+				return tile === "." && distance >= 3 && distance <= 5;
+			})
+			.map(({ row, col }) => ({ row, col }))
+			.find((coordinate) => {
+				let state = {
+					...hexBase,
+					monsters: [
+						{
+							id: "1:1",
+							kind: "hexweaver",
+							floorNumber: 1,
+							coordinate,
+							health: 12,
+							intent: { type: "idle" },
+							lastDamagedTurn: null,
+						},
+					],
+				};
+				state = resolvePlayerAction(state, { type: "wait" }).state;
+				state = resolvePlayerAction(state, { type: "wait" }).state;
+				return (
+					state.player.health > 0 &&
+					state.afflictions.some((a) => a.kind === "curse")
+				);
+			});
+		if (!hexTile) throw new Error("Expected a hexweaver tile in sight");
+		const hexweaverSight = {
+			...hexBase,
+			monsters: [
+				{
+					id: "1:1",
+					kind: "hexweaver",
+					floorNumber: 1,
+					coordinate: hexTile,
+					health: 12,
+					intent: { type: "idle" },
+					lastDamagedTurn: null,
+				},
+			],
+		};
 		// A Forgotten Forge beside the player on floor 6 of a six-floor run.
 		const forgeConfiguration = { ...configuration, floorCount: 6 };
 		const forgeRun = connectDungeonFloors(
@@ -989,6 +1043,7 @@ export default async function prepareFixtures() {
 			["town-library", townLibrary, configuration],
 			["plague-bite", plagueBite, configuration],
 			["leech-bite", leechBite, configuration],
+			["hexweaver-sight", hexweaverSight, configuration],
 			["forge", forgeState, forgeConfiguration],
 			["well", wellState, forgeConfiguration],
 			["spider-web", spiderWeb, configuration],

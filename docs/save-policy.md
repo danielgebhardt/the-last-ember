@@ -90,3 +90,7 @@ Retain v27. Activity adds `town-forged` (item, enchantment 1–3, gold) and `lib
 ## Curse (#357, #363)
 
 Retain v27. `afflictions` accepts `curse` (lifetime `null`). New adventures save `curseRemedies: true`, which enables Remove Curse scroll loot; adventures without it keep their earlier loot pools. No migration.
+
+## Hexweaver (#367)
+
+Retain v27. New monster kind `hexweaver`; an optional `hexTurn` and a `preparing-hex` intent, validated like the spider's web fields; Activity adds `monster-hex-prepared`, `monster-hex-hit` and `monster-hex-avoided`. No migration.

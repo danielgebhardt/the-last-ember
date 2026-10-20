@@ -4,7 +4,11 @@ import {
 } from "../game/AfflictionDefinitions";
 import { SPELL_DEFINITIONS } from "../game/Spells";
 import { ITEM_DEFINITIONS } from "../items/Item";
-import { MONSTER_DEFINITIONS, type MonsterKind } from "./Monster";
+import {
+	MONSTER_DEFINITIONS,
+	type MonsterKind,
+	monsterAffliction,
+} from "./Monster";
 
 const ON_HIT_AFFLICTION_TEXT: Record<AfflictionKind, string> = {
 	disease:
@@ -53,6 +57,10 @@ export const monsterTraits = (kind: MonsterKind): readonly string[] => {
 		traits.push(
 			`Web: marks your tile within ${definition.webAttack.range} tiles instead of attacking, then resolves on its next action. Step off the marked tile to avoid it; staying applies Slowed (evasion −10 for 10 phases, refreshes without stacking). No damage; magic resistance does not protect. At least ${definition.webAttack.cooldown} phases between webs. Sleep or Fear cancels it. Cleansing potion or the sanctuary cures Slowed; the first spider of an adventure always drops a Cleansing potion.`,
 		);
+	if (definition.hexAttack)
+		traits.push(
+			`Hex: while it can see you within ${definition.hexAttack.range} tiles, it prepares a hex instead of attacking, then casts on its next action: ${definition.hexAttack.damage} arcane damage (magic resistance applies) and Curse (melee to-hit −10 and damage −1 until cured). Break its line of sight or leave range to make it fizzle; Sleep or Fear cancels it. At least ${definition.hexAttack.cooldown} phases between hexes. Remove Curse scroll or the sanctuary cures Curse.`,
+		);
 	if (definition.onHitManaDrain)
 		traits.push(
 			`Every landed melee hit also drains ${definition.onHitManaDrain.min}–${definition.onHitManaDrain.max} mana (never below 0). Misses drain nothing.`,
@@ -61,9 +69,10 @@ export const monsterTraits = (kind: MonsterKind): readonly string[] => {
 		traits.push(
 			`Landed melee hits have a ${Math.round(definition.onHitAffliction.chance * 100)}% chance to inflict ${ON_HIT_AFFLICTION_TEXT[definition.onHitAffliction.kind]}`,
 		);
-	if (definition.afflictionSource && definition.onHitAffliction)
+	const sourceAffliction = monsterAffliction(kind);
+	if (definition.afflictionSource && sourceAffliction)
 		traits.push(
-			`Sparse: at most one affliction carrier per eligible floor, replacing an ordinary creature. The first ${definition.name} of an adventure always drops a ${ITEM_DEFINITIONS[AFFLICTION_DEFINITIONS[definition.onHitAffliction.kind].cure].name}.`,
+			`Sparse: at most one affliction carrier per eligible floor, replacing an ordinary creature. The first ${definition.name} of an adventure always drops a ${ITEM_DEFINITIONS[AFFLICTION_DEFINITIONS[sourceAffliction].cure].name}.`,
 		);
 	if (definition.alarmRadius)
 		traits.push(

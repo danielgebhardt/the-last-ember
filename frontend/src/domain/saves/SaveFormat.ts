@@ -164,6 +164,7 @@ export const createSaveDocument = (
 				heroic,
 				remedyDrop,
 				webTurn,
+				hexTurn,
 			}) => ({
 				id,
 				kind,
@@ -176,6 +177,7 @@ export const createSaveDocument = (
 				...(heroic !== undefined ? { heroic } : {}),
 				...(remedyDrop !== undefined ? { remedyDrop } : {}),
 				...(webTurn !== undefined ? { webTurn } : {}),
+				...(hexTurn !== undefined ? { hexTurn } : {}),
 				intent:
 					intent.type === "idle" || intent.type === "recovering-charge"
 						? { type: intent.type }

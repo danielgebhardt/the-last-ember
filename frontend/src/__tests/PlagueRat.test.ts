@@ -151,7 +151,10 @@ it("replaces at most one ordinary spawn per eligible floor from its own stream a
 			expect(rat.floorNumber).toBeLessThanOrEqual(6);
 			expect(rat.health).toBe(4);
 		}
-		const marked = monsters.filter((m) => m.remedyDrop);
+		// Other affliction sources (hexweavers from floor 6) carry their own markers.
+		const marked = monsters.filter(
+			(m) => m.remedyDrop && m.kind === "plague-rat",
+		);
 		expect(marked).toEqual(
 			rats.length
 				? [rats.reduce((a, b) => (b.floorNumber < a.floorNumber ? b : a))]
