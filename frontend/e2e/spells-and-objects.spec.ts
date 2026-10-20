@@ -103,6 +103,10 @@ test("reliquary confirms its ten-health lethal sacrifice and supports free cance
 		"10 / 10",
 	);
 	await page.keyboard.press("e");
+	// Choice keys reach the dialog only after it takes focus; until then "1" goes to the map.
+	await expect(
+		choice.getByRole("heading", { name: "Sealed reliquary", exact: true }),
+	).toBeFocused();
 	await page.keyboard.press("1");
 	await expect(
 		page.getByRole("dialog", { name: "You died", exact: true }),
