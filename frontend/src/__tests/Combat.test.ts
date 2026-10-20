@@ -79,19 +79,31 @@ describe("Bump combat", () => {
 		expect(walked.activityHistory).toBe(killed.activityHistory);
 	});
 
-	it.each(["down", "up"] as const)(
-		"does not provoke the goblin on an ordinary or blocked %s step",
-		(direction) => {
-			const game = encounter();
-			const result = resolvePlayerAction(game, { type: "move", direction });
-			expect(result.state.player).toBe(game.player);
-			if (direction === "up") expect(result.state.monsters).toBe(game.monsters);
-			else
-				expect(result.state.monsters[0].coordinate).toEqual({ row: 2, col: 2 });
-			expect(result.state.activityHistory).toBe(game.activityHistory);
-			expect(result.state.turn).toBe(direction === "down" ? 8 : 7);
-		},
-	);
+	it("does not provoke the goblin on a blocked step", () => {
+		const game = encounter();
+		const result = resolvePlayerAction(game, { type: "move", direction: "up" });
+		expect(result.state.player).toBe(game.player);
+		expect(result.state.monsters).toBe(game.monsters);
+		expect(result.state.activityHistory).toBe(game.activityHistory);
+		expect(result.state.turn).toBe(7);
+	});
+
+	it("lets the adjacent goblin strike once as the player steps away", () => {
+		const game = encounter();
+		const result = resolvePlayerAction(game, {
+			type: "move",
+			direction: "down",
+		});
+		expect(result.state.run.playerCoordinate).toEqual({ row: 2, col: 1 });
+		expect(result.state.player).toEqual({ health: 9, maxHealth: 10 });
+		expect(result.state.monsters[0].coordinate).toEqual({ row: 1, col: 2 });
+		expect(
+			result.state.activityHistory.entries.map((entry) => entry.event),
+		).toEqual([
+			{ type: "monster-withdrawal-hit", turn: 8, monster: "goblin", damage: 1 },
+		]);
+		expect(result.state.turn).toBe(8);
+	});
 
 	it("does not attack a goblin at the same coordinate on a different floor", () => {
 		const game = encounter();

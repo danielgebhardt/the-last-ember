@@ -39,7 +39,11 @@ import {
 	sellLowerEquipment,
 } from "../merchant/MerchantTrades";
 import type { Monster } from "../monsters/Monster.ts";
-import { resolveMonsterPhase } from "../monsters/MonsterTurns";
+import {
+	type MonsterPhaseScope,
+	resolveMonsterPhase,
+	withdrawalStrikers,
+} from "../monsters/MonsterTurns";
 import { triggerArrivalTrap } from "../objects/DungeonTraps";
 import { collectGoldAtPlayer } from "../objects/Gold";
 import { navigationRun } from "../objects/NavigationTerrain";
@@ -285,14 +289,40 @@ export const resolvePlayerAction = (
 		return { state, turnAdvanced: false, error: "You are not in town." };
 	// Effects receive the committed turn; only this boundary advances it.
 	const committed = { ...state, turn: state.turn + 1 };
-	const effect = resolvePlayerEffect(committed, action, rollSource);
+	const planned = resolvePlayerEffect(committed, action, rollSource);
+	// Stepping away from an adjacent melee monster lets it strike first; that
+	// strike is its turn, and a lethal strike cancels the step.
+	const strikers =
+		action.type === "move" &&
+		planned &&
+		!("error" in planned) &&
+		leftTile(committed, planned)
+			? withdrawalStrikers(committed, rollSource)
+			: new Set<string>();
+	const struck = strikers.size
+		? resolveMonsterPhase(committed, rollSource, {
+				strikers,
+				part: "before-step",
+			})
+		: committed;
+	const scope: MonsterPhaseScope | undefined = strikers.size
+		? { strikers, part: "after-step" }
+		: undefined;
+	const effect =
+		struck === committed
+			? planned
+			: struck.player.health > 0
+				? resolvePlayerEffect(struck, action, rollSource)
+				: struck;
 	const result =
-		effect && !("error" in effect) && action.type !== "exit-dungeon"
-			? announceObjectArrival(
-					state,
-					triggerArrivalTrap(collectGoldAtPlayer(effect)),
-				)
-			: effect;
+		struck.player.health <= 0
+			? struck
+			: effect && !("error" in effect) && action.type !== "exit-dungeon"
+				? announceObjectArrival(
+						state,
+						triggerArrivalTrap(collectGoldAtPlayer(effect)),
+					)
+				: effect;
 	if (!result) return { state, turnAdvanced: false };
 	if ("error" in result)
 		return { state, turnAdvanced: false, error: result.error };
@@ -303,7 +333,9 @@ export const resolvePlayerAction = (
 		responseState.quest.victory || responseState.player.health <= 0
 			? undefined
 			: advanceTimedEffects(
-					tickAfflictionDamage(resolveMonsterPhase(responseState, rollSource)),
+					tickAfflictionDamage(
+						resolveMonsterPhase(responseState, rollSource, scope),
+					),
 				);
 	const resolved = monsterPhase
 		? recoverManaAfterTurn(
@@ -475,6 +507,11 @@ const resolvePlayerEffect = (
 				state.run.activeFloor,
 			);
 };
+
+const leftTile = (before: GameState, after: GameState) =>
+	before.run.activeFloor !== after.run.activeFloor ||
+	before.run.playerCoordinate.row !== after.run.playerCoordinate.row ||
+	before.run.playerCoordinate.col !== after.run.playerCoordinate.col;
 
 const announceArrival = (state: GameState, fromFloor: number): GameState => {
 	const events: ActivityEvent[] = [];

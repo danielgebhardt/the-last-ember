@@ -21,7 +21,7 @@ import { hasMonsterEffect, monsterSkipsAction } from "../game/TimedEffects";
 import { navigationRun } from "../objects/NavigationTerrain";
 import { alertNearbyMonsters } from "./AlarmAlerts";
 import { chooseEnemySpell } from "./EnemyCasting";
-import { MONSTER_DEFINITIONS } from "./Monster";
+import { MONSTER_DEFINITIONS, type Monster } from "./Monster";
 import { resolveMonsterAlarm } from "./MonsterAlarm";
 import { resolveMonsterArea } from "./MonsterAreaAttack";
 import { advanceUnseenPursuit } from "./MonsterAwareness";
@@ -33,12 +33,70 @@ import { detectsPlayer, selectPursuitStep, sensesCure } from "./MonsterPursuit";
 import { selectRetreatStep } from "./MonsterRetreat";
 import { maximumMonsterHealth, monsterAttackDamage } from "./MonsterStats";
 import { resolveMonsterWeb } from "./MonsterWeb";
-import { pursuitRulesFor } from "./PursuitRules";
+import { type PursuitRules, pursuitRulesFor } from "./PursuitRules";
+
+// A step splits the phase: listed strikers act from the player's original tile
+// first, then everyone else acts after the step lands.
+export type MonsterPhaseScope = Readonly<{
+	strikers: ReadonlySet<string>;
+	part: "before-step" | "after-step";
+}>;
+
+// Mirrors the phase's action order: a striker is an adjacent monster whose
+// action this phase would be a plain melee attack. Special actions, prepared
+// heavy attacks and spells stay after the step so their telegraphs still work.
+const strikesBeforeStep = (
+	state: GameState,
+	monster: Monster,
+	rules: Readonly<PursuitRules>,
+	rollSource: AttackRollSource,
+): boolean => {
+	const definition = MONSTER_DEFINITIONS[monster.kind];
+	if (
+		monster.health <= 0 ||
+		monster.floorNumber !== state.run.activeFloor ||
+		monster.intent.type !== "idle" ||
+		orthogonalDistance(monster.coordinate, state.run.playerCoordinate) !== 1 ||
+		monsterSkipsAction(state, monster) ||
+		state.turn % (definition.actionInterval ?? 1) !== 0 ||
+		hasMonsterEffect(state, monster, "afraid") ||
+		definition.preparesAttack ||
+		(definition.enemySpells && (definition.rangedAttackRange ?? 0) >= 1)
+	)
+		return false;
+	const navigation = navigationRun(state);
+	if (!detectsPlayer(navigation, monster, rules)) return false;
+	const scene = { ...state, run: navigation };
+	return (
+		!(
+			!hasMonsterEffect(state, monster, "rooted") &&
+			!definition.stationary &&
+			monsterDoorToOpen(state, monster, state.monsters)
+		) &&
+		!resolveMonsterAlarm(state, monster, true) &&
+		!resolveMonsterCharge(scene, monster, state.monsters, rollSource, true) &&
+		!resolveMonsterArea(scene, monster, rollSource, rules) &&
+		!resolveMonsterHex(state, monster, true) &&
+		!resolveMonsterWeb(state, monster, true)
+	);
+};
+export const withdrawalStrikers = (
+	state: GameState,
+	rollSource: AttackRollSource = createAttackRolls,
+): ReadonlySet<string> => {
+	const rules = pursuitRulesFor(state);
+	return new Set(
+		state.monsters
+			.filter((monster) => strikesBeforeStep(state, monster, rules, rollSource))
+			.map((monster) => monster.id),
+	);
+};
 
 // The player phase has already chosen the active floor and turn number.
 export const resolveMonsterPhase = (
 	state: GameState,
 	rollSource: AttackRollSource = createAttackRolls,
+	scope?: MonsterPhaseScope,
 ): GameState => {
 	if (state.quest.victory) return state;
 	let objects = state.objects;
@@ -65,7 +123,10 @@ export const resolveMonsterPhase = (
 	const active = state.monsters
 		.filter(
 			(monster) =>
-				monster.health > 0 && monster.floorNumber === state.run.activeFloor,
+				monster.health > 0 &&
+				monster.floorNumber === state.run.activeFloor &&
+				(!scope ||
+					scope.strikers.has(monster.id) === (scope.part === "before-step")),
 		)
 		.sort((a, b) => Number(a.id.split(":")[1]) - Number(b.id.split(":")[1]));
 	for (const snapshot of active) {
@@ -413,13 +474,16 @@ export const resolveMonsterPhase = (
 			armor,
 			state.difficulty,
 		);
+		const withdrawing = scope?.part === "before-step";
 		if (!outcome.hit) {
 			events.push({
 				type: preparing
 					? "monster-heavy-missed"
 					: shooting
 						? "monster-shot-missed"
-						: "monster-missed",
+						: withdrawing
+							? "monster-withdrawal-missed"
+							: "monster-missed",
 				turn: state.turn,
 				monster: monster.kind,
 			});
@@ -432,7 +496,9 @@ export const resolveMonsterPhase = (
 				? "monster-heavy-hit"
 				: shooting
 					? "monster-shot-hit"
-					: "monster-hit",
+					: withdrawing
+						? "monster-withdrawal-hit"
+						: "monster-hit",
 			turn: state.turn,
 			monster: monster.kind,
 			damage,

@@ -47,6 +47,7 @@ const contains = (points: readonly Coordinate[], point: Coordinate) =>
 	points.some((p) => same(p, point));
 const damageTypes = new Set([
 	"monster-hit",
+	"monster-withdrawal-hit",
 	"monster-shot-hit",
 	"monster-heavy-hit",
 	"monster-charge-hit",

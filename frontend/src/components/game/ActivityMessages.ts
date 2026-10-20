@@ -102,6 +102,8 @@ export const formatActivityEvent = (event: ActivityEvent): string => {
 			return `${prefix}You ${event.toFloor > event.fromFloor ? "descend" : "ascend"} to floor ${event.toFloor}.`;
 		case "monster-missed":
 			return `${prefix}The ${MONSTER_DEFINITIONS[event.monster].name} misses you.`;
+		case "monster-withdrawal-missed":
+			return `${prefix}As you step away, the ${MONSTER_DEFINITIONS[event.monster].name} swings and misses.`;
 		case "monster-shot-missed":
 			return `${prefix}The ${MONSTER_DEFINITIONS[event.monster].name}'s shot misses you.`;
 		case "monster-shot-hit":
@@ -178,6 +180,8 @@ export const formatActivityEvent = (event: ActivityEvent): string => {
 			return `${prefix}You hit the ${MONSTER_DEFINITIONS[event.monster].name} for ${event.damage} damage.`;
 		case "monster-hit":
 			return `${prefix}The ${MONSTER_DEFINITIONS[event.monster].name} hits you for ${event.damage} damage.`;
+		case "monster-withdrawal-hit":
+			return `${prefix}As you step away, the ${MONSTER_DEFINITIONS[event.monster].name} hits you for ${event.damage} damage.`;
 		case "player-mana-drained":
 			return `${prefix}The ${MONSTER_DEFINITIONS[event.monster].name} drains ${event.mana} mana.`;
 		case "monster-died":

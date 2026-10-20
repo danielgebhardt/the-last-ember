@@ -181,6 +181,7 @@ export type ActivityEvent = { turn: number } & (
 			type:
 				| "player-hit"
 				| "monster-hit"
+				| "monster-withdrawal-hit"
 				| "monster-shot-hit"
 				| "monster-heavy-hit";
 			monster: MonsterKind;
@@ -203,7 +204,8 @@ export type ActivityEvent = { turn: number } & (
 				| "monster-hex-avoided"
 				| "monster-shot-missed"
 				| "player-missed"
-				| "monster-missed";
+				| "monster-missed"
+				| "monster-withdrawal-missed";
 			monster: MonsterKind;
 	  }
 	| { type: "monster-died"; monster: MonsterKind }

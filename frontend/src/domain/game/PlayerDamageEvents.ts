@@ -3,6 +3,7 @@ import type { ActivityEvent } from "./ActivityHistory";
 const incomingTypes = new Set([
 	"player-spell-hit",
 	"monster-hit",
+	"monster-withdrawal-hit",
 	"monster-shot-hit",
 	"monster-heavy-hit",
 	"monster-charge-hit",

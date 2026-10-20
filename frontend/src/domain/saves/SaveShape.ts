@@ -259,6 +259,7 @@ const eventFields = {
 	"spell-healed": { spell: spellKind, recovered: natural },
 	"player-hit": { monster: monsterKind, damage: natural },
 	"monster-hit": { monster: monsterKind, damage: natural },
+	"monster-withdrawal-hit": { monster: monsterKind, damage: natural },
 	"player-mana-drained": { monster: monsterKind, mana: integer(1, 100) },
 	"monster-shot-hit": { monster: monsterKind, damage: natural },
 	"monster-shot-missed": { monster: monsterKind },
@@ -275,6 +276,7 @@ const eventFields = {
 	"monster-died": { monster: monsterKind },
 	"player-missed": { monster: monsterKind },
 	"monster-missed": { monster: monsterKind },
+	"monster-withdrawal-missed": { monster: monsterKind },
 	"experience-gained": { amount: natural },
 	"level-gained": { level: integer(1, MAX_PLAYER_LEVEL), healthGain: natural },
 	"attribute-gained": {

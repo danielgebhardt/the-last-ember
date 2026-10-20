@@ -112,9 +112,10 @@ const committedActions: {
 	mana: number;
 }[] = [
 	{
+		// Stepping away from the adjacent monster draws its strike first.
 		name: "move",
 		action: { type: "move", direction: "left" },
-		health: 5,
+		health: 4,
 		mana: 6,
 	},
 	{

@@ -227,6 +227,14 @@ const DungeonHelp = ({
 						deal no damage. The same seed and actions reproduce outcomes.
 					</li>
 					<li>
+						<span className="font-medium text-foreground">Stepping away.</span>{" "}
+						Moving off a tile next to a monster that is about to hit you lets it
+						strike first, and that strike is its turn. If it kills you, you
+						don't move. A telegraphed heavy attack can still be dodged by
+						stepping off its marked tile, and casters and special attacks act
+						after your step.
+					</li>
+					<li>
 						<span className="font-medium text-foreground">Wait.</span> Stay in
 						place while monsters take their turn. Press Space once for each
 						turn; holding it does not repeat.
