@@ -17,7 +17,7 @@
 	--color-player: var(--player);
 	--color-monster-ember: var(--monster-ember);
 	--color-monster-rose: var(--monster-rose);
-	--color-monster-fuchsia: var(--monster-fuchsia);
+	--color-monster-blight: var(--monster-blight);
 	--color-monster-teal: var(--monster-teal);
 	--color-monster-rust: var(--monster-rust);
 	--color-monster-cyan: var(--monster-cyan);
@@ -168,7 +168,7 @@
 	--player: #dc2626;
 	--monster-ember: #c2410c;
 	--monster-rose: #be185d;
-	--monster-fuchsia: #a21caf;
+	--monster-blight: #6f8d44;
 	--monster-teal: #0f766e;
 	--monster-rust: #9a3412;
 	--monster-cyan: #0e7490;
@@ -251,7 +251,7 @@
 	--player: #f87171;
 	--monster-ember: #fb923c;
 	--monster-rose: #f472b6;
-	--monster-fuchsia: #e879f9;
+	--monster-blight: #9fcb6b;
 	--monster-teal: #2dd4bf;
 	--monster-rust: #fdba74;
 	--monster-cyan: #22d3ee;

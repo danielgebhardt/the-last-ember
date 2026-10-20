@@ -77,7 +77,7 @@ export const MONSTER_VISUALS: Record<
 	},
 	"plague-rat": {
 		icon: PlagueRatIcon,
-		color: "text-monster-fuchsia",
+		color: "text-monster-blight",
 		label: MONSTER_DEFINITIONS["plague-rat"].name,
 	},
 	orc: {
