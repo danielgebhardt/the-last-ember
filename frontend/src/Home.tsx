@@ -59,6 +59,7 @@ import { emptyEquipmentSlotFor } from "./domain/items/Equipment";
 import { ITEM_DEFINITIONS } from "./domain/items/Item";
 import type { HotbarSlot } from "./domain/items/PotionHotbar";
 import { type DungeonObject, isDoor } from "./domain/objects/DungeonObject";
+import { isFloorRevealed } from "./domain/objects/MirrorOfShadows";
 import { objectChoices } from "./domain/objects/ObjectChoices";
 import { nearbyInteractionObjects } from "./domain/objects/ObjectInteraction";
 import {
@@ -682,6 +683,10 @@ const Home = ({
 												? exploration.explored.get(run.activeFloor)
 												: undefined
 										}
+										revealed={isFloorRevealed(
+											game.state.objects,
+											run.activeFloor,
+										)}
 										playerPosition={run.playerCoordinate}
 										upStair={activeFloor.upStair?.coordinate}
 										entrance={

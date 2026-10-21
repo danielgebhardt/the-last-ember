@@ -52,6 +52,8 @@ export type Monster = {
 	heroic?: boolean;
 	// The first affliction source of an adventure guarantees its matching remedy drop.
 	remedyDrop?: boolean;
+	// A mirror reflection's stats, copied from the player when it was summoned.
+	reflection?: Readonly<{ maxHealth: number; attackDamage: number }>;
 	// Turn each cooldown telegraph last resolved; another needs more than its cooldown.
 	telegraphTurn?: Partial<Record<TelegraphCooldown, number>>;
 };
@@ -337,6 +339,20 @@ const monsterCatalog = {
 		spawnWeight: 3,
 		dropChance: 0.5,
 		lootPreferences: { "short-sword": 2, "wooden-shield": 2 },
+	},
+	// Summoned only by a Mirror of Shadows; each instance saves its own snapshot stats.
+	reflection: {
+		name: "reflection",
+		minFloor: 4,
+		maxFloor: 20,
+		maxHealth: 1,
+		attackDamage: 1,
+		experienceReward: 12,
+		detectionRadius: 8,
+		spawnWeight: 1,
+		spawnEnabled: false,
+		dropChance: 0,
+		lootPreferences: {},
 	},
 	"giant-rat": {
 		name: "giant rat",

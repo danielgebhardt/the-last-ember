@@ -43,6 +43,11 @@ import {
 	TRAP_DISARM_EXPERIENCE,
 } from "../../domain/objects/DungeonObject";
 import { FORGE_PRICES } from "../../domain/objects/ForgottenForge";
+import {
+	MIRROR_BACKLASH_SHARE,
+	MIRROR_REWARD_ENCHANTMENT,
+	MIRROR_SHATTER_ODDS,
+} from "../../domain/objects/MirrorOfShadows";
 import { RARE_DISCOVERY_CHANCE } from "../../domain/objects/RareDiscoveryPlacement";
 import { WELL_ODDS, WELL_OFFERINGS } from "../../domain/objects/WishingWell";
 import { TOWN_EQUIPMENT_OFFERS } from "../../domain/town/TownEquipmentStock";
@@ -270,8 +275,10 @@ const DeveloperCatalog = ({
 										Floors {definition.minFloor}–{definition.maxFloor}
 									</p>
 									<p>
-										Health {definition.maxHealth} · Attack{" "}
-										{definition.attackDamage} · XP {definition.experienceReward}
+										{kind === "reflection"
+											? `Health half your effective maximum (rounded up) · Attack your minimum melee damage, both copied when summoned`
+											: `Health ${definition.maxHealth} · Attack ${definition.attackDamage}`}{" "}
+										· XP {definition.experienceReward}
 									</p>
 									<p>
 										Detection {definition.detectionRadius} ·{" "}
@@ -418,6 +425,22 @@ const DeveloperCatalog = ({
 											? `${Math.round(RARE_DISCOVERY_CHANCE * 100)}% shared rare-discovery chance per adventure, equal weight with the other discoveries; at most one discovery/dungeon; omitted without safe space`
 											: `${Math.round(definition.chance * 100)}% placement chance`}
 									</p>
+									{kind === "mirror" && (
+										<p>
+											Floors 4+. Reveal: this floor's terrain and doors, not
+											creatures, items or traps. Reflection: half your effective
+											max HP and your minimum melee damage, copied when
+											summoned; drops the mirror's fixed reward at +
+											{MIRROR_REWARD_ENCHANTMENT}; refused free without room.
+											Shatter: {Math.round(MIRROR_SHATTER_ODDS.item * 100)}% the
+											same reward /{" "}
+											{Math.round(MIRROR_SHATTER_ODDS.empty * 100)}% nothing /{" "}
+											{Math.round(MIRROR_SHATTER_ODDS.hostile * 100)}% hostile
+											floor creature, or a {MIRROR_BACKLASH_SHARE * 100}% max-HP
+											backlash without room. One turn and one use. Provisional
+											playtest balance.
+										</p>
+									)}
 									{kind === "well" && (
 										<p>
 											{WELL_OFFERINGS.map(

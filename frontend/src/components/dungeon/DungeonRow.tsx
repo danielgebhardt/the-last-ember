@@ -181,6 +181,7 @@ const DungeonRow = memo(
 		rowIndex,
 		visible,
 		explored,
+		revealed = false,
 		playerColumn,
 		upStairColumn,
 		entranceColumn,
@@ -200,6 +201,7 @@ const DungeonRow = memo(
 		row: readonly string[];
 		visible?: readonly boolean[];
 		explored?: readonly boolean[];
+		revealed?: boolean;
 		rowIndex: number;
 		playerColumn?: number;
 		upStairColumn?: number;
@@ -225,14 +227,17 @@ const DungeonRow = memo(
 				}}
 			>
 				{row.map((terrain, columnIndex) => {
-					const visibility: TileVisibility =
+					const seen =
 						columnIndex === playerColumn ||
 						visible === undefined ||
-						visible[columnIndex]
-							? "visible"
-							: explored?.[columnIndex]
-								? "remembered"
-								: "unknown";
+						visible[columnIndex];
+					const remembered = !seen && !!explored?.[columnIndex];
+					// Revealed terrain shows like memory, but only doors among objects.
+					const visibility: TileVisibility = seen
+						? "visible"
+						: remembered || revealed
+							? "remembered"
+							: "unknown";
 					const monster = monsters?.find(
 						(actor) => actor.coordinate.col === columnIndex,
 					);
@@ -287,7 +292,9 @@ const DungeonRow = memo(
 								tile !== STAIRS_UP &&
 								tile !== STAIRS_DOWN
 									? dungeonObjects?.find(
-											(object) => object.coordinate.col === columnIndex,
+											(object) =>
+												object.coordinate.col === columnIndex &&
+												(seen || remembered || isDoor(object)),
 										)
 									: undefined
 							}
@@ -336,6 +343,7 @@ const DungeonRow = memo(
 		previous.rowIndex === next.rowIndex &&
 		previous.visible === next.visible &&
 		previous.explored === next.explored &&
+		previous.revealed === next.revealed &&
 		previous.playerColumn === next.playerColumn &&
 		previous.upStairColumn === next.upStairColumn &&
 		previous.entranceColumn === next.entranceColumn &&

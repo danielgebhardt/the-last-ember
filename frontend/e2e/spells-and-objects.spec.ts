@@ -306,3 +306,40 @@ test("Wishing Well shows every offering's odds, cancels freely and takes one off
 	await page.keyboard.press("e");
 	await expect(dialog).toHaveCount(0);
 });
+
+test("Mirror of Shadows explains its choices and reveals the floor's layout", async ({
+	page,
+}, info) => {
+	await page.setViewportSize({ width: 1470, height: 830 });
+	await importAdventure(page, "mirror");
+	const remembered = page.locator('[data-visibility="remembered"]');
+	const before = await remembered.count();
+	await page.keyboard.press("e");
+	const dialog = page.getByRole("dialog", {
+		name: "Mirror of Shadows",
+		exact: true,
+	});
+	for (const text of [
+		"Reveal this floor",
+		"Face your reflection",
+		"Shatter the mirror",
+		"60%",
+		"stay hidden until you see them",
+	])
+		await expect(dialog).toContainText(text);
+	await page.keyboard.press("Escape");
+	await expect(map(page)).toBeFocused();
+	await expect(turns(page)).toHaveText("Turn 0");
+	await page.keyboard.press("e");
+	await expect(
+		dialog.getByRole("heading", { name: "Mirror of Shadows", exact: true }),
+	).toBeFocused();
+	await page.keyboard.press("1");
+	await expect(dialog).toHaveCount(0);
+	await expect(turns(page)).toHaveText("Turn 1");
+	await expect(page.getByRole("log")).toContainText(
+		"The Mirror of Shadows shows you this floor's layout",
+	);
+	expect(await remembered.count()).toBeGreaterThan(before + 50);
+	await page.screenshot({ path: info.outputPath("mirror-revealed.png") });
+});

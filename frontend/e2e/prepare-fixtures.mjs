@@ -311,6 +311,18 @@ export default async function prepareFixtures() {
 				mainHand: { id: "worn:sword", kind: "iron-sword", enchantment: 1 },
 			},
 		};
+		const mirrorState = {
+			...forgeState,
+			objects: [
+				{
+					id: "floor:6:object:mirror:1",
+					kind: "mirror",
+					floorNumber: 6,
+					coordinate: { row: forgeStart.row, col: forgeStart.col + 1 },
+					activated: false,
+				},
+			],
+		};
 		const wellState = {
 			...forgeState,
 			objects: [
@@ -1043,6 +1055,12 @@ export default async function prepareFixtures() {
 			["bleeding", bleeding, configuration],
 			["forge", forgeState, forgeConfiguration],
 			["well", wellState, forgeConfiguration],
+			[
+				"mirror",
+				mirrorState,
+				forgeConfiguration,
+				{ ...fog, enabled: true, radius: 3 },
+			],
 			["spider-web", spiderWeb, configuration],
 			["scrolling", scrolling, configuration],
 			["stacks", stacks, configuration],

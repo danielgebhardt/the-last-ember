@@ -2,6 +2,7 @@ import { protectedFloorLocations } from "../monsters/MonsterLocations";
 import { sarcophagusOutcome } from "../objects/AncientSarcophagi";
 import { isDoor } from "../objects/DungeonObject";
 import { forgeRiskyOutcome } from "../objects/ForgottenForge";
+import { mirrorShatterOutcome } from "../objects/MirrorOfShadows";
 import {
 	findOptionalEliteRooms,
 	sealedEliteTiles,
@@ -85,6 +86,22 @@ export const hasConsistentGeometry = (document: SaveDocument): boolean => {
 	if (objects.filter((o) => o.kind === "sarcophagus").length > 1) return false;
 	if (objects.filter((o) => o.kind === "forge").length > 1) return false;
 	if (objects.filter((o) => o.kind === "well").length > 1) return false;
+	if (objects.filter((o) => o.kind === "mirror").length > 1) return false;
+	for (const object of objects) {
+		const result = object.mirrorResult;
+		if (
+			object.kind === "mirror"
+				? object.floorNumber < 4 ||
+					(object.activated
+						? !result ||
+							(result.choice === "shatter"
+								? result.outcome !== mirrorShatterOutcome(run.seed, object)
+								: "outcome" in result && result.outcome !== undefined)
+						: result !== undefined)
+				: result !== undefined
+		)
+			return false;
+	}
 	for (const object of objects)
 		if (
 			object.kind === "well"

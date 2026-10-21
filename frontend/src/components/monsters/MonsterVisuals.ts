@@ -17,6 +17,7 @@ import NecromancerIcon from "./NecromancerIcon";
 import OgreIcon from "./OgreIcon";
 import OrcIcon from "./OrcIcon";
 import PlagueRatIcon from "./PlagueRatIcon";
+import ReflectionIcon from "./ReflectionIcon";
 import SalamanderIcon from "./SalamanderIcon";
 import SentryIcon from "./SentryIcon";
 import ShadowStalkerIcon from "./ShadowStalkerIcon";
@@ -162,6 +163,11 @@ export const MONSTER_VISUALS: Record<
 		icon: FrostGiantIcon,
 		color: "text-monster-cyan",
 		label: MONSTER_DEFINITIONS["frost-giant"].name,
+	},
+	reflection: {
+		icon: ReflectionIcon,
+		color: "text-monster-shadow",
+		label: MONSTER_DEFINITIONS.reflection.name,
 	},
 	"soul-wraith": {
 		icon: SoulWraithIcon,

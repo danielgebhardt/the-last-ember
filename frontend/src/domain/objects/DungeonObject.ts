@@ -35,6 +35,16 @@ export const OBJECT_DEFINITIONS = {
 		chance: 0.2,
 		placement: "rare-discovery",
 	},
+	mirror: {
+		name: "Mirror of Shadows",
+		freshLabel: "mirror of shadows",
+		usedLabel: "darkened mirror of shadows",
+		minFloor: 4,
+		maxFloor: 20,
+		maxPerFloor: 1,
+		chance: 0.2,
+		placement: "rare-discovery",
+	},
 	merchant: {
 		name: "Wandering potion merchant",
 		freshLabel: "potion merchant",
@@ -156,6 +166,7 @@ export type DungeonObject = Readonly<{
 	sarcophagusOutcome?: import("./AncientSarcophagi").SarcophagusOutcome;
 	forgeResult?: import("./ForgottenForge").ForgeResult;
 	wellResult?: import("./WishingWell").WellResult;
+	mirrorResult?: import("./MirrorOfShadows").MirrorResult;
 }>;
 export const objectLabel = (
 	object: Pick<DungeonObject, "kind" | "activated">,

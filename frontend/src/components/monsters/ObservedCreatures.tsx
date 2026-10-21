@@ -6,8 +6,8 @@ import {
 	type Monster,
 } from "../../domain/monsters/Monster";
 import {
-	maximumMonsterHealth,
-	monsterDamageRange,
+	actorDamageRange,
+	actorMaximumHealth,
 } from "../../domain/monsters/MonsterStats";
 import { monsterTraits } from "../../domain/monsters/MonsterTraits";
 import MonsterIcon from "./MonsterIcon";
@@ -55,9 +55,11 @@ const ObservedCreatures = ({
 			) : (
 				kinds.map(({ kind, heroic }) => {
 					const definition = MONSTER_DEFINITIONS[kind];
-					const floorNumber = observed.find(
+					// Stats come from an actual actor, so a reflection shows its snapshot.
+					const sample = observed.find(
 						(actor) => actor.kind === kind && !!actor.heroic === heroic,
-					)?.floorNumber;
+					) ?? { kind, heroic };
+					const damage = actorDamageRange(sample, difficulty);
 					return (
 						<section
 							key={`${kind}:${heroic}`}
@@ -71,8 +73,7 @@ const ObservedCreatures = ({
 								{definition.name}
 							</h4>
 							<p className="text-xs text-muted-foreground">
-								Maximum health{" "}
-								{maximumMonsterHealth(kind, difficulty, floorNumber, heroic)} ·{" "}
+								Maximum health {actorMaximumHealth(sample, difficulty)} ·{" "}
 								{definition.areaAttack
 									? `blast damage ${scaleEnemyValue(definition.areaAttack.minDamage, difficulty)}–${scaleEnemyValue(definition.areaAttack.maxDamage, difficulty)}`
 									: definition.enemySpells
@@ -83,7 +84,7 @@ const ObservedCreatures = ({
 													return `${damage.name} ${scaleEnemyValue(damage.minimumDamage, difficulty)}–${scaleEnemyValue(damage.maximumDamage, difficulty)}`;
 												})
 												.join("; ")}`
-										: `melee damage ${monsterDamageRange(kind, difficulty, floorNumber, heroic).minDamage}–${monsterDamageRange(kind, difficulty, floorNumber, heroic).maxDamage}`}
+										: `melee damage ${damage.minDamage}–${damage.maxDamage}`}
 							</p>
 							<p className="flex flex-wrap gap-x-3 text-xs text-muted-foreground">
 								{(

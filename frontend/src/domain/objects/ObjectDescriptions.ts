@@ -17,6 +17,12 @@ const hints: Record<DungeonObjectKind, { fresh: string; spent: string }> = {
 		spent:
 			"Opened once; the tomb cannot be rerolled. Any remaining treasure is on the floor for G pickup.",
 	},
+	mirror: {
+		fresh:
+			"Press E to review its choices: reveal this floor's layout, face a hostile reflection for a reward, or shatter it for a risky prize. One use.",
+		spent:
+			"The mirror has gone dark. Anything it gave is on the floor for G pickup.",
+	},
 	well: {
 		fresh:
 			"Press E to review offerings: 50, 100 or 250 gold for a known chance of gear or a blessing, nothing, or a hostile creature. One offering.",

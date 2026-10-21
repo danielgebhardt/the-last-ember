@@ -96,6 +96,7 @@ export const createSaveDocument = (
 				sarcophagusOutcome,
 				forgeResult,
 				wellResult,
+				mirrorResult,
 			}) => ({
 				id,
 				kind,
@@ -105,6 +106,7 @@ export const createSaveDocument = (
 				...(sarcophagusOutcome ? { sarcophagusOutcome } : {}),
 				...(forgeResult ? { forgeResult: { ...forgeResult } } : {}),
 				...(wellResult ? { wellResult: { ...wellResult } } : {}),
+				...(mirrorResult ? { mirrorResult: { ...mirrorResult } } : {}),
 			}),
 		),
 		mana: state.mana,
@@ -146,6 +148,7 @@ export const createSaveDocument = (
 				alarmUsed,
 				heroic,
 				remedyDrop,
+				reflection,
 				telegraphTurn,
 			}) => ({
 				id,
@@ -158,6 +161,7 @@ export const createSaveDocument = (
 				alarmUsed,
 				...(heroic !== undefined ? { heroic } : {}),
 				...(remedyDrop !== undefined ? { remedyDrop } : {}),
+				...(reflection !== undefined ? { reflection: { ...reflection } } : {}),
 				...(telegraphTurn !== undefined
 					? { telegraphTurn: { ...telegraphTurn } }
 					: {}),

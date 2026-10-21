@@ -10,6 +10,7 @@ import {
 	type MerchantSupply,
 } from "../merchant/MerchantRules";
 import { sarcophagusOutcome } from "../objects/AncientSarcophagi";
+import { mirrorRewardKind } from "../objects/MirrorOfShadows";
 import { chestReward } from "../objects/TreasureChests";
 import { wellReward } from "../objects/WishingWell";
 import { TOWN_EQUIPMENT_OFFERS } from "../town/TownEquipmentStock";
@@ -75,6 +76,19 @@ export const hasConsistentInventory = (document: SaveDocument): boolean => {
 					sarcophagusOutcome(state.run.seed, owner),
 				) ||
 				chestReward(state.run.seed, owner).item.kind !== item.kind
+			)
+				return false;
+		}
+
+		if (item.id.includes(":object:mirror:")) {
+			const owner = state.objects.find(
+				(o) => o.kind === "mirror" && `${o.id}:reward` === item.id,
+			);
+			if (
+				!owner?.activated ||
+				owner.mirrorResult?.choice !== "shatter" ||
+				owner.mirrorResult.outcome !== "item" ||
+				mirrorRewardKind(state.run.seed, owner) !== item.kind
 			)
 				return false;
 		}

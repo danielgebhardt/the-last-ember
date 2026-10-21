@@ -17,6 +17,7 @@ const pool = [
 	{ value: "sarcophagus" as const, weight: 1 },
 	{ value: "forge" as const, weight: 1 },
 	{ value: "well" as const, weight: 1 },
+	{ value: "mirror" as const, weight: 1 },
 ];
 export const rareDiscoverySelection = (
 	run: Pick<DungeonRun, "seed" | "floors">,

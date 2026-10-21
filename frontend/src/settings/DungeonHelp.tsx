@@ -573,11 +573,12 @@ const DungeonHelp = ({
 				<p>
 					At most one rare discovery appears in about 40% of new adventures: an
 					ancient sarcophagus (floor 2 or deeper), a Wishing Well (floor 3 or
-					deeper) or a Forgotten Forge (floor 6 or deeper), when safe space
-					exists. These are substantially rarer than thrones or fountains. Press
-					E nearby, then choose Open or cancel freely with Escape. Opening
-					spends one normal turn: 40% treasure, 25% Heroic guardian, 25% both,
-					10% empty. These initial weights are for playtesting.
+					deeper), a Mirror of Shadows (floor 4 or deeper) or a Forgotten Forge
+					(floor 6 or deeper), when safe space exists. These are substantially
+					rarer than thrones or fountains. Press E nearby, then choose Open or
+					cancel freely with Escape. Opening spends one normal turn: 40%
+					treasure, 25% Heroic guardian, 25% both, 10% empty. These initial
+					weights are for playtesting.
 				</p>
 				<p>
 					A Heroic guardian is an ordinary floor-relevant enemy, preferring
@@ -589,6 +590,29 @@ const DungeonHelp = ({
 					its ordinary equipment or consumable. The opened tomb remains
 					inspectable. Inspection, cancellation, waiting and reloading cannot
 					change its result or grant a second reward.
+				</p>
+			</section>
+			<section
+				aria-label="Mirror of Shadows"
+				className="grid gap-3 rounded-lg border p-4 text-sm"
+			>
+				<h3 className="font-medium">Mirror of Shadows</h3>
+				<p>
+					Press E beside it to choose once. Reveal shows this floor&apos;s
+					walls, floors, doors and stairs; creatures, items, traps and other
+					discoveries stay hidden until you see them. Face your reflection
+					summons a hostile copy with half your maximum HP and your minimum
+					melee damage at that moment; defeat it for an ordinary weapon or armor
+					piece from that floor at +1. If it has no room to appear, the choice
+					is refused for free. Shatter gives 60% that same reward, 25% nothing
+					and 15% a hostile floor creature; with no room for the creature, a
+					backlash deals 15% of your maximum HP instead, ignoring armor, and can
+					kill.
+				</p>
+				<p>
+					Every choice uses one turn and the mirror, and monsters respond
+					normally. Each mirror&apos;s shatter result and reward are fixed, so
+					cancelling or reloading cannot reroll them.
 				</p>
 			</section>
 			<section

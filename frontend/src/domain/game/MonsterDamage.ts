@@ -2,6 +2,7 @@ import { createMonsterDrop } from "../items/MonsterDrops";
 import { MONSTER_DEFINITIONS, type Monster } from "../monsters/Monster";
 import { resistedDamage } from "../monsters/MonsterResistance";
 import { goldAmount } from "../objects/Gold";
+import { mirrorFor, reflectionDrop } from "../objects/MirrorOfShadows";
 import { type ActivityEvent, appendActivityEvents } from "./ActivityHistory";
 
 import type { DamageElement } from "./DamageElements";
@@ -74,7 +75,11 @@ export const damageMonster = (
 		mana = gained.mana;
 		events.push(...gained.events);
 
-		const drop = createMonsterDrop(state.run.seed, monster);
+		// A mirror's reflection always drops that mirror's fixed reward.
+		const mirror = mirrorFor(state.objects, monster);
+		const drop = mirror
+			? reflectionDrop(state.run.seed, monster, mirror)
+			: createMonsterDrop(state.run.seed, monster);
 		if (drop && !floorItems.some((entry) => entry.item.id === drop.item.id)) {
 			floorItems = [...floorItems, drop];
 			// Player attacks resolve on a visible target before the monster phase.

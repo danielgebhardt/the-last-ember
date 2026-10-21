@@ -11,7 +11,7 @@ import {
 	MONSTER_DEFINITIONS,
 	type Monster,
 } from "./Monster";
-import { maximumMonsterHealth } from "./MonsterStats";
+import { actorMaximumHealth } from "./MonsterStats";
 export type EnemySpellOutcome =
 	| { type: "wait" }
 	| { type: "heal"; spell: "heal"; recovered: number }
@@ -24,12 +24,7 @@ export const chooseEnemySpell = (
 	rolls: AttackRollSource,
 ): EnemySpellOutcome => {
 	const definition = MONSTER_DEFINITIONS[monster.kind];
-	const maxHealth = maximumMonsterHealth(
-		monster.kind,
-		state.difficulty,
-		monster.floorNumber,
-		monster.heroic,
-	);
+	const maxHealth = actorMaximumHealth(monster, state.difficulty);
 	const interval = definition.spellInterval ?? 3;
 	const index = Number(monster.id.split(":")[1]);
 	if ((state.turn - 1 + index - 1) % interval !== 0) return { type: "wait" };

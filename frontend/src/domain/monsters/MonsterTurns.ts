@@ -33,7 +33,7 @@ import { orthogonalDistance } from "./MonsterLocations";
 import { detectsPlayer, selectPursuitStep, sensesCure } from "./MonsterPursuit";
 import { selectRetreatStep } from "./MonsterRetreat";
 import { resolveMonsterSoulBolt } from "./MonsterSoulBolt";
-import { maximumMonsterHealth, monsterAttackDamage } from "./MonsterStats";
+import { actorAttackDamage, actorMaximumHealth } from "./MonsterStats";
 import type { SpecialActionOutcome } from "./MonsterTelegraphs";
 import { resolveMonsterWeb } from "./MonsterWeb";
 import { type PursuitRules, pursuitRulesFor } from "./PursuitRules";
@@ -186,12 +186,7 @@ export const resolveMonsterPhase = (
 		) {
 			const recovered = Math.min(
 				profile.regeneration,
-				maximumMonsterHealth(
-					monster.kind,
-					state.difficulty,
-					monster.floorNumber,
-					monster.heroic,
-				) - monster.health,
+				actorMaximumHealth(monster, state.difficulty) - monster.health,
 			);
 			if (recovered > 0) {
 				monster = { ...monster, health: monster.health + recovered };
@@ -448,10 +443,7 @@ export const resolveMonsterPhase = (
 			continue;
 		}
 		const outcome = resolveMeleeAttack(
-			attackProfile(
-				monsterAttackDamage(monster.kind, monster.floorNumber, monster.heroic),
-				monsterHitThreshold,
-			),
+			attackProfile(actorAttackDamage(monster), monsterHitThreshold),
 			rollSource({
 				seed: state.run.seed,
 				floorNumber: state.run.activeFloor,

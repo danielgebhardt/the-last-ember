@@ -9,6 +9,7 @@ import { offerAtShrine } from "./DungeonShrines";
 import { resolveThroneChoice } from "./DungeonThrones";
 import { disarmTrap } from "./DungeonTraps";
 import { operateForge } from "./ForgottenForge";
+import { gazeIntoMirror } from "./MirrorOfShadows";
 import { describeObject } from "./ObjectDescriptions";
 import { openDiscovery } from "./RareDiscoveries";
 import { openChest } from "./TreasureChests";
@@ -29,7 +30,10 @@ export type ObjectChoice =
 	| "forge-risky"
 	| "offer-50"
 	| "offer-100"
-	| "offer-250";
+	| "offer-250"
+	| "mirror-reveal"
+	| "mirror-reflection"
+	| "mirror-shatter";
 export type InteractAction = {
 	type: "interact";
 	objectId?: string;
@@ -90,6 +94,8 @@ export const interactObject = (
 	if (object.kind === "sarcophagus")
 		return openSarcophagus(state, object, action.choice);
 	if (object.kind === "well") return offerAtWell(state, object, action.choice);
+	if (object.kind === "mirror")
+		return gazeIntoMirror(state, object, action.choice);
 	if (object.kind === "forge")
 		return operateForge(state, object, action.choice, action.itemId);
 	if (object.kind === "reliquary" || object.kind === "archive")

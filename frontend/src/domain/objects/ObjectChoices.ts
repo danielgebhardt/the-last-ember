@@ -11,6 +11,14 @@ import { fountainRestoration } from "./DungeonFountains";
 import { type DungeonObject, RELIQUARY_HEALTH_COST } from "./DungeonObject";
 import { shrineTerms } from "./DungeonShrines";
 import { FORGE_PRICES, forgeTargets } from "./ForgottenForge";
+import {
+	MIRROR_BACKLASH_SHARE,
+	MIRROR_CHOICES,
+	MIRROR_REWARD_ENCHANTMENT,
+	MIRROR_SHATTER_ODDS,
+	mirrorBacklash,
+	reflectionStats,
+} from "./MirrorOfShadows";
 import type { ObjectChoice } from "./ObjectInteraction";
 import { WELL_ODDS, WELL_OFFERINGS } from "./WishingWell";
 export type InteractionChoice = Readonly<{
@@ -74,6 +82,28 @@ export const objectChoices = (
 	> &
 		Partial<Pick<GameState, "bag" | "gold">>,
 ): readonly InteractionChoice[] => {
+	if (object.kind === "mirror") {
+		const reflection = state && reflectionStats(state);
+		const odds = MIRROR_SHATTER_ODDS;
+		return [
+			{
+				value: MIRROR_CHOICES.reveal,
+				label: "Reveal this floor",
+				description:
+					"Show the layout of every room and corridor on this floor: walls, floors, doors and stairs. Creatures, items, traps and other discoveries stay hidden until you see them. One turn; the mirror goes dark.",
+			},
+			{
+				value: MIRROR_CHOICES.reflection,
+				label: "Face your reflection",
+				description: `A hostile reflection steps out${reflection ? ` with ${reflection.maxHealth} HP (half your maximum) and ${reflection.attackDamage} melee damage (your minimum hit)` : " with half your maximum HP and your minimum melee damage"}, before difficulty. Defeat it for one ordinary weapon or armor piece +${MIRROR_REWARD_ENCHANTMENT} from this floor. Refused for free if it has no room to appear. One turn; the mirror goes dark.`,
+			},
+			{
+				value: MIRROR_CHOICES.shatter,
+				label: "Shatter the mirror",
+				description: `${Math.round(odds.item * 100)}%: one ordinary weapon or armor piece +${MIRROR_REWARD_ENCHANTMENT} from this floor. ${Math.round(odds.empty * 100)}%: nothing. ${Math.round(odds.hostile * 100)}%: a hostile floor creature emerges nearby; with no room for it, a backlash deals ${state ? mirrorBacklash(state.player.maxHealth) : `${MIRROR_BACKLASH_SHARE * 100}% of your maximum HP`} damage instead, ignoring armor and potentially fatal. One turn; the mirror is destroyed.`,
+			},
+		];
+	}
 	if (object.kind === "well")
 		return WELL_OFFERINGS.map((offering) => {
 			const odds = WELL_ODDS[offering];

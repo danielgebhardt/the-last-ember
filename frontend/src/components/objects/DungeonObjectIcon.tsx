@@ -17,6 +17,7 @@ import type {
 import ForgeIcon from "./ForgeIcon";
 import FountainIcon from "./FountainIcon";
 import MerchantIcon from "./MerchantIcon";
+import MirrorIcon from "./MirrorIcon";
 import SarcophagusIcon from "./SarcophagusIcon";
 import ThroneIcon from "./ThroneIcon";
 import TreasureChestIcon, {
@@ -31,6 +32,7 @@ const icons: Record<
 	sarcophagus: SarcophagusIcon,
 	forge: ForgeIcon,
 	well: WellIcon,
+	mirror: MirrorIcon,
 	door: DoorClosed,
 	reliquary: Gem,
 	archive: LibraryBig,
@@ -47,6 +49,15 @@ const DungeonObjectIcon = ({ object }: { object: DungeonObject }) => {
 		return (
 			<SarcophagusIcon
 				opened={object.activated}
+				aria-hidden="true"
+				focusable="false"
+				className={`size-full text-object-stone ${object.activated ? "opacity-50" : ""}`}
+			/>
+		);
+	if (object.kind === "mirror")
+		return (
+			<MirrorIcon
+				spent={object.activated}
 				aria-hidden="true"
 				focusable="false"
 				className={`size-full text-object-stone ${object.activated ? "opacity-50" : ""}`}

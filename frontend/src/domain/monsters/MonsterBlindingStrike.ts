@@ -8,7 +8,7 @@ import {
 } from "../game/MeleeRules";
 import { MONSTER_DEFINITIONS, type Monster } from "./Monster";
 import { orthogonalDistance } from "./MonsterLocations";
-import { monsterAttackDamage } from "./MonsterStats";
+import { actorAttackDamage } from "./MonsterStats";
 import {
 	resolvedTelegraph,
 	type SpecialActionOutcome,
@@ -50,10 +50,7 @@ export const resolveMonsterBlindingStrike = (
 			state.afflictions,
 		);
 		const outcome = resolveMeleeAttack(
-			attackProfile(
-				monsterAttackDamage(monster.kind, monster.floorNumber, monster.heroic),
-				monsterHitThreshold,
-			),
+			attackProfile(actorAttackDamage(monster), monsterHitThreshold),
 			rollSource({
 				seed: state.run.seed,
 				floorNumber: state.run.activeFloor,

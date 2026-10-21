@@ -4,7 +4,7 @@ import {
 	orthogonalDistance,
 	protectedFloorLocations,
 } from "../monsters/MonsterLocations";
-import { maximumMonsterHealth } from "../monsters/MonsterStats";
+import { actorMaximumHealth } from "../monsters/MonsterStats";
 import {
 	TARGET_TELEGRAPHS,
 	TELEGRAPH_COOLDOWNS,
@@ -14,6 +14,11 @@ import {
 	sarcophagusGuardianKind,
 	sarcophagusOutcome,
 } from "../objects/AncientSarcophagi";
+import {
+	MIRROR_HOSTILE_ID,
+	MIRROR_REFLECTION_ID,
+	mirrorHostileKind,
+} from "../objects/MirrorOfShadows";
 import { WELL_SPAWN_ID, wellHostileKind } from "../objects/WishingWell";
 import {
 	sameCoordinate,
@@ -53,6 +58,29 @@ export const hasConsistentActors = (document: SaveDocument): boolean => {
 				/^\d+:[1-9]\d*$/.test(entry.id) &&
 				Number(entry.id.split(":")[0]) === entry.floorNumber &&
 				entry.id.endsWith(":1000001") === (entry.heroic === true) &&
+				// Only a mirror's reflection choice summons a reflection, with saved stats.
+				(entry.kind === "reflection") ===
+					entry.id.endsWith(`:${MIRROR_REFLECTION_ID}`) &&
+				(entry.kind === "reflection") === (entry.reflection !== undefined) &&
+				(entry.kind !== "reflection" ||
+					state.objects.some(
+						(o) =>
+							o.kind === "mirror" &&
+							o.activated &&
+							o.floorNumber === entry.floorNumber &&
+							o.mirrorResult?.choice === "reflection",
+					)) &&
+				// A shattered mirror's hostile result owns this reserved identity.
+				(!entry.id.endsWith(`:${MIRROR_HOSTILE_ID}`) ||
+					state.objects.some(
+						(o) =>
+							o.kind === "mirror" &&
+							o.activated &&
+							o.floorNumber === entry.floorNumber &&
+							o.mirrorResult?.choice === "shatter" &&
+							o.mirrorResult.outcome === "hostile" &&
+							entry.kind === mirrorHostileKind(run.seed, o),
+					)) &&
 				// A well's hostile result owns this reserved identity.
 				(!entry.id.endsWith(`:${WELL_SPAWN_ID}`) ||
 					state.objects.some(
@@ -91,13 +119,7 @@ export const hasConsistentActors = (document: SaveDocument): boolean => {
 				(entry.awareness === undefined ||
 					entry.awareness.type === "idle" ||
 					walkable(entry.floorNumber, entry.awareness.target)) &&
-				entry.health <=
-					maximumMonsterHealth(
-						entry.kind,
-						savedDifficulty(document),
-						entry.floorNumber,
-						entry.heroic,
-					) &&
+				entry.health <= actorMaximumHealth(entry, savedDifficulty(document)) &&
 				!(
 					"alarmUsed" in entry &&
 					entry.alarmUsed === true &&

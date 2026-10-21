@@ -135,6 +135,12 @@ const eventFields = {
 		kind: oneOf(Object.keys(OBJECT_DEFINITIONS)),
 		activated: boolean,
 	},
+	"mirror-used": {
+		choice: oneOf(["reveal", "reflection", "shatter"]),
+		outcome: optional(oneOf(["item", "empty", "hostile"])),
+		item: optional(itemKind),
+		damage: optional(integer(1)),
+	},
 	"well-offered": {
 		gold: oneOf([50, 100, 250]),
 		outcome: oneOf(["positive", "neutral", "negative"]),
@@ -476,6 +482,13 @@ const documentShape = object({
 				sarcophagusOutcome: optional(
 					oneOf(["treasure", "guardian", "both", "empty"]),
 				),
+				// Which choices carry an outcome is a consistency rule.
+				mirrorResult: optional(
+					object({
+						choice: oneOf(["reveal", "reflection", "shatter"]),
+						outcome: optional(oneOf(["item", "empty", "hostile"])),
+					}),
+				),
 				wellResult: optional(
 					object({
 						offering: oneOf([50, 100, 250]),
@@ -567,6 +580,9 @@ const documentShape = object({
 				alarmUsed: optional(boolean),
 				heroic: optional(boolean),
 				remedyDrop: optional(boolean),
+				reflection: optional(
+					object({ maxHealth: integer(1), attackDamage: integer(1) }),
+				),
 				// Which kinds a monster may hold is a consistency rule.
 				telegraphTurn: optional(
 					(value) =>

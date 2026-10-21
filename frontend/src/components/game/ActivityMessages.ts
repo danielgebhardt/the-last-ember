@@ -54,6 +54,14 @@ export const formatActivityEvent = (event: ActivityEvent): string => {
 			return `${prefix}You open the ${OBJECT_DEFINITIONS[event.kind].name}.${event.damage ? ` The seal deals ${event.damage} damage.` : ""} ${ITEM_DEFINITIONS[event.item].name} remains on the floor for G pickup.`;
 		case "object-seen":
 			return `${prefix}${describeObject(event)}`;
+		case "mirror-used":
+			return `${prefix}${
+				event.choice === "reveal"
+					? "The Mirror of Shadows shows you this floor's layout, then goes dark."
+					: event.choice === "reflection"
+						? "Your reflection steps out of the Mirror of Shadows to fight you."
+						: `You shatter the Mirror of Shadows. ${event.outcome === "item" && event.item ? `${ITEM_DEFINITIONS[event.item].name} +1 lies among the shards; it is on the floor for G pickup.` : event.outcome === "empty" ? "Nothing but shards." : event.damage ? `Shadows lash out for ${event.damage} damage.` : "A hostile creature climbs out of the shards!"}`
+			}`;
 		case "well-offered":
 			return `${prefix}You offer ${event.gold} gold to the Wishing Well. ${event.outcome === "positive" ? (event.attribute ? `A blessing: +1 permanent ${event.attribute}.` : event.item ? `${ITEM_DEFINITIONS[event.item].name} rises from the water; it is on the floor for G pickup.` : "Something glimmers, then fades.") : event.outcome === "neutral" ? "Nothing happens." : event.escaped ? "Something stirs below, but no creature can emerge." : "A hostile creature climbs out of the well!"} The well falls still.`;
 		case "library-learned":

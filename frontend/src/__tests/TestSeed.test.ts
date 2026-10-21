@@ -117,8 +117,9 @@ describe("reserved test seed", () => {
 				.filter((m) => m.floorNumber <= TEST_SEED_FLOORS)
 				.map((m) => m.kind),
 		);
+		// The reflection appears only when you face the floor-1 mirror.
 		for (const kind of Object.keys(MONSTER_DEFINITIONS) as MonsterKind[])
-			expect(placed.has(kind), kind).toBe(true);
+			if (kind !== "reflection") expect(placed.has(kind), kind).toBe(true);
 	});
 
 	it("keeps every authored tile reachable and linked to the generated floors", () => {

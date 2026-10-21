@@ -71,6 +71,14 @@ export type ActivityEvent = { turn: number } & (
 			activated: boolean;
 	  }
 	| {
+			type: "mirror-used";
+			choice: "reveal" | "reflection" | "shatter";
+			outcome?: "item" | "empty" | "hostile";
+			item?: ItemKind;
+			// Backlash when a hostile shatter result had no room to emerge.
+			damage?: number;
+	  }
+	| {
 			type: "well-offered";
 			gold: 50 | 100 | 250;
 			outcome: "positive" | "neutral" | "negative";
