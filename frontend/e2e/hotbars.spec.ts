@@ -150,7 +150,7 @@ test("interleaved scroll stacks keep their coordinates and selected actions acro
 		if (bonus < 3) {
 			await expect(scroll).toHaveAttribute("aria-pressed", "true");
 			if (bonus === 1)
-				await expect(scroll).toHaveAccessibleDescription("2 carried");
+				await expect(scroll).toHaveAccessibleDescription(/^2 carried/);
 			expect(await scroll.boundingBox()).toEqual(scrollBounds);
 			expect(await sword.boundingBox()).toEqual(swordBounds);
 			expect(await mana.boundingBox()).toEqual(manaBounds);
@@ -196,7 +196,7 @@ test("shortcut and Character potion use retain the stack, reject full mana freel
 		name: "Mana potion, slot 3",
 		exact: true,
 	});
-	await expect(mana).toHaveAccessibleDescription("2 carried");
+	await expect(mana).toHaveAccessibleDescription(/^2 carried/);
 	await mana.click();
 	const bounds = await mana.boundingBox();
 	await character

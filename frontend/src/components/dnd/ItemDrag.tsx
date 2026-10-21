@@ -22,13 +22,20 @@ import {
 	useState,
 } from "react";
 import { createPortal } from "react-dom";
+import type { SpellKind } from "../../domain/game/Spells";
 import type { ItemInstance } from "../../domain/items/Item";
-import { itemName } from "../../domain/items/ItemValues";
+import { SPELL_ICONS, spellIconColor } from "../game/SpellVisuals";
 import ItemIcon from "../items/ItemIcon";
 
-// A dragged item and where it came from; a target describes itself and whether it
-// takes that item. Drops only map onto actions the dialog already offers by button.
-export type ItemDragSource = Readonly<{ item: ItemInstance; from: string }>;
+// A dragged item or spell, its spoken name and where it came from; a target
+// describes itself and whether it takes that source. Drops only map onto actions the
+// dialog already offers by button.
+export type ItemDragSource = Readonly<{
+	from: string;
+	name: string;
+	item?: ItemInstance;
+	spell?: SpellKind;
+}>;
 export type ItemDropTarget = Readonly<{
 	label: string;
 	accepts: (source: ItemDragSource) => boolean;
@@ -87,9 +94,7 @@ const nearestTargetInDirection: KeyboardCoordinateGetter = (
 };
 
 const describe = (data: unknown) =>
-	(data as ItemDragSource | undefined)?.item
-		? itemName((data as ItemDragSource).item)
-		: "item";
+	(data as ItemDragSource | undefined)?.name ?? "item";
 const targetLabel = (data: unknown) =>
 	(data as ItemDropTarget | undefined)?.label ?? "this area";
 const announcements: Announcements = {
@@ -112,12 +117,15 @@ const DraggingContext = createContext<ItemDragSource | null>(null);
 export const useDraggedItem = () => use(DraggingContext);
 
 // One drag context per dialog. onDrop runs only for a target that accepts the item;
-// anything else snaps back without an action.
+// anything else snaps back without an action, except that a pointer drag released
+// away from every target reports onDropNowhere (a shortcut dragged off its bar).
 export const ItemDragProvider = ({
 	onDrop,
+	onDropNowhere,
 	children,
 }: {
 	onDrop: (source: ItemDragSource, targetId: string) => void;
+	onDropNowhere?: (source: ItemDragSource) => void;
 	children: ReactNode;
 }) => {
 	const [dragging, setDragging] = useState<ItemDragSource | null>(null);
@@ -162,12 +170,13 @@ export const ItemDragProvider = ({
 			coordinateGetter: nearestTargetInDirection,
 		}),
 	);
-	const finish = (event: DragEndEvent) => {
+	const finish = (event: DragEndEvent, byPointer: boolean) => {
 		setDragging(null);
 		const source = event.active.data.current as ItemDragSource | undefined;
 		const target = event.over?.data.current as ItemDropTarget | undefined;
 		if (source && target && event.over && target.accepts(source))
 			onDrop(source, String(event.over.id));
+		else if (source && !event.over && byPointer) onDropNowhere?.(source);
 	};
 	return (
 		<DndContext
@@ -184,8 +193,9 @@ export const ItemDragProvider = ({
 						: "pointer";
 			}}
 			onDragEnd={(event) => {
+				const byPointer = active.current === "pointer";
 				active.current = null;
-				finish(event);
+				finish(event, byPointer);
 			}}
 			onDragCancel={() => {
 				active.current = null;
@@ -199,10 +209,14 @@ export const ItemDragProvider = ({
 					{dragging ? (
 						<div className="ember-item-slot grid size-14 justify-items-center gap-1 rounded-md border border-primary/60 bg-card p-1 shadow-lg">
 							<span className="size-5">
-								<ItemIcon kind={dragging.item.kind} />
+								{dragging.item ? (
+									<ItemIcon kind={dragging.item.kind} />
+								) : dragging.spell ? (
+									<SpellIcon spell={dragging.spell} />
+								) : null}
 							</span>
 							<span className="line-clamp-2 text-center text-[9px] leading-[10px]">
-								{itemName(dragging.item)}
+								{dragging.name}
 							</span>
 						</div>
 					) : null}
@@ -213,12 +227,21 @@ export const ItemDragProvider = ({
 	);
 };
 
+const SpellIcon = ({ spell }: { spell: SpellKind }) => {
+	const Icon = SPELL_ICONS[spell];
+	return (
+		<Icon aria-hidden="true" className={`size-full ${spellIconColor(spell)}`} />
+	);
+};
+
 // Spreads onto the existing slot button: it stays a button for click and keyboard
-// selection, and also becomes a drag source.
+// selection, and also becomes a drag source. A source that isn't a native button
+// (a filled shortcut slot) keeps dnd-kit's own button role and description.
 export const useItemDrag = (
 	id: string,
 	source: ItemDragSource | null,
 	disabled = false,
+	native = true,
 ) => {
 	const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
 		id,
@@ -236,6 +259,14 @@ export const useItemDrag = (
 		"aria-disabled": _dragDisabled,
 		...rest
 	} = attributes;
+	if (!native)
+		return {
+			ref: setNodeRef,
+			dragProps: disabled || !source ? {} : { ...attributes, ...listeners },
+			describedBy: () =>
+				disabled || !source ? undefined : (instructionsId as string),
+			isDragging,
+		};
 	return {
 		ref: setNodeRef,
 		dragProps: { ...rest, ...listeners },

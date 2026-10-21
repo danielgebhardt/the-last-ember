@@ -18,6 +18,7 @@ import {
 	type TimedEffect,
 } from "../../domain/game/TimedEffects";
 import type { Equipment } from "../../domain/items/Equipment";
+import { useItemDrag } from "../dnd/ItemDrag";
 import { SPELL_ICONS, spellIconColor } from "./SpellVisuals";
 
 type Props = {
@@ -78,6 +79,12 @@ const SpellLibraryCard = ({
 				: null;
 
 	const assignedKeys = SPELL_SLOTS.filter((slot) => slots[slot - 1] === spell);
+	const drag = useItemDrag(
+		`spell-card:${spell}`,
+		{ spell, name: definition.name, from: "spell-card" },
+		!assignmentsEnabled,
+		false,
+	);
 
 	return (
 		<article
@@ -88,7 +95,18 @@ const SpellLibraryCard = ({
 		>
 			{/* Compact spell header */}
 			<div className="flex min-w-0 items-start gap-3">
-				<div className="flex size-10 shrink-0 items-center justify-center rounded-lg border border-primary/20 bg-background/60 p-2">
+				{/* The icon is the drag handle onto a spell shortcut. */}
+				<div
+					ref={drag.ref}
+					{...drag.dragProps}
+					{...(assignmentsEnabled
+						? {
+								"aria-label": `Drag ${definition.name} to a spell shortcut`,
+								"aria-describedby": drag.describedBy(),
+							}
+						: {})}
+					className={`flex size-10 shrink-0 touch-manipulation items-center justify-center rounded-lg border border-primary/20 bg-background/60 p-2 outline-none focus-visible:ring-2 focus-visible:ring-ring ${assignmentsEnabled ? "cursor-grab" : ""} ${drag.isDragging ? "opacity-40" : ""}`}
+				>
 					<Icon
 						aria-hidden="true"
 						className={`size-full ${spellIconColor(spell)}`}

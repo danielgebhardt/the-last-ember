@@ -30,7 +30,7 @@ import CharacterStats from "./CharacterStats";
 import EquipmentView, { equipDropId } from "./EquipmentView";
 import FloorItemsView from "./FloorItemsView";
 import ItemDetails from "./ItemDetails";
-import PotionAssignments from "./PotionAssignments";
+import PotionAssignments, { potionSlotFrom } from "./PotionAssignments";
 import ProgressionView from "./ProgressionView";
 import QuestStatus from "./QuestStatus";
 import SpellsView from "./SpellsView";
@@ -113,23 +113,40 @@ const CharacterDialog = ({
 	useLayoutEffect(() => {
 		if (selectedKey) detailsRef.current?.scrollIntoView?.({ block: "nearest" });
 	}, [selectedKey]);
-	// A drop is a gesture for the Equip/Unequip buttons: same action, turn cost and
-	// refusals. Afterwards focus follows the moved item wherever it now sits.
+	// A drop is a gesture for an existing button: Equip/Unequip (same turn cost and
+	// refusals) or a free shortcut assignment. Afterwards focus follows a moved item
+	// wherever it now sits.
 	const dragEnabled = player.health > 0 && !won;
 	const dropItem = (source: ItemDragSource, targetId: string) => {
+		const item = source.item;
+		if (!item) return;
 		const slot = (Object.keys(EQUIPMENT_SLOT_LABELS) as EquipmentSlot[]).find(
 			(s) => equipDropId(s) === targetId,
 		);
+		const potionSlot = potionSlotFrom(targetId);
+		const fromPotionSlot = potionSlotFrom(source.from);
 		if (slot && source.from === "bag")
-			onAction({ type: "equip", itemId: source.item.id, slot });
+			onAction({ type: "equip", itemId: item.id, slot });
 		else if (targetId === BAG_DROP_ID && source.from.startsWith("slot:"))
 			onAction({
 				type: "unequip",
 				slot: source.from.slice("slot:".length) as EquipmentSlot,
 			});
+		else if (potionSlot)
+			onAction({ type: "assign-hotbar", slot: potionSlot, itemId: item.id });
+		else if (targetId === BAG_DROP_ID && fromPotionSlot)
+			onAction({ type: "clear-hotbar", slot: fromPotionSlot });
 		else return;
-		setSelection(null);
-		setFocusItemId(source.item.id);
+		if (source.from === "bag" || source.from.startsWith("slot:")) {
+			setSelection(null);
+			setFocusItemId(item.id);
+		}
+	};
+	// A potion shortcut dragged off the bar and released is cleared.
+	const dropItemNowhere = (source: ItemDragSource) => {
+		const fromPotionSlot = potionSlotFrom(source.from);
+		if (fromPotionSlot)
+			onAction({ type: "clear-hotbar", slot: fromPotionSlot });
 	};
 	// The action and this request commit in one render, so the moved item is already
 	// in its new place when this runs.
@@ -239,7 +256,10 @@ const CharacterDialog = ({
 							/>
 						</div>
 						<div className="min-w-0 p-2 pb-4">
-							<ItemDragProvider onDrop={dropItem}>
+							<ItemDragProvider
+								onDrop={dropItem}
+								onDropNowhere={dropItemNowhere}
+							>
 								<div className="grid min-w-0 items-start gap-3 md:grid-cols-2 xl:grid-cols-[minmax(0,0.8fr)_minmax(0,1.1fr)_minmax(0,38.125rem)]">
 									<ProgressionView
 										afflictions={afflictions}

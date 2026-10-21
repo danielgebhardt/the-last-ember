@@ -300,12 +300,14 @@ const DungeonHelp = ({
 					</li>
 					<li>
 						<span className="font-medium text-foreground">Potions.</span> Select
-						a potion in Character and choose Drink potion. New adventures start
-						with one Healing potion on key 1 and one Mana potion on key 2. You
-						can freely change these assignments. Picking up a new potion kind
-						assigns it to the first empty shortcut. You can also assign it to a
-						shortcut and use keys 1–4 (or click its slot below the map). Basic
-						healing and mana potions restore up to 5 health or mana before
+						a potion in Character and choose Drink potion, or drag a potion
+						stack onto a potion shortcut in Character (drag a shortcut onto
+						another to move it, or off the bar to clear it). New adventures
+						start with one Healing potion on key 1 and one Mana potion on key 2.
+						You can freely change these assignments. Picking up a new potion
+						kind assigns it to the first empty shortcut. You can also assign it
+						to a shortcut and use keys 1–4 (or click its slot below the map).
+						Basic healing and mana potions restore up to 5 health or mana before
 						monsters act, using one turn. At full health or mana respectively,
 						it costs nothing and stays in your bag. Empty or unavailable
 						shortcuts also cost nothing. Potions cannot be used after death.
@@ -718,14 +720,15 @@ const DungeonHelp = ({
 				</p>
 				<p>
 					Spell shortcuts 5–9 and 0 activate the six slots assigned in Character
-					→ Spells. Assignments are free. Intelligence improves spell damage,
-					healing, and maximum mana. The Spells tab shows current effects.
-					Fireball hits its center hardest and splashes at half strength,
-					including damage to you inside its wall-aware radius-three blast.
-					Check the targeting warning before casting. Three to six distinct
-					spellbooks are selected per full-depth adventure; archives relocate a
-					remaining book rather than duplicate it. Future spells come from found
-					spellbooks, never automatic level unlocks.
+					→ Spells. Assignments are free; you can also drag a spell&apos;s icon
+					onto a shortcut, or a shortcut off the bar to clear it. Intelligence
+					improves spell damage, healing, and maximum mana. The Spells tab shows
+					current effects. Fireball hits its center hardest and splashes at half
+					strength, including damage to you inside its wall-aware radius-three
+					blast. Check the targeting warning before casting. Three to six
+					distinct spellbooks are selected per full-depth adventure; archives
+					relocate a remaining book rather than duplicate it. Future spells come
+					from found spellbooks, never automatic level unlocks.
 				</p>
 			</section>
 			<section

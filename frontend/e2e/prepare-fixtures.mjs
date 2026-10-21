@@ -381,7 +381,7 @@ export default async function prepareFixtures() {
 				(entry) => entry.item.kind === "cure",
 			),
 		};
-		// Spare gear in the bag for equipment drag: a sword, a helmet and a ring.
+		// Spare gear and potions in the bag for equipment and shortcut drag.
 		const dragGear = {
 			...quiet,
 			player: { ...fresh.player },
@@ -390,6 +390,9 @@ export default async function prepareFixtures() {
 					{ id: "drag:sword", kind: "iron-sword" },
 					{ id: "drag:cap", kind: "leather-cap" },
 					{ id: "drag:ring", kind: "copper-ring" },
+					{ id: "drag:heal-1", kind: "healing-potion" },
+					{ id: "drag:heal-2", kind: "healing-potion" },
+					{ id: "drag:mana", kind: "mana-potion" },
 				],
 			},
 		};

@@ -25,7 +25,7 @@ const renderGrid = (dragEnabled: boolean) => {
 			<BagContents
 				bag={createBag([
 					{ id: "sword", kind: "iron-sword" },
-					{ id: "potion", kind: "healing-potion" },
+					{ id: "scroll", kind: "enchantment-scroll" },
 				])}
 				comparisonContext={{
 					equipment,
@@ -45,7 +45,7 @@ const renderGrid = (dragEnabled: boolean) => {
 	);
 };
 
-it("gear and worn items describe the keyboard drag; other items stay plain buttons", () => {
+it("gear and worn items describe the keyboard drag; items with no target stay plain buttons", () => {
 	renderGrid(true);
 	const sword = screen.getByRole("button", { name: /^Iron sword, slot/ });
 	expect(sword).toHaveAccessibleDescription(
@@ -54,9 +54,11 @@ it("gear and worn items describe the keyboard drag; other items stay plain butto
 	expect(
 		screen.getByRole("button", { name: /^Main hand: / }),
 	).toHaveAccessibleDescription(DRAG_INSTRUCTIONS);
-	const potion = screen.getByRole("button", { name: /^Healing potion, slot/ });
-	expect(potion).not.toHaveAttribute("aria-disabled");
-	expect(potion).not.toHaveAccessibleDescription(
+	const scroll = screen.getByRole("button", {
+		name: /^Enchantment scroll, slot/,
+	});
+	expect(scroll).not.toHaveAttribute("aria-disabled");
+	expect(scroll).not.toHaveAccessibleDescription(
 		expect.stringContaining(DRAG_INSTRUCTIONS),
 	);
 	// Every item keeps its button role for selection.

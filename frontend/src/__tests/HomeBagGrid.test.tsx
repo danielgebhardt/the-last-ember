@@ -51,7 +51,7 @@ describe("Visual bag and shared item details", () => {
 			"1 / 27 slots",
 		);
 		const stack = bag.getByRole("button", { name: "Healing potion, slot 1" });
-		expect(stack).toHaveAccessibleDescription("2 carried");
+		expect(stack).toHaveAccessibleDescription(/^2 carried/);
 		expect(bag.getAllByRole("button")).toHaveLength(1);
 		await user.click(stack);
 		await user.click(panel.getByRole("button", { name: "Drop item" }));

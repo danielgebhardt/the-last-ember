@@ -27,7 +27,7 @@ export const createStartingPotionHotbar = (): PotionHotbar => [
 	null,
 	null,
 ];
-const isPotionKind = (kind: ItemKind): kind is PotionKind =>
+export const isPotionKind = (kind: ItemKind): kind is PotionKind =>
 	ITEM_DEFINITIONS[kind].type === "potion";
 
 // Called only after a successful pickup, with the bag from before the transfer.

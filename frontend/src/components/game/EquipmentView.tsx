@@ -44,13 +44,16 @@ const EquipmentSlotCell = ({
 	const label = EQUIPMENT_SLOT_LABELS[slot];
 	const drag = useItemDrag(
 		`slot-item:${slot}`,
-		item ? { item, from: slotDragFrom(slot) } : null,
+		item ? { item, name: itemName(item), from: slotDragFrom(slot) } : null,
 		!dragEnabled,
 	);
 	const drop = useItemDropTarget(equipDropId(slot), {
 		label: `the ${label.toLowerCase()} slot`,
 		accepts: ({ item: dragged, from }) =>
-			dragEnabled && from === "bag" && fitsEquipmentSlot(dragged, slot),
+			dragEnabled &&
+			from === "bag" &&
+			dragged !== undefined &&
+			fitsEquipmentSlot(dragged, slot),
 	});
 	return (
 		<section

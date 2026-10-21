@@ -14,17 +14,19 @@ import {
 } from "../../domain/items/EquipmentComparison";
 import type { ItemInstance } from "../../domain/items/Item";
 import { itemName } from "../../domain/items/ItemValues";
+import { isPotionKind } from "../../domain/items/PotionHotbar";
 import { useItemDrag, useItemDropTarget } from "../dnd/ItemDrag";
 import ItemIcon from "../items/ItemIcon";
 import {
 	comparisonDescription,
 	comparisonStyles,
 } from "./EquipmentComparisonView";
+import { POTION_SLOT_PREFIX } from "./PotionAssignments";
 
 export const BAG_DROP_ID = "bag";
 
-// Gear can be dragged onto a matching equipment slot; other items stay
-// click-only until a later drag story gives them a target.
+// Gear can be dragged onto a matching equipment slot and potions onto a potion
+// shortcut; other items stay click-only until a later story gives them a target.
 const BagItemButton = ({
 	item,
 	index,
@@ -47,8 +49,9 @@ const BagItemButton = ({
 	const comparison = compareEquipment(item, comparisonContext);
 	const drag = useItemDrag(
 		`bag-item:${bagItemKey(item)}`,
-		{ item, from: "bag" },
-		!dragEnabled || equipmentSlotsFor(item).length === 0,
+		{ item, name: itemName(item), from: "bag" },
+		!dragEnabled ||
+			(equipmentSlotsFor(item).length === 0 && !isPotionKind(item.kind)),
 	);
 	return (
 		<Button
@@ -138,10 +141,13 @@ const BagContents = ({
 }) => {
 	const comparisonId = useId();
 	const slots = bagSlots(bag);
-	// Dropping worn gear anywhere on the bag unequips it.
+	// Dropping worn gear anywhere on the bag unequips it; dropping a potion
+	// shortcut there clears that shortcut.
 	const drop = useItemDropTarget(BAG_DROP_ID, {
 		label: "the bag",
-		accepts: ({ from }) => dragEnabled && from.startsWith("slot:"),
+		accepts: ({ from }) =>
+			dragEnabled &&
+			(from.startsWith("slot:") || from.startsWith(POTION_SLOT_PREFIX)),
 	});
 
 	return (

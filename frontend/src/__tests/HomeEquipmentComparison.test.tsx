@@ -91,9 +91,10 @@ describe("Equipment comparison in Character", () => {
 		expect(
 			panel.getByRole("button", { name: "Leather cap, slot 3" }),
 		).toHaveAccessibleDescription(/Better/);
+		// A potion has no comparison; its description is only the drag instructions.
 		expect(
 			panel.getByRole("button", { name: "Healing potion, slot 4" }),
-		).not.toHaveAttribute("aria-describedby");
+		).not.toHaveAccessibleDescription(/Better|Lower|Same/);
 		await user.click(lower);
 		expect(panel.getByLabelText("Equipment comparison")).toHaveTextContent(
 			"Damage 2–4 → 1–3",

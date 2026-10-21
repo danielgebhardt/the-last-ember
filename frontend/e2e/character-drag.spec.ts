@@ -1,5 +1,6 @@
 import { expect, type Locator, type Page, test } from "@playwright/test";
 import { importAdventure, turns } from "./adventure-helpers.js";
+import { mouseDrag } from "./drag-helpers.js";
 
 const character = (page: Page) =>
 	page.getByRole("dialog", { name: "The Adventurer's Ledger", exact: true });
@@ -14,26 +15,6 @@ const bagItem = (dialog: Locator, name: string) =>
 	dialog
 		.getByRole("list", { name: "Carried items" })
 		.getByRole("button", { name: new RegExp(`^${name}, slot`) });
-
-// A real pointer drag: press, move past the activation distance, then over the target.
-const mouseDrag = async (page: Page, from: Locator, to: Locator) => {
-	const start = await from.boundingBox();
-	const end = await to.boundingBox();
-	if (!start || !end) throw new Error("Drag endpoints must be visible");
-	await page.mouse.move(start.x + start.width / 2, start.y + start.height / 2);
-	await page.mouse.down();
-	await page.mouse.move(
-		start.x + start.width / 2 + 10,
-		start.y + start.height / 2,
-		{
-			steps: 3,
-		},
-	);
-	await page.mouse.move(end.x + end.width / 2, end.y + end.height / 2, {
-		steps: 8,
-	});
-	await page.mouse.up();
-};
 
 test.describe("Character equipment drag", () => {
 	test.use({ viewport: { width: 1470, height: 830 } });
