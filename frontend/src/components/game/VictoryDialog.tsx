@@ -4,6 +4,8 @@ import { type RefObject, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import type { VictorySummary } from "../../domain/game/Adventure";
 import { ADVENTURE_STORY } from "../../domain/game/AdventureStory";
+import type { RunRecap } from "../../domain/game/RunRecap";
+import RunRecapDetails from "./RunRecapDetails";
 
 const VictoryDialog = ({
 	summary,
@@ -12,8 +14,12 @@ const VictoryDialog = ({
 	onNewDungeon,
 	onReplay,
 	mapRef,
+	recap,
+	deepestFloor,
 }: {
 	summary: VictorySummary | null;
+	recap: RunRecap;
+	deepestFloor: number;
 	open: boolean;
 	onDismiss: () => void;
 	onNewDungeon: () => void;
@@ -44,7 +50,7 @@ const VictoryDialog = ({
 				<Dialog.Popup
 					initialFocus={title}
 					finalFocus={mapRef}
-					className="fixed top-1/2 left-1/2 z-50 w-[calc(100%-2rem)] max-w-lg max-h-[calc(100dvh-2rem)] -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-xl border bg-popover p-6 text-popover-foreground shadow-xl"
+					className="fixed top-1/2 left-1/2 z-50 w-[calc(100%-2rem)] max-w-3xl max-h-[calc(100dvh-2rem)] -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-xl border bg-popover p-6 text-popover-foreground shadow-xl"
 				>
 					<Trophy aria-hidden="true" className="mb-3 size-8 text-primary" />
 					<Dialog.Title
@@ -57,11 +63,14 @@ const VictoryDialog = ({
 					<Dialog.Description className="mt-2 text-sm text-muted-foreground">
 						{ADVENTURE_STORY.victory}
 					</Dialog.Description>
-					<dl className="my-5 grid grid-cols-2 gap-3">
+					<dl className="my-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
 						{values.map(([label, value]) => (
-							<div key={label} className="rounded-lg border bg-muted/20 p-3">
+							<div
+								key={label}
+								className="rounded-lg border bg-muted/20 px-3 py-2"
+							>
 								<dt className="text-xs text-muted-foreground">{label}</dt>
-								<dd className="mt-1 text-lg font-medium tabular-nums">
+								<dd className="mt-1 font-medium tabular-nums">
 									<output aria-label={`Victory ${label.toLowerCase()}`}>
 										{value}
 									</output>
@@ -69,7 +78,8 @@ const VictoryDialog = ({
 							</div>
 						))}
 					</dl>
-					<div className="flex flex-wrap gap-2">
+					<RunRecapDetails recap={recap} deepestFloor={deepestFloor} />
+					<div className="mt-4 flex flex-wrap gap-2">
 						<Button onClick={onNewDungeon}>New Dungeon</Button>
 						<Button variant="outline" onClick={onReplay}>
 							Replay this seed

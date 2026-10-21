@@ -13,6 +13,7 @@ import AdventureSaveSheet from "./AdventureSaveSheet";
 import DifficultyChoice from "./DifficultyChoice";
 import DungeonSizeChoice from "./DungeonSizeChoice";
 import EmberEmblem from "./EmberEmblem";
+import RunHistoryDialog from "./RunHistoryDialog";
 
 const AdventureOpening = ({
 	onBegin,
@@ -214,6 +215,8 @@ const AdventureOpening = ({
 
 								<AdventureSaveSheet onRestore={onRestore} />
 							</Sheet>
+
+							<RunHistoryDialog triggerClassName="h-9 w-full" />
 
 							<div className="text-center">
 								<p className="text-xs text-muted-foreground">

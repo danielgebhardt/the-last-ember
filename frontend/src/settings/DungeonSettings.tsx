@@ -12,6 +12,7 @@ import {
 	SheetTitle,
 } from "@/components/ui/sheet";
 import DifficultyChoice from "../components/game/DifficultyChoice";
+import RunHistoryDialog from "../components/game/RunHistoryDialog";
 import {
 	CONFIGURATION_LIMITS,
 	type FogConfiguration,
@@ -236,6 +237,12 @@ const DungeonSettings = ({
 						</ToggleGroup>
 						<p className="text-xs text-muted-foreground">
 							Saved on this device. System follows your device’s appearance.
+						</p>
+					</div>
+					<div className="grid gap-2 border-t pt-4">
+						<RunHistoryDialog />
+						<p className="text-xs text-muted-foreground">
+							Your last finished adventures on this device, with their recaps.
 						</p>
 					</div>
 				</EmberPanel>

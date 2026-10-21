@@ -5,7 +5,9 @@ import { Button } from "@/components/ui/button";
 import { defeatRecap } from "../../domain/game/DefeatRecap";
 import type { GameState } from "../../domain/game/GameState";
 import { levelForExperience } from "../../domain/game/Progression";
+import { runRecap } from "../../domain/game/RunRecap";
 import { formatActivityEvent } from "./ActivityMessages";
+import RunRecapDetails from "./RunRecapDetails";
 
 const GameOverDialog = ({
 	state,
@@ -14,8 +16,10 @@ const GameOverDialog = ({
 	onNewDungeon,
 	onReplay,
 	mapRef,
+	deepestFloor,
 }: {
 	state: GameState;
+	deepestFloor: number;
 	open: boolean;
 	onDismiss: () => void;
 	onNewDungeon: () => void;
@@ -26,7 +30,7 @@ const GameOverDialog = ({
 	const recentDamage = defeatRecap(state.activityHistory, state.turn);
 	const values = [
 		["Seed", state.run.seed],
-		["Floor reached", state.run.activeFloor],
+		["Final floor", state.run.activeFloor],
 		["Turns", state.turn],
 		["Level", levelForExperience(state.progression.experience)],
 		["Total XP", state.progression.experience],
@@ -45,7 +49,7 @@ const GameOverDialog = ({
 				<Dialog.Popup
 					initialFocus={title}
 					finalFocus={mapRef}
-					className="fixed top-1/2 left-1/2 z-50 max-h-[calc(100dvh-2rem)] w-[calc(100%-2rem)] max-w-lg -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-xl border bg-popover p-6 text-popover-foreground shadow-xl"
+					className="fixed top-1/2 left-1/2 z-50 max-h-[calc(100dvh-2rem)] w-[calc(100%-2rem)] max-w-3xl -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-xl border bg-popover p-6 text-popover-foreground shadow-xl"
 				>
 					<Skull aria-hidden="true" className="mb-3 size-8 text-destructive" />
 					<Dialog.Title
@@ -96,9 +100,12 @@ const GameOverDialog = ({
 							</p>
 						)}
 					</section>
-					<dl className="my-5 grid grid-cols-2 gap-3">
+					<dl className="my-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
 						{values.map(([label, value]) => (
-							<div key={label} className="rounded-lg border bg-muted/20 p-3">
+							<div
+								key={label}
+								className="rounded-lg border bg-muted/20 px-3 py-2"
+							>
 								<dt className="text-xs text-muted-foreground">{label}</dt>
 								<dd className="mt-1 font-medium tabular-nums">
 									<output aria-label={`Run ${label.toLowerCase()}`}>
@@ -108,7 +115,11 @@ const GameOverDialog = ({
 							</div>
 						))}
 					</dl>
-					<div className="flex flex-wrap gap-2">
+					<RunRecapDetails
+						recap={runRecap(state)}
+						deepestFloor={deepestFloor}
+					/>
+					<div className="mt-4 flex flex-wrap gap-2">
 						<Button onClick={onNewDungeon}>New Adventure</Button>
 						<Button variant="outline" onClick={onReplay}>
 							Replay this seed

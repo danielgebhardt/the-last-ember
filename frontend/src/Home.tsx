@@ -22,6 +22,7 @@ import DungeonHelp from "@/settings/DungeonHelp.tsx";
 import DungeonFrame from "./components/dungeon/DungeonFrame";
 import DungeonLayout from "./components/dungeon/DungeonLayout.tsx";
 import ActivityLog from "./components/game/ActivityLog.tsx";
+import { formatActivityEvent } from "./components/game/ActivityMessages";
 import AdventureSaveSheet from "./components/game/AdventureSaveSheet";
 import CharacterDialog from "./components/game/CharacterDialog.tsx";
 import DungeonNotices from "./components/game/DungeonNotices";
@@ -54,6 +55,8 @@ import {
 } from "./domain/dungeon/RunConfiguration.ts";
 import { MAX_SEED, parseSeedInput } from "./domain/dungeon/Seed.ts";
 import type { VictorySummary } from "./domain/game/Adventure";
+import { defeatRecap } from "./domain/game/DefeatRecap";
+import { createRunRecord, runRecap } from "./domain/game/RunRecap";
 import { isTestSeed, randomAdventureSeed } from "./domain/game/TestSeed";
 import { canAddToBag } from "./domain/items/Bag";
 import { emptyEquipmentSlotFor } from "./domain/items/Equipment";
@@ -73,6 +76,7 @@ import { canReachTownSalvageShop } from "./domain/town/TownSalvageShop";
 import { reachableTownService } from "./domain/town/TownServices";
 import { atDungeonEntrance, atTownGate } from "./domain/town/TownTravel";
 import Header from "./Header.tsx";
+import { addRunToHistory } from "./persistence/RunHistory";
 import DungeonSettings from "./settings/DungeonSettings.tsx";
 import { APP_FEATURES } from "./settings/FeatureFlags";
 import {
@@ -126,6 +130,30 @@ const Home = ({
 	const deathOpen = player.health === 0 && !dismissedDeath;
 	const victory = game.state.quest.victory;
 	const victoryOpen = victory !== null && dismissedVictory !== victory;
+	// Every floor this adventure has seen, including the one it ended on.
+	const deepestFloor = Math.max(
+		run.activeFloor,
+		...game.exploration.explored.keys(),
+	);
+	// A finished adventure is kept in this browser's run history once.
+	const finished = player.health === 0 || victory !== null;
+	const recordedRun = useRef<string | null>(null);
+	useEffect(() => {
+		if (!finished) return;
+		const last = defeatRecap(game.state.activityHistory, game.state.turn).at(
+			-1,
+		);
+		const record = createRunRecord(
+			game.state,
+			configuration,
+			deepestFloor,
+			player.health === 0 && last ? formatActivityEvent(last.event) : undefined,
+			new Date(),
+		);
+		if (recordedRun.current === record.id) return;
+		recordedRun.current = record.id;
+		addRunToHistory(record);
+	}, [finished, game.state, configuration, deepestFloor, player.health]);
 	const townService = reachableTownService(game.state);
 	const canPlay = player.health > 0 && victory === null;
 	const { exploration } = game;
@@ -794,6 +822,7 @@ const Home = ({
 				state={game.state}
 				open={deathOpen}
 				onDismiss={() => setDismissedDeath(true)}
+				deepestFloor={deepestFloor}
 				onNewDungeon={handleNewDungeon}
 				onReplay={() => {
 					if (startRun(run.seed, configuration))
@@ -906,6 +935,8 @@ const Home = ({
 				summary={victory}
 				open={victoryOpen}
 				onDismiss={() => setDismissedVictory(victory)}
+				recap={runRecap(game.state)}
+				deepestFloor={deepestFloor}
 				onNewDungeon={handleNewDungeon}
 				onReplay={() => {
 					if (startRun(run.seed, configuration))
