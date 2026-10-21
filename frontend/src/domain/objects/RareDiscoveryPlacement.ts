@@ -18,6 +18,7 @@ const pool = [
 	{ value: "forge" as const, weight: 1 },
 	{ value: "well" as const, weight: 1 },
 	{ value: "mirror" as const, weight: 1 },
+	{ value: "runic-portal" as const, weight: 1 },
 ];
 export const rareDiscoverySelection = (
 	run: Pick<DungeonRun, "seed" | "floors">,
@@ -29,10 +30,12 @@ export const rareDiscoverySelection = (
 	const kind = selectWeighted(pool, random);
 	if (!kind) return undefined;
 	const definition = OBJECT_DEFINITIONS[kind];
+	// A portal needs a way down on its own floor, so never the final floor.
 	const floors = run.floors.filter(
 		(f) =>
 			f.floorNumber >= definition.minFloor &&
-			f.floorNumber <= definition.maxFloor,
+			f.floorNumber <= definition.maxFloor &&
+			(kind !== "runic-portal" || f.floorNumber < run.floors.length),
 	);
 	if (!floors.length) return undefined;
 	return {

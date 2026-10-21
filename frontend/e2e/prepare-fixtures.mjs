@@ -286,6 +286,11 @@ export default async function prepareFixtures() {
 			row: forgeRoom.startRow + 1,
 			col: forgeRoom.startCol + 1,
 		};
+		const forgeRoom5 = forgeRun.floors[4].rooms[0];
+		const forgeStart5 = {
+			row: forgeRoom5.startRow + 1,
+			col: forgeRoom5.startCol + 1,
+		};
 		const forgeBase = createGameState(
 			{ ...forgeRun, activeFloor: 6, playerCoordinate: forgeStart },
 			forgeConfiguration.difficulty,
@@ -310,6 +315,28 @@ export default async function prepareFixtures() {
 				...forgeBase.equipment,
 				mainHand: { id: "worn:sword", kind: "iron-sword", enchantment: 1 },
 			},
+		};
+		// Floor 5 of the six-floor run; floor 6 is final, so the portal leads beside
+		// floor 5's own down stair.
+		const portalBase = createGameState(
+			{ ...forgeRun, activeFloor: 5, playerCoordinate: forgeStart5 },
+			forgeConfiguration.difficulty,
+		);
+		const portalState = {
+			...portalBase,
+			monsters: [],
+			objects: [
+				{
+					id: "floor:5:object:runic-portal:1",
+					kind: "runic-portal",
+					floorNumber: 5,
+					coordinate: { row: forgeStart5.row, col: forgeStart5.col + 1 },
+					activated: false,
+				},
+			],
+			floorItems: portalBase.floorItems.filter(
+				(entry) => entry.item.kind === "cure",
+			),
 		};
 		const mirrorState = {
 			...forgeState,
@@ -1055,6 +1082,12 @@ export default async function prepareFixtures() {
 			["bleeding", bleeding, configuration],
 			["forge", forgeState, forgeConfiguration],
 			["well", wellState, forgeConfiguration],
+			[
+				"runic-portal",
+				portalState,
+				forgeConfiguration,
+				{ ...fog, enabled: true, radius: 3 },
+			],
 			[
 				"mirror",
 				mirrorState,

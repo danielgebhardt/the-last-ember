@@ -77,6 +77,7 @@ export type ActivityEvent = { turn: number } & (
 			kind: import("../objects/DungeonObject").DungeonObjectKind;
 			activated: boolean;
 	  }
+	| { type: "portal-used"; fromFloor: number; toFloor: number }
 	| {
 			type: "mirror-used";
 			choice: "reveal" | "reflection" | "shatter";

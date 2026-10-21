@@ -79,8 +79,9 @@ it("keeps the shared discovery pool rare, singular, deterministic and safely ins
 			expect(createGameState(run).objects).toEqual(state.objects);
 		}
 	}
-	expect(counts.sarcophagus).toBeGreaterThan(20);
-	expect(counts.sarcophagus).toBeLessThan(55);
+	// 40% of adventures, split equally across five discovery kinds: about 16 of 200.
+	expect(counts.sarcophagus).toBeGreaterThan(6);
+	expect(counts.sarcophagus).toBeLessThan(30);
 	expect(counts.sarcophagus).toBeLessThan(counts.throne / 10);
 	expect(counts.sarcophagus).toBeLessThan(counts.fountain / 10);
 	console.info("200-seed discovery corpus", counts);

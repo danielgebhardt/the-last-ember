@@ -12,6 +12,7 @@ import { operateForge } from "./ForgottenForge";
 import { gazeIntoMirror } from "./MirrorOfShadows";
 import { describeObject } from "./ObjectDescriptions";
 import { openDiscovery } from "./RareDiscoveries";
+import { stepThroughPortal } from "./RunicPortal";
 import { openChest } from "./TreasureChests";
 import { offerAtWell } from "./WishingWell";
 export type ObjectChoice =
@@ -33,7 +34,8 @@ export type ObjectChoice =
 	| "offer-250"
 	| "mirror-reveal"
 	| "mirror-reflection"
-	| "mirror-shatter";
+	| "mirror-shatter"
+	| "portal-enter";
 export type InteractAction = {
 	type: "interact";
 	objectId?: string;
@@ -94,6 +96,8 @@ export const interactObject = (
 	if (object.kind === "sarcophagus")
 		return openSarcophagus(state, object, action.choice);
 	if (object.kind === "well") return offerAtWell(state, object, action.choice);
+	if (object.kind === "runic-portal")
+		return stepThroughPortal(state, object, action.choice);
 	if (object.kind === "mirror")
 		return gazeIntoMirror(state, object, action.choice);
 	if (object.kind === "forge")

@@ -45,6 +45,16 @@ export const OBJECT_DEFINITIONS = {
 		chance: 0.2,
 		placement: "rare-discovery",
 	},
+	"runic-portal": {
+		name: "Runic Portal",
+		freshLabel: "humming runic portal",
+		usedLabel: "dark runic portal",
+		minFloor: 5,
+		maxFloor: 20,
+		maxPerFloor: 1,
+		chance: 0.2,
+		placement: "rare-discovery",
+	},
 	merchant: {
 		name: "Wandering potion merchant",
 		freshLabel: "potion merchant",
@@ -167,6 +177,7 @@ export type DungeonObject = Readonly<{
 	forgeResult?: import("./ForgottenForge").ForgeResult;
 	wellResult?: import("./WishingWell").WellResult;
 	mirrorResult?: import("./MirrorOfShadows").MirrorResult;
+	portalDestination?: import("./RunicPortal").PortalDestination;
 }>;
 export const objectLabel = (
 	object: Pick<DungeonObject, "kind" | "activated">,

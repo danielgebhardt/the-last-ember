@@ -188,5 +188,11 @@ it("joins the shared discovery pool from floor 3", () => {
 		if (choice.kind === "well")
 			expect(choice.floorNumber).toBeGreaterThanOrEqual(3);
 	}
-	expect([...kinds].sort()).toEqual(["forge", "mirror", "sarcophagus", "well"]);
+	expect([...kinds].sort()).toEqual([
+		"forge",
+		"mirror",
+		"runic-portal",
+		"sarcophagus",
+		"well",
+	]);
 });

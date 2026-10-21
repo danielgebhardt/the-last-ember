@@ -97,6 +97,7 @@ export const createSaveDocument = (
 				forgeResult,
 				wellResult,
 				mirrorResult,
+				portalDestination,
 			}) => ({
 				id,
 				kind,
@@ -107,6 +108,14 @@ export const createSaveDocument = (
 				...(forgeResult ? { forgeResult: { ...forgeResult } } : {}),
 				...(wellResult ? { wellResult: { ...wellResult } } : {}),
 				...(mirrorResult ? { mirrorResult: { ...mirrorResult } } : {}),
+				...(portalDestination
+					? {
+							portalDestination: {
+								floorNumber: portalDestination.floorNumber,
+								coordinate: { ...portalDestination.coordinate },
+							},
+						}
+					: {}),
 			}),
 		),
 		mana: state.mana,

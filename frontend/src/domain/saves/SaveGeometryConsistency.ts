@@ -1,3 +1,4 @@
+import { FLOOR } from "../dungeon/Tiles";
 import { protectedFloorLocations } from "../monsters/MonsterLocations";
 import { sarcophagusOutcome } from "../objects/AncientSarcophagi";
 import { isDoor } from "../objects/DungeonObject";
@@ -7,6 +8,7 @@ import {
 	findOptionalEliteRooms,
 	sealedEliteTiles,
 } from "../objects/OptionalEliteRooms";
+import { portalDestinationFloor } from "../objects/RunicPortal";
 import { wellOutcome } from "../objects/WishingWell";
 import {
 	sameCoordinate,
@@ -87,6 +89,24 @@ export const hasConsistentGeometry = (document: SaveDocument): boolean => {
 	if (objects.filter((o) => o.kind === "forge").length > 1) return false;
 	if (objects.filter((o) => o.kind === "well").length > 1) return false;
 	if (objects.filter((o) => o.kind === "mirror").length > 1) return false;
+	if (objects.filter((o) => o.kind === "runic-portal").length > 1) return false;
+	// A used portal records the seeded floor and a walkable landing tile there.
+	for (const object of objects) {
+		const destination = object.portalDestination;
+		if (
+			object.kind === "runic-portal"
+				? object.floorNumber < 5 ||
+					(object.activated
+						? !destination ||
+							destination.floorNumber !== portalDestinationFloor(run, object) ||
+							run.floors[destination.floorNumber - 1]?.terrain[
+								destination.coordinate.row
+							]?.[destination.coordinate.col] !== FLOOR
+						: destination !== undefined)
+				: destination !== undefined
+		)
+			return false;
+	}
 	for (const object of objects) {
 		const result = object.mirrorResult;
 		if (

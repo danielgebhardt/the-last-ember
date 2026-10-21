@@ -49,6 +49,7 @@ import {
 	MIRROR_SHATTER_ODDS,
 } from "../../domain/objects/MirrorOfShadows";
 import { RARE_DISCOVERY_CHANCE } from "../../domain/objects/RareDiscoveryPlacement";
+import { PORTAL_FLOOR_SPAN } from "../../domain/objects/RunicPortal";
 import { WELL_ODDS, WELL_OFFERINGS } from "../../domain/objects/WishingWell";
 import { TOWN_EQUIPMENT_OFFERS } from "../../domain/town/TownEquipmentStock";
 import TileIcon from "../dungeon/TileIcon";
@@ -425,6 +426,16 @@ const DeveloperCatalog = ({
 											? `${Math.round(RARE_DISCOVERY_CHANCE * 100)}% shared rare-discovery chance per adventure, equal weight with the other discoveries; at most one discovery/dungeon; omitted without safe space`
 											: `${Math.round(definition.chance * 100)}% placement chance`}
 									</p>
+									{kind === "runic-portal" && (
+										<p>
+											Floors 5+, never the final floor. One use, one turn: lands
+											beside the down stair of this floor or up to{" "}
+											{PORTAL_FLOOR_SPAN} floors deeper, equal odds per floor,
+											fixed per portal. Refused free while carrying the ember or
+											without a free landing tile. Separate from town portal
+											scrolls.
+										</p>
+									)}
 									{kind === "mirror" && (
 										<p>
 											Floors 4+. Reveal: this floor's terrain and doors, not

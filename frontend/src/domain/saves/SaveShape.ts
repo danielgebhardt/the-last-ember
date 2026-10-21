@@ -135,6 +135,7 @@ const eventFields = {
 		kind: oneOf(Object.keys(OBJECT_DEFINITIONS)),
 		activated: boolean,
 	},
+	"portal-used": { fromFloor: floorNumber, toFloor: floorNumber },
 	"mirror-used": {
 		choice: oneOf(["reveal", "reflection", "shatter"]),
 		outcome: optional(oneOf(["item", "empty", "hostile"])),
@@ -488,6 +489,7 @@ const documentShape = object({
 				sarcophagusOutcome: optional(
 					oneOf(["treasure", "guardian", "both", "empty"]),
 				),
+				portalDestination: optional(object({ floorNumber, coordinate })),
 				// Which choices carry an outcome is a consistency rule.
 				mirrorResult: optional(
 					object({

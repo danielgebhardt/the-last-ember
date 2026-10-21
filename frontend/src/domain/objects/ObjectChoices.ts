@@ -20,6 +20,7 @@ import {
 	reflectionStats,
 } from "./MirrorOfShadows";
 import type { ObjectChoice } from "./ObjectInteraction";
+import { PORTAL_FLOOR_SPAN } from "./RunicPortal";
 import { WELL_ODDS, WELL_OFFERINGS } from "./WishingWell";
 export type InteractionChoice = Readonly<{
 	value: ObjectChoice;
@@ -82,6 +83,14 @@ export const objectChoices = (
 	> &
 		Partial<Pick<GameState, "bag" | "gold">>,
 ): readonly InteractionChoice[] => {
+	if (object.kind === "runic-portal")
+		return [
+			{
+				value: "portal-enter",
+				label: "Step through",
+				description: `Leads beside a way down: this floor's down stair or one up to ${PORTAL_FLOOR_SPAN} floors deeper, with equal odds. What waits there is unknown, and floors you skip stay unexplored for your climb home. One turn; the portal goes dark. It will not take you while you carry the Last Ember.`,
+			},
+		];
 	if (object.kind === "mirror") {
 		const reflection = state && reflectionStats(state);
 		const odds = MIRROR_SHATTER_ODDS;

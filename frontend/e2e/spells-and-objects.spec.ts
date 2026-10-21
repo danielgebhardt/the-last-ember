@@ -343,3 +343,35 @@ test("Mirror of Shadows explains its choices and reveals the floor's layout", as
 	expect(await remembered.count()).toBeGreaterThan(before + 50);
 	await page.screenshot({ path: info.outputPath("mirror-revealed.png") });
 });
+
+test("Runic Portal previews a way down and sets you beside it for one turn", async ({
+	page,
+}) => {
+	await page.setViewportSize({ width: 1470, height: 830 });
+	await importAdventure(page, "runic-portal");
+	await page.keyboard.press("e");
+	const dialog = page.getByRole("dialog", {
+		name: "Runic Portal",
+		exact: true,
+	});
+	await expect(
+		dialog.getByRole("heading", { name: "Runic Portal", exact: true }),
+	).toBeFocused();
+	await expect(dialog).toContainText("What waits there is unknown");
+	await page.keyboard.press("Escape");
+	await expect(turns(page)).toHaveText("Turn 0");
+	await page.keyboard.press("e");
+	await expect(
+		dialog.getByRole("heading", { name: "Runic Portal", exact: true }),
+	).toBeFocused();
+	await page.keyboard.press("1");
+	await expect(dialog).toHaveCount(0);
+	await expect(turns(page)).toHaveText("Turn 1");
+	await expect(page.getByRole("log")).toContainText(
+		"You step through the Runic Portal",
+	);
+	// The down stair is now in view beside you.
+	await expect(
+		map(page).getByRole("cell", { name: /stairs down/i }),
+	).toBeVisible();
+});

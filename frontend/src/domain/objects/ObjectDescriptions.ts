@@ -17,6 +17,11 @@ const hints: Record<DungeonObjectKind, { fresh: string; spent: string }> = {
 		spent:
 			"Opened once; the tomb cannot be rerolled. Any remaining treasure is on the floor for G pickup.",
 	},
+	"runic-portal": {
+		fresh:
+			"Press E to review it: a one-way step to beside a down stair on this floor or up to four floors deeper. One use.",
+		spent: "The runes have gone dark; the portal is spent.",
+	},
 	mirror: {
 		fresh:
 			"Press E to review its choices: reveal this floor's layout, face a hostile reflection for a reward, or shatter it for a risky prize. One use.",

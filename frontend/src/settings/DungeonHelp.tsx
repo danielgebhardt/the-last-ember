@@ -573,12 +573,13 @@ const DungeonHelp = ({
 				<p>
 					At most one rare discovery appears in about 40% of new adventures: an
 					ancient sarcophagus (floor 2 or deeper), a Wishing Well (floor 3 or
-					deeper), a Mirror of Shadows (floor 4 or deeper) or a Forgotten Forge
-					(floor 6 or deeper), when safe space exists. These are substantially
-					rarer than thrones or fountains. Press E nearby, then choose Open or
-					cancel freely with Escape. Opening spends one normal turn: 40%
-					treasure, 25% Heroic guardian, 25% both, 10% empty. These initial
-					weights are for playtesting.
+					deeper), a Mirror of Shadows (floor 4 or deeper), a Runic Portal
+					(floor 5 or deeper) or a Forgotten Forge (floor 6 or deeper), when
+					safe space exists. These are substantially rarer than thrones or
+					fountains. Press E nearby, then choose Open or cancel freely with
+					Escape. Opening spends one normal turn: 40% treasure, 25% Heroic
+					guardian, 25% both, 10% empty. These initial weights are for
+					playtesting.
 				</p>
 				<p>
 					A Heroic guardian is an ordinary floor-relevant enemy, preferring
@@ -590,6 +591,21 @@ const DungeonHelp = ({
 					its ordinary equipment or consumable. The opened tomb remains
 					inspectable. Inspection, cancellation, waiting and reloading cannot
 					change its result or grant a second reward.
+				</p>
+			</section>
+			<section
+				aria-label="Runic Portal"
+				className="grid gap-3 rounded-lg border p-4 text-sm"
+			>
+				<h3 className="font-medium">Runic Portal</h3>
+				<p>
+					Press E beside it to step through once. It sets you down beside a down
+					stair: this floor&apos;s, or one up to four floors deeper, each
+					equally likely. Where it leads is fixed for each portal, so cancelling
+					or reloading cannot change it. Stepping through uses one turn;
+					monsters on the arrival floor then act normally, and floors you skip
+					stay unexplored for your climb home. It will not take you while you
+					carry the Last Ember, and it is unrelated to Town portal scrolls.
 				</p>
 			</section>
 			<section

@@ -57,6 +57,8 @@ export const formatActivityEvent = (event: ActivityEvent): string => {
 			return `${prefix}You open the ${OBJECT_DEFINITIONS[event.kind].name}.${event.damage ? ` The seal deals ${event.damage} damage.` : ""} ${ITEM_DEFINITIONS[event.item].name} remains on the floor for G pickup.`;
 		case "object-seen":
 			return `${prefix}${describeObject(event)}`;
+		case "portal-used":
+			return `${prefix}You step through the Runic Portal${event.toFloor === event.fromFloor ? " and arrive beside this floor's way down" : ` and arrive on floor ${event.toFloor}, beside its way down`}. The portal goes dark.`;
 		case "mirror-used":
 			return `${prefix}${
 				event.choice === "reveal"
