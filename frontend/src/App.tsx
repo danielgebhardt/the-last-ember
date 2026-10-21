@@ -1,4 +1,5 @@
 import { createAdventureSession } from "./components/game/useAdventureSession";
+import { randomAdventureSeed } from "./domain/game/TestSeed";
 import "./App.css";
 import "./styles/Menus.css";
 import "./styles/Town.css";
@@ -7,7 +8,6 @@ import { Analytics } from "@vercel/analytics/react";
 import { useState } from "react";
 import AdventureOpening from "./components/game/AdventureOpening";
 import { DEFAULT_FOG_CONFIGURATION } from "./domain/dungeon/RunConfiguration";
-import { MAX_SEED } from "./domain/dungeon/Seed";
 import { type RestoredAdventure, restoreSave } from "./domain/saves/SaveFormat";
 import Home from "./Home.tsx";
 import { ThemeProvider } from "./settings/ThemeProvider.tsx";
@@ -23,7 +23,7 @@ function App() {
 					startError={startError}
 					onBegin={(configuration) => {
 						try {
-							const seed = Math.floor(Math.random() * (MAX_SEED + 1));
+							const seed = randomAdventureSeed();
 							setAdventure(
 								createAdventureSession(
 									seed,

@@ -20,6 +20,10 @@ Efficiency must preserve correctness, deterministic gameplay, save ownership, ke
 
 Pre-public-release, the developer is the only player. Only the **current** save version loads (v29); older saves are rejected with the unsupported-version message. On a breaking persisted-state change, bump `SAVE_FORMAT_VERSION` and refresh the captured fixture instead of adding optional legacy fields, marker flags, retired-data tables or migrations. Keep current-format validation, ownership/corruption checks and deterministic save/load continuation. Follow `docs/save-policy.md`. Once outside players join, decide the compatibility policy explicitly before changing the persisted contract.
 
+## Test seed
+
+Seed 7357 (`frontend/src/domain/game/TestSeed.ts`) is the developer test adventure. Its floors and kit are derived from the content definitions, so new object kinds, affliction sources, monsters, potions, scrolls, spells and special finds join it automatically; `TestSeed.test.ts` fails if something can't be represented. When a feature adds content that derivation doesn't cover (a new item category, a new kind of floor feature, a state the player needs to start with), update the test seed in the same story. It can't be saved, so it never meets save validation.
+
 ## Supported screens
 
 Target laptops and larger monitors, with an iPad as the smallest: it must look right on a 13" MacBook (about 1470×830 browser area) and on large displays. Phones are not a target, so don't add phone-specific layouts or 390px browser variants.

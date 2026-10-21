@@ -11,10 +11,13 @@ import AdventureSaveControls from "../../settings/AdventureSaveControls";
 
 const AdventureSaveSheet = ({
 	createSnapshot,
+	saveBlockedReason,
 	onRestore,
 	finalFocus,
 }: {
 	createSnapshot?: () => SaveDocument;
+	// Shown instead of save controls when this adventure cannot be saved.
+	saveBlockedReason?: string;
 	onRestore: (document: SaveDocument) => void;
 	finalFocus?: RefObject<HTMLElement | null> | false;
 }) => {
@@ -53,7 +56,8 @@ const AdventureSaveSheet = ({
 					<SheetDescription className="ember-menu-description">
 						{createSnapshot
 							? "Keep your adventure here, or take a save file with you."
-							: "Continue a saved adventure from this browser or a file."}
+							: (saveBlockedReason ??
+								"Continue a saved adventure from this browser or a file.")}
 					</SheetDescription>
 				}
 			/>

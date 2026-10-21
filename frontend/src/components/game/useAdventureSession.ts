@@ -16,6 +16,7 @@ import {
 	type PlayerAction,
 	resolvePlayerAction,
 } from "../../domain/game/PlayerActions";
+import { createTestSeedState, isTestSeed } from "../../domain/game/TestSeed";
 import { itemsAtPlayer } from "../../domain/items/FloorItems";
 import { objectAvailable } from "../../domain/merchant/MerchantAvailability";
 import {
@@ -58,10 +59,12 @@ export const createAdventureSession = (
 	configuration: RunConfiguration,
 	fog: FogConfiguration,
 ): Session => {
-	const state = createGameState(
-		createRun(seed, configuration),
-		configuration.difficulty ?? 1,
-	);
+	const state = isTestSeed(seed)
+		? createTestSeedState(configuration)
+		: createGameState(
+				createRun(seed, configuration),
+				configuration.difficulty ?? 1,
+			);
 	return {
 		state: { ...state, town: createTownLocation() },
 		configuration,

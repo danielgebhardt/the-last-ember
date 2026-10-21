@@ -53,6 +53,7 @@ import {
 } from "./domain/dungeon/RunConfiguration.ts";
 import { MAX_SEED, parseSeedInput } from "./domain/dungeon/Seed.ts";
 import type { VictorySummary } from "./domain/game/Adventure";
+import { isTestSeed, randomAdventureSeed } from "./domain/game/TestSeed";
 import { canAddToBag } from "./domain/items/Bag";
 import { emptyEquipmentSlotFor } from "./domain/items/Equipment";
 import { ITEM_DEFINITIONS } from "./domain/items/Item";
@@ -234,7 +235,7 @@ const Home = ({
 	};
 
 	const handleNewDungeon = () => {
-		const seed = Math.floor(Math.random() * (MAX_SEED + 1));
+		const seed = randomAdventureSeed();
 
 		if (startRun(seed, configuration))
 			mapRef.current?.focus({ preventScroll: true });
@@ -435,13 +436,21 @@ const Home = ({
 						</SheetTrigger>
 						<AdventureSaveSheet
 							finalFocus={mapInputAvailable ? mapRef : false}
-							createSnapshot={() =>
-								createSaveDocument(
-									game.state,
-									exploration,
-									configuration,
-									fogConfiguration,
-								)
+							createSnapshot={
+								isTestSeed(run.seed)
+									? undefined
+									: () =>
+											createSaveDocument(
+												game.state,
+												exploration,
+												configuration,
+												fogConfiguration,
+											)
+							}
+							saveBlockedReason={
+								isTestSeed(run.seed)
+									? `Seed ${run.seed} is the reserved test seed, so saving is disabled. Loading still replaces this adventure.`
+									: undefined
 							}
 							onRestore={handleRestore}
 						/>
