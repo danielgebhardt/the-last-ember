@@ -59,6 +59,7 @@ import ItemIcon from "../items/ItemIcon";
 import MonsterIcon from "../monsters/MonsterIcon";
 import DungeonObjectIcon from "../objects/DungeonObjectIcon";
 import TownPreview from "../town/TownPreview";
+import SeedCorpusPanel from "./SeedCorpusPanel";
 import { SPELL_ICONS, spellIconColor } from "./SpellVisuals";
 import { AFFLICTION_VISUALS, type StatusVisual } from "./StatusEffectIcons";
 
@@ -98,6 +99,7 @@ const CATALOG_SECTIONS = [
 	"Dungeon objects",
 	"Terrain",
 	"Town",
+	"Seed report",
 ] as const;
 const ConditionIcon = ({
 	visual: { Icon, className },
@@ -195,7 +197,8 @@ const DeveloperCatalog = ({
 	finalFocus?: RefObject<HTMLElement | null> | false;
 }) => {
 	const [query, setQuery] = useState("");
-	const [townSelected, setTownSelected] = useState(false);
+	// The town preview and the seed report have no catalog entries to filter.
+	const [filterHidden, setFilterHidden] = useState(false);
 	const filterId = useId();
 	const matches = (kind: string, name: string, description = "") =>
 		`${kind} ${name} ${description}`
@@ -228,7 +231,7 @@ const DeveloperCatalog = ({
 				defaultValue="Monsters"
 				onValueChange={(value) => {
 					setQuery("");
-					setTownSelected(value === "Town");
+					setFilterHidden(value === "Town" || value === "Seed report");
 				}}
 				className="flex min-h-0 flex-1 flex-col gap-4 px-4 pb-6"
 			>
@@ -240,7 +243,7 @@ const DeveloperCatalog = ({
 					))}
 				</EmberTabsList>
 
-				{!townSelected && (
+				{!filterHidden && (
 					<label
 						htmlFor={filterId}
 						className="grid shrink-0 gap-2 text-sm font-medium"
@@ -542,6 +545,12 @@ const DeveloperCatalog = ({
 				</Group>
 				<Tabs.Panel value="Town" className="min-h-0 flex-1 overflow-y-auto">
 					<TownPreview />
+				</Tabs.Panel>
+				<Tabs.Panel
+					value="Seed report"
+					className="min-h-0 flex-1 overflow-y-auto"
+				>
+					<SeedCorpusPanel />
 				</Tabs.Panel>
 			</Tabs.Root>
 		</SheetContent>

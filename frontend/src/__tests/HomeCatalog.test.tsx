@@ -137,7 +137,7 @@ describe("Developer catalog", () => {
 		expect(sheet.getByRole("tab", { name: "Spells" })).toHaveFocus();
 		expect(sheet.getByRole("tabpanel", { name: "Spells" })).toBeVisible();
 		await user.keyboard("{End}");
-		expect(sheet.getByRole("tabpanel", { name: "Town" })).toBeVisible();
+		expect(sheet.getByRole("tabpanel", { name: "Seed report" })).toBeVisible();
 		expect(screen.getByLabelText("Turn count")).toHaveTextContent("Turn 0");
 	});
 	it("keeps town preview walking isolated from the adventure and restores map focus", async () => {
