@@ -49,6 +49,7 @@ const damageTypes = new Set([
 	"monster-hit",
 	"monster-withdrawal-hit",
 	"monster-blind-hit",
+	"monster-hex-hit",
 	"monster-soul-bolt-hit",
 	"monster-shot-hit",
 	"monster-heavy-hit",

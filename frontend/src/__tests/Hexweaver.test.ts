@@ -3,6 +3,7 @@ import { expect, it } from "vitest";
 import { formatActivityEvent } from "../components/game/ActivityMessages";
 import { createGameState, type GameState } from "../domain/game/GameState";
 import { resolvePlayerAction } from "../domain/game/PlayerActions";
+import { isPlayerDamage } from "../domain/game/PlayerDamageEvents";
 import {
 	createSaveDocument,
 	parseSave,
@@ -63,6 +64,8 @@ it("prepares a hex in sight, then lands damage and Curse on its next action", ()
 	expect(formatActivityEvent(hit)).toBe(
 		"Turn 2 — The hexweaver's hex strikes you for 2 damage.",
 	);
+	// Hex damage counts as incoming damage for feedback and corridor stops.
+	expect(isPlayerDamage(hit)).toBe(true);
 	// Cooldown: no new hex for the next three phases.
 	let next = hexed;
 	for (let phase = 0; phase < 3; phase++) {
