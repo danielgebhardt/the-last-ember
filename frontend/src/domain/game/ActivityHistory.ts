@@ -40,6 +40,13 @@ export type ActivityEvent = { turn: number } & (
 			target: Coordinate;
 	  }
 	| {
+			type: "monster-summoned";
+			actorId: string;
+			monster: MonsterKind;
+			summonedId: string;
+			summoned: MonsterKind;
+	  }
+	| {
 			type: "monster-charge-prepared";
 			actorId: string;
 			monster: MonsterKind;

@@ -22,6 +22,8 @@ export type SpecialActionOutcome = Readonly<{
 	events: ActivityEvent[];
 	damage?: number;
 	affliction?: AfflictionKind;
+	// A new actor joins after this phase's actors, so it first acts next phase.
+	summoned?: Monster;
 }>;
 // Behaviors that need a pause after resolving; the monster saves the turn. The
 // soul bolt is unprepared but shares this cooldown record.

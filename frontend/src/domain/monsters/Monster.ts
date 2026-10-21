@@ -52,6 +52,10 @@ export type Monster = {
 	heroic?: boolean;
 	// The first affliction source of an adventure guarantees its matching remedy drop.
 	remedyDrop?: boolean;
+	// A sounded alarm sentry's reinforcements: how many it has called and when it last did.
+	summons?: Readonly<{ count: number; turn: number }>;
+	// The sentry that called this reinforcement; it gives no XP, loot or gold.
+	summonedBy?: string;
 	// A mirror reflection's stats, copied from the player when it was summoned.
 	reflection?: Readonly<{ maxHealth: number; attackDamage: number }>;
 	// Turn each cooldown telegraph last resolved; another needs more than its cooldown.

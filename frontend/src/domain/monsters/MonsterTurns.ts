@@ -53,7 +53,7 @@ type SpecialActionContext = Readonly<{
 const SPECIAL_ACTIONS: readonly ((
 	context: SpecialActionContext,
 ) => SpecialActionOutcome | undefined)[] = [
-	(c) => resolveMonsterAlarm(c.state, c.monster, c.detected),
+	(c) => resolveMonsterAlarm(c.scene, c.monster, c.detected, c.monsters),
 	(c) =>
 		resolveMonsterCharge(
 			c.scene,
@@ -320,6 +320,7 @@ export const resolveMonsterPhase = (
 			monsters = monsters.map((actor) =>
 				actor.id === monster.id ? special.monster : actor,
 			);
+			if (special.summoned) monsters = [...monsters, special.summoned];
 			events.push(...special.events);
 			const signal = special.events.find(
 				(event) => event.type === "monster-alarm-sounded",

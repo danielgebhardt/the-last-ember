@@ -56,16 +56,17 @@ export const damageMonster = (
 		});
 	if (health === 0)
 		events.push({ type: "monster-died", turn, monster: monster.kind });
-	const gold =
-		health === 0
-			? goldAmount(state.run.seed, monster.floorNumber, monster.id)
-			: 0;
+	// A sentry's reinforcements cannot be farmed: no gold, XP or loot.
+	const rewarded = health === 0 && monster.summonedBy === undefined;
+	const gold = rewarded
+		? goldAmount(state.run.seed, monster.floorNumber, monster.id)
+		: 0;
 	if (gold) events.push({ type: "gold-collected", amount: gold, turn });
 	let floorItems = state.floorItems;
 	let player = state.player;
 	let progression = state.progression;
 	let mana = state.mana;
-	if (health === 0) {
+	if (rewarded) {
 		const reward =
 			MONSTER_DEFINITIONS[monster.kind].experienceReward *
 			(monster.heroic ? 2 : 1);

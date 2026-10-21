@@ -148,6 +148,8 @@ export const createSaveDocument = (
 				alarmUsed,
 				heroic,
 				remedyDrop,
+				summons,
+				summonedBy,
 				reflection,
 				telegraphTurn,
 			}) => ({
@@ -161,6 +163,8 @@ export const createSaveDocument = (
 				alarmUsed,
 				...(heroic !== undefined ? { heroic } : {}),
 				...(remedyDrop !== undefined ? { remedyDrop } : {}),
+				...(summons !== undefined ? { summons: { ...summons } } : {}),
+				...(summonedBy !== undefined ? { summonedBy } : {}),
 				...(reflection !== undefined ? { reflection: { ...reflection } } : {}),
 				...(telegraphTurn !== undefined
 					? { telegraphTurn: { ...telegraphTurn } }

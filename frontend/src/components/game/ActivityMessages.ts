@@ -7,6 +7,7 @@ import { EFFECT_DEFINITIONS } from "../../domain/game/TimedEffects";
 import { equipmentPlacementLabel } from "../../domain/items/Equipment";
 import { ITEM_DEFINITIONS } from "../../domain/items/Item";
 import { MONSTER_DEFINITIONS } from "../../domain/monsters/Monster";
+import { SENTRY_SUMMON_INTERVAL } from "../../domain/monsters/MonsterAlarm";
 import { ESCAPE_PURSUIT_RULES } from "../../domain/monsters/PursuitRules";
 import { OBJECT_DEFINITIONS } from "../../domain/objects/DungeonObject";
 import { describeObject } from "../../domain/objects/ObjectDescriptions";
@@ -38,7 +39,9 @@ export const formatActivityEvent = (event: ActivityEvent): string => {
 		case "monster-alarm-prepared":
 			return `${prefix}The ${MONSTER_DEFINITIONS[event.monster].name} raises its alarm. Stop it before its next action!`;
 		case "monster-alarm-sounded":
-			return `${prefix}The ${MONSTER_DEFINITIONS[event.monster].name} sounds its alarm. Nearby creatures may investigate your last seen position.`;
+			return `${prefix}The ${MONSTER_DEFINITIONS[event.monster].name} sounds its alarm. Nearby creatures may investigate your last seen position, and it will call reinforcements every ${SENTRY_SUMMON_INTERVAL} turns until destroyed.`;
+		case "monster-summoned":
+			return `${prefix}The ${MONSTER_DEFINITIONS[event.monster].name} calls a ${MONSTER_DEFINITIONS[event.summoned].name} to its side.`;
 		case "escape-started":
 			return `${prefix}${ADVENTURE_STORY.return} Enemies sense the ember through walls within ${ESCAPE_PURSUIT_RULES.cureSenseRadius} tiles. Keep moving toward the entrance on floor 1!`;
 		case "monster-awareness-changed": {

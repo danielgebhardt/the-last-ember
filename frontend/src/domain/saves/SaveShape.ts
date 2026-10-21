@@ -311,6 +311,12 @@ const eventFields = {
 		monster: monsterKind,
 		target: coordinate,
 	},
+	"monster-summoned": {
+		actorId: text,
+		monster: monsterKind,
+		summonedId: text,
+		summoned: monsterKind,
+	},
 	"monster-charge-prepared": {
 		actorId: text,
 		monster: monsterKind,
@@ -580,6 +586,8 @@ const documentShape = object({
 				alarmUsed: optional(boolean),
 				heroic: optional(boolean),
 				remedyDrop: optional(boolean),
+				summons: optional(object({ count: natural, turn: natural })),
+				summonedBy: optional(text),
 				reflection: optional(
 					object({ maxHealth: integer(1), attackDamage: integer(1) }),
 				),

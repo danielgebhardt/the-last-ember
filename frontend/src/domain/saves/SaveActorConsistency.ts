@@ -1,5 +1,14 @@
 import { hasLineOfSight } from "../dungeon/Visibility";
-import { MONSTER_DEFINITIONS, monsterAffliction } from "../monsters/Monster";
+import {
+	MONSTER_DEFINITIONS,
+	type Monster,
+	monsterAffliction,
+} from "../monsters/Monster";
+import {
+	SENTRY_MAX_SUMMONS_ALIVE,
+	SENTRY_SUMMON_ID_BASE,
+	sentrySummonKinds,
+} from "../monsters/MonsterAlarm";
 import {
 	orthogonalDistance,
 	protectedFloorLocations,
@@ -27,6 +36,29 @@ import {
 	unique,
 } from "./SaveConsistencyHelpers";
 import type { SaveDocument } from "./SaveDocument";
+
+// A reinforcement's ID encodes its sentry and call number; its kind is an ordinary
+// floor creature, and a living sentry has made that call and keeps at most three alive.
+const isConsistentReinforcement = (
+	entry: Monster,
+	monsters: readonly Monster[],
+): boolean => {
+	const index = Number(entry.id.split(":")[1]);
+	if (index < SENTRY_SUMMON_ID_BASE) return entry.summonedBy === undefined;
+	const offset = index - SENTRY_SUMMON_ID_BASE;
+	const sentryId = `${entry.floorNumber}:${Math.floor(offset / 1000)}`;
+	const call = offset % 1000;
+	const sentry = monsters.find((m) => m.id === sentryId);
+	return (
+		entry.summonedBy === sentryId &&
+		call >= 1 &&
+		sentrySummonKinds(entry.floorNumber).includes(entry.kind) &&
+		(!sentry ||
+			(call <= (sentry.summons?.count ?? 0) &&
+				monsters.filter((m) => m.summonedBy === sentryId && m.health > 0)
+					.length <= SENTRY_MAX_SUMMONS_ALIVE))
+	);
+};
 
 export const hasConsistentActors = (document: SaveDocument): boolean => {
 	const { state } = document;
@@ -58,6 +90,12 @@ export const hasConsistentActors = (document: SaveDocument): boolean => {
 				/^\d+:[1-9]\d*$/.test(entry.id) &&
 				Number(entry.id.split(":")[0]) === entry.floorNumber &&
 				entry.id.endsWith(":1000001") === (entry.heroic === true) &&
+				// Only a sounded sentry tracks reinforcements.
+				(entry.summons === undefined ||
+					(MONSTER_DEFINITIONS[entry.kind].alarmRadius !== undefined &&
+						entry.alarmUsed === true &&
+						entry.summons.turn <= state.turn)) &&
+				isConsistentReinforcement(entry, state.monsters) &&
 				// Only a mirror's reflection choice summons a reflection, with saved stats.
 				(entry.kind === "reflection") ===
 					entry.id.endsWith(`:${MIRROR_REFLECTION_ID}`) &&

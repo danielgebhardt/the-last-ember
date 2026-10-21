@@ -7,6 +7,10 @@ import {
 	type MonsterKind,
 	monsterAffliction,
 } from "./Monster";
+import {
+	SENTRY_MAX_SUMMONS_ALIVE,
+	SENTRY_SUMMON_INTERVAL,
+} from "./MonsterAlarm";
 
 export const monsterTraits = (kind: MonsterKind): readonly string[] => {
 	const definition = MONSTER_DEFINITIONS[kind];
@@ -72,7 +76,7 @@ export const monsterTraits = (kind: MonsterKind): readonly string[] => {
 		);
 	if (definition.alarmRadius)
 		traits.push(
-			"Alerts up to six nearby creatures within clear wall/door sight using your last seen position. Stays at its post. Prepares one alarm before sounding it on the next active phase. Kill, Sleep or Fear interrupts preparation; rooting does not silence it.",
+			`Alerts up to six nearby creatures within clear wall/door sight using your last seen position. Stays at its post. Prepares one alarm before sounding it on the next active phase. Kill, Sleep or Fear interrupts preparation; rooting does not silence it. Once sounded, it calls an ordinary floor creature to the nearest free room tile every ${SENTRY_SUMMON_INTERVAL} of its actions while fewer than ${SENTRY_MAX_SUMMONS_ALIVE} of them live, until killed. Reinforcements give no XP, loot or gold.`,
 		);
 	if (definition.chargeRange)
 		traits.push(

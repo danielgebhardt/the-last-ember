@@ -44,7 +44,11 @@ export const sarcophagusGuardianKind = (
 	);
 	return pool[Math.floor(random() * pool.length)];
 };
-export const sarcophagusSpawn = (state: GameState, object: DungeonObject) => {
+// The nearest free reachable room tile from an origin; shared by every summon.
+export const sarcophagusSpawn = (
+	state: GameState,
+	object: Pick<DungeonObject, "floorNumber" | "coordinate">,
+) => {
 	const occupied = new Set(
 		[
 			state.run.playerCoordinate,

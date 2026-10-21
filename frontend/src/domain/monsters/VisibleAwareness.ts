@@ -55,15 +55,20 @@ export const visibleThreatHistory = (
 			event.type !== "monster-charge-prepared" &&
 			event.type !== "monster-charge-ended" &&
 			event.type !== "monster-alarm-prepared" &&
-			event.type !== "monster-alarm-sounded"
+			event.type !== "monster-alarm-sounded" &&
+			event.type !== "monster-summoned"
 		)
 			return true;
-		const actor = actors.find(
-			(actor) => actor.id === event.actorId && actor.floorNumber === floor,
-		);
-		return (
-			actor !== undefined &&
-			visible[actor.coordinate.row]?.[actor.coordinate.col]
+		// A summon shows when you can see the sentry or the creature it called.
+		const ids = [
+			event.actorId,
+			...(event.type === "monster-summoned" ? [event.summonedId] : []),
+		];
+		return actors.some(
+			(actor) =>
+				ids.includes(actor.id) &&
+				actor.floorNumber === floor &&
+				visible[actor.coordinate.row]?.[actor.coordinate.col],
 		);
 	});
 	return retained.length === newEntries.length
