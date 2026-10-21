@@ -97,6 +97,8 @@ import {
 	resolveMeleeAttack,
 } from "./MeleeRules";
 import { damageMonster } from "./MonsterDamage";
+import { type ChoosePerkAction, choosePerk } from "./PerkChoiceAction";
+import { opportunistBonus } from "./PerkEffects";
 import { levelForExperience } from "./Progression";
 import { type CastAction, castSpell } from "./SpellCasting";
 import {
@@ -130,7 +132,8 @@ export type PlayerAction =
 	| ConsumeAction
 	| HotbarAction
 	| FloorItemAction
-	| SpellAssignmentAction;
+	| SpellAssignmentAction
+	| ChoosePerkAction;
 
 export type ActionResolution = {
 	state: GameState;
@@ -165,6 +168,7 @@ export const resolvePlayerAction = (
 				? { error: "The adventure is complete." }
 				: {}),
 		};
+	if (action.type === "choose-perk") return choosePerk(state, action);
 	if (action.type === "assign-spell") {
 		const slots = assignSpell(state.spellHotbar, state.knownSpells, action);
 		if ("error" in slots)
@@ -391,6 +395,7 @@ const resolvePlayerEffect = (
 		| TownStorageAction
 		| HotbarAction
 		| SpellAssignmentAction
+		| ChoosePerkAction
 		| TownTravelAction
 		| ReturnTownPortalAction
 		| BuyTownEquipmentAction
@@ -606,7 +611,7 @@ const resolveAttack = (
 		attackProfile(
 			afflictedMeleeAttack(
 				deriveCombatStats(state.equipment, state.progression, state.effects)
-					.attack,
+					.attack + opportunistBonus(state.progression, monster),
 				state.afflictions,
 			),
 			deriveAccuracy(

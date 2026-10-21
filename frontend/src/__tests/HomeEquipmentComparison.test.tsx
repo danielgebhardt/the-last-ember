@@ -36,7 +36,7 @@ const setup = async (overrides: Partial<GameState.GameState> = {}) => {
 	});
 	renderHome(<Home />);
 	const user = userEvent.setup();
-	await user.click(screen.getByRole("button", { name: "Character" }));
+	await user.click(screen.getByRole("button", { name: /^Character/ }));
 	return {
 		user,
 		panel: within(
@@ -155,7 +155,7 @@ describe("Equipment comparison in Character", () => {
 		await user.keyboard("c");
 		await user.click(screen.getByRole("button", { name: "New Dungeon" }));
 		await user.click(screen.getByRole("button", { name: "Start new dungeon" }));
-		await user.click(screen.getByRole("button", { name: "Character" }));
+		await user.click(screen.getByRole("button", { name: /^Character/ }));
 		expect(screen.getByLabelText("Bag capacity")).toHaveTextContent("2 / 27");
 		expect(
 			screen.queryByRole("button", { name: /Leather cap, slot/ }),

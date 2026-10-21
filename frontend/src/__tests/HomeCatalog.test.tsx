@@ -2,6 +2,7 @@ import { screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { TILE_LABELS } from "../components/dungeon/TileVisuals";
+import { PERK_DEFINITIONS } from "../domain/game/Perks";
 import { SPELL_DEFINITIONS } from "../domain/game/Spells";
 import { ITEM_DEFINITIONS } from "../domain/items/Item";
 import { MONSTER_DEFINITIONS } from "../domain/monsters/Monster";
@@ -40,6 +41,7 @@ describe("Developer catalog", () => {
 					"soul-drain": 1,
 				},
 			],
+			["Perks", PERK_DEFINITIONS],
 			["Dungeon objects", OBJECT_DEFINITIONS],
 			["Terrain", TILE_LABELS],
 		] as const) {

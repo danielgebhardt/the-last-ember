@@ -41,7 +41,7 @@ const ProgressionView = ({
 	return (
 		<section
 			aria-label="Character progression"
-			className="ember-menu-panel grid min-w-0 content-start gap-3 md:col-span-2 xl:col-span-1"
+			className="ember-menu-panel grid min-w-0 content-start gap-3"
 		>
 			<div className="flex items-center justify-between gap-2">
 				<h3 className="ember-menu-section-heading flex items-center gap-2">

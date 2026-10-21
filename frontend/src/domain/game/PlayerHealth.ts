@@ -4,12 +4,14 @@ import {
 	type ActiveAffliction,
 	afflictionModifiers,
 } from "./AfflictionDefinitions";
+import { hasPerk } from "./Perks";
 import { DEFAULT_PLAYER_MAX_HEALTH } from "./PlayerStats";
 import {
 	HEALTH_PER_LEVEL,
 	levelForExperience,
 	type Progression,
 } from "./Progression";
+export const TOUGH_HEALTH = 4;
 export const maximumHealth = (
 	progression: Progression,
 	equipment: Equipment,
@@ -18,7 +20,8 @@ export const maximumHealth = (
 	const normal =
 		DEFAULT_PLAYER_MAX_HEALTH +
 		HEALTH_PER_LEVEL * (levelForExperience(progression.experience) - 1) +
-		equipmentBonuses(equipment).health;
+		equipmentBonuses(equipment).health +
+		(hasPerk(progression, "tough") ? TOUGH_HEALTH : 0);
 	const multiplier = afflictions.reduce(
 		(product, a) =>
 			product * (afflictionModifiers(a.kind).maximumHealthMultiplier ?? 1),

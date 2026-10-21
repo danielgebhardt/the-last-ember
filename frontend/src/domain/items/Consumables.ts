@@ -4,6 +4,7 @@ import {
 } from "../game/AfflictionDefinitions";
 import type { GameState } from "../game/GameState";
 import { maximumMana } from "../game/Mana";
+import { herbalistBonus } from "../game/PerkEffects";
 import {
 	type AttributeName,
 	MAX_PERMANENT_ATTRIBUTE_GAIN,
@@ -128,7 +129,8 @@ export const consumeItem = (
 		};
 	}
 
-	const { resource, amount } = definition.recovery;
+	const { resource } = definition.recovery;
+	const amount = definition.recovery.amount + herbalistBonus(state.progression);
 	const current = resource === "health" ? player.health : mana;
 	const maximum =
 		resource === "health"

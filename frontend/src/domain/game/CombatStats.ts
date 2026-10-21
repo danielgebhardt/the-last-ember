@@ -3,6 +3,7 @@ import { equipmentBonuses } from "../items/EquipmentBonuses";
 import { itemArmor, itemAttackBonus } from "../items/ItemValues";
 import { deriveAttributes } from "./Attributes";
 import { playerEffectBonuses } from "./EffectBonuses";
+import { hasPerk } from "./Perks";
 import { BASE_PLAYER_ATTACK_DAMAGE } from "./PlayerStats";
 import type { Progression } from "./Progression";
 import type { TimedEffect } from "./TimedEffects";
@@ -35,8 +36,17 @@ export const deriveCombatStats = (
 		baseAttack: BASE_PLAYER_ATTACK_DAMAGE,
 		weaponBonus,
 		strengthBonus,
-		attack: BASE_PLAYER_ATTACK_DAMAGE + strengthBonus + weaponBonus,
-		armor: armor + playerEffectBonuses(effects).armor + bonuses.armor,
+		perkAttack: hasPerk(progression, "brutal") ? 1 : 0,
+		attack:
+			BASE_PLAYER_ATTACK_DAMAGE +
+			strengthBonus +
+			weaponBonus +
+			(hasPerk(progression, "brutal") ? 1 : 0),
+		armor:
+			armor +
+			playerEffectBonuses(effects).armor +
+			bonuses.armor +
+			(hasPerk(progression, "iron-hide") ? 1 : 0),
 	};
 };
 

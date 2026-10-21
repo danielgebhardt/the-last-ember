@@ -10,6 +10,7 @@ import {
 import { AFFLICTION_DEFINITIONS } from "../game/AfflictionDefinitions";
 import { DAMAGE_ELEMENTS } from "../game/DamageElements";
 import { isDifficulty } from "../game/Difficulty";
+import { PERK_KINDS, PERK_LEVELS } from "../game/Perks";
 import { isPermanentAttributes } from "../game/PermanentAttributes";
 import { PLAYER_AFFLICTION_LIMIT } from "../game/PlayerAfflictions";
 import { MAX_PLAYER_LEVEL } from "../game/Progression";
@@ -136,6 +137,7 @@ const eventFields = {
 		activated: boolean,
 	},
 	"portal-used": { fromFloor: floorNumber, toFloor: floorNumber },
+	"perk-chosen": { perk: oneOf(PERK_KINDS), level: integer(3, 19) },
 	"warden-woke": {},
 	"warden-enraged": {},
 	"warden-followed": { floorNumber },
@@ -422,7 +424,7 @@ const monsterAwareness: Schema = (value) =>
 			(value.type !== "pursuing" || integer(0, 100)(value.blocked))));
 
 const documentShape = object({
-	version: oneOf([31]),
+	version: oneOf([32]),
 	savedAt: (value) =>
 		text(value) &&
 		typeof value === "string" &&
@@ -551,6 +553,12 @@ const documentShape = object({
 		progression: object({
 			experience: natural,
 			permanentAttributes: isPermanentAttributes,
+			// Which offers were chosen is a consistency rule.
+			perks: array(
+				object({ level: integer(3, 19), perk: oneOf(PERK_KINDS) }),
+				0,
+				PERK_LEVELS.length,
+			),
 		}),
 		quest: object({
 			goalFloor: floorNumber,

@@ -6,9 +6,10 @@ import type {
 	FogConfiguration,
 	RunConfiguration,
 } from "../dungeon/RunConfiguration";
-import { afflictedSightRadius } from "../game/AfflictionDefinitions";
 import { difficultyLabel } from "../game/Difficulty";
 import type { GameState } from "../game/GameState";
+import { playerSightRadius } from "../game/PerkEffects";
+import { chosenPerks } from "../game/Perks";
 import { permanentAttributeGains } from "../game/PermanentAttributes";
 import { levelForExperience } from "../game/Progression";
 import type { ItemInstance } from "../items/Item";
@@ -17,7 +18,7 @@ import { navigationRun } from "../objects/NavigationTerrain";
 import type { SaveDocument } from "./SaveDocument";
 import { validateSaveDocument } from "./SaveValidation";
 
-export const SAVE_FORMAT_VERSION = 31;
+export const SAVE_FORMAT_VERSION = 32;
 // Bound imported input before parsing. A maximum-size snapshot is measured in the review.
 export const MAX_SAVE_BYTES = 4 * 1024 * 1024;
 
@@ -129,6 +130,7 @@ export const createSaveDocument = (
 		progression: {
 			...state.progression,
 			permanentAttributes: { ...permanentAttributeGains(state.progression) },
+			perks: chosenPerks(state.progression).map((choice) => ({ ...choice })),
 		},
 		equipment: {
 			mainHand: nullableItem(state.equipment.mainHand),
@@ -258,7 +260,11 @@ export const restoreSave = (document: SaveDocument): RestoredAdventure => {
 			rows.map((row) => [...row].map((cell) => cell === "1")),
 		]),
 	);
-	const sight = afflictedSightRadius(document.fog.radius, state.afflictions);
+	const sight = playerSightRadius(
+		document.fog.radius,
+		state.progression,
+		state.afflictions,
+	);
 	const initial = updateExploration(navigationRun(state), sight);
 	return {
 		state,

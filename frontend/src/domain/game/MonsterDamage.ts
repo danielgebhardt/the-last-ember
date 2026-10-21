@@ -5,10 +5,10 @@ import { resistedDamage } from "../monsters/MonsterResistance";
 import { goldAmount } from "../objects/Gold";
 import { mirrorFor, reflectionDrop } from "../objects/MirrorOfShadows";
 import { type ActivityEvent, appendActivityEvents } from "./ActivityHistory";
-
 import type { DamageElement } from "./DamageElements";
 import { experienceReward } from "./ExperienceRewards";
 import type { GameState } from "./GameState";
+import { scavengedGold } from "./PerkEffects";
 
 import type { SpellKind } from "./Spells";
 import { SPELL_DEFINITIONS } from "./Spells";
@@ -60,7 +60,10 @@ export const damageMonster = (
 	// A sentry's reinforcements cannot be farmed: no gold, XP or loot.
 	const rewarded = health === 0 && monster.summonedBy === undefined;
 	const gold = rewarded
-		? goldAmount(state.run.seed, monster.floorNumber, monster.id)
+		? scavengedGold(
+				state.progression,
+				goldAmount(state.run.seed, monster.floorNumber, monster.id),
+			)
 		: 0;
 	if (gold) events.push({ type: "gold-collected", amount: gold, turn });
 	let floorItems = state.floorItems;

@@ -34,13 +34,14 @@ describe("Character and Spells tabs", () => {
 		expect(
 			within(dialog).getByRole("tab", { name: "Character" }),
 		).toHaveAttribute("aria-selected", "true");
-		expect(
-			within(dialog).getByLabelText("Character Intelligence"),
-		).toHaveTextContent("Intelligence 12");
+		expect(within(dialog).getByRole("region", { name: "Bag" })).toBeVisible();
 		expect(within(dialog).getByLabelText("Character mana")).toHaveTextContent(
 			"Mana 5 / 12",
 		);
-		expect(within(dialog).getByRole("region", { name: "Bag" })).toBeVisible();
+		await user.click(within(dialog).getByRole("tab", { name: /^Progression/ }));
+		expect(
+			within(dialog).getByLabelText("Character Intelligence"),
+		).toHaveTextContent("Intelligence 12");
 	});
 	it("shows known spells with derived effects, protects keys and resets the selected tab on reopening", async () => {
 		const user = setup();
@@ -89,6 +90,8 @@ describe("Character and Spells tabs", () => {
 		const user = setup();
 		await user.keyboard("i");
 		screen.getByRole("tab", { name: "Character" }).focus();
+		await user.keyboard("{ArrowRight}");
+		expect(screen.getByRole("tab", { name: /^Progression/ })).toHaveFocus();
 		await user.keyboard("{ArrowRight}");
 		expect(screen.getByRole("tab", { name: "Spells" })).toHaveFocus();
 		expect(screen.getByRole("tab", { name: "Spells" })).toHaveAttribute(

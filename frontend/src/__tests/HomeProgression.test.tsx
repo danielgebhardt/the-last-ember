@@ -38,12 +38,43 @@ const setup = (experience = 9) => {
 };
 afterEach(resetHomeTestState);
 describe("Progression on the play screen", () => {
+	it("offers a waiting perk from a badge and records the free choice", async () => {
+		const user = setup(30);
+		expect(
+			screen.getByRole("button", { name: "Character, perk available" }),
+		).toBeVisible();
+		await user.keyboard("c");
+		await user.click(
+			await screen.findByRole("tab", { name: "Progression, 1 perk available" }),
+		);
+		const choice = within(
+			screen.getByRole("group", { name: "Level 3 perk choice" }),
+		);
+		const offers = choice.getAllByRole("button", { name: /^Choose / });
+		expect(offers).toHaveLength(3);
+		const name = offers[0].textContent?.replace("Choose ", "") ?? "";
+		await user.click(offers[0]);
+		expect(screen.getByLabelText("Chosen perks")).toHaveTextContent(
+			`Level 3 · ${name}:`,
+		);
+		expect(screen.getByText(/No perk is waiting/)).toBeVisible();
+		expect(screen.getByRole("tab", { name: "Progression" })).toBeVisible();
+		expect(screen.getByLabelText("Turn count")).toHaveTextContent("Turn 0");
+		expect(screen.getByRole("log")).toHaveTextContent(
+			`You choose ${name} (level 3)`,
+		);
+		await user.keyboard("{Escape}");
+		expect(
+			await screen.findByRole("button", { name: "Character" }),
+		).toBeVisible();
+	});
 	it("shows capped hit chance and diminished evasion with an accurate growth explanation", async () => {
 		const user = setup(3800);
 		await user.keyboard("i");
 		expect(screen.getByLabelText("Character evasion")).toHaveTextContent(
 			"Evade 55%",
 		);
+		await user.click(screen.getByRole("tab", { name: /^Progression/ }));
 		await user.click(screen.getByText("Stat bonuses and growth"));
 		expect(screen.getByText(/Hit 95% · evade 55%/)).toBeVisible();
 		expect(screen.getByText(/through 20, then per 4 Dexterity/)).toBeVisible();
@@ -64,6 +95,7 @@ describe("Progression on the play screen", () => {
 		const dialog = within(
 			await screen.findByRole("dialog", { name: "The Adventurer's Ledger" }),
 		);
+		await user.click(dialog.getByRole("tab", { name: /^Progression/ }));
 		expect(
 			dialog.getByRole("region", { name: "Character progression" }),
 		).toBeVisible();
@@ -93,30 +125,33 @@ describe("Progression on the play screen", () => {
 		expect(screen.getByLabelText("Player level")).toHaveTextContent("Level 1");
 		expect(screen.getByLabelText("Player experience")).toHaveTextContent("XP");
 		await user.keyboard("i");
+		await user.click(screen.getByRole("tab", { name: /^Progression/ }));
 		expect(screen.getByLabelText("Total experience")).toHaveTextContent("0 XP");
 	});
 	it("shows earned Strength and its separate damage contribution", async () => {
 		const user = setup(30);
 		await user.keyboard("c");
-		expect(screen.getByLabelText("Character Strength")).toHaveTextContent(
-			"Strength 12",
-		);
 		expect(screen.getByLabelText("Character attack")).toHaveTextContent(
 			"Attack 2–4",
 		);
 		expect(screen.getByText("Base 1 + Strength 1 + weapon 1")).toBeVisible();
+		await user.click(screen.getByRole("tab", { name: /^Progression/ }));
+		expect(screen.getByLabelText("Character Strength")).toHaveTextContent(
+			"Strength 12",
+		);
 	});
 	it("shows Dexterity and the actual accuracy and evasion at level four", async () => {
 		const user = setup(60);
 		await user.keyboard("i");
-		expect(screen.getByLabelText("Character Dexterity")).toHaveTextContent(
-			"Dexterity 14",
-		);
 		expect(screen.getByLabelText("Character hit chance")).toHaveTextContent(
 			"Hit 95%",
 		);
 		expect(screen.getByLabelText("Character evasion")).toHaveTextContent(
 			"Evade 30%",
+		);
+		await user.click(screen.getByRole("tab", { name: /^Progression/ }));
+		expect(screen.getByLabelText("Character Dexterity")).toHaveTextContent(
+			"Dexterity 14",
 		);
 	});
 	it("shows maximum level and retained total XP instead of promising level twenty-one", async () => {
@@ -125,6 +160,7 @@ describe("Progression on the play screen", () => {
 		const dialog = within(
 			await screen.findByRole("dialog", { name: "The Adventurer's Ledger" }),
 		);
+		await user.click(dialog.getByRole("tab", { name: /^Progression/ }));
 		expect(dialog.getByLabelText("Character level")).toHaveTextContent(
 			"Level 20",
 		);

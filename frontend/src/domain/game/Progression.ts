@@ -1,3 +1,4 @@
+import type { PerkChoice } from "./Perks";
 import {
 	createPermanentAttributes,
 	type PermanentAttributes,
@@ -13,10 +14,13 @@ const EXPERIENCE_STEP = 10;
 export type Progression = Readonly<{
 	experience: number;
 	permanentAttributes?: PermanentAttributes;
+	// Perks chosen at odd levels from 3, in level order.
+	perks?: readonly PerkChoice[];
 }>;
 export const createProgression = (): Progression => ({
 	experience: 0,
 	permanentAttributes: createPermanentAttributes(),
+	perks: [],
 });
 export const experienceThreshold = (level: number): number => {
 	if (!Number.isInteger(level) || level < 1 || level > MAX_PLAYER_LEVEL)

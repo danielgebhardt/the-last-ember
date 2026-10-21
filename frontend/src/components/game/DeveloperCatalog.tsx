@@ -1,5 +1,5 @@
 import { Tabs } from "@base-ui/react/tabs";
-import { LibraryBig } from "lucide-react";
+import { LibraryBig, Sparkles } from "lucide-react";
 import {
 	Children,
 	type ReactNode,
@@ -23,6 +23,7 @@ import {
 	afflictionDetails,
 	afflictionFacts,
 } from "../../domain/game/AfflictionText";
+import { PERK_DEFINITIONS, PERK_KINDS } from "../../domain/game/Perks";
 import { SPELL_DEFINITIONS, type SpellKind } from "../../domain/game/Spells";
 import {
 	ITEM_DEFINITIONS,
@@ -97,6 +98,7 @@ const CATALOG_SECTIONS = [
 	"Spells",
 	"Items",
 	"Conditions",
+	"Perks",
 	"Dungeon objects",
 	"Terrain",
 	"Town",
@@ -187,6 +189,7 @@ const catalogObjects = byName(
 	Object.keys(OBJECT_DEFINITIONS) as DungeonObjectKind[],
 	(kind) => OBJECT_DEFINITIONS[kind].name,
 );
+const catalogPerks = byName(PERK_KINDS, (kind) => PERK_DEFINITIONS[kind].name);
 const catalogTerrain = byName(
 	Object.entries(TILE_LABELS),
 	([kind, name]) => name ?? kind,
@@ -406,6 +409,34 @@ const DeveloperCatalog = ({
 							<p className="text-muted-foreground">{condition.cures}</p>
 						</Card>
 					))}
+				</Group>
+				<Group name="Perks">
+					{catalogPerks
+						.filter((kind) =>
+							matches(
+								kind,
+								PERK_DEFINITIONS[kind].name,
+								`${PERK_DEFINITIONS[kind].family} ${PERK_DEFINITIONS[kind].effect}`,
+							),
+						)
+						.map((kind) => (
+							<Card
+								key={kind}
+								kind={kind}
+								name={PERK_DEFINITIONS[kind].name}
+								icon={
+									<Sparkles
+										aria-hidden="true"
+										className="size-full text-primary"
+									/>
+								}
+							>
+								<p>{PERK_DEFINITIONS[kind].family}</p>
+								<p className="text-muted-foreground">
+									{PERK_DEFINITIONS[kind].effect}
+								</p>
+							</Card>
+						))}
 				</Group>
 				<Group name="Dungeon objects">
 					{catalogObjects

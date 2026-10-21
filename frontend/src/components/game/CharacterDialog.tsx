@@ -1,6 +1,12 @@
 import { Dialog } from "@base-ui/react/dialog";
 import { Tabs } from "@base-ui/react/tabs";
-import { Backpack, BookOpen, PackageOpen, UserRound } from "lucide-react";
+import {
+	Backpack,
+	BookOpen,
+	PackageOpen,
+	TrendingUp,
+	UserRound,
+} from "lucide-react";
 import {
 	type ReactNode,
 	type RefObject,
@@ -14,6 +20,7 @@ import { EmberTab, EmberTabsList } from "@/components/ui/EmberTabs";
 import type { ActivityHistory } from "../../domain/game/ActivityHistory";
 import type { QuestState } from "../../domain/game/Adventure";
 import type { ActiveAffliction } from "../../domain/game/AfflictionDefinitions";
+import { pendingPerkCount } from "../../domain/game/Perks";
 import type { PlayerAction } from "../../domain/game/PlayerActions";
 import type { PlayerStats } from "../../domain/game/PlayerStats";
 import type { Progression } from "../../domain/game/Progression";
@@ -40,6 +47,7 @@ import CharacterStats from "./CharacterStats";
 import EquipmentView, { equipDropId } from "./EquipmentView";
 import FloorItemsView from "./FloorItemsView";
 import ItemDetails from "./ItemDetails";
+import PerksPanel from "./PerksPanel";
 import PotionAssignments, { potionSlotFrom } from "./PotionAssignments";
 import ProgressionView from "./ProgressionView";
 import QuestStatus from "./QuestStatus";
@@ -90,6 +98,8 @@ type CharacterDialogProps = {
 	bag: Bag;
 	potionHotbar: PotionHotbar;
 	floorItems: readonly FloorItem[];
+	// The adventure seed fixes each level's perk offers.
+	seed: number;
 	// Items can only be dropped on the ground in the dungeon.
 	inTown?: boolean;
 	gold?: number;
@@ -115,6 +125,7 @@ const CharacterDialog = ({
 	bag,
 	potionHotbar,
 	floorItems,
+	seed,
 	inTown = false,
 	gold = 0,
 	turn,
@@ -204,6 +215,7 @@ const CharacterDialog = ({
 			?.focus({ preventScroll: true });
 		setFocusItemId(null);
 	}, [focusItemId]);
+	const perksWaiting = pendingPerkCount(progression);
 	const titleRef = useRef<HTMLHeadingElement>(null);
 	const events = history.entries.filter((entry) => entry.event.turn === turn);
 	return (
@@ -281,6 +293,21 @@ const CharacterDialog = ({
 							Character
 						</EmberTab>
 
+						<EmberTab value="progression">
+							<TrendingUp aria-hidden="true" className="size-4" />
+							Progression
+							{perksWaiting > 0 && (
+								<span className="rounded-full bg-primary px-1.5 text-[10px] font-semibold text-primary-foreground">
+									<span aria-hidden="true">{perksWaiting}</span>
+									<span className="sr-only">
+										{perksWaiting === 1
+											? ", 1 perk available"
+											: `, ${perksWaiting} perks available`}
+									</span>
+								</span>
+							)}
+						</EmberTab>
+
 						<EmberTab value="spells">
 							<BookOpen aria-hidden="true" className="size-4" />
 							Spells
@@ -306,13 +333,7 @@ const CharacterDialog = ({
 								onDrop={dropItem}
 								onDropNowhere={dropItemNowhere}
 							>
-								<div className="grid min-w-0 items-start gap-3 md:grid-cols-2 xl:grid-cols-[minmax(0,0.8fr)_minmax(0,1.1fr)_minmax(0,38.125rem)]">
-									<ProgressionView
-										afflictions={afflictions}
-										equipment={equipment}
-										effects={effects}
-										progression={progression}
-									/>
+								<div className="grid min-w-0 items-start gap-3 md:grid-cols-2 xl:grid-cols-[minmax(0,1fr)_minmax(0,38.125rem)]">
 									<div className="grid min-w-0 content-start gap-2">
 										<EquipmentView
 											dragEnabled={dragEnabled}
@@ -399,6 +420,25 @@ const CharacterDialog = ({
 									</div>
 								</div>
 							</ItemDragProvider>
+						</div>
+					</Tabs.Panel>
+					<Tabs.Panel
+						value="progression"
+						className="min-h-0 min-w-0 flex-1 overflow-x-hidden overflow-y-auto"
+					>
+						<div className="grid min-w-0 items-start gap-3 p-3 md:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)]">
+							<ProgressionView
+								afflictions={afflictions}
+								equipment={equipment}
+								effects={effects}
+								progression={progression}
+							/>
+							<PerksPanel
+								seed={seed}
+								progression={progression}
+								enabled={player.health > 0 && !won}
+								onAction={onAction}
+							/>
 						</div>
 					</Tabs.Panel>
 					<Tabs.Panel

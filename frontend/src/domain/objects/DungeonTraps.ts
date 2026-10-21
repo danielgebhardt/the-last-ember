@@ -5,6 +5,8 @@ import { applyPlayerAffliction } from "../game/Afflictions";
 import { deriveAttributes } from "../game/Attributes";
 import { awardExperience } from "../game/ExperienceRewards";
 import type { GameState } from "../game/GameState";
+import { TRAPWISE_BONUS } from "../game/PerkEffects";
+import { hasPerk } from "../game/Perks";
 import {
 	type DungeonObject,
 	TRAP_BLEEDING_CHANCE,
@@ -50,7 +52,8 @@ export const disarmTrap = (
 	);
 	const chance = Math.min(
 		0.95,
-		Math.max(0.25, 0.55 + dexterityModifier * 0.05),
+		Math.max(0.25, 0.55 + dexterityModifier * 0.05) +
+			(hasPerk(state.progression, "trapwise") ? TRAPWISE_BONUS : 0),
 	);
 	const roll = createSeededRandom(
 		hashStringToUint32(`${state.run.seed}:${trap.id}:disarm`),

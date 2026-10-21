@@ -61,8 +61,12 @@ describe("Character sheet", () => {
 			"Armor 1",
 		);
 		expect(panel.getByText("Base 1 + Strength 0 + weapon 1")).toBeVisible();
-		await user.click(panel.getByText("Combat rules"));
-		expect(panel.getByText(/Misses deal none/)).toBeVisible();
+		await user.click(screen.getByRole("tab", { name: /^Progression/ }));
+		const progression = within(
+			screen.getByRole("tabpanel", { name: /^Progression/ }),
+		);
+		await user.click(progression.getByText("Combat rules"));
+		expect(progression.getByText(/Misses deal none/)).toBeVisible();
 	});
 	it("shows base combat values when both equipment slots are empty", async () => {
 		const create = GameState.createGameState;

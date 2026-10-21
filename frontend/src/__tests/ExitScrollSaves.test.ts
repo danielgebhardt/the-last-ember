@@ -34,7 +34,7 @@ it("round-trips scroll copies and the explicit exit event, then continues determ
 	const document = snapshot();
 	const loaded = parseSave(serializeSave(document));
 	if (!loaded.ok) throw new Error(loaded.error);
-	expect(loaded.value.version).toBe(31);
+	expect(loaded.value.version).toBe(32);
 	const restored = restoreSave(loaded.value);
 	const result = resolvePlayerAction(restored.state, {
 		type: "exit-dungeon",

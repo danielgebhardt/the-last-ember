@@ -56,6 +56,7 @@ import {
 import { MAX_SEED, parseSeedInput } from "./domain/dungeon/Seed.ts";
 import type { VictorySummary } from "./domain/game/Adventure";
 import { defeatRecap } from "./domain/game/DefeatRecap";
+import { pendingPerkCount } from "./domain/game/Perks";
 import { createRunRecord, runRecap } from "./domain/game/RunRecap";
 import { isTestSeed, randomAdventureSeed } from "./domain/game/TestSeed";
 import { canAddToBag } from "./domain/items/Bag";
@@ -416,6 +417,14 @@ const Home = ({
 						>
 							<UserRound aria-hidden="true" focusable="false" />
 							Character
+							{pendingPerkCount(game.state.progression) > 0 && (
+								<span
+									title="A perk is waiting under Character → Progression"
+									className="size-2 rounded-full bg-primary"
+								>
+									<span className="sr-only">, perk available</span>
+								</span>
+							)}
 						</Dialog.Trigger>
 						<CharacterDialog
 							afflictions={game.state.afflictions}
@@ -434,6 +443,7 @@ const Home = ({
 							bag={game.state.bag}
 							potionHotbar={game.state.potionHotbar}
 							floorItems={currentItems}
+							seed={run.seed}
 							inTown={game.state.town !== null}
 							turn={turn}
 							history={game.state.activityHistory}

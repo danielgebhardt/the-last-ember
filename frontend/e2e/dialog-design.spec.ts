@@ -74,7 +74,7 @@ for (const width of [1280]) {
 			await ledger.getByRole("tab", { name: "Spells", exact: true }).focus();
 			await page.keyboard.press("ArrowLeft");
 			await expect(
-				ledger.getByRole("tab", { name: "Character", exact: true }),
+				ledger.getByRole("tab", { name: /^Progression/ }),
 			).toHaveAttribute("aria-selected", "true");
 			await page.keyboard.press("ArrowRight");
 			await expect(

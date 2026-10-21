@@ -1,6 +1,7 @@
 import type { ActivityEvent } from "../../domain/game/ActivityHistory.ts";
 import { ADVENTURE_STORY } from "../../domain/game/AdventureStory";
 import { AFFLICTION_DEFINITIONS } from "../../domain/game/AfflictionDefinitions";
+import { PERK_DEFINITIONS, PERK_LEVELS } from "../../domain/game/Perks";
 import { PLAYER_AFFLICTION_LIMIT } from "../../domain/game/PlayerAfflictions";
 import { SPELL_DEFINITIONS } from "../../domain/game/Spells";
 import { EFFECT_DEFINITIONS } from "../../domain/game/TimedEffects";
@@ -68,6 +69,8 @@ export const formatActivityEvent = (event: ActivityEvent): string => {
 			return `${prefix}You take the ember from its guardian. The Ember Warden roars and will follow you all the way home.`;
 		case "warden-followed":
 			return `${prefix}The Ember Warden climbs after you onto floor ${event.floorNumber}.`;
+		case "perk-chosen":
+			return `${prefix}You choose ${PERK_DEFINITIONS[event.perk].name} (level ${event.level}): ${PERK_DEFINITIONS[event.perk].effect}`;
 		case "portal-used":
 			return `${prefix}You step through the Runic Portal${event.toFloor === event.fromFloor ? " and arrive beside this floor's way down" : ` and arrive on floor ${event.toFloor}, beside its way down`}. The portal goes dark.`;
 		case "mirror-used":
@@ -111,7 +114,7 @@ export const formatActivityEvent = (event: ActivityEvent): string => {
 		case "experience-gained":
 			return `${prefix}You gain ${event.amount} XP.`;
 		case "level-gained":
-			return `${prefix}You reach level ${event.level}. Maximum and current health increase by ${event.healthGain}.`;
+			return `${prefix}You reach level ${event.level}. Maximum and current health increase by ${event.healthGain}.${(PERK_LEVELS as readonly number[]).includes(event.level) ? " A perk is waiting: choose it under Character → Progression." : ""}`;
 		case "quest-completed":
 			return `${prefix}${ADVENTURE_STORY.victory}`;
 		case "entrance-reminder":

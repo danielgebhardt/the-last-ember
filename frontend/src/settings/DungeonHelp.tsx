@@ -27,6 +27,11 @@ import {
 	MONSTER_HIT_CHANCE,
 	PLAYER_HIT_CHANCE,
 } from "../domain/game/MeleeRules";
+import {
+	PERK_DEFINITIONS,
+	PERK_KINDS,
+	PERK_LEVELS,
+} from "../domain/game/Perks";
 import { HEALTH_PER_LEVEL, MAX_PLAYER_LEVEL } from "../domain/game/Progression";
 import { SPELL_DEFINITIONS } from "../domain/game/Spells";
 import { ESCAPE_ENCOUNTER_RULES } from "../domain/monsters/EscapeEncounters";
@@ -765,6 +770,25 @@ const DungeonHelp = ({
 					allocation. Character shows the actual contributions and final
 					chances.
 				</p>
+				<h3 className="mt-4 mb-2 font-medium">Perks</h3>
+				<p>
+					Levels {PERK_LEVELS.join(", ")} each offer three perks from three
+					different families, fixed by the adventure seed. Choose under
+					Character → Progression whenever you like; a dot on Character marks a
+					waiting choice. Choosing is free, takes no turn and is permanent.
+					Waiting choices resolve in level order, and a perk already taken is
+					never offered again. Provisional playtest values:
+				</p>
+				<ul className="mt-2 grid gap-1 text-muted-foreground sm:grid-cols-2">
+					{PERK_KINDS.map((perk) => (
+						<li key={perk}>
+							<span className="font-medium text-foreground">
+								{PERK_DEFINITIONS[perk].name}
+							</span>{" "}
+							({PERK_DEFINITIONS[perk].family}): {PERK_DEFINITIONS[perk].effect}
+						</li>
+					))}
+				</ul>
 			</section>
 			<p className="flex items-start gap-2 rounded-lg border bg-muted/30 p-3 text-xs leading-relaxed text-muted-foreground">
 				<Shield aria-hidden="true" className="mt-0.5 size-4 shrink-0" />

@@ -1,6 +1,7 @@
 import type { Equipment } from "../items/Equipment";
 import { deriveAttributes } from "./Attributes";
 import type { DamageElement } from "./DamageElements";
+import { hasPerk } from "./Perks";
 import type { Progression } from "./Progression";
 import type { EffectKind, PlayerEffectKind, TimedEffect } from "./TimedEffects";
 
@@ -296,16 +297,19 @@ export const spellPotency = (
 		effects,
 		equipment,
 	).intelligenceModifier;
+	const focus = hasPerk(progression, "spellfocus") ? 1 : 0;
 	switch (definition.effect) {
 		case "damage":
 			return {
 				effect: "damage",
 				minimumDamage:
 					definition.minimumDamage +
-					modifier * (definition.intelligenceScaling ?? 1),
+					modifier * (definition.intelligenceScaling ?? 1) +
+					focus,
 				maximumDamage:
 					definition.maximumDamage +
-					modifier * (definition.intelligenceScaling ?? 1),
+					modifier * (definition.intelligenceScaling ?? 1) +
+					focus,
 			} as const;
 		case "condition":
 			return { effect: "condition", condition: definition.condition } as const;
@@ -314,7 +318,7 @@ export const spellPotency = (
 		case "heal":
 			return {
 				effect: "heal",
-				healing: definition.healing + modifier,
+				healing: definition.healing + modifier + focus,
 			} as const;
 	}
 };

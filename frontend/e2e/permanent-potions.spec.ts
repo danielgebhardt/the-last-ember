@@ -31,6 +31,7 @@ for (const width of [1280, 1440])
 				}),
 			).toHaveCount(0);
 			await page.keyboard.press("c");
+			await page.getByRole("tab", { name: /^Progression/ }).click();
 			for (const attribute of ["Strength", "Dexterity", "Intelligence"])
 				await expect(
 					page.getByLabel(`Character ${attribute}`, { exact: true }),
@@ -65,14 +66,15 @@ for (const width of [1280, 1440])
 			for (let turn = 0; turn < 7; turn++) await page.keyboard.press("Space");
 			await page.keyboard.press("c");
 			await expect(
+				page.getByLabel("Character mana", { exact: true }),
+			).toContainText("4 / 12");
+			await page.getByRole("tab", { name: /^Progression/ }).click();
+			await expect(
 				page.getByLabel("Permanent potion gains", { exact: true }),
 			).toContainText("INT +2");
 			await expect(
 				page.getByLabel("Character Intelligence", { exact: true }),
 			).toContainText("12");
-			await expect(
-				page.getByLabel("Character mana", { exact: true }),
-			).toContainText("4 / 12");
 		});
 	}
 test("town stat potions cost 1,500 gold and buying grants a bottle rather than an immediate stat gain", async ({
@@ -104,6 +106,7 @@ test("town stat potions cost 1,500 gold and buying grants a bottle rather than a
 	await page.keyboard.press("Escape");
 	await expect(page.getByLabel("Town map", { exact: true })).toBeFocused();
 	await page.keyboard.press("c");
+	await page.getByRole("tab", { name: /^Progression/ }).click();
 	await expect(
 		page.getByLabel("Permanent potion gains", { exact: true }),
 	).toContainText("STR +0");

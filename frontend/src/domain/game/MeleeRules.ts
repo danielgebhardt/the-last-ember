@@ -7,6 +7,7 @@ import {
 import { deriveAttributes } from "./Attributes";
 import { resolveIncomingDamage } from "./CombatStats";
 import { assertDifficulty, scaleEnemyValue } from "./Difficulty";
+import { hasPerk } from "./Perks";
 import type { Progression } from "./Progression";
 import type { TimedEffect } from "./TimedEffects";
 
@@ -45,10 +46,13 @@ export const deriveAccuracy = (
 	equipment?: Partial<Equipment>,
 	afflictions: readonly ActiveAffliction[] = [],
 ) => {
+	// Perks are one d20 step (5 points) the other way from an affliction penalty.
 	const thresholds = accuracyThresholds(
 		deriveAttributes(progression, effects, equipment).dexterityModifier,
-		afflictionEvasionSteps(afflictions),
-		afflictionAccuracySteps(afflictions),
+		afflictionEvasionSteps(afflictions) -
+			(hasPerk(progression, "evasive") ? 1 : 0),
+		afflictionAccuracySteps(afflictions) -
+			(hasPerk(progression, "precise") ? 1 : 0),
 	);
 	return {
 		...thresholds,

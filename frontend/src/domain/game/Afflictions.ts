@@ -7,6 +7,7 @@ import {
 } from "./AfflictionDefinitions";
 import type { GameState } from "./GameState";
 import { maximumMana } from "./Mana";
+import { perkAdjustedAffliction } from "./PerkEffects";
 import {
 	advanceAfflictions,
 	applyAffliction,
@@ -46,7 +47,7 @@ export const applyPlayerAffliction = (
 	if (state.player.health <= 0) return state;
 	const result = applyAffliction(
 		state.afflictions,
-		AFFLICTION_DEFINITIONS[kind],
+		perkAdjustedAffliction(AFFLICTION_DEFINITIONS[kind], state.progression),
 		source,
 	);
 	if (result.outcome === "unchanged") return state;

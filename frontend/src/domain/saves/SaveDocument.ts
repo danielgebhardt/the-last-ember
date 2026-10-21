@@ -6,6 +6,7 @@ import type {
 } from "../dungeon/RunConfiguration";
 import type { Difficulty } from "../game/Difficulty";
 import type { GameState } from "../game/GameState";
+import type { PerkChoice } from "../game/Perks";
 import type { PermanentAttributes } from "../game/PermanentAttributes";
 
 // Explicit persisted fields keep incidental UI/runtime additions out of the format.
@@ -15,7 +16,7 @@ type SavedFloor = Pick<
 	"floorNumber" | "partitions" | "rooms" | "corridors" | "upStair" | "downStair"
 > & { terrain: string[] };
 export type SaveDocument = {
-	version: 31;
+	version: 32;
 	savedAt: string;
 	configuration: RunConfiguration & {
 		difficulty: Difficulty;
@@ -60,6 +61,7 @@ export type SaveDocument = {
 		progression: {
 			experience: number;
 			permanentAttributes: PermanentAttributes;
+			perks: PerkChoice[];
 		};
 	};
 	explored: { floorNumber: number; rows: string[] }[];

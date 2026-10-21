@@ -30,13 +30,14 @@ it("uses a boost potion from a numbered shortcut and displays boosted mana and c
 	);
 	await user.keyboard("c");
 	await screen.findByRole("dialog", { name: "The Adventurer's Ledger" });
+	expect(screen.getByLabelText("Character mana")).toHaveTextContent("10 / 10");
+	await user.click(screen.getByRole("tab", { name: /^Progression/ }));
 	expect(screen.getByLabelText("Character Intelligence")).toHaveTextContent(
 		"Intelligence 11",
 	);
 	expect(screen.getByLabelText("Permanent potion gains")).toHaveTextContent(
 		"INT +1",
 	);
-	expect(screen.getByLabelText("Character mana")).toHaveTextContent("10 / 10");
 	await user.keyboard("{Escape}");
 	await waitFor(() => expect(map).toHaveFocus());
 });

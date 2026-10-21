@@ -1,5 +1,6 @@
 import { AFFLICTION_DEFINITIONS } from "../game/AfflictionDefinitions";
 import { maximumMana } from "../game/Mana";
+import { isValidPerkHistory } from "../game/Perks";
 import { maximumHealth } from "../game/PlayerHealth";
 import {
 	MONSTER_EFFECT_KINDS,
@@ -12,6 +13,8 @@ export const hasConsistentResources = (document: SaveDocument): boolean => {
 	const { state } = document;
 	const { quest } = state;
 	if (quest.victory && quest.victory.gold !== state.gold) return false;
+	// Each saved perk was offered at its level, chosen in level order.
+	if (!isValidPerkHistory(state.run.seed, state.progression)) return false;
 
 	const effects = document.state.effects;
 	if (

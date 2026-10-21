@@ -2,6 +2,7 @@ import { hashStringToUint32 } from "../dungeon/DungeonRun";
 import { createSeededRandom } from "../dungeon/Seed";
 import { appendActivityEvents } from "../game/ActivityHistory";
 import type { GameState } from "../game/GameState";
+import { scavengedGold } from "../game/PerkEffects";
 export const goldAmount = (
 	seed: number,
 	floor: number,
@@ -24,7 +25,11 @@ export const collectGoldAtPlayer = (state: GameState): GameState => {
 	if (!finds.length) return state;
 	const amount = finds.reduce(
 		(total, object) =>
-			total + goldAmount(state.run.seed, object.floorNumber, object.id),
+			total +
+			scavengedGold(
+				state.progression,
+				goldAmount(state.run.seed, object.floorNumber, object.id),
+			),
 		0,
 	);
 	return {

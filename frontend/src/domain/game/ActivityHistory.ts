@@ -78,6 +78,7 @@ export type ActivityEvent = { turn: number } & (
 			activated: boolean;
 	  }
 	| { type: "portal-used"; fromFloor: number; toFloor: number }
+	| { type: "perk-chosen"; perk: import("./Perks").PerkKind; level: number }
 	| { type: "warden-woke" | "warden-enraged" }
 	| { type: "warden-followed"; floorNumber: number }
 	| {
