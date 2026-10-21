@@ -997,6 +997,15 @@ export default async function prepareFixtures() {
 				configuration,
 			],
 			[
+				"town-scrolls",
+				{
+					...quiet,
+					gold: 1000,
+					town: { ...createTownLocation(), coordinate: { row: 13, col: 20 } },
+				},
+				configuration,
+			],
+			[
 				"town-rag-and-bone",
 				{
 					...quiet,

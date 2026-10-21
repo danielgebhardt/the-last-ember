@@ -106,7 +106,7 @@ const buildings: readonly TownBuilding[] = Object.freeze(
 		{
 			id: "scrolls",
 			name: "Scroll shop",
-			sign: "Scrolls — please do not test the stock near the beacon.",
+			sign: "Scrolls — town portals and Remove Curse. Please do not test the stock near the beacon.",
 			district: "Market Street",
 			mark: "S",
 			row: 14,
@@ -145,6 +145,7 @@ const buildings: readonly TownBuilding[] = Object.freeze(
 			entry: Object.freeze(building.entry),
 			status: [
 				"potions",
+				"scrolls",
 				"armor",
 				"weapons",
 				"rag-and-bone",

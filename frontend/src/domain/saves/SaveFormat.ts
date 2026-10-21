@@ -17,7 +17,7 @@ import { navigationRun } from "../objects/NavigationTerrain";
 import type { SaveDocument } from "./SaveDocument";
 import { validateSaveDocument } from "./SaveValidation";
 
-export const SAVE_FORMAT_VERSION = 29;
+export const SAVE_FORMAT_VERSION = 30;
 // Bound imported input before parsing. A maximum-size snapshot is measured in the review.
 export const MAX_SAVE_BYTES = 4 * 1024 * 1024;
 
@@ -78,6 +78,7 @@ export const createSaveDocument = (
 		townEquipmentStock: state.townEquipmentStock.map(savedItem),
 		townEquipmentPurchases: [...state.townEquipmentPurchases],
 		townPotionStock: { ...state.townPotionStock },
+		townScrollStock: { ...state.townScrollStock },
 		town: state.town
 			? { ...state.town, coordinate: { ...state.town.coordinate } }
 			: null,

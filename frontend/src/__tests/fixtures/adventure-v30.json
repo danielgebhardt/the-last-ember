@@ -1,5 +1,5 @@
 {
-	"version": 29,
+	"version": 30,
 	"savedAt": "2026-10-21T12:00:00.000Z",
 	"configuration": {
 		"rows": 15,
@@ -87,6 +87,10 @@
 			"strength-potion": 2,
 			"dexterity-potion": 2,
 			"intelligence-potion": 2
+		},
+		"townScrollStock": {
+			"exit-scroll": 3,
+			"remove-curse-scroll": 2
 		},
 		"town": null,
 		"gold": 300,

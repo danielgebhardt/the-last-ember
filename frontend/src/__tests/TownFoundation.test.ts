@@ -43,6 +43,7 @@ describe("fixed level-zero town", () => {
 			expect(building.status).toBe(
 				[
 					"potions",
+					"scrolls",
 					"armor",
 					"weapons",
 					"rag-and-bone",

@@ -1,6 +1,6 @@
 # Level 0 town rules — #326
 
-Current town and travel rules under epic #325. The potion, armor and weapon stores and The Rag & Bone are open; the remaining reserved buildings belong to later service stories.
+Current town and travel rules under epic #325. The potion, scroll, armor and weapon stores and The Rag & Bone are open; the remaining reserved buildings belong to later service stories.
 
 ## Location and starts
 
@@ -16,7 +16,7 @@ Town and dungeon locations are explicit alternatives. Entering town must retain 
 - Town walking, inspecting signs, opening/closing menus and normal gate travel do not advance adventure turns, the dungeon simulation, timed effects or passive recovery. Closed doors and blocked moves do nothing to resources or turns.
 - Health, mana, gold, equipment, inventory, spell knowledge and every timed-effect duration are retained on entering/leaving. Poison does not tick in town, but neither does healing, regeneration, buff duration or mana recovery. Real time, walking, waiting, browsing, reload and re-entry cannot restore resources.
 - Later town trades and services are free of dungeon time. Each transaction atomically changes only its stated payment, stock, ownership or service result. A healer may restore health only through its explicit paid service; shopping itself cannot tick healing/mana effects. Prices, finite stock, costs and later restock eligibility belong to #331 onward. Existing dungeon merchants keep their current one-turn trade rules and stock.
-- No rest button, free shrine, implicit refill, passive interest or cross-adventure storage is part of this foundation. The potion, armor and weapon stores and The Rag & Bone are open; reserved services remain visibly closed.
+- No rest button, free shrine, implicit refill, passive interest or cross-adventure storage is part of this foundation. The potion, scroll, armor and weapon stores and The Rag & Bone are open; reserved services remain visibly closed.
 
 ## Ember homecoming and recall
 

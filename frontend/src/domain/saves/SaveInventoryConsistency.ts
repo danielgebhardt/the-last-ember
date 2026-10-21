@@ -12,8 +12,8 @@ import {
 import { sarcophagusOutcome } from "../objects/AncientSarcophagi";
 import { chestReward } from "../objects/TreasureChests";
 import { wellReward } from "../objects/WishingWell";
-import { TOWN_POTION_OFFERS, type TownPotion } from "../town/TownEconomy";
 import { TOWN_EQUIPMENT_OFFERS } from "../town/TownEquipmentStock";
+import { TOWN_STOCK_STORES } from "../town/TownStockStores";
 import { savedLocations, unique } from "./SaveConsistencyHelpers";
 import type { SaveDocument } from "./SaveDocument";
 import { hasConsistentRareEquipment } from "./SaveRareEquipmentConsistency";
@@ -110,22 +110,28 @@ export const hasConsistentInventory = (document: SaveDocument): boolean => {
 			return false;
 	}
 
-	for (const item of allItems) {
-		if (!item.id.startsWith("town-potion:")) continue;
-		const parts = item.id.split(":"),
-			kind = parts[1] as TownPotion,
-			index = Number(parts[2]);
-		if (
-			parts.length !== 3 ||
-			kind !== item.kind ||
-			!Object.hasOwn(TOWN_POTION_OFFERS, kind) ||
-			!Number.isSafeInteger(index) ||
-			index < 1 ||
-			String(index) !== parts[2] ||
-			index >
-				TOWN_POTION_OFFERS[kind].quantity - document.state.townPotionStock[kind]
-		)
-			return false;
+	// Bought copies are numbered in purchase order, so each must already be sold.
+	for (const { idPrefix, stock, offers } of Object.values(TOWN_STOCK_STORES)) {
+		const remaining: Readonly<Record<string, number>> = document.state[stock];
+		const offered: Readonly<
+			Record<string, { price: number; quantity: number }>
+		> = offers;
+		for (const item of allItems) {
+			if (!item.id.startsWith(`${idPrefix}:`)) continue;
+			const parts = item.id.split(":"),
+				kind = parts[1],
+				index = Number(parts[2]);
+			if (
+				parts.length !== 3 ||
+				kind !== item.kind ||
+				!Object.hasOwn(offered, kind) ||
+				!Number.isSafeInteger(index) ||
+				index < 1 ||
+				String(index) !== parts[2] ||
+				index > offered[kind].quantity - remaining[kind]
+			)
+				return false;
+		}
 	}
 
 	for (const item of allItems) {

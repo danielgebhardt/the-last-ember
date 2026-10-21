@@ -24,26 +24,47 @@ export const TOWN_POTION_OFFERS = {
 >;
 export type TownPotion = keyof typeof TOWN_POTION_OFFERS;
 export type TownPotionStock = Readonly<Record<TownPotion, number>>;
-export const townPotionKinds = Object.keys(TOWN_POTION_OFFERS) as TownPotion[];
-export const createTownPotionStock = (): TownPotionStock =>
+// No Enchantment scrolls: a buyable +1 would undercut the tier-priced town forge.
+export const TOWN_SCROLL_OFFERS = {
+	"exit-scroll": { price: 200, quantity: 3 },
+	"remove-curse-scroll": { price: 375, quantity: 2 },
+} as const satisfies Partial<
+	Record<ItemKind, { price: number; quantity: number }>
+>;
+export type TownScroll = keyof typeof TOWN_SCROLL_OFFERS;
+export type TownScrollStock = Readonly<Record<TownScroll, number>>;
+type Offers = Readonly<Record<string, { price: number; quantity: number }>>;
+const createStock = <K extends string>(offers: Offers) =>
 	Object.fromEntries(
-		townPotionKinds.map((kind) => [kind, TOWN_POTION_OFFERS[kind].quantity]),
-	) as TownPotionStock;
-export const isTownPotionStock = (value: unknown): value is TownPotionStock => {
-	if (typeof value !== "object" || value === null || Array.isArray(value))
-		return false;
-	const stock = value as Record<string, unknown>;
-	return (
-		Object.keys(stock).length === townPotionKinds.length &&
-		townPotionKinds.every(
-			(kind) =>
-				typeof stock[kind] === "number" &&
-				Number.isSafeInteger(stock[kind]) &&
-				Number(stock[kind]) >= 0 &&
-				Number(stock[kind]) <= TOWN_POTION_OFFERS[kind].quantity,
-		)
-	);
-};
+		Object.keys(offers).map((kind) => [kind, offers[kind].quantity]),
+	) as Readonly<Record<K, number>>;
+// Remaining copies per offered kind, between none and the authored quantity.
+const isStock =
+	<K extends string>(offers: Offers) =>
+	(value: unknown): value is Readonly<Record<K, number>> => {
+		if (typeof value !== "object" || value === null || Array.isArray(value))
+			return false;
+		const stock = value as Record<string, unknown>;
+		const kinds = Object.keys(offers);
+		return (
+			Object.keys(stock).length === kinds.length &&
+			kinds.every(
+				(kind) =>
+					typeof stock[kind] === "number" &&
+					Number.isSafeInteger(stock[kind]) &&
+					Number(stock[kind]) >= 0 &&
+					Number(stock[kind]) <= offers[kind].quantity,
+			)
+		);
+	};
+export const townPotionKinds = Object.keys(TOWN_POTION_OFFERS) as TownPotion[];
+export const townScrollKinds = Object.keys(TOWN_SCROLL_OFFERS) as TownScroll[];
+export const createTownPotionStock = (): TownPotionStock =>
+	createStock<TownPotion>(TOWN_POTION_OFFERS);
+export const createTownScrollStock = (): TownScrollStock =>
+	createStock<TownScroll>(TOWN_SCROLL_OFFERS);
+export const isTownPotionStock = isStock<TownPotion>(TOWN_POTION_OFFERS);
+export const isTownScrollStock = isStock<TownScroll>(TOWN_SCROLL_OFFERS);
 // Shop copy keeps the effect and drops dungeon-use mechanics (turn cost, stacking rules)
 // that the bag, item details and Catalog still explain in full.
 export const townPotionDescription = (kind: TownPotion): string =>

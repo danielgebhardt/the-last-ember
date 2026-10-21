@@ -31,7 +31,9 @@ import { spawnRunObjects } from "../objects/ObjectPlacement";
 import { addOptionalEliteRooms } from "../objects/OptionalEliteRooms";
 import {
 	createTownPotionStock,
+	createTownScrollStock,
 	type TownPotionStock,
+	type TownScrollStock,
 } from "../town/TownEconomy";
 import { createTownEquipmentStock } from "../town/TownEquipmentStock";
 import type { TownLocation } from "../town/TownLocation";
@@ -58,6 +60,7 @@ export type GameState = {
 	townPortal: TownPortal | null;
 	townEquipmentStock: readonly ItemInstance[];
 	townPotionStock: TownPotionStock;
+	townScrollStock: TownScrollStock;
 	town: TownLocation | null;
 	readonly difficulty: Difficulty;
 	merchantStock: MerchantStock;
@@ -120,6 +123,7 @@ export const createGameState = (
 		town: null,
 		townPortal: null,
 		townPotionStock: createTownPotionStock(),
+		townScrollStock: createTownScrollStock(),
 		townEquipmentStock: createTownEquipmentStock(),
 		difficulty,
 		run,

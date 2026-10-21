@@ -39,6 +39,7 @@ import {
 } from "../domain/objects/DungeonObject";
 import { FORGE_PRICES } from "../domain/objects/ForgottenForge";
 import { SANCTUARY_CONDITION_FEES } from "../domain/town/Sanctuary";
+import { TOWN_SCROLL_OFFERS } from "../domain/town/TownEconomy";
 import { FORGE_TIER_PRICES } from "../domain/town/TownForge";
 import { LIBRARY_PRICE } from "../domain/town/TownLibrary";
 
@@ -398,13 +399,18 @@ const DungeonHelp = ({
 						<span className="font-medium text-foreground">Town.</span> New
 						adventures begin with {STARTING_GOLD} gold for a modest upgrade or
 						supplies. Use E at a shop doorway to browse. Shops trade in gold;
-						purchases go into your bag. The Rag &amp; Bone buys carried
-						equipment at the old expansion plot in the southeast. Its Sell menu
-						includes confirmed Sell all Lower items; worn gear and supplies stay
-						yours. Town movement and shopping do not advance dungeon turns or
-						restore health or mana. Stand on the south gate and press Enter to
-						enter the dungeon. At the floor-1 exit, Enter returns to town until
-						you recover the ember.
+						purchases go into your bag. The Market Street scroll shop sells{" "}
+						{TOWN_SCROLL_OFFERS["exit-scroll"].quantity} Town portal scrolls (
+						{TOWN_SCROLL_OFFERS["exit-scroll"].price} gold) and{" "}
+						{TOWN_SCROLL_OFFERS["remove-curse-scroll"].quantity} Remove Curse
+						scrolls ({TOWN_SCROLL_OFFERS["remove-curse-scroll"].price} gold) per
+						adventure; Enchantment scrolls are dungeon finds only. The Rag &amp;
+						Bone buys carried equipment at the old expansion plot in the
+						southeast. Its Sell menu includes confirmed Sell all Lower items;
+						worn gear and supplies stay yours. Town movement and shopping do not
+						advance dungeon turns or restore health or mana. Stand on the south
+						gate and press Enter to enter the dungeon. At the floor-1 exit,
+						Enter returns to town until you recover the ember.
 					</li>
 					<li>
 						<span className="font-medium text-foreground">Town portals.</span>{" "}

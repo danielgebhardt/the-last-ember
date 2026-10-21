@@ -44,7 +44,7 @@ import TownEquipmentShop from "./components/town/TownEquipmentShop";
 import TownForgeDialog from "./components/town/TownForgeDialog";
 import TownLibraryDialog from "./components/town/TownLibraryDialog";
 import TownMap from "./components/town/TownMap";
-import TownPotionShop from "./components/town/TownPotionShop";
+import TownStockShop from "./components/town/TownStockShop";
 import {
 	DEFAULT_FOG_CONFIGURATION,
 	DEFAULT_RUN_CONFIGURATION,
@@ -826,7 +826,17 @@ const Home = ({
 				onBuy={handleActionRequested}
 				mapRef={mapRef}
 			/>
-			<TownPotionShop
+			<TownStockShop
+				store="buy-town-potion"
+				open={townShopOpen && canPlay}
+				state={game.state}
+				error={game.actionError}
+				onClose={() => setTownShopOpen(false)}
+				onBuy={handleActionRequested}
+				mapRef={mapRef}
+			/>
+			<TownStockShop
+				store="buy-town-scroll"
 				open={townShopOpen && canPlay}
 				state={game.state}
 				error={game.actionError}

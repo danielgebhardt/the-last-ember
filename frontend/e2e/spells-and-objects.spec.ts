@@ -186,7 +186,7 @@ for (const width of [1280, 1440])
 			const saved = await page.evaluate(() =>
 				JSON.parse(localStorage.getItem("larn:adventure-save") ?? "null"),
 			);
-			expect(saved.version).toBe(29);
+			expect(saved.version).toBe(30);
 			expect(saved.state.townPortal.floorNumber).toBe(3);
 			expect(
 				saved.state.bag.items.filter(

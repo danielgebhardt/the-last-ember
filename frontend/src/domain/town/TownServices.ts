@@ -24,6 +24,7 @@ const SERVICES = [
 	["forge", "Forge"],
 	["library", "Library"],
 	["potions", "Potion store"],
+	["scrolls", "Scroll shop"],
 	["armor", "Equipment store"],
 	["weapons", "Equipment store"],
 	["rag-and-bone", "The Rag & Bone"],

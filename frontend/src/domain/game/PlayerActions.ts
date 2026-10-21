@@ -66,13 +66,10 @@ import {
 	townPortalMessage,
 } from "../town/TownPortal";
 import {
-	type BuyTownPotionAction,
-	buyTownPotion,
-} from "../town/TownPotionStore";
-import {
 	sellAtTownSalvageShop,
 	type TownSellAction,
 } from "../town/TownSalvageShop";
+import { type BuyTownStockAction, buyTownStock } from "../town/TownStockStores";
 import {
 	type TownTravelAction,
 	travelBetweenTownAndDungeon,
@@ -114,7 +111,7 @@ export type PlayerAction =
 	| ReturnTownPortalAction
 	| TownSellAction
 	| BuyTownEquipmentAction
-	| BuyTownPotionAction
+	| BuyTownStockAction
 	| TownTravelAction
 	| { type: "inspect-town" }
 	| ExitDungeonAction
@@ -153,6 +150,7 @@ export const resolvePlayerAction = (
 			action.type === "travel" ||
 			action.type === "return-town-portal" ||
 			action.type === "buy-town-potion" ||
+			action.type === "buy-town-scroll" ||
 			action.type === "buy-town-equipment" ||
 			action.type === "sell-town-equipment" ||
 			action.type === "sell-town-lower" ||
@@ -198,6 +196,7 @@ export const resolvePlayerAction = (
 						action.type === "exit-dungeon" ||
 						action.type === "return-town-portal" ||
 						action.type === "buy-town-potion" ||
+						action.type === "buy-town-scroll" ||
 						action.type === "buy-town-equipment" ||
 						action.type === "sell-town-equipment" ||
 						action.type === "sell-town-lower" ||
@@ -218,7 +217,8 @@ export const resolvePlayerAction = (
 		return travelBetweenTownAndDungeon(state, action);
 	if (action.type === "buy-town-equipment")
 		return buyTownEquipment(state, action);
-	if (action.type === "buy-town-potion") return buyTownPotion(state, action);
+	if (action.type === "buy-town-potion" || action.type === "buy-town-scroll")
+		return buyTownStock(state, action);
 	if (action.type === "sanctuary-treatment")
 		return treatAtSanctuary(state, action);
 	if (action.type === "town-forge") return reforgeAtTown(state, action);
@@ -384,7 +384,7 @@ const resolvePlayerEffect = (
 		| TownTravelAction
 		| ReturnTownPortalAction
 		| BuyTownEquipmentAction
-		| BuyTownPotionAction
+		| BuyTownStockAction
 		| TownSellAction
 		| { type: "inspect-town" }
 	>,

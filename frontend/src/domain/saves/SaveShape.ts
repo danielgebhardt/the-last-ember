@@ -27,7 +27,7 @@ import {
 } from "../monsters/MonsterTelegraphs";
 import { OBJECT_DEFINITIONS } from "../objects/DungeonObject";
 import { SANCTUARY_CONDITIONS, SANCTUARY_SERVICES } from "../town/Sanctuary";
-import { isTownPotionStock } from "../town/TownEconomy";
+import { isTownPotionStock, isTownScrollStock } from "../town/TownEconomy";
 import { isTownEquipmentStock } from "../town/TownEquipmentStock";
 import { isTownLocation } from "../town/TownLocation";
 import type { SaveDocument } from "./SaveDocument";
@@ -403,7 +403,7 @@ const monsterAwareness: Schema = (value) =>
 			(value.type !== "pursuing" || integer(0, 100)(value.blocked))));
 
 const documentShape = object({
-	version: oneOf([29]),
+	version: oneOf([30]),
 	savedAt: (value) =>
 		text(value) &&
 		typeof value === "string" &&
@@ -439,6 +439,7 @@ const documentShape = object({
 		townPortal: nullable(object({ floorNumber, coordinate })),
 		town: nullable(isTownLocation),
 		townPotionStock: isTownPotionStock,
+		townScrollStock: isTownScrollStock,
 		townEquipmentStock: isTownEquipmentStock,
 		townEquipmentPurchases: array(text),
 		merchantStock: isMerchantStock,
