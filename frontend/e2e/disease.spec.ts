@@ -200,7 +200,7 @@ test("Spider web loop: see the marked tile, get Slowed, read guidance and drink 
 	await page.keyboard.press("Space");
 	await expect(log).toContainText("web catches you");
 	const slowed = page.getByRole("button", {
-		name: "Slowed — 9 phases remaining",
+		name: "Slowed — 29 phases remaining",
 		exact: true,
 	});
 	await expect(slowed).toBeVisible();

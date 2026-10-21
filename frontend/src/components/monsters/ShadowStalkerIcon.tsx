@@ -1,6 +1,7 @@
 import type { SVGProps } from "react";
 
-// Smoke-like body with slanted eyes and a flat mouth.
+// Smoke-like body with slanted eyes and a flat mouth; the lower-left wisp is
+// pulled in so the stroke stays inside the 24px box.
 const ShadowStalkerIcon = (props: SVGProps<SVGSVGElement>) => (
 	<svg
 		aria-hidden="true"
@@ -13,7 +14,7 @@ const ShadowStalkerIcon = (props: SVGProps<SVGSVGElement>) => (
 		strokeLinejoin="round"
 		{...props}
 	>
-		<path d="M12 3q7 1 7 8 0 5-4 7l2 4-5-2-4 2-4-2-5 2 2-5Q5 4 12 3Z" />
+		<path d="M12 3q7 1 7 8 0 5-4 7l2 4-5-2-4 2-4-2-2.5 2 1-5Q5 4 12 3Z" />
 		<path d="M8 11l3 1m5-1-3 1" />
 		<path d="M9 16h6" />
 		<circle cx="9.3" cy="10.9" r="0.4" fill="currentColor" stroke="none" />
