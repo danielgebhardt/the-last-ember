@@ -42,7 +42,12 @@ const runs = Array.from({ length: 10 }, (_, seed) => {
 });
 
 it("covers every source monster", () => {
-	expect(SOURCES).toEqual(["plague-rat", "hexweaver", "mana-leech"]);
+	expect(SOURCES).toEqual([
+		"plague-rat",
+		"hexweaver",
+		"shadow-stalker",
+		"mana-leech",
+	]);
 });
 
 describe.each(SOURCES)("%s", (kind) => {

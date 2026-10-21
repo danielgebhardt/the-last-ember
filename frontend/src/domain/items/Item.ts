@@ -48,13 +48,13 @@ export const ITEM_DEFINITIONS = {
 		attackBonus: 0,
 		armor: 0,
 		// Later slices extend coverage; it never implies an all-condition cure.
-		removesAfflictions: ["slowed", "mana-burn"],
+		removesAfflictions: ["slowed", "mana-burn", "blinded"],
 		minFloor: 3,
 		maxFloor: 12,
 		foundWeight: 0.25,
 		dropWeight: 0.25,
 		description:
-			"Removes Slowed and Mana Burn before the ensuing phase, restoring evasion and passive mana recovery. Does not cure poison, Disease or other conditions. One effective use consumes one bottle and one dungeon turn; unaffected use is free. Found on floors 3–12 and in matching chests/drops. Cannot be sold, like other potions.",
+			"Removes Slowed, Mana Burn and Blinded before the ensuing phase, restoring evasion, passive mana recovery and sight. Does not cure poison, Disease or other conditions. One effective use consumes one bottle and one dungeon turn; unaffected use is free. Found on floors 3–12 and in matching chests/drops. Cannot be sold, like other potions.",
 	},
 	"warding-cloak": {
 		specialFindOnly: true,

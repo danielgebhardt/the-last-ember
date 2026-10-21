@@ -114,6 +114,14 @@ export const formatActivityEvent = (event: ActivityEvent): string => {
 			return `${prefix}The ${MONSTER_DEFINITIONS[event.monster].name}'s hex strikes you for ${event.damage} damage.`;
 		case "monster-hex-avoided":
 			return `${prefix}The ${MONSTER_DEFINITIONS[event.monster].name}'s hex fizzles.`;
+		case "monster-blind-prepared":
+			return `${prefix}The ${MONSTER_DEFINITIONS[event.monster].name} gathers darkness. Move off your tile before it acts again.`;
+		case "monster-blind-hit":
+			return `${prefix}The ${MONSTER_DEFINITIONS[event.monster].name}'s blinding strike hits you for ${event.damage} damage.`;
+		case "monster-blind-missed":
+			return `${prefix}The ${MONSTER_DEFINITIONS[event.monster].name}'s blinding strike misses you.`;
+		case "monster-blind-avoided":
+			return `${prefix}The ${MONSTER_DEFINITIONS[event.monster].name}'s blinding strike finds only empty air.`;
 		case "monster-web-prepared":
 			return `${prefix}The ${MONSTER_DEFINITIONS[event.monster].name} readies a web at your tile. Move off it to avoid being Slowed.`;
 		case "monster-web-hit":

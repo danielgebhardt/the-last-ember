@@ -15,6 +15,8 @@ export type AfflictionDefinition<K extends string = string> = Readonly<{
 		meleeDamage?: number;
 		// Damage dealt after monsters act in each committed phase it is active.
 		damagePerPhase?: number;
+		// Caps the live sight radius in tiles; explored memory is kept.
+		sightRadius?: number;
 	}>;
 	// Whether corridor running refuses to start while it lasts; onset always stops a run.
 	blocksRunning: boolean;

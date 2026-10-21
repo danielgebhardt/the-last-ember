@@ -24,7 +24,7 @@ export type SpecialActionOutcome = Readonly<{
 	affliction?: AfflictionKind;
 }>;
 // Behaviors that need a pause after resolving; the monster saves the turn.
-export type TelegraphCooldown = "web" | "hex";
+export type TelegraphCooldown = "web" | "hex" | "blind";
 
 type TelegraphRule = Readonly<{
 	owns: (definition: MonsterDefinition) => boolean;
@@ -85,6 +85,12 @@ export const TARGET_TELEGRAPHS: Readonly<
 		advice:
 			"Hex on its next action: break its line of sight, get out of range, or use Sleep or Fear to avoid Curse.",
 	},
+	"preparing-blind": {
+		owns: (definition) => definition.blindingStrike !== undefined,
+		reaches: (monster, target) => reach(monster, target) === 1,
+		advice:
+			"Blinding strike on its next action: move off the marked tile, or use Sleep or Fear to cancel it.",
+	},
 };
 export const isTargetTelegraph = (type: string): type is TargetTelegraph =>
 	Object.hasOwn(TARGET_TELEGRAPHS, type);
@@ -97,6 +103,7 @@ export const TELEGRAPH_COOLDOWNS: Readonly<
 > = {
 	web: (definition) => definition.webAttack?.cooldown,
 	hex: (definition) => definition.hexAttack?.cooldown,
+	blind: (definition) => definition.blindingStrike?.cooldown,
 };
 
 // Another use needs more than the cooldown since the last resolution.

@@ -40,17 +40,17 @@ export const AFFLICTION_DEFINITIONS = {
 	slowed: {
 		kind: "slowed",
 		sanctuaryFee: 50,
-		summary: "evasion −10 points (minimum 5%) for 10 phases",
+		summary: "evasion −10 points (minimum 5%) for 30 phases",
 		target: "player",
 		name: "Slowed",
-		lifetime: { type: "phases", duration: 10 },
+		lifetime: { type: "phases", duration: 30 },
 		modifiers: { evasion: -10 },
 		blocksRunning: true,
 		cure: "cleansing-potion",
 		guidance:
-			"Evasion reduced by 10 percentage points (minimum 5%) for 10 committed phases, including the phase it lands. Refreshing resets the duration without deepening the penalty. Cleansing potion or sanctuary treatment removes it. Your actions and turns are unchanged.",
+			"Evasion reduced by 10 percentage points (minimum 5%) for 30 committed phases, including the phase it lands. Refreshing resets the duration without deepening the penalty. Cleansing potion or sanctuary treatment removes it. Your actions and turns are unchanged.",
 		appliedText:
-			"Evasion −10 for 10 phases. Use a Cleansing potion or sanctuary treatment.",
+			"Evasion −10 for 30 phases. Use a Cleansing potion or sanctuary treatment.",
 		removedText: "Evasion restored.",
 		absentText: "You are not Slowed.",
 	},
@@ -89,6 +89,23 @@ export const AFFLICTION_DEFINITIONS = {
 			"Melee to-hit −10 and damage −1 until cured. Read a Remove Curse scroll or visit the sanctuary.",
 		removedText: "Melee accuracy and damage restored.",
 		absentText: "You are not cursed.",
+	},
+	blinded: {
+		kind: "blinded",
+		sanctuaryFee: 50,
+		summary: "sight 2 tiles and melee to-hit −20 for 30 phases",
+		target: "player",
+		name: "Blinded",
+		lifetime: { type: "phases", duration: 30 },
+		modifiers: { accuracy: -20, sightRadius: 2 },
+		blocksRunning: true,
+		cure: "cleansing-potion",
+		guidance:
+			"You see only 2 tiles around you and melee to-hit drops by 20 percentage points for 30 committed phases, including the phase it lands. Explored map memory stays. Refreshing resets the duration. Cleansing potion or sanctuary treatment removes it.",
+		appliedText:
+			"Sight 2 tiles and melee to-hit −20 for 30 phases. Use a Cleansing potion or sanctuary treatment.",
+		removedText: "Your sight returns.",
+		absentText: "You are not Blinded.",
 	},
 } as const satisfies Record<string, AfflictionDefinition>;
 export type AfflictionKind = keyof typeof AFFLICTION_DEFINITIONS;
@@ -133,6 +150,16 @@ export const afflictedMeleeAttack = (
 			(total, a) => total + (afflictionModifiers(a.kind).meleeDamage ?? 0),
 			attack,
 		),
+	);
+// Live sight radius: afflictions can only narrow the configured fog radius.
+export const afflictedSightRadius = (
+	radius: number,
+	afflictions: readonly ActiveAffliction[] = [],
+): number =>
+	afflictions.reduce(
+		(sight, a) =>
+			Math.min(sight, afflictionModifiers(a.kind).sightRadius ?? sight),
+		radius,
 	);
 export const suppressesManaRecovery = (
 	afflictions: readonly ActiveAffliction[] = [],

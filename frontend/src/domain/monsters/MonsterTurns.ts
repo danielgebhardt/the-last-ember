@@ -25,6 +25,7 @@ import { MONSTER_DEFINITIONS, type Monster } from "./Monster";
 import { resolveMonsterAlarm } from "./MonsterAlarm";
 import { resolveMonsterArea } from "./MonsterAreaAttack";
 import { advanceUnseenPursuit } from "./MonsterAwareness";
+import { resolveMonsterBlindingStrike } from "./MonsterBlindingStrike";
 import { resolveMonsterCharge } from "./MonsterCharge";
 import { doorPlanningRun, monsterDoorToOpen } from "./MonsterDoors";
 import { resolveMonsterHex } from "./MonsterHex";
@@ -63,6 +64,8 @@ const SPECIAL_ACTIONS: readonly ((
 	(c) => resolveMonsterArea(c.scene, c.monster, c.rollSource, c.rules),
 	(c) => resolveMonsterHex(c.state, c.monster, c.detected),
 	(c) => resolveMonsterWeb(c.state, c.monster, c.detected),
+	(c) =>
+		resolveMonsterBlindingStrike(c.state, c.monster, c.detected, c.rollSource),
 ];
 const resolveSpecialAction = (context: SpecialActionContext) => {
 	for (const resolve of SPECIAL_ACTIONS) {

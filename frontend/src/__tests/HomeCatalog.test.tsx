@@ -29,7 +29,14 @@ describe("Developer catalog", () => {
 			["Items", ITEM_DEFINITIONS],
 			[
 				"Conditions",
-				{ poisoned: 1, disease: 1, slowed: 1, "mana-burn": 1, curse: 1 },
+				{
+					poisoned: 1,
+					disease: 1,
+					slowed: 1,
+					"mana-burn": 1,
+					curse: 1,
+					blinded: 1,
+				},
 			],
 			["Dungeon objects", OBJECT_DEFINITIONS],
 			["Terrain", TILE_LABELS],

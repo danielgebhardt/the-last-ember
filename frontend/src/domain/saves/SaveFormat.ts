@@ -6,6 +6,7 @@ import type {
 	FogConfiguration,
 	RunConfiguration,
 } from "../dungeon/RunConfiguration";
+import { afflictedSightRadius } from "../game/AfflictionDefinitions";
 import { difficultyLabel } from "../game/Difficulty";
 import type { GameState } from "../game/GameState";
 import { permanentAttributeGains } from "../game/PermanentAttributes";
@@ -234,12 +235,13 @@ export const restoreSave = (document: SaveDocument): RestoredAdventure => {
 			rows.map((row) => [...row].map((cell) => cell === "1")),
 		]),
 	);
-	const initial = updateExploration(navigationRun(state), document.fog.radius);
+	const sight = afflictedSightRadius(document.fog.radius, state.afflictions);
+	const initial = updateExploration(navigationRun(state), sight);
 	return {
 		state,
 		configuration: document.configuration,
 		fog: document.fog,
-		exploration: updateExploration(navigationRun(state), document.fog.radius, {
+		exploration: updateExploration(navigationRun(state), sight, {
 			...initial,
 			// Force current sight to be recomputed while retaining every floor's memory.
 			origin: { row: -1, col: -1 },

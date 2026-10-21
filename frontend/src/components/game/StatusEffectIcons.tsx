@@ -4,6 +4,7 @@ import {
 	Brain,
 	Dumbbell,
 	Eclipse,
+	EyeOff,
 	Footprints,
 	HeartPulse,
 	Shield,
@@ -108,6 +109,14 @@ export const AFFLICTION_VISUALS: Record<AfflictionKind, StatusVisual> = {
          border-sky-600/70 bg-sky-500/10 text-sky-800
          shadow-[0_0_8px_rgba(2,132,199,0.22)]
          dark:border-sky-400/70 dark:bg-sky-950/50 dark:text-sky-300
+      `,
+	},
+	blinded: {
+		Icon: EyeOff,
+		className: `
+         border-slate-600/70 bg-slate-500/10 text-slate-800
+         shadow-[0_0_8px_rgba(71,85,105,0.24)]
+         dark:border-slate-400/70 dark:bg-slate-900/60 dark:text-slate-200
       `,
 	},
 	slowed: {

@@ -52,7 +52,7 @@ it("telegraphs a web at the seen tile, then Slows a player who stays, without da
 	const caught = wait(prepared);
 	expect(types(caught, 1)).toEqual(["monster-web-hit", "affliction-changed"]);
 	expect(caught.afflictions).toEqual([
-		{ kind: "slowed", remaining: 9, source: "giant spider" },
+		{ kind: "slowed", remaining: 29, source: "giant spider" },
 	]);
 	expect(caught.player).toEqual(encounter().player);
 	expect(caught.effects).toEqual([]);
@@ -101,7 +101,7 @@ it("refreshes Slowed on a second web, ignores magic resistance, and Sleep cancel
 		}),
 	);
 	expect(again.afflictions).toEqual([
-		{ kind: "slowed", remaining: 9, source: "giant spider" },
+		{ kind: "slowed", remaining: 29, source: "giant spider" },
 	]);
 	const warded = {
 		...encounter(),

@@ -32,7 +32,7 @@ it("refreshes duration without deepening the penalty, and clamps at the evasion 
 		state = advancePlayerAfflictions(state);
 	const refreshed = applyPlayerAffliction(state, "slowed", "second");
 	expect(refreshed.afflictions).toEqual([
-		{ kind: "slowed", remaining: 10, source: "second" },
+		{ kind: "slowed", remaining: 30, source: "second" },
 	]);
 	expect(evade(refreshed)).toBe(10);
 	expect(changes(refreshed)).toEqual(["applied", "refreshed"]);
@@ -97,5 +97,5 @@ it("lets an otherwise-evaded monster roll land while Slowed", () => {
 	).state;
 	expect(healthy.player.health).toBe(10);
 	expect(slowed.player.health).toBe(9);
-	expect(slowed.afflictions?.[0]?.remaining).toBe(9);
+	expect(slowed.afflictions?.[0]?.remaining).toBe(29);
 });

@@ -175,7 +175,11 @@ export type ActivityEvent = { turn: number } & (
 	  }
 	| { type: "door-changed"; opened: boolean }
 	| { type: "player-mana-drained"; monster: MonsterKind; mana: number }
-	| { type: "monster-hex-hit"; monster: MonsterKind; damage: number }
+	| {
+			type: "monster-hex-hit" | "monster-blind-hit";
+			monster: MonsterKind;
+			damage: number;
+	  }
 	| { type: "spell-healed"; spell: SpellKind; recovered: number }
 	| {
 			type:
@@ -191,7 +195,8 @@ export type ActivityEvent = { turn: number } & (
 			type:
 				| "monster-prepared"
 				| "monster-web-prepared"
-				| "monster-hex-prepared";
+				| "monster-hex-prepared"
+				| "monster-blind-prepared";
 			monster: MonsterKind;
 			target: Coordinate;
 	  }
@@ -202,6 +207,8 @@ export type ActivityEvent = { turn: number } & (
 				| "monster-web-hit"
 				| "monster-web-avoided"
 				| "monster-hex-avoided"
+				| "monster-blind-missed"
+				| "monster-blind-avoided"
 				| "monster-shot-missed"
 				| "player-missed"
 				| "monster-missed"

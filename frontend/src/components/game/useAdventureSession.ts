@@ -10,6 +10,7 @@ import type {
 	RunConfiguration,
 } from "../../domain/dungeon/RunConfiguration";
 import { appendActivityEvents } from "../../domain/game/ActivityHistory";
+import { afflictedSightRadius } from "../../domain/game/AfflictionDefinitions";
 import { createGameState } from "../../domain/game/GameState";
 import {
 	type PlayerAction,
@@ -65,7 +66,10 @@ export const createAdventureSession = (
 		state: { ...state, town: createTownLocation() },
 		configuration,
 		fog,
-		exploration: updateExploration(navigationRun(state), fog.radius),
+		exploration: updateExploration(
+			navigationRun(state),
+			afflictedSightRadius(fog.radius, state.afflictions),
+		),
 		actionError: "",
 	};
 };
@@ -143,7 +147,7 @@ export const useAdventureSession = ({
 			fog: { ...current.fog, radius },
 			exploration: updateExploration(
 				navigationRun(current.state),
-				radius,
+				afflictedSightRadius(radius, current.state.afflictions),
 				current.exploration,
 			),
 		}));
@@ -162,7 +166,10 @@ export const useAdventureSession = ({
 				(current.state.town !== null && result.state.town === null)
 					? updateExploration(
 							navigationRun(result.state),
-							current.fog.radius,
+							afflictedSightRadius(
+								current.fog.radius,
+								result.state.afflictions,
+							),
 							current.exploration,
 						)
 					: current.exploration;

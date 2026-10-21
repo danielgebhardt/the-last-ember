@@ -19,6 +19,7 @@ import OrcIcon from "./OrcIcon";
 import PlagueRatIcon from "./PlagueRatIcon";
 import SalamanderIcon from "./SalamanderIcon";
 import SentryIcon from "./SentryIcon";
+import ShadowStalkerIcon from "./ShadowStalkerIcon";
 import SkeletonIcon from "./SkeletonIcon";
 import SpiderIcon from "./SpiderIcon";
 import TrollIcon from "./TrollIcon";
@@ -75,6 +76,11 @@ export const MONSTER_VISUALS: Record<
 		icon: HexweaverIcon,
 		color: "text-monster-hex",
 		label: MONSTER_DEFINITIONS.hexweaver.name,
+	},
+	"shadow-stalker": {
+		icon: ShadowStalkerIcon,
+		color: "text-monster-shadow",
+		label: MONSTER_DEFINITIONS["shadow-stalker"].name,
 	},
 	"mana-leech": {
 		icon: ManaLeechIcon,

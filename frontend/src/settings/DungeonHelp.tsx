@@ -313,8 +313,8 @@ const DungeonHelp = ({
 						after monsters act for six phases; another dose resets the timer. An
 						Antidote removes it before that tick but does not protect against a
 						fresh dose. At most three harmful conditions (poison, Disease,
-						Slowed, Mana Burn, Curse) can be active at once; a fourth is
-						rejected.
+						Slowed, Mana Burn, Curse, Blinded) can be active at once; a fourth
+						is rejected.
 					</li>
 					<li>
 						<span className="font-medium text-foreground">Disease.</span> Rare
@@ -330,11 +330,11 @@ const DungeonHelp = ({
 					<li>
 						<span className="font-medium text-foreground">Slowed.</span> Giant
 						spiders can web you. Slowed lowers evasion by 10 points (never below
-						5%) for 10 committed turns, counting the turn it lands; another web
+						5%) for 30 committed turns, counting the turn it lands; another web
 						resets the timer without deepening it. Your turns and actions are
 						unchanged. A Cleansing potion removes it before monsters act, using
-						one turn; it also cures Mana Burn. Corridor running stops when
-						Slowed begins and cannot start while it lasts.
+						one turn; it also cures Mana Burn and Blinded. Corridor running
+						stops when Slowed begins and cannot start while it lasts.
 					</li>
 					<li>
 						<span className="font-medium text-foreground">Mana Burn.</span> Rare
@@ -356,6 +356,16 @@ const DungeonHelp = ({
 						before monsters act, using one turn; healing, rest and Cleansing
 						potions do not. Corridor running stops when it begins but may
 						continue afterward.
+					</li>
+					<li>
+						<span className="font-medium text-foreground">Blinded.</span> Rare
+						shadow stalkers on floors 7–14 mark your tile when beside you, then
+						strike on their next action unless you step off it. A landed strike
+						deals normal damage and blinds you for 30 committed turns: you see
+						only 2 tiles around you and melee to-hit drops by 20 points. Your
+						explored map stays remembered. A Cleansing potion or the sanctuary
+						removes it. Corridor running stops when it begins and cannot start
+						while it lasts.
 					</li>
 					<li>
 						<span className="font-medium text-foreground">Town.</span> New
@@ -390,7 +400,8 @@ const DungeonHelp = ({
 						{SANCTUARY_CONDITION_FEES.disease} gold, Slowed{" "}
 						{SANCTUARY_CONDITION_FEES.slowed} gold, Mana Burn{" "}
 						{SANCTUARY_CONDITION_FEES["mana-burn"]} gold, Curse{" "}
-						{SANCTUARY_CONDITION_FEES.curse} gold, or a complete cleanse of
+						{SANCTUARY_CONDITION_FEES.curse} gold, Blinded{" "}
+						{SANCTUARY_CONDITION_FEES.blinded} gold, or a complete cleanse of
 						every active condition for their combined fee (at most 600). Every
 						treatment shows its exact price and needs confirmation. Cures keep
 						buffs and restore no HP or mana; buy healing separately. Treatment

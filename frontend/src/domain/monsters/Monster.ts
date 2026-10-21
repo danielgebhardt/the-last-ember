@@ -24,6 +24,7 @@ export type MonsterIntent =
 	| { type: "preparing-attack"; target: Coordinate }
 	| { type: "preparing-web"; target: Coordinate }
 	| { type: "preparing-hex"; target: Coordinate }
+	| { type: "preparing-blind"; target: Coordinate }
 	| {
 			type: "preparing-area";
 			target: Coordinate;
@@ -85,6 +86,9 @@ export type MonsterDefinition = {
 	// Telegraphed ranged hex: prepared in sight, resolved next action if still in sight and
 	// range. Base arcane damage (magic resistance applies) plus Curse.
 	hexAttack?: { range: number; cooldown: number; damage: number };
+	// Telegraphed adjacent strike: marks your tile, then makes a normal melee roll
+	// next action if you stayed. A landed hit deals normal damage and Blinded.
+	blindingStrike?: { cooldown: number };
 	// Spawned only through the shared sparse affliction-source budget.
 	afflictionSource?: boolean;
 	regeneration?: number;
@@ -123,6 +127,7 @@ export const validateMonsterDefinition = (
 		afflictionSource,
 		webAttack,
 		hexAttack,
+		blindingStrike,
 		regeneration,
 		enemySpells,
 		spellInterval,
@@ -244,9 +249,17 @@ export const validateMonsterDefinition = (
 				onHitManaDrain.min < 1 ||
 				onHitManaDrain.max < onHitManaDrain.min ||
 				rangedAttackRange !== undefined)) ||
+		(blindingStrike !== undefined &&
+			(!Number.isSafeInteger(blindingStrike.cooldown) ||
+				blindingStrike.cooldown < 3 ||
+				preparesAttack ||
+				webAttack !== undefined ||
+				hexAttack !== undefined ||
+				onHitAffliction !== undefined ||
+				rangedAttackRange !== undefined)) ||
 		(afflictionSource !== undefined &&
 			(afflictionSource !== true ||
-				(!onHitAffliction && !hexAttack) ||
+				(!onHitAffliction && !hexAttack && !blindingStrike) ||
 				spawnEnabled !== false))
 	)
 		throw new RangeError(
@@ -348,6 +361,21 @@ const monsterCatalog = {
 		spawnEnabled: false,
 		afflictionSource: true,
 		hexAttack: { range: 5, cooldown: 3, damage: 2 },
+		dropChance: 0.55,
+		lootPreferences: {},
+	},
+	"shadow-stalker": {
+		name: "shadow stalker",
+		experienceReward: 16,
+		maxHealth: 14,
+		attackDamage: 5,
+		detectionRadius: 7,
+		minFloor: 7,
+		maxFloor: 14,
+		spawnWeight: 1,
+		spawnEnabled: false,
+		afflictionSource: true,
+		blindingStrike: { cooldown: 4 },
 		dropChance: 0.55,
 		lootPreferences: {},
 	},
@@ -665,4 +693,6 @@ export const monsterAffliction = (
 		? "slowed"
 		: MONSTER_DEFINITIONS[kind].hexAttack
 			? "curse"
-			: undefined);
+			: MONSTER_DEFINITIONS[kind].blindingStrike
+				? "blinded"
+				: undefined);

@@ -17,9 +17,10 @@ Current reference for harmful player conditions. Each affliction's definition in
 |---|---|---|---|---|---|
 | Poison | 6 phases | 1 damage per phase after monsters act | Antidote | 40 | Giant spider and wyvern bites, fountains, thrones |
 | Disease | until cured | Maximum HP ×0.8 (minimum 1) | Cure Disease potion | 150 | Plague rat (floors 2–6), 20% per landed bite |
-| Slowed | 10 phases | Evasion −10 points (minimum 5%) | Cleansing potion | 50 | Giant spider web (telegraphed; step off the tile) |
+| Slowed | 30 phases | Evasion −10 points (minimum 5%) | Cleansing potion | 50 | Giant spider web (telegraphed; step off the tile) |
 | Mana Burn | 90 phases | No passive mana recovery (three lost 30-turn ticks) | Cleansing potion | 75 | Mana leech (floors 9–16): every hit drains 2–4 mana, plus a 20% burn |
 | Curse | until cured | Melee to-hit −10, melee damage −1 (minimum 1) | Remove Curse scroll | 250 | Hexweaver (floors 6–12): telegraphed ranged hex, 2 arcane damage plus Curse |
+| Blinded | 30 phases | Live sight radius capped at 2 (map memory kept), melee to-hit −20 | Cleansing potion | 50 | Shadow stalker (floors 7–14): telegraphed adjacent strike; a landed melee roll blinds |
 
 Monster poison (from the Poison Dart spell) is a separate monster timed effect.
 
@@ -28,7 +29,8 @@ Monster poison (from the Poison Dart spell) is a separate monster timed effect.
 - **Sparse budget:** dedicated source monsters (`afflictionSource`) never spawn through ordinary selection. On each eligible floor, a 25% roll on `seed:floor:affliction-source` replaces one of the first two ordinary spawns, so there is at most one source per floor. Giant spiders are an explicit exception: every spider can web.
 - **Guaranteed cure:** at adventure creation, the shallowest source of each affliction saves `remedyDrop` and always drops that affliction's cure.
 - **Remedy loot:** remedies join floor, chest and drop loot in their floor bands. Cure Disease: floors 2–6. Cleansing: 3–12. Remove Curse: 6–14. Antidote: from floor 2.
-- **Telegraphed attacks:** webs and hexes mark their intent first. Sleep or Fear cancels a prepared attack. Saved `webTurn` / `hexTurn` values enforce each cooldown.
+- **Telegraphed attacks:** webs, hexes and blinding strikes mark their intent first. Sleep or Fear cancels a prepared attack. `TARGET_TELEGRAPHS` (`MonsterTelegraphs.ts`) declares each single-target telegraph's owner, saved-target check and threat advice; the saved `telegraphTurn` record enforces cooldowns.
+- **Sight:** Blinded's `sightRadius` modifier caps the radius passed to exploration, so rendering, inspection, targeting and threat markers share one visibility grid. With fog disabled in Settings everything stays visible.
 
 ## Planned
 
