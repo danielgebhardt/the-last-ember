@@ -82,10 +82,15 @@ const SanctuaryDialog = ({
 			error={error}
 			leaveLabel="Leave sanctuary"
 			className="w-[min(44rem,calc(100vw-2rem))]"
-			description="Mercy has a price. Only a confirmed paid treatment changes your condition. Town treatments use no dungeon time and never restore mana."
+			description="Mercy has a price. Only a confirmed paid treatment changes your condition. Town treatments use no dungeon time and never restore mana. Cures are listed for the conditions you have."
 		>
 			<ul className="grid min-h-0 divide-y overflow-y-auto rounded-lg border">
-				{SANCTUARY_SERVICES.map((service) => {
+				{SANCTUARY_SERVICES.filter(
+					(service) =>
+						service === "health" ||
+						service === "cleanse" ||
+						state.afflictions.some((a) => a.kind === service),
+				).map((service) => {
 					const quote = sanctuaryQuote(state, service);
 					const reason = !quote.cost
 						? "Not needed"

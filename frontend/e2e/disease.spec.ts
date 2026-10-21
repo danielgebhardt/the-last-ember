@@ -120,12 +120,10 @@ for (const width of [1280, 1440])
 			.click();
 		await expect(sanctuary).toContainText("Gold: 250");
 		await expect(sanctuary).toContainText("HP 4 / 10");
+		// Only active conditions are listed, so the cured row is gone.
 		await expect(
-			sanctuary.getByRole("button", {
-				name: "Cure Disease Not needed",
-				exact: true,
-			}),
-		).toBeDisabled();
+			sanctuary.getByRole("button", { name: /^Cure Disease/ }),
+		).toHaveCount(0);
 		await sanctuary
 			.getByRole("button", { name: "Leave sanctuary", exact: true })
 			.click();

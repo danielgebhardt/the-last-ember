@@ -30,6 +30,12 @@ it("opens the existing sanctuary, cancels freely, confirms health once and resto
 	const dialog = within(
 		await screen.findByRole("dialog", { name: "Sanctuary" }),
 	);
+	// With no conditions only health and the cleanse are listed.
+	expect(
+		dialog
+			.getAllByRole("listitem")
+			.map((row) => row.firstChild?.firstChild?.textContent),
+	).toEqual(["Restore health", "Complete cleanse"]);
 	await user.click(
 		dialog.getByRole("button", { name: /^Restore health \d+ gold$/ }),
 	);
@@ -55,4 +61,48 @@ it("opens the existing sanctuary, cancels freely, confirms health once and resto
 	await waitFor(() =>
 		expect(screen.getByLabelText("Town map", { exact: true })).toHaveFocus(),
 	);
+});
+
+it("lists a cure only for each active condition", async () => {
+	const initial = createAdventureSession(
+		123,
+		config,
+		DEFAULT_FOG_CONFIGURATION,
+	);
+	const state = {
+		...initial.state,
+		town: { ...createTownLocation(), coordinate: { row: 5, col: 7 } },
+		gold: 300,
+		afflictions: [
+			{ kind: "bleeding" as const, remaining: null, source: "trap" },
+			{ kind: "slowed" as const, remaining: 12, source: "giant spider" },
+		],
+	};
+	render(<Home initialAdventure={{ ...initial, state }} />, {
+		wrapper: ThemeProvider,
+	});
+	const user = userEvent.setup();
+	await user.click(screen.getByRole("button", { name: "Inspect Sanctuary" }));
+	const dialog = within(
+		await screen.findByRole("dialog", { name: "Sanctuary" }),
+	);
+	expect(
+		dialog
+			.getAllByRole("listitem")
+			.map((row) => row.firstChild?.firstChild?.textContent),
+	).toEqual([
+		"Restore health",
+		"Cure Slowed",
+		"Cure Bleeding",
+		"Complete cleanse",
+	]);
+	await user.click(
+		dialog.getByRole("button", { name: "Cure Bleeding 50 gold" }),
+	);
+	await user.click(dialog.getByRole("button", { name: "Confirm treatment" }));
+	expect(dialog.getByText("Gold: 250")).toBeVisible();
+	expect(
+		dialog.queryByRole("button", { name: /^Cure Bleeding/ }),
+	).not.toBeInTheDocument();
+	expect(dialog.getByRole("button", { name: /^Cure Slowed/ })).toBeEnabled();
 });
