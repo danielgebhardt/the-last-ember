@@ -1,6 +1,7 @@
 import { appendActivityEvents } from "../game/ActivityHistory";
 import type { GameState } from "../game/GameState";
 import { canAddToBag, createBag } from "../items/Bag";
+import { ownedItems } from "../items/OwnedItems";
 import { assignPickedUpPotion } from "../items/PotionHotbar";
 import { orthogonalDistance } from "../monsters/MonsterLocations";
 import {
@@ -43,13 +44,7 @@ export const buyPotion = (
 		id: `merchant:${action.kind}:${11 - count}`,
 		kind: action.kind,
 	};
-	if (
-		[
-			...state.bag.items,
-			...Object.values(state.equipment),
-			...state.floorItems.map((e) => e.item),
-		].some((copy) => copy?.id === item.id)
-	)
+	if (ownedItems(state).some((copy) => copy.id === item.id))
 		return { error: "That bottle already belongs to this adventure." };
 	if (!canAddToBag(state.bag, item))
 		return { error: "Your bag is full. Make room before buying a new supply." };

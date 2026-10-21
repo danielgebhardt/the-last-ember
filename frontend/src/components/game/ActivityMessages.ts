@@ -59,6 +59,9 @@ export const formatActivityEvent = (event: ActivityEvent): string => {
 			return `${prefix}${describeObject(event)}`;
 		case "hourglass-turned":
 			return `${prefix}You turn the Hourglass of Ages: +${event.health} HP and +${event.mana} mana, fully restored. ${event.empowered} creature${event.empowered === 1 ? "" : "s"} on this floor grow${event.empowered === 1 ? "s" : ""} stronger.`;
+		case "storage-deposited":
+		case "storage-withdrawn":
+			return `${prefix}You ${event.type === "storage-deposited" ? "store" : "take"} ${ITEM_DEFINITIONS[event.item].name}${event.count > 1 ? ` ×${event.count}` : ""} ${event.type === "storage-deposited" ? "in" : "from"} the storage chest.`;
 		case "portal-used":
 			return `${prefix}You step through the Runic Portal${event.toFloor === event.fromFloor ? " and arrive beside this floor's way down" : ` and arrive on floor ${event.toFloor}, beside its way down`}. The portal goes dark.`;
 		case "mirror-used":

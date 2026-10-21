@@ -61,6 +61,8 @@ export type GameState = {
 	townEquipmentStock: readonly ItemInstance[];
 	townPotionStock: TownPotionStock;
 	townScrollStock: TownScrollStock;
+	// Items left in the town storage chest, in deposit order.
+	townStorage: readonly ItemInstance[];
 	town: TownLocation | null;
 	readonly difficulty: Difficulty;
 	merchantStock: MerchantStock;
@@ -124,6 +126,7 @@ export const createGameState = (
 		townPortal: null,
 		townPotionStock: createTownPotionStock(),
 		townScrollStock: createTownScrollStock(),
+		townStorage: [],
 		townEquipmentStock: createTownEquipmentStock(),
 		difficulty,
 		run,

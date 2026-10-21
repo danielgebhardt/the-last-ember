@@ -1,6 +1,7 @@
 import { appendActivityEvents } from "../game/ActivityHistory";
 import type { GameState } from "../game/GameState";
 import { canAddToBag, createBag } from "../items/Bag";
+import { ownedItems } from "../items/OwnedItems";
 import { assignPickedUpPotion } from "../items/PotionHotbar";
 import {
 	TOWN_POTION_OFFERS,
@@ -75,13 +76,7 @@ export const buyTownStock = (state: GameState, action: BuyTownStockAction) => {
 		id: `${store.idPrefix}:${action.kind}:${offer.quantity - count + 1}`,
 		kind: action.kind,
 	};
-	if (
-		[
-			...state.bag.items,
-			...Object.values(state.equipment),
-			...state.floorItems.map((entry) => entry.item),
-		].some((owned) => owned?.id === item.id)
-	)
+	if (ownedItems(state).some((owned) => owned.id === item.id))
 		return reject(`That ${store.copy} already belongs to this adventure.`);
 	if (!canAddToBag(state.bag, item))
 		return reject(`Your bag is full. Make room for a new ${store.noun} kind.`);

@@ -50,6 +50,7 @@ describe("fixed level-zero town", () => {
 					"sanctuary",
 					"forge",
 					"library",
+					"storage",
 				].includes(building.id)
 					? "open"
 					: "closed",

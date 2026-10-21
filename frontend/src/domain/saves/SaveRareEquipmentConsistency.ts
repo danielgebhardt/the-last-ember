@@ -1,4 +1,5 @@
 import { isRareEquipmentKind } from "../items/Item";
+import { ownedItems } from "../items/OwnedItems";
 import {
 	rareEquipmentId,
 	selectRunRareEquipment,
@@ -9,11 +10,7 @@ import type { SaveDocument } from "./SaveDocument";
 export const hasConsistentRareEquipment = ({
 	state,
 }: SaveDocument): boolean => {
-	const owned = [
-		...state.bag.items,
-		...Object.values(state.equipment).filter((i) => i !== null),
-		...state.floorItems.map((i) => i.item),
-	];
+	const owned = ownedItems(state);
 	const stock = state.townEquipmentStock;
 	const dungeonRare = owned.filter((i) => i.id.startsWith("rare-gear:"));
 	if (

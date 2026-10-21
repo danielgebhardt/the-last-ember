@@ -1,6 +1,7 @@
 import { appendActivityEvents } from "../game/ActivityHistory";
 import type { GameState } from "../game/GameState";
 import { canAddToBag, createBag } from "../items/Bag";
+import { ownedItems } from "../items/OwnedItems";
 import { rareEquipmentId } from "../items/RareEquipment";
 import {
 	TOWN_EQUIPMENT_OFFERS,
@@ -57,13 +58,7 @@ export const buyTownEquipment = (
 		return reject("You do not have enough gold.");
 	if (!canAddToBag(state.bag, item))
 		return reject("Your bag is full. Equipment needs its own slot.");
-	if (
-		[
-			...state.bag.items,
-			...Object.values(state.equipment),
-			...state.floorItems.map((entry) => entry.item),
-		].some((owned) => owned?.id === item.id)
-	)
+	if (ownedItems(state).some((owned) => owned.id === item.id))
 		return reject("That copy already belongs to this adventure.");
 	return {
 		state: {

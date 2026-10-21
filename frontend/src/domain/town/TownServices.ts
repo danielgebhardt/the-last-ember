@@ -23,6 +23,7 @@ const SERVICES = [
 	["sanctuary", "Sanctuary"],
 	["forge", "Forge"],
 	["library", "Library"],
+	["storage", "Storage chest"],
 	["potions", "Potion store"],
 	["scrolls", "Scroll shop"],
 	["armor", "Equipment store"],

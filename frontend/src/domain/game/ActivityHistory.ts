@@ -79,6 +79,11 @@ export type ActivityEvent = { turn: number } & (
 	  }
 	| { type: "portal-used"; fromFloor: number; toFloor: number }
 	| {
+			type: "storage-deposited" | "storage-withdrawn";
+			item: ItemKind;
+			count: number;
+	  }
+	| {
 			type: "hourglass-turned";
 			health: number;
 			mana: number;

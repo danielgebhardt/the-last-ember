@@ -1,5 +1,5 @@
 {
-	"version": 30,
+	"version": 31,
 	"savedAt": "2026-10-21T12:00:00.000Z",
 	"configuration": {
 		"rows": 15,
@@ -92,6 +92,7 @@
 			"exit-scroll": 3,
 			"remove-curse-scroll": 2
 		},
+		"townStorage": [],
 		"town": null,
 		"gold": 300,
 		"merchantStock": {

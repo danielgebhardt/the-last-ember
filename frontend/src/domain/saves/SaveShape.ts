@@ -136,6 +136,8 @@ const eventFields = {
 		activated: boolean,
 	},
 	"portal-used": { fromFloor: floorNumber, toFloor: floorNumber },
+	"storage-deposited": { item: itemKind, count: integer(1) },
+	"storage-withdrawn": { item: itemKind, count: integer(1) },
 	"hourglass-turned": { health: natural, mana: natural, empowered: natural },
 	"mirror-used": {
 		choice: oneOf(["reveal", "reflection", "shatter"]),
@@ -417,7 +419,7 @@ const monsterAwareness: Schema = (value) =>
 			(value.type !== "pursuing" || integer(0, 100)(value.blocked))));
 
 const documentShape = object({
-	version: oneOf([30]),
+	version: oneOf([31]),
 	savedAt: (value) =>
 		text(value) &&
 		typeof value === "string" &&
@@ -454,6 +456,7 @@ const documentShape = object({
 		town: nullable(isTownLocation),
 		townPotionStock: isTownPotionStock,
 		townScrollStock: isTownScrollStock,
+		townStorage: array(item, 0, MAX_BAG_ITEMS),
 		townEquipmentStock: isTownEquipmentStock,
 		townEquipmentPurchases: array(text),
 		merchantStock: isMerchantStock,

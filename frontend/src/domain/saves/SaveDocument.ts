@@ -15,7 +15,7 @@ type SavedFloor = Pick<
 	"floorNumber" | "partitions" | "rooms" | "corridors" | "upStair" | "downStair"
 > & { terrain: string[] };
 export type SaveDocument = {
-	version: 30;
+	version: 31;
 	savedAt: string;
 	configuration: RunConfiguration & {
 		difficulty: Difficulty;
@@ -30,6 +30,7 @@ export type SaveDocument = {
 		| "townEquipmentPurchases"
 		| "townPotionStock"
 		| "townScrollStock"
+		| "townStorage"
 		| "town"
 		| "gold"
 		| "merchantStock"

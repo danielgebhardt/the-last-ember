@@ -1131,6 +1131,14 @@ export default async function prepareFixtures() {
 			["ready", quiet, configuration],
 			["drag-gear", dragGear, configuration],
 			[
+				"town-storage",
+				{
+					...dragGear,
+					town: { ...createTownLocation(), coordinate: { row: 5, col: 16 } },
+				},
+				configuration,
+			],
+			[
 				"drag-gear-town",
 				{
 					...dragGear,

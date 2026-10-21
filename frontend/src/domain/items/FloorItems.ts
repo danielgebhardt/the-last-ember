@@ -73,9 +73,11 @@ export const transferFloorItem = (
 			};
 		}
 		if (
-			[...state.bag.items, ...Object.values(state.equipment)].some(
-				(item) => item?.id === action.itemId,
-			)
+			[
+				...state.bag.items,
+				...Object.values(state.equipment),
+				...state.townStorage,
+			].some((item) => item?.id === action.itemId)
 		)
 			return { error: "You already own that item." };
 		const slot = emptyEquipmentSlotFor(state.equipment, found.item);

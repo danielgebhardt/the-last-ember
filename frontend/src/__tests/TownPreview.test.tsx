@@ -16,9 +16,9 @@ it("supports focused keyboard walking, collision and closed-gate inspection", as
 	await user.keyboard("{ArrowUp}");
 	expect(screen.getByText(/Position:/)).toHaveTextContent("18, 12");
 	expect(screen.getByText("Potion store")).toBeVisible();
-	expect(screen.getAllByText("Closed")).toHaveLength(2);
+	expect(screen.getAllByText("Closed")).toHaveLength(1);
 	expect(screen.getByText("The Rag & Bone")).toBeVisible();
-	expect(screen.getAllByText("Open")).toHaveLength(8);
+	expect(screen.getAllByText("Open")).toHaveLength(9);
 });
 
 it("offers touch movement and inspection without leaving the preview", async () => {

@@ -49,7 +49,7 @@ describe("Portable adventure save files", () => {
 		).toEqual({ ok: true, value: document });
 		for (const text of [
 			"broken",
-			serializeSave({ ...document, version: 99 as 30 }),
+			serializeSave({ ...document, version: 99 as 31 }),
 		])
 			expect((await readAdventureFile(new File([text], "save.json"))).ok).toBe(
 				false,

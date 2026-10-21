@@ -70,6 +70,7 @@ import {
 	type TownSellAction,
 } from "../town/TownSalvageShop";
 import { type BuyTownStockAction, buyTownStock } from "../town/TownStockStores";
+import { moveTownStorage, type TownStorageAction } from "../town/TownStorage";
 import {
 	type TownTravelAction,
 	travelBetweenTownAndDungeon,
@@ -108,6 +109,7 @@ export type PlayerAction =
 	| SanctuaryAction
 	| TownForgeAction
 	| LibraryLearnAction
+	| TownStorageAction
 	| ReturnTownPortalAction
 	| TownSellAction
 	| BuyTownEquipmentAction
@@ -156,7 +158,9 @@ export const resolvePlayerAction = (
 			action.type === "sell-town-lower" ||
 			action.type === "sanctuary-treatment" ||
 			action.type === "town-forge" ||
-			action.type === "library-learn"
+			action.type === "library-learn" ||
+			action.type === "storage-deposit" ||
+			action.type === "storage-withdraw"
 				? { error: "The adventure is complete." }
 				: {}),
 		};
@@ -202,7 +206,9 @@ export const resolvePlayerAction = (
 						action.type === "sell-town-lower" ||
 						action.type === "sanctuary-treatment" ||
 						action.type === "town-forge" ||
-						action.type === "library-learn"
+						action.type === "library-learn" ||
+						action.type === "storage-deposit" ||
+						action.type === "storage-withdraw"
 					? { error: "This adventure has ended." }
 					: {}),
 		};
@@ -223,6 +229,8 @@ export const resolvePlayerAction = (
 		return treatAtSanctuary(state, action);
 	if (action.type === "town-forge") return reforgeAtTown(state, action);
 	if (action.type === "library-learn") return learnAtLibrary(state, action);
+	if (action.type === "storage-deposit" || action.type === "storage-withdraw")
+		return moveTownStorage(state, action);
 	if (action.type === "use-hotbar") {
 		if (!HOTBAR_SLOTS.includes(action.slot))
 			return {
@@ -379,6 +387,7 @@ const resolvePlayerEffect = (
 		| SanctuaryAction
 		| TownForgeAction
 		| LibraryLearnAction
+		| TownStorageAction
 		| HotbarAction
 		| SpellAssignmentAction
 		| TownTravelAction

@@ -5,6 +5,7 @@ import {
 	fitsEquipmentSlot,
 } from "../items/Equipment";
 import { ITEM_DEFINITIONS } from "../items/Item";
+import { ownedItems } from "../items/OwnedItems";
 import {
 	MERCHANT_OFFERS,
 	type MerchantSupply,
@@ -15,6 +16,7 @@ import { chestReward } from "../objects/TreasureChests";
 import { wellReward } from "../objects/WishingWell";
 import { TOWN_EQUIPMENT_OFFERS } from "../town/TownEquipmentStock";
 import { TOWN_STOCK_STORES } from "../town/TownStockStores";
+import { STORAGE_CAPACITY, storageSlots } from "../town/TownStorage";
 import { savedLocations, unique } from "./SaveConsistencyHelpers";
 import type { SaveDocument } from "./SaveDocument";
 import { hasConsistentRareEquipment } from "./SaveRareEquipmentConsistency";
@@ -33,11 +35,13 @@ export const hasConsistentInventory = (document: SaveDocument): boolean => {
 			return false;
 	}
 	if (bagSlots(state.bag).length > BAG_CAPACITY) return false;
-	const allItems = [
-		...state.bag.items,
-		...Object.values(state.equipment).filter((entry) => entry !== null),
-		...state.floorItems.map((entry) => entry.item),
-	];
+	const allItems = ownedItems(state);
+	// Storage is town-only, holds whole stacks within its slots and never the ember.
+	if (
+		storageSlots(state.townStorage).length > STORAGE_CAPACITY ||
+		state.townStorage.some((item) => item.kind === "cure")
+	)
+		return false;
 	if (!unique(allItems.map((entry) => entry.id))) return false;
 	if (!hasConsistentRareEquipment(document)) return false;
 	const purchased = state.townEquipmentPurchases;

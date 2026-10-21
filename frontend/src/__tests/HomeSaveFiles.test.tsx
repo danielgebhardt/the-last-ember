@@ -4,7 +4,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { serializeSave } from "../domain/saves/SaveFormat";
 import { LOCAL_SAVE_KEY } from "../persistence/LocalAdventureSave";
 import { ThemeProvider } from "../settings/ThemeProvider";
-import capturedSaveFile from "./fixtures/adventure-v30.json?raw";
+import capturedSaveFile from "./fixtures/adventure-v31.json?raw";
 import {
 	closeSaveSheet,
 	openSaveSheet,

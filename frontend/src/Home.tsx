@@ -45,6 +45,7 @@ import TownForgeDialog from "./components/town/TownForgeDialog";
 import TownLibraryDialog from "./components/town/TownLibraryDialog";
 import TownMap from "./components/town/TownMap";
 import TownStockShop from "./components/town/TownStockShop";
+import TownStorageDialog from "./components/town/TownStorageDialog";
 import {
 	DEFAULT_FOG_CONFIGURATION,
 	DEFAULT_RUN_CONFIGURATION,
@@ -813,6 +814,14 @@ const Home = ({
 				error={game.actionError}
 				onClose={() => setTownShopOpen(false)}
 				onLearn={handleActionRequested}
+				mapRef={mapRef}
+			/>
+			<TownStorageDialog
+				open={townShopOpen && canPlay}
+				state={game.state}
+				error={game.actionError}
+				onClose={() => setTownShopOpen(false)}
+				onMove={handleActionRequested}
 				mapRef={mapRef}
 			/>
 			<TownForgeDialog
