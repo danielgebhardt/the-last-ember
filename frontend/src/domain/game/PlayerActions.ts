@@ -82,7 +82,11 @@ import {
 	afflictedMeleeAttack,
 	suppressesManaRecovery,
 } from "./AfflictionDefinitions";
-import { advancePlayerAfflictions, tickAfflictionDamage } from "./Afflictions";
+import {
+	advancePlayerAfflictions,
+	tickAfflictionDamage,
+	tickMovementDamage,
+} from "./Afflictions";
 import { type AttackRollSource, createAttackRolls } from "./CombatRandomness";
 import { deriveCombatStats } from "./CombatStats";
 import { activateEscapeFloor } from "./Escape";
@@ -314,15 +318,26 @@ export const resolvePlayerAction = (
 			: struck.player.health > 0
 				? resolvePlayerEffect(struck, action, rollSource)
 				: struck;
+	// Bleeding resolves on the step itself; a lethal step never reaches the tile's trap or gold.
+	const stepped =
+		effect &&
+		!("error" in effect) &&
+		action.type === "move" &&
+		leftTile(struck, effect)
+			? tickMovementDamage(effect)
+			: effect;
 	const result =
 		struck.player.health <= 0
 			? struck
-			: effect && !("error" in effect) && action.type !== "exit-dungeon"
+			: stepped &&
+					!("error" in stepped) &&
+					action.type !== "exit-dungeon" &&
+					stepped.player.health > 0
 				? announceObjectArrival(
 						state,
-						triggerArrivalTrap(collectGoldAtPlayer(effect)),
+						triggerArrivalTrap(collectGoldAtPlayer(stepped)),
 					)
-				: effect;
+				: stepped;
 	if (!result) return { state, turnAdvanced: false };
 	if ("error" in result)
 		return { state, turnAdvanced: false, error: result.error };

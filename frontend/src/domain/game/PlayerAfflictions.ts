@@ -16,6 +16,8 @@ export type AfflictionDefinition<K extends string = string> = Readonly<{
 		meleeDamage?: number;
 		// Damage dealt after monsters act in each committed phase it is active.
 		damagePerPhase?: number;
+		// Damage dealt by each successful voluntary dungeon step.
+		damagePerMove?: number;
 		// Caps the live sight radius in tiles; explored memory is kept.
 		sightRadius?: number;
 	}>;

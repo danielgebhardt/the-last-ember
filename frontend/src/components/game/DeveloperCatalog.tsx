@@ -39,6 +39,7 @@ import { monsterTraits } from "../../domain/monsters/MonsterTraits";
 import {
 	type DungeonObjectKind,
 	OBJECT_DEFINITIONS,
+	TRAP_BLEEDING_CHANCE,
 	TRAP_DISARM_EXPERIENCE,
 } from "../../domain/objects/DungeonObject";
 import { FORGE_PRICES } from "../../domain/objects/ForgottenForge";
@@ -455,6 +456,12 @@ const DeveloperCatalog = ({
 										<p>
 											Successful disarm: {TRAP_DISARM_EXPERIENCE} XP (once per
 											trap)
+										</p>
+									)}
+									{kind === "trap" && (
+										<p>
+											Sprung (stepped on or failed disarm):{" "}
+											{TRAP_BLEEDING_CHANCE * 100}% chance of Bleeding
 										</p>
 									)}
 									<Preview

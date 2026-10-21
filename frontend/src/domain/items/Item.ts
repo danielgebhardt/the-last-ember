@@ -69,6 +69,20 @@ export const ITEM_DEFINITIONS = {
 		description:
 			"Removes Soul Drain before the ensuing phase, restoring maximum mana without refilling it. Does not cure other conditions. One effective use consumes one bottle and one dungeon turn; unaffected use is free. Found on floors 14–20 and in matching chests/drops. Cannot be sold, like other potions.",
 	},
+	// A potion-family remedy so it shares quick slots and potion rules; it is applied, not drunk.
+	bandages: {
+		name: "Bandages",
+		type: "potion",
+		attackBonus: 0,
+		armor: 0,
+		removesAfflictions: ["bleeding"],
+		minFloor: 2,
+		maxFloor: 12,
+		foundWeight: 0.25,
+		dropWeight: 0.25,
+		description:
+			"Stops Bleeding before the ensuing phase. Does not restore HP or cure other conditions. One effective use consumes one roll and one dungeon turn; using it without bleeding is free. Found on floors 2–12 and in matching chests/drops. Cannot be sold, like potions.",
+	},
 	"warding-cloak": {
 		specialFindOnly: true,
 		name: "Warding Cloak",

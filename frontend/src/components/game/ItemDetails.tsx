@@ -253,7 +253,7 @@ const ItemDetails = ({
 									})
 								}
 							>
-								Drink potion
+								{item.kind === "bandages" ? "Apply Bandages" : "Drink potion"}
 							</Button>
 						)}
 

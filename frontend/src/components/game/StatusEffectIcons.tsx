@@ -2,6 +2,7 @@ import { Popover } from "@base-ui/react/popover";
 import {
 	Biohazard,
 	Brain,
+	Droplet,
 	Dumbbell,
 	Eclipse,
 	EyeOff,
@@ -118,6 +119,14 @@ export const AFFLICTION_VISUALS: Record<AfflictionKind, StatusVisual> = {
          border-cyan-700/70 bg-cyan-500/10 text-cyan-800
          shadow-[0_0_8px_rgba(14,116,144,0.24)]
          dark:border-cyan-400/70 dark:bg-cyan-950/50 dark:text-cyan-300
+      `,
+	},
+	bleeding: {
+		Icon: Droplet,
+		className: `
+         border-red-700/70 bg-red-500/10 text-red-800
+         shadow-[0_0_8px_rgba(185,28,28,0.24)]
+         dark:border-red-400/70 dark:bg-red-950/50 dark:text-red-300
       `,
 	},
 	blinded: {

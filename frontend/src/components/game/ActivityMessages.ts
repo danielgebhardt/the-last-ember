@@ -151,7 +151,9 @@ export const formatActivityEvent = (event: ActivityEvent): string => {
 			return `${prefix}${definition.name} ${event.change} (${event.source}). ${event.change === "cured" ? definition.removedText : definition.appliedText}`;
 		}
 		case "player-condition-hit":
-			return `${prefix}${AFFLICTION_DEFINITIONS[event.condition].name} deals ${event.damage} damage to you.`;
+			return event.condition === "bleeding"
+				? `${prefix}You bleed for ${event.damage} damage.`
+				: `${prefix}${AFFLICTION_DEFINITIONS[event.condition].name} deals ${event.damage} damage to you.`;
 		case "player-condition-applied":
 			return `${prefix}You gain ${EFFECT_DEFINITIONS[event.condition].name} for ${event.duration} committed turns.`;
 		case "condition-hit":
@@ -219,7 +221,11 @@ export const formatActivityEvent = (event: ActivityEvent): string => {
 			return `${prefix}The ${MONSTER_DEFINITIONS[event.monster].name} drops ${ITEM_DEFINITIONS[event.item].name}.`;
 		case "item-cleansed": {
 			const verb =
-				ITEM_DEFINITIONS[event.item].type === "scroll" ? "read" : "drink";
+				ITEM_DEFINITIONS[event.item].type === "scroll"
+					? "read"
+					: event.item === "bandages"
+						? "apply"
+						: "drink";
 			const removed = event.conditions ?? [];
 			return removed.length
 				? `${prefix}You ${verb} ${ITEM_DEFINITIONS[event.item].name} and remove ${removed.map((c) => AFFLICTION_DEFINITIONS[c].name).join(" and ")}. ${removed.map((c) => AFFLICTION_DEFINITIONS[c].removedText).join(" ")}`

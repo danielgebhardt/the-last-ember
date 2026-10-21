@@ -264,6 +264,18 @@ export default async function prepareFixtures() {
 				},
 			],
 		};
+		// Bleeding with Bandages on key 1 and nothing else on the floor.
+		const bleeding = {
+			...quiet,
+			player: { ...fresh.player },
+			objects: [],
+			floorItems: quiet.floorItems.filter(
+				(entry) => entry.item.kind === "cure",
+			),
+			afflictions: [{ kind: "bleeding", remaining: null, source: "trap" }],
+			bag: { items: [{ id: "smoke:bandages", kind: "bandages" }] },
+			potionHotbar: ["bandages", null, null, null],
+		};
 		// A Forgotten Forge beside the player on floor 6 of a six-floor run.
 		const forgeConfiguration = { ...configuration, floorCount: 6 };
 		const forgeRun = connectDungeonFloors(
@@ -1019,6 +1031,7 @@ export default async function prepareFixtures() {
 			["plague-bite", plagueBite, configuration],
 			["leech-bite", leechBite, configuration],
 			["hexweaver-sight", hexweaverSight, configuration],
+			["bleeding", bleeding, configuration],
 			["forge", forgeState, forgeConfiguration],
 			["well", wellState, forgeConfiguration],
 			["spider-web", spiderWeb, configuration],

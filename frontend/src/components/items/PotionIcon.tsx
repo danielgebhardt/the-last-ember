@@ -33,6 +33,12 @@ const bottles = {
 		path: "M10 2h4v4l3 4v10a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2V10l3-4V2Z",
 		liquid: "M12 11c-2 2-2 4.5 0 7 2-2.5 2-5 0-7Z",
 	},
+	// A bandage roll with its strip unwound, not a bottle.
+	bandages: {
+		color: "text-item-cure",
+		path: "M8 15a5 5 0 1 1 0-10 5 5 0 0 1 0 10h12v4H10",
+		liquid: "M8 8.5a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3Z",
+	},
 	antidote: {
 		color: "text-item-antidote",
 		path: "M10 3h4v6l6 10a1.3 1.3 0 0 1-1 2H5a1.3 1.3 0 0 1-1-2l6-10V3Z",
@@ -43,6 +49,7 @@ const families: Record<PotionKind, keyof typeof bottles> = {
 	"cure-disease-potion": "remedy",
 	"cleansing-potion": "cleansing",
 	"soul-restoration-potion": "soul",
+	bandages: "bandages",
 	"healing-potion": "health",
 	"greater-healing-potion": "health",
 	"mana-potion": "mana",

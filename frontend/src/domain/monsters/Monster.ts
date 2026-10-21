@@ -485,6 +485,8 @@ const monsterCatalog = {
 		experienceReward: 8,
 		detectionRadius: 8,
 		spawnWeight: 1,
+		// An ordinary spawn, not a sparse source: a deliberate exception like the spider web.
+		onHitAffliction: { kind: "bleeding", chance: 0.15 },
 		dropChance: 0.45,
 		lootPreferences: {},
 	},

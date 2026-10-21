@@ -124,14 +124,15 @@ export const advancePlayerAfflictions = (ticked: GameState): GameState => {
 	};
 };
 
-// Damage ticks right after monsters act and before timed effects such as Renewal, so
-// lethal poison cannot be healed away in the same phase.
-export const tickAfflictionDamage = (state: GameState): GameState => {
+const conditionDamage = (
+	state: GameState,
+	modifier: "damagePerPhase" | "damagePerMove",
+): GameState => {
 	let next = state;
 	for (const { kind } of state.afflictions) {
-		const perPhase = afflictionModifiers(kind).damagePerPhase;
-		if (!perPhase || next.player.health <= 0) continue;
-		const damage = Math.min(next.player.health, perPhase);
+		const amount = afflictionModifiers(kind)[modifier];
+		if (!amount || next.player.health <= 0) continue;
+		const damage = Math.min(next.player.health, amount);
 		const health = next.player.health - damage;
 		next = {
 			...next,
@@ -151,3 +152,13 @@ export const tickAfflictionDamage = (state: GameState): GameState => {
 	}
 	return next;
 };
+
+// Damage ticks right after monsters act and before timed effects such as Renewal, so
+// lethal poison cannot be healed away in the same phase.
+export const tickAfflictionDamage = (state: GameState): GameState =>
+	conditionDamage(state, "damagePerPhase");
+
+// Called once after a successful voluntary dungeon step (a stair step counts once),
+// before the arrival tile resolves, so a lethal step ends the action there.
+export const tickMovementDamage = (state: GameState): GameState =>
+	conditionDamage(state, "damagePerMove");

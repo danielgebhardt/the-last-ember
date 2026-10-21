@@ -33,7 +33,10 @@ import { ESCAPE_ENCOUNTER_RULES } from "../domain/monsters/EscapeEncounters";
 import type { Monster } from "../domain/monsters/Monster";
 import { MONSTER_DEFINITIONS } from "../domain/monsters/Monster";
 import { ESCAPE_PURSUIT_RULES } from "../domain/monsters/PursuitRules";
-import { TRAP_DISARM_EXPERIENCE } from "../domain/objects/DungeonObject";
+import {
+	TRAP_BLEEDING_CHANCE,
+	TRAP_DISARM_EXPERIENCE,
+} from "../domain/objects/DungeonObject";
 import { FORGE_PRICES } from "../domain/objects/ForgottenForge";
 import { SANCTUARY_CONDITION_FEES } from "../domain/town/Sanctuary";
 import { FORGE_TIER_PRICES } from "../domain/town/TownForge";
@@ -256,13 +259,14 @@ const DungeonHelp = ({
 						tile, E opens its numbered loot selection; adjacent opening leaves
 						loot there until you move onto it. G also collects floor items.
 						Walking onto coins collects gold. Traps are visible: avoid them,
-						cross for 2–6 damage, or use E to attempt disarm for one turn. Base
-						disarm chance is 55%, +5% per Dexterity modifier (maximum 95%);
-						success grants {TRAP_DISARM_EXPERIENCE} XP once; failure springs the
-						trap. Spent traps cannot hurt again or grant more XP. Fountains
-						offer a safe sip or a stronger risky draw. E opens their choices;
-						number keys choose and Escape cancels for free. Each chosen draw
-						empties the fountain.
+						cross for 2–6 damage ({TRAP_BLEEDING_CHANCE * 100}% chance of
+						Bleeding), or use E to attempt disarm for one turn. Base disarm
+						chance is 55%, +5% per Dexterity modifier (maximum 95%); success
+						grants {TRAP_DISARM_EXPERIENCE} XP once; failure springs the trap,
+						which can also cause Bleeding. Spent traps cannot hurt again or
+						grant more XP. Fountains offer a safe sip or a stronger risky draw.
+						E opens their choices; number keys choose and Escape cancels for
+						free. Each chosen draw empties the fountain.
 					</li>
 					<li>
 						<span className="font-medium text-foreground">Quest.</span> Recover
@@ -313,8 +317,8 @@ const DungeonHelp = ({
 						after monsters act for six phases; another dose resets the timer. An
 						Antidote removes it before that tick but does not protect against a
 						fresh dose. At most three harmful conditions (poison, Disease,
-						Slowed, Mana Burn, Curse, Blinded, Soul Drain) can be active at
-						once; a fourth is rejected.
+						Slowed, Mana Burn, Curse, Blinded, Bleeding, Soul Drain) can be
+						active at once; a fourth is rejected.
 					</li>
 					<li>
 						<span className="font-medium text-foreground">Disease.</span> Rare
@@ -368,6 +372,18 @@ const DungeonHelp = ({
 						while it lasts.
 					</li>
 					<li>
+						<span className="font-medium text-foreground">Bleeding.</span> A
+						trap that deals damage has a {TRAP_BLEEDING_CHANCE * 100}% chance to
+						open a wound, and a landed wolf bite (floors 2–9) a{" "}
+						{(MONSTER_DEFINITIONS.wolf.onHitAffliction?.chance ?? 0) * 100}%
+						chance. While Bleeding, each step you take in the dungeon costs 1
+						HP, including corridor-run steps and a step onto stairs; it can
+						kill. Waiting, attacking, failed moves and town movement do not
+						bleed. It lasts until Bandages (one turn) or the sanctuary stop it;
+						healing restores HP but not the wound. Corridor running stops when
+						it begins and cannot start while it lasts.
+					</li>
+					<li>
 						<span className="font-medium text-foreground">Soul Drain.</span>{" "}
 						Rare soul wraiths on floors 14–20 fire a soul bolt without warning
 						while they can see you within 3 tiles, then fight in melee until it
@@ -412,7 +428,8 @@ const DungeonHelp = ({
 						{SANCTUARY_CONDITION_FEES.slowed} gold, Mana Burn{" "}
 						{SANCTUARY_CONDITION_FEES["mana-burn"]} gold, Curse{" "}
 						{SANCTUARY_CONDITION_FEES.curse} gold, Blinded{" "}
-						{SANCTUARY_CONDITION_FEES.blinded} gold, Soul Drain{" "}
+						{SANCTUARY_CONDITION_FEES.blinded} gold, Bleeding{" "}
+						{SANCTUARY_CONDITION_FEES.bleeding} gold, Soul Drain{" "}
 						{SANCTUARY_CONDITION_FEES["soul-drain"]} gold, or a complete cleanse
 						of every active condition for their combined fee (at most 600).
 						Every treatment shows its exact price and needs confirmation. Cures

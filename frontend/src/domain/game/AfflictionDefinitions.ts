@@ -107,6 +107,24 @@ export const AFFLICTION_DEFINITIONS = {
 		removedText: "Your sight returns.",
 		absentText: "You are not Blinded.",
 	},
+	bleeding: {
+		kind: "bleeding",
+		sanctuaryFee: 50,
+		summary: "1 damage per step you take until cured",
+		target: "player",
+		name: "Bleeding",
+		lifetime: { type: "until-cured" },
+		modifiers: { damagePerMove: 1 },
+		// Running would bleed you step by step without a decision.
+		blocksRunning: true,
+		cure: "bandages",
+		guidance:
+			"Each step you take in the dungeon deals 1 damage, including corridor-run steps and a step onto stairs; it can kill. Waiting, attacking, failed moves and town movement do not bleed. Until cured by Bandages or sanctuary treatment. Healing restores HP but does not stop the bleeding.",
+		appliedText:
+			"1 damage per step until cured. Apply Bandages or visit the sanctuary.",
+		removedText: "The bleeding stops.",
+		absentText: "You are not bleeding.",
+	},
 	"soul-drain": {
 		kind: "soul-drain",
 		sanctuaryFee: 400,

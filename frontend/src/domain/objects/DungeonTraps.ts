@@ -1,10 +1,15 @@
 import { hashStringToUint32 } from "../dungeon/DungeonRun";
 import { createSeededRandom } from "../dungeon/Seed";
 import { appendActivityEvents } from "../game/ActivityHistory";
+import { applyPlayerAffliction } from "../game/Afflictions";
 import { deriveAttributes } from "../game/Attributes";
 import { awardExperience } from "../game/ExperienceRewards";
 import type { GameState } from "../game/GameState";
-import { type DungeonObject, TRAP_DISARM_EXPERIENCE } from "./DungeonObject";
+import {
+	type DungeonObject,
+	TRAP_BLEEDING_CHANCE,
+	TRAP_DISARM_EXPERIENCE,
+} from "./DungeonObject";
 import { objectDamage, spendObject } from "./ObjectEffects";
 export const trapDamage = (seed: number, trap: DungeonObject): number =>
 	2 +
@@ -12,12 +17,27 @@ export const trapDamage = (seed: number, trap: DungeonObject): number =>
 	Math.floor(
 		createSeededRandom(hashStringToUint32(`${seed}:${trap.id}:damage`))() * 3,
 	);
-export const springTrap = (state: GameState, trap: DungeonObject): GameState =>
-	objectDamage(spendObject(state, trap), trapDamage(state.run.seed, trap), {
-		type: "trap-sprung",
-		damage: trapDamage(state.run.seed, trap),
-		turn: state.turn,
-	});
+// A sprung trap's own stream decides Bleeding, so disarm and damage rolls stay unchanged.
+export const trapCausesBleeding = (seed: number, trap: DungeonObject) =>
+	createSeededRandom(hashStringToUint32(`${seed}:${trap.id}:bleeding`))() <
+	TRAP_BLEEDING_CHANCE;
+export const springTrap = (
+	state: GameState,
+	trap: DungeonObject,
+): GameState => {
+	const sprung = objectDamage(
+		spendObject(state, trap),
+		trapDamage(state.run.seed, trap),
+		{
+			type: "trap-sprung",
+			damage: trapDamage(state.run.seed, trap),
+			turn: state.turn,
+		},
+	);
+	return trapCausesBleeding(state.run.seed, trap)
+		? applyPlayerAffliction(sprung, "bleeding", "trap")
+		: sprung;
+};
 export const disarmTrap = (
 	state: GameState,
 	trap: DungeonObject,

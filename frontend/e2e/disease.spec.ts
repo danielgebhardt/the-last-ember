@@ -288,3 +288,35 @@ test("Hexweaver: a telegraphed hex curses; a Remove Curse scroll lifts it", asyn
 	);
 	expect(await mapGeometry(page)).toEqual(frame);
 });
+
+test("Bleeding: each step costs 1 HP until Bandages stop it", async ({
+	page,
+}) => {
+	await page.goto("/");
+	await importAdventure(page, "bleeding");
+	const frame = await mapGeometry(page);
+	const log = page.getByRole("log", { name: "Activity log", exact: true });
+	const wound = page.getByRole("button", {
+		name: "Bleeding — until cured",
+		exact: true,
+	});
+	await expect(wound).toBeVisible();
+	await wound.click();
+	await expect(page.getByRole("dialog", { name: /Bleeding/ })).toContainText(
+		"Cure: Bandages (one turn) or sanctuary Cure Bleeding (50 gold).",
+	);
+	await page.keyboard.press("Escape");
+	await map(page).click();
+	const before = await health(page).textContent();
+	for (const key of ["ArrowRight", "ArrowLeft", "ArrowDown", "ArrowUp"]) {
+		await page.keyboard.press(key);
+		if ((await health(page).textContent()) !== before) break;
+	}
+	await expect(log).toContainText("You bleed for 1 damage.");
+	await page.keyboard.press("1");
+	await expect(page.getByRole("button", { name: /^Bleeding/ })).toHaveCount(0);
+	await expect(log).toContainText(
+		"You apply Bandages and remove Bleeding. The bleeding stops.",
+	);
+	expect(await mapGeometry(page)).toEqual(frame);
+});
