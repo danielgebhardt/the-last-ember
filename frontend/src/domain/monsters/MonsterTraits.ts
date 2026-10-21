@@ -74,6 +74,10 @@ export const monsterTraits = (kind: MonsterKind): readonly string[] => {
 		traits.push(
 			`Sparse: at most one affliction carrier per eligible floor, replacing an ordinary creature. The first ${definition.name} of an adventure always drops a ${ITEM_DEFINITIONS[AFFLICTION_DEFINITIONS[sourceAffliction].cure].name}.`,
 		);
+	if (kind === "ember-warden")
+		traits.push(
+			"Guards the ember on the final floor and sleeps until it first sees you. Alternates a marked heavy strike (step off the tile) and a fire breath with a countdown, at least 4 phases apart, with melee in between. Health and attack grow with the dungeon's depth. Take the ember while it stands and it follows you up every floor; defeat it for a +2 weapon or armor piece and a large XP reward.",
+		);
 	if (definition.alarmRadius)
 		traits.push(
 			`Alerts up to six nearby creatures within clear wall/door sight using your last seen position. Stays at its post. Prepares one alarm before sounding it on the next active phase. Kill, Sleep or Fear interrupts preparation; rooting does not silence it. Once sounded, it calls an ordinary floor creature to the nearest free room tile every ${SENTRY_SUMMON_INTERVAL} of its actions while fewer than ${SENTRY_MAX_SUMMONS_ALIVE} of them live, until killed. Reinforcements give no XP, loot or gold.`,

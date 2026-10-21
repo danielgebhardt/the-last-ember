@@ -27,7 +27,12 @@ export type SpecialActionOutcome = Readonly<{
 }>;
 // Behaviors that need a pause after resolving; the monster saves the turn. The
 // soul bolt is unprepared but shares this cooldown record.
-export type TelegraphCooldown = "web" | "hex" | "blind" | "soul-bolt";
+export type TelegraphCooldown =
+	| "web"
+	| "hex"
+	| "blind"
+	| "soul-bolt"
+	| "breath";
 
 type TelegraphRule = Readonly<{
 	owns: (definition: MonsterDefinition) => boolean;
@@ -108,6 +113,8 @@ export const TELEGRAPH_COOLDOWNS: Readonly<
 	hex: (definition) => definition.hexAttack?.cooldown,
 	blind: (definition) => definition.blindingStrike?.cooldown,
 	"soul-bolt": (definition) => definition.soulBolt?.cooldown,
+	// Only a breather with a cooldown (the Ember Warden) pauses between breaths.
+	breath: (definition) => definition.areaAttack?.cooldown,
 };
 
 // Another use needs more than the cooldown since the last resolution.

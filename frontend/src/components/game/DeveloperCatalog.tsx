@@ -30,6 +30,7 @@ import {
 	type ItemKind,
 	isRareEquipmentKind,
 } from "../../domain/items/Item";
+import { wardenStats } from "../../domain/monsters/EmberWarden";
 import {
 	MONSTER_DEFINITIONS,
 	type MonsterKind,
@@ -282,7 +283,9 @@ const DeveloperCatalog = ({
 									<p>
 										{kind === "reflection"
 											? `Health half your effective maximum (rounded up) · Attack your minimum melee damage, both copied when summoned`
-											: `Health ${definition.maxHealth} · Attack ${definition.attackDamage}`}{" "}
+											: kind === "ember-warden"
+												? `Health ${wardenStats(5).maxHealth}–${wardenStats(20).maxHealth} · Attack ${wardenStats(5).attackDamage}–${wardenStats(20).attackDamage} by dungeon depth (5–20 floors)`
+												: `Health ${definition.maxHealth} · Attack ${definition.attackDamage}`}{" "}
 										· XP {definition.experienceReward}
 									</p>
 									<p>

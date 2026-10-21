@@ -6,6 +6,7 @@ import BruteIcon from "./BruteIcon";
 import ChampionIcon from "./ChampionIcon";
 import ChargerIcon from "./ChargerIcon";
 import CultistIcon from "./CultistIcon";
+import EmberWardenIcon from "./EmberWardenIcon";
 import FrostGiantIcon from "./FrostGiantIcon";
 import GoblinArcherIcon from "./GoblinArcherIcon";
 import GoblinIcon from "./GoblinIcon.tsx";
@@ -163,6 +164,11 @@ export const MONSTER_VISUALS: Record<
 		icon: FrostGiantIcon,
 		color: "text-monster-cyan",
 		label: MONSTER_DEFINITIONS["frost-giant"].name,
+	},
+	"ember-warden": {
+		icon: EmberWardenIcon,
+		color: "text-item-gear",
+		label: MONSTER_DEFINITIONS["ember-warden"].name,
 	},
 	reflection: {
 		icon: ReflectionIcon,

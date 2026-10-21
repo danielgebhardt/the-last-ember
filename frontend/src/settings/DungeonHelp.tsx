@@ -276,7 +276,11 @@ const DungeonHelp = ({
 						the ember on the final floor with G, then return to the entrance on
 						floor 1. The protected quest pouch uses no bag slot; the ember
 						cannot be drunk or dropped. Step onto the entrance tile with the
-						ember to win. There is no time limit.
+						ember to win. There is no time limit. The Ember Warden guards the
+						ember: it sleeps until it sees you, then alternates a marked heavy
+						strike and a counted-down fire breath. Defeat it for a +2 weapon or
+						armor piece and a large XP reward, or take the ember while it
+						stands, and it follows you up every floor until it falls.
 					</li>
 					<li>
 						<span className="font-medium text-foreground">Equipment.</span> Open

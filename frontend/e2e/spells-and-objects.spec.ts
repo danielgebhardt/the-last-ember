@@ -400,3 +400,21 @@ test("Hourglass of Ages trades a full recovery for stronger creatures", async ({
 	const health = page.getByLabel("Player health", { exact: true });
 	await expect(health).toContainText(/Health (\d+) \/ \1/);
 });
+
+test("the Ember Warden wakes when it sees you, then telegraphs its fire breath", async ({
+	page,
+}, info) => {
+	await page.setViewportSize({ width: 1470, height: 830 });
+	await importAdventure(page, "ember-warden");
+	const log = page.getByRole("log");
+	await page.keyboard.press("Space");
+	await expect(log).toContainText(
+		"The Ember Warden rises from the ember's light.",
+	);
+	await page.keyboard.press("Space");
+	await expect(log).toContainText(
+		/The Ember Warden prepares a fire blast\. Leave the marked area within \d+ turns\./,
+	);
+	await expect(page.getByLabel(/Ember Warden/).first()).toBeVisible();
+	await page.screenshot({ path: info.outputPath("warden-breath.png") });
+});

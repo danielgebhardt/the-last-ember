@@ -58,6 +58,15 @@ export type Monster = {
 	summonedBy?: string;
 	// Survived an Hourglass of Ages: ×1.5 base health and attack, never compounded.
 	empowered?: true;
+	// The Ember Warden's stats, fixed by dungeon depth when generated, so following you
+	// to shallower floors never weakens it; plus whether it has woken or been enraged.
+	warden?: Readonly<{
+		maxHealth: number;
+		attackDamage: number;
+		depth: number;
+		awake?: true;
+		enraged?: true;
+	}>;
 	// A mirror reflection's stats, copied from the player when it was summoned.
 	reflection?: Readonly<{ maxHealth: number; attackDamage: number }>;
 	// Turn each cooldown telegraph last resolved; another needs more than its cooldown.
@@ -113,6 +122,8 @@ export type MonsterDefinition = {
 		radius: 1 | 2;
 		minDamage: number;
 		maxDamage: number;
+		// Phases between breaths; with one, a breather may also prepare heavy attacks.
+		cooldown?: number;
 	};
 };
 export const validateMonsterDefinition = (
@@ -199,7 +210,10 @@ export const validateMonsterDefinition = (
 				areaAttack.minDamage < 1 ||
 				!Number.isInteger(areaAttack.maxDamage) ||
 				areaAttack.maxDamage < areaAttack.minDamage ||
-				preparesAttack ||
+				(areaAttack.cooldown !== undefined &&
+					(!Number.isSafeInteger(areaAttack.cooldown) ||
+						areaAttack.cooldown < 3)) ||
+				(preparesAttack && areaAttack.cooldown === undefined) ||
 				enemySpells !== undefined)) ||
 		!Number.isSafeInteger(experienceReward) ||
 		experienceReward <= 0 ||
@@ -359,6 +373,31 @@ const monsterCatalog = {
 		spawnEnabled: false,
 		dropChance: 0,
 		lootPreferences: {},
+	},
+	// The ember's guardian: placed once by quest generation on the final floor, never by
+	// ordinary spawning. Its health and attack come from its saved depth stats.
+	"ember-warden": {
+		name: "Ember Warden",
+		minFloor: 5,
+		maxFloor: 20,
+		maxHealth: 80,
+		attackDamage: 12,
+		experienceReward: 72,
+		detectionRadius: 8,
+		spawnWeight: 1,
+		spawnEnabled: false,
+		dropChance: 0,
+		lootPreferences: {},
+		preparesAttack: true,
+		resists: ["fire"],
+		areaAttack: {
+			element: "fire",
+			range: 5,
+			radius: 2,
+			minDamage: 6,
+			maxDamage: 12,
+			cooldown: 4,
+		},
 	},
 	"giant-rat": {
 		name: "giant rat",

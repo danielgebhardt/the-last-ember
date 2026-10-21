@@ -62,6 +62,12 @@ export const formatActivityEvent = (event: ActivityEvent): string => {
 		case "storage-deposited":
 		case "storage-withdrawn":
 			return `${prefix}You ${event.type === "storage-deposited" ? "store" : "take"} ${ITEM_DEFINITIONS[event.item].name}${event.count > 1 ? ` ×${event.count}` : ""} ${event.type === "storage-deposited" ? "in" : "from"} the storage chest.`;
+		case "warden-woke":
+			return `${prefix}The Ember Warden rises from the ember's light. It guards the ember with a heavy strike and a breath of fire.`;
+		case "warden-enraged":
+			return `${prefix}You take the ember from its guardian. The Ember Warden roars and will follow you all the way home.`;
+		case "warden-followed":
+			return `${prefix}The Ember Warden climbs after you onto floor ${event.floorNumber}.`;
 		case "portal-used":
 			return `${prefix}You step through the Runic Portal${event.toFloor === event.fromFloor ? " and arrive beside this floor's way down" : ` and arrive on floor ${event.toFloor}, beside its way down`}. The portal goes dark.`;
 		case "mirror-used":

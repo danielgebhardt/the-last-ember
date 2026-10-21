@@ -1,4 +1,5 @@
 import { createMonsterDrop } from "../items/MonsterDrops";
+import { isWarden, wardenDrop } from "../monsters/EmberWarden";
 import { MONSTER_DEFINITIONS, type Monster } from "../monsters/Monster";
 import { resistedDamage } from "../monsters/MonsterResistance";
 import { goldAmount } from "../objects/Gold";
@@ -80,7 +81,9 @@ export const damageMonster = (
 		const mirror = mirrorFor(state.objects, monster);
 		const drop = mirror
 			? reflectionDrop(state.run.seed, monster, mirror)
-			: createMonsterDrop(state.run.seed, monster);
+			: isWarden(monster)
+				? wardenDrop(state.run.seed, monster)
+				: createMonsterDrop(state.run.seed, monster);
 		if (drop && !floorItems.some((entry) => entry.item.id === drop.item.id)) {
 			floorItems = [...floorItems, drop];
 			// Player attacks resolve on a visible target before the monster phase.

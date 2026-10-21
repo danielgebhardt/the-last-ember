@@ -396,6 +396,42 @@ export default async function prepareFixtures() {
 				],
 			},
 		};
+		// Floor 5 (the final floor) a few tiles from the dormant Ember Warden, in its room,
+		// with the floor's other monsters removed.
+		const freshWarden = fresh.monsters.find((m) => m.kind === "ember-warden");
+		if (!freshWarden) throw new Error("Expected the Ember Warden");
+		const wardenRoom = run.floors[4].rooms.find(
+			(r) =>
+				freshWarden.coordinate.row >= r.startRow &&
+				freshWarden.coordinate.row <= r.endRow &&
+				freshWarden.coordinate.col >= r.startCol &&
+				freshWarden.coordinate.col <= r.endCol,
+		);
+		if (!wardenRoom) throw new Error("Expected the Warden's room");
+		let wardenApproach;
+		for (let row = wardenRoom.startRow; row <= wardenRoom.endRow; row++)
+			for (let col = wardenRoom.startCol; col <= wardenRoom.endCol; col++) {
+				const distance =
+					Math.abs(row - freshWarden.coordinate.row) +
+					Math.abs(col - freshWarden.coordinate.col);
+				const free = !fresh.floorItems.some(
+					(i) =>
+						i.floorNumber === 5 &&
+						i.coordinate.row === row &&
+						i.coordinate.col === col,
+				);
+				if (!wardenApproach && distance >= 3 && distance <= 4 && free)
+					wardenApproach = { row, col };
+			}
+		if (!wardenApproach) throw new Error("Expected a tile near the Warden");
+		const wardenState = {
+			...fresh,
+			run: { ...run, activeFloor: 5, playerCoordinate: wardenApproach },
+			monsters: fresh.monsters.filter(
+				(m) => m.floorNumber !== 5 || m.kind === "ember-warden",
+			),
+			objects: fresh.objects.filter((o) => o.floorNumber !== 5),
+		};
 		const mirrorState = {
 			...forgeState,
 			objects: [
@@ -1158,6 +1194,7 @@ export default async function prepareFixtures() {
 			["forge", forgeState, forgeConfiguration],
 			["well", wellState, forgeConfiguration],
 			["hourglass", hourglassState, hourglassConfiguration],
+			["ember-warden", wardenState, configuration],
 			[
 				"runic-portal",
 				portalState,

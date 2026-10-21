@@ -38,7 +38,10 @@ describe("Generated expanded adventure continuation", () => {
 			expect(makeState()).toEqual(initial);
 			expect(initial.run.floors).toHaveLength(20);
 			expect(
-				initial.monsters.filter((actor) => actor.kind !== "iron-champion"),
+				initial.monsters.filter(
+					(actor) =>
+						actor.kind !== "iron-champion" && actor.kind !== "ember-warden",
+				),
 			).toHaveLength(240);
 			expect(initial.bag.items.map((item) => item.kind)).toEqual([
 				"healing-potion",

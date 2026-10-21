@@ -78,6 +78,8 @@ export type ActivityEvent = { turn: number } & (
 			activated: boolean;
 	  }
 	| { type: "portal-used"; fromFloor: number; toFloor: number }
+	| { type: "warden-woke" | "warden-enraged" }
+	| { type: "warden-followed"; floorNumber: number }
 	| {
 			type: "storage-deposited" | "storage-withdrawn";
 			item: ItemKind;

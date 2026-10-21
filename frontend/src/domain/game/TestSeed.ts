@@ -49,8 +49,9 @@ export const randomAdventureSeed = (random: () => number = Math.random) => {
 };
 
 // Coverage comes from the content definitions, so new objects, affliction
-// sources and monsters join the test floors without editing this file. The champion
-// and the reflection only exist through their encounters (elite gate, mirror).
+// sources and monsters join the test floors without editing this file. The champion,
+// the reflection and the Ember Warden only exist through their encounters (elite gate,
+// mirror, the ember on the generated final floor).
 const ENCOUNTERS = (
 	Object.keys(OBJECT_DEFINITIONS) as DungeonObjectKind[]
 ).filter((kind) => kind !== "door");
@@ -65,6 +66,7 @@ const BESTIARY = (Object.keys(MONSTER_DEFINITIONS) as MonsterKind[]).filter(
 	(kind) =>
 		kind !== "iron-champion" &&
 		kind !== "reflection" &&
+		kind !== "ember-warden" &&
 		!AFFLICTION_SOURCES.includes(kind),
 );
 

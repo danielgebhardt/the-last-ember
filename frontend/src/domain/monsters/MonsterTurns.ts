@@ -20,6 +20,7 @@ import {
 import { hasMonsterEffect, monsterSkipsAction } from "../game/TimedEffects";
 import { navigationRun } from "../objects/NavigationTerrain";
 import { alertNearbyMonsters } from "./AlarmAlerts";
+import { wakeWarden, wardenDormant } from "./EmberWarden";
 import { chooseEnemySpell } from "./EnemyCasting";
 import { MONSTER_DEFINITIONS, type Monster } from "./Monster";
 import { resolveMonsterAlarm } from "./MonsterAlarm";
@@ -202,6 +203,22 @@ export const resolveMonsterPhase = (
 			}
 		}
 		if (monsterSkipsAction(state, monster)) continue;
+		// A dormant Warden does nothing until it first sees you; waking takes its action.
+		if (wardenDormant(monster)) {
+			const woke = wakeWarden(
+				state,
+				monster,
+				detectsPlayer(navigation, monster, pursuitRules),
+			);
+			if (woke) {
+				monster = woke.monster;
+				monsters = monsters.map((actor) =>
+					actor.id === monster.id ? monster : actor,
+				);
+				events.push(...woke.events);
+			}
+			continue;
+		}
 		const interval = MONSTER_DEFINITIONS[monster.kind].actionInterval ?? 1;
 		if (state.turn % interval !== 0) continue;
 		if (hasMonsterEffect(state, monster, "afraid")) {

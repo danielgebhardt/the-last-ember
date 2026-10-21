@@ -62,13 +62,14 @@ const empowered = (value: number, monster: StatSource) =>
 // difficulty scales the result once.
 type StatSource = Pick<
 	Monster,
-	"kind" | "heroic" | "reflection" | "empowered"
+	"kind" | "heroic" | "reflection" | "warden" | "empowered"
 > & {
 	floorNumber?: number;
 };
 export const actorAttackDamage = (monster: StatSource): number =>
 	empowered(
 		monster.reflection?.attackDamage ??
+			monster.warden?.attackDamage ??
 			monsterAttackDamage(monster.kind, monster.floorNumber, monster.heroic),
 		monster,
 	);
@@ -79,6 +80,7 @@ export const actorMaximumHealth = (
 	scaleEnemyValue(
 		empowered(
 			monster.reflection?.maxHealth ??
+				monster.warden?.maxHealth ??
 				monsterBaseHealth(monster.kind, monster.floorNumber, monster.heroic),
 			monster,
 		),

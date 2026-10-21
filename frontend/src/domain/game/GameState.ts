@@ -20,6 +20,7 @@ import {
 	createMerchantStock,
 	type MerchantStock,
 } from "../merchant/MerchantRules";
+import { placeEmberWarden } from "../monsters/EmberWarden";
 import type { Monster } from "../monsters/Monster.ts";
 import {
 	markFirstRemedySources,
@@ -113,11 +114,19 @@ export const createGameState = (
 		objects: spawnRunObjects(run, monsters, floorItems),
 	});
 	const objects = placeMerchants({ ...encounters, run, floorItems });
+
 	const rare = allocateRunRareEquipment(
 		run,
 		encounters.monsters,
 		floorItems,
 		objects,
+	);
+	const warden = placeEmberWarden(
+		run,
+		encounters.monsters,
+		[...floorItems, ...rare.items],
+		objects,
+		difficulty,
 	);
 	return {
 		rareEquipment: rare.allocation,
@@ -148,8 +157,8 @@ export const createGameState = (
 		bag: createStartingBag(),
 		potionHotbar: createStartingPotionHotbar(),
 		floorItems: [...floorItems, ...rare.items],
-		monsters:
-			difficulty === 1
+		monsters: [
+			...(difficulty === 1
 				? markFirstRemedySources(encounters.monsters)
 				: markFirstRemedySources(encounters.monsters).map((monster) => ({
 						...monster,
@@ -158,7 +167,10 @@ export const createGameState = (
 							difficulty,
 							monster.floorNumber,
 						),
-					})),
+					}))),
+			// The ember's guardian joins after ordinary placement, so it never shifts it.
+			...(warden ? [warden] : []),
+		],
 		activityHistory: createActivityHistory(),
 	};
 };

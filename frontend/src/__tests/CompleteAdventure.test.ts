@@ -165,8 +165,11 @@ describe("Complete cure-and-return adventures", () => {
 					ITEM_DEFINITIONS[x.item.kind].type !== "spellbook",
 			),
 		);
-		expect(long.monsters.filter((x) => x.floorNumber <= 5)).toEqual(
-			short.monsters,
-		);
+		// Each dungeon's own Warden guards its final floor.
+		expect(
+			long.monsters.filter(
+				(x) => x.floorNumber <= 5 && x.kind !== "ember-warden",
+			),
+		).toEqual(short.monsters.filter((x) => x.kind !== "ember-warden"));
 	});
 });

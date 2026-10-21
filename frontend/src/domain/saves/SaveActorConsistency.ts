@@ -1,4 +1,5 @@
 import { hasLineOfSight } from "../dungeon/Visibility";
+import { WARDEN_SPAWN_ID, wardenStats } from "../monsters/EmberWarden";
 import {
 	MONSTER_DEFINITIONS,
 	type Monster,
@@ -60,6 +61,26 @@ const isConsistentReinforcement = (
 	);
 };
 
+// The Ember Warden is unique, owns its reserved ID, carries the stats for this
+// dungeon's depth, and only leaves the final floor once enraged.
+const isConsistentWarden = (entry: Monster, depth: number): boolean => {
+	const warden = entry.kind === "ember-warden";
+	if (
+		warden !== (entry.warden !== undefined) ||
+		warden !== entry.id.endsWith(`:${WARDEN_SPAWN_ID}`)
+	)
+		return false;
+	if (!entry.warden) return true;
+	const stats = wardenStats(depth);
+	return (
+		entry.warden.depth === depth &&
+		entry.warden.maxHealth === stats.maxHealth &&
+		entry.warden.attackDamage === stats.attackDamage &&
+		(entry.floorNumber === depth || entry.warden.enraged === true) &&
+		(entry.warden.enraged !== true || entry.warden.awake === true)
+	);
+};
+
 export const hasConsistentActors = (document: SaveDocument): boolean => {
 	const { state } = document;
 	const { run } = state;
@@ -73,6 +94,8 @@ export const hasConsistentActors = (document: SaveDocument): boolean => {
 	);
 	if (
 		!unique(state.monsters.map((entry) => entry.id)) ||
+		state.monsters.filter((entry) => entry.kind === "ember-warden").length >
+			1 ||
 		// At most one guaranteed remedy per affliction, matching an enabled remedy.
 		!unique(
 			state.monsters.flatMap((entry) =>
@@ -90,6 +113,7 @@ export const hasConsistentActors = (document: SaveDocument): boolean => {
 				/^\d+:[1-9]\d*$/.test(entry.id) &&
 				Number(entry.id.split(":")[0]) === entry.floorNumber &&
 				entry.id.endsWith(":1000001") === (entry.heroic === true) &&
+				isConsistentWarden(entry, run.floors.length) &&
 				// Only a turned hourglass on the monster's floor empowers it.
 				(entry.empowered === undefined ||
 					state.objects.some(

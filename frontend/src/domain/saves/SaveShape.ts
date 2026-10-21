@@ -136,6 +136,9 @@ const eventFields = {
 		activated: boolean,
 	},
 	"portal-used": { fromFloor: floorNumber, toFloor: floorNumber },
+	"warden-woke": {},
+	"warden-enraged": {},
+	"warden-followed": { floorNumber },
 	"storage-deposited": { item: itemKind, count: integer(1) },
 	"storage-withdrawn": { item: itemKind, count: integer(1) },
 	"hourglass-turned": { health: natural, mana: natural, empowered: natural },
@@ -595,6 +598,15 @@ const documentShape = object({
 				summons: optional(object({ count: natural, turn: natural })),
 				summonedBy: optional(text),
 				empowered: optional((value) => value === true),
+				warden: optional(
+					object({
+						maxHealth: integer(1),
+						attackDamage: integer(1),
+						depth: floorNumber,
+						awake: optional((value) => value === true),
+						enraged: optional((value) => value === true),
+					}),
+				),
 				reflection: optional(
 					object({ maxHealth: integer(1), attackDamage: integer(1) }),
 				),

@@ -36,7 +36,10 @@ it("places each selected book once within its floor band without changing ordina
 	).toEqual(
 		spawnRunItems(
 			run,
-			state.monsters.filter((actor) => actor.kind !== "iron-champion"),
+			state.monsters.filter(
+				(actor) =>
+					actor.kind !== "iron-champion" && actor.kind !== "ember-warden",
+			),
 		),
 	);
 	expect(eligibleLootKinds(1, "found")).not.toContain("book-ember-bolt");

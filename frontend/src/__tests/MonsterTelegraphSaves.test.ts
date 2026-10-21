@@ -1,5 +1,6 @@
 // @vitest-environment node
 import { describe, expect, it } from "vitest";
+import { WARDEN_SPAWN_ID, wardenStats } from "../domain/monsters/EmberWarden";
 import {
 	MONSTER_DEFINITIONS,
 	type Monster,
@@ -15,6 +16,17 @@ import { parseSave, serializeSave } from "../domain/saves/SaveFormat";
 import { savedAdventure } from "./SaveTestHelpers";
 
 const kinds = Object.keys(MONSTER_DEFINITIONS) as MonsterKind[];
+// The Warden only exists with its reserved ID and depth stats; off the final floor it
+// must be enraged. Any other kind is reshaped as is.
+const asKind = (monster: Monster, kind: MonsterKind): Monster =>
+	kind === "ember-warden"
+		? {
+				...monster,
+				kind,
+				id: `${monster.floorNumber}:${WARDEN_SPAWN_ID}`,
+				warden: { ...wardenStats(5), awake: true, enraged: true },
+			}
+		: { ...monster, kind };
 // One floor-2 actor (the player is on floor 1) reshaped into the kind under test.
 const withActor = (change: (monster: Monster) => Monster) => {
 	const document = savedAdventure();
@@ -54,7 +66,7 @@ describe("registered monster telegraphs in saves", () => {
 			const other = kinds.find((kind) => !rule.owns(MONSTER_DEFINITIONS[kind]));
 			if (!owner || !other) throw new Error(`${type} needs both kinds`);
 			const prepare = (kind: MonsterKind) => (monster: Monster) => {
-				const actor = { ...monster, kind };
+				const actor = asKind(monster, kind);
 				return {
 					...actor,
 					intent: {
@@ -81,8 +93,7 @@ describe("registered monster telegraphs in saves", () => {
 			const other = kinds.find((kind) => !owns(kind));
 			if (!owner || !other) throw new Error(`${cooldown} needs both kinds`);
 			const cooled = (kind: MonsterKind) => (monster: Monster) => ({
-				...monster,
-				kind,
+				...asKind(monster, kind),
 				telegraphTurn: { [cooldown]: 0 },
 			});
 			const parsed = parseSave(serializeSave(withActor(cooled(owner))));

@@ -11,7 +11,20 @@ import type { GameState } from "../game/GameState";
 import { MONSTER_DEFINITIONS, type Monster } from "./Monster";
 import { orthogonalDistance } from "./MonsterLocations";
 import { detectsPlayer } from "./MonsterPursuit";
+import { resolvedTelegraph, telegraphReady } from "./MonsterTelegraphs";
 import { PURSUIT_RULES, type PursuitRules } from "./PursuitRules";
+
+// The Warden's breath scales with its saved depth attack: half to full, raw.
+const breathDamage = (
+	monster: Monster,
+	profile: { minDamage: number; maxDamage: number },
+): [number, number] =>
+	monster.warden
+		? [
+				Math.max(1, Math.ceil(monster.warden.attackDamage / 2)),
+				monster.warden.attackDamage,
+			]
+		: [profile.minDamage, profile.maxDamage];
 export const resolveMonsterArea = (
 	state: GameState,
 	monster: Monster,
@@ -32,7 +45,10 @@ export const resolveMonsterArea = (
 				},
 				events: [],
 			};
-		const finished = { ...monster, intent: { type: "idle" as const } };
+		// A breather with a cooldown records when it breathed, blocked or not.
+		const finished = profile.cooldown
+			? resolvedTelegraph(monster, "breath", state.turn)
+			: { ...monster, intent: { type: "idle" as const } };
 		if (
 			!hasLineOfSight(
 				state.run.floors[state.run.activeFloor - 1].terrain,
@@ -78,7 +94,7 @@ export const resolveMonsterArea = (
 			turn: state.turn,
 			attackerId: `${monster.id}:area:${intent.element}`,
 			targetId: "player",
-		}).damage(profile.minDamage, profile.maxDamage);
+		}).damage(...breathDamage(monster, profile));
 		const damage = resolveIncomingMagicDamage(
 			scaleEnemyValue(rawDamage, state.difficulty),
 			deriveCombatStats(state.equipment, state.progression, state.effects)
@@ -100,6 +116,7 @@ export const resolveMonsterArea = (
 	}
 	if (
 		monster.intent.type !== "idle" ||
+		!telegraphReady(monster, "breath", state.turn) ||
 		!detectsPlayer(state.run, monster, rules) ||
 		orthogonalDistance(monster.coordinate, state.run.playerCoordinate) >
 			profile.range

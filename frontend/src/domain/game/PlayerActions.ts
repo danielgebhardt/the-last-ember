@@ -38,6 +38,7 @@ import {
 	sellEquipment,
 	sellLowerEquipment,
 } from "../merchant/MerchantTrades";
+import { enrageWarden, followWarden } from "../monsters/EmberWarden";
 import type { Monster } from "../monsters/Monster.ts";
 import {
 	type MonsterPhaseScope,
@@ -431,7 +432,7 @@ const resolvePlayerEffect = (
 	if (action.type === "pickup" || action.type === "drop") {
 		const transfer = transferFloorItem(state, action);
 		if ("error" in transfer) return transfer;
-		return {
+		const transferred: GameState = {
 			...state,
 			bag: transfer.bag,
 			...(action.type === "pickup" &&
@@ -476,6 +477,10 @@ const resolvePlayerEffect = (
 				...(transfer.equipEvent ? [{ ...transfer.equipEvent, turn }] : []),
 			]),
 		};
+		// Taking the ember while its Warden stands enrages it.
+		return action.type === "pickup" && transfer.event.item === "cure"
+			? enrageWarden(transferred)
+			: transferred;
 	}
 	if (action.type === "equip" || action.type === "unequip") {
 		const change = changeEquipment(state.equipment, state.bag, action);
@@ -526,8 +531,11 @@ const resolvePlayerEffect = (
 	);
 	return monster
 		? resolveAttack(state, monster, rollSource)
-		: activateEscapeFloor(
-				announceArrival({ ...state, run }, state.run.activeFloor),
+		: followWarden(
+				activateEscapeFloor(
+					announceArrival({ ...state, run }, state.run.activeFloor),
+					state.run.activeFloor,
+				),
 				state.run.activeFloor,
 			);
 };
