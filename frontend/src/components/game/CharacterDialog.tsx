@@ -1,7 +1,13 @@
 import { Dialog } from "@base-ui/react/dialog";
 import { Tabs } from "@base-ui/react/tabs";
 import { Backpack, BookOpen, PackageOpen, UserRound } from "lucide-react";
-import { type RefObject, useLayoutEffect, useRef, useState } from "react";
+import {
+	type ReactNode,
+	type RefObject,
+	useLayoutEffect,
+	useRef,
+	useState,
+} from "react";
 import { Button } from "@/components/ui/button";
 import { EmberMenuHeader } from "@/components/ui/EmberMenu";
 import { EmberTab, EmberTabsList } from "@/components/ui/EmberTabs";
@@ -22,7 +28,11 @@ import {
 } from "../../domain/items/Equipment";
 import type { FloorItem } from "../../domain/items/FloorItems";
 import type { PotionHotbar } from "../../domain/items/PotionHotbar";
-import { ItemDragProvider, type ItemDragSource } from "../dnd/ItemDrag";
+import {
+	ItemDragProvider,
+	type ItemDragSource,
+	useItemDropTarget,
+} from "../dnd/ItemDrag";
 import { formatActivityEvent } from "./ActivityMessages";
 import BagContents, { BAG_DROP_ID } from "./BagContents";
 import { isCharacterShortcut } from "./CharacterShortcut";
@@ -34,6 +44,37 @@ import PotionAssignments, { potionSlotFrom } from "./PotionAssignments";
 import ProgressionView from "./ProgressionView";
 import QuestStatus from "./QuestStatus";
 import SpellsView from "./SpellsView";
+
+const GROUND_DROP_ID = "ground";
+// Dragging a bag stack here drops every copy on your tile for one turn, like Drop.
+const GroundPanel = ({
+	enabled,
+	children,
+}: {
+	enabled: boolean;
+	children: ReactNode;
+}) => {
+	const drop = useItemDropTarget(GROUND_DROP_ID, {
+		label: "the ground",
+		accepts: ({ from }) => enabled && from === "bag",
+	});
+	return (
+		<div
+			ref={drop.ref}
+			className={`ember-menu-panel min-w-0 ${
+				drop.accepts
+					? `ring-2 ${drop.isOver ? "ring-primary" : "ring-primary/40"}`
+					: ""
+			}`}
+		>
+			<h3 className="ember-menu-section-heading mb-2 flex items-center gap-2">
+				<PackageOpen aria-hidden="true" className="size-4 text-primary" />
+				Nearby / Ground
+			</h3>
+			{children}
+		</div>
+	);
+};
 
 type CharacterDialogProps = {
 	afflictions?: readonly ActiveAffliction[];
@@ -49,6 +90,8 @@ type CharacterDialogProps = {
 	bag: Bag;
 	potionHotbar: PotionHotbar;
 	floorItems: readonly FloorItem[];
+	// Items can only be dropped on the ground in the dungeon.
+	inTown?: boolean;
 	gold?: number;
 	turn: number;
 	history: ActivityHistory;
@@ -72,6 +115,7 @@ const CharacterDialog = ({
 	bag,
 	potionHotbar,
 	floorItems,
+	inTown = false,
 	gold = 0,
 	turn,
 	history,
@@ -136,6 +180,8 @@ const CharacterDialog = ({
 			onAction({ type: "assign-hotbar", slot: potionSlot, itemId: item.id });
 		else if (targetId === BAG_DROP_ID && fromPotionSlot)
 			onAction({ type: "clear-hotbar", slot: fromPotionSlot });
+		else if (targetId === GROUND_DROP_ID && source.from === "bag")
+			onAction({ type: "drop", itemId: item.id, wholeStack: true });
 		else return;
 		if (source.from === "bag" || source.from.startsWith("slot:")) {
 			setSelection(null);
@@ -342,21 +388,14 @@ const CharacterDialog = ({
 											) : null}
 										</BagContents>
 										<QuestStatus quest={quest} pouch />
-										<div className="ember-menu-panel min-w-0">
-											<h3 className="ember-menu-section-heading mb-2 flex items-center gap-2">
-												<PackageOpen
-													aria-hidden="true"
-													className="size-4 text-primary"
-												/>
-												Nearby / Ground
-											</h3>
+										<GroundPanel enabled={dragEnabled && !inTown}>
 											<FloorItemsView
 												compactEmpty
 												items={floorItems}
 												alive={player.health > 0 && !won}
 												onAction={onAction}
 											/>
-										</div>
+										</GroundPanel>
 									</div>
 								</div>
 							</ItemDragProvider>

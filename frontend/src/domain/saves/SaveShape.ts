@@ -337,7 +337,7 @@ const eventFields = {
 	"item-equipped": { item: itemKind, slot, replaced: optional(itemKind) },
 	"item-unequipped": { item: itemKind, slot, replaced: optional(itemKind) },
 	"item-picked-up": { item: itemKind },
-	"item-dropped": { item: itemKind },
+	"item-dropped": { item: itemKind, count: optional(integer(2)) },
 	"item-cleansed": {
 		item: itemKind,
 		conditions: optional(

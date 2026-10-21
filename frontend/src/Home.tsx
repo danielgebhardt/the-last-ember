@@ -406,6 +406,7 @@ const Home = ({
 							bag={game.state.bag}
 							potionHotbar={game.state.potionHotbar}
 							floorItems={currentItems}
+							inTown={game.state.town !== null}
 							turn={turn}
 							history={game.state.activityHistory}
 							actionError={game.actionError}

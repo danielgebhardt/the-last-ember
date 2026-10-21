@@ -297,7 +297,8 @@ const DungeonHelp = ({
 						Use Page Up / Page Down for larger piles. You can also use Character
 						to pick up or drop items. Successful transfers use a turn; opening
 						or dismissing the chooser is free. Unequip worn gear before dropping
-						it.
+						it. In the dungeon you can also drag a bag stack onto Nearby /
+						Ground in Character to drop the whole stack for one turn.
 					</li>
 					<li>
 						<span className="font-medium text-foreground">Potions.</span> Select
@@ -418,6 +419,7 @@ const DungeonHelp = ({
 						chest, for free. The Rag &amp; Bone buys carried equipment at the
 						old expansion plot in the southeast. Its Sell menu includes
 						confirmed Sell all Lower items; worn gear and supplies stay yours.
+						You can also drag gear onto its sell area, then confirm the sale.
 						Town movement and shopping do not advance dungeon turns or restore
 						health or mana. Stand on the south gate and press Enter to enter the
 						dungeon. At the floor-1 exit, Enter returns to town until you

@@ -1,6 +1,7 @@
 import { Dialog } from "@base-ui/react/dialog";
 import { Tabs } from "@base-ui/react/tabs";
 import {
+	type ReactNode,
 	type RefObject,
 	useId,
 	useLayoutEffect,
@@ -19,12 +20,67 @@ import {
 	type MerchantSupply,
 } from "../../domain/merchant/MerchantRules";
 import {
+	ItemDragProvider,
+	useDraggedItem,
+	useItemDrag,
+	useItemDropTarget,
+} from "../dnd/ItemDrag";
+import {
 	comparisonDescription,
 	comparisonStyles,
 } from "../game/EquipmentComparisonView";
 import EquipmentPreviews from "../game/EquipmentPreviews";
 import ItemIcon from "../items/ItemIcon";
 import MerchantIcon from "../objects/MerchantIcon";
+
+const SALE_DROP_ID = "sale";
+// Lets a sale button also be dragged onto the sell area; it stays a normal button.
+const SaleDragSource = ({
+	item,
+	enabled,
+	render,
+}: {
+	item: ItemInstance;
+	enabled: boolean;
+	render: (drag: ReturnType<typeof useItemDrag>) => ReactNode;
+}) => {
+	const drag = useItemDrag(
+		`sale:${item.id}`,
+		{ item, name: itemName(item), from: "sale" },
+		!enabled,
+	);
+	return render(drag);
+};
+// The footer is always a drop target; while gear is dragged it invites the drop,
+// which only proposes a sale for confirmation.
+const SellDropArea = ({
+	enabled,
+	children,
+}: {
+	enabled: boolean;
+	children: ReactNode;
+}) => {
+	const drop = useItemDropTarget(SALE_DROP_ID, {
+		label: "the sell area",
+		accepts: ({ from }) => enabled && from === "sale",
+	});
+	const dragged = useDraggedItem();
+	return (
+		<div
+			ref={drop.ref}
+			className={`h-full rounded-md ${drop.accepts ? `ring-2 ${drop.isOver ? "ring-primary" : "ring-primary/40"}` : ""}`}
+		>
+			{drop.accepts && dragged?.item ? (
+				<p className="flex h-full items-center justify-center p-2 text-sm">
+					Drop here to sell {dragged.name} for{" "}
+					{equipmentSalePrice(dragged.item)} gold. You will confirm first.
+				</p>
+			) : (
+				children
+			)}
+		</div>
+	);
+};
 
 type Props = {
 	venue?: "dungeon" | "rag-and-bone";
@@ -50,6 +106,13 @@ const MerchantDialog = ({
 }: Props) => {
 	const inTown = venue === "rag-and-bone";
 	const [confirmLowerSale, setConfirmLowerSale] = useState(false);
+	// A gear stack dropped on the sell area waits here for confirmation.
+	const [pendingSale, setPendingSale] = useState<ItemInstance | null>(null);
+	const saleConfirmationRef = useRef<HTMLFieldSetElement>(null);
+	useLayoutEffect(() => {
+		if (open && pendingSale)
+			saleConfirmationRef.current?.focus({ preventScroll: true });
+	}, [open, pendingSale]);
 	const confirmationRef = useRef<HTMLFieldSetElement>(null);
 	const lowerSale = lowerEquipmentSale(state);
 	useLayoutEffect(() => {
@@ -57,7 +120,10 @@ const MerchantDialog = ({
 			confirmationRef.current?.focus({ preventScroll: true });
 	}, [open, confirmLowerSale]);
 	useLayoutEffect(() => {
-		if (!open) setConfirmLowerSale(false);
+		if (!open) {
+			setConfirmLowerSale(false);
+			setPendingSale(null);
+		}
 	}, [open]);
 	const titleRef = useRef<HTMLHeadingElement>(null),
 		[tab, setTab] = useState<"buy" | "sell">(inTown ? "sell" : "buy");
@@ -152,238 +218,297 @@ const MerchantDialog = ({
 							Close
 						</Dialog.Close>
 					</header>
-					<Tabs.Root
-						value={tab}
-						onValueChange={(value) => {
-							if (value === "buy" || value === "sell") {
-								setTab(value);
+					<ItemDragProvider
+						onDrop={(source, targetId) => {
+							if (targetId === SALE_DROP_ID && source.item) {
 								setConfirmLowerSale(false);
+								setPendingSale(source.item);
 							}
 						}}
-						className="flex min-h-0 flex-1 flex-col gap-2"
 					>
-						<Tabs.List
-							className="flex shrink-0 items-center gap-2 border-b"
-							aria-label="Merchant trading"
+						<Tabs.Root
+							value={tab}
+							onValueChange={(value) => {
+								if (value === "buy" || value === "sell") {
+									setTab(value);
+									setConfirmLowerSale(false);
+									setPendingSale(null);
+								}
+							}}
+							className="flex min-h-0 flex-1 flex-col gap-2"
 						>
-							{!inTown && (
+							<Tabs.List
+								className="flex shrink-0 items-center gap-2 border-b"
+								aria-label="Merchant trading"
+							>
+								{!inTown && (
+									<Tabs.Tab
+										value="buy"
+										ref={buyTab}
+										className="rounded-t px-4 py-2 font-semibold data-[active]:border-b-2 data-[active]:border-primary"
+									>
+										Buy
+									</Tabs.Tab>
+								)}
 								<Tabs.Tab
-									value="buy"
-									ref={buyTab}
+									value="sell"
+									ref={sellTab}
 									className="rounded-t px-4 py-2 font-semibold data-[active]:border-b-2 data-[active]:border-primary"
 								>
-									Buy
+									Sell
 								</Tabs.Tab>
-							)}
-							<Tabs.Tab
-								value="sell"
-								ref={sellTab}
-								className="rounded-t px-4 py-2 font-semibold data-[active]:border-b-2 data-[active]:border-primary"
-							>
-								Sell
-							</Tabs.Tab>
-							<p className="ml-auto font-semibold tabular-nums">
-								Gold {state.gold}
-							</p>
-						</Tabs.List>
-						{!inTown && (
-							<Tabs.Panel
-								value="buy"
-								className="grid min-h-0 flex-1 content-start gap-2 overflow-y-auto sm:grid-cols-2 lg:grid-cols-4"
-							>
-								{supplies.map((kind, index) => (
-									<Button
-										key={kind}
-										variant="outline"
-										className="relative grid h-auto min-w-0 content-start justify-items-start gap-2 whitespace-normal p-3 text-left"
-										disabled={
-											!onBuy ||
-											state.merchantStock[kind] === 0 ||
-											state.gold < MERCHANT_OFFERS[kind].price
-										}
-										onClick={() => onBuy?.(kind)}
-									>
-										<kbd className="absolute top-3 right-3 rounded border px-1.5 text-xs text-muted-foreground">
-											{index + 1}
-										</kbd>
-										<span className="size-7 shrink-0">
-											<ItemIcon kind={kind} />
-										</span>
-										<span>
-											<span className="block font-semibold">
-												{ITEM_DEFINITIONS[kind].name}
-											</span>
-											<span className="block text-xs text-muted-foreground">
-												{MERCHANT_OFFERS[kind].price} gold ·{" "}
-												{state.merchantStock[kind]} remaining
-											</span>
-											<span className="mt-1 block text-xs font-normal text-muted-foreground">
-												{ITEM_DEFINITIONS[kind].description}
-											</span>
-										</span>
-									</Button>
-								))}
-							</Tabs.Panel>
-						)}
-						<Tabs.Panel value="sell" className="min-h-0 flex-1 overflow-y-auto">
-							<p className="mb-2 text-xs text-muted-foreground">
-								Unequip worn gear first. Sell carried equipment only; supplies
-								and the ember stay yours. Sold slots stay until you close.
-							</p>
-							{saleItems.length > 0 && (
-								<ul className="grid items-start gap-2 sm:grid-cols-2 lg:grid-cols-4">
-									{saleItems.map((original) => {
-										const current = gear.find(
-											(item) => item.id === original.id,
-										);
-										const sold = !current;
-										const item = current ?? original;
-										const comparison = compareEquipment(item, state);
-										const descriptionId = `${comparisonId}-${item.id}`;
-										return (
-											<li key={item.id} className="relative min-w-0 rounded-lg">
-												<div
-													aria-hidden={sold || undefined}
-													className={`grid content-start gap-1 ${sold ? "invisible pointer-events-none opacity-0" : ""}`}
-												>
-													<Button
-														variant="outline"
-														className={`h-auto min-h-20 w-full justify-start gap-2 whitespace-normal p-2 text-left ${comparison ? comparisonStyles[comparison.label].border : ""}`}
-														aria-label={`${itemName(item)} · Sell for ${equipmentSalePrice(item)} gold`}
-														disabled={!onSell || sold}
-														aria-describedby={
-															comparison ? descriptionId : undefined
-														}
-														onClick={() => {
-															onSell?.(item.id);
-															setConfirmLowerSale(false);
-															setFocusAfterSale(true);
-														}}
-													>
-														<span className="size-6 shrink-0">
-															<ItemIcon kind={item.kind} />
-														</span>
-														<span>
-															<span className="block break-words">
-																{itemName(item)}
-															</span>
-															<span className="block text-xs text-muted-foreground">
-																Sell for {equipmentSalePrice(item)} gold
-															</span>
-															{comparison && (
-																<span
-																	aria-hidden="true"
-																	className={`block text-xs font-medium ${comparisonStyles[comparison.label].text}`}
-																>
-																	{comparison.label}
-																</span>
-															)}
-														</span>
-													</Button>
-													{comparison && (
-														<>
-															<span id={descriptionId} className="sr-only">
-																{comparisonDescription(comparison)}
-															</span>
-															<details className="text-xs">
-																<summary className="cursor-pointer rounded px-2 py-1 text-muted-foreground">
-																	Compare {itemName(item)}
-																</summary>
-																<div className="mt-2">
-																	<EquipmentPreviews
-																		item={item}
-																		context={state}
-																	/>
-																</div>
-															</details>
-														</>
-													)}
-												</div>
-												{sold && (
-													<p
-														role="status"
-														className="absolute inset-0 flex items-center justify-center p-3 text-sm text-muted-foreground"
-													>
-														Sold: {itemName(item)}
-													</p>
-												)}
-											</li>
-										);
-									})}
-								</ul>
-							)}
-							{gear.length === 0 && (
-								<p className="text-sm text-muted-foreground">
-									No carried equipment to sell.
+								<p className="ml-auto font-semibold tabular-nums">
+									Gold {state.gold}
 								</p>
-							)}
-						</Tabs.Panel>
-					</Tabs.Root>
-					<div
-						className={
-							tab === "sell"
-								? "h-28 shrink-0 overflow-y-auto border-t pt-2 sm:h-16"
-								: "hidden"
-						}
-					>
-						{tab === "sell" &&
-							(confirmLowerSale ? (
-								<fieldset
-									ref={confirmationRef}
-									tabIndex={-1}
-									aria-label="Confirm Lower equipment sale"
-									className="flex flex-wrap items-center justify-between gap-2"
+							</Tabs.List>
+							{!inTown && (
+								<Tabs.Panel
+									value="buy"
+									className="grid min-h-0 flex-1 content-start gap-2 overflow-y-auto sm:grid-cols-2 lg:grid-cols-4"
 								>
-									<div>
-										<p className="text-sm">
-											Sell {lowerSale.items.length} Lower items for{" "}
-											{lowerSale.gold} gold?
-										</p>
-										<p className="text-xs text-muted-foreground">
-											{inTown
-												? "The whole sale is free of dungeon time."
-												: "The whole sale takes one turn, then monsters act once."}
-										</p>
-									</div>
-									<div className="flex flex-wrap gap-2">
+									{supplies.map((kind, index) => (
 										<Button
-											disabled={!onSellLower || !lowerSale.items.length}
-											onClick={() => {
-												onSellLower?.();
-												setConfirmLowerSale(false);
-												setFocusAfterSale(true);
-											}}
-										>
-											Confirm bulk sale
-										</Button>
-										<Button
+											key={kind}
 											variant="outline"
-											onClick={() => {
-												setConfirmLowerSale(false);
-												setFocusAfterSale(true);
-											}}
+											className="relative grid h-auto min-w-0 content-start justify-items-start gap-2 whitespace-normal p-3 text-left"
+											disabled={
+												!onBuy ||
+												state.merchantStock[kind] === 0 ||
+												state.gold < MERCHANT_OFFERS[kind].price
+											}
+											onClick={() => onBuy?.(kind)}
 										>
-											Cancel bulk sale
+											<kbd className="absolute top-3 right-3 rounded border px-1.5 text-xs text-muted-foreground">
+												{index + 1}
+											</kbd>
+											<span className="size-7 shrink-0">
+												<ItemIcon kind={kind} />
+											</span>
+											<span>
+												<span className="block font-semibold">
+													{ITEM_DEFINITIONS[kind].name}
+												</span>
+												<span className="block text-xs text-muted-foreground">
+													{MERCHANT_OFFERS[kind].price} gold ·{" "}
+													{state.merchantStock[kind]} remaining
+												</span>
+												<span className="mt-1 block text-xs font-normal text-muted-foreground">
+													{ITEM_DEFINITIONS[kind].description}
+												</span>
+											</span>
 										</Button>
-									</div>
-								</fieldset>
-							) : (
-								<div className="flex flex-wrap items-center gap-x-4 gap-y-1">
-									<Button
-										variant="outline"
-										disabled={!onSellLower || !lowerSale.items.length}
-										onClick={() => setConfirmLowerSale(true)}
-									>
-										Sell all Lower items ({lowerSale.items.length}) ·{" "}
-										{lowerSale.gold} gold
-									</Button>
-									<p className="text-xs text-muted-foreground">
-										Red/Lower gear only. Better, Same and Tradeoff items stay
-										yours.
+									))}
+								</Tabs.Panel>
+							)}
+							<Tabs.Panel
+								value="sell"
+								className="min-h-0 flex-1 overflow-y-auto"
+							>
+								<p className="mb-2 text-xs text-muted-foreground">
+									Unequip worn gear first. Sell carried equipment only; supplies
+									and the ember stay yours. Sold slots stay until you close.
+								</p>
+								{saleItems.length > 0 && (
+									<ul className="grid items-start gap-2 sm:grid-cols-2 lg:grid-cols-4">
+										{saleItems.map((original) => {
+											const current = gear.find(
+												(item) => item.id === original.id,
+											);
+											const sold = !current;
+											const item = current ?? original;
+											const comparison = compareEquipment(item, state);
+											const descriptionId = `${comparisonId}-${item.id}`;
+											return (
+												<li
+													key={item.id}
+													className="relative min-w-0 rounded-lg"
+												>
+													<div
+														aria-hidden={sold || undefined}
+														className={`grid content-start gap-1 ${sold ? "invisible pointer-events-none opacity-0" : ""}`}
+													>
+														<SaleDragSource
+															item={item}
+															enabled={inTown && !!onSell && !sold}
+															render={(drag) => (
+																<Button
+																	ref={drag.ref}
+																	variant="outline"
+																	className={`h-auto min-h-20 w-full touch-manipulation justify-start gap-2 whitespace-normal p-2 text-left ${comparison ? comparisonStyles[comparison.label].border : ""} ${drag.isDragging ? "opacity-40" : ""}`}
+																	aria-label={`${itemName(item)} · Sell for ${equipmentSalePrice(item)} gold`}
+																	disabled={!onSell || sold}
+																	{...drag.dragProps}
+																	aria-describedby={drag.describedBy(
+																		comparison ? descriptionId : undefined,
+																	)}
+																	onClick={() => {
+																		onSell?.(item.id);
+																		setConfirmLowerSale(false);
+																		setFocusAfterSale(true);
+																	}}
+																>
+																	<span className="size-6 shrink-0">
+																		<ItemIcon kind={item.kind} />
+																	</span>
+																	<span>
+																		<span className="block break-words">
+																			{itemName(item)}
+																		</span>
+																		<span className="block text-xs text-muted-foreground">
+																			Sell for {equipmentSalePrice(item)} gold
+																		</span>
+																		{comparison && (
+																			<span
+																				aria-hidden="true"
+																				className={`block text-xs font-medium ${comparisonStyles[comparison.label].text}`}
+																			>
+																				{comparison.label}
+																			</span>
+																		)}
+																	</span>
+																</Button>
+															)}
+														/>
+														{comparison && (
+															<>
+																<span id={descriptionId} className="sr-only">
+																	{comparisonDescription(comparison)}
+																</span>
+																<details className="text-xs">
+																	<summary className="cursor-pointer rounded px-2 py-1 text-muted-foreground">
+																		Compare {itemName(item)}
+																	</summary>
+																	<div className="mt-2">
+																		<EquipmentPreviews
+																			item={item}
+																			context={state}
+																		/>
+																	</div>
+																</details>
+															</>
+														)}
+													</div>
+													{sold && (
+														<p
+															role="status"
+															className="absolute inset-0 flex items-center justify-center p-3 text-sm text-muted-foreground"
+														>
+															Sold: {itemName(item)}
+														</p>
+													)}
+												</li>
+											);
+										})}
+									</ul>
+								)}
+								{gear.length === 0 && (
+									<p className="text-sm text-muted-foreground">
+										No carried equipment to sell.
 									</p>
-								</div>
-							))}
-					</div>
+								)}
+							</Tabs.Panel>
+						</Tabs.Root>
+						<div
+							className={
+								tab === "sell"
+									? "h-28 shrink-0 overflow-y-auto border-t pt-2 sm:h-16"
+									: "hidden"
+							}
+						>
+							{tab === "sell" &&
+								(pendingSale ? (
+									<fieldset
+										ref={saleConfirmationRef}
+										tabIndex={-1}
+										aria-label="Confirm equipment sale"
+										className="flex flex-wrap items-center justify-between gap-2"
+									>
+										<p className="text-sm">
+											Sell {itemName(pendingSale)} for{" "}
+											{equipmentSalePrice(pendingSale)} gold?
+										</p>
+										<div className="flex flex-wrap gap-2">
+											<Button
+												disabled={!onSell}
+												onClick={() => {
+													onSell?.(pendingSale.id);
+													setPendingSale(null);
+													setFocusAfterSale(true);
+												}}
+											>
+												Confirm sale
+											</Button>
+											<Button
+												variant="outline"
+												onClick={() => {
+													setPendingSale(null);
+													setFocusAfterSale(true);
+												}}
+											>
+												Cancel sale
+											</Button>
+										</div>
+									</fieldset>
+								) : confirmLowerSale ? (
+									<fieldset
+										ref={confirmationRef}
+										tabIndex={-1}
+										aria-label="Confirm Lower equipment sale"
+										className="flex flex-wrap items-center justify-between gap-2"
+									>
+										<div>
+											<p className="text-sm">
+												Sell {lowerSale.items.length} Lower items for{" "}
+												{lowerSale.gold} gold?
+											</p>
+											<p className="text-xs text-muted-foreground">
+												{inTown
+													? "The whole sale is free of dungeon time."
+													: "The whole sale takes one turn, then monsters act once."}
+											</p>
+										</div>
+										<div className="flex flex-wrap gap-2">
+											<Button
+												disabled={!onSellLower || !lowerSale.items.length}
+												onClick={() => {
+													onSellLower?.();
+													setConfirmLowerSale(false);
+													setFocusAfterSale(true);
+												}}
+											>
+												Confirm bulk sale
+											</Button>
+											<Button
+												variant="outline"
+												onClick={() => {
+													setConfirmLowerSale(false);
+													setFocusAfterSale(true);
+												}}
+											>
+												Cancel bulk sale
+											</Button>
+										</div>
+									</fieldset>
+								) : (
+									<SellDropArea enabled={inTown && !!onSell}>
+										<div className="flex flex-wrap items-center gap-x-4 gap-y-1">
+											<Button
+												variant="outline"
+												disabled={!onSellLower || !lowerSale.items.length}
+												onClick={() => setConfirmLowerSale(true)}
+											>
+												Sell all Lower items ({lowerSale.items.length}) ·{" "}
+												{lowerSale.gold} gold
+											</Button>
+											<p className="text-xs text-muted-foreground">
+												Red/Lower gear only. Better, Same and Tradeoff items
+												stay yours. You can also drag gear here to sell it.
+											</p>
+										</div>
+									</SellDropArea>
+								))}
+						</div>
+					</ItemDragProvider>
 					<div className={error ? "shrink-0" : "hidden"}>
 						{error && (
 							<p role="alert" className="text-sm text-destructive">

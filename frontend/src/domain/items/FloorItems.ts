@@ -1,7 +1,13 @@
 import type { Coordinate } from "../dungeon/DungeonTypes";
 import type { GameState } from "../game/GameState";
 import type { SpellKind } from "../game/Spells";
-import { type Bag, canAddToBag, createBag, removeBagItem } from "./Bag";
+import {
+	type Bag,
+	bagItemKey,
+	canAddToBag,
+	createBag,
+	removeBagItem,
+} from "./Bag";
 import {
 	type Equipment,
 	emptyEquipmentSlotFor,
@@ -17,10 +23,13 @@ export type FloorItem = Readonly<{
 }>;
 export type FloorItemAction =
 	| { type: "pickup"; itemId: string }
-	| { type: "drop"; itemId: string };
+	// A whole-stack drop (dragged from Character) drops every copy for one turn.
+	| { type: "drop"; itemId: string; wholeStack?: boolean };
 export type FloorItemEvent = {
 	type: "item-picked-up" | "item-dropped";
 	item: ItemKind;
+	// Copies dropped together, when more than one.
+	count?: number;
 };
 type Transfer =
 	| {
@@ -105,18 +114,30 @@ export const transferFloorItem = (
 			error:
 				"That item is not in your bag. Unequip worn gear before dropping it.",
 		};
-	if (state.floorItems.some((entry) => entry.item.id === item.id))
+	const copies =
+		action.wholeStack === true
+			? state.bag.items.filter((copy) => bagItemKey(copy) === bagItemKey(item))
+			: [item];
+	if (
+		state.floorItems.some((entry) =>
+			copies.some((copy) => copy.id === entry.item.id),
+		)
+	)
 		return { error: "That item is already on the floor." };
 	return {
-		bag: removeBagItem(state.bag, item.id),
+		bag: copies.reduce((bag, copy) => removeBagItem(bag, copy.id), state.bag),
 		floorItems: [
 			...state.floorItems,
-			{
-				item,
+			...copies.map((copy) => ({
+				item: copy,
 				floorNumber: state.run.activeFloor,
 				coordinate: { ...state.run.playerCoordinate },
-			},
+			})),
 		],
-		event: { type: "item-dropped", item: item.kind },
+		event: {
+			type: "item-dropped",
+			item: item.kind,
+			...(copies.length > 1 ? { count: copies.length } : {}),
+		},
 	};
 };

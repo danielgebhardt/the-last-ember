@@ -234,7 +234,7 @@ export const formatActivityEvent = (event: ActivityEvent): string => {
 				return `${prefix}${ADVENTURE_STORY.pickup} Return to the entrance on floor 1.`;
 			return `${prefix}You pick up ${ITEM_DEFINITIONS[event.item].name}.`;
 		case "item-dropped":
-			return `${prefix}You drop ${ITEM_DEFINITIONS[event.item].name}.`;
+			return `${prefix}You drop ${ITEM_DEFINITIONS[event.item].name}${event.count ? ` ×${event.count}` : ""}.`;
 		case "monster-loot":
 			return `${prefix}The ${MONSTER_DEFINITIONS[event.monster].name} drops ${ITEM_DEFINITIONS[event.item].name}.`;
 		case "item-cleansed": {
