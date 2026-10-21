@@ -15,14 +15,19 @@ import type { SpellHotbar } from "../../domain/game/SpellHotbar";
 import type { SpellKind } from "../../domain/game/Spells";
 import type { TimedEffect } from "../../domain/game/TimedEffects";
 import { type Bag, bagItemKey } from "../../domain/items/Bag";
-import type { Equipment, EquipmentSlot } from "../../domain/items/Equipment";
+import {
+	EQUIPMENT_SLOT_LABELS,
+	type Equipment,
+	type EquipmentSlot,
+} from "../../domain/items/Equipment";
 import type { FloorItem } from "../../domain/items/FloorItems";
 import type { PotionHotbar } from "../../domain/items/PotionHotbar";
+import { ItemDragProvider, type ItemDragSource } from "../dnd/ItemDrag";
 import { formatActivityEvent } from "./ActivityMessages";
-import BagContents from "./BagContents";
+import BagContents, { BAG_DROP_ID } from "./BagContents";
 import { isCharacterShortcut } from "./CharacterShortcut";
 import CharacterStats from "./CharacterStats";
-import EquipmentView from "./EquipmentView";
+import EquipmentView, { equipDropId } from "./EquipmentView";
 import FloorItemsView from "./FloorItemsView";
 import ItemDetails from "./ItemDetails";
 import PotionAssignments from "./PotionAssignments";
@@ -108,6 +113,34 @@ const CharacterDialog = ({
 	useLayoutEffect(() => {
 		if (selectedKey) detailsRef.current?.scrollIntoView?.({ block: "nearest" });
 	}, [selectedKey]);
+	// A drop is a gesture for the Equip/Unequip buttons: same action, turn cost and
+	// refusals. Afterwards focus follows the moved item wherever it now sits.
+	const dragEnabled = player.health > 0 && !won;
+	const dropItem = (source: ItemDragSource, targetId: string) => {
+		const slot = (Object.keys(EQUIPMENT_SLOT_LABELS) as EquipmentSlot[]).find(
+			(s) => equipDropId(s) === targetId,
+		);
+		if (slot && source.from === "bag")
+			onAction({ type: "equip", itemId: source.item.id, slot });
+		else if (targetId === BAG_DROP_ID && source.from.startsWith("slot:"))
+			onAction({
+				type: "unequip",
+				slot: source.from.slice("slot:".length) as EquipmentSlot,
+			});
+		else return;
+		setSelection(null);
+		setFocusItemId(source.item.id);
+	};
+	// The action and this request commit in one render, so the moved item is already
+	// in its new place when this runs.
+	const [focusItemId, setFocusItemId] = useState<string | null>(null);
+	useLayoutEffect(() => {
+		if (!focusItemId) return;
+		document
+			.querySelector<HTMLElement>(`[data-item-id="${focusItemId}"]`)
+			?.focus({ preventScroll: true });
+		setFocusItemId(null);
+	}, [focusItemId]);
 	const titleRef = useRef<HTMLHeadingElement>(null);
 	const events = history.entries.filter((entry) => entry.event.turn === turn);
 	return (
@@ -206,103 +239,107 @@ const CharacterDialog = ({
 							/>
 						</div>
 						<div className="min-w-0 p-2 pb-4">
-							<div className="grid min-w-0 items-start gap-3 md:grid-cols-2 xl:grid-cols-[minmax(0,0.8fr)_minmax(0,1.1fr)_minmax(0,38.125rem)]">
-								<ProgressionView
-									afflictions={afflictions}
-									equipment={equipment}
-									effects={effects}
-									progression={progression}
-								/>
-								<div className="grid min-w-0 content-start gap-2">
-									<EquipmentView
+							<ItemDragProvider onDrop={dropItem}>
+								<div className="grid min-w-0 items-start gap-3 md:grid-cols-2 xl:grid-cols-[minmax(0,0.8fr)_minmax(0,1.1fr)_minmax(0,38.125rem)]">
+									<ProgressionView
+										afflictions={afflictions}
 										equipment={equipment}
-										selectedId={
-											selection?.source === "equipment"
-												? (selected?.id ?? null)
-												: null
-										}
-										headingRef={equipmentHeadingRef}
-										onSelect={(slot) => {
-											const item = equipment[slot];
-											setSelection(
-												item
-													? { source: "equipment", slot, id: item.id }
-													: null,
-											);
-										}}
+										effects={effects}
+										progression={progression}
 									/>
-									<PotionAssignments
-										enabled={!won}
-										bag={bag}
-										potionHotbar={potionHotbar}
-										onAction={onAction}
-									/>
-								</div>
-								<div className="grid min-w-0 content-start gap-2">
-									<BagContents
-										bag={bag}
-										comparisonContext={comparisonContext}
-										selectedKey={
-											selection?.source === "bag" ? selectedKey : null
-										}
-										headingRef={bagHeadingRef}
-										onSelect={(key) => setSelection({ source: "bag", key })}
-									>
-										{selected && selection ? (
-											<div ref={detailsRef} className="min-w-0">
-												<ItemDetails
-													bag={bag}
-													onCancel={() => {
-														setSelection(null);
-														bagHeadingRef.current?.focus({
-															preventScroll: true,
-														});
-													}}
-													item={selected}
-													carryingEmber={quest.cureRecovered}
-													comparisonContext={comparisonContext}
-													potionHotbar={potionHotbar}
-													assignmentsEnabled={!won}
-													equippedSlot={
-														selection.source === "equipment"
-															? selection.slot
-															: undefined
-													}
-													alive={player.health > 0 && !won}
-													onAction={onAction}
-													afterAction={() => {
-														const heading =
-															selection.source === "bag"
-																? bagHeadingRef
-																: equipmentHeadingRef;
-														heading.current?.focus({ preventScroll: true });
-													}}
-												/>
-											</div>
-										) : bag.items.length > 0 ? (
-											<p className="text-xs text-muted-foreground">
-												Select an item to see its details.
-											</p>
-										) : null}
-									</BagContents>
-									<QuestStatus quest={quest} pouch />
-									<div className="ember-menu-panel min-w-0">
-										<h3 className="ember-menu-section-heading mb-2 flex items-center gap-2">
-											<PackageOpen
-												aria-hidden="true"
-												className="size-4 text-primary"
-											/>
-											Nearby / Ground
-										</h3>
-										<FloorItemsView
-											compactEmpty
-											items={floorItems}
-											alive={player.health > 0 && !won}
+									<div className="grid min-w-0 content-start gap-2">
+										<EquipmentView
+											dragEnabled={dragEnabled}
+											equipment={equipment}
+											selectedId={
+												selection?.source === "equipment"
+													? (selected?.id ?? null)
+													: null
+											}
+											headingRef={equipmentHeadingRef}
+											onSelect={(slot) => {
+												const item = equipment[slot];
+												setSelection(
+													item
+														? { source: "equipment", slot, id: item.id }
+														: null,
+												);
+											}}
+										/>
+										<PotionAssignments
+											enabled={!won}
+											bag={bag}
+											potionHotbar={potionHotbar}
 											onAction={onAction}
 										/>
 									</div>
+									<div className="grid min-w-0 content-start gap-2">
+										<BagContents
+											dragEnabled={dragEnabled}
+											bag={bag}
+											comparisonContext={comparisonContext}
+											selectedKey={
+												selection?.source === "bag" ? selectedKey : null
+											}
+											headingRef={bagHeadingRef}
+											onSelect={(key) => setSelection({ source: "bag", key })}
+										>
+											{selected && selection ? (
+												<div ref={detailsRef} className="min-w-0">
+													<ItemDetails
+														bag={bag}
+														onCancel={() => {
+															setSelection(null);
+															bagHeadingRef.current?.focus({
+																preventScroll: true,
+															});
+														}}
+														item={selected}
+														carryingEmber={quest.cureRecovered}
+														comparisonContext={comparisonContext}
+														potionHotbar={potionHotbar}
+														assignmentsEnabled={!won}
+														equippedSlot={
+															selection.source === "equipment"
+																? selection.slot
+																: undefined
+														}
+														alive={player.health > 0 && !won}
+														onAction={onAction}
+														afterAction={() => {
+															const heading =
+																selection.source === "bag"
+																	? bagHeadingRef
+																	: equipmentHeadingRef;
+															heading.current?.focus({ preventScroll: true });
+														}}
+													/>
+												</div>
+											) : bag.items.length > 0 ? (
+												<p className="text-xs text-muted-foreground">
+													Select an item to see its details.
+												</p>
+											) : null}
+										</BagContents>
+										<QuestStatus quest={quest} pouch />
+										<div className="ember-menu-panel min-w-0">
+											<h3 className="ember-menu-section-heading mb-2 flex items-center gap-2">
+												<PackageOpen
+													aria-hidden="true"
+													className="size-4 text-primary"
+												/>
+												Nearby / Ground
+											</h3>
+											<FloorItemsView
+												compactEmpty
+												items={floorItems}
+												alive={player.health > 0 && !won}
+												onAction={onAction}
+											/>
+										</div>
+									</div>
 								</div>
-							</div>
+							</ItemDragProvider>
 						</div>
 					</Tabs.Panel>
 					<Tabs.Panel

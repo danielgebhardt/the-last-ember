@@ -7,16 +7,117 @@ import {
 	bagItemKey,
 	bagSlots,
 } from "../../domain/items/Bag";
+import { equipmentSlotsFor } from "../../domain/items/Equipment";
 import {
 	compareEquipment,
 	type EquipmentComparisonContext,
 } from "../../domain/items/EquipmentComparison";
+import type { ItemInstance } from "../../domain/items/Item";
 import { itemName } from "../../domain/items/ItemValues";
+import { useItemDrag, useItemDropTarget } from "../dnd/ItemDrag";
 import ItemIcon from "../items/ItemIcon";
 import {
 	comparisonDescription,
 	comparisonStyles,
 } from "./EquipmentComparisonView";
+
+export const BAG_DROP_ID = "bag";
+
+// Gear can be dragged onto a matching equipment slot; other items stay
+// click-only until a later drag story gives them a target.
+const BagItemButton = ({
+	item,
+	index,
+	count,
+	comparisonContext,
+	descriptionId,
+	selected,
+	onSelect,
+	dragEnabled,
+}: {
+	item: ItemInstance;
+	index: number;
+	count: number;
+	comparisonContext: EquipmentComparisonContext;
+	descriptionId: string;
+	selected: boolean;
+	onSelect: (key: string) => void;
+	dragEnabled: boolean;
+}) => {
+	const comparison = compareEquipment(item, comparisonContext);
+	const drag = useItemDrag(
+		`bag-item:${bagItemKey(item)}`,
+		{ item, from: "bag" },
+		!dragEnabled || equipmentSlotsFor(item).length === 0,
+	);
+	return (
+		<Button
+			ref={drag.ref}
+			type="button"
+			variant="outline"
+			data-item-id={item.id}
+			aria-label={`${itemName(item)}, slot ${index + 1}`}
+			aria-pressed={selected}
+			{...drag.dragProps}
+			aria-describedby={drag.describedBy(
+				count > 1
+					? `${descriptionId}-quantity`
+					: comparison
+						? descriptionId
+						: undefined,
+			)}
+			onClick={() => onSelect(bagItemKey(item))}
+			className={`ember-item-slot relative grid size-14 touch-manipulation justify-items-center ${
+				comparison
+					? "grid-rows-[1rem_1.25rem_0.625rem] gap-0"
+					: "grid-rows-[1.25rem_1.25rem] gap-1"
+			} whitespace-normal rounded-md p-1 aria-pressed:ring-2 aria-pressed:ring-primary/60 aria-pressed:ring-offset-1 aria-pressed:ring-offset-card ${
+				comparison ? comparisonStyles[comparison.label].border : ""
+			} ${drag.isDragging ? "opacity-40" : ""}`}
+		>
+			<span className={comparison ? "size-4" : "size-5"}>
+				<ItemIcon kind={item.kind} />
+			</span>
+
+			<span className="line-clamp-2 min-h-0 text-[9px] leading-[10px]">
+				{itemName(item)}
+			</span>
+
+			{item.enchantment && (
+				<span className="absolute right-0.5 top-0.5 rounded bg-background px-0.5 text-[9px] font-semibold">
+					+{item.enchantment}
+				</span>
+			)}
+
+			{count > 1 && (
+				<span
+					id={`${descriptionId}-quantity`}
+					className="absolute right-1 top-0.5 rounded bg-background px-0.5 text-[10px] font-semibold tabular-nums"
+				>
+					<span aria-hidden="true">{count}</span>
+					<span className="sr-only">{count} carried</span>
+				</span>
+			)}
+
+			{comparison && (
+				<>
+					<span
+						aria-hidden="true"
+						className={`text-[8px] leading-[10px] font-medium ${
+							comparisonStyles[comparison.label].text
+						}`}
+					>
+						{comparison.label}
+					</span>
+
+					<span id={descriptionId} className="sr-only">
+						{comparisonDescription(comparison)}
+					</span>
+				</>
+			)}
+		</Button>
+	);
+};
 
 const BagContents = ({
 	bag,
@@ -25,6 +126,7 @@ const BagContents = ({
 	onSelect,
 	headingRef,
 	children,
+	dragEnabled = false,
 }: {
 	bag: Bag;
 	comparisonContext: EquipmentComparisonContext;
@@ -32,14 +134,25 @@ const BagContents = ({
 	onSelect: (key: string) => void;
 	headingRef: RefObject<HTMLHeadingElement | null>;
 	children: ReactNode;
+	dragEnabled?: boolean;
 }) => {
 	const comparisonId = useId();
 	const slots = bagSlots(bag);
+	// Dropping worn gear anywhere on the bag unequips it.
+	const drop = useItemDropTarget(BAG_DROP_ID, {
+		label: "the bag",
+		accepts: ({ from }) => dragEnabled && from.startsWith("slot:"),
+	});
 
 	return (
 		<section
+			ref={drop.ref}
 			aria-labelledby="character-bag-title"
-			className="ember-menu-panel grid min-w-0 grid-cols-1 content-start gap-3"
+			className={`ember-menu-panel grid min-w-0 grid-cols-1 content-start gap-3 ${
+				drop.accepts
+					? `ring-2 ${drop.isOver ? "ring-primary" : "ring-primary/40"}`
+					: ""
+			}`}
 		>
 			<div className="flex w-full min-w-0 items-center justify-between gap-3 pr-1">
 				<h3
@@ -68,78 +181,20 @@ const BagContents = ({
 					{Array.from({ length: BAG_CAPACITY }, (_, index) => {
 						const item = slots[index]?.item;
 						const count = slots[index]?.count ?? 0;
-						const comparison = item
-							? compareEquipment(item, comparisonContext)
-							: null;
-						const descriptionId = `${comparisonId}-${index}`;
 
 						return (
 							<li key={item ? bagItemKey(item) : `empty:${index}`}>
 								{item ? (
-									<Button
-										type="button"
-										variant="outline"
-										aria-label={`${itemName(item)}, slot ${index + 1}`}
-										aria-pressed={selectedKey === bagItemKey(item)}
-										aria-describedby={
-											count > 1
-												? `${descriptionId}-quantity`
-												: comparison
-													? descriptionId
-													: undefined
-										}
-										onClick={() => onSelect(bagItemKey(item))}
-										className={`ember-item-slot relative grid size-14 justify-items-center ${
-											comparison
-												? "grid-rows-[1rem_1.25rem_0.625rem] gap-0"
-												: "grid-rows-[1.25rem_1.25rem] gap-1"
-										} whitespace-normal rounded-md p-1 aria-pressed:ring-2 aria-pressed:ring-primary/60 aria-pressed:ring-offset-1 aria-pressed:ring-offset-card ${
-											comparison
-												? comparisonStyles[comparison.label].border
-												: ""
-										}`}
-									>
-										<span className={comparison ? "size-4" : "size-5"}>
-											<ItemIcon kind={item.kind} />
-										</span>
-
-										<span className="line-clamp-2 min-h-0 text-[9px] leading-[10px]">
-											{itemName(item)}
-										</span>
-
-										{item.enchantment && (
-											<span className="absolute right-0.5 top-0.5 rounded bg-background px-0.5 text-[9px] font-semibold">
-												+{item.enchantment}
-											</span>
-										)}
-
-										{count > 1 && (
-											<span
-												id={`${descriptionId}-quantity`}
-												className="absolute right-1 top-0.5 rounded bg-background px-0.5 text-[10px] font-semibold tabular-nums"
-											>
-												<span aria-hidden="true">{count}</span>
-												<span className="sr-only">{count} carried</span>
-											</span>
-										)}
-
-										{comparison && (
-											<>
-												<span
-													aria-hidden="true"
-													className={`text-[8px] leading-[10px] font-medium ${
-														comparisonStyles[comparison.label].text
-													}`}
-												>
-													{comparison.label}
-												</span>
-
-												<span id={descriptionId} className="sr-only">
-													{comparisonDescription(comparison)}
-												</span>
-											</>
-										)}
-									</Button>
+									<BagItemButton
+										item={item}
+										index={index}
+										count={count}
+										comparisonContext={comparisonContext}
+										descriptionId={`${comparisonId}-${index}`}
+										selected={selectedKey === bagItemKey(item)}
+										onSelect={onSelect}
+										dragEnabled={dragEnabled}
+									/>
 								) : (
 									<span
 										role="img"

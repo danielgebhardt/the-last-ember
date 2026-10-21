@@ -283,7 +283,11 @@ const DungeonHelp = ({
 						occupied slot. Main/off hand, chest, head and two rings are
 						available; armor from equipped gear adds together. Capacity
 						increases do not refill resources. Successful gear changes use a
-						turn; inspecting items is free.
+						turn; inspecting items is free. You can also drag gear from the bag
+						onto a matching slot, or drag worn gear back to the bag; by
+						keyboard, focus an item, press M, choose a highlighted slot with the
+						arrow keys and press Space or Enter (Escape cancels). A drag costs
+						the same as the button.
 					</li>
 					<li>
 						<span className="font-medium text-foreground">Items.</span> Use G to

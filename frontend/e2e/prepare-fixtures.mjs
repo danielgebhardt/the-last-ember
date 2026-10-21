@@ -381,6 +381,18 @@ export default async function prepareFixtures() {
 				(entry) => entry.item.kind === "cure",
 			),
 		};
+		// Spare gear in the bag for equipment drag: a sword, a helmet and a ring.
+		const dragGear = {
+			...quiet,
+			player: { ...fresh.player },
+			bag: {
+				items: [
+					{ id: "drag:sword", kind: "iron-sword" },
+					{ id: "drag:cap", kind: "leather-cap" },
+					{ id: "drag:ring", kind: "copper-ring" },
+				],
+			},
+		};
 		const mirrorState = {
 			...forgeState,
 			objects: [
@@ -1114,6 +1126,15 @@ export default async function prepareFixtures() {
 				configuration,
 			],
 			["ready", quiet, configuration],
+			["drag-gear", dragGear, configuration],
+			[
+				"drag-gear-town",
+				{
+					...dragGear,
+					town: { ...createTownLocation(), coordinate: { row: 13, col: 3 } },
+				},
+				configuration,
+			],
 			["poisoned", poisoned, configuration],
 			["diseased", diseased, configuration],
 			["town-diseased", townDiseased, configuration],

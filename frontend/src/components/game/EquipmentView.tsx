@@ -5,8 +5,11 @@ import {
 	EQUIPMENT_SLOT_LABELS,
 	type Equipment,
 	type EquipmentSlot,
+	fitsEquipmentSlot,
 } from "../../domain/items/Equipment";
+import type { ItemInstance } from "../../domain/items/Item";
 import { itemName } from "../../domain/items/ItemValues";
+import { useItemDrag, useItemDropTarget } from "../dnd/ItemDrag";
 import ItemIcon from "../items/ItemIcon";
 
 const slots = [
@@ -18,16 +21,88 @@ const slots = [
 	{ key: "chest", position: "col-start-2 row-start-3" },
 ] as const;
 
+export const equipDropId = (slot: EquipmentSlot) => `equip:${slot}`;
+export const slotDragFrom = (slot: EquipmentSlot) => `slot:${slot}`;
+
+// A slot is both a drop target for bag gear that fits it and, when filled, a drag
+// source that can be dropped back into the bag.
+const EquipmentSlotCell = ({
+	slot,
+	position,
+	item,
+	selectedId,
+	onSelect,
+	dragEnabled,
+}: {
+	slot: EquipmentSlot;
+	position: string;
+	item: ItemInstance | null;
+	selectedId: string | null;
+	onSelect: (slot: EquipmentSlot) => void;
+	dragEnabled: boolean;
+}) => {
+	const label = EQUIPMENT_SLOT_LABELS[slot];
+	const drag = useItemDrag(
+		`slot-item:${slot}`,
+		item ? { item, from: slotDragFrom(slot) } : null,
+		!dragEnabled,
+	);
+	const drop = useItemDropTarget(equipDropId(slot), {
+		label: `the ${label.toLowerCase()} slot`,
+		accepts: ({ item: dragged, from }) =>
+			dragEnabled && from === "bag" && fitsEquipmentSlot(dragged, slot),
+	});
+	return (
+		<section
+			ref={drop.ref}
+			aria-labelledby={`character-${slot}`}
+			className={`${position} min-w-0 rounded-md ${drop.accepts ? `ring-2 ${drop.isOver ? "ring-primary" : "ring-primary/40"}` : ""}`}
+		>
+			<h4
+				id={`character-${slot}`}
+				className="mb-1 text-center text-xs text-muted-foreground"
+			>
+				{label}
+			</h4>
+			<Button
+				ref={drag.ref}
+				type="button"
+				variant="outline"
+				data-item-id={item?.id}
+				aria-label={`${label}: ${item ? itemName(item) : "empty"}`}
+				aria-pressed={selectedId === item?.id && selectedId !== null}
+				{...drag.dragProps}
+				aria-describedby={drag.describedBy()}
+				onClick={() => onSelect(slot)}
+				className={`ember-item-slot grid h-auto min-h-12 w-full min-w-0 touch-manipulation justify-items-center gap-1 whitespace-normal rounded-md p-1 text-center ${item ? "border-primary/30" : "border-dashed text-muted-foreground"} ${drag.isDragging ? "opacity-40" : ""}`}
+			>
+				{item ? (
+					<>
+						<span className="size-5">
+							<ItemIcon kind={item.kind} />
+						</span>
+						<span className="break-words text-xs">{itemName(item)}</span>
+					</>
+				) : (
+					<span className="text-xs">{label} empty</span>
+				)}
+			</Button>
+		</section>
+	);
+};
+
 const EquipmentView = ({
 	equipment,
 	selectedId,
 	onSelect,
 	headingRef,
+	dragEnabled = false,
 }: {
 	equipment: Equipment;
 	selectedId: string | null;
 	onSelect: (slot: EquipmentSlot) => void;
 	headingRef: RefObject<HTMLHeadingElement | null>;
+	dragEnabled?: boolean;
 }) => (
 	<section
 		aria-labelledby="character-equipment-title"
@@ -43,43 +118,17 @@ const EquipmentView = ({
 			Equipment
 		</h3>
 		<div className="grid min-w-0 grid-cols-3 items-center gap-2 rounded-lg border border-primary/15 bg-background/35 p-2">
-			{slots.map(({ key, position }) => {
-				const label = EQUIPMENT_SLOT_LABELS[key];
-				const item = equipment[key];
-				return (
-					<section
-						key={key}
-						aria-labelledby={`character-${key}`}
-						className={`${position} min-w-0`}
-					>
-						<h4
-							id={`character-${key}`}
-							className="mb-1 text-center text-xs text-muted-foreground"
-						>
-							{label}
-						</h4>
-						<Button
-							type="button"
-							variant="outline"
-							aria-label={`${label}: ${item ? itemName(item) : "empty"}`}
-							aria-pressed={selectedId === item?.id && selectedId !== null}
-							onClick={() => onSelect(key)}
-							className={`ember-item-slot grid h-auto min-h-12 w-full min-w-0 justify-items-center gap-1 whitespace-normal rounded-md p-1 text-center ${item ? "border-primary/30" : "border-dashed text-muted-foreground"}`}
-						>
-							{item ? (
-								<>
-									<span className="size-5">
-										<ItemIcon kind={item.kind} />
-									</span>
-									<span className="break-words text-xs">{itemName(item)}</span>
-								</>
-							) : (
-								<span className="text-xs">{label} empty</span>
-							)}
-						</Button>
-					</section>
-				);
-			})}
+			{slots.map(({ key, position }) => (
+				<EquipmentSlotCell
+					key={key}
+					slot={key}
+					position={position}
+					item={equipment[key]}
+					selectedId={selectedId}
+					onSelect={onSelect}
+					dragEnabled={dragEnabled}
+				/>
+			))}
 			<div
 				aria-hidden="true"
 				className="col-start-2 row-start-2 flex h-16 items-center justify-center text-muted-foreground/50"
