@@ -190,6 +190,7 @@ it("joins the shared discovery pool from floor 3", () => {
 	}
 	expect([...kinds].sort()).toEqual([
 		"forge",
+		"hourglass",
 		"mirror",
 		"runic-portal",
 		"sarcophagus",

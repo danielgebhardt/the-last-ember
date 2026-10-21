@@ -90,6 +90,14 @@ export const hasConsistentActors = (document: SaveDocument): boolean => {
 				/^\d+:[1-9]\d*$/.test(entry.id) &&
 				Number(entry.id.split(":")[0]) === entry.floorNumber &&
 				entry.id.endsWith(":1000001") === (entry.heroic === true) &&
+				// Only a turned hourglass on the monster's floor empowers it.
+				(entry.empowered === undefined ||
+					state.objects.some(
+						(o) =>
+							o.kind === "hourglass" &&
+							o.activated &&
+							o.floorNumber === entry.floorNumber,
+					)) &&
 				// Only a sounded sentry tracks reinforcements.
 				(entry.summons === undefined ||
 					(MONSTER_DEFINITIONS[entry.kind].alarmRadius !== undefined &&

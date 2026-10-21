@@ -237,7 +237,7 @@ describe("Home Help menu", () => {
 	it("explains the Forgotten Forge's prices, odds and fixed result", async () => {
 		const user = renderHelpRun();
 		const help = await openHelp(user);
-		expect(help).toHaveTextContent("about 40% of new adventures");
+		expect(help).toHaveTextContent("about 60% of new adventures");
 		expect(help).toHaveTextContent("Reliable forging costs 300 gold");
 		expect(help).toHaveTextContent(
 			"50% +1, 35% unchanged, 15% the item is destroyed",

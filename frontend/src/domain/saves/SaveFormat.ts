@@ -159,6 +159,7 @@ export const createSaveDocument = (
 				remedyDrop,
 				summons,
 				summonedBy,
+				empowered,
 				reflection,
 				telegraphTurn,
 			}) => ({
@@ -174,6 +175,7 @@ export const createSaveDocument = (
 				...(remedyDrop !== undefined ? { remedyDrop } : {}),
 				...(summons !== undefined ? { summons: { ...summons } } : {}),
 				...(summonedBy !== undefined ? { summonedBy } : {}),
+				...(empowered ? { empowered } : {}),
 				...(reflection !== undefined ? { reflection: { ...reflection } } : {}),
 				...(telegraphTurn !== undefined
 					? { telegraphTurn: { ...telegraphTurn } }

@@ -4,6 +4,7 @@ import { createProgression } from "../game/Progression";
 import { createStartingEquipment } from "../items/Equipment";
 import { itemName } from "../items/ItemValues";
 import {
+	EMPOWERED_MULTIPLIER,
 	maximumMonsterHealth,
 	monsterDamageRange,
 } from "../monsters/MonsterStats";
@@ -11,6 +12,7 @@ import { fountainRestoration } from "./DungeonFountains";
 import { type DungeonObject, RELIQUARY_HEALTH_COST } from "./DungeonObject";
 import { shrineTerms } from "./DungeonShrines";
 import { FORGE_PRICES, forgeTargets } from "./ForgottenForge";
+import { hourglassRefusal, hourglassTargets } from "./HourglassOfAges";
 import {
 	MIRROR_BACKLASH_SHARE,
 	MIRROR_CHOICES,
@@ -81,8 +83,32 @@ export const objectChoices = (
 		| "afflictions"
 		| "difficulty"
 	> &
-		Partial<Pick<GameState, "bag" | "gold">>,
+		Partial<Pick<GameState, "bag" | "gold" | "mana" | "monsters" | "run">>,
 ): readonly InteractionChoice[] => {
+	if (object.kind === "hourglass") {
+		const refusal =
+			state?.mana !== undefined && state.monsters && state.run
+				? hourglassRefusal(
+						{
+							...state,
+							mana: state.mana,
+							monsters: state.monsters,
+							run: state.run,
+						},
+						object,
+					)
+				: undefined;
+		const targets = state?.monsters
+			? hourglassTargets({ monsters: state.monsters }, object).length
+			: undefined;
+		return [
+			{
+				value: "hourglass-turn",
+				label: "Turn the hourglass",
+				description: `Restores you to full health and mana. In exchange, every living creature on this floor${targets !== undefined ? ` (${targets} now)` : ""} permanently gains ${Math.round((EMPOWERED_MULTIPLIER - 1) * 100)}% maximum health and attack, keeping its share of wounds. Creatures that arrive later are unaffected. One turn; monsters then act normally and can kill you. One use.${refusal ? ` ${refusal}` : ""}`,
+			},
+		];
+	}
 	if (object.kind === "runic-portal")
 		return [
 			{

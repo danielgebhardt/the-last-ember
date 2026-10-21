@@ -282,7 +282,7 @@ it("saves the forge result and rejects results that disagree with the seed", () 
 	).toBe(false);
 });
 
-it("draws at most one rare discovery in about 40% of adventures, forges only from floor 6", () => {
+it("draws at most one rare discovery in about 60% of adventures, forges only from floor 6", () => {
 	let selected = 0;
 	let forges = 0;
 	for (let seed = 0; seed < 600; seed++) {
@@ -299,8 +299,8 @@ it("draws at most one rare discovery in about 40% of adventures, forges only fro
 			expect(choice.floorNumber).toBeGreaterThanOrEqual(6);
 		}
 	}
-	expect(selected / 600).toBeGreaterThan(0.33);
-	expect(selected / 600).toBeLessThan(0.47);
+	expect(selected / 600).toBeGreaterThan(0.53);
+	expect(selected / 600).toBeLessThan(0.67);
 	expect(forges).toBeGreaterThan(0);
 	expect(forges).toBeLessThan(selected);
 	const run = connectDungeonFloors(

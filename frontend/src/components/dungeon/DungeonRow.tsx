@@ -38,6 +38,7 @@ const DungeonCell = memo(function DungeonCell({
 	playerRef,
 	monsterKind,
 	heroic = false,
+	empowered = false,
 	itemKind,
 	dungeonObject,
 	itemCount = 0,
@@ -57,6 +58,7 @@ const DungeonCell = memo(function DungeonCell({
 	playerRef?: PlayerRef;
 	monsterKind?: MonsterKind;
 	heroic?: boolean;
+	empowered?: boolean;
 	itemKind?: ItemKind;
 	dungeonObject?: DungeonObject;
 	itemCount?: number;
@@ -75,7 +77,7 @@ const DungeonCell = memo(function DungeonCell({
 		!monsterKind &&
 		!(dungeonObject && isDoor(dungeonObject));
 	const description = monsterKind
-		? `${heroic ? "Heroic " : ""}${MONSTER_VISUALS[monsterKind].label}${heroic ? ". Double base health and attack damage; ordinary abilities and timing." : ""}`
+		? `${heroic ? "Heroic " : ""}${empowered ? "Empowered " : ""}${MONSTER_VISUALS[monsterKind].label}${heroic ? ". Double base health and attack damage; ordinary abilities and timing." : ""}${empowered ? ". Strengthened by the Hourglass of Ages: half again its health and attack." : ""}`
 		: dungeonObject && isDoor(dungeonObject)
 			? objectLabel(dungeonObject)
 			: itemKind
@@ -301,6 +303,7 @@ const DungeonRow = memo(
 							itemKind={items?.[0]?.item.kind}
 							itemCount={items?.length}
 							heroic={monster?.heroic}
+							empowered={monster?.empowered}
 							monsterKind={
 								visibility === "visible" &&
 								tile !== PLAYER &&

@@ -35,6 +35,7 @@ import {
 	type MonsterKind,
 } from "../../domain/monsters/Monster";
 import { AFFLICTION_SOURCE_CHANCE } from "../../domain/monsters/MonsterPlacement";
+import { EMPOWERED_MULTIPLIER } from "../../domain/monsters/MonsterStats";
 import { monsterTraits } from "../../domain/monsters/MonsterTraits";
 import {
 	type DungeonObjectKind,
@@ -423,9 +424,18 @@ const DeveloperCatalog = ({
 										Floors {definition.minFloor}–{definition.maxFloor} · Up to{" "}
 										{definition.maxPerFloor}/floor ·{" "}
 										{definition.placement === "rare-discovery"
-											? `${Math.round(RARE_DISCOVERY_CHANCE * 100)}% shared rare-discovery chance per adventure, equal weight with the other discoveries; at most one discovery/dungeon; omitted without safe space`
+											? `${Math.round(RARE_DISCOVERY_CHANCE * 100)}% shared rare-discovery chance per adventure, ${kind === "hourglass" ? "half the weight of" : "equal weight with"} the other discoveries; at most one discovery/dungeon; omitted without safe space`
 											: `${Math.round(definition.chance * 100)}% placement chance`}
 									</p>
+									{kind === "hourglass" && (
+										<p>
+											Floors 8+. Full health and mana; every living creature on
+											the floor gains ×{EMPOWERED_MULTIPLIER} base health and
+											attack once, keeping its wound share (rounded up). Needs
+											missing HP/mana and a living creature; otherwise refused
+											free. One turn, one use. Provisional playtest balance.
+										</p>
+									)}
 									{kind === "runic-portal" && (
 										<p>
 											Floors 5+, never the final floor. One use, one turn: lands

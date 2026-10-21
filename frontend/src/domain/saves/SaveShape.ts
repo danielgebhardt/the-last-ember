@@ -136,6 +136,7 @@ const eventFields = {
 		activated: boolean,
 	},
 	"portal-used": { fromFloor: floorNumber, toFloor: floorNumber },
+	"hourglass-turned": { health: natural, mana: natural, empowered: natural },
 	"mirror-used": {
 		choice: oneOf(["reveal", "reflection", "shatter"]),
 		outcome: optional(oneOf(["item", "empty", "hostile"])),
@@ -590,6 +591,7 @@ const documentShape = object({
 				remedyDrop: optional(boolean),
 				summons: optional(object({ count: natural, turn: natural })),
 				summonedBy: optional(text),
+				empowered: optional((value) => value === true),
 				reflection: optional(
 					object({ maxHealth: integer(1), attackDamage: integer(1) }),
 				),

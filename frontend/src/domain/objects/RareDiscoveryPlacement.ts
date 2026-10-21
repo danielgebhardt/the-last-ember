@@ -12,13 +12,15 @@ import { navigationRun } from "./NavigationTerrain";
 
 // Future epic children join this pool, never roll a second per-floor budget.
 // At most one discovery per adventure; each kind keeps its own floor band.
-export const RARE_DISCOVERY_CHANCE = 0.4;
+export const RARE_DISCOVERY_CHANCE = 0.6;
 const pool = [
 	{ value: "sarcophagus" as const, weight: 1 },
 	{ value: "forge" as const, weight: 1 },
 	{ value: "well" as const, weight: 1 },
 	{ value: "mirror" as const, weight: 1 },
 	{ value: "runic-portal" as const, weight: 1 },
+	// The very rare high-risk discovery: half an ordinary weight.
+	{ value: "hourglass" as const, weight: 0.5 },
 ];
 export const rareDiscoverySelection = (
 	run: Pick<DungeonRun, "seed" | "floors">,

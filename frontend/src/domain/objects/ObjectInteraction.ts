@@ -9,6 +9,7 @@ import { offerAtShrine } from "./DungeonShrines";
 import { resolveThroneChoice } from "./DungeonThrones";
 import { disarmTrap } from "./DungeonTraps";
 import { operateForge } from "./ForgottenForge";
+import { turnHourglass } from "./HourglassOfAges";
 import { gazeIntoMirror } from "./MirrorOfShadows";
 import { describeObject } from "./ObjectDescriptions";
 import { openDiscovery } from "./RareDiscoveries";
@@ -35,7 +36,8 @@ export type ObjectChoice =
 	| "mirror-reveal"
 	| "mirror-reflection"
 	| "mirror-shatter"
-	| "portal-enter";
+	| "portal-enter"
+	| "hourglass-turn";
 export type InteractAction = {
 	type: "interact";
 	objectId?: string;
@@ -96,6 +98,8 @@ export const interactObject = (
 	if (object.kind === "sarcophagus")
 		return openSarcophagus(state, object, action.choice);
 	if (object.kind === "well") return offerAtWell(state, object, action.choice);
+	if (object.kind === "hourglass")
+		return turnHourglass(state, object, action.choice);
 	if (object.kind === "runic-portal")
 		return stepThroughPortal(state, object, action.choice);
 	if (object.kind === "mirror")

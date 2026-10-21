@@ -338,6 +338,49 @@ export default async function prepareFixtures() {
 				(entry) => entry.item.kind === "cure",
 			),
 		};
+		// Floor 8 of a nine-floor run: wounded beside an Hourglass of Ages, with one goblin
+		// asleep in a far room so turning it has someone to strengthen.
+		const hourglassConfiguration = { ...configuration, floorCount: 9 };
+		const hourglassRun = connectDungeonFloors(
+			generateDungeonRun(123, 9, hourglassConfiguration),
+		);
+		const hourglassRooms = hourglassRun.floors[7].rooms;
+		const hourglassStart = {
+			row: hourglassRooms[0].startRow + 1,
+			col: hourglassRooms[0].startCol + 1,
+		};
+		const farRoom = hourglassRooms.at(-1);
+		const hourglassBase = createGameState(
+			{ ...hourglassRun, activeFloor: 8, playerCoordinate: hourglassStart },
+			hourglassConfiguration.difficulty,
+		);
+		const hourglassState = {
+			...hourglassBase,
+			player: { ...hourglassBase.player, health: 3 },
+			objects: [
+				{
+					id: "floor:8:object:hourglass:1",
+					kind: "hourglass",
+					floorNumber: 8,
+					coordinate: { row: hourglassStart.row, col: hourglassStart.col + 1 },
+					activated: false,
+				},
+			],
+			monsters: [
+				{
+					id: "8:1",
+					kind: "goblin",
+					floorNumber: 8,
+					coordinate: { row: farRoom.endRow - 1, col: farRoom.endCol - 1 },
+					health: 2,
+					intent: { type: "idle" },
+					lastDamagedTurn: null,
+				},
+			],
+			floorItems: hourglassBase.floorItems.filter(
+				(entry) => entry.item.kind === "cure",
+			),
+		};
 		const mirrorState = {
 			...forgeState,
 			objects: [
@@ -1082,6 +1125,7 @@ export default async function prepareFixtures() {
 			["bleeding", bleeding, configuration],
 			["forge", forgeState, forgeConfiguration],
 			["well", wellState, forgeConfiguration],
+			["hourglass", hourglassState, hourglassConfiguration],
 			[
 				"runic-portal",
 				portalState,

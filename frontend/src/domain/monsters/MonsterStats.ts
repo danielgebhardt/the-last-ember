@@ -21,18 +21,22 @@ export const monsterAttackDamage = (
 	(MONSTER_DEFINITIONS[kind].attackDamage + championDepth(kind, floorNumber)) *
 	(heroic ? 2 : 1);
 
+// Base health before difficulty scaling.
+const monsterBaseHealth = (
+	kind: MonsterKind,
+	floorNumber = MONSTER_DEFINITIONS[kind].minFloor,
+	heroic = false,
+): number =>
+	(MONSTER_DEFINITIONS[kind].maxHealth +
+		CHAMPION_HEALTH_PER_FLOOR * championDepth(kind, floorNumber)) *
+	(heroic ? 2 : 1);
 export const maximumMonsterHealth = (
 	kind: MonsterKind,
 	difficulty: Difficulty = 1,
 	floorNumber = MONSTER_DEFINITIONS[kind].minFloor,
 	heroic = false,
 ): number =>
-	scaleEnemyValue(
-		(MONSTER_DEFINITIONS[kind].maxHealth +
-			CHAMPION_HEALTH_PER_FLOOR * championDepth(kind, floorNumber)) *
-			(heroic ? 2 : 1),
-		difficulty,
-	);
+	scaleEnemyValue(monsterBaseHealth(kind, floorNumber, heroic), difficulty);
 export const monsterDamageRange = (
 	kind: MonsterKind,
 	difficulty: Difficulty = 1,
@@ -49,26 +53,37 @@ export const monsterDamageRange = (
 	};
 };
 
+// An Hourglass of Ages raises a surviving monster's base health and attack once.
+export const EMPOWERED_MULTIPLIER = 1.5;
+const empowered = (value: number, monster: StatSource) =>
+	monster.empowered ? Math.ceil(value * EMPOWERED_MULTIPLIER) : value;
 // An actual monster's stats: a reflection uses its saved snapshot as base values,
-// with ordinary difficulty scaling; every other monster uses its kind.
-type StatSource = Pick<Monster, "kind" | "heroic" | "reflection"> & {
+// every other monster uses its kind; empowerment applies to either base, and
+// difficulty scales the result once.
+type StatSource = Pick<
+	Monster,
+	"kind" | "heroic" | "reflection" | "empowered"
+> & {
 	floorNumber?: number;
 };
 export const actorAttackDamage = (monster: StatSource): number =>
-	monster.reflection?.attackDamage ??
-	monsterAttackDamage(monster.kind, monster.floorNumber, monster.heroic);
+	empowered(
+		monster.reflection?.attackDamage ??
+			monsterAttackDamage(monster.kind, monster.floorNumber, monster.heroic),
+		monster,
+	);
 export const actorMaximumHealth = (
 	monster: StatSource,
 	difficulty: Difficulty = 1,
 ): number =>
-	monster.reflection
-		? scaleEnemyValue(monster.reflection.maxHealth, difficulty)
-		: maximumMonsterHealth(
-				monster.kind,
-				difficulty,
-				monster.floorNumber,
-				monster.heroic,
-			);
+	scaleEnemyValue(
+		empowered(
+			monster.reflection?.maxHealth ??
+				monsterBaseHealth(monster.kind, monster.floorNumber, monster.heroic),
+			monster,
+		),
+		difficulty,
+	);
 export const actorDamageRange = (
 	monster: StatSource,
 	difficulty: Difficulty = 1,

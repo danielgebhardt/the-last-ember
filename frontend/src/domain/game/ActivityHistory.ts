@@ -79,6 +79,12 @@ export type ActivityEvent = { turn: number } & (
 	  }
 	| { type: "portal-used"; fromFloor: number; toFloor: number }
 	| {
+			type: "hourglass-turned";
+			health: number;
+			mana: number;
+			empowered: number;
+	  }
+	| {
 			type: "mirror-used";
 			choice: "reveal" | "reflection" | "shatter";
 			outcome?: "item" | "empty" | "hostile";

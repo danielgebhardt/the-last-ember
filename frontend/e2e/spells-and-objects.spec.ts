@@ -375,3 +375,28 @@ test("Runic Portal previews a way down and sets you beside it for one turn", asy
 		map(page).getByRole("cell", { name: /stairs down/i }),
 	).toBeVisible();
 });
+
+test("Hourglass of Ages trades a full recovery for stronger creatures", async ({
+	page,
+}) => {
+	await page.setViewportSize({ width: 1470, height: 830 });
+	await importAdventure(page, "hourglass");
+	await page.keyboard.press("e");
+	const dialog = page.getByRole("dialog", {
+		name: "Hourglass of Ages",
+		exact: true,
+	});
+	await expect(
+		dialog.getByRole("heading", { name: "Hourglass of Ages", exact: true }),
+	).toBeFocused();
+	await expect(dialog).toContainText("Restores you to full health and mana");
+	await expect(dialog).toContainText("(1 now)");
+	await page.keyboard.press("1");
+	await expect(dialog).toHaveCount(0);
+	await expect(turns(page)).toHaveText("Turn 1");
+	await expect(page.getByRole("log")).toContainText(
+		"1 creature on this floor grows stronger.",
+	);
+	const health = page.getByLabel("Player health", { exact: true });
+	await expect(health).toContainText(/Health (\d+) \/ \1/);
+});

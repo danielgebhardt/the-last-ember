@@ -56,6 +56,8 @@ export type Monster = {
 	summons?: Readonly<{ count: number; turn: number }>;
 	// The sentry that called this reinforcement; it gives no XP, loot or gold.
 	summonedBy?: string;
+	// Survived an Hourglass of Ages: ×1.5 base health and attack, never compounded.
+	empowered?: true;
 	// A mirror reflection's stats, copied from the player when it was summoned.
 	reflection?: Readonly<{ maxHealth: number; attackDamage: number }>;
 	// Turn each cooldown telegraph last resolved; another needs more than its cooldown.

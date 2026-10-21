@@ -38,6 +38,7 @@ import {
 	TRAP_DISARM_EXPERIENCE,
 } from "../domain/objects/DungeonObject";
 import { FORGE_PRICES } from "../domain/objects/ForgottenForge";
+import { RARE_DISCOVERY_CHANCE } from "../domain/objects/RareDiscoveryPlacement";
 import { SANCTUARY_CONDITION_FEES } from "../domain/town/Sanctuary";
 import { TOWN_SCROLL_OFFERS } from "../domain/town/TownEconomy";
 import { FORGE_TIER_PRICES } from "../domain/town/TownForge";
@@ -571,15 +572,16 @@ const DungeonHelp = ({
 			>
 				<h3 className="font-medium">Ancient sarcophagi</h3>
 				<p>
-					At most one rare discovery appears in about 40% of new adventures: an
+					At most one rare discovery appears in about{" "}
+					{Math.round(RARE_DISCOVERY_CHANCE * 100)}% of new adventures: an
 					ancient sarcophagus (floor 2 or deeper), a Wishing Well (floor 3 or
 					deeper), a Mirror of Shadows (floor 4 or deeper), a Runic Portal
-					(floor 5 or deeper) or a Forgotten Forge (floor 6 or deeper), when
-					safe space exists. These are substantially rarer than thrones or
-					fountains. Press E nearby, then choose Open or cancel freely with
-					Escape. Opening spends one normal turn: 40% treasure, 25% Heroic
-					guardian, 25% both, 10% empty. These initial weights are for
-					playtesting.
+					(floor 5 or deeper), a Forgotten Forge (floor 6 or deeper) or, half as
+					often, an Hourglass of Ages (floor 8 or deeper), when safe space
+					exists. These are substantially rarer than thrones or fountains. Press
+					E nearby, then choose Open or cancel freely with Escape. Opening
+					spends one normal turn: 40% treasure, 25% Heroic guardian, 25% both,
+					10% empty. These initial weights are for playtesting.
 				</p>
 				<p>
 					A Heroic guardian is an ordinary floor-relevant enemy, preferring
@@ -591,6 +593,21 @@ const DungeonHelp = ({
 					its ordinary equipment or consumable. The opened tomb remains
 					inspectable. Inspection, cancellation, waiting and reloading cannot
 					change its result or grant a second reward.
+				</p>
+			</section>
+			<section
+				aria-label="Hourglass of Ages"
+				className="grid gap-3 rounded-lg border p-4 text-sm"
+			>
+				<h3 className="font-medium">Hourglass of Ages</h3>
+				<p>
+					Press E beside it to turn it once. It restores you to full health and
+					mana. In exchange, every living creature on that floor permanently
+					gains half again its maximum health and attack, keeping the same share
+					of its wounds; creatures that arrive later are unaffected. It only
+					turns when you are missing health or mana and at least one creature on
+					the floor is alive. Turning it uses one turn, and monsters then act
+					normally, which can be fatal.
 				</p>
 			</section>
 			<section

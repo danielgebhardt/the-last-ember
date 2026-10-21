@@ -45,6 +45,16 @@ export const OBJECT_DEFINITIONS = {
 		chance: 0.2,
 		placement: "rare-discovery",
 	},
+	hourglass: {
+		name: "Hourglass of Ages",
+		freshLabel: "hourglass of ages",
+		usedLabel: "emptied hourglass of ages",
+		minFloor: 8,
+		maxFloor: 20,
+		maxPerFloor: 1,
+		chance: 0.2,
+		placement: "rare-discovery",
+	},
 	"runic-portal": {
 		name: "Runic Portal",
 		freshLabel: "humming runic portal",

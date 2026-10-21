@@ -30,15 +30,21 @@ const ObservedCreatures = ({
 	const kinds = [
 		...new Map(
 			observed.map((actor) => [
-				`${actor.kind}:${!!actor.heroic}`,
-				{ kind: actor.kind, heroic: !!actor.heroic },
+				`${actor.kind}:${!!actor.heroic}:${!!actor.empowered}`,
+				{
+					kind: actor.kind,
+					heroic: !!actor.heroic,
+					empowered: !!actor.empowered,
+				},
 			]),
 		).values(),
 	].sort(
 		(a, b) =>
 			MONSTER_DEFINITIONS[a.kind].name.localeCompare(
 				MONSTER_DEFINITIONS[b.kind].name,
-			) || Number(a.heroic) - Number(b.heroic),
+			) ||
+			Number(a.heroic) - Number(b.heroic) ||
+			Number(a.empowered) - Number(b.empowered),
 	);
 	return (
 		<section
@@ -53,16 +59,18 @@ const ObservedCreatures = ({
 			{kinds.length === 0 ? (
 				<p>No creatures currently in sight.</p>
 			) : (
-				kinds.map(({ kind, heroic }) => {
+				kinds.map(({ kind, heroic, empowered }) => {
 					const definition = MONSTER_DEFINITIONS[kind];
+					const same = (actor: Monster) =>
+						actor.kind === kind &&
+						!!actor.heroic === heroic &&
+						!!actor.empowered === empowered;
 					// Stats come from an actual actor, so a reflection shows its snapshot.
-					const sample = observed.find(
-						(actor) => actor.kind === kind && !!actor.heroic === heroic,
-					) ?? { kind, heroic };
+					const sample = observed.find(same) ?? { kind, heroic };
 					const damage = actorDamageRange(sample, difficulty);
 					return (
 						<section
-							key={`${kind}:${heroic}`}
+							key={`${kind}:${heroic}:${empowered}`}
 							className="grid gap-2 border-t pt-3"
 						>
 							<h4 className="flex items-center gap-2 font-medium">
@@ -70,6 +78,7 @@ const ObservedCreatures = ({
 									<MonsterIcon kind={kind} />
 								</span>
 								{heroic ? "Heroic " : ""}
+								{empowered ? "Empowered " : ""}
 								{definition.name}
 							</h4>
 							<p className="text-xs text-muted-foreground">
@@ -96,8 +105,7 @@ const ObservedCreatures = ({
 								).map(([state, label]) => {
 									const count = observed.filter(
 										(actor) =>
-											actor.kind === kind &&
-											!!actor.heroic === heroic &&
+											same(actor) &&
 											(actor.awareness?.type ?? "idle") === state,
 									).length;
 									return count ? (
@@ -116,20 +124,20 @@ const ObservedCreatures = ({
 									{
 										observed.filter(
 											(actor) =>
-												actor.kind === kind &&
-												!!actor.heroic === heroic &&
-												actor.intent.type === "preparing-alarm",
+												same(actor) && actor.intent.type === "preparing-alarm",
 										).length
 									}{" "}
 									· Alarm spent:{" "}
 									{
-										observed.filter(
-											(actor) =>
-												actor.kind === kind &&
-												!!actor.heroic === heroic &&
-												actor.alarmUsed,
-										).length
+										observed.filter((actor) => same(actor) && actor.alarmUsed)
+											.length
 									}
+								</p>
+							)}
+							{empowered && (
+								<p className="text-xs text-muted-foreground">
+									Strengthened by the Hourglass of Ages: half again its base
+									health and attack, once. Normal XP, loot and gold.
 								</p>
 							)}
 							{heroic && (

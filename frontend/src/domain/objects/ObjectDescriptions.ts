@@ -17,6 +17,11 @@ const hints: Record<DungeonObjectKind, { fresh: string; spent: string }> = {
 		spent:
 			"Opened once; the tomb cannot be rerolled. Any remaining treasure is on the floor for G pickup.",
 	},
+	hourglass: {
+		fresh:
+			"Press E to review it: full health and mana now, in exchange for permanently stronger creatures on this floor. One use.",
+		spent: "The sand has run out; the hourglass is spent.",
+	},
 	"runic-portal": {
 		fresh:
 			"Press E to review it: a one-way step to beside a down stair on this floor or up to four floors deeper. One use.",

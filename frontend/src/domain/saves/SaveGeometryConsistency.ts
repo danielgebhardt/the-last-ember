@@ -90,6 +90,9 @@ export const hasConsistentGeometry = (document: SaveDocument): boolean => {
 	if (objects.filter((o) => o.kind === "well").length > 1) return false;
 	if (objects.filter((o) => o.kind === "mirror").length > 1) return false;
 	if (objects.filter((o) => o.kind === "runic-portal").length > 1) return false;
+	if (objects.filter((o) => o.kind === "hourglass").length > 1) return false;
+	if (objects.some((o) => o.kind === "hourglass" && o.floorNumber < 8))
+		return false;
 	// A used portal records the seeded floor and a walkable landing tile there.
 	for (const object of objects) {
 		const destination = object.portalDestination;
