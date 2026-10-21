@@ -21,7 +21,12 @@ export const resourcesAfterEquipmentChange = (
 				: { maxHealth, health: Math.min(state.player.health, maxHealth) },
 		mana: Math.min(
 			state.mana,
-			maximumMana(state.progression, equipment, state.effects),
+			maximumMana(
+				state.progression,
+				equipment,
+				state.effects,
+				state.afflictions,
+			),
 		),
 	};
 };

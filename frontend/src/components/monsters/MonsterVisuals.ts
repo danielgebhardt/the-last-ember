@@ -21,6 +21,7 @@ import SalamanderIcon from "./SalamanderIcon";
 import SentryIcon from "./SentryIcon";
 import ShadowStalkerIcon from "./ShadowStalkerIcon";
 import SkeletonIcon from "./SkeletonIcon";
+import SoulWraithIcon from "./SoulWraithIcon";
 import SpiderIcon from "./SpiderIcon";
 import TrollIcon from "./TrollIcon";
 import WardenIcon from "./WardenIcon";
@@ -161,6 +162,11 @@ export const MONSTER_VISUALS: Record<
 		icon: FrostGiantIcon,
 		color: "text-monster-cyan",
 		label: MONSTER_DEFINITIONS["frost-giant"].name,
+	},
+	"soul-wraith": {
+		icon: SoulWraithIcon,
+		color: "text-monster-soul",
+		label: MONSTER_DEFINITIONS["soul-wraith"].name,
 	},
 	necromancer: {
 		icon: NecromancerIcon,

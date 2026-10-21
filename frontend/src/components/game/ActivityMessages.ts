@@ -114,6 +114,8 @@ export const formatActivityEvent = (event: ActivityEvent): string => {
 			return `${prefix}The ${MONSTER_DEFINITIONS[event.monster].name}'s hex strikes you for ${event.damage} damage.`;
 		case "monster-hex-avoided":
 			return `${prefix}The ${MONSTER_DEFINITIONS[event.monster].name}'s hex fizzles.`;
+		case "monster-soul-bolt-hit":
+			return `${prefix}The ${MONSTER_DEFINITIONS[event.monster].name}'s soul bolt hits you for ${event.damage} shadow damage.`;
 		case "monster-blind-prepared":
 			return `${prefix}The ${MONSTER_DEFINITIONS[event.monster].name} gathers darkness. Move off your tile before it acts again.`;
 		case "monster-blind-hit":

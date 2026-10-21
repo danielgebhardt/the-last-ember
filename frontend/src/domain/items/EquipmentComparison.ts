@@ -42,7 +42,7 @@ const loadoutStats = (
 			: context.player.maxHealth +
 				equipmentBonuses(equipment).health -
 				equipmentBonuses(context.equipment).health,
-		maxMana: maximumMana(progression, equipment, effects),
+		maxMana: maximumMana(progression, equipment, effects, context.afflictions),
 		spellPowerBonus: attributes.intelligenceModifier,
 		minDamage: damage.minDamage,
 		maxDamage: damage.maxDamage,

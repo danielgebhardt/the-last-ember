@@ -36,6 +36,7 @@ describe("Developer catalog", () => {
 					"mana-burn": 1,
 					curse: 1,
 					blinded: 1,
+					"soul-drain": 1,
 				},
 			],
 			["Dungeon objects", OBJECT_DEFINITIONS],

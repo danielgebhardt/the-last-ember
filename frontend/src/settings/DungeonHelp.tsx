@@ -313,8 +313,8 @@ const DungeonHelp = ({
 						after monsters act for six phases; another dose resets the timer. An
 						Antidote removes it before that tick but does not protect against a
 						fresh dose. At most three harmful conditions (poison, Disease,
-						Slowed, Mana Burn, Curse, Blinded) can be active at once; a fourth
-						is rejected.
+						Slowed, Mana Burn, Curse, Blinded, Soul Drain) can be active at
+						once; a fourth is rejected.
 					</li>
 					<li>
 						<span className="font-medium text-foreground">Disease.</span> Rare
@@ -368,6 +368,17 @@ const DungeonHelp = ({
 						while it lasts.
 					</li>
 					<li>
+						<span className="font-medium text-foreground">Soul Drain.</span>{" "}
+						Rare soul wraiths on floors 14–20 fire a soul bolt without warning
+						while they can see you within 3 tiles, then fight in melee until it
+						is ready again. A bolt deals shadow damage (magic resistance
+						applies) and Soul Drain: maximum mana drops by 20%, rounded down
+						(minimum 1), until cured, and mana above the new maximum is lost. It
+						does not stack. A Soul Restoration potion or the sanctuary removes
+						it, restoring capacity but not lost mana. Corridor running stops
+						when it begins but may continue afterward.
+					</li>
+					<li>
 						<span className="font-medium text-foreground">Town.</span> New
 						adventures begin with {STARTING_GOLD} gold for a modest upgrade or
 						supplies. Use E at a shop doorway to browse. Shops trade in gold;
@@ -401,11 +412,12 @@ const DungeonHelp = ({
 						{SANCTUARY_CONDITION_FEES.slowed} gold, Mana Burn{" "}
 						{SANCTUARY_CONDITION_FEES["mana-burn"]} gold, Curse{" "}
 						{SANCTUARY_CONDITION_FEES.curse} gold, Blinded{" "}
-						{SANCTUARY_CONDITION_FEES.blinded} gold, or a complete cleanse of
-						every active condition for their combined fee (at most 600). Every
-						treatment shows its exact price and needs confirmation. Cures keep
-						buffs and restore no HP or mana; buy healing separately. Treatment
-						uses no dungeon turn.
+						{SANCTUARY_CONDITION_FEES.blinded} gold, Soul Drain{" "}
+						{SANCTUARY_CONDITION_FEES["soul-drain"]} gold, or a complete cleanse
+						of every active condition for their combined fee (at most 600).
+						Every treatment shows its exact price and needs confirmation. Cures
+						keep buffs and restore no HP or mana; buy healing separately.
+						Treatment uses no dungeon turn.
 					</li>
 					<li>
 						<span className="font-medium text-foreground">Library.</span> Press

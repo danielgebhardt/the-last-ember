@@ -47,6 +47,7 @@ it("covers every source monster", () => {
 		"hexweaver",
 		"shadow-stalker",
 		"mana-leech",
+		"soul-wraith",
 	]);
 });
 

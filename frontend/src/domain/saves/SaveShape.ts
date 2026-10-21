@@ -276,6 +276,7 @@ const eventFields = {
 	"monster-hex-avoided": { monster: monsterKind },
 	"monster-blind-prepared": { monster: monsterKind, target: coordinate },
 	"monster-blind-hit": { monster: monsterKind, damage: natural },
+	"monster-soul-bolt-hit": { monster: monsterKind, damage: natural },
 	"monster-blind-missed": { monster: monsterKind },
 	"monster-blind-avoided": { monster: monsterKind },
 	"monster-heavy-hit": { monster: monsterKind, damage: natural },

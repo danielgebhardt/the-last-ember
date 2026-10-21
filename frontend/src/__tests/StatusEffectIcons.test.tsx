@@ -86,6 +86,7 @@ it("shows Disease beside poison as until cured with the exact penalty and both c
 			]}
 			impact={{
 				maxHealth: { normal: 23, effective: 18 },
+				maxMana: { normal: 10, effective: 10 },
 				evade: { normal: 25, effective: 15 },
 				hit: { normal: 80, effective: 80 },
 			}}
@@ -116,6 +117,7 @@ it("shows Slowed's remaining phases, exact evasion change and both cures beside 
 			]}
 			impact={{
 				maxHealth: { normal: 23, effective: 18 },
+				maxMana: { normal: 10, effective: 10 },
 				evade: { normal: 25, effective: 15 },
 				hit: { normal: 80, effective: 80 },
 			}}

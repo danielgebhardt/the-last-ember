@@ -6,6 +6,7 @@ import {
 	Eclipse,
 	EyeOff,
 	Footprints,
+	Ghost,
 	HeartPulse,
 	Shield,
 	Skull,
@@ -109,6 +110,14 @@ export const AFFLICTION_VISUALS: Record<AfflictionKind, StatusVisual> = {
          border-sky-600/70 bg-sky-500/10 text-sky-800
          shadow-[0_0_8px_rgba(2,132,199,0.22)]
          dark:border-sky-400/70 dark:bg-sky-950/50 dark:text-sky-300
+      `,
+	},
+	"soul-drain": {
+		Icon: Ghost,
+		className: `
+         border-cyan-700/70 bg-cyan-500/10 text-cyan-800
+         shadow-[0_0_8px_rgba(14,116,144,0.24)]
+         dark:border-cyan-400/70 dark:bg-cyan-950/50 dark:text-cyan-300
       `,
 	},
 	blinded: {

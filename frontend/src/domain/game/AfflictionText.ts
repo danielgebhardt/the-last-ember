@@ -5,6 +5,7 @@ import {
 	AFFLICTION_DEFINITIONS,
 	type AfflictionKind,
 } from "./AfflictionDefinitions";
+import { maximumMana } from "./Mana";
 import { deriveAccuracy } from "./MeleeRules";
 import type { AfflictionDefinition } from "./PlayerAfflictions";
 import { maximumHealth } from "./PlayerHealth";
@@ -15,6 +16,7 @@ type Change = Readonly<{ normal: number; effective: number }>;
 // Normal versus effective figures for the stats afflictions can change.
 export type AfflictionImpact = Readonly<{
 	maxHealth: Change;
+	maxMana: Change;
 	evade: Change;
 	hit: Change;
 }>;
@@ -35,6 +37,10 @@ export const afflictionImpact = (
 		maxHealth: {
 			normal: maximumHealth(progression, equipment),
 			effective: maximumHealth(progression, equipment, afflictions),
+		},
+		maxMana: {
+			normal: maximumMana(progression, equipment, effects),
+			effective: maximumMana(progression, equipment, effects, afflictions),
 		},
 		evade: { normal: normal.evadeChance, effective: effective.evadeChance },
 		hit: {
@@ -61,6 +67,8 @@ export const afflictionDetails = (
 		? [
 				modifiers.maximumHealthMultiplier &&
 					change("Maximum HP", impact.maxHealth),
+				modifiers.maximumManaMultiplier &&
+					change("Maximum mana", impact.maxMana),
 				modifiers.evasion && change("Evade", impact.evade, "%"),
 				modifiers.accuracy && change("Hit", impact.hit, "%"),
 			].filter(Boolean)

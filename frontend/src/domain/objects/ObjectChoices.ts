@@ -65,7 +65,12 @@ export const objectChoices = (
 	object: DungeonObject,
 	state?: Pick<
 		GameState,
-		"player" | "progression" | "equipment" | "effects" | "difficulty"
+		| "player"
+		| "progression"
+		| "equipment"
+		| "effects"
+		| "afflictions"
+		| "difficulty"
 	> &
 		Partial<Pick<GameState, "bag" | "gold">>,
 ): readonly InteractionChoice[] => {
@@ -99,6 +104,7 @@ export const objectChoices = (
 				effects: [],
 				progression: createProgression(),
 				equipment: createStartingEquipment(),
+				afflictions: [],
 			},
 		);
 		return [

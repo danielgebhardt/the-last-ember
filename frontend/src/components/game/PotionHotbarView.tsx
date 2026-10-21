@@ -18,6 +18,7 @@ import {
 const POTION_LABELS: Record<PotionKind, string> = {
 	"cure-disease-potion": "Cure Disease",
 	"cleansing-potion": "Cleansing",
+	"soul-restoration-potion": "Soul",
 	"strength-potion": "Strength",
 	"dexterity-potion": "Dexterity",
 	"intelligence-potion": "Intellect",

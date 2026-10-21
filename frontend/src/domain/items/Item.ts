@@ -56,6 +56,19 @@ export const ITEM_DEFINITIONS = {
 		description:
 			"Removes Slowed, Mana Burn and Blinded before the ensuing phase, restoring evasion, passive mana recovery and sight. Does not cure poison, Disease or other conditions. One effective use consumes one bottle and one dungeon turn; unaffected use is free. Found on floors 3–12 and in matching chests/drops. Cannot be sold, like other potions.",
 	},
+	"soul-restoration-potion": {
+		name: "Soul Restoration potion",
+		type: "potion",
+		attackBonus: 0,
+		armor: 0,
+		removesAfflictions: ["soul-drain"],
+		minFloor: 14,
+		maxFloor: 20,
+		foundWeight: 0.15,
+		dropWeight: 0.15,
+		description:
+			"Removes Soul Drain before the ensuing phase, restoring maximum mana without refilling it. Does not cure other conditions. One effective use consumes one bottle and one dungeon turn; unaffected use is free. Found on floors 14–20 and in matching chests/drops. Cannot be sold, like other potions.",
+	},
 	"warding-cloak": {
 		specialFindOnly: true,
 		name: "Warding Cloak",

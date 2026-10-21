@@ -156,7 +156,12 @@ export const advanceTimedEffects = (state: GameState): GameState => {
 				effects,
 				mana: Math.min(
 					next.mana,
-					maximumMana(next.progression, next.equipment, effects),
+					maximumMana(
+						next.progression,
+						next.equipment,
+						effects,
+						next.afflictions,
+					),
 				),
 			}
 		: state;

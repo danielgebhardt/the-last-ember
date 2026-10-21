@@ -27,6 +27,12 @@ const bottles = {
 		path: "M10 2h4v5a7 7 0 1 1-4 0V2Z",
 		liquid: "M8.5 15.5c1.5-1.5 2.5 1 4 0s1.5-2 3-1M9.5 18.5c1.5-1 3 .5 5-.5",
 	},
+	// Slim flask holding a rising soul wisp.
+	soul: {
+		color: "text-monster-soul",
+		path: "M10 2h4v4l3 4v10a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2V10l3-4V2Z",
+		liquid: "M12 11c-2 2-2 4.5 0 7 2-2.5 2-5 0-7Z",
+	},
 	antidote: {
 		color: "text-item-antidote",
 		path: "M10 3h4v6l6 10a1.3 1.3 0 0 1-1 2H5a1.3 1.3 0 0 1-1-2l6-10V3Z",
@@ -36,6 +42,7 @@ const bottles = {
 const families: Record<PotionKind, keyof typeof bottles> = {
 	"cure-disease-potion": "remedy",
 	"cleansing-potion": "cleansing",
+	"soul-restoration-potion": "soul",
 	"healing-potion": "health",
 	"greater-healing-potion": "health",
 	"mana-potion": "mana",

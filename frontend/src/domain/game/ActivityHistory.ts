@@ -176,7 +176,7 @@ export type ActivityEvent = { turn: number } & (
 	| { type: "door-changed"; opened: boolean }
 	| { type: "player-mana-drained"; monster: MonsterKind; mana: number }
 	| {
-			type: "monster-hex-hit" | "monster-blind-hit";
+			type: "monster-hex-hit" | "monster-blind-hit" | "monster-soul-bolt-hit";
 			monster: MonsterKind;
 			damage: number;
 	  }

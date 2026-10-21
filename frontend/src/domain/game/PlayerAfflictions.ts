@@ -8,6 +8,7 @@ export type AfflictionDefinition<K extends string = string> = Readonly<{
 	// Evasion is in percentage points; one d20 threshold step is 5 points.
 	modifiers: Readonly<{
 		maximumHealthMultiplier?: number;
+		maximumManaMultiplier?: number;
 		evasion?: number;
 		suppressesManaRecovery?: boolean;
 		// Melee to-hit in percentage points (one d20 step is 5) and flat melee damage.

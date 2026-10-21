@@ -12,6 +12,7 @@ import {
 	deriveCombatStats,
 } from "../../domain/game/CombatStats";
 import { playerEffectBonuses } from "../../domain/game/EffectBonuses";
+import { maximumMana } from "../../domain/game/Mana";
 import { attackProfile, deriveAccuracy } from "../../domain/game/MeleeRules";
 import { maximumHealth } from "../../domain/game/PlayerHealth";
 import type { PlayerStats } from "../../domain/game/PlayerStats";
@@ -38,6 +39,13 @@ const CharacterStats = ({
 	afflictions?: readonly ActiveAffliction[];
 }) => {
 	const normalMaxHealth = maximumHealth(progression, equipment);
+	const normalMaxMana = maximumMana(progression, equipment, effects);
+	const effectiveMaxMana = maximumMana(
+		progression,
+		equipment,
+		effects,
+		afflictions,
+	);
 	const combat = deriveCombatStats(equipment, progression, effects);
 	const armor = armorContributions(equipment);
 	const accuracy = deriveAccuracy(progression, effects, equipment, afflictions);
@@ -94,6 +102,7 @@ const CharacterStats = ({
 					<div className={value}>
 						<ManaDisplay
 							effects={effects}
+							afflictions={afflictions}
 							equipment={equipment}
 							mana={mana}
 							progression={progression}
@@ -103,6 +112,8 @@ const CharacterStats = ({
 					</div>
 					<p className={hint}>
 						Current / maximum
+						{by("maximumManaMultiplier") &&
+							` · ${by("maximumManaMultiplier")} −${normalMaxMana - effectiveMaxMana} (normal ${normalMaxMana})`}
 						{manaBlock &&
 							` · ${AFFLICTION_DEFINITIONS[manaBlock.kind].name}: no passive recovery${manaBlock.remaining === null ? "" : ` for ${manaBlock.remaining} ${manaBlock.remaining === 1 ? "phase" : "phases"}`}`}
 					</p>

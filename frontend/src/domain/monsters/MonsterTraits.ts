@@ -53,6 +53,10 @@ export const monsterTraits = (kind: MonsterKind): readonly string[] => {
 		traits.push(
 			`Blinding strike: when beside you, it marks your tile instead of attacking, then strikes on its next action with a normal melee roll. A landed hit deals normal damage and Blinded (sight 2 tiles and melee to-hit −20 for 30 phases). Step off the marked tile to avoid it; Sleep or Fear cancels it. At least ${definition.blindingStrike.cooldown} phases between strikes. Cleansing potion or the sanctuary cures Blinded.`,
 		);
+	if (definition.soulBolt)
+		traits.push(
+			`Soul bolt: no warning. While it can see you within ${definition.soulBolt.range} tiles, it fires a bolt instead of attacking: ${definition.soulBolt.damage} shadow damage (magic resistance applies) and Soul Drain (maximum mana −20% until cured). Break its line of sight or stay out of range to avoid it. At least ${definition.soulBolt.cooldown} phases between bolts; it fights in melee in between. A Soul Restoration potion or the sanctuary cures Soul Drain.`,
+		);
 	if (definition.onHitManaDrain)
 		traits.push(
 			`Every landed melee hit also drains ${definition.onHitManaDrain.min}–${definition.onHitManaDrain.max} mana (never below 0). Misses drain nothing.`,

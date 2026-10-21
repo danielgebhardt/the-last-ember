@@ -107,6 +107,23 @@ export const AFFLICTION_DEFINITIONS = {
 		removedText: "Your sight returns.",
 		absentText: "You are not Blinded.",
 	},
+	"soul-drain": {
+		kind: "soul-drain",
+		sanctuaryFee: 400,
+		summary: "maximum mana −20% (minimum 1) until cured",
+		target: "player",
+		name: "Soul Drain",
+		lifetime: { type: "until-cured" },
+		modifiers: { maximumManaMultiplier: 0.8 },
+		blocksRunning: false,
+		cure: "soul-restoration-potion",
+		guidance:
+			"Maximum mana reduced by 20%, rounded down (minimum 1), until cured by a Soul Restoration potion or sanctuary treatment. Current mana above the new maximum is lost. Curing restores capacity, not mana. No attributes or spells are lost.",
+		appliedText:
+			"Maximum mana reduced by 20% until cured. Drink a Soul Restoration potion or visit the sanctuary.",
+		removedText: "Maximum mana restored without refilling it.",
+		absentText: "You do not have Soul Drain.",
+	},
 } as const satisfies Record<string, AfflictionDefinition>;
 export type AfflictionKind = keyof typeof AFFLICTION_DEFINITIONS;
 export type ActiveAffliction = PlayerAffliction<AfflictionKind>;

@@ -54,6 +54,7 @@ export const hasConsistentResources = (document: SaveDocument): boolean => {
 		state.progression,
 		state.equipment,
 		state.effects,
+		state.afflictions,
 	);
 	if (
 		state.player.maxHealth !==

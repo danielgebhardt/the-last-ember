@@ -233,6 +233,7 @@ const PlayerStatus = ({
 						<ManaDisplay
 							compact
 							effects={effects}
+							afflictions={afflictions}
 							equipment={equipment}
 							mana={mana}
 							progression={progression}
@@ -243,7 +244,7 @@ const PlayerStatus = ({
 					<Reserve
 						label="Mana reserve"
 						value={mana}
-						maximum={maximumMana(progression, equipment, effects)}
+						maximum={maximumMana(progression, equipment, effects, afflictions)}
 						mana
 					/>
 				</ResourceCard>

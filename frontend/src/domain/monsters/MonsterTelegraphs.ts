@@ -23,8 +23,9 @@ export type SpecialActionOutcome = Readonly<{
 	damage?: number;
 	affliction?: AfflictionKind;
 }>;
-// Behaviors that need a pause after resolving; the monster saves the turn.
-export type TelegraphCooldown = "web" | "hex" | "blind";
+// Behaviors that need a pause after resolving; the monster saves the turn. The
+// soul bolt is unprepared but shares this cooldown record.
+export type TelegraphCooldown = "web" | "hex" | "blind" | "soul-bolt";
 
 type TelegraphRule = Readonly<{
 	owns: (definition: MonsterDefinition) => boolean;
@@ -104,6 +105,7 @@ export const TELEGRAPH_COOLDOWNS: Readonly<
 	web: (definition) => definition.webAttack?.cooldown,
 	hex: (definition) => definition.hexAttack?.cooldown,
 	blind: (definition) => definition.blindingStrike?.cooldown,
+	"soul-bolt": (definition) => definition.soulBolt?.cooldown,
 };
 
 // Another use needs more than the cooldown since the last resolution.

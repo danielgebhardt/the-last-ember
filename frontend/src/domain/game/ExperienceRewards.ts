@@ -34,6 +34,7 @@ export const experienceReward = (state: GameState, reward: number) => {
 		state.progression,
 		gained.progression,
 		state.equipment,
+		state.afflictions,
 	);
 	const events: ActivityEvent[] = [
 		{ type: "experience-gained", amount: reward, turn },

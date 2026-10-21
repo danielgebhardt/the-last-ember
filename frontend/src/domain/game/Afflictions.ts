@@ -6,6 +6,7 @@ import {
 	afflictionModifiers,
 } from "./AfflictionDefinitions";
 import type { GameState } from "./GameState";
+import { maximumMana } from "./Mana";
 import {
 	advanceAfflictions,
 	applyAffliction,
@@ -13,17 +14,28 @@ import {
 } from "./PlayerAfflictions";
 import { maximumHealth } from "./PlayerHealth";
 
-// Capacity is derived from afflictions; current HP clamps but is never healed.
+// Capacity is derived from afflictions; current HP and mana clamp but never refill.
 const withAfflictions = (
 	state: GameState,
 	afflictions: readonly ActiveAffliction[],
-): GameState["player"] => {
+): Pick<GameState, "player" | "mana"> => {
 	const maxHealth = maximumHealth(
 		state.progression,
 		state.equipment,
 		afflictions,
 	);
-	return { maxHealth, health: Math.min(state.player.health, maxHealth) };
+	return {
+		player: { maxHealth, health: Math.min(state.player.health, maxHealth) },
+		mana: Math.min(
+			state.mana,
+			maximumMana(
+				state.progression,
+				state.equipment,
+				state.effects,
+				afflictions,
+			),
+		),
+	};
 };
 
 export const applyPlayerAffliction = (
@@ -53,7 +65,7 @@ export const applyPlayerAffliction = (
 	return {
 		...state,
 		afflictions: result.afflictions,
-		player: withAfflictions(state, result.afflictions),
+		...withAfflictions(state, result.afflictions),
 		activityHistory: appendActivityEvents(state.activityHistory, [event]),
 	};
 };
@@ -69,7 +81,7 @@ export const removePlayerAfflictions = (
 	return {
 		...state,
 		afflictions,
-		player: withAfflictions(state, afflictions),
+		...withAfflictions(state, afflictions),
 		activityHistory: appendActivityEvents(
 			state.activityHistory,
 			active
@@ -98,7 +110,7 @@ export const advancePlayerAfflictions = (ticked: GameState): GameState => {
 	return {
 		...ticked,
 		afflictions,
-		player: withAfflictions(ticked, afflictions),
+		...withAfflictions(ticked, afflictions),
 		activityHistory: appendActivityEvents(
 			ticked.activityHistory,
 			expired.map((a) => ({

@@ -89,6 +89,9 @@ export type MonsterDefinition = {
 	// Telegraphed adjacent strike: marks your tile, then makes a normal melee roll
 	// next action if you stayed. A landed hit deals normal damage and Blinded.
 	blindingStrike?: { cooldown: number };
+	// Unprepared shadow bolt while it sees you within range: damage (magic
+	// resistance applies) and Soul Drain. Between bolts it fights normally.
+	soulBolt?: { range: number; cooldown: number; damage: number };
 	// Spawned only through the shared sparse affliction-source budget.
 	afflictionSource?: boolean;
 	regeneration?: number;
@@ -128,6 +131,7 @@ export const validateMonsterDefinition = (
 		webAttack,
 		hexAttack,
 		blindingStrike,
+		soulBolt,
 		regeneration,
 		enemySpells,
 		spellInterval,
@@ -257,9 +261,21 @@ export const validateMonsterDefinition = (
 				hexAttack !== undefined ||
 				onHitAffliction !== undefined ||
 				rangedAttackRange !== undefined)) ||
+		(soulBolt !== undefined &&
+			(!Number.isSafeInteger(soulBolt.range) ||
+				soulBolt.range < 2 ||
+				soulBolt.range > 8 ||
+				!Number.isSafeInteger(soulBolt.cooldown) ||
+				soulBolt.cooldown < 3 ||
+				!Number.isSafeInteger(soulBolt.damage) ||
+				soulBolt.damage < 1 ||
+				hexAttack !== undefined ||
+				onHitAffliction !== undefined ||
+				rangedAttackRange !== undefined ||
+				enemySpells !== undefined)) ||
 		(afflictionSource !== undefined &&
 			(afflictionSource !== true ||
-				(!onHitAffliction && !hexAttack && !blindingStrike) ||
+				(!onHitAffliction && !hexAttack && !blindingStrike && !soulBolt) ||
 				spawnEnabled !== false))
 	)
 		throw new RangeError(
@@ -626,6 +642,21 @@ const monsterCatalog = {
 			maxDamage: 12,
 		},
 	},
+	"soul-wraith": {
+		name: "soul wraith",
+		experienceReward: 45,
+		maxHealth: 40,
+		attackDamage: 10,
+		detectionRadius: 7,
+		minFloor: 14,
+		maxFloor: 20,
+		spawnWeight: 1,
+		spawnEnabled: false,
+		afflictionSource: true,
+		soulBolt: { range: 3, cooldown: 4, damage: 6 },
+		dropChance: 1,
+		lootPreferences: {},
+	},
 	necromancer: {
 		opensDoors: true,
 		resists: ["shadow"],
@@ -695,4 +726,6 @@ export const monsterAffliction = (
 			? "curse"
 			: MONSTER_DEFINITIONS[kind].blindingStrike
 				? "blinded"
-				: undefined);
+				: MONSTER_DEFINITIONS[kind].soulBolt
+					? "soul-drain"
+					: undefined);

@@ -32,6 +32,7 @@ import { resolveMonsterHex } from "./MonsterHex";
 import { orthogonalDistance } from "./MonsterLocations";
 import { detectsPlayer, selectPursuitStep, sensesCure } from "./MonsterPursuit";
 import { selectRetreatStep } from "./MonsterRetreat";
+import { resolveMonsterSoulBolt } from "./MonsterSoulBolt";
 import { maximumMonsterHealth, monsterAttackDamage } from "./MonsterStats";
 import type { SpecialActionOutcome } from "./MonsterTelegraphs";
 import { resolveMonsterWeb } from "./MonsterWeb";
@@ -66,6 +67,7 @@ const SPECIAL_ACTIONS: readonly ((
 	(c) => resolveMonsterWeb(c.state, c.monster, c.detected),
 	(c) =>
 		resolveMonsterBlindingStrike(c.state, c.monster, c.detected, c.rollSource),
+	(c) => resolveMonsterSoulBolt(c.state, c.monster, c.detected),
 ];
 const resolveSpecialAction = (context: SpecialActionContext) => {
 	for (const resolve of SPECIAL_ACTIONS) {

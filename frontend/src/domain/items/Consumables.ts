@@ -133,7 +133,12 @@ export const consumeItem = (
 	const maximum =
 		resource === "health"
 			? player.maxHealth
-			: maximumMana(state.progression, state.equipment, state.effects);
+			: maximumMana(
+					state.progression,
+					state.equipment,
+					state.effects,
+					state.afflictions,
+				);
 	if (current >= maximum)
 		return { error: `You are already at full ${resource}.` };
 	const recovered = Math.min(amount, maximum - current);

@@ -5,6 +5,7 @@ const incomingTypes = new Set([
 	"monster-hit",
 	"monster-withdrawal-hit",
 	"monster-blind-hit",
+	"monster-soul-bolt-hit",
 	"monster-shot-hit",
 	"monster-heavy-hit",
 	"monster-charge-hit",
