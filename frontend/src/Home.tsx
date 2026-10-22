@@ -33,6 +33,7 @@ import PickupDialog from "./components/game/PickupDialog";
 import PlayerStatus from "./components/game/PlayerStatus.tsx";
 import PotionHotbarView from "./components/game/PotionHotbarView";
 import QuestStatus from "./components/game/QuestStatus";
+import RemediesButton from "./components/game/RemediesButton";
 import SpellHotbarView from "./components/game/SpellHotbarView";
 import { useAdventureSession } from "./components/game/useAdventureSession";
 import { useAutosave } from "./components/game/useAutosave";
@@ -374,6 +375,14 @@ const Home = ({
 		mapRef,
 		onStep: (direction) => handleActionRequested({ type: "move", direction }),
 	});
+
+	const [remediesOpen, setRemediesOpen] = useState(false);
+	const remediesEnabled = gameplayEnabled && !spells.targeting && !town;
+	const handleRemedyUsed = (itemId: string) => {
+		setRemediesOpen(false);
+		handleActionRequested({ type: "consume", itemId });
+		mapRef.current?.focus({ preventScroll: true });
+	};
 
 	const handlePotionRequested = (slot: HotbarSlot) => {
 		handleActionRequested({ type: "use-hotbar", slot });
@@ -768,6 +777,9 @@ const Home = ({
 										}
 										onPickupRequested={handlePickupRequested}
 										onPotionRequested={handlePotionRequested}
+										onRemediesRequested={
+											remediesEnabled ? () => setRemediesOpen(true) : undefined
+										}
 										onCharacterRequested={
 											mapInputAvailable
 												? () => {
@@ -825,9 +837,17 @@ const Home = ({
 									className="
             flex min-w-0 max-w-full flex-wrap
             items-start justify-center gap-x-3 gap-y-3
-            bg-muted/20 px-2 py-2 sm:px-7
+            bg-muted/20 px-2 py-2 sm:px-5
          "
 								>
+									<RemediesButton
+										bag={game.state.bag}
+										afflictions={game.state.afflictions}
+										enabled={remediesEnabled}
+										open={remediesOpen}
+										onOpenChange={setRemediesOpen}
+										onUse={handleRemedyUsed}
+									/>
 									<PotionHotbarView
 										bag={game.state.bag}
 										potionHotbar={game.state.potionHotbar}

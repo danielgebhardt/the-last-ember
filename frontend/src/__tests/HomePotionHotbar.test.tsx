@@ -151,9 +151,14 @@ describe("Potion hotbar gameplay", () => {
 		await user.click(screen.getByRole("button", { name: "New Dungeon" }));
 		await user.click(screen.getByRole("button", { name: "Start new dungeon" }));
 		await enterDungeonFromTown(user);
-		for (const slot of [3, 4])
+		for (const [slot, name] of [
+			[3, "Greater healing potion"],
+			[4, "Greater mana potion"],
+		])
 			expect(
-				screen.getByRole("button", { name: `Potion slot ${slot}: empty` }),
+				screen.getByRole("button", {
+					name: `Potion slot ${slot}: ${name}, 0 carried`,
+				}),
 			).toBeVisible();
 		expect(
 			screen.getByRole("button", {

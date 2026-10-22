@@ -36,7 +36,7 @@ const buy = (
 ) =>
 	resolvePlayerAction(state, { type: "buy-town-potion", kind, expectedStock });
 describe("finite town potion purchases", () => {
-	it("atomically spends gold, records a unique bottle and stock, and assigns a hotbar without a dungeon phase", () => {
+	it("atomically spends gold, records a unique bottle and stock, without a dungeon phase, leaving the full starting bar unchanged", () => {
 		const state = shopState();
 		const next = buy(state);
 		expect(next.error).toBeUndefined();
@@ -47,7 +47,7 @@ describe("finite town potion purchases", () => {
 			id: "town-potion:antidote:1",
 			kind: "antidote",
 		});
-		expect(next.state.potionHotbar).toContain("antidote");
+		expect(next.state.potionHotbar).toBe(state.potionHotbar);
 		for (const key of [
 			"run",
 			"monsters",

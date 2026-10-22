@@ -28,7 +28,7 @@ test("the reserved test seed starts the full kit on the authored encounter floor
 	).toBeVisible();
 	await expect(
 		page.getByRole("button", {
-			name: "Potion slot 1: Greater healing potion, 20 carried",
+			name: "Potion slot 1: Healing potion, 20 carried",
 			exact: true,
 		}),
 	).toBeVisible();

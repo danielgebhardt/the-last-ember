@@ -186,6 +186,10 @@ const DungeonHelp = ({
 							</span>
 						</li>
 						<li className="flex items-center justify-between gap-3 py-2">
+							<span>Open Remedies</span>
+							<Keycap>P</Keycap>
+						</li>
+						<li className="flex items-center justify-between gap-3 py-2">
 							<span>Target a ranged spell</span>
 							<Keycap>Z</Keycap>
 						</li>
@@ -328,14 +332,16 @@ const DungeonHelp = ({
 						a potion in Character and choose Drink potion, or drag a potion
 						stack onto a potion shortcut in Character (drag a shortcut onto
 						another to move it, or off the bar to clear it). New adventures
-						start with one Healing potion on key 1 and one Mana potion on key 2.
-						You can freely change these assignments. Picking up a new potion
-						kind assigns it to the first empty shortcut. You can also assign it
-						to a shortcut and use keys 1–4 (or click its slot below the map).
-						Basic healing and mana potions restore up to 5 health or mana before
-						monsters act, using one turn. At full health or mana respectively,
-						it costs nothing and stays in your bag. Empty or unavailable
-						shortcuts also cost nothing. Potions cannot be used after death.
+						start with one Healing potion on key 1 and one Mana potion on key 2,
+						with keys 3 and 4 reserved for Greater healing and Greater mana
+						potions. You can freely change these assignments. Picking up a new
+						potion kind assigns it to the first empty shortcut. You can also
+						assign it to a shortcut and use keys 1–4 (or click its slot below
+						the map). Basic healing and mana potions restore up to 5 health or
+						mana before monsters act, using one turn. At full health or mana
+						respectively, it costs nothing and stays in your bag. Empty or
+						unavailable shortcuts also cost nothing. Potions cannot be used
+						after death.
 					</li>
 					<li>
 						<span className="font-medium text-foreground">Stat potions.</span>{" "}
@@ -351,7 +357,11 @@ const DungeonHelp = ({
 						Antidote removes it before that tick but does not protect against a
 						fresh dose. At most three harmful conditions (poison, Disease,
 						Slowed, Mana Burn, Curse, Blinded, Bleeding, Soul Drain) can be
-						active at once; a fourth is rejected.
+						active at once; a fourth is rejected. In the dungeon, Remedies (P,
+						or the button beside the potion shortcuts) lists the cures you
+						carry, those for your current conditions first; choose one or press
+						its number to use it. A red dot on the button means a cure you carry
+						would help now.
 					</li>
 					<li>
 						<span className="font-medium text-foreground">Disease.</span> Rare

@@ -108,8 +108,8 @@ describe("Potion hotbar assignments", () => {
 		expect(createGameState(before.run).potionHotbar).toEqual([
 			"healing-potion",
 			"mana-potion",
-			null,
-			null,
+			"greater-healing-potion",
+			"greater-mana-potion",
 		]);
 	});
 });

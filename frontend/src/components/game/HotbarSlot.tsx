@@ -1,5 +1,5 @@
 export const HOTBAR_CARD_CLASS_NAME =
-	"grid w-16 justify-items-center gap-1 text-center sm:w-20";
+	"grid w-16 justify-items-center gap-1 text-center sm:w-[4.5rem]";
 
 // Keep the slot surface shared while each hotbar owns its interaction semantics.
 export const HOTBAR_SLOT_CLASS_NAME =

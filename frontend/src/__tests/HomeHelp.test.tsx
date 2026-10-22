@@ -52,6 +52,8 @@ describe("Home Help menu", () => {
 		expect(help.getByText("Wait one turn")).toBeVisible();
 		expect(help.getByText("Pick up an item")).toBeVisible();
 		expect(help.getByText("Use potion shortcut")).toBeVisible();
+		expect(help.getByText("Open Remedies")).toBeVisible();
+		expect(help.getByText("P", { selector: "kbd" })).toBeVisible();
 		expect(help.getByText("Enter", { selector: "kbd" })).toBeVisible();
 		expect(
 			help.getByText(

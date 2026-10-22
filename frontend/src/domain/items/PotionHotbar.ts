@@ -21,11 +21,12 @@ export type HotbarAssignmentAction =
 export type HotbarAction =
 	| HotbarAssignmentAction
 	| { type: "use-hotbar"; slot: HotbarSlot };
+// 3 and 4 are reserved for Greater potions so remedies stay in Remedies, not on the bar.
 export const createStartingPotionHotbar = (): PotionHotbar => [
 	"healing-potion",
 	"mana-potion",
-	null,
-	null,
+	"greater-healing-potion",
+	"greater-mana-potion",
 ];
 export const isPotionKind = (kind: ItemKind): kind is PotionKind =>
 	ITEM_DEFINITIONS[kind].type === "potion";

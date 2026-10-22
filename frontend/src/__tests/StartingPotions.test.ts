@@ -4,6 +4,7 @@ import { expect, it } from "vitest";
 import { createGameState } from "../domain/game/GameState";
 import { resolvePlayerAction } from "../domain/game/PlayerActions";
 import { bagSlots } from "../domain/items/Bag";
+import { hotbarSlotContents } from "../domain/items/PotionHotbar";
 import {
 	parseSave,
 	restoreSave,
@@ -12,7 +13,7 @@ import {
 import { createCorridorEncounter } from "./MonsterEncounterTestHelpers";
 import { savedAdventure } from "./SaveTestHelpers";
 
-it("starts freely with one healing potion on 1 and one mana potion on 2", () => {
+it("starts freely with one healing and one mana potion, and Greater potions reserved on 3 and 4", () => {
 	const state = createGameState(createCorridorEncounter());
 	expect(state.bag.items).toEqual([
 		{ id: "starting:healing-potion", kind: "healing-potion" },
@@ -21,8 +22,8 @@ it("starts freely with one healing potion on 1 and one mana potion on 2", () => 
 	expect(state.potionHotbar).toEqual([
 		"healing-potion",
 		"mana-potion",
-		null,
-		null,
+		"greater-healing-potion",
+		"greater-mana-potion",
 	]);
 	expect(state.turn).toBe(0);
 	expect(state.activityHistory.entries).toEqual([]);
@@ -72,7 +73,12 @@ it("stacks mana-first pickups without displacing defaults or restoring manually 
 		type: "clear-hotbar",
 		slot: 2,
 	}).state;
-	expect(cleared.potionHotbar).toEqual([null, null, null, "healing-potion"]);
+	expect(cleared.potionHotbar).toEqual([
+		null,
+		null,
+		"greater-healing-potion",
+		"healing-potion",
+	]);
 	expect(cleared.turn).toBe(2);
 	const extra = {
 		...cleared,
@@ -155,7 +161,61 @@ it("round-trips new starter ownership without duplicating bottles", () => {
 	expect(loaded.potionHotbar).toEqual([
 		"healing-potion",
 		"mana-potion",
-		null,
-		null,
+		"greater-healing-potion",
+		"greater-mana-potion",
+	]);
+});
+
+it("keeps remedies and attribute potions off the full starting bar, fills reserved Greater slots, and reuses a cleared slot", () => {
+	const fresh = createGameState(createCorridorEncounter());
+	const at = fresh.run.playerCoordinate;
+	const found = (
+		id: string,
+		kind: "antidote" | "strength-potion" | "greater-healing-potion",
+	) => ({
+		...fresh,
+		monsters: [],
+		objects: [],
+		floorItems: [{ item: { id, kind }, floorNumber: 1, coordinate: at }],
+	});
+	const pickUp = (state: ReturnType<typeof found>, id: string) =>
+		resolvePlayerAction(state, { type: "pickup", itemId: id }).state;
+	expect(
+		pickUp(found("found:antidote", "antidote"), "found:antidote").potionHotbar,
+	).toBe(fresh.potionHotbar);
+	expect(
+		pickUp(found("found:strength", "strength-potion"), "found:strength")
+			.potionHotbar,
+	).toBe(fresh.potionHotbar);
+	const greater = pickUp(
+		found("found:greater", "greater-healing-potion"),
+		"found:greater",
+	);
+	expect(greater.potionHotbar).toBe(fresh.potionHotbar);
+	expect(hotbarSlotContents(greater, 3)).toMatchObject({
+		kind: "greater-healing-potion",
+		count: 1,
+	});
+
+	const empty = resolvePlayerAction(fresh, { type: "use-hotbar", slot: 4 });
+	expect(empty.turnAdvanced).toBe(false);
+	expect(empty.error).toBe("You have no carried copies of that potion.");
+
+	const cleared = resolvePlayerAction(fresh, {
+		type: "clear-hotbar",
+		slot: 4,
+	}).state;
+	const antidote = pickUp(
+		{
+			...found("found:antidote", "antidote"),
+			potionHotbar: cleared.potionHotbar,
+		},
+		"found:antidote",
+	);
+	expect(antidote.potionHotbar).toEqual([
+		"healing-potion",
+		"mana-potion",
+		"greater-healing-potion",
+		"antidote",
 	]);
 });

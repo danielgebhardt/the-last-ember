@@ -139,7 +139,7 @@ describe("Assigning potion shortcuts in Character", () => {
 			await screen.findByRole("dialog", { name: "The Adventurer's Ledger" }),
 		);
 		expect(fresh.getByLabelText("Potion slot 3 assignment")).toHaveTextContent(
-			"Empty",
+			"Greater healing potion · Slot 3 · 0 carried",
 		);
 		await user.click(
 			fresh.getByRole("button", { name: "Main hand: Short sword" }),

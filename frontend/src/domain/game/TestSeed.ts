@@ -16,6 +16,7 @@ import {
 	type ItemInstance,
 	type ItemKind,
 } from "../items/Item";
+import { createStartingPotionHotbar } from "../items/PotionHotbar";
 import {
 	MONSTER_DEFINITIONS,
 	type Monster,
@@ -308,11 +309,6 @@ export const createTestSeedState = (
 		knownSpells,
 		spellHotbar: createSpellHotbar(knownSpells),
 		bag: testBag(),
-		potionHotbar: [
-			"greater-healing-potion",
-			"greater-mana-potion",
-			"cleansing-potion",
-			"antidote",
-		],
+		potionHotbar: createStartingPotionHotbar(),
 	};
 };

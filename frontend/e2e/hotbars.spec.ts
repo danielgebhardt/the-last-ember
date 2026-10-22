@@ -100,10 +100,16 @@ test("fresh starts, New Dungeon and seed replay restore starter potions without 
 		}),
 	).toBeVisible();
 	await expect(
-		page.getByRole("button", { name: "Potion slot 3: empty", exact: true }),
+		page.getByRole("button", {
+			name: "Potion slot 3: Greater healing potion, 0 carried",
+			exact: true,
+		}),
 	).toBeVisible();
 	await expect(
-		page.getByRole("button", { name: "Potion slot 4: empty", exact: true }),
+		page.getByRole("button", {
+			name: "Potion slot 4: Greater mana potion, 0 carried",
+			exact: true,
+		}),
 	).toBeVisible();
 });
 

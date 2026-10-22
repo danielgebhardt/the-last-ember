@@ -13,6 +13,7 @@ export type DungeonKeyboardOptions = {
 	onTravelRequested?: () => void;
 	onCharacterRequested?: () => void;
 	onPotionRequested?: (slot: HotbarSlot) => void;
+	onRemediesRequested?: () => void;
 	onSpellSlotRequested?: (slot: SpellSlot) => void;
 	onSpellRequested?: (spell: SpellKind) => void;
 	onTargetingKey?: (key: string) => void;
@@ -31,6 +32,7 @@ export const useDungeonKeyboard = ({
 	onTravelRequested,
 	onCharacterRequested,
 	onPotionRequested,
+	onRemediesRequested,
 	onSpellRequested,
 	onSpellSlotRequested,
 	onTargetingKey,
@@ -176,6 +178,12 @@ export const useDungeonKeyboard = ({
 				return;
 			}
 
+			if (event.key.toLowerCase() === "p" && onRemediesRequested) {
+				event.preventDefault();
+				if (!event.repeat) onRemediesRequested();
+				return;
+			}
+
 			if (event.key.toLowerCase() === "e") {
 				if (
 					!onInteractRequested ||
@@ -256,6 +264,7 @@ export const useDungeonKeyboard = ({
 		onTravelRequested,
 		onCharacterRequested,
 		onPotionRequested,
+		onRemediesRequested,
 		onSpellRequested,
 		onSpellSlotRequested,
 		onTargetingKey,
