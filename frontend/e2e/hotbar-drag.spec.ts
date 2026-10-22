@@ -33,18 +33,22 @@ test("dragging a potion stack assigns, moves and clears potion shortcuts for fre
 		bagItem(dialog, "Healing potion"),
 		potionSlot(dialog, 1),
 	);
-	await expect(potionSlot(dialog, 1)).toHaveText("Healing potion · 2 carried");
+	await expect(potionSlot(dialog, 1)).toHaveText(
+		"Healing potion · Slot 1 · 2 carried",
+	);
 	// Onto another slot moves the assignment.
 	await mouseDrag(page, filledPotionSlot(dialog, 1), potionSlot(dialog, 3));
-	await expect(potionSlot(dialog, 1)).toHaveText("Empty");
-	await expect(potionSlot(dialog, 3)).toHaveText("Healing potion · 2 carried");
+	await expect(potionSlot(dialog, 1)).toHaveText("Empty · Slot 1");
+	await expect(potionSlot(dialog, 3)).toHaveText(
+		"Healing potion · Slot 3 · 2 carried",
+	);
 	// Onto the bag clears it.
 	await mouseDrag(
 		page,
 		filledPotionSlot(dialog, 3),
 		dialog.getByRole("list", { name: "Carried items" }),
 	);
-	await expect(potionSlot(dialog, 3)).toHaveText("Empty");
+	await expect(potionSlot(dialog, 3)).toHaveText("Empty · Slot 3");
 	// Released away from every target also clears it.
 	await mouseDrag(page, bagItem(dialog, "Mana potion"), potionSlot(dialog, 2));
 	await mouseDrag(
@@ -52,11 +56,11 @@ test("dragging a potion stack assigns, moves and clears potion shortcuts for fre
 		filledPotionSlot(dialog, 2),
 		dialog.getByRole("heading", { name: "The Adventurer's Ledger" }),
 	);
-	await expect(potionSlot(dialog, 2)).toHaveText("Empty");
+	await expect(potionSlot(dialog, 2)).toHaveText("Empty · Slot 2");
 	await expect(turns(page)).toHaveText("Turn 0");
 	// Gear can't go on a potion shortcut.
 	await mouseDrag(page, bagItem(dialog, "Iron sword"), potionSlot(dialog, 4));
-	await expect(potionSlot(dialog, 4)).toHaveText("Empty");
+	await expect(potionSlot(dialog, 4)).toHaveText("Empty · Slot 4");
 });
 
 test("keyboard: M on a bag potion, arrows to a shortcut, Enter assigns", async ({
@@ -68,11 +72,13 @@ test("keyboard: M on a bag potion, arrows to a shortcut, Enter assigns", async (
 	await bagItem(dialog, "Mana potion").focus();
 	await page.keyboard.press("m");
 	const live = page.locator('[id^="DndLiveRegion"]');
-	// Shortcut slots sit left of the bag; keep moving until one is targeted.
-	await page.keyboard.press("ArrowLeft");
+	// Shortcut slots sit above the bag.
+	await page.keyboard.press("ArrowUp");
 	await expect(live).toContainText(/Mana potion is over potion slot \d/);
 	await page.keyboard.press("Enter");
-	await expect(dialog.getByText(/Mana potion · 1 carried/)).toBeVisible();
+	await expect(
+		dialog.getByText(/Mana potion · Slot \d · 1 carried/),
+	).toBeVisible();
 	await expect(turns(page)).toHaveText("Turn 0");
 });
 

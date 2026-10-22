@@ -1,4 +1,7 @@
-import { equipmentSlotsFor } from "../../domain/items/Equipment";
+import {
+	EQUIPMENT_SLOT_LABELS,
+	equipmentSlotsFor,
+} from "../../domain/items/Equipment";
 import {
 	compareEquipment,
 	type EquipmentComparisonContext,
@@ -19,6 +22,9 @@ const EquipmentPreviews = ({
 
 	if (!comparisons.length) return null;
 
+	const changesSpellModifier = comparisons.some(
+		({ before, after }) => before.spellPowerBonus !== after.spellPowerBonus,
+	);
 	const changesCapacity = comparisons.some(
 		({ before, after }) =>
 			before.maxHealth !== after.maxHealth || before.maxMana !== after.maxMana,
@@ -26,22 +32,31 @@ const EquipmentPreviews = ({
 
 	return (
 		<div className="grid gap-2">
-			{comparisons.map((comparison) => (
-				<EquipmentComparisonView
+			<EquipmentComparisonView comparison={comparisons[0]} />
+			{/* A ring fits either hand; the other slot's comparison is one click away. */}
+			{comparisons.slice(1).map((comparison) => (
+				<details
 					key={comparison.slot}
-					comparison={comparison}
-				/>
+					className="text-xs text-muted-foreground"
+				>
+					<summary className="cursor-pointer">
+						Compare with {EQUIPMENT_SLOT_LABELS[comparison.slot].toLowerCase()}
+					</summary>
+					<div className="mt-2">
+						<EquipmentComparisonView comparison={comparison} />
+					</div>
+				</details>
 			))}
-
-			<p className="text-xs text-muted-foreground">
-				The base spell modifier also improves Heal. Control and movement effects
-				do not scale.
-			</p>
+			{changesSpellModifier && (
+				<p className="text-xs text-muted-foreground">
+					The base spell modifier also improves Heal. Control and movement
+					effects do not scale.
+				</p>
+			)}
 			{changesCapacity && (
 				<p className="text-xs leading-relaxed text-muted-foreground">
-					Equipping items that increase health or mana capacity does not refill
-					those resources. Removing capacity can reduce your current resources
-					to the new maximum.
+					Capacity gains don't refill health or mana; losing capacity can lower
+					them to the new maximum.
 				</p>
 			)}
 		</div>

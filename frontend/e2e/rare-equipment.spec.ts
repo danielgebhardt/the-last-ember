@@ -78,9 +78,9 @@ for (const [fixture, name, other, slot, width] of [
 			.getByRole("button", { name: new RegExp(`^${name}, slot`) })
 			.click();
 		const details = character.getByRole("region", { name: "Item details" });
-		await expect(details).toContainText(
-			"Magic resistance +10 percentage points",
-		);
+		await expect(
+			details.getByLabel("Equipment comparison", { exact: true }),
+		).toContainText("Magic resistance");
 		await page.keyboard.press("Escape");
 		await expect(map).toBeFocused();
 		await page.keyboard.press("e");

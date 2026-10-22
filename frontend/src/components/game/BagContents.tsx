@@ -1,5 +1,5 @@
 import { Backpack } from "lucide-react";
-import { type ReactNode, type RefObject, useId } from "react";
+import { type RefObject, useId } from "react";
 import { Button } from "@/components/ui/button";
 import {
 	BAG_CAPACITY,
@@ -128,7 +128,6 @@ const BagContents = ({
 	selectedKey,
 	onSelect,
 	headingRef,
-	children,
 	dragEnabled = false,
 }: {
 	bag: Bag;
@@ -136,7 +135,6 @@ const BagContents = ({
 	selectedKey: string | null;
 	onSelect: (key: string) => void;
 	headingRef: RefObject<HTMLHeadingElement | null>;
-	children: ReactNode;
 	dragEnabled?: boolean;
 }) => {
 	const comparisonId = useId();
@@ -219,8 +217,6 @@ const BagContents = ({
 			{slots.length === 0 && (
 				<p className="text-xs text-muted-foreground">Your bag is empty.</p>
 			)}
-
-			{children}
 		</section>
 	);
 };

@@ -95,9 +95,10 @@ describe("Visual bag and shared item details", () => {
 		const { user, panel } = await setup();
 		await user.click(panel.getByRole("button", { name: "Iron sword, slot 1" }));
 		await user.click(panel.getByRole("button", { name: "Equip on main hand" }));
+		// The details column falls back to its prompt instead of a stale item.
 		expect(
-			panel.queryByRole("region", { name: "Item details" }),
-		).not.toBeInTheDocument();
+			panel.getByRole("region", { name: "Item details" }),
+		).toHaveTextContent(/Select an item in your bag or equipment/);
 		expect(
 			panel.getByRole("button", { name: "Short sword, slot 1" }),
 		).toHaveAttribute("aria-pressed", "false");

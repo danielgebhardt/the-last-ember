@@ -61,7 +61,7 @@ describe("Assigning potion shortcuts in Character", () => {
 			panel.getByRole("button", { name: "Assign to potion slot 2" }),
 		).toHaveAttribute("aria-pressed", "false");
 		expect(panel.getByLabelText("Potion slot 3 assignment")).toHaveTextContent(
-			"Healing potion · 2 carried",
+			"Healing potion · Slot 3 · 2 carried",
 		);
 		expect(screen.getByLabelText("Turn count")).toHaveTextContent("Turn 0");
 	});
@@ -79,7 +79,7 @@ describe("Assigning potion shortcuts in Character", () => {
 		);
 		expect(
 			summary.getByLabelText("Potion slot 2 assignment"),
-		).toHaveTextContent("Healing potion · 2 carried");
+		).toHaveTextContent("Healing potion · Slot 2 · 2 carried");
 		await user.click(
 			panel.getByRole("button", { name: "Assign to potion slot 4" }),
 		);
@@ -88,7 +88,7 @@ describe("Assigning potion shortcuts in Character", () => {
 		).toHaveTextContent("Empty");
 		expect(
 			summary.getByLabelText("Potion slot 4 assignment"),
-		).toHaveTextContent("Healing potion · 2 carried");
+		).toHaveTextContent("Healing potion · Slot 4 · 2 carried");
 		await user.click(
 			summary.getByRole("button", { name: "Clear potion slot 4" }),
 		);
@@ -112,13 +112,13 @@ describe("Assigning potion shortcuts in Character", () => {
 		);
 		await user.click(panel.getByRole("button", { name: "Drop item" }));
 		expect(panel.getByLabelText("Potion slot 1 assignment")).toHaveTextContent(
-			"Healing potion · 0 carried",
+			"Healing potion · Slot 1 · 0 carried",
 		);
 		await user.click(
 			panel.getByRole("button", { name: "Pick up Healing potion, item 1" }),
 		);
 		expect(panel.getByLabelText("Potion slot 1 assignment")).toHaveTextContent(
-			"Healing potion · 1 carried",
+			"Healing potion · Slot 1 · 1 carried",
 		);
 		expect(screen.getByLabelText("Turn count")).toHaveTextContent("Turn 3");
 	});

@@ -38,9 +38,7 @@ const renderGrid = (dragEnabled: boolean) => {
 				onSelect={vi.fn()}
 				headingRef={createRef()}
 				dragEnabled={dragEnabled}
-			>
-				{null}
-			</BagContents>
+			/>
 		</ItemDragProvider>,
 	);
 };

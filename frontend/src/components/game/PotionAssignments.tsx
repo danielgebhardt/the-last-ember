@@ -74,10 +74,8 @@ const PotionSlot = ({
 							"aria-describedby": drag.describedBy(),
 						}
 					: {})}
-				className={`flex min-w-0 touch-manipulation flex-col items-center gap-1 rounded-md px-1 py-2 text-center outline-none focus-visible:ring-2 focus-visible:ring-ring ${drag.isDragging ? "opacity-40" : ""}`}
+				className={`grid min-w-0 touch-manipulation grid-cols-[auto_minmax(0,1fr)] items-center gap-x-2 rounded-md py-1.5 pr-5 pl-2 text-left outline-none focus-visible:ring-2 focus-visible:ring-ring ${drag.isDragging ? "opacity-40" : ""}`}
 			>
-				<span className="text-[10px] text-muted-foreground">Slot {slot}</span>
-
 				{kind ? (
 					<span className="size-5 shrink-0">
 						<ItemIcon kind={kind} />
@@ -95,13 +93,14 @@ const PotionSlot = ({
 					aria-label={`Potion slot ${slot} assignment`}
 					className="min-w-0 text-[11px] leading-tight"
 				>
-					{kind ? ITEM_DEFINITIONS[kind].name : "Empty"}
-					{kind && (
-						<span className="block text-[10px] text-muted-foreground">
-							<span className="sr-only"> · </span>
-							{count} carried
-						</span>
-					)}
+					<span className="line-clamp-2">
+						{kind ? ITEM_DEFINITIONS[kind].name : "Empty"}
+					</span>
+					<span className="block text-[10px] text-muted-foreground">
+						<span className="sr-only"> · </span>
+						Slot {slot}
+						{kind && ` · ${count} carried`}
+					</span>
 				</output>
 			</div>
 

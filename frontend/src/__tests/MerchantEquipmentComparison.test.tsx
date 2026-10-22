@@ -124,9 +124,7 @@ describe("Equipment decisions at the merchant", () => {
 		expect(previews[1]).toHaveTextContent("Maximum mana 16 → 14");
 		expect(previews[1]).toHaveTextContent("Maximum health 14 → 14");
 		expect(
-			ring.getByText(
-				/Equipping items that increase health or mana capacity does not refill/,
-			),
+			ring.getByText(/Capacity gains don't refill health or mana/),
 		).toBeVisible();
 		expect(onSell).not.toHaveBeenCalled();
 		expect(state).toEqual(original);

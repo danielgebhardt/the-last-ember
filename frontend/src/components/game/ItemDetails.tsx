@@ -1,4 +1,4 @@
-import { useId } from "react";
+import { useId, useLayoutEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
 	AFFLICTION_DEFINITIONS,
@@ -45,6 +45,49 @@ const labels = {
 // Remedies name exactly what they cure, from the affliction definitions.
 const remedyStat = (kinds: readonly AfflictionKind[]) =>
 	`Removes ${kinds.map((kind) => AFFLICTION_DEFINITIONS[kind].name).join(" and ")} · one use, one turn`;
+
+// Long descriptions are clamped to keep the details column short; More only
+// appears when the clamp actually hides text. Keyed by item, so each item
+// starts collapsed.
+const ClampedDescription = ({ text }: { text: string }) => {
+	const id = useId();
+	const paragraph = useRef<HTMLParagraphElement>(null);
+	const [expanded, setExpanded] = useState(false);
+	const [clamped, setClamped] = useState(false);
+	useLayoutEffect(() => {
+		const element = paragraph.current;
+		if (!element || expanded) return;
+		const measure = () =>
+			setClamped(element.scrollHeight > element.clientHeight);
+		measure();
+		if (typeof ResizeObserver === "undefined") return;
+		const observer = new ResizeObserver(measure);
+		observer.observe(element);
+		return () => observer.disconnect();
+	}, [expanded]);
+	return (
+		<div className="@lg:border-l @lg:border-primary/15 @lg:pl-3">
+			<p
+				id={id}
+				ref={paragraph}
+				className={`text-sm leading-relaxed text-muted-foreground ${expanded ? "" : "line-clamp-3"}`}
+			>
+				{text}
+			</p>
+			{clamped && (
+				<button
+					type="button"
+					aria-expanded={expanded}
+					aria-controls={id}
+					className="mt-0.5 rounded-sm text-xs font-medium text-primary outline-none hover:underline focus-visible:ring-2 focus-visible:ring-ring"
+					onClick={() => setExpanded(!expanded)}
+				>
+					{expanded ? "Less" : "More"}
+				</button>
+			)}
+		</div>
+	);
+};
 
 const ItemDetails = ({
 	item,
@@ -118,9 +161,9 @@ const ItemDetails = ({
 		<section
 			aria-label="Item details"
 			aria-describedby={titleId}
-			className="grid min-w-0 gap-3 rounded-lg border border-primary/25 bg-muted/20 p-3"
+			className="@container grid min-w-0 gap-3 rounded-lg border border-primary/25 bg-muted/20 p-3"
 		>
-			<div className="grid min-w-0 gap-3 sm:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)] sm:items-start">
+			<div className="grid min-w-0 gap-3 @lg:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)] @lg:items-start">
 				<div className="flex min-w-0 items-start gap-3">
 					<div className="flex size-12 shrink-0 items-center justify-center rounded-lg border border-primary/20 bg-background/70 p-2.5">
 						<ItemIcon kind={item.kind} />
@@ -147,12 +190,11 @@ const ItemDetails = ({
 					</div>
 				</div>
 
-				<p className="text-sm leading-relaxed text-muted-foreground sm:border-l sm:border-primary/15 sm:pl-3">
-					{details.description}
-				</p>
+				<ClampedDescription key={item.id} text={details.description} />
 			</div>
 
-			{itemMagicResistance(item) > 0 && (
+			{/* Unequipped items show this change in their comparison instead. */}
+			{equippedSlot && itemMagicResistance(item) > 0 && (
 				<p className="text-xs font-medium">
 					Magic resistance +{itemMagicResistance(item)} percentage points while
 					equipped (50% total cap; unchanged by enchantment).

@@ -24,7 +24,7 @@ const QuestStatus = ({
 		return (
 			<section
 				aria-label="Quest pouch"
-				className="flex min-w-0 items-center gap-3 rounded-lg border border-primary/20 bg-card/50 px-3 py-2.5"
+				className="flex min-w-0 items-center gap-3 rounded-lg border border-primary/20 bg-card/50 px-3 py-1.5"
 			>
 				<span aria-hidden="true" className="size-6 shrink-0">
 					<ItemIcon kind="cure" />
@@ -40,7 +40,7 @@ const QuestStatus = ({
 					</p>
 					<output
 						aria-label="Quest objective"
-						className="basis-full text-xs text-muted-foreground"
+						className="text-xs text-muted-foreground"
 					>
 						{instruction}
 						{returnInstruction}

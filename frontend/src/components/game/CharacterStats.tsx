@@ -68,12 +68,14 @@ const CharacterStats = ({
 	const manaBlock = afflictions.find(
 		(a) => afflictionModifiers(a.kind).suppressesManaRecovery,
 	);
-	const card = "min-w-0 rounded-lg border border-border bg-card/60 p-3";
-	const value = "mt-1 text-lg font-semibold leading-tight tabular-nums";
-	const hint = "mt-1 text-xs leading-relaxed text-muted-foreground";
+	// Label and value share the first row; every note below spans the card.
+	const card =
+		"grid min-w-0 grid-cols-[1fr_auto] items-baseline gap-x-2 rounded-lg border border-border bg-card/60 px-3 py-2 [&>*:nth-child(n+3)]:col-span-2";
+	const value = "text-lg font-semibold leading-tight tabular-nums";
+	const hint = "mt-0.5 text-[11px] leading-snug text-muted-foreground";
 	return (
 		<section aria-label="Character stats" className="grid min-w-0 gap-2">
-			<div className="grid min-w-0 grid-cols-2 gap-2 md:grid-cols-3 xl:grid-cols-5">
+			<div className="grid min-w-0 grid-cols-2 gap-2 md:grid-cols-3 lg:grid-cols-5">
 				<div className={card}>
 					<p className="flex items-center gap-2 font-medium">
 						<Heart aria-hidden="true" className="size-4 text-player" />
@@ -134,7 +136,7 @@ const CharacterStats = ({
 					</p>
 					<output
 						aria-label="Character hit chance"
-						className="text-xs text-muted-foreground"
+						className="text-[11px] text-muted-foreground"
 					>
 						Hit {accuracy.playerHitChance}%
 						{normalHit !== accuracy.playerHitChance &&
@@ -161,7 +163,7 @@ const CharacterStats = ({
 					</p>
 					<output
 						aria-label="Character evasion"
-						className="text-xs text-muted-foreground"
+						className="text-[11px] text-muted-foreground"
 					>
 						Evade {accuracy.evadeChance}%
 						{normalEvade !== accuracy.evadeChance &&

@@ -198,9 +198,7 @@ describe("Equipment comparison in Character", () => {
 		expect(right).toHaveTextContent("Maximum mana 16 → 14");
 		expect(right).toHaveTextContent("Armor 3 → 3");
 		expect(
-			panel.getByText(
-				/Equipping items that increase health or mana capacity does not refill/,
-			),
+			panel.getByText(/Capacity gains don't refill health or mana/),
 		).toBeVisible();
 		expect(panel.getByLabelText("Character health")).toHaveTextContent(
 			"Health 7 / 14",

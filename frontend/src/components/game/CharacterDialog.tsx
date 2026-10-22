@@ -69,13 +69,13 @@ const GroundPanel = ({
 	return (
 		<div
 			ref={drop.ref}
-			className={`ember-menu-panel min-w-0 ${
+			className={`ember-menu-panel flex min-w-0 flex-wrap items-baseline gap-x-3 gap-y-2 py-2.5! ${
 				drop.accepts
 					? `ring-2 ${drop.isOver ? "ring-primary" : "ring-primary/40"}`
 					: ""
 			}`}
 		>
-			<h3 className="ember-menu-section-heading mb-2 flex items-center gap-2">
+			<h3 className="ember-menu-section-heading flex items-center gap-2">
 				<PackageOpen aria-hidden="true" className="size-4 text-primary" />
 				Nearby / Ground
 			</h3>
@@ -217,7 +217,10 @@ const CharacterDialog = ({
 	}, [focusItemId]);
 	const perksWaiting = pendingPerkCount(progression);
 	const titleRef = useRef<HTMLHeadingElement>(null);
-	const events = history.entries.filter((entry) => entry.event.turn === turn);
+	const turnMessages = history.entries
+		.filter((entry) => entry.event.turn === turn)
+		.map((entry) => formatActivityEvent(entry.event))
+		.join(" · ");
 	return (
 		<Dialog.Portal>
 			<Dialog.Backdrop className="fixed inset-0 z-50 bg-black/30 supports-backdrop-filter:backdrop-blur-xs" />
@@ -316,9 +319,9 @@ const CharacterDialog = ({
 
 					<Tabs.Panel
 						value="character"
-						className="min-h-0 min-w-0 flex-1 overflow-x-auto overflow-y-auto"
+						className="flex min-h-0 min-w-0 flex-1 flex-col overflow-x-auto overflow-y-auto"
 					>
-						<div className="shrink-0 border-b border-primary/20 bg-primary/[0.035] px-4 py-3">
+						<div className="shrink-0 border-b border-primary/20 bg-primary/[0.035] px-4 py-2">
 							<CharacterStats
 								afflictions={afflictions}
 								effects={effects}
@@ -328,12 +331,15 @@ const CharacterDialog = ({
 								progression={progression}
 							/>
 						</div>
-						<div className="min-w-0 p-2 pb-4">
+						<div className="min-w-0 p-2 pb-3 lg:min-h-0 lg:flex-1">
 							<ItemDragProvider
 								onDrop={dropItem}
 								onDropNowhere={dropItemNowhere}
 							>
-								<div className="grid min-w-0 items-start gap-3 md:grid-cols-2 xl:grid-cols-[minmax(0,1fr)_minmax(0,38.125rem)]">
+								{/* Equipment | shortcuts and bag | details. Too narrow for three
+								    columns (iPad landscape), details sit under Equipment, so every
+								    drag target stays visible; only the details area scrolls. */}
+								<div className="grid min-w-0 items-start gap-3 md:grid-cols-2 lg:h-full lg:grid-cols-[minmax(0,1fr)_auto] lg:grid-rows-[auto_minmax(0,1fr)] xl:grid-cols-[minmax(0,1fr)_auto_minmax(0,21rem)] xl:grid-rows-[minmax(0,1fr)]">
 									<div className="grid min-w-0 content-start gap-2">
 										<EquipmentView
 											dragEnabled={dragEnabled}
@@ -353,14 +359,17 @@ const CharacterDialog = ({
 												);
 											}}
 										/>
-										<PotionAssignments
-											enabled={!won}
-											bag={bag}
-											potionHotbar={potionHotbar}
-											onAction={onAction}
-										/>
 									</div>
-									<div className="grid min-w-0 content-start gap-2">
+									<div className="grid min-w-0 content-start gap-2 lg:col-start-2 lg:row-span-2 lg:row-start-1 xl:row-span-1">
+										{/* Sized by the bag, so the shortcuts never widen this column. */}
+										<div className="min-w-0 [contain:inline-size]">
+											<PotionAssignments
+												enabled={!won}
+												bag={bag}
+												potionHotbar={potionHotbar}
+												onAction={onAction}
+											/>
+										</div>
 										<BagContents
 											dragEnabled={dragEnabled}
 											bag={bag}
@@ -370,44 +379,7 @@ const CharacterDialog = ({
 											}
 											headingRef={bagHeadingRef}
 											onSelect={(key) => setSelection({ source: "bag", key })}
-										>
-											{selected && selection ? (
-												<div ref={detailsRef} className="min-w-0">
-													<ItemDetails
-														bag={bag}
-														onCancel={() => {
-															setSelection(null);
-															bagHeadingRef.current?.focus({
-																preventScroll: true,
-															});
-														}}
-														item={selected}
-														carryingEmber={quest.cureRecovered}
-														comparisonContext={comparisonContext}
-														potionHotbar={potionHotbar}
-														assignmentsEnabled={!won}
-														equippedSlot={
-															selection.source === "equipment"
-																? selection.slot
-																: undefined
-														}
-														alive={player.health > 0 && !won}
-														onAction={onAction}
-														afterAction={() => {
-															const heading =
-																selection.source === "bag"
-																	? bagHeadingRef
-																	: equipmentHeadingRef;
-															heading.current?.focus({ preventScroll: true });
-														}}
-													/>
-												</div>
-											) : bag.items.length > 0 ? (
-												<p className="text-xs text-muted-foreground">
-													Select an item to see its details.
-												</p>
-											) : null}
-										</BagContents>
+										/>
 										<QuestStatus quest={quest} pouch />
 										<GroundPanel enabled={dragEnabled && !inTown}>
 											<FloorItemsView
@@ -417,6 +389,56 @@ const CharacterDialog = ({
 												onAction={onAction}
 											/>
 										</GroundPanel>
+									</div>
+									<div className="grid min-w-0 content-start md:col-span-2 lg:col-span-1 lg:col-start-1 lg:row-start-2 lg:h-full lg:min-h-0 lg:overflow-y-auto xl:col-start-3 xl:row-start-1">
+										{selected && selection ? (
+											<div ref={detailsRef} className="min-w-0">
+												<ItemDetails
+													bag={bag}
+													onCancel={() => {
+														setSelection(null);
+														bagHeadingRef.current?.focus({
+															preventScroll: true,
+														});
+													}}
+													item={selected}
+													carryingEmber={quest.cureRecovered}
+													comparisonContext={comparisonContext}
+													potionHotbar={potionHotbar}
+													assignmentsEnabled={!won}
+													equippedSlot={
+														selection.source === "equipment"
+															? selection.slot
+															: undefined
+													}
+													alive={player.health > 0 && !won}
+													onAction={onAction}
+													afterAction={() => {
+														const heading =
+															selection.source === "bag"
+																? bagHeadingRef
+																: equipmentHeadingRef;
+														heading.current?.focus({ preventScroll: true });
+													}}
+												/>
+											</div>
+										) : (
+											<section
+												aria-labelledby="item-details-prompt"
+												className="ember-menu-panel grid gap-2"
+											>
+												<h3
+													id="item-details-prompt"
+													className="ember-menu-section-heading"
+												>
+													Item details
+												</h3>
+												<p className="text-xs leading-relaxed text-muted-foreground">
+													Select an item in your bag or equipment to see its
+													details and compare it with what you wear.
+												</p>
+											</section>
+										)}
 									</div>
 								</div>
 							</ItemDragProvider>
@@ -457,7 +479,7 @@ const CharacterDialog = ({
 						/>
 					</Tabs.Panel>
 				</Tabs.Root>
-				<div className="ember-menu-footer grid max-h-36 shrink-0 overflow-y-auto gap-2 px-4 py-3">
+				<div className="ember-menu-footer grid shrink-0 gap-1 px-4 py-2">
 					{actionError && (
 						<p role="alert" className="text-sm text-destructive">
 							{actionError}
@@ -468,22 +490,23 @@ const CharacterDialog = ({
 							You died. Start a new dungeon or replay a seed to try again.
 						</p>
 					)}
+					{/* One line so the tab keeps its height; the full text stays in the
+					    live region and the tooltip. */}
 					<div
 						role="status"
 						aria-label="Character activity"
 						aria-live="polite"
 						aria-atomic="true"
-						className="grid gap-1 text-xs leading-relaxed"
+						title={turnMessages || undefined}
+						className="truncate text-xs leading-relaxed"
 					>
-						<p className="font-medium tabular-nums">
+						<span className="font-medium tabular-nums">
 							Gold {gold} · Turn {turn} · Health {player.health} /{" "}
 							{player.maxHealth}
-						</p>
-						{events.map((entry) => (
-							<p key={entry.id} className="text-muted-foreground">
-								{formatActivityEvent(entry.event)}
-							</p>
-						))}
+						</span>
+						{turnMessages && (
+							<span className="text-muted-foreground"> — {turnMessages}</span>
+						)}
 					</div>
 				</div>
 			</Dialog.Popup>

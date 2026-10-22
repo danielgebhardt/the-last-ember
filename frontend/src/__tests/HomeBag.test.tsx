@@ -53,7 +53,9 @@ describe("Character bag", () => {
 			),
 		).toBeVisible();
 		expect(
-			bagView.getByText("Select an item to see its details."),
+			within(panel.getByRole("region", { name: "Item details" })).getByText(
+				/Select an item in your bag or equipment/,
+			),
 		).toBeVisible();
 	});
 	it("shows the selected item's type, description, and contributions without equipping it", async () => {
@@ -61,9 +63,7 @@ describe("Character bag", () => {
 		await user.click(
 			bagView.getByRole("button", { name: "Iron sword, slot 1" }),
 		);
-		const details = within(
-			bagView.getByRole("region", { name: "Item details" }),
-		);
+		const details = within(panel.getByRole("region", { name: "Item details" }));
 		expect(details.getByText("Iron sword")).toBeVisible();
 		expect(details.getByText("Weapon")).toBeVisible();
 		expect(details.getByText(/heavier blade/)).toBeVisible();
@@ -74,7 +74,7 @@ describe("Character bag", () => {
 		expect(screen.getByLabelText("Turn count")).toHaveTextContent("Turn 0");
 	});
 	it("selects item details with the keyboard while gameplay stays paused", async () => {
-		const { user, bagView } = await openBag();
+		const { user, panel, bagView } = await openBag();
 		const sword = bagView.getByRole("button", { name: "Iron sword, slot 1" });
 		sword.focus();
 		await user.keyboard("{Enter}");
@@ -87,9 +87,7 @@ describe("Character bag", () => {
 		await user.keyboard(" ");
 		expect(shield).toHaveAttribute("aria-pressed", "true");
 		expect(sword).toHaveAttribute("aria-pressed", "false");
-		const details = within(
-			bagView.getByRole("region", { name: "Item details" }),
-		);
+		const details = within(panel.getByRole("region", { name: "Item details" }));
 		expect(details.getByText("Shield")).toBeVisible();
 		expect(details.getByText("Armor 1")).toBeVisible();
 		expect(screen.getByLabelText("Turn count")).toHaveTextContent("Turn 0");
