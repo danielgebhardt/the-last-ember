@@ -16,6 +16,7 @@ import type { Monster } from "../../domain/monsters/Monster.ts";
 import { chargeLine } from "../../domain/monsters/MonsterCharge";
 import type { DungeonObject } from "../../domain/objects/DungeonObject";
 import { PLAYER_FOLLOW_MARGINS_TILES } from "../../settings/UIConfiguration";
+import CombatFeedbackLayer, { type FeedbackMark } from "./CombatFeedbackLayer";
 import DungeonRow from "./DungeonRow.tsx";
 import { getScrollOffset } from "./MapScroll.ts";
 import {
@@ -41,6 +42,7 @@ type DungeonLayoutProps = DungeonKeyboardOptions & {
 	monsters?: readonly Monster[];
 	floorItems?: readonly FloorItem[];
 	dungeonObjects?: readonly DungeonObject[];
+	feedback?: readonly FeedbackMark[];
 };
 
 const NO_MONSTERS: readonly Monster[] = [];
@@ -76,6 +78,7 @@ const DungeonLayout = ({
 	monsters = NO_MONSTERS,
 	floorItems = NO_ITEMS,
 	dungeonObjects = NO_OBJECTS,
+	feedback,
 }: DungeonLayoutProps) => {
 	const spellRows = useMemo(() => {
 		const rows = new Map<number, number[]>();
@@ -246,43 +249,50 @@ const DungeonLayout = ({
 			tabIndex={0}
 			className="min-h-0 w-full flex-1 overflow-auto focus-visible:outline-1 focus-visible:-outline-offset-1 focus-visible:outline-muted-foreground/60"
 		>
-			<table aria-label="Dungeon" className="mx-auto w-max border-collapse">
-				<tbody className="grid">
-					{dungeon.map((row, rowIndex) => (
-						<DungeonRow
-							key={rowIndex}
-							row={row}
-							targetIds={targetIds}
-							selectedTargetId={selectedTargetId}
-							onTargetRequested={onTargetRequested}
-							rowIndex={rowIndex}
-							monsters={monsterRows.get(rowIndex)}
-							floorItems={itemRows.get(rowIndex)}
-							dungeonObjects={objectRows.get(rowIndex)}
-							threatColumns={threatRows.heavy.get(rowIndex)}
-							areaThreatColumns={threatRows.area.get(rowIndex)}
-							chargeColumns={threatRows.charge.get(rowIndex)}
-							spellColumns={spellRows.get(rowIndex)}
-							visible={visible?.[rowIndex]}
-							explored={explored?.[rowIndex]}
-							revealed={revealed}
-							playerColumn={
-								playerPosition.row === rowIndex ? playerPosition.col : undefined
-							}
-							entranceColumn={
-								entrance?.row === rowIndex ? entrance.col : undefined
-							}
-							upStairColumn={
-								upStair?.row === rowIndex ? upStair.col : undefined
-							}
-							downStairColumn={
-								downStair?.row === rowIndex ? downStair.col : undefined
-							}
-							playerRef={playerRef}
-						/>
-					))}
-				</tbody>
-			</table>
+			<div className="relative mx-auto w-max">
+				<table aria-label="Dungeon" className="w-max border-collapse">
+					<tbody className="grid">
+						{dungeon.map((row, rowIndex) => (
+							<DungeonRow
+								key={rowIndex}
+								row={row}
+								targetIds={targetIds}
+								selectedTargetId={selectedTargetId}
+								onTargetRequested={onTargetRequested}
+								rowIndex={rowIndex}
+								monsters={monsterRows.get(rowIndex)}
+								floorItems={itemRows.get(rowIndex)}
+								dungeonObjects={objectRows.get(rowIndex)}
+								threatColumns={threatRows.heavy.get(rowIndex)}
+								areaThreatColumns={threatRows.area.get(rowIndex)}
+								chargeColumns={threatRows.charge.get(rowIndex)}
+								spellColumns={spellRows.get(rowIndex)}
+								visible={visible?.[rowIndex]}
+								explored={explored?.[rowIndex]}
+								revealed={revealed}
+								playerColumn={
+									playerPosition.row === rowIndex
+										? playerPosition.col
+										: undefined
+								}
+								entranceColumn={
+									entrance?.row === rowIndex ? entrance.col : undefined
+								}
+								upStairColumn={
+									upStair?.row === rowIndex ? upStair.col : undefined
+								}
+								downStairColumn={
+									downStair?.row === rowIndex ? downStair.col : undefined
+								}
+								playerRef={playerRef}
+							/>
+						))}
+					</tbody>
+				</table>
+				{feedback && feedback.length > 0 && (
+					<CombatFeedbackLayer marks={feedback} />
+				)}
+			</div>
 		</section>
 	);
 };

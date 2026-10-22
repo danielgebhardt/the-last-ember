@@ -1,0 +1,120 @@
+/* ==========================================
+   Combat feedback: floating numbers and hit
+   flashes drawn over map tiles. Absolutely
+   positioned, so the map never moves.
+   ========================================== */
+
+:root {
+	--feedback-duration: 900ms;
+	--feedback-outline: rgb(15 18 24 / 85%);
+	--feedback-physical: #ef4444;
+	--feedback-arcane: #a78bfa;
+	--feedback-fire: #fb923c;
+	--feedback-cold: #38bdf8;
+	--feedback-lightning: #facc15;
+	--feedback-poison: #84cc16;
+	--feedback-sonic: #e879f9;
+	--feedback-shadow: #c084fc;
+	--feedback-bleeding: #f43f5e;
+	--feedback-heal: #34d399;
+	--feedback-miss: #e2e8f0;
+	--feedback-gold: #fbbf24;
+	--feedback-xp: #fde68a;
+	--feedback-death: #f1f5f9;
+	--feedback-loot: #fcd34d;
+}
+
+.combat-feedback-layer {
+	pointer-events: none;
+	position: absolute;
+	inset: 0;
+	z-index: 5;
+}
+
+.combat-feedback-tile {
+	position: absolute;
+	width: var(--dungeon-tile-size);
+	height: var(--dungeon-tile-size);
+}
+
+.combat-feedback-flash {
+	position: absolute;
+	inset: 0;
+	border-radius: 2px;
+	background: rgb(255 255 255 / 55%);
+	animation: combat-feedback-flash 260ms ease-out forwards;
+}
+
+.combat-feedback-mark {
+	position: absolute;
+	left: 50%;
+	bottom: 72%;
+	white-space: nowrap;
+	font-size: 14px;
+	font-weight: 800;
+	line-height: 1;
+	color: var(--feedback-tone);
+	text-shadow:
+		-1px -1px 0 var(--feedback-outline),
+		1px -1px 0 var(--feedback-outline),
+		-1px 1px 0 var(--feedback-outline),
+		1px 1px 0 var(--feedback-outline);
+	transform: translate(-50%, calc(var(--feedback-stack, 0) * -14px));
+	animation: combat-feedback-rise var(--feedback-duration) ease-out forwards;
+}
+
+.combat-feedback-mark[data-tone="miss"],
+.combat-feedback-mark[data-tone="loot"],
+.combat-feedback-mark[data-tone="death"] {
+	font-size: 11px;
+	font-weight: 700;
+	text-transform: uppercase;
+	letter-spacing: 0.04em;
+}
+
+@keyframes combat-feedback-rise {
+	0% {
+		opacity: 0;
+		translate: 0 4px;
+	}
+	15% {
+		opacity: 1;
+		translate: 0 0;
+	}
+	70% {
+		opacity: 1;
+	}
+	100% {
+		opacity: 0;
+		translate: 0 -14px;
+	}
+}
+
+@keyframes combat-feedback-flash {
+	from {
+		opacity: 1;
+	}
+	to {
+		opacity: 0;
+	}
+}
+
+/* Reduced motion: static badges that fade in place, and no flash. */
+@media (prefers-reduced-motion: reduce) {
+	.combat-feedback-mark {
+		animation-name: combat-feedback-fade;
+	}
+	.combat-feedback-flash {
+		display: none;
+	}
+}
+
+@keyframes combat-feedback-fade {
+	0%,
+	75% {
+		opacity: 1;
+	}
+	100% {
+		opacity: 0;
+	}
+}

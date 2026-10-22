@@ -35,6 +35,7 @@ import PotionHotbarView from "./components/game/PotionHotbarView";
 import QuestStatus from "./components/game/QuestStatus";
 import SpellHotbarView from "./components/game/SpellHotbarView";
 import { useAdventureSession } from "./components/game/useAdventureSession";
+import { useCombatFeedback } from "./components/game/useCombatFeedback";
 import { useCorridorTravel } from "./components/game/useCorridorTravel";
 import { useHints } from "./components/game/useHints";
 import { useSpellTargeting } from "./components/game/useSpellTargeting";
@@ -186,6 +187,10 @@ const Home = ({
 		mapRef.current?.focus({ preventScroll: true }),
 	);
 	const [helpSection, setHelpSection] = useState<string>();
+	const feedback = useCombatFeedback(
+		game.state,
+		fogConfiguration.enabled ? exploration.visible : undefined,
+	);
 	useEffect(() => {
 		if (
 			town ||
@@ -695,6 +700,7 @@ const Home = ({
 									/>
 								) : (
 									<DungeonLayout
+										feedback={feedback}
 										onTravelRequested={
 											atDungeonEntrance(game.state) &&
 											!game.state.quest.cureRecovered
