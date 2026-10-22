@@ -4,11 +4,17 @@ import {
 	type SaveDocument,
 	type SaveResult,
 } from "./SaveFormat";
+import { migrateSave } from "./SaveMigrations";
 import { isSaveDocument } from "./SaveShape";
 
+// Supported older versions are migrated first; the result must then pass every
+// current-format check, exactly like a save written by this version.
 export const validateSaveDocument = (
-	data: unknown,
+	input: unknown,
 ): SaveResult<SaveDocument> => {
+	const migrated = migrateSave(input, SAVE_FORMAT_VERSION);
+	if (!migrated.ok) return migrated;
+	const data = migrated.value;
 	if (
 		typeof data === "object" &&
 		data !== null &&

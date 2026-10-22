@@ -18,7 +18,7 @@ Efficiency must preserve correctness, deterministic gameplay, save ownership, ke
 
 ## Save compatibility
 
-Pre-public-release, the developer is the only player. Only the **current** save version loads (v32); older saves are rejected with the unsupported-version message. On a breaking persisted-state change, bump `SAVE_FORMAT_VERSION` and refresh the captured fixture instead of adding optional legacy fields, marker flags, retired-data tables or migrations. Keep current-format validation, ownership/corruption checks and deterministic save/load continuation. Follow `docs/save-policy.md`. Once outside players join, decide the compatibility policy explicitly before changing the persisted contract.
+Outside players' saves must survive updates: every version from **v32** (`OLDEST_SUPPORTED_SAVE_VERSION`) to the current `SAVE_FORMAT_VERSION` loads. A breaking persisted-state change bumps the version **and** ships, in the same story, a pure migration step in `domain/saves/SaveMigrations.ts`, a new frozen fixture `src/__tests/fixtures/adventure-vN.json`, and a test of the step. Never edit or refresh an existing versioned fixture, and never raise the oldest supported version without the developer's explicit decision. Keep current-format validation, ownership/corruption checks and deterministic save/load continuation, including after migration. Follow `docs/save-policy.md`.
 
 ## Test seed
 

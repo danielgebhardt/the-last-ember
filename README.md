@@ -35,11 +35,11 @@ Seed replay is deterministic for the same rules version, configuration and actio
 
 ## Saves and release compatibility
 
-**Only the current save format (v32) is supported.** Before public release, breaking changes bump the version instead of carrying compatibility code. Unsupported saves produce an error; loading never regenerates or silently resets them. A rejected import does not replace the current adventure or browser save.
+**Saves from v32 onward keep loading.** A breaking format change bumps the version and adds a migration step, so older saves are upgraded on load and then validated like current ones. Versions older than v32, or newer than this build, produce an error; loading never regenerates or silently resets them. A rejected import does not replace the current adventure or browser save.
 
-Browser Save/Load and file import/export persist the actual dungeon, discovery, actors, inventory, stock, conditions, permanent attributes and portal anchor. They validate shape, bounded input and cross-field consistency before restoring. Reading the browser slot does not rewrite it. The historical storage key `larn:adventure-save` and internal item keys remain stable.
+Browser Save/Load, the separate autosave and file import/export persist the actual dungeon, discovery, actors, inventory, stock, conditions, permanent attributes and portal anchor. They validate shape, bounded input and cross-field consistency before restoring. Reading the browser slot does not rewrite it. The historical storage key `larn:adventure-save` and internal item keys remain stable.
 
-[Save architecture and compatibility policy](docs/save-policy.md) describes the current boundary. Once outside players start, an intentional format change needs an explicit compatibility decision and a captured fixture; do not automatically recreate a migration for every experimental development step.
+[Save architecture and compatibility policy](docs/save-policy.md) describes the migration chain, frozen per-version fixtures and when a change needs a version bump.
 
 ## Code organization
 
@@ -56,6 +56,7 @@ Browser Save/Load and file import/export persist the actual dungeon, discovery, 
 | `domain/items/`, `domain/monsters/`, `domain/objects/` | Content and combat/interaction rules |
 | `domain/town/`, `domain/merchant/` | Fixed town, travel, shops and shared equipment sales |
 | `domain/saves/SaveDocument.ts`, `SaveShape.ts` | Current persisted contract and direct shape validation |
+| `domain/saves/SaveMigrations.ts` | Pure steps that upgrade supported older saves before validation |
 | `domain/saves/*Consistency.ts` | Ownership, resource, geometry, actor, history and town invariants |
 | `frontend/e2e/` | Feature-based Chromium scenarios and shared import/focus helpers |
 

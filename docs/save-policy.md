@@ -1,7 +1,18 @@
 # Save policy
 
-- **One supported version.** Only the current `SAVE_FORMAT_VERSION` (v32) loads. Any other version shows "This save uses an unsupported format version." Older personal saves are intentionally retired; the developer is the only player before public release.
-- **Breaking changes bump the version.** When persisted state changes incompatibly, increment the version, refresh `src/__tests/fixtures/adventure-v32.json` (renaming it to the new version), and update the version expectations. Don't add optional legacy fields, per-feature "this adventure has X" markers, retired-stock tables or migrations.
-- **Validation stays strict.** A current save must pass the shape check (`SaveShape.ts`) and the consistency checks (resources, ownership, geometry, actors, history, rare equipment). Loading never regenerates played floors, stock or seeded outcomes.
-- **Determinism.** A save and load mid-adventure must continue exactly as an uninterrupted session would.
-- **Outside players.** Before the first public release, decide explicitly what compatibility to offer, and add only the transitions that requires.
+Outside players keep their adventures across updates. Every save from **v32** onward must keep loading.
+
+- **Supported range.** Versions from `OLDEST_SUPPORTED_SAVE_VERSION` (v32) up to the current `SAVE_FORMAT_VERSION` load. Older or future versions show "This save uses an unsupported format version."
+- **Breaking changes bump and migrate.** When persisted state changes incompatibly:
+  - increment `SAVE_FORMAT_VERSION`;
+  - update the shape (`SaveShape.ts`) and document type (`SaveDocument.ts`) to the new contract;
+  - add a step to `SAVE_MIGRATIONS` in `domain/saves/SaveMigrations.ts`, keyed by the version it upgrades from;
+  - capture a new frozen fixture `src/__tests/fixtures/adventure-vN.json` for the new version;
+  - add a test that the step produces correct, deterministic state from the previous version's fixture.
+- **Migrations are pure.** A step takes the parsed JSON of one version and returns the next. It runs on a deep copy, never reads storage or randomness, and fills new state with what that version would have had, derived from the seed and existing data where it matters. The runner stamps the version.
+- **Fixtures are frozen.** Never edit or refresh an existing `adventure-vN.json`. `SaveMigrations.test.ts` requires one fixture per supported version and checks that each loads, migrates and plays on deterministically.
+- **Validation stays strict.** After migrating, a save must pass the same shape check and consistency checks (resources, ownership, geometry, actors, history, rare equipment) as one written by the current version. Loading never regenerates played floors, stock or seeded outcomes.
+- **One path for every source.** The browser save, the autosave and imported files all load through `parseSave`, so they migrate the same way. Loading never rewrites storage; a migrated save is stored in the current version only when the game next saves or autosaves.
+- **Determinism.** A save and load mid-adventure must continue exactly as an uninterrupted session would, including after migration.
+- **Non-breaking additions.** An optional field that older saves can simply lack doesn't need a version bump, as long as its absence means the old behavior.
+- **Retiring a version.** Raising `OLDEST_SUPPORTED_SAVE_VERSION` drops saves outside players may still have. Only do it as an explicit, announced decision, and remove the retired steps and fixtures in the same change.
