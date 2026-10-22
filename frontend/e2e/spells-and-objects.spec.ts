@@ -418,3 +418,36 @@ test("the Ember Warden wakes when it sees you, then telegraphs its fire breath",
 	await expect(page.getByLabel(/Ember Warden/).first()).toBeVisible();
 	await page.screenshot({ path: info.outputPath("warden-breath.png") });
 });
+
+for (const size of [
+	{ width: 1470, height: 830 },
+	{ width: 1180, height: 820 },
+	{ width: 1024, height: 768 },
+])
+	test(`encounter dialogs are roomy and fit at ${size.width}×${size.height}`, async ({
+		page,
+	}) => {
+		await page.setViewportSize(size);
+		await importAdventure(page, "well");
+		await page.keyboard.press("e");
+		const dialog = page.getByRole("dialog", {
+			name: "Wishing Well",
+			exact: true,
+		});
+		await expect(dialog).toBeInViewport({ ratio: 1 });
+		expect((await dialog.boundingBox())?.width).toBe(640);
+		const offer = dialog.getByRole("button", { name: /^1 Offer 50 gold/ });
+		const fontSize = (locator: typeof offer) =>
+			locator.evaluate(
+				(node) =>
+					node.ownerDocument.defaultView?.getComputedStyle(node).fontSize,
+			);
+		expect(await fontSize(offer.getByText("Offer 50 gold"))).toBe("16px");
+		expect(await fontSize(offer.getByText(/^40% reward/))).toBe("14px");
+		await expect(
+			dialog.getByRole("button", { name: "Cancel", exact: true }),
+		).toBeInViewport({ ratio: 1 });
+		await page.keyboard.press("Escape");
+		await expect(map(page)).toBeFocused();
+		await expect(turns(page)).toHaveText("Turn 0");
+	});

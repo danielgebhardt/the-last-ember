@@ -165,7 +165,8 @@ const MerchantDialog = ({
 				<Dialog.Popup
 					initialFocus={titleRef}
 					finalFocus={mapRef}
-					className={`fixed top-1/2 left-1/2 z-50 flex ${tab === "sell" ? "h-[calc(100dvh-2rem)] sm:h-[min(34rem,calc(100dvh-2rem))]" : "max-h-[calc(100dvh-2rem)]"} w-[min(60rem,calc(100vw-2rem))] -translate-x-1/2 -translate-y-1/2 flex-col gap-2 overflow-hidden rounded-xl border bg-card p-4 shadow-xl`}
+					// One height for Buy and Sell, so switching tabs never moves the dialog.
+					className="fixed top-1/2 left-1/2 z-50 flex h-[calc(100dvh-2rem)] w-[min(60rem,calc(100vw-2rem))] -translate-x-1/2 -translate-y-1/2 flex-col gap-2 overflow-hidden rounded-xl border bg-card p-4 shadow-xl sm:h-[min(34rem,calc(100dvh-2rem))]"
 					onKeyDown={(event) => {
 						if (event.repeat || event.ctrlKey || event.metaKey || event.altKey)
 							return;

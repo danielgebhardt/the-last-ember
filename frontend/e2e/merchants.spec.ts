@@ -38,7 +38,7 @@ test("merchant uses four compact desktop columns and keeps narrow layouts within
 	if (!first || !fourth) throw new Error("Expected purchase cards");
 	expect(fourth.y).toBe(first.y);
 	expect(fourth.x).toBeGreaterThan(first.x + first.width * 2);
-	expect((await merchant.boundingBox())?.height).toBeLessThan(400);
+	const buyBox = await merchant.boundingBox();
 	await page.screenshot({
 		path: testInfo.outputPath("merchant-buy-desktop.png"),
 	});
@@ -50,6 +50,8 @@ test("merchant uses four compact desktop columns and keeps narrow layouts within
 	if (!firstSale || !fourthSale) throw new Error("Expected sale cards");
 	expect(fourthSale.y).toBe(firstSale.y);
 	expect(fourthSale.x).toBeGreaterThan(firstSale.x + firstSale.width * 2);
+	// Buy and Sell share one size, so switching tabs never moves the dialog.
+	expect(await merchant.boundingBox()).toEqual(buyBox);
 	await page.screenshot({
 		path: testInfo.outputPath("merchant-sell-desktop.png"),
 	});
@@ -327,3 +329,28 @@ test("bulk selling confirms only Lower gear and commits one turn without moving 
 	await page.keyboard.press("Escape");
 	await expect(map(page)).toBeFocused();
 });
+
+for (const size of [
+	{ width: 1470, height: 830 },
+	{ width: 1180, height: 820 },
+])
+	test(`merchant keeps one size and position across Buy and Sell at ${size.width}×${size.height}`, async ({
+		page,
+	}) => {
+		await page.setViewportSize(size);
+		await importAdventure(page, "merchant-many");
+		await page.keyboard.press("e");
+		const merchant = page.getByRole("dialog", {
+			name: "Wandering potion merchant",
+			exact: true,
+		});
+		await expect(
+			merchant.getByRole("tabpanel", { name: "Buy", exact: true }),
+		).toBeVisible();
+		const buy = await merchant.boundingBox();
+		await selectMerchantSellTab(page);
+		expect(await merchant.boundingBox()).toEqual(buy);
+		await merchant.getByRole("tab", { name: "Buy", exact: true }).click();
+		expect(await merchant.boundingBox()).toEqual(buy);
+		await expect(merchant).toBeInViewport({ ratio: 1 });
+	});

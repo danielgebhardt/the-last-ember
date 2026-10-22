@@ -81,7 +81,7 @@ const ObjectChoiceDialog = ({
 				<Dialog.Popup
 					initialFocus={titleRef}
 					finalFocus={mapRef}
-					className="fixed top-1/2 left-1/2 z-50 grid w-[min(32rem,calc(100vw-2rem))] -translate-x-1/2 -translate-y-1/2 gap-4 rounded-xl border bg-card p-6 shadow-xl"
+					className="fixed top-1/2 left-1/2 z-50 grid max-h-[calc(100dvh-2rem)] w-[min(40rem,calc(100vw-2rem))] -translate-x-1/2 -translate-y-1/2 gap-4 overflow-y-auto rounded-xl border bg-card p-7 shadow-xl"
 					onKeyDown={(event) => {
 						if (
 							event.repeat ||
@@ -102,13 +102,13 @@ const ObjectChoiceDialog = ({
 					<Dialog.Title
 						ref={titleRef}
 						tabIndex={-1}
-						className="text-lg font-semibold"
+						className="text-2xl font-semibold"
 					>
 						{object
 							? OBJECT_DEFINITIONS[object.kind].name
 							: "Interact with surroundings"}
 					</Dialog.Title>
-					<Dialog.Description className="text-sm text-muted-foreground">
+					<Dialog.Description className="text-base text-muted-foreground">
 						Choose an interaction. Inspection and canceling use no turn.
 					</Dialog.Description>
 					{!object &&
@@ -116,7 +116,7 @@ const ObjectChoiceDialog = ({
 							<Button
 								key={target.id}
 								variant="outline"
-								className="h-auto justify-start gap-3 whitespace-normal p-3 text-left"
+								className="h-auto justify-start gap-4 whitespace-normal p-4 text-left text-base"
 								onClick={() => choose(index)}
 							>
 								<kbd className="rounded border px-2 py-1">{index + 1}</kbd>
@@ -131,7 +131,7 @@ const ObjectChoiceDialog = ({
 												: "Open closed door"
 											: OBJECT_DEFINITIONS[target.kind].name}
 									</span>
-									<span className="block text-xs font-normal text-muted-foreground">
+									<span className="mt-0.5 block text-sm leading-snug font-normal text-muted-foreground">
 										{describeObject(target)}
 									</span>
 								</span>
@@ -141,20 +141,20 @@ const ObjectChoiceDialog = ({
 						<Button
 							key={`${choice.value}:${choice.itemId ?? ""}`}
 							variant="outline"
-							className="h-auto justify-start gap-3 whitespace-normal p-3 text-left"
+							className="h-auto justify-start gap-4 whitespace-normal p-4 text-left text-base"
 							onClick={() => choose(index)}
 						>
 							<kbd className="rounded border px-2 py-1">{index + 1}</kbd>
 							<span>
 								<span className="block font-medium">{choice.label}</span>
-								<span className="block text-xs font-normal text-muted-foreground">
+								<span className="mt-0.5 block text-sm leading-snug font-normal text-muted-foreground">
 									{choice.description}
 								</span>
 							</span>
 						</Button>
 					))}
 					{forge && !choices.length && (
-						<p role="status" className="text-sm">
+						<p role="status" className="text-base">
 							No owned ordinary weapon or armor piece below +3 can be forged.
 						</p>
 					)}
