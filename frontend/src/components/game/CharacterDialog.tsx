@@ -463,9 +463,10 @@ const CharacterDialog = ({
 							/>
 						</div>
 					</Tabs.Panel>
+					{/* The spell list scrolls inside SpellsView so its shortcuts stay in view. */}
 					<Tabs.Panel
 						value="spells"
-						className="min-h-0 min-w-0 flex-1 overflow-x-hidden overflow-y-auto"
+						className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden"
 					>
 						<SpellsView
 							effects={effects}

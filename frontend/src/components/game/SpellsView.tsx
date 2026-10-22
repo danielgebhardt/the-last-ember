@@ -149,13 +149,11 @@ const SpellsView = ({
 	};
 	return (
 		<ItemDragProvider onDrop={dropSpell} onDropNowhere={dropSpellNowhere}>
-			<div className="grid min-w-0 content-start gap-3 p-3">
-				{/* Mana and spell shortcut overview */}
-
-				{/* Combined mana and spell shortcuts */}
+			<div className="flex min-h-0 min-w-0 flex-1 flex-col gap-3 p-3">
+				{/* Shortcuts stay fixed so a card from any row can be dragged onto them. */}
 				<section
 					aria-label="Spell shortcuts"
-					className="ember-menu-panel grid min-w-0 gap-3"
+					className="ember-menu-panel grid min-w-0 shrink-0 gap-3"
 				>
 					<div className="flex flex-wrap items-center justify-between gap-3">
 						<h3 className="ember-menu-section-heading">Spell shortcuts</h3>
@@ -198,85 +196,90 @@ const SpellsView = ({
 					</div>
 				</section>
 
-				{/* Learned spell cards */}
-				<section aria-label="Known spells" className="grid gap-3">
-					<h3 className="ember-menu-section-heading flex items-baseline gap-2 px-1">
-						Known spells
-						<span className="text-sm font-normal tabular-nums text-muted-foreground">
-							({knownSpells.length} learned)
-						</span>
-					</h3>
-
-					<div className="grid items-stretch gap-3 sm:grid-cols-2 xl:grid-cols-3">
-						{knownSpells.map((spell) => (
-							<SpellLibraryCard
-								key={spell}
-								spell={spell}
-								slots={slots}
-								progression={progression}
-								equipment={equipment}
-								effects={effects}
-								assignmentsEnabled={assignmentsEnabled}
-								onAction={onAction}
-							/>
-						))}
-					</div>
-
-					{knownSpells.length === 0 && (
-						<div className="ember-menu-panel">
-							<p className="text-sm text-muted-foreground">
-								No spells learned yet. Find spellbooks while exploring the
-								dungeon to learn new spells.
-							</p>
-						</div>
-					)}
-				</section>
-
-				{/* Casting instructions moved below the cards */}
-				<section
-					aria-label="Spell controls"
-					className="ember-menu-panel text-xs leading-relaxed text-muted-foreground"
+				<div
+					data-testid="spell-list-scroll"
+					className="-mx-1 grid min-h-0 min-w-0 flex-1 content-start gap-3 overflow-x-hidden overflow-y-auto px-1 pb-1"
 				>
-					<details>
-						<summary className="cursor-pointer font-medium text-foreground">
-							Casting controls
-						</summary>
+					{/* Learned spell cards */}
+					<section aria-label="Known spells" className="grid gap-3">
+						<h3 className="ember-menu-section-heading flex items-baseline gap-2 px-1">
+							Known spells
+							<span className="text-sm font-normal tabular-nums text-muted-foreground">
+								({knownSpells.length} learned)
+							</span>
+						</h3>
 
-						<div className="grid gap-2 pt-3">
-							<p>
-								After closing Character, use a spell's assigned key or hotbar
-								button.
-							</p>
-
-							<p>
-								For targeted spells, arrows or WASD cast straight in that
-								direction. Enter or a target click casts at the highlighted
-								monster.
-							</p>
-
-							<p>
-								Targets must be visible, within range, and have clear wall
-								sight. Distance combines horizontal and vertical steps. Escape
-								or Z cancels for free.
-							</p>
-
-							<p>
-								Self-cast spells activate immediately. Z selects Magic Missile;
-								H casts Heal.
-							</p>
-
-							<p className="border-t border-primary/15 pt-2">
-								A successful cast uses one turn before monsters act.
-								Unaffordable or invalid casts are free.
-							</p>
-
-							<p>
-								Intelligence improves spell potency and mana capacity. Levels do
-								not teach spells; learn more from found spellbooks.
-							</p>
+						<div className="grid items-stretch gap-3 sm:grid-cols-2 xl:grid-cols-3">
+							{knownSpells.map((spell) => (
+								<SpellLibraryCard
+									key={spell}
+									spell={spell}
+									slots={slots}
+									progression={progression}
+									equipment={equipment}
+									effects={effects}
+									assignmentsEnabled={assignmentsEnabled}
+									onAction={onAction}
+								/>
+							))}
 						</div>
-					</details>
-				</section>
+
+						{knownSpells.length === 0 && (
+							<div className="ember-menu-panel">
+								<p className="text-sm text-muted-foreground">
+									No spells learned yet. Find spellbooks while exploring the
+									dungeon to learn new spells.
+								</p>
+							</div>
+						)}
+					</section>
+
+					{/* Casting instructions moved below the cards */}
+					<section
+						aria-label="Spell controls"
+						className="ember-menu-panel text-xs leading-relaxed text-muted-foreground"
+					>
+						<details>
+							<summary className="cursor-pointer font-medium text-foreground">
+								Casting controls
+							</summary>
+
+							<div className="grid gap-2 pt-3">
+								<p>
+									After closing Character, use a spell's assigned key or hotbar
+									button.
+								</p>
+
+								<p>
+									For targeted spells, arrows or WASD cast straight in that
+									direction. Enter or a target click casts at the highlighted
+									monster.
+								</p>
+
+								<p>
+									Targets must be visible, within range, and have clear wall
+									sight. Distance combines horizontal and vertical steps. Escape
+									or Z cancels for free.
+								</p>
+
+								<p>
+									Self-cast spells activate immediately. Z selects Magic
+									Missile; H casts Heal.
+								</p>
+
+								<p className="border-t border-primary/15 pt-2">
+									A successful cast uses one turn before monsters act.
+									Unaffordable or invalid casts are free.
+								</p>
+
+								<p>
+									Intelligence improves spell potency and mana capacity. Levels
+									do not teach spells; learn more from found spellbooks.
+								</p>
+							</div>
+						</details>
+					</section>
+				</div>
 			</div>
 		</ItemDragProvider>
 	);

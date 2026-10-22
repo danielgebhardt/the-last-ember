@@ -6,6 +6,7 @@ import {
 	type DragStartEvent,
 	type KeyboardCoordinateGetter,
 	KeyboardSensor,
+	type KeyboardSensorProps,
 	MouseSensor,
 	TouchSensor,
 	useDraggable,
@@ -49,6 +50,23 @@ export const DRAG_INSTRUCTIONS =
 
 // Jump to the nearest accepting target in the arrow's direction instead of nudging
 // a few pixels, so keyboard dragging goes slot to slot.
+// dnd-kit scrolls the dragged item's scrollable parents before moving, which suits
+// sortable lists. Arrow keys here jump straight to a drop target that can sit outside
+// such a parent (a spell card's list below fixed shortcuts), so it sees none.
+class TargetKeyboardSensor extends KeyboardSensor {
+	constructor(props: KeyboardSensorProps) {
+		const { context } = props;
+		super({
+			...props,
+			context: {
+				get current() {
+					return { ...context.current, scrollableAncestors: [] };
+				},
+			},
+		});
+	}
+}
+
 const nearestTargetInDirection: KeyboardCoordinateGetter = (
 	event,
 	{ context, currentCoordinates },
@@ -161,7 +179,7 @@ export const ItemDragProvider = ({
 		useSensor(TouchSensor, {
 			activationConstraint: { delay: 180, tolerance: 6 },
 		}),
-		useSensor(KeyboardSensor, {
+		useSensor(TargetKeyboardSensor, {
 			keyboardCodes: {
 				start: ["KeyM"],
 				cancel: ["Escape"],
