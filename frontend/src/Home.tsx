@@ -35,6 +35,7 @@ import PotionHotbarView from "./components/game/PotionHotbarView";
 import QuestStatus from "./components/game/QuestStatus";
 import SpellHotbarView from "./components/game/SpellHotbarView";
 import { useAdventureSession } from "./components/game/useAdventureSession";
+import { useAutosave } from "./components/game/useAutosave";
 import { useCombatFeedback } from "./components/game/useCombatFeedback";
 import { useCorridorTravel } from "./components/game/useCorridorTravel";
 import { useHints } from "./components/game/useHints";
@@ -187,6 +188,7 @@ const Home = ({
 		mapRef.current?.focus({ preventScroll: true }),
 	);
 	const [helpSection, setHelpSection] = useState<string>();
+	useAutosave(game.state, exploration, configuration, fogConfiguration);
 	const feedback = useCombatFeedback(
 		game.state,
 		fogConfiguration.enabled ? exploration.visible : undefined,

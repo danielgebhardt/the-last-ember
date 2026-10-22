@@ -1,5 +1,5 @@
 import { Dialog } from "@base-ui/react/dialog";
-import { ArrowRight, FolderOpen, Shield } from "lucide-react";
+import { ArrowRight, FolderOpen, History, Shield } from "lucide-react";
 import { useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetTrigger } from "@/components/ui/sheet";
@@ -8,7 +8,8 @@ import {
 	type RunConfiguration,
 } from "../../domain/dungeon/RunConfiguration";
 import { ADVENTURE_STORY } from "../../domain/game/AdventureStory";
-import type { SaveDocument } from "../../domain/saves/SaveFormat";
+import { type SaveDocument, saveSummary } from "../../domain/saves/SaveFormat";
+import { readAutosave } from "../../persistence/LocalAdventureSave";
 import AdventureSaveSheet from "./AdventureSaveSheet";
 import DifficultyChoice from "./DifficultyChoice";
 import DungeonSizeChoice from "./DungeonSizeChoice";
@@ -28,6 +29,11 @@ const AdventureOpening = ({
 }) => {
 	const [configuration, setConfiguration] = useState(initialConfiguration);
 	const [saveOpen, setSaveOpen] = useState(false);
+	// Read once: the opening screen is shown before any autosave can change.
+	const [autosave] = useState(() => {
+		const result = readAutosave();
+		return result.ok ? result.value : null;
+	});
 	const title = useRef<HTMLHeadingElement>(null);
 
 	return (
@@ -184,6 +190,42 @@ const AdventureOpening = ({
 									/>
 								</Button>
 							</form>
+
+							{autosave && (
+								<div className="grid gap-1">
+									<Button
+										type="button"
+										variant="outline"
+										aria-describedby="autosave-summary"
+										onClick={() => onRestore(autosave)}
+										className="
+                                    h-9 w-full
+                                    border-amber-700/50
+                                    bg-amber-500/10
+                                    text-foreground
+                                    hover:border-amber-700/70
+                                    hover:bg-amber-500/20
+                                    dark:border-amber-500/50
+                                    dark:hover:border-amber-400/70
+                                 "
+									>
+										<History
+											aria-hidden="true"
+											className="size-4 text-amber-800 dark:text-amber-400"
+										/>
+										Continue autosave
+									</Button>
+									<p
+										id="autosave-summary"
+										className="text-center text-[11px] text-muted-foreground"
+									>
+										{saveSummary(autosave)} ·{" "}
+										<time dateTime={autosave.savedAt}>
+											{new Date(autosave.savedAt).toLocaleString()}
+										</time>
+									</p>
+								</div>
+							)}
 
 							{/* Load existing adventure */}
 							<Sheet open={saveOpen} onOpenChange={setSaveOpen}>

@@ -61,7 +61,11 @@ it("walks deliberately into the dungeon, returns without a turn and restores exa
 	);
 	await user.click(sheet.getByRole("button", { name: "Save adventure" }));
 	await user.click(screen.getByRole("button", { name: "Confirm save" }));
-	expect(await sheet.findByText(/Town/)).toBeVisible();
+	expect(
+		await within(
+			sheet.getByRole("region", { name: "Browser save" }),
+		).findByText(/Town/),
+	).toBeVisible();
 	await user.keyboard("{Escape}");
 	await waitFor(() =>
 		expect(screen.queryByRole("dialog")).not.toBeInTheDocument(),

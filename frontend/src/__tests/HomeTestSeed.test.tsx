@@ -37,5 +37,5 @@ it("offers loading but no saving or export on the reserved test seed", async () 
 	expect(
 		sheet.queryByRole("button", { name: /Export/ }),
 	).not.toBeInTheDocument();
-	expect(sheet.getByRole("button", { name: /Load/ })).toBeVisible();
+	expect(sheet.getByRole("button", { name: "Load adventure" })).toBeVisible();
 });

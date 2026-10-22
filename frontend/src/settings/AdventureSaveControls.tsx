@@ -1,5 +1,12 @@
 import { Dialog } from "@base-ui/react/dialog";
-import { Download, FileJson, FolderOpen, Save, Upload } from "lucide-react";
+import {
+	Download,
+	FileJson,
+	FolderOpen,
+	History,
+	Save,
+	Upload,
+} from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { type SaveDocument, saveSummary } from "../domain/saves/SaveFormat";
@@ -8,6 +15,7 @@ import {
 	readAdventureFile,
 } from "../persistence/AdventureSaveFiles";
 import {
+	readAutosave,
 	readLocalSave,
 	writeLocalSave,
 } from "../persistence/LocalAdventureSave";
@@ -20,6 +28,7 @@ const AdventureSaveControls = ({
 	onRestore: (document: SaveDocument) => void;
 }) => {
 	const [slot, setSlot] = useState(readLocalSave);
+	const [autosave, setAutosave] = useState(readAutosave);
 	const [feedback, setFeedback] = useState("");
 	const [pending, setPending] = useState<{
 		kind: "save" | "load";
@@ -83,6 +92,29 @@ const AdventureSaveControls = ({
 		setPending({ kind: "load", document: latest.value });
 		setFeedback("");
 	};
+	const requestAutosaveLoad = (button: HTMLButtonElement) => {
+		restoring.current = false;
+		initiatorRef.current = button;
+		const latest = readAutosave();
+		setAutosave(latest);
+		if (!latest.ok || !latest.value) {
+			setFeedback(latest.ok ? "There is no autosave right now." : latest.error);
+			return;
+		}
+		setPending({ kind: "load", document: latest.value });
+		setFeedback("");
+	};
+	const exportAutosave = () => {
+		const latest = readAutosave();
+		setAutosave(latest);
+		if (!latest.ok || !latest.value) {
+			setFeedback(latest.ok ? "There is no autosave right now." : latest.error);
+			return;
+		}
+		const result = exportAdventureFile(latest.value);
+		setFeedback(result.ok ? "Autosave download started." : result.error);
+	};
+	const autosaved = autosave.ok ? autosave.value : null;
 	const confirm = () => {
 		if (!pending) return;
 		if (pending.kind === "load") {
@@ -146,6 +178,55 @@ const AdventureSaveControls = ({
 						<FolderOpen aria-hidden="true" />
 						Load adventure
 					</Button>
+				</div>
+			</section>
+			<section
+				aria-label="Autosave"
+				className="grid gap-3 rounded-xl border bg-muted/15 p-4"
+			>
+				<h3 className="flex items-center gap-2 font-medium">
+					<History aria-hidden="true" className="size-4 text-primary" />
+					Autosave
+				</h3>
+				<p className="text-xs leading-relaxed text-muted-foreground">
+					Saved automatically on each floor change, town visit and town
+					purchase, and every 100 turns. Separate from your browser save, and
+					cleared when an adventure ends.
+				</p>
+				<div className="rounded-lg border bg-background/70 p-3 text-xs leading-relaxed">
+					{autosaved ? (
+						<>
+							<p className="font-medium">{saveSummary(autosaved)}</p>
+							<time
+								dateTime={autosaved.savedAt}
+								className="mt-1 block text-muted-foreground"
+							>
+								{new Date(autosaved.savedAt).toLocaleString()}
+							</time>
+						</>
+					) : (
+						<p>{autosave.ok ? "No autosave yet." : autosave.error}</p>
+					)}
+				</div>
+				<div className={createSnapshot ? "grid grid-cols-2 gap-2" : "grid"}>
+					<Button
+						variant="outline"
+						disabled={!autosaved || importing}
+						onClick={(event) => requestAutosaveLoad(event.currentTarget)}
+					>
+						<FolderOpen aria-hidden="true" />
+						Load autosave
+					</Button>
+					{createSnapshot && (
+						<Button
+							variant="outline"
+							disabled={!autosaved || importing}
+							onClick={exportAutosave}
+						>
+							<Download aria-hidden="true" />
+							Export autosave
+						</Button>
+					)}
 				</div>
 			</section>
 			<section
