@@ -16,6 +16,18 @@ import DungeonSizeChoice from "./DungeonSizeChoice";
 import EmberEmblem from "./EmberEmblem";
 import RunHistoryDialog from "./RunHistoryDialog";
 
+// Gold rule with a centred diamond, used under the title and between settings.
+const Flourish = ({ className }: { className: string }) => (
+	<div
+		aria-hidden="true"
+		className={`mx-auto flex items-center gap-3 ${className}`}
+	>
+		<span className="h-px flex-1 bg-gradient-to-r from-transparent to-amber-700/60 dark:to-amber-500/60" />
+		<span className="size-2 rotate-45 border border-amber-700/70 bg-amber-500/25 dark:border-amber-400/70" />
+		<span className="h-px flex-1 bg-gradient-to-l from-transparent to-amber-700/60 dark:to-amber-500/60" />
+	</div>
+);
+
 const AdventureOpening = ({
 	onBegin,
 	onRestore,
@@ -47,167 +59,173 @@ const AdventureOpening = ({
 						className="
                      fixed top-1/2 left-1/2 z-50
                      max-h-[calc(100dvh-1.5rem)]
-                     w-[calc(100%-1.5rem)] max-w-2xl
+                     w-[calc(100%-1.5rem)] max-w-[65rem]
                      -translate-x-1/2 -translate-y-1/2
                      overflow-y-auto rounded-xl
                      border border-amber-800/35
-                     bg-popover text-popover-foreground
+                     bg-gradient-to-b
+                     from-amber-100/70 via-popover via-30% to-popover
+                     px-5 py-5 text-popover-foreground
                      shadow-[0_24px_70px_rgba(0,0,0,0.35)]
+                     sm:px-7
                      dark:border-amber-600/35
+                     dark:from-[#302318]
+                     [@media(max-height:800px)]:py-4
                      [@media(max-height:800px)]:[&_label]:py-1.5
                   "
 					>
-						{/* Title and emblem */}
-						<div
-							className="
-                        relative border-b border-amber-800/20
-                        bg-gradient-to-b
-                        from-amber-100/70 via-card to-card
-                        px-5 pt-4 pb-3 text-center
-                        dark:border-amber-500/20
-                        dark:from-[#302318] dark:via-card dark:to-card
-                        [@media(max-height:800px)]:pt-3 [@media(max-height:800px)]:pb-2
-                     "
+						<form
+							className="grid gap-2.5"
+							onSubmit={(event) => {
+								event.preventDefault();
+								onBegin(configuration);
+							}}
 						>
-							<EmberEmblem className="mx-auto size-14 [@media(max-height:800px)]:size-10" />
+							<div className="mb-2.5 grid gap-5 min-[900px]:grid-cols-[minmax(0,13fr)_minmax(0,7fr)] min-[900px]:gap-0">
+								{/* Branding and introduction */}
+								<div className="space-y-4 min-[900px]:pr-7 [@media(max-height:800px)]:space-y-3">
+									<div className="text-center">
+										<EmberEmblem className="mx-auto size-14 [@media(max-height:800px)]:size-10" />
 
-							<Dialog.Title
-								ref={title}
-								tabIndex={-1}
-								className="
-                           mt-1 font-serif text-3xl font-bold
-                           tracking-wide text-amber-950 outline-none
-                           dark:text-amber-100
-                        "
-							>
-								{ADVENTURE_STORY.title}
-							</Dialog.Title>
+										<Dialog.Title
+											ref={title}
+											tabIndex={-1}
+											className="
+                                 mt-1 font-serif text-4xl font-bold
+                                 tracking-wide text-amber-950 outline-none
+                                 dark:text-amber-100
+                              "
+										>
+											{ADVENTURE_STORY.title}
+										</Dialog.Title>
 
-							<div
-								aria-hidden="true"
-								className="mx-auto mt-2 flex max-w-60 items-center gap-3"
-							>
-								<span className="h-px flex-1 bg-gradient-to-r from-transparent to-amber-700/60 dark:to-amber-500/60" />
-								<span className="size-2 rotate-45 border border-amber-700/70 bg-amber-500/25 dark:border-amber-400/70" />
-								<span className="h-px flex-1 bg-gradient-to-l from-transparent to-amber-700/60 dark:to-amber-500/60" />
-							</div>
+										<Flourish className="mt-2 max-w-sm" />
 
-							<p className="mt-2 text-[10px] font-medium uppercase tracking-[0.2em] text-amber-900/70 dark:text-amber-300/70">
-								A journey beneath the dying light
-							</p>
-						</div>
+										<p className="mt-2 text-[11px] font-medium uppercase tracking-[0.25em] text-amber-900/70 dark:text-amber-300/70">
+											A journey beneath the dying light
+										</p>
+									</div>
 
-						<div className="space-y-3 px-5 py-4 sm:px-6 [@media(max-height:800px)]:space-y-2 [@media(max-height:800px)]:py-3">
-							{/* Framed prologue */}
-							<div
-								className="
-      rounded-lg border border-amber-800/20
-      bg-gradient-to-b from-amber-50/80 to-muted/30
-      px-4 py-2.5
-      dark:border-amber-600/20
-      dark:from-amber-950/15 dark:to-muted/20
-   "
-							>
-								<Dialog.Description className="font-serif text-sm leading-relaxed text-foreground/90">
-									{ADVENTURE_STORY.opening.join(" ")}
-								</Dialog.Description>
-							</div>
-
-							{/* Gameplay reminder */}
-							<div
-								className="
-                           flex items-start gap-2.5
-                           rounded-md border-l-2 border-amber-600/60
-                           bg-amber-700/5 px-3 py-2
-                           dark:border-amber-400/60
-                           dark:bg-amber-400/5
-                        "
-							>
-								<Shield
-									aria-hidden="true"
-									className="mt-0.5 size-4 shrink-0 text-amber-800 dark:text-amber-400"
-								/>
-								<p className="text-xs leading-relaxed text-foreground/85">
-									Explore carefully. Every action gives your enemies a turn.
-									Your spells, supplies, and discoveries may be the difference
-									between a safe return and a lost expedition.
-								</p>
-							</div>
-
-							{/* Adventure settings */}
-							<form
-								className="grid gap-3 [@media(max-height:800px)]:gap-2"
-								onSubmit={(event) => {
-									event.preventDefault();
-									onBegin(configuration);
-								}}
-							>
-								<DungeonSizeChoice
-									configuration={configuration}
-									onChange={(size) =>
-										setConfiguration((current) => ({
-											...current,
-											...size,
-										}))
-									}
-								/>
-
-								<DifficultyChoice
-									value={configuration.difficulty ?? 1}
-									onChange={(difficulty) =>
-										setConfiguration((current) => ({
-											...current,
-											difficulty,
-										}))
-									}
-								/>
-
-								{startError && (
-									<p role="alert" className="text-sm text-destructive">
-										{startError}
-									</p>
-								)}
-
-								<Button
-									type="submit"
-									className="
-                              group h-11 w-full
-                              border border-amber-700/70
-                              bg-gradient-to-b from-amber-300 to-amber-500
-                              font-serif text-base font-bold text-amber-950
-                              shadow-[inset_0_1px_0_rgba(255,255,255,0.5),0_3px_12px_rgba(180,83,9,0.15)]
-                              hover:from-amber-200 hover:to-amber-400
-                              dark:border-amber-500/70
-                              dark:from-[#865015] dark:to-[#4b2b10]
-                              dark:text-amber-100
-                              dark:hover:from-[#a2631c] dark:hover:to-[#603817]
+									{/* Framed prologue */}
+									<div
+										className="
+                              rounded-lg border border-amber-800/20
+                              bg-gradient-to-b from-amber-50/80 to-muted/30
+                              px-5 py-3.5
+                              dark:border-amber-600/20
+                              dark:from-amber-950/15 dark:to-muted/20
                            "
-								>
-									Begin Adventure
-									<ArrowRight
-										aria-hidden="true"
-										className="ml-1 size-4 transition-transform group-hover:translate-x-1"
-									/>
-								</Button>
-							</form>
+									>
+										<Dialog.Description className="font-serif text-base leading-normal text-foreground/90">
+											{ADVENTURE_STORY.opening.join(" ")}
+										</Dialog.Description>
+									</div>
 
-							{autosave && (
-								<div className="grid gap-1">
+									{/* Gameplay reminder */}
+									<div
+										className="
+                              flex items-start gap-3
+                              rounded-md border-l-2 border-amber-600/60
+                              bg-amber-700/5 px-4 py-3
+                              dark:border-amber-400/60
+                              dark:bg-amber-400/5
+                           "
+									>
+										<Shield
+											aria-hidden="true"
+											className="mt-0.5 size-5 shrink-0 text-amber-800 dark:text-amber-400"
+										/>
+										<p className="text-[15px] leading-normal text-foreground/85">
+											Explore carefully. Every action gives your enemies a turn.
+											Your spells, supplies, and discoveries may be the
+											difference between a safe return and a lost expedition.
+										</p>
+									</div>
+								</div>
+
+								{/* Adventure settings */}
+								<div
+									className="
+                           grid content-start gap-3
+                           min-[900px]:border-l min-[900px]:border-amber-800/25
+                           min-[900px]:pl-7
+                           dark:min-[900px]:border-amber-500/25
+                        "
+								>
+									<DungeonSizeChoice
+										configuration={configuration}
+										onChange={(size) =>
+											setConfiguration((current) => ({
+												...current,
+												...size,
+											}))
+										}
+									/>
+
+									<Flourish className="w-full" />
+
+									<DifficultyChoice
+										value={configuration.difficulty ?? 1}
+										onChange={(difficulty) =>
+											setConfiguration((current) => ({
+												...current,
+												difficulty,
+											}))
+										}
+									/>
+								</div>
+							</div>
+
+							{/* Actions */}
+							{startError && (
+								<p role="alert" className="text-sm text-destructive">
+									{startError}
+								</p>
+							)}
+
+							<Button
+								type="submit"
+								className="
+                           group h-12 w-full
+                           border border-amber-700/70
+                           bg-gradient-to-b from-amber-300 to-amber-500
+                           font-serif text-lg font-bold text-amber-950
+                           shadow-[inset_0_1px_0_rgba(255,255,255,0.5),0_3px_12px_rgba(180,83,9,0.15)]
+                           hover:from-amber-200 hover:to-amber-400
+                           dark:border-amber-500/70
+                           dark:from-[#865015] dark:to-[#4b2b10]
+                           dark:text-amber-100
+                           dark:hover:from-[#a2631c] dark:hover:to-[#603817]
+                        "
+							>
+								Begin Adventure
+								<ArrowRight
+									aria-hidden="true"
+									className="ml-1 size-4 transition-transform group-hover:translate-x-1"
+								/>
+							</Button>
+						</form>
+
+						<div className="mt-2.5 grid gap-2.5">
+							<div
+								className={`grid gap-2.5 ${autosave ? "sm:grid-cols-2" : ""}`}
+							>
+								{autosave && (
 									<Button
 										type="button"
 										variant="outline"
 										aria-describedby="autosave-summary"
 										onClick={() => onRestore(autosave)}
 										className="
-                                    h-9 w-full
-                                    border-amber-700/50
-                                    bg-amber-500/10
-                                    text-foreground
-                                    hover:border-amber-700/70
-                                    hover:bg-amber-500/20
-                                    dark:border-amber-500/50
-                                    dark:hover:border-amber-400/70
-                                 "
+                                 h-10 w-full
+                                 border-amber-700/50
+                                 bg-amber-500/10
+                                 text-foreground
+                                 hover:border-amber-700/70
+                                 hover:bg-amber-500/20
+                                 dark:border-amber-500/50
+                                 dark:hover:border-amber-400/70
+                              "
 									>
 										<History
 											aria-hidden="true"
@@ -215,50 +233,53 @@ const AdventureOpening = ({
 										/>
 										Continue autosave
 									</Button>
-									<p
-										id="autosave-summary"
-										className="text-center text-[11px] text-muted-foreground"
+								)}
+
+								{/* Load existing adventure */}
+								<Sheet open={saveOpen} onOpenChange={setSaveOpen}>
+									<SheetTrigger
+										render={
+											<Button
+												type="button"
+												variant="outline"
+												className="
+                                       h-10 w-full
+                                       border-amber-900/30
+                                       bg-gradient-to-b from-card to-muted/50
+                                       text-foreground
+                                       hover:border-amber-700/60
+                                       hover:bg-amber-700/10
+                                       dark:border-amber-600/35
+                                       dark:hover:border-amber-400/60
+                                       dark:hover:bg-amber-400/10
+                                    "
+											/>
+										}
 									>
-										{saveSummary(autosave)} ·{" "}
-										<time dateTime={autosave.savedAt}>
-											{new Date(autosave.savedAt).toLocaleString()}
-										</time>
-									</p>
-								</div>
+										<FolderOpen
+											aria-hidden="true"
+											className="size-4 text-amber-800 dark:text-amber-400"
+										/>
+										Load an existing save
+									</SheetTrigger>
+
+									<AdventureSaveSheet onRestore={onRestore} />
+								</Sheet>
+							</div>
+
+							{autosave && (
+								<p
+									id="autosave-summary"
+									className="-mt-1 text-center text-[11px] text-muted-foreground"
+								>
+									{saveSummary(autosave)} ·{" "}
+									<time dateTime={autosave.savedAt}>
+										{new Date(autosave.savedAt).toLocaleString()}
+									</time>
+								</p>
 							)}
 
-							{/* Load existing adventure */}
-							<Sheet open={saveOpen} onOpenChange={setSaveOpen}>
-								<SheetTrigger
-									render={
-										<Button
-											type="button"
-											variant="outline"
-											className="
-                                    h-9 w-full
-                                    border-amber-900/30
-                                    bg-gradient-to-b from-card to-muted/50
-                                    text-foreground
-                                    hover:border-amber-700/60
-                                    hover:bg-amber-700/10
-                                    dark:border-amber-600/35
-                                    dark:hover:border-amber-400/60
-                                    dark:hover:bg-amber-400/10
-                                 "
-										/>
-									}
-								>
-									<FolderOpen
-										aria-hidden="true"
-										className="size-4 text-amber-800 dark:text-amber-400"
-									/>
-									Load an existing save
-								</SheetTrigger>
-
-								<AdventureSaveSheet onRestore={onRestore} />
-							</Sheet>
-
-							<RunHistoryDialog triggerClassName="h-9 w-full" />
+							<RunHistoryDialog triggerClassName="h-10 w-full text-muted-foreground hover:text-foreground" />
 
 							<div className="text-center">
 								<p className="text-xs text-muted-foreground">
@@ -268,7 +289,7 @@ const AdventureOpening = ({
 										{configuration.floorCount} floors
 									</output>
 								</p>
-								<p className="mt-1 text-[10px] italic text-muted-foreground/70">
+								<p className="mt-0.5 text-[10px] italic text-muted-foreground/70">
 									Inspired by the classic roguelike Larn.
 								</p>
 							</div>

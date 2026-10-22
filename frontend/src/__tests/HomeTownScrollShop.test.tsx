@@ -33,6 +33,17 @@ it("opens the Market Street scroll shop, explains the portal's ember rule and co
 		shop.getAllByRole("heading", { level: 3 }).map((h) => h.textContent),
 	).toEqual(["Town portal scroll", "Remove Curse scroll"]);
 	expect(shop.getByText(/carrying the Last Ember/)).toBeVisible();
+	// Shop copy keeps what a buyer needs; item details keep the full rules.
+	expect(
+		shop.getByText(
+			"Read in a cleared dungeon area to open a single-use return portal in Beacon town. Stand on the town portal and press Enter to return to your exact departure location, or a nearby safe tile if blocked, for free. Cannot be used while carrying the Last Ember.",
+		),
+	).toBeVisible();
+	expect(
+		shop.getByText(
+			"Lifts a Curse before the ensuing phase, restoring melee accuracy and damage. Does not cure other conditions.",
+		),
+	).toBeVisible();
 	expect(shop.getByText("200 gold · 3 remaining")).toBeVisible();
 	expect(shop.getByText("375 gold · 2 remaining")).toBeVisible();
 	await user.click(

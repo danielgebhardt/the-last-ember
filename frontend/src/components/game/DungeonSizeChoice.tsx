@@ -19,7 +19,8 @@ const DungeonSizeChoice = ({
 				Dungeon size
 			</legend>
 
-			<div className="grid grid-cols-3 gap-2">
+			{/* Stacked beside the introduction; a row once the dialog stacks. */}
+			<div className="grid grid-cols-3 gap-2 min-[900px]:grid-cols-1">
 				{DUNGEON_SIZE_PRESETS.map((size) => {
 					const selected =
 						configuration.rows === size.rows &&
@@ -32,6 +33,7 @@ const DungeonSizeChoice = ({
                         relative flex min-w-0 cursor-pointer
                         flex-col items-center justify-center
                         rounded-md border px-2 py-2.5 text-center
+                        min-[900px]:min-h-14 min-[900px]:px-10
                         transition-[background-color,border-color,box-shadow]
                         duration-150
                         ${
@@ -56,7 +58,9 @@ const DungeonSizeChoice = ({
 							<span
 								aria-hidden="true"
 								className={`
-                           mb-1 size-2.5 rotate-45 border
+                           mb-1 size-2.5 shrink-0 rotate-45 border
+                           min-[900px]:absolute min-[900px]:top-1/2 min-[900px]:left-5
+                           min-[900px]:mb-0 min-[900px]:-translate-y-1/2
                            ${
 															selected
 																? "border-amber-600 bg-amber-500 dark:border-amber-400 dark:bg-amber-400"
@@ -65,12 +69,14 @@ const DungeonSizeChoice = ({
                         `}
 							/>
 
-							<span className="font-serif text-sm font-semibold">
-								{size.label}
-							</span>
+							<span className="flex flex-col">
+								<span className="font-serif text-sm font-semibold">
+									{size.label}
+								</span>
 
-							<span className="mt-0.5 text-[11px] text-muted-foreground">
-								{size.rows} × {size.cols}
+								<span className="mt-0.5 text-[11px] text-muted-foreground">
+									{size.rows} × {size.cols}
+								</span>
 							</span>
 						</label>
 					);

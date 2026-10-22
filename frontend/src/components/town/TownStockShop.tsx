@@ -5,6 +5,7 @@ import { ITEM_DEFINITIONS, type ItemKind } from "../../domain/items/Item";
 import {
 	townPotionDescription,
 	townPotionKinds,
+	townScrollDescription,
 	townScrollKinds,
 } from "../../domain/town/TownEconomy";
 import { canReachOpenBuilding } from "../../domain/town/TownServices";
@@ -53,7 +54,8 @@ const STORE_VIEWS: Record<
 		description:
 			"Every scroll counted twice. Finite town stock; no restocking. Buying is free of dungeon time.",
 		kinds: townScrollKinds,
-		describe: (kind) => ITEM_DEFINITIONS[kind].description,
+		describe: (kind) =>
+			townScrollDescription(kind as (typeof townScrollKinds)[number]),
 		gridClassName: "sm:grid-cols-2",
 		confirmLabel: "Confirm scroll purchase",
 		confirmText:
