@@ -9,7 +9,7 @@ import {
 	type SpellHotbar,
 } from "../../domain/game/SpellHotbar";
 import {
-	SPELL_DEFINITIONS,
+	playerSpell,
 	type SpellKind,
 	spellPotency,
 } from "../../domain/game/Spells";
@@ -40,7 +40,7 @@ const SpellLibraryCard = ({
 	onAction,
 }: Props) => {
 	const ongoing = ongoingSpellPotency(progression, equipment, effects);
-	const definition = SPELL_DEFINITIONS[spell];
+	const definition = playerSpell(spell, progression);
 
 	const potency = spellPotency(progression, definition, equipment, effects);
 

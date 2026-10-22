@@ -60,7 +60,7 @@ import {
 import { MAX_SEED, parseSeedInput } from "./domain/dungeon/Seed.ts";
 import type { VictorySummary } from "./domain/game/Adventure";
 import { defeatRecap } from "./domain/game/DefeatRecap";
-import { pendingPerkCount } from "./domain/game/Perks";
+import { hasPerk, pendingPerkCount } from "./domain/game/Perks";
 import { createRunRecord, runRecap } from "./domain/game/RunRecap";
 import { isTestSeed, randomAdventureSeed } from "./domain/game/TestSeed";
 import { canAddToBag } from "./domain/items/Bag";
@@ -774,6 +774,10 @@ const Home = ({
 											game.state.objects,
 											run.activeFloor,
 										)}
+										downStairMarked={hasPerk(
+											game.state.progression,
+											"pathfinder",
+										)}
 										playerPosition={run.playerCoordinate}
 										upStair={activeFloor.upStair?.coordinate}
 										entrance={
@@ -880,6 +884,7 @@ const Home = ({
 										enabled={gameplayEnabled && !town}
 										targeting={spells.targeting?.spell}
 										onActivate={spells.activate}
+										progression={game.state.progression}
 									/>
 								</fieldset>
 							</FantasyRail>

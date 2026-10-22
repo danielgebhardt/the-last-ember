@@ -9,7 +9,11 @@ import {
 	sellLowerCarriedEquipment,
 } from "./EquipmentSales";
 import { merchantsEnabled } from "./MerchantAvailability";
-import { MERCHANT_OFFERS, type MerchantSupply } from "./MerchantRules";
+import {
+	MERCHANT_OFFERS,
+	type MerchantSupply,
+	merchantPrice,
+} from "./MerchantRules";
 export type BuyAction = {
 	type: "buy";
 	merchantId: string;
@@ -36,7 +40,7 @@ export const buyPotion = (
 	if (!Object.hasOwn(MERCHANT_OFFERS, action.kind))
 		return { error: "That supply is not offered." };
 	const count = state.merchantStock[action.kind],
-		price = MERCHANT_OFFERS[action.kind].price;
+		price = merchantPrice(action.kind, state.progression);
 	if (count <= 0)
 		return { error: "That supply is sold out for this adventure." };
 	if (state.gold < price) return { error: "You do not have enough gold." };

@@ -40,6 +40,7 @@ import {
 } from "../merchant/MerchantTrades";
 import { enrageWarden, followWarden } from "../monsters/EmberWarden";
 import type { Monster } from "../monsters/Monster.ts";
+import { actorMaximumHealth } from "../monsters/MonsterStats";
 import {
 	type MonsterPhaseScope,
 	resolveMonsterPhase,
@@ -98,7 +99,7 @@ import {
 } from "./MeleeRules";
 import { damageMonster } from "./MonsterDamage";
 import { type ChoosePerkAction, choosePerk } from "./PerkChoiceAction";
-import { opportunistBonus } from "./PerkEffects";
+import { executionerBonus, opportunistBonus } from "./PerkEffects";
 import { levelForExperience } from "./Progression";
 import { type CastAction, castSpell } from "./SpellCasting";
 import {
@@ -611,7 +612,13 @@ const resolveAttack = (
 		attackProfile(
 			afflictedMeleeAttack(
 				deriveCombatStats(state.equipment, state.progression, state.effects)
-					.attack + opportunistBonus(state.progression, monster),
+					.attack +
+					opportunistBonus(state.progression, monster) +
+					executionerBonus(
+						state.progression,
+						monster,
+						actorMaximumHealth(monster, state.difficulty),
+					),
 				state.afflictions,
 			),
 			deriveAccuracy(

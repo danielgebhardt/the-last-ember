@@ -184,6 +184,7 @@ const DungeonRow = memo(
 		visible,
 		explored,
 		revealed = false,
+		downStairMarked = false,
 		playerColumn,
 		upStairColumn,
 		entranceColumn,
@@ -204,6 +205,8 @@ const DungeonRow = memo(
 		visible?: readonly boolean[];
 		explored?: readonly boolean[];
 		revealed?: boolean;
+		// Pathfinder marks the stairs down even before you have seen them.
+		downStairMarked?: boolean;
 		rowIndex: number;
 		playerColumn?: number;
 		upStairColumn?: number;
@@ -237,7 +240,9 @@ const DungeonRow = memo(
 					// Revealed terrain shows like memory, but only doors among objects.
 					const visibility: TileVisibility = seen
 						? "visible"
-						: remembered || revealed
+						: remembered ||
+								revealed ||
+								(downStairMarked && columnIndex === downStairColumn)
 							? "remembered"
 							: "unknown";
 					const monster = monsters?.find(
@@ -347,6 +352,7 @@ const DungeonRow = memo(
 		previous.visible === next.visible &&
 		previous.explored === next.explored &&
 		previous.revealed === next.revealed &&
+		previous.downStairMarked === next.downStairMarked &&
 		previous.playerColumn === next.playerColumn &&
 		previous.upStairColumn === next.upStairColumn &&
 		previous.entranceColumn === next.entranceColumn &&

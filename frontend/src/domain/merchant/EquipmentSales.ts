@@ -2,7 +2,7 @@ import { appendActivityEvents } from "../game/ActivityHistory";
 import type { GameState } from "../game/GameState";
 import { createBag } from "../items/Bag";
 import { lowerEquipmentSale } from "./LowerEquipmentSales";
-import { equipmentSalePrice } from "./MerchantRules";
+import { equipmentSaleGold } from "./MerchantRules";
 
 // Ownership, pricing and atomic mutations are shared by town and dungeon buyers.
 export const sellLowerCarriedEquipment = (
@@ -22,7 +22,7 @@ export const sellLowerCarriedEquipment = (
 			sale.items.map((item) => ({
 				type: "merchant-sold" as const,
 				item: item.kind,
-				gold: equipmentSalePrice(item) ?? 0,
+				gold: equipmentSaleGold(item, state.progression) ?? 0,
 				turn: state.turn,
 			})),
 		),
@@ -37,7 +37,7 @@ export const sellCarriedEquipment = (
 		return {
 			error: "That equipment is not in your bag. Unequip worn gear first.",
 		};
-	const gold = equipmentSalePrice(item);
+	const gold = equipmentSaleGold(item, state.progression);
 	if (gold === null)
 		return { error: "The merchant buys only carried equipment." };
 	if (!Number.isSafeInteger(state.gold + gold))

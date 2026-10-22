@@ -348,6 +348,7 @@ const eventFields = {
 		conditions: optional(
 			array(oneOf(Object.keys(AFFLICTION_DEFINITIONS)), 1, 2),
 		),
+		recovered: optional(integer(1)),
 	},
 	"equipment-enchanted": { item: itemKind, enchantment: integer(1, 3) },
 	"item-attribute-increased": {

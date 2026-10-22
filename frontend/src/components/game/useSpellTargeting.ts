@@ -6,6 +6,7 @@ import type { PlayerAction } from "../../domain/game/PlayerActions";
 import { isSpellTarget } from "../../domain/game/SpellCasting";
 import { spellTargetDetails } from "../../domain/game/SpellDetails";
 import {
+	playerSpell,
 	SPELL_DEFINITIONS,
 	type SpellKind,
 	spellKnowledgeError,
@@ -22,7 +23,7 @@ const eligibleTargets = (
 	state.monsters
 		.filter(
 			(monster) =>
-				isSpellTarget(state, monster, SPELL_DEFINITIONS[spell]) &&
+				isSpellTarget(state, monster, playerSpell(spell, state.progression)) &&
 				(!visible || visible[monster.coordinate.row]?.[monster.coordinate.col]),
 		)
 		.sort(
@@ -76,7 +77,7 @@ export const useSpellTargeting = (
 			onError(error);
 			return;
 		}
-		const definition = SPELL_DEFINITIONS[spell];
+		const definition = playerSpell(spell, state.progression);
 		if (state.mana < definition.cost) {
 			onError(
 				`Not enough mana for ${definition.name}. You need ${definition.cost}.`,

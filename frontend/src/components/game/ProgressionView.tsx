@@ -3,6 +3,7 @@ import type { ActiveAffliction } from "../../domain/game/AfflictionDefinitions";
 import { deriveAttributes } from "../../domain/game/Attributes";
 import { deriveAccuracy } from "../../domain/game/MeleeRules";
 import { permanentAttributeGains } from "../../domain/game/PermanentAttributes";
+import type { PlayerStats } from "../../domain/game/PlayerStats";
 import {
 	HEALTH_PER_LEVEL,
 	levelForExperience,
@@ -19,16 +20,24 @@ const ProgressionView = ({
 	equipment,
 	effects = [],
 	afflictions = [],
+	player,
 }: {
 	progression: Progression;
 	equipment?: Equipment;
 	effects?: readonly TimedEffect[];
 	afflictions?: readonly ActiveAffliction[];
+	player?: PlayerStats;
 }) => {
 	const level = levelForExperience(progression.experience);
 	const attributes = deriveAttributes(progression, effects, equipment);
 	const permanent = permanentAttributeGains(progression);
-	const accuracy = deriveAccuracy(progression, effects, equipment, afflictions);
+	const accuracy = deriveAccuracy(
+		progression,
+		effects,
+		equipment,
+		afflictions,
+		player,
+	);
 
 	const temporary = effects.some(
 		(effect) =>

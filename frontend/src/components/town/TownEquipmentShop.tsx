@@ -1,6 +1,7 @@
 import { Tabs } from "@base-ui/react/tabs";
 import { type RefObject, useLayoutEffect, useRef, useState } from "react";
 import type { GameState } from "../../domain/game/GameState";
+import { haggledPrice } from "../../domain/game/PerkEffects";
 import { canAddToBag } from "../../domain/items/Bag";
 import { compareEquipment } from "../../domain/items/EquipmentComparison";
 import { ITEM_DEFINITIONS, type ItemInstance } from "../../domain/items/Item";
@@ -61,7 +62,8 @@ const TownEquipmentShop = ({
 		const offer = TOWN_EQUIPMENT_OFFERS[id];
 		if (!state.townEquipmentStock.some((item) => item.id === id))
 			return "Sold out";
-		if (state.gold < offer.price) return "Not enough gold";
+		if (state.gold < haggledPrice(state.progression, offer.price))
+			return "Not enough gold";
 		if (!canAddToBag(state.bag, offer.item)) return "Bag full";
 		return null;
 	};
@@ -91,7 +93,7 @@ const TownEquipmentShop = ({
 									{itemName(item)}
 								</h3>
 								<PriceBadge
-									price={price}
+									price={haggledPrice(state.progression, price)}
 									dimmed={reason === "Not enough gold"}
 								/>
 							</div>
@@ -160,7 +162,7 @@ const TownEquipmentShop = ({
 				<ConfirmPanel
 					panelRef={confirmation}
 					label="Confirm equipment purchase"
-					legend={`Buy ${itemName(selected.item)} for ${selected.price} gold?`}
+					legend={`Buy ${itemName(selected.item)} for ${haggledPrice(state.progression, selected.price)} gold?`}
 					cancelLabel="Cancel purchase"
 					confirmLabel="Confirm purchase"
 					disabled={unavailable(pending) !== null}

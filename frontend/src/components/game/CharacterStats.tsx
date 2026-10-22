@@ -13,7 +13,11 @@ import {
 } from "../../domain/game/CombatStats";
 import { playerEffectBonuses } from "../../domain/game/EffectBonuses";
 import { maximumMana } from "../../domain/game/Mana";
-import { attackProfile, deriveAccuracy } from "../../domain/game/MeleeRules";
+import {
+	attackProfile,
+	deriveAccuracy,
+	isLastStand,
+} from "../../domain/game/MeleeRules";
 import { maximumHealth } from "../../domain/game/PlayerHealth";
 import type { PlayerStats } from "../../domain/game/PlayerStats";
 import type { Progression } from "../../domain/game/Progression";
@@ -48,11 +52,20 @@ const CharacterStats = ({
 	);
 	const combat = deriveCombatStats(equipment, progression, effects);
 	const armor = armorContributions(equipment);
-	const accuracy = deriveAccuracy(progression, effects, equipment, afflictions);
+	const accuracy = deriveAccuracy(
+		progression,
+		effects,
+		equipment,
+		afflictions,
+		player,
+	);
+	// "Normal" drops only afflictions, so its difference names them alone.
 	const normalEvade = deriveAccuracy(
 		progression,
 		effects,
 		equipment,
+		[],
+		player,
 	).evadeChance;
 	const profile = attackProfile(
 		afflictedMeleeAttack(combat.attack, afflictions),
@@ -132,6 +145,7 @@ const CharacterStats = ({
 					<p className={hint}>
 						Base {combat.baseAttack} + Strength {combat.strengthBonus} + weapon{" "}
 						{combat.weaponBonus}
+						{combat.perkAttack > 0 && ` + perks ${combat.perkAttack}`}
 						{by("meleeDamage") && ` · ${by("meleeDamage")} −1`}
 					</p>
 					<output
@@ -166,6 +180,7 @@ const CharacterStats = ({
 						className="text-[11px] text-muted-foreground"
 					>
 						Evade {accuracy.evadeChance}%
+						{isLastStand(progression, player) && " (Last stand +10)"}
 						{normalEvade !== accuracy.evadeChance &&
 							` (${by("evasion")} −${normalEvade - accuracy.evadeChance})`}
 					</output>

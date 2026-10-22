@@ -1,5 +1,6 @@
 import { appendActivityEvents } from "../game/ActivityHistory";
 import type { GameState } from "../game/GameState";
+import { haggledPrice } from "../game/PerkEffects";
 import { canAddToBag, createBag } from "../items/Bag";
 import { ownedItems } from "../items/OwnedItems";
 import { rareEquipmentId } from "../items/RareEquipment";
@@ -38,6 +39,7 @@ export const buyTownEquipment = (
 	if (!Object.hasOwn(TOWN_EQUIPMENT_OFFERS, action.offerId))
 		return reject("That item is not offered.");
 	const offer = TOWN_EQUIPMENT_OFFERS[action.offerId];
+	const price = haggledPrice(state.progression, offer.price);
 	if (offer.store !== store)
 		return reject("That item belongs to another store.");
 	if (state.townEquipmentPurchases.includes(action.offerId))
@@ -54,7 +56,7 @@ export const buyTownEquipment = (
 		item.enchantment !== offer.item.enchantment
 	)
 		return reject("That offer changed.");
-	if (!Number.isSafeInteger(state.gold) || state.gold < offer.price)
+	if (!Number.isSafeInteger(state.gold) || state.gold < price)
 		return reject("You do not have enough gold.");
 	if (!canAddToBag(state.bag, item))
 		return reject("Your bag is full. Equipment needs its own slot.");
@@ -63,7 +65,7 @@ export const buyTownEquipment = (
 	return {
 		state: {
 			...state,
-			gold: state.gold - offer.price,
+			gold: state.gold - price,
 			townEquipmentPurchases: [...state.townEquipmentPurchases, item.id],
 			...(state.rareEquipment &&
 			rareEquipmentId(state.rareEquipment) === item.id
@@ -77,7 +79,7 @@ export const buyTownEquipment = (
 				{
 					type: "merchant-bought",
 					item: item.kind,
-					gold: offer.price,
+					gold: price,
 					turn: state.turn,
 				},
 			]),

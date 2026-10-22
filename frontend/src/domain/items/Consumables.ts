@@ -4,7 +4,7 @@ import {
 } from "../game/AfflictionDefinitions";
 import type { GameState } from "../game/GameState";
 import { maximumMana } from "../game/Mana";
-import { herbalistBonus } from "../game/PerkEffects";
+import { fieldMedicHealing, herbalistBonus } from "../game/PerkEffects";
 import {
 	type AttributeName,
 	MAX_PERMANENT_ATTRIBUTE_GAIN,
@@ -36,6 +36,8 @@ export type ConsumptionEvent =
 			item: ItemKind;
 			// Afflictions a remedy removed; absent for poison and earlier saved entries.
 			conditions?: readonly AfflictionKind[];
+			// Health Field medic restored; absent without it or at full health.
+			recovered?: number;
 	  }
 	| {
 			type: "item-consumed";
@@ -84,15 +86,18 @@ export const consumeItem = (
 					.map((kind) => AFFLICTION_DEFINITIONS[kind].absentText)
 					.join(" "),
 			};
+		const maxHealth = maximumHealth(
+			state.progression,
+			state.equipment,
+			afflictions,
+		);
+		// Field medic heals after the cure, within the restored maximum.
+		const recovered = Math.min(
+			fieldMedicHealing(state.progression),
+			Math.max(0, maxHealth - player.health),
+		);
 		return {
-			player: {
-				...player,
-				maxHealth: maximumHealth(
-					state.progression,
-					state.equipment,
-					afflictions,
-				),
-			},
+			player: { health: player.health + recovered, maxHealth },
 			mana,
 			afflictions,
 			effects: state.effects,
@@ -103,6 +108,7 @@ export const consumeItem = (
 				conditions: active
 					.filter((a) => !afflictions.includes(a))
 					.map((a) => a.kind),
+				...(recovered > 0 ? { recovered } : {}),
 			},
 		};
 	}

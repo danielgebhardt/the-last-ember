@@ -10,7 +10,7 @@ import { appendActivityEvents } from "./ActivityHistory";
 import type { AttackRollSource } from "./CombatRandomness";
 import type { GameState } from "./GameState";
 import { damageMonster } from "./MonsterDamage";
-import { SPELL_DEFINITIONS, type SpellKind, spellPotency } from "./Spells";
+import { playerSpell, type SpellKind, spellPotency } from "./Spells";
 import { applyTimedEffect } from "./TimedEffects";
 
 export const areaDamageRange = (
@@ -55,7 +55,7 @@ export const castAreaSpell = (
 	center: Coordinate,
 	rolls: AttackRollSource,
 ): { state: GameState } | { error: string } => {
-	const definition = SPELL_DEFINITIONS[spell];
+	const definition = playerSpell(spell, state.progression);
 	const potency = spellPotency(
 		state.progression,
 		definition,
@@ -106,7 +106,7 @@ export const castAreaSpell = (
 		}).damage(range.minimumDamage, range.maximumDamage);
 		next = damageMonster(next, target, damage, { type: "spell-hit", spell });
 		const survivor = next.monsters.find((monster) => monster.id === target.id);
-		if (survivor && "condition" in definition)
+		if (survivor && "condition" in definition && definition.condition)
 			next = applyTimedEffect(next, survivor, definition.condition);
 	}
 	if (

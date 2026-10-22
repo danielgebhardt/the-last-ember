@@ -10,6 +10,7 @@ describe("Visible hotbar labels", () => {
 		const activate = vi.fn();
 		render(
 			<SpellHotbarView
+				progression={{ experience: 0 }}
 				knownSpells={["heal"]}
 				slots={[null, null, null, null, null, "heal"]}
 				enabled
@@ -52,6 +53,7 @@ describe("Visible hotbar labels", () => {
 	it("shows assigned spell names alongside their key and mana cost", () => {
 		render(
 			<SpellHotbarView
+				progression={{ experience: 0 }}
 				knownSpells={["magic-missile", "heal", "sonic-spear"]}
 				slots={["magic-missile", "heal", "sonic-spear", null, null, null]}
 				enabled

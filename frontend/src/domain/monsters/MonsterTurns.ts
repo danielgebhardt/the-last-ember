@@ -17,6 +17,7 @@ import {
 	deriveAccuracy,
 	resolveMeleeAttack,
 } from "../game/MeleeRules";
+import { arrowWardedDamage } from "../game/PerkEffects";
 import { hasMonsterEffect, monsterSkipsAction } from "../game/TimedEffects";
 import { navigationRun } from "../objects/NavigationTerrain";
 import { alertNearbyMonsters } from "./AlarmAlerts";
@@ -159,11 +160,13 @@ export const resolveMonsterPhase = (
 		state.progression,
 		state.effects,
 	);
+	// Last stand is judged from health as the monster phase begins.
 	const { monsterHitThreshold } = deriveAccuracy(
 		state.progression,
 		state.effects,
 		state.equipment,
 		state.afflictions,
+		state.player,
 	);
 	// IDs encode floor:spawnIndex; sort numeric indices, not incidental storage order.
 	const active = state.monsters
@@ -491,7 +494,9 @@ export const resolveMonsterPhase = (
 			});
 			continue;
 		}
-		const damage = outcome.damage;
+		const damage = shooting
+			? arrowWardedDamage(state.progression, outcome.damage)
+			: outcome.damage;
 		player = { ...player, health: Math.max(0, player.health - damage) };
 		events.push({
 			type: preparing

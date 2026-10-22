@@ -1,5 +1,6 @@
 import { type RefObject, useLayoutEffect, useRef, useState } from "react";
 import type { GameState } from "../../domain/game/GameState";
+import { haggledPrice } from "../../domain/game/PerkEffects";
 import { canAddToBag } from "../../domain/items/Bag";
 import { ITEM_DEFINITIONS, type ItemKind } from "../../domain/items/Item";
 import {
@@ -107,7 +108,8 @@ const TownStockShop = ({
 	}, [open, focusTitle]);
 	const unavailable = (kind: ItemKind): string => {
 		if (stock[kind] <= 0) return "Sold out";
-		if (state.gold < offers[kind].price) return "Not enough gold";
+		if (state.gold < haggledPrice(state.progression, offers[kind].price))
+			return "Not enough gold";
 		if (!canAddToBag(state.bag, { id: "town:preview", kind }))
 			return "Bag full — new stack needs a slot";
 		return "Available";
@@ -144,7 +146,8 @@ const TownStockShop = ({
 						</h3>
 						<p className="text-muted-foreground">{view.describe(kind)}</p>
 						<p>
-							{offers[kind].price} gold · {stock[kind]} remaining
+							{haggledPrice(state.progression, offers[kind].price)} gold ·{" "}
+							{stock[kind]} remaining
 						</p>
 						<p>{unavailable(kind)}</p>
 						<Button
@@ -162,7 +165,7 @@ const TownStockShop = ({
 				<ConfirmPanel
 					panelRef={confirmation}
 					label={view.confirmLabel}
-					legend={`Buy ${ITEM_DEFINITIONS[pending.kind].name} for ${offers[pending.kind].price} gold?`}
+					legend={`Buy ${ITEM_DEFINITIONS[pending.kind].name} for ${haggledPrice(state.progression, offers[pending.kind].price)} gold?`}
 					cancelLabel="Cancel purchase"
 					confirmLabel="Confirm purchase"
 					disabled={

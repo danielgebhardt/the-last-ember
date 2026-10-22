@@ -10,14 +10,17 @@ import {
 } from "react";
 import { Button } from "@/components/ui/button";
 import type { GameState } from "../../domain/game/GameState";
+import type { Progression } from "../../domain/game/Progression";
 import { compareEquipment } from "../../domain/items/EquipmentComparison";
 import { ITEM_DEFINITIONS, type ItemInstance } from "../../domain/items/Item";
 import { itemName } from "../../domain/items/ItemValues";
 import { lowerEquipmentSale } from "../../domain/merchant/LowerEquipmentSales";
 import {
+	equipmentSaleGold,
 	equipmentSalePrice,
 	MERCHANT_OFFERS,
 	type MerchantSupply,
+	merchantPrice,
 } from "../../domain/merchant/MerchantRules";
 import {
 	ItemDragProvider,
@@ -55,9 +58,11 @@ const SaleDragSource = ({
 // which only proposes a sale for confirmation.
 const SellDropArea = ({
 	enabled,
+	progression,
 	children,
 }: {
 	enabled: boolean;
+	progression: Progression;
 	children: ReactNode;
 }) => {
 	const drop = useItemDropTarget(SALE_DROP_ID, {
@@ -73,7 +78,8 @@ const SellDropArea = ({
 			{drop.accepts && dragged?.item ? (
 				<p className="flex h-full items-center justify-center p-2 text-sm">
 					Drop here to sell {dragged.name} for{" "}
-					{equipmentSalePrice(dragged.item)} gold. You will confirm first.
+					{equipmentSaleGold(dragged.item, progression)} gold. You will confirm
+					first.
 				</p>
 			) : (
 				children
@@ -190,7 +196,7 @@ const MerchantDialog = ({
 							const kind = supplies[index];
 							if (
 								onBuy &&
-								state.gold >= MERCHANT_OFFERS[kind].price &&
+								state.gold >= merchantPrice(kind, state.progression) &&
 								state.merchantStock[kind] > 0
 							)
 								onBuy(kind);
@@ -275,7 +281,7 @@ const MerchantDialog = ({
 											disabled={
 												!onBuy ||
 												state.merchantStock[kind] === 0 ||
-												state.gold < MERCHANT_OFFERS[kind].price
+												state.gold < merchantPrice(kind, state.progression)
 											}
 											onClick={() => onBuy?.(kind)}
 										>
@@ -290,7 +296,7 @@ const MerchantDialog = ({
 													{ITEM_DEFINITIONS[kind].name}
 												</span>
 												<span className="block text-xs text-muted-foreground">
-													{MERCHANT_OFFERS[kind].price} gold ·{" "}
+													{merchantPrice(kind, state.progression)} gold ·{" "}
 													{state.merchantStock[kind]} remaining
 												</span>
 												<span className="mt-1 block text-xs font-normal text-muted-foreground">
@@ -336,7 +342,7 @@ const MerchantDialog = ({
 																	ref={drag.ref}
 																	variant="outline"
 																	className={`h-auto min-h-20 w-full touch-manipulation justify-start gap-2 whitespace-normal p-2 text-left ${comparison ? comparisonStyles[comparison.label].border : ""} ${drag.isDragging ? "opacity-40" : ""}`}
-																	aria-label={`${itemName(item)} · Sell for ${equipmentSalePrice(item)} gold`}
+																	aria-label={`${itemName(item)} · Sell for ${equipmentSaleGold(item, state.progression)} gold`}
 																	disabled={!onSell || sold}
 																	{...drag.dragProps}
 																	aria-describedby={drag.describedBy(
@@ -356,7 +362,12 @@ const MerchantDialog = ({
 																			{itemName(item)}
 																		</span>
 																		<span className="block text-xs text-muted-foreground">
-																			Sell for {equipmentSalePrice(item)} gold
+																			Sell for{" "}
+																			{equipmentSaleGold(
+																				item,
+																				state.progression,
+																			)}{" "}
+																			gold
 																		</span>
 																		{comparison && (
 																			<span
@@ -426,7 +437,7 @@ const MerchantDialog = ({
 									>
 										<p className="text-sm">
 											Sell {itemName(pendingSale)} for{" "}
-											{equipmentSalePrice(pendingSale)} gold?
+											{equipmentSaleGold(pendingSale, state.progression)} gold?
 										</p>
 										<div className="flex flex-wrap gap-2">
 											<Button
@@ -491,7 +502,10 @@ const MerchantDialog = ({
 										</div>
 									</fieldset>
 								) : (
-									<SellDropArea enabled={inTown && !!onSell}>
+									<SellDropArea
+										enabled={inTown && !!onSell}
+										progression={state.progression}
+									>
 										<div className="flex flex-wrap items-center gap-x-4 gap-y-1">
 											<Button
 												variant="outline"

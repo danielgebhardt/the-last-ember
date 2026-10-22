@@ -1,5 +1,6 @@
 import { appendActivityEvents } from "../game/ActivityHistory";
 import type { GameState } from "../game/GameState";
+import { haggledPrice } from "../game/PerkEffects";
 import { canAddToBag, createBag } from "../items/Bag";
 import { ownedItems } from "../items/OwnedItems";
 import { assignPickedUpPotion } from "../items/PotionHotbar";
@@ -63,6 +64,7 @@ export const buyTownStock = (state: GameState, action: BuyTownStockAction) => {
 		store.offers;
 	const offer = offers[action.kind],
 		count = stock[action.kind];
+	const price = haggledPrice(state.progression, offer.price);
 	if (
 		!Number.isSafeInteger(action.expectedStock) ||
 		count !== action.expectedStock
@@ -70,7 +72,7 @@ export const buyTownStock = (state: GameState, action: BuyTownStockAction) => {
 		return reject("The stock changed. Review the offer and confirm again.");
 	if (count <= 0)
 		return reject(`That ${store.noun} is sold out for this adventure.`);
-	if (!Number.isSafeInteger(state.gold) || state.gold < offer.price)
+	if (!Number.isSafeInteger(state.gold) || state.gold < price)
 		return reject("You do not have enough gold.");
 	const item = {
 		id: `${store.idPrefix}:${action.kind}:${offer.quantity - count + 1}`,
@@ -83,7 +85,7 @@ export const buyTownStock = (state: GameState, action: BuyTownStockAction) => {
 	return {
 		state: {
 			...state,
-			gold: state.gold - offer.price,
+			gold: state.gold - price,
 			[store.stock]: { ...stock, [action.kind]: count - 1 },
 			bag: createBag([...state.bag.items, item]),
 			potionHotbar: assignPickedUpPotion(
@@ -95,7 +97,7 @@ export const buyTownStock = (state: GameState, action: BuyTownStockAction) => {
 				{
 					type: "merchant-bought",
 					item: action.kind,
-					gold: offer.price,
+					gold: price,
 					turn: state.turn,
 				},
 			]),

@@ -39,6 +39,7 @@ type DungeonLayoutProps = DungeonKeyboardOptions & {
 	explored?: VisibilityGrid;
 	// A Mirror of Shadows revealed this floor's terrain, not what is on it.
 	revealed?: boolean;
+	downStairMarked?: boolean;
 	monsters?: readonly Monster[];
 	floorItems?: readonly FloorItem[];
 	dungeonObjects?: readonly DungeonObject[];
@@ -76,6 +77,7 @@ const DungeonLayout = ({
 	visible,
 	explored,
 	revealed = false,
+	downStairMarked = false,
 	monsters = NO_MONSTERS,
 	floorItems = NO_ITEMS,
 	dungeonObjects = NO_OBJECTS,
@@ -272,6 +274,7 @@ const DungeonLayout = ({
 								visible={visible?.[rowIndex]}
 								explored={explored?.[rowIndex]}
 								revealed={revealed}
+								downStairMarked={downStairMarked}
 								playerColumn={
 									playerPosition.row === rowIndex
 										? playerPosition.col

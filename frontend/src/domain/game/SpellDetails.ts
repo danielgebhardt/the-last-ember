@@ -7,7 +7,7 @@ import type { GameState } from "./GameState";
 import { ongoingSpellPotency } from "./OngoingSpellPotency";
 import { isSpellTarget } from "./SpellCasting";
 import {
-	SPELL_DEFINITIONS,
+	playerSpell,
 	type SpellDefinition,
 	type SpellKind,
 	spellPotency,
@@ -51,7 +51,7 @@ export const spellTargetDetails = (
 	target: Monster,
 	visible?: VisibilityGrid,
 ): string | null => {
-	const definition = SPELL_DEFINITIONS[spell];
+	const definition = playerSpell(spell, state.progression);
 	if (
 		!state.knownSpells.includes(spell) ||
 		!isSpellTarget(state, target, definition) ||
@@ -82,7 +82,11 @@ export const spellTargetDetails = (
 				? `${element} weakness`
 				: `normal ${element} damage`;
 		parts.unshift(`Damage ${minimum}–${maximum} to this target · ${defense}`);
-		if ("splashMultiplier" in definition && "radius" in definition) {
+		if (
+			"splashMultiplier" in definition &&
+			"radius" in definition &&
+			definition.radius !== undefined
+		) {
 			const splash = areaDamageRange(
 				potency.minimumDamage,
 				potency.maximumDamage,

@@ -1,10 +1,11 @@
 import { Button } from "@/components/ui/button";
+import type { Progression } from "../../domain/game/Progression";
 import {
 	SPELL_SLOT_KEYS,
 	SPELL_SLOTS,
 	type SpellHotbar,
 } from "../../domain/game/SpellHotbar";
-import { SPELL_DEFINITIONS, type SpellKind } from "../../domain/game/Spells";
+import { playerSpell, type SpellKind } from "../../domain/game/Spells";
 import {
 	HOTBAR_CARD_CLASS_NAME,
 	HOTBAR_SLOT_CLASS_NAME,
@@ -19,8 +20,10 @@ const SpellHotbarView = ({
 	enabled,
 	targeting,
 	onActivate,
+	progression,
 }: {
 	knownSpells: readonly SpellKind[];
+	progression: Progression;
 	slots: SpellHotbar;
 	enabled: boolean;
 	targeting?: SpellKind;
@@ -57,7 +60,7 @@ const SpellHotbarView = ({
 				);
 			}
 
-			const definition = SPELL_DEFINITIONS[spell];
+			const definition = playerSpell(spell, progression);
 			const Icon = SPELL_ICONS[spell];
 			const label = `${definition.name}, ${definition.cost} mana`;
 

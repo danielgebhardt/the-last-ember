@@ -452,6 +452,7 @@ const CharacterDialog = ({
 					>
 						<div className="grid min-w-0 items-start gap-3 p-3 md:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)]">
 							<ProgressionView
+								player={player}
 								afflictions={afflictions}
 								equipment={equipment}
 								effects={effects}

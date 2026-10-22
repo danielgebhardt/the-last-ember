@@ -140,6 +140,7 @@ export const resolveMonsterCharge = (
 						state.effects,
 						state.equipment,
 						state.afflictions,
+						state.player,
 					).monsterHitThreshold,
 				),
 				rolls({

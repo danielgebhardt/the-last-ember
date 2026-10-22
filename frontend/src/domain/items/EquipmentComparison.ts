@@ -30,6 +30,7 @@ const loadoutStats = (
 		effects,
 		equipment,
 		context.afflictions,
+		context.player,
 	);
 	const damage = attackProfile(
 		afflictedMeleeAttack(combat.attack, context.afflictions),

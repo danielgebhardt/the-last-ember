@@ -10,7 +10,7 @@ import type { GameState } from "./GameState";
 import { damageMonster } from "./MonsterDamage";
 import { repositionSpell } from "./RepositionSpells";
 import {
-	SPELL_DEFINITIONS,
+	playerSpell,
 	type SpellDefinition,
 	type SpellKind,
 	spellKnowledgeError,
@@ -44,7 +44,7 @@ export const castSpell = (
 ): { state: GameState } | { error: string } => {
 	const knowledgeError = spellKnowledgeError(state.knownSpells, action.spell);
 	if (knowledgeError) return { error: knowledgeError };
-	const definition = SPELL_DEFINITIONS[action.spell];
+	const definition = playerSpell(action.spell, state.progression);
 	if (state.mana < definition.cost)
 		return {
 			error: `Not enough mana for ${definition.name}. You need ${definition.cost}.`,
@@ -165,7 +165,7 @@ export const castSpell = (
 	const survivor = damaged.monsters.find((monster) => monster.id === target.id);
 	return {
 		state:
-			survivor && "condition" in definition
+			survivor && "condition" in definition && definition.condition
 				? applyTimedEffect(damaged, survivor, definition.condition)
 				: damaged,
 	};

@@ -48,6 +48,7 @@ export const resolveMonsterBlindingStrike = (
 			state.effects,
 			state.equipment,
 			state.afflictions,
+			state.player,
 		);
 		const outcome = resolveMeleeAttack(
 			attackProfile(actorAttackDamage(monster), monsterHitThreshold),

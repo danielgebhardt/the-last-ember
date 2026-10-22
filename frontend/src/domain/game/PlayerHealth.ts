@@ -12,6 +12,7 @@ import {
 	type Progression,
 } from "./Progression";
 export const TOUGH_HEALTH = 4;
+export const IRON_CONSTITUTION_MULTIPLIER = 0.9;
 export const maximumHealth = (
 	progression: Progression,
 	equipment: Equipment,
@@ -22,9 +23,13 @@ export const maximumHealth = (
 		HEALTH_PER_LEVEL * (levelForExperience(progression.experience) - 1) +
 		equipmentBonuses(equipment).health +
 		(hasPerk(progression, "tough") ? TOUGH_HEALTH : 0);
+	// Iron constitution halves Disease's loss of maximum health.
 	const multiplier = afflictions.reduce(
 		(product, a) =>
-			product * (afflictionModifiers(a.kind).maximumHealthMultiplier ?? 1),
+			product *
+			(a.kind === "disease" && hasPerk(progression, "iron-constitution")
+				? IRON_CONSTITUTION_MULTIPLIER
+				: (afflictionModifiers(a.kind).maximumHealthMultiplier ?? 1)),
 		1,
 	);
 	return Math.max(1, Math.floor(normal * multiplier));

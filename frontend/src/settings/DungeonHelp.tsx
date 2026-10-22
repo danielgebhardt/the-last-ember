@@ -805,10 +805,11 @@ const DungeonHelp = ({
 				<p>
 					Levels {PERK_LEVELS.join(", ")} each offer three perks from three
 					different families, fixed by the adventure seed. Choose under
-					Character → Progression whenever you like; a dot on Character marks a
-					waiting choice. Choosing is free, takes no turn and is permanent.
-					Waiting choices resolve in level order, and a perk already taken is
-					never offered again. Provisional playtest values:
+					Character → Progression whenever you like; a gold Perk badge on
+					Character and a Choose perk button beside your level mark a waiting
+					choice. Choosing is free, takes no turn and is permanent. Waiting
+					choices resolve in level order, and a perk already taken is never
+					offered again. Provisional playtest values:
 				</p>
 				<ul className="mt-2 grid gap-1 text-muted-foreground sm:grid-cols-2">
 					{PERK_KINDS.map((perk) => (

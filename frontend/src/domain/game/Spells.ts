@@ -274,6 +274,20 @@ export const SPELL_DEFINITIONS = {
 	},
 } as const satisfies Record<string, SpellDefinition>;
 export type SpellKind = keyof typeof SPELL_DEFINITIONS;
+// A spell as this caster casts it: Efficient casting lowers its cost and Long reach
+// extends a targeted spell's range. Use it wherever cost or range is checked or shown.
+export const playerSpell = (
+	spell: SpellKind,
+	progression: Progression,
+): SpellDefinition => {
+	const definition: SpellDefinition = SPELL_DEFINITIONS[spell];
+	const cost = hasPerk(progression, "efficient-casting")
+		? Math.max(1, definition.cost - 1)
+		: definition.cost;
+	if (definition.mode === "targeted" && hasPerk(progression, "long-reach"))
+		return { ...definition, cost, range: definition.range + 1 };
+	return cost === definition.cost ? definition : { ...definition, cost };
+};
 export const createKnownSpells = (): readonly SpellKind[] => [
 	"magic-missile",
 	"heal",

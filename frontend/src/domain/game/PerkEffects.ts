@@ -14,6 +14,10 @@ export const RESILIENT_SHARE = 0.75;
 export const ANTIVENOM_POISON_PHASES = 3;
 export const SCAVENGER_SHARE = 1.25;
 export const TRAPWISE_BONUS = 0.2;
+export const EXECUTIONER_DAMAGE = 3;
+export const ARROW_WARD_REDUCTION = 2;
+export const FIELD_MEDIC_HEALTH = 3;
+export const HAGGLER_SHARE = 0.1;
 
 // A monster that hasn't noticed you: no pursuit, no memory of you.
 export const opportunistBonus = (
@@ -24,6 +28,30 @@ export const opportunistBonus = (
 	(monster.awareness === undefined || monster.awareness.type === "idle")
 		? OPPORTUNIST_DAMAGE
 		: 0;
+export const executionerBonus = (
+	progression: Progression,
+	monster: { health: number },
+	maxHealth: number,
+): number =>
+	hasPerk(progression, "executioner") && monster.health * 2 < maxHealth
+		? EXECUTIONER_DAMAGE
+		: 0;
+// Shots and slings only; armor has already reduced the hit.
+export const arrowWardedDamage = (progression: Progression, damage: number) =>
+	hasPerk(progression, "arrow-ward")
+		? Math.max(1, damage - ARROW_WARD_REDUCTION)
+		: damage;
+export const fieldMedicHealing = (progression: Progression): number =>
+	hasPerk(progression, "field-medic") ? FIELD_MEDIC_HEALTH : 0;
+// Haggling never gives away more than its share: prices round up, payouts down.
+export const haggledPrice = (progression: Progression, price: number) =>
+	hasPerk(progression, "haggler")
+		? Math.ceil(price * (1 - HAGGLER_SHARE))
+		: price;
+export const haggledSale = (progression: Progression, gold: number) =>
+	hasPerk(progression, "haggler")
+		? Math.floor(gold * (1 + HAGGLER_SHARE))
+		: gold;
 export const herbalistBonus = (progression: Progression): number =>
 	hasPerk(progression, "herbalist") ? HERBALIST_RECOVERY : 0;
 export const scavengedGold = (progression: Progression, amount: number) =>

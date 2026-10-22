@@ -1,3 +1,5 @@
+import { haggledPrice, haggledSale } from "../game/PerkEffects";
+import type { Progression } from "../game/Progression";
 import { equipmentSlotFor } from "../items/Equipment";
 import { ITEM_DEFINITIONS, type ItemInstance } from "../items/Item";
 
@@ -21,6 +23,19 @@ export const equipmentSalePrice = (item: ItemInstance): number | null =>
 		: 10 +
 			Math.ceil(ITEM_DEFINITIONS[item.kind].minFloor / 4) * 10 +
 			(item.enchantment ?? 0) * 5;
+
+// What this buyer actually pays or receives, after Haggler.
+export const merchantPrice = (
+	kind: MerchantSupply,
+	progression: Progression,
+): number => haggledPrice(progression, MERCHANT_OFFERS[kind].price);
+export const equipmentSaleGold = (
+	item: ItemInstance,
+	progression: Progression,
+): number | null => {
+	const gold = equipmentSalePrice(item);
+	return gold === null ? null : haggledSale(progression, gold);
+};
 
 export const isMerchantStock = (value: unknown): value is MerchantStock => {
 	if (typeof value !== "object" || value === null || Array.isArray(value))

@@ -1,7 +1,7 @@
 import type { GameState } from "../game/GameState";
 import { compareEquipment } from "../items/EquipmentComparison";
 import type { ItemInstance } from "../items/Item";
-import { equipmentSalePrice } from "./MerchantRules";
+import { equipmentSaleGold, equipmentSalePrice } from "./MerchantRules";
 
 export const isLowerEquipmentForSale = (
 	item: ItemInstance,
@@ -17,7 +17,8 @@ export const lowerEquipmentSale = (state: GameState) => {
 	return {
 		items,
 		gold: items.reduce(
-			(total, item) => total + (equipmentSalePrice(item) ?? 0),
+			(total, item) =>
+				total + (equipmentSaleGold(item, state.progression) ?? 0),
 			0,
 		),
 	};

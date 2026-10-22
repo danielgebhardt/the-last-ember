@@ -15,9 +15,29 @@ export const PERK_DEFINITIONS = {
 		name: "Opportunist",
 		effect: "+2 melee damage against monsters that haven't noticed you.",
 	},
+	executioner: {
+		family: "Combat",
+		name: "Executioner",
+		effect: "+3 melee damage against monsters below half their maximum health.",
+	},
+	reckless: {
+		family: "Combat",
+		name: "Reckless",
+		effect: "+2 melee damage, −5% evasion.",
+	},
 	tough: { family: "Defense", name: "Tough", effect: "+4 maximum health." },
 	evasive: { family: "Defense", name: "Evasive", effect: "+5% evasion." },
 	"iron-hide": { family: "Defense", name: "Iron hide", effect: "+1 armor." },
+	"last-stand": {
+		family: "Defense",
+		name: "Last stand",
+		effect: "+10% evasion while below 25% of maximum health.",
+	},
+	"arrow-ward": {
+		family: "Defense",
+		name: "Arrow ward",
+		effect: "Ranged attacks against you deal 2 less damage (minimum 1).",
+	},
 	"deep-reserves": {
 		family: "Magic",
 		name: "Deep reserves",
@@ -32,6 +52,16 @@ export const PERK_DEFINITIONS = {
 		family: "Magic",
 		name: "Quick recovery",
 		effect: "Mana recovers every 24 turns instead of 30.",
+	},
+	"efficient-casting": {
+		family: "Magic",
+		name: "Efficient casting",
+		effect: "Spells cost 1 less mana (minimum 1).",
+	},
+	"long-reach": {
+		family: "Magic",
+		name: "Long reach",
+		effect: "Targeted spells get +1 range.",
 	},
 	herbalist: {
 		family: "Survival",
@@ -48,6 +78,16 @@ export const PERK_DEFINITIONS = {
 		name: "Antivenom",
 		effect: "Poison lasts 3 phases instead of 10.",
 	},
+	"field-medic": {
+		family: "Survival",
+		name: "Field medic",
+		effect: "Using a remedy also restores 3 health.",
+	},
+	"iron-constitution": {
+		family: "Survival",
+		name: "Iron constitution",
+		effect: "Disease lowers maximum health by 10% instead of 20%.",
+	},
 	scavenger: {
 		family: "Exploration",
 		name: "Scavenger",
@@ -63,10 +103,39 @@ export const PERK_DEFINITIONS = {
 		name: "Keen eyes",
 		effect: "+1 sight radius.",
 	},
+	haggler: {
+		family: "Exploration",
+		name: "Haggler",
+		effect: "Merchants and town shops charge 10% less and pay 10% more.",
+	},
+	pathfinder: {
+		family: "Exploration",
+		name: "Pathfinder",
+		effect: "Each floor's stairs down are marked on your map.",
+	},
 } as const;
 export type PerkKind = keyof typeof PERK_DEFINITIONS;
 export type PerkFamily = (typeof PERK_DEFINITIONS)[PerkKind]["family"];
 export const PERK_KINDS = Object.keys(PERK_DEFINITIONS) as PerkKind[];
+// The pool before #408 added ten perks. Offers depend on the pool, so saves made with
+// it are validated against it too. Frozen: never add to or reorder this list.
+export const ORIGINAL_PERK_KINDS: readonly PerkKind[] = [
+	"brutal",
+	"precise",
+	"opportunist",
+	"tough",
+	"evasive",
+	"iron-hide",
+	"deep-reserves",
+	"spellfocus",
+	"quick-recovery",
+	"herbalist",
+	"resilient",
+	"antivenom",
+	"scavenger",
+	"trapwise",
+	"keen-eyes",
+];
 export type PerkChoice = Readonly<{ level: number; perk: PerkKind }>;
 
 // Strength grows at odd levels and Dexterity at even ones; a perk joins each odd
@@ -86,12 +155,13 @@ export const perkOffers = (
 	seed: number,
 	level: number,
 	taken: readonly PerkKind[],
+	pool: readonly PerkKind[] = PERK_KINDS,
 ): readonly PerkKind[] => {
 	const random = createSeededRandom(
 		hashStringToUint32(`${seed}:perk:${level}`),
 	);
 	const families = new Map<string, PerkKind[]>();
-	for (const perk of PERK_KINDS)
+	for (const perk of pool)
 		if (!taken.includes(perk)) {
 			const family = PERK_DEFINITIONS[perk].family;
 			families.set(family, [...(families.get(family) ?? []), perk]);
@@ -136,7 +206,8 @@ export const pendingPerkCount = (progression: Progression): number => {
 	);
 };
 
-// Every saved choice was offered at its level, in order, with no gaps.
+// Every saved choice was offered at its level, in order, with no gaps. A choice may come
+// from the original pool (saves made before #408) or the current one.
 export const isValidPerkHistory = (
 	seed: number,
 	progression: Progression,
@@ -147,10 +218,13 @@ export const isValidPerkHistory = (
 		(choice, index) =>
 			choice.level === PERK_LEVELS[index] &&
 			choice.level <= reached &&
-			perkOffers(
-				seed,
-				choice.level,
-				chosen.slice(0, index).map((c) => c.perk),
-			).includes(choice.perk),
+			[ORIGINAL_PERK_KINDS, PERK_KINDS].some((pool) =>
+				perkOffers(
+					seed,
+					choice.level,
+					chosen.slice(0, index).map((c) => c.perk),
+					pool,
+				).includes(choice.perk),
+			),
 	);
 };

@@ -254,9 +254,12 @@ export const formatActivityEvent = (event: ActivityEvent): string => {
 						? "apply"
 						: "drink";
 			const removed = event.conditions ?? [];
+			const healed = event.recovered
+				? ` Field medic: you recover ${event.recovered} health.`
+				: "";
 			return removed.length
-				? `${prefix}You ${verb} ${ITEM_DEFINITIONS[event.item].name} and remove ${removed.map((c) => AFFLICTION_DEFINITIONS[c].name).join(" and ")}. ${removed.map((c) => AFFLICTION_DEFINITIONS[c].removedText).join(" ")}`
-				: `${prefix}You ${verb} ${ITEM_DEFINITIONS[event.item].name}.`;
+				? `${prefix}You ${verb} ${ITEM_DEFINITIONS[event.item].name} and remove ${removed.map((c) => AFFLICTION_DEFINITIONS[c].name).join(" and ")}. ${removed.map((c) => AFFLICTION_DEFINITIONS[c].removedText).join(" ")}${healed}`
+				: `${prefix}You ${verb} ${ITEM_DEFINITIONS[event.item].name}.${healed}`;
 		}
 		case "item-consumed": {
 			const item = ITEM_DEFINITIONS[event.item];

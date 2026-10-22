@@ -36,12 +36,12 @@ export const deriveCombatStats = (
 		baseAttack: BASE_PLAYER_ATTACK_DAMAGE,
 		weaponBonus,
 		strengthBonus,
-		perkAttack: hasPerk(progression, "brutal") ? 1 : 0,
+		perkAttack: perkAttack(progression),
 		attack:
 			BASE_PLAYER_ATTACK_DAMAGE +
 			strengthBonus +
 			weaponBonus +
-			(hasPerk(progression, "brutal") ? 1 : 0),
+			perkAttack(progression),
 		armor:
 			armor +
 			playerEffectBonuses(effects).armor +
@@ -49,6 +49,11 @@ export const deriveCombatStats = (
 			(hasPerk(progression, "iron-hide") ? 1 : 0),
 	};
 };
+
+export const RECKLESS_DAMAGE = 2;
+const perkAttack = (progression: Progression) =>
+	(hasPerk(progression, "brutal") ? 1 : 0) +
+	(hasPerk(progression, "reckless") ? RECKLESS_DAMAGE : 0);
 
 export const resolveIncomingDamage = (
 	incoming: number,

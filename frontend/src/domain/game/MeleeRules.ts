@@ -8,6 +8,7 @@ import { deriveAttributes } from "./Attributes";
 import { resolveIncomingDamage } from "./CombatStats";
 import { assertDifficulty, scaleEnemyValue } from "./Difficulty";
 import { hasPerk } from "./Perks";
+import type { PlayerStats } from "./PlayerStats";
 import type { Progression } from "./Progression";
 import type { TimedEffect } from "./TimedEffects";
 
@@ -39,17 +40,26 @@ export const accuracyThresholds = (
 		),
 	};
 };
+// Below a quarter of maximum health, while still alive.
+export const isLastStand = (progression: Progression, player: PlayerStats) =>
+	hasPerk(progression, "last-stand") &&
+	player.health > 0 &&
+	player.health * 4 < player.maxHealth;
 export const deriveAccuracy = (
 	progression: Progression,
 	effects: readonly TimedEffect[] = [],
 	equipment?: Partial<Equipment>,
 	afflictions: readonly ActiveAffliction[] = [],
+	// Last stand needs current health; without it, the bonus is not applied.
+	player?: PlayerStats,
 ) => {
-	// Perks are one d20 step (5 points) the other way from an affliction penalty.
+	// Perks are d20 steps (5 points each) the other way from an affliction penalty.
 	const thresholds = accuracyThresholds(
 		deriveAttributes(progression, effects, equipment).dexterityModifier,
 		afflictionEvasionSteps(afflictions) -
-			(hasPerk(progression, "evasive") ? 1 : 0),
+			(hasPerk(progression, "evasive") ? 1 : 0) +
+			(hasPerk(progression, "reckless") ? 1 : 0) -
+			(player && isLastStand(progression, player) ? 2 : 0),
 		afflictionAccuracySteps(afflictions) -
 			(hasPerk(progression, "precise") ? 1 : 0),
 	);
