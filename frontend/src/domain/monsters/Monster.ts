@@ -413,8 +413,8 @@ const monsterCatalog = {
 	},
 	"plague-rat": {
 		name: "plague rat",
-		experienceReward: 3,
-		maxHealth: 4,
+		experienceReward: 5,
+		maxHealth: 10,
 		attackDamage: 1,
 		detectionRadius: 5,
 		minFloor: 2,

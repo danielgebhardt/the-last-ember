@@ -31,14 +31,15 @@ describe("Practical loadout previews", () => {
 			expect(
 				compareEquipment(item("ring-dexterity"), current, "leftRing"),
 			).toMatchObject({
+				// Evasion steps at every 4 Dexterity: 20 → 22 crosses one, 22 → 24 doesn't.
 				before: {
 					dexterity: otherRing ? 22 : 20,
-					evadeChance: 45,
+					evadeChance: otherRing ? 35 : 30,
 					hitChance: 95,
 				},
 				after: {
 					dexterity: otherRing ? 24 : 22,
-					evadeChance: otherRing ? 50 : 45,
+					evadeChance: 35,
 					hitChance: 95,
 				},
 			});
@@ -108,13 +109,14 @@ describe("Practical loadout previews", () => {
 		});
 	});
 	it("shows a Dexterity benefit even when the hit chance is already capped", () => {
-		const current = { ...context(), progression: { experience: 100 } };
+		// Level 6: Dexterity 16 caps hit chance; the ring reaches the 18 evasion step.
+		const current = { ...context(), progression: { experience: 200 } };
 		expect(
 			compareEquipment(item("ring-dexterity"), current, "leftRing"),
 		).toMatchObject({
 			label: "Better",
-			before: { hitChance: 95, evadeChance: 30 },
-			after: { hitChance: 95, evadeChance: 35, dexterity: 16 },
+			before: { hitChance: 95, evadeChance: 25 },
+			after: { hitChance: 95, evadeChance: 30, dexterity: 18 },
 		});
 	});
 	it("compares each ring destination and chooses the useful empty slot for the bag badge", () => {

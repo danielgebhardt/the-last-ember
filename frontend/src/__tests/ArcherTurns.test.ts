@@ -181,7 +181,8 @@ describe("Goblin archer turns", () => {
 
 	it("applies evasion to shots without rolling damage on a miss", () => {
 		const before = encounter();
-		before.progression = { experience: 10 };
+		// Level 4 (Dexterity 14) is the first evasion step: a 5 misses.
+		before.progression = { experience: 60 };
 		const damage = vi.fn(() => 3);
 		const after = wait(before, () => ({ d20: () => 5, damage }));
 		expect(after.player.health).toBe(10);

@@ -33,9 +33,10 @@ it("both rings add to effective stats while earned progression stays unchanged",
 		dexterity: 12,
 	});
 	expect(deriveCombatStats(equipment, progression).attack).toBe(2);
+	// Dexterity 12 is below the first evasion step (14), so only accuracy rises.
 	expect(deriveAccuracy(progression, [], equipment)).toMatchObject({
 		playerHitChance: 90,
-		evadeChance: 25,
+		evadeChance: 20,
 	});
 	expect(progression.experience).toBe(0);
 });
@@ -95,6 +96,8 @@ it("capacity rings increase maximums without healing or refilling, and removal c
 it("Dexterity equipment changes the monster's real response on the equip turn", () => {
 	const initial = {
 		...createGameState(createCorridorEncounter()),
+		// Level 2's Dexterity 12 plus the ring reaches the first evasion step.
+		progression: { experience: 10 },
 		bag: createBag([{ id: "dex", kind: "ring-dexterity" }]),
 		monsters: [
 			{

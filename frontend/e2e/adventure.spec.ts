@@ -133,7 +133,7 @@ test("a loaded late-game character shows the applied evasion curve and returns m
 	});
 	await expect(
 		character.getByLabel("Character evasion", { exact: true }),
-	).toHaveText("Evade 60%");
+	).toHaveText("Evade 50%");
 	await expect(
 		character.getByLabel("Character hit chance", { exact: true }),
 	).toHaveText("Hit 95%");
@@ -142,9 +142,9 @@ test("a loaded late-game character shows the applied evasion curve and returns m
 		character.getByLabel("Character Dexterity", { exact: true }),
 	).toHaveText("Dexterity 34");
 	await character.getByText("Stat bonuses and growth", { exact: true }).click();
-	await expect(character.getByText(/Hit 95% · evade 60%/)).toBeVisible();
+	await expect(character.getByText(/Hit 95% · evade 50%/)).toBeVisible();
 	await expect(
-		character.getByText(/through 20, then per 4 Dexterity/),
+		character.getByText(/Evasion gains 5 percentage points per 4 Dexterity\./),
 	).toBeVisible();
 	await page.keyboard.press("Escape");
 	await expect(character).toBeHidden();

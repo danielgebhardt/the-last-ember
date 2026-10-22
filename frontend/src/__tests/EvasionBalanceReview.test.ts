@@ -27,8 +27,8 @@ import {
 
 describe("Run-three evasion balance evidence", () => {
 	it.each([
-		[2, 32, 60, 19, 11, 44],
-		[3, 34, 60, 21, 11, 48],
+		[2, 32, 45, 19, 11, 44],
+		[3, 34, 50, 21, 11, 48],
 	])(
 		"reproduces recorded checkpoint %i",
 		(checkpoint, dexterity, evasion, attack, armor, health) => {
@@ -52,7 +52,7 @@ describe("Run-three evasion balance evidence", () => {
 			expect(
 				deriveAccuracy(moved.progression, moved.effects, moved.equipment)
 					.evadeChance,
-			).toBe(60);
+			).toBe(45);
 		}
 	});
 	it("measures all twenty hit faces and all damage outcomes without death censoring", () => {
@@ -60,9 +60,9 @@ describe("Run-three evasion balance evidence", () => {
 		const legacy = reviewPressure(state, "iron-champion", 123, 200, false);
 		const applied = reviewPressure(state, "iron-champion", 123, 200, true);
 		expect(legacy.expectedDamagePerAttempt).toBe(4);
-		expect(applied.expectedDamagePerAttempt).toBeCloseTo(6.4);
+		expect(applied.expectedDamagePerAttempt).toBeCloseTo(8.8);
 		expect(legacy.evadeChance).toBe(75);
-		expect(applied.evadeChance).toBe(60);
+		expect(applied.evadeChance).toBe(45);
 		expect(applied.hits).toBeGreaterThanOrEqual(legacy.hits);
 		expect(applied.damage).toBeGreaterThanOrEqual(legacy.damage);
 		expect(reviewPressure(state, "iron-champion", 123, 200, false)).toEqual(
@@ -70,12 +70,13 @@ describe("Run-three evasion balance evidence", () => {
 		);
 	});
 	it.each([0, 1])(
-		"preserves representative early/mid pressure at checkpoint %i",
+		"never lightens early/mid pressure below the legacy curve at checkpoint %i",
 		(checkpoint) => {
 			const state = createReviewEncounter(checkpoint, 123);
-			expect(reviewPressure(state, "goblin", 123, 200, true)).toEqual(
-				reviewPressure(state, "goblin", 123, 200, false),
-			);
+			const legacy = reviewPressure(state, "goblin", 123, 200, false);
+			const applied = reviewPressure(state, "goblin", 123, 200, true);
+			expect(applied.evadeChance).toBeLessThanOrEqual(legacy.evadeChance);
+			expect(applied.hits).toBeGreaterThanOrEqual(legacy.hits);
 		},
 	);
 	it.each(["legacy", "applied"] as const)(
@@ -94,7 +95,7 @@ describe("Run-three evasion balance evidence", () => {
 	it("applies the active curve's exact hit boundary to actual charges", () => {
 		for (const [applied, expectedHits] of [
 			[false, 5],
-			[true, 8],
+			[true, 11],
 		] as const) {
 			let hits = 0;
 			for (let face = 1; face <= 20; face++) {
@@ -155,7 +156,7 @@ describe("Run-three evasion balance evidence", () => {
 		});
 	});
 	it.each(["melee", "shot", "heavy", "charge"])(
-		"uses the shared 60% evasion gate for %s",
+		"uses the shared 45% evasion gate for %s",
 		(attack) => {
 			let landed = 0;
 			const before = createReviewEncounter(
@@ -188,7 +189,7 @@ describe("Run-three evasion balance evidence", () => {
 				}));
 				landed += Number(after.player.health < before.player.health);
 			}
-			expect(landed).toBe(8);
+			expect(landed).toBe(11);
 		},
 	);
 	it.each([false, true])(
@@ -232,7 +233,7 @@ describe("Run-three evasion balance evidence", () => {
 			expect(
 				deriveAccuracy(resumed.progression, resumed.effects, resumed.equipment)
 					.evadeChance,
-			).toBe(60);
+			).toBe(45);
 			// Saved wounds/preparation remain, but a 13 now lands under the approved curve.
 			expect(
 				resolvePlayerAction(resumed, { type: "wait" }, () => ({

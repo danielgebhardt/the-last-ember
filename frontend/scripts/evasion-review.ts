@@ -1,4 +1,4 @@
-// Diagnostic comparison of the legacy linear curve and active diminished evasion. Nothing here is imported by the game.
+// Diagnostic comparison of the legacy linear curve and the active evasion curve. Nothing here is imported by the game.
 import type { DungeonFloor } from "../src/domain/dungeon/DungeonRun";
 import { deriveAttributes } from "../src/domain/game/Attributes";
 import {

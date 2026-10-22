@@ -41,7 +41,8 @@ it("refreshes duration without deepening the penalty, and clamps at the evasion 
 	// Two threshold steps after Dexterity, never below the existing 5% minimum.
 	expect(accuracyThresholds(0, 2).monsterHitThreshold).toBe(3);
 	expect(accuracyThresholds(-5, 2).monsterHitThreshold).toBe(2);
-	expect(accuracyThresholds(5, 2).monsterHitThreshold).toBe(8);
+	// A +5 Dexterity modifier is two evasion steps, which Slowed cancels.
+	expect(accuracyThresholds(5, 2).monsterHitThreshold).toBe(5);
 });
 
 it("coexists with Disease and poison, and only its own cure removes it", () => {

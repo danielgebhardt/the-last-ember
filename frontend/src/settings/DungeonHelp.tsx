@@ -353,7 +353,7 @@ const DungeonHelp = ({
 						<span className="font-medium text-foreground">Status effects.</span>{" "}
 						Select a status icon in the player bar for its remaining duration
 						and effect. The Activity log records changes. Poison deals 1 damage
-						after monsters act for six phases; another dose resets the timer. An
+						after monsters act for ten phases; another dose resets the timer. An
 						Antidote removes it before that tick but does not protect against a
 						fresh dose. At most three harmful conditions (poison, Disease,
 						Slowed, Mana Burn, Curse, Blinded, Bleeding, Soul Drain) can be

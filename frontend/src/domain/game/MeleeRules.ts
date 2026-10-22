@@ -27,9 +27,8 @@ export const accuracyThresholds = (
 	)
 		throw new RangeError("Accuracy modifiers must be safe whole numbers.");
 	const clamp = (threshold: number) => Math.max(2, Math.min(20, threshold));
-	// Full evasion growth through Dexterity 20, then one step per four Dexterity.
-	const evasionModifier =
-		Math.min(modifier, 5) + Math.floor(Math.max(0, modifier - 5) / 2);
+	// One evasion step per four Dexterity, half the accuracy growth.
+	const evasionModifier = Math.floor(modifier / 2);
 	return {
 		playerHitThreshold: clamp(
 			PLAYER_HIT_THRESHOLD - modifier + accuracyPenalty,

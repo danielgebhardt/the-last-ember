@@ -100,7 +100,7 @@ describe("Depth-appropriate champion pressure", () => {
 		expect(combat.armor).toBe(7);
 		expect(
 			deriveAccuracy(state.progression, [], state.equipment).evadeChance,
-		).toBe(45);
+		).toBe(30);
 		for (let i = 0; i < 3; i++)
 			state = resolvePlayerActionWithHits(state, {
 				type: "move",
@@ -116,7 +116,7 @@ describe("Depth-appropriate champion pressure", () => {
 		);
 		expect(
 			deriveAccuracy(state.progression, [], state.equipment).evadeChance,
-		).toBe(55);
+		).toBe(45);
 		for (let i = 0; i < 2; i++)
 			state = resolvePlayerActionWithHits(state, {
 				type: "move",

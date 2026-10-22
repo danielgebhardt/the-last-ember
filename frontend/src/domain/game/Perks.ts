@@ -46,7 +46,7 @@ export const PERK_DEFINITIONS = {
 	antivenom: {
 		family: "Survival",
 		name: "Antivenom",
-		effect: "Poison lasts 3 phases instead of 6.",
+		effect: "Poison lasts 3 phases instead of 10.",
 	},
 	scavenger: {
 		family: "Exploration",

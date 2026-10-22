@@ -205,9 +205,9 @@ describe("Perk effects", () => {
 		const poison = (progression: Progression) =>
 			applyPlayerAffliction({ ...state, progression }, "poisoned", "test")
 				.afflictions[0]?.remaining;
-		expect(poison(base)).toBe(6);
+		expect(poison(base)).toBe(10);
 		expect(poison(withPerks("antivenom"))).toBe(3);
-		expect(poison(withPerks("resilient"))).toBe(5);
+		expect(poison(withPerks("resilient"))).toBe(8);
 		expect(poison(withPerks("antivenom", "resilient"))).toBe(3);
 	});
 });

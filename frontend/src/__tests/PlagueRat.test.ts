@@ -4,6 +4,7 @@ import { applyPlayerAffliction } from "../domain/game/Afflictions";
 import { createGameState, type GameState } from "../domain/game/GameState";
 import { resolvePlayerAction } from "../domain/game/PlayerActions";
 import { createMonsterDrop } from "../domain/items/MonsterDrops";
+import { MONSTER_DEFINITIONS } from "../domain/monsters/Monster";
 import {
 	createSaveDocument,
 	parseSave,
@@ -196,4 +197,9 @@ it("saves the carrier marker and continues an infection identically after load",
 	expect(resolvePlayerAction(resumed, { type: "wait" }, hit).state).toEqual(
 		resolvePlayerAction(live, { type: "wait" }, hit).state,
 	);
+});
+
+it("is sturdy enough to land a bite before it falls", () => {
+	expect(MONSTER_DEFINITIONS["plague-rat"].maxHealth).toBe(10);
+	expect(MONSTER_DEFINITIONS["plague-rat"].experienceReward).toBe(5);
 });

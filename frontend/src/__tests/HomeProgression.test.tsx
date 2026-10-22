@@ -68,16 +68,18 @@ describe("Progression on the play screen", () => {
 			await screen.findByRole("button", { name: "Character" }),
 		).toBeVisible();
 	});
-	it("shows capped hit chance and diminished evasion with an accurate growth explanation", async () => {
+	it("shows capped hit chance and level-20 evasion with an accurate growth explanation", async () => {
 		const user = setup(3800);
 		await user.keyboard("i");
 		expect(screen.getByLabelText("Character evasion")).toHaveTextContent(
-			"Evade 55%",
+			"Evade 45%",
 		);
 		await user.click(screen.getByRole("tab", { name: /^Progression/ }));
 		await user.click(screen.getByText("Stat bonuses and growth"));
-		expect(screen.getByText(/Hit 95% · evade 55%/)).toBeVisible();
-		expect(screen.getByText(/through 20, then per 4 Dexterity/)).toBeVisible();
+		expect(screen.getByText(/Hit 95% · evade 45%/)).toBeVisible();
+		expect(
+			screen.getByText(/Evasion gains 5 percentage points per 4 Dexterity\./),
+		).toBeVisible();
 	});
 	it("updates level, health, and Character XP from a real kill, then resets on a new adventure", async () => {
 		const user = setup();
@@ -147,7 +149,7 @@ describe("Progression on the play screen", () => {
 			"Hit 95%",
 		);
 		expect(screen.getByLabelText("Character evasion")).toHaveTextContent(
-			"Evade 30%",
+			"Evade 25%",
 		);
 		await user.click(screen.getByRole("tab", { name: /^Progression/ }));
 		expect(screen.getByLabelText("Character Dexterity")).toHaveTextContent(

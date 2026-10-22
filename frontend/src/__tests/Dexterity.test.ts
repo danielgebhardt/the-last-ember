@@ -9,24 +9,23 @@ import {
 	resolveMeleeAttack,
 } from "../domain/game/MeleeRules";
 import { resolvePlayerAction } from "../domain/game/PlayerActions";
+import { experienceThreshold } from "../domain/game/Progression";
 import { createCorridorEncounter } from "./MonsterEncounterTestHelpers";
 
 describe("Earned Dexterity and melee accuracy", () => {
 	it.each([
+		// +5 points per 4 Dexterity: half the earlier early-level growth.
 		[10, 20],
-		[14, 30],
-		[20, 45],
-		[21, 45],
-		[22, 45],
-		[23, 45],
-		[24, 50],
-		[26, 50],
-		[28, 55],
-		[30, 55],
-		[32, 60],
-		[34, 60],
-		[36, 65],
-		[60, 95],
+		[14, 25],
+		[17, 25],
+		[18, 30],
+		[20, 30],
+		[22, 35],
+		[26, 40],
+		[30, 45],
+		[34, 50],
+		[38, 55],
+		[60, 80],
 	])(
 		"gives Dexterity %i the approved %i percent evasion without changing player accuracy",
 		(dexterity, evasion) => {
@@ -38,11 +37,12 @@ describe("Earned Dexterity and melee accuracy", () => {
 			);
 		},
 	);
-	it("combines a ring and temporary Dexterity across a diminished-return step, then expires it", () => {
+	it("combines a ring and temporary Dexterity across an evasion step, then expires it", () => {
 		const initial = createGameState(createCorridorEncounter());
 		let state: GameState = {
 			...initial,
-			progression: { experience: 800 },
+			// Earned 18 + ring 2 = 20; the spell's +2 reaches the next step at 22.
+			progression: { experience: experienceThreshold(8) },
 			monsters: [],
 			knownSpells: ["dexterity"],
 			equipment: {
@@ -52,7 +52,7 @@ describe("Earned Dexterity and melee accuracy", () => {
 		};
 		expect(
 			deriveAccuracy(state.progression, [], state.equipment).evadeChance,
-		).toBe(45);
+		).toBe(30);
 		state = resolvePlayerAction(state, {
 			type: "cast",
 			spell: "dexterity",
@@ -60,18 +60,18 @@ describe("Earned Dexterity and melee accuracy", () => {
 		expect(
 			deriveAttributes(state.progression, state.effects, state.equipment)
 				.dexterity,
-		).toBe(24);
+		).toBe(22);
 		expect(
 			deriveAccuracy(state.progression, state.effects, state.equipment)
 				.evadeChance,
-		).toBe(50);
+		).toBe(35);
 		for (let turn = 0; turn < 19; turn++)
 			state = resolvePlayerAction(state, { type: "wait" }).state;
 		expect(state.effects).toEqual([]);
 		expect(
 			deriveAccuracy(state.progression, state.effects, state.equipment)
 				.evadeChance,
-		).toBe(45);
+		).toBe(30);
 	});
 	it.each([
 		[0, 10, 0],
@@ -91,9 +91,9 @@ describe("Earned Dexterity and melee accuracy", () => {
 	);
 	it.each([
 		[0, 85, 20],
-		[10, 90, 25],
-		[60, 95, 30],
-		[1000, 95, 45],
+		[10, 90, 20],
+		[60, 95, 25],
+		[1000, 95, 30],
 	])(
 		"shows real accuracy and evasion for %i XP",
 		(experience, playerHitChance, evadeChance) => {
@@ -105,8 +105,8 @@ describe("Earned Dexterity and melee accuracy", () => {
 	);
 	it.each([
 		[0, 4, 5],
-		[10, 3, 6],
-		[60, 2, 7],
+		[10, 3, 5],
+		[60, 2, 6],
 	])(
 		"resolves exact hit/miss boundaries for %i XP",
 		(experience, playerThreshold, monsterThreshold) => {
@@ -150,7 +150,8 @@ describe("Earned Dexterity and melee accuracy", () => {
 		const before = {
 			...initial,
 			run: { ...initial.run, playerCoordinate: { row: 1, col: 2 } },
-			progression: { experience: 9 },
+			// One goblin kill reaches level 4, whose Dexterity 14 is the first evasion step.
+			progression: { experience: experienceThreshold(4) - 5 },
 			player: { health: 6, maxHealth: 10 },
 			monsters: [
 				{
@@ -185,7 +186,7 @@ describe("Earned Dexterity and melee accuracy", () => {
 		).toContainEqual({
 			type: "attribute-gained",
 			attribute: "Dexterity",
-			value: 12,
+			value: 14,
 			turn: 1,
 		});
 		expect(outcome.activityHistory.entries.at(-1)?.event).toMatchObject({
@@ -194,3 +195,24 @@ describe("Earned Dexterity and melee accuracy", () => {
 		});
 	});
 });
+
+it.each([
+	[1, 20, 20],
+	[5, 25, 30],
+	[9, 30, 35],
+	[15, 35, 40],
+	[19, 40, 45],
+])(
+	"at level %i, earned Dexterity alone gives %i percent evasion, and Evasive %i",
+	(level, evasion, evasive) => {
+		const progression = { experience: experienceThreshold(level) };
+		expect(deriveAccuracy(progression).evadeChance).toBe(evasion);
+		if (level >= 3)
+			expect(
+				deriveAccuracy({
+					...progression,
+					perks: [{ level: 3, perk: "evasive" }],
+				}).evadeChance,
+			).toBe(evasive);
+	},
+);

@@ -149,8 +149,8 @@ const ProgressionView = ({
 						Dexterity grows at even levels.
 					</p>
 					<p>
-						Evasion gains 5 percentage points per 2 Dexterity through 20, then
-						per 4 Dexterity. Hit and evasion chances stay within 5–95%.
+						Evasion gains 5 percentage points per 4 Dexterity. Hit and evasion
+						chances stay within 5–95%.
 					</p>
 					<p>
 						+{attributes.intelligenceModifier} spell damage / healing · +

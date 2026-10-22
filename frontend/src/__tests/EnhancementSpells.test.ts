@@ -97,6 +97,8 @@ it("Protection reduces the casting turn's retaliation and refreshing does not st
 it("Dexterity changes actual retaliation accuracy while respecting existing clamps", () => {
 	const initial = {
 		...createGameState(createCorridorEncounter()),
+		// Level 2's Dexterity 12 plus the spell's 2 reaches the first evasion step.
+		progression: { experience: 10 },
 		knownSpells: ["dexterity"] as const,
 		monsters: [
 			{
@@ -116,7 +118,7 @@ it("Dexterity changes actual retaliation accuracy while respecting existing clam
 	).state;
 	expect(after.player.health).toBe(10);
 	expect(deriveAccuracy(after.progression, after.effects)).toMatchObject({
-		playerHitChance: 90,
+		playerHitChance: 95,
 		evadeChance: 25,
 	});
 });
