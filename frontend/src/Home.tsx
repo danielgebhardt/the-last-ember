@@ -161,6 +161,8 @@ const Home = ({
 	}, [finished, game.state, configuration, deepestFloor, player.health]);
 	const townService = reachableTownService(game.state);
 	const canPlay = player.health > 0 && victory === null;
+	// Perks can't be chosen after death or victory, so the reminders stop there too.
+	const perksWaiting = canPlay ? pendingPerkCount(game.state.progression) : 0;
 	const { exploration } = game;
 	const [configDraft, setConfigDraft] = useState(() =>
 		configurationDraft(initialAdventure?.configuration ?? initialConfiguration),
@@ -176,7 +178,16 @@ const Home = ({
 	const [catalogOpen, setCatalogOpen] = useState(false);
 	const [helpOpen, setHelpOpen] = useState(false);
 	const [characterOpen, setCharacterOpen] = useState(false);
+	// The perk reminder opens Character on Progression; every other open starts on Character.
+	const [characterTab, setCharacterTab] = useState<"character" | "progression">(
+		"character",
+	);
 	const [characterOpenedFromMap, setCharacterOpenedFromMap] = useState(false);
+	const openCharacterFromMap = (tab: "character" | "progression") => {
+		setCharacterTab(tab);
+		setCharacterOpenedFromMap(true);
+		setCharacterOpen(true);
+	};
 	const [interactionObject, setInteractionObject] =
 		useState<DungeonObject | null>(null);
 	const [interactionTargets, setInteractionTargets] = useState<
@@ -427,7 +438,10 @@ const Home = ({
 				characterAction={
 					<Dialog.Root open={characterOpen} onOpenChange={setCharacterOpen}>
 						<Dialog.Trigger
-							onClick={() => setCharacterOpenedFromMap(false)}
+							onClick={() => {
+								setCharacterTab("character");
+								setCharacterOpenedFromMap(false);
+							}}
 							render={
 								<Button
 									type="button"
@@ -438,11 +452,12 @@ const Home = ({
 						>
 							<UserRound aria-hidden="true" focusable="false" />
 							Character
-							{pendingPerkCount(game.state.progression) > 0 && (
+							{perksWaiting > 0 && (
 								<span
 									title="A perk is waiting under Character → Progression"
-									className="size-2 rounded-full bg-primary"
+									className="rounded-full bg-amber-500 px-1.5 text-[10px] leading-4 font-bold text-amber-950"
 								>
+									<span aria-hidden="true">Perk</span>
 									<span className="sr-only">, perk available</span>
 								</span>
 							)}
@@ -456,6 +471,7 @@ const Home = ({
 							knownSpells={game.state.knownSpells}
 							progression={game.state.progression}
 							onCloseRequested={() => setCharacterOpen(false)}
+							initialTab={characterTab}
 							finalFocus={characterOpenedFromMap ? mapRef : undefined}
 							player={player}
 							won={victory !== null}
@@ -650,6 +666,8 @@ const Home = ({
 									turn={turn}
 									player={player}
 									progression={game.state.progression}
+									perksWaiting={perksWaiting}
+									onPerkRequested={() => openCharacterFromMap("progression")}
 								/>
 							</div>
 
@@ -703,10 +721,9 @@ const Home = ({
 														)
 												: undefined
 										}
-										onCharacterRequested={() => {
-											setCharacterOpenedFromMap(true);
-											setCharacterOpen(true);
-										}}
+										onCharacterRequested={() =>
+											openCharacterFromMap("character")
+										}
 										onPotionRequested={handlePotionRequested}
 									/>
 								) : (
@@ -782,10 +799,7 @@ const Home = ({
 										}
 										onCharacterRequested={
 											mapInputAvailable
-												? () => {
-														setCharacterOpenedFromMap(true);
-														setCharacterOpen(true);
-													}
+												? () => openCharacterFromMap("character")
 												: undefined
 										}
 										movementEnabled={gameplayEnabled && !town}

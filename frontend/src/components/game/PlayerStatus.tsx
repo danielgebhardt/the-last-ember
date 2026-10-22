@@ -1,4 +1,4 @@
-import { Coins, Droplets, Heart, Sparkles } from "lucide-react";
+import { Coins, Droplets, Heart, Sparkles, Star } from "lucide-react";
 import type { ReactNode } from "react";
 import adventurerPortrait from "@/assets/adventurer-portrait.png";
 import type { ActiveAffliction } from "../../domain/game/AfflictionDefinitions";
@@ -118,6 +118,8 @@ type PlayerStatusProps = {
 	equipment?: Equipment;
 	effects?: readonly TimedEffect[];
 	afflictions?: readonly ActiveAffliction[];
+	perksWaiting?: number;
+	onPerkRequested?: () => void;
 };
 
 const PlayerStatus = ({
@@ -130,6 +132,8 @@ const PlayerStatus = ({
 	equipment,
 	effects = [],
 	afflictions = [],
+	perksWaiting = 0,
+	onPerkRequested,
 }: PlayerStatusProps) => {
 	const lowHealth = isLowHealth(player);
 	const level = levelForExperience(progression.experience);
@@ -284,6 +288,17 @@ const PlayerStatus = ({
 							<span className="sr-only">Level </span>
 							{level}
 						</output>
+						{perksWaiting > 0 && onPerkRequested && (
+							<button
+								type="button"
+								aria-label={`${perksWaiting > 1 ? `${perksWaiting} perks` : "Choose perk"}: choose in Progression`}
+								onClick={onPerkRequested}
+								className="ml-auto inline-flex items-center gap-1 rounded-full border border-amber-500/70 bg-amber-400/20 px-2 py-0.5 font-sans text-[11px] font-semibold text-amber-800 shadow-[0_0_10px_rgba(245,158,11,0.45)] outline-none hover:bg-amber-400/30 focus-visible:ring-2 focus-visible:ring-ring motion-safe:animate-pulse dark:text-amber-200"
+							>
+								<Star aria-hidden="true" className="size-3 fill-current" />
+								{perksWaiting > 1 ? `${perksWaiting} perks` : "Choose perk"}
+							</button>
+						)}
 					</div>
 
 					<ExperienceProgress progression={progression} compact inline />

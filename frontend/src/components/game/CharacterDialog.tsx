@@ -109,6 +109,7 @@ type CharacterDialogProps = {
 	onAction: (action: PlayerAction) => void;
 	onCloseRequested: () => void;
 	finalFocus?: RefObject<HTMLElement | null>;
+	initialTab?: "character" | "progression" | "spells";
 };
 
 const CharacterDialog = ({
@@ -134,6 +135,7 @@ const CharacterDialog = ({
 	onAction,
 	onCloseRequested,
 	finalFocus,
+	initialTab = "character",
 }: CharacterDialogProps) => {
 	const [selection, setSelection] = useState<
 		| { source: "bag"; key: string }
@@ -287,7 +289,7 @@ const CharacterDialog = ({
 				/>
 
 				<Tabs.Root
-					defaultValue="character"
+					defaultValue={initialTab}
 					className="flex min-h-0 min-w-0 flex-1 flex-col"
 				>
 					<EmberTabsList aria-label="Character sections" className="px-4 pt-2">

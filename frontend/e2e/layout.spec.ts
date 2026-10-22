@@ -403,3 +403,64 @@ for (const size of [{ width: 1280, height: 720 }]) {
 		await expect(map(page)).toBeFocused();
 	});
 }
+
+test("the perk reminder fits beside the level and pulses only when motion is allowed", async ({
+	page,
+}) => {
+	await page.goto("/");
+	await page
+		.getByRole("button", { name: "Begin Adventure", exact: true })
+		.click();
+	await page.getByRole("button", { name: "Settings", exact: true }).click();
+	const settings = page.getByRole("dialog", { name: "Settings", exact: true });
+	await settings
+		.getByRole("textbox", { name: "Dungeon seed", exact: true })
+		.fill("7357");
+	await settings
+		.getByRole("button", { name: "Start from seed", exact: true })
+		.click();
+	await expect(settings).toBeHidden();
+	// The test seed starts at level 10 with four perks waiting.
+	const reminder = page.getByRole("button", {
+		name: "4 perks: choose in Progression",
+		exact: true,
+	});
+	const status = page.getByRole("region", {
+		name: "Player status",
+		exact: true,
+	});
+	for (const size of [
+		{ width: 1470, height: 830 },
+		{ width: 1180, height: 820 },
+		{ width: 1024, height: 768 },
+	])
+		for (const theme of ["Light", "Dark"]) {
+			await page.setViewportSize(size);
+			await page.getByRole("button", { name: "Settings", exact: true }).click();
+			await page.getByRole("button", { name: theme, exact: true }).click();
+			await page.keyboard.press("Escape");
+			await expect(reminder).toBeInViewport({ ratio: 1 });
+			const pill = await reminder.boundingBox();
+			const bar = await status.boundingBox();
+			const level = await page
+				.getByLabel("Player level", { exact: true })
+				.boundingBox();
+			if (!pill || !bar || !level) throw new Error("Expected the status bar");
+			expect(pill.x + pill.width).toBeLessThanOrEqual(bar.x + bar.width);
+			expect(pill.x).toBeGreaterThan(level.x + level.width);
+		}
+	const animation = () =>
+		reminder.evaluate(
+			(node) =>
+				node.ownerDocument.defaultView?.getComputedStyle(node).animationName,
+		);
+	expect(await animation()).not.toBe("none");
+	await page.emulateMedia({ reducedMotion: "reduce" });
+	expect(await animation()).toBe("none");
+	await reminder.click();
+	await expect(
+		page
+			.getByRole("dialog", { name: "The Adventurer's Ledger", exact: true })
+			.getByRole("tab", { selected: true }),
+	).toHaveText(/^Progression/);
+});
