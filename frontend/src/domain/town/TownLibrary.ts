@@ -2,9 +2,12 @@ import { type DungeonRun, hashStringToUint32 } from "../dungeon/DungeonRun";
 import { createSeededRandom } from "../dungeon/Seed";
 import { appendActivityEvents } from "../game/ActivityHistory";
 import type { GameState } from "../game/GameState";
+import type { Progression } from "../game/Progression";
 import {
 	createKnownSpells,
+	playerSpell,
 	SPELL_DEFINITIONS,
+	type SpellDefinition,
 	type SpellKind,
 } from "../game/Spells";
 import { ITEM_DEFINITIONS, type ItemKind } from "../items/Item";
@@ -40,9 +43,15 @@ export const libraryOffers = (run: DungeonRun): readonly Spellbook[] => {
 	);
 };
 
-// Plain facts drawn from the definition, so the shelf never overstates a spell.
-export const spellFacts = (spell: SpellKind): string => {
-	const definition = SPELL_DEFINITIONS[spell];
+// Plain facts drawn from the definition, so the shelf never overstates a spell. With
+// the buyer's progression, cost and range include their perks.
+export const spellFacts = (
+	spell: SpellKind,
+	progression?: Progression,
+): string => {
+	const definition: SpellDefinition = progression
+		? playerSpell(spell, progression)
+		: SPELL_DEFINITIONS[spell];
 	return [
 		`${definition.cost} mana`,
 		definition.mode === "self" ? "Self" : "Targeted",

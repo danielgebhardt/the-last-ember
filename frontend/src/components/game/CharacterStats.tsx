@@ -83,9 +83,11 @@ const CharacterStats = ({
 	);
 	// Label and value share the first row; every note below spans the card.
 	const card =
-		"grid min-w-0 grid-cols-[1fr_auto] items-baseline gap-x-2 rounded-lg border border-border bg-card/60 px-3 py-2 [&>*:nth-child(n+3)]:col-span-2";
-	const value = "text-lg font-semibold leading-tight tabular-nums";
-	const hint = "mt-0.5 text-[11px] leading-snug text-muted-foreground";
+		"grid min-w-0 grid-cols-[1fr_auto] items-baseline gap-x-2 rounded-lg border border-border bg-card/60 px-3 py-2 [@media(max-height:840px)]:py-1.5 [&>*:nth-child(n+3)]:col-span-2";
+	// Whole-pixel line heights keep card heights integral, so the tab never rounds
+	// up into a 1px scroll.
+	const value = "text-lg font-semibold leading-[22px] tabular-nums";
+	const hint = "mt-0.5 text-[11px] leading-[15px] text-muted-foreground";
 	return (
 		<section aria-label="Character stats" className="grid min-w-0 gap-2">
 			<div className="grid min-w-0 grid-cols-2 gap-2 md:grid-cols-3 lg:grid-cols-5">
@@ -98,7 +100,7 @@ const CharacterStats = ({
 						player={player}
 						label="Character health"
 						compact
-						className="text-lg font-semibold tabular-nums"
+						className="text-lg font-semibold leading-[22px] tabular-nums"
 					/>
 					<p className={hint}>
 						Current / maximum
@@ -150,7 +152,7 @@ const CharacterStats = ({
 					</p>
 					<output
 						aria-label="Character hit chance"
-						className="text-[11px] text-muted-foreground"
+						className="text-[11px] leading-[15px] text-muted-foreground"
 					>
 						Hit {accuracy.playerHitChance}%
 						{normalHit !== accuracy.playerHitChance &&
@@ -177,7 +179,7 @@ const CharacterStats = ({
 					</p>
 					<output
 						aria-label="Character evasion"
-						className="text-[11px] text-muted-foreground"
+						className="text-[11px] leading-[15px] text-muted-foreground"
 					>
 						Evade {accuracy.evadeChance}%
 						{isLastStand(progression, player) && " (Last stand +10)"}
@@ -201,7 +203,7 @@ const CharacterStats = ({
 						{combat.magicResistance}%
 					</output>
 					<p className={hint}>
-						Base 5% + Intelligence {combat.magicResistanceIntelligenceBonus}%
+						Base 5% + Int {combat.magicResistanceIntelligenceBonus}%
 						{combat.magicResistanceEquipmentBonus > 0 &&
 							` + equipment ${combat.magicResistanceEquipmentBonus}%`}{" "}
 						(max 50%)

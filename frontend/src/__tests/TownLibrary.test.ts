@@ -54,6 +54,19 @@ it("offers three distinct books per seed, never a dungeon book or starting spell
 	expect(spellFacts("ember-bolt")).toBe(
 		"4 mana · Targeted · Range 4 · Fire · 8–12 damage",
 	);
+	// The buyer's perks adjust cost and range.
+	expect(
+		spellFacts("ember-bolt", {
+			experience: 30,
+			perks: [{ level: 3, perk: "efficient-casting" }],
+		}),
+	).toBe("3 mana · Targeted · Range 4 · Fire · 8–12 damage");
+	expect(
+		spellFacts("ember-bolt", {
+			experience: 30,
+			perks: [{ level: 3, perk: "long-reach" }],
+		}),
+	).toBe("4 mana · Targeted · Range 5 · Fire · 8–12 damage");
 });
 
 it("teaches an offered spell for 1000 gold and no turn, then saves and restores it", () => {

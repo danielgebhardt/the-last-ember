@@ -285,7 +285,7 @@ test("magic resistance stays readable in Character on desktop and mobile in both
 			await expect(resistance).toHaveText("Magic resistance 5%");
 			await expect(resistance).toBeInViewport();
 			await expect(
-				character.getByText("Base 5% + Intelligence 0% (max 50%)"),
+				character.getByText("Base 5% + Int 0% (max 50%)"),
 			).toBeVisible();
 			const fits = await resistance.evaluate((element) => {
 				const card = element.parentElement;
@@ -463,4 +463,63 @@ test("the perk reminder fits beside the level and pulses only when motion is all
 			.getByRole("dialog", { name: "The Adventurer's Ledger", exact: true })
 			.getByRole("tab", { selected: true }),
 	).toHaveText(/^Progression/);
+});
+
+test("the Character tab fits without scrolling on laptop and both iPad sizes", async ({
+	page,
+}) => {
+	await page.goto("/");
+	await page
+		.getByRole("button", { name: "Begin Adventure", exact: true })
+		.click();
+	await page.getByRole("button", { name: "Settings", exact: true }).click();
+	const settings = page.getByRole("dialog", { name: "Settings", exact: true });
+	await settings
+		.getByRole("textbox", { name: "Dungeon seed", exact: true })
+		.fill("7357");
+	await settings
+		.getByRole("button", { name: "Start from seed", exact: true })
+		.click();
+	await expect(settings).toBeHidden();
+	const character = page.getByRole("dialog", {
+		name: "The Adventurer's Ledger",
+		exact: true,
+	});
+	const overflow = () =>
+		character
+			.getByRole("tabpanel")
+			.evaluate((panel) => panel.scrollHeight - panel.clientHeight);
+	const check = async () => {
+		for (const size of [
+			{ width: 1470, height: 830 },
+			{ width: 1180, height: 820 },
+			{ width: 1024, height: 768 },
+		]) {
+			await page.setViewportSize(size);
+			await page.keyboard.press("c");
+			await expect(character).toBeVisible();
+			// Polled: layout settles once fonts load after the resize.
+			await expect
+				.poll(overflow, { message: `${size.width}×${size.height}` })
+				.toBe(0);
+			await character
+				.getByRole("button", { name: /^Warding Cloak, slot/ })
+				.click();
+			await expect(
+				character.getByRole("region", { name: "Item details" }),
+			).toBeVisible();
+			await expect
+				.poll(overflow, { message: `${size.width}×${size.height} selected` })
+				.toBe(0);
+			await page.keyboard.press("Escape");
+			await expect(character).toBeHidden();
+		}
+	};
+	await check();
+	// The dungeon adds Nearby / Ground and, on arrival, a footer message.
+	await page.getByLabel("Town map", { exact: true }).focus();
+	await page.keyboard.type("ss");
+	await page.keyboard.press("Enter");
+	await expect(page.getByLabel("Dungeon map", { exact: true })).toBeFocused();
+	await check();
 });

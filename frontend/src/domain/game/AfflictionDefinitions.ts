@@ -23,7 +23,8 @@ export const AFFLICTION_DEFINITIONS = {
 	disease: {
 		kind: "disease",
 		sanctuaryFee: 150,
-		summary: "maximum HP −20% (minimum 1) until cured",
+		summary:
+			"maximum HP −20% (−10% with Iron constitution; minimum 1) until cured",
 		target: "player",
 		name: "Disease",
 		lifetime: { type: "until-cured" },
@@ -31,9 +32,9 @@ export const AFFLICTION_DEFINITIONS = {
 		blocksRunning: false,
 		cure: "cure-disease-potion",
 		guidance:
-			"Maximum HP reduced by 20%, rounded down (minimum 1). Until cured by Cure Disease potion or sanctuary treatment. Curing restores capacity, not HP. Heal, Renewal, rest and ordinary potions do not cure Disease.",
+			"Maximum HP reduced by 20% (10% with Iron constitution), rounded down (minimum 1). Until cured by Cure Disease potion or sanctuary treatment. Curing restores capacity, not HP. Heal, Renewal, rest and ordinary potions do not cure Disease.",
 		appliedText:
-			"Maximum HP reduced by 20% until cured. Use Cure Disease potion or sanctuary treatment.",
+			"Maximum HP reduced by 20% (10% with Iron constitution) until cured. Use Cure Disease potion or sanctuary treatment.",
 		removedText: "Maximum HP restored without healing.",
 		absentText: "You do not have Disease.",
 	},

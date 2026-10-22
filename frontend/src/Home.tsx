@@ -607,6 +607,7 @@ const Home = ({
 						</SheetTrigger>
 						<DungeonHelp
 							section={helpSection}
+							progression={game.state.progression}
 							finalFocus={mapInputAvailable ? mapRef : false}
 							monsters={activeMonsters}
 							difficulty={game.state.difficulty}

@@ -48,9 +48,7 @@ describe("Character sheet", () => {
 		expect(
 			panel.getByLabelText("Character magic resistance"),
 		).toHaveTextContent("Magic resistance 5%");
-		expect(
-			panel.getByText("Base 5% + Intelligence 0% (max 50%)"),
-		).toBeVisible();
+		expect(panel.getByText("Base 5% + Int 0% (max 50%)")).toBeVisible();
 		expect(panel.getByLabelText("Character hit chance")).toHaveTextContent(
 			"Hit 85%",
 		);

@@ -81,7 +81,9 @@ const TownLibraryDialog = ({
 									<PriceBadge price={LIBRARY_PRICE} dimmed={reason !== null} />
 								)}
 							</div>
-							<p className="font-medium">{spellFacts(spell)}</p>
+							<p className="font-medium">
+								{spellFacts(spell, state.progression)}
+							</p>
 							<p className="text-muted-foreground">{definition.description}</p>
 							<Button
 								variant="outline"

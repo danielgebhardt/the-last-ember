@@ -32,8 +32,16 @@ import {
 	PERK_KINDS,
 	PERK_LEVELS,
 } from "../domain/game/Perks";
-import { HEALTH_PER_LEVEL, MAX_PLAYER_LEVEL } from "../domain/game/Progression";
-import { SPELL_DEFINITIONS } from "../domain/game/Spells";
+import {
+	HEALTH_PER_LEVEL,
+	MAX_PLAYER_LEVEL,
+	type Progression,
+} from "../domain/game/Progression";
+import {
+	playerSpell,
+	SPELL_DEFINITIONS,
+	type SpellDefinition,
+} from "../domain/game/Spells";
 import { ESCAPE_ENCOUNTER_RULES } from "../domain/monsters/EscapeEncounters";
 import type { Monster } from "../domain/monsters/Monster";
 import { MONSTER_DEFINITIONS } from "../domain/monsters/Monster";
@@ -81,13 +89,30 @@ const ScrollToSection = ({ id }: { id?: string }) => {
 	}, [id]);
 	return null;
 };
+// The starting spells as this player casts them (base values without progression).
+const startingSpells = (progression?: Progression) => {
+	const missile: SpellDefinition = progression
+		? playerSpell("magic-missile", progression)
+		: SPELL_DEFINITIONS["magic-missile"];
+	const heal = progression
+		? playerSpell("heal", progression)
+		: SPELL_DEFINITIONS.heal;
+	return {
+		missileCost: missile.cost,
+		missileRange: missile.mode === "targeted" ? missile.range : 0,
+		healCost: heal.cost,
+	};
+};
 const DungeonHelp = ({
 	monsters,
 	difficulty = 1,
 	visible,
 	finalFocus,
 	section,
+	progression,
 }: {
+	// The player's perks adjust the spell costs and ranges quoted here.
+	progression?: Progression;
 	monsters?: readonly Monster[];
 	difficulty?: Difficulty;
 	visible?: VisibilityGrid;
@@ -366,13 +391,13 @@ const DungeonHelp = ({
 					<li>
 						<span className="font-medium text-foreground">Disease.</span> Rare
 						plague rats on floors 2–6 can spread it with a landed bite. Disease
-						lowers maximum HP by 20%, rounded down (minimum 1), and lasts until
-						cured; current HP above the new maximum is lost. It does not stack.
-						A Cure Disease potion removes it before monsters act, using one
-						turn; with no Disease it costs nothing. Curing restores maximum HP
-						but not lost HP. Heal, Renewal, rest, town visits and ordinary
-						potions do not cure it. Corridor running stops when Disease begins
-						but may continue afterward.
+						lowers maximum HP by 20% (10% with Iron constitution), rounded down
+						(minimum 1), and lasts until cured; current HP above the new maximum
+						is lost. It does not stack. A Cure Disease potion removes it before
+						monsters act, using one turn; with no Disease it costs nothing.
+						Curing restores maximum HP but not lost HP. Heal, Renewal, rest,
+						town visits and ordinary potions do not cure it. Corridor running
+						stops when Disease begins but may continue afterward.
 					</li>
 					<li>
 						<span className="font-medium text-foreground">Slowed.</span> Giant
@@ -750,9 +775,9 @@ const DungeonHelp = ({
 					its shortcut after closing menus.
 				</p>
 				<p>
-					Magic Missile ({SPELL_DEFINITIONS["magic-missile"].cost} mana): Z
+					Magic Missile ({startingSpells(progression).missileCost} mana): Z
 					selects the nearest visible monster within{" "}
-					{SPELL_DEFINITIONS["magic-missile"].range} tiles and clear wall sight.
+					{startingSpells(progression).missileRange} tiles and clear wall sight.
 					Use arrows or WASD to cast at the nearest eligible monster straight in
 					that direction. Enter or click casts at the highlighted monster. An
 					empty direction costs no turn or mana. Escape or Z cancels for free.
@@ -760,9 +785,9 @@ const DungeonHelp = ({
 					block the bolt.
 				</p>
 				<p>
-					Heal ({SPELL_DEFINITIONS.heal.cost} mana): H or its hotbar button
-					casts on yourself, restoring health before monsters act. Full health
-					and insufficient mana cost no turn.
+					Heal ({startingSpells(progression).healCost} mana): H or its hotbar
+					button casts on yourself, restoring health before monsters act. Full
+					health and insufficient mana cost no turn.
 				</p>
 				<p>
 					Spell shortcuts 5–9 and 0 activate the six slots assigned in Character

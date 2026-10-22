@@ -70,3 +70,22 @@ it("shows the perk-adjusted spell cost on the hotbar and the perk attack in Char
 	);
 	expect(ledger.getByText(/\+ perks 2/)).toBeVisible();
 });
+
+it("quotes the perk-adjusted starting spell costs and range in Help", async () => {
+	const { user } = play("efficient-casting", "long-reach");
+	const missile = SPELL_DEFINITIONS["magic-missile"];
+	await user.click(screen.getByRole("button", { name: "Help" }));
+	const help = within(await screen.findByRole("dialog", { name: /Help/ }));
+	expect(
+		help.getByText(
+			new RegExp(
+				`Magic Missile \\(${missile.cost - 1} mana\\).*within ${missile.range + 1} tiles`,
+			),
+		),
+	).toBeVisible();
+	expect(
+		help.getByText(
+			new RegExp(`^Heal \\(${SPELL_DEFINITIONS.heal.cost - 1} mana\\)`),
+		),
+	).toBeVisible();
+});

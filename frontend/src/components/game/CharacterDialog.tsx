@@ -69,7 +69,7 @@ const GroundPanel = ({
 	return (
 		<div
 			ref={drop.ref}
-			className={`ember-menu-panel flex min-w-0 flex-wrap items-baseline gap-x-3 gap-y-2 py-2.5! ${
+			className={`ember-menu-panel flex min-w-0 flex-wrap items-baseline gap-x-3 gap-y-2 py-2.5! [@media(max-height:840px)]:py-1.5! ${
 				drop.accepts
 					? `ring-2 ${drop.isOver ? "ring-primary" : "ring-primary/40"}`
 					: ""
@@ -256,8 +256,10 @@ const CharacterDialog = ({
    text-sm text-popover-foreground
 "
 			>
+				{/* On short screens (the 1024×768 iPad) the subtitle stays for screen
+				    readers only and the ornament hides, so the Character tab fits. */}
 				<EmberMenuHeader
-					className="shrink-0"
+					className="shrink-0 [@media(max-height:800px)]:py-2! [@media(max-height:800px)]:[&_.ember-menu-divider]:hidden!"
 					icon={<Backpack className="size-5" />}
 					heading={
 						<Dialog.Title
@@ -269,7 +271,7 @@ const CharacterDialog = ({
 						</Dialog.Title>
 					}
 					subtitle={
-						<Dialog.Description className="ember-menu-description">
+						<Dialog.Description className="ember-menu-description [@media(max-height:800px)]:sr-only">
 							Your progression, equipment, carried items, and known spells.
 						</Dialog.Description>
 					}
@@ -323,7 +325,9 @@ const CharacterDialog = ({
 						value="character"
 						className="flex min-h-0 min-w-0 flex-1 flex-col overflow-x-auto overflow-y-auto"
 					>
-						<div className="shrink-0 border-b border-primary/20 bg-primary/[0.035] px-4 py-2">
+						{/* Up to 840px tall (13" laptops and iPads), the strip, cards, Ground
+						    row and footer use slightly tighter padding so the tab fits. */}
+						<div className="shrink-0 border-b border-primary/20 bg-primary/[0.035] px-4 py-2 [@media(max-height:840px)]:py-1">
 							<CharacterStats
 								afflictions={afflictions}
 								effects={effects}
@@ -333,7 +337,7 @@ const CharacterDialog = ({
 								progression={progression}
 							/>
 						</div>
-						<div className="min-w-0 p-2 pb-3 lg:min-h-0 lg:flex-1">
+						<div className="min-w-0 p-2 pb-3 lg:min-h-0 lg:flex-1 [@media(max-height:840px)]:pb-2">
 							<ItemDragProvider
 								onDrop={dropItem}
 								onDropNowhere={dropItemNowhere}
@@ -483,7 +487,7 @@ const CharacterDialog = ({
 						/>
 					</Tabs.Panel>
 				</Tabs.Root>
-				<div className="ember-menu-footer grid shrink-0 gap-1 px-4 py-2">
+				<div className="ember-menu-footer grid shrink-0 gap-1 px-4 py-2 [@media(max-height:840px)]:py-1!">
 					{actionError && (
 						<p role="alert" className="text-sm text-destructive">
 							{actionError}
