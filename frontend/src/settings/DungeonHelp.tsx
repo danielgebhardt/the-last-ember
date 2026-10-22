@@ -9,7 +9,7 @@ import {
 	Map as MapIcon,
 	Shield,
 } from "lucide-react";
-import type { ReactNode, RefObject } from "react";
+import { type ReactNode, type RefObject, useEffect } from "react";
 import { EmberMenuHeader, EmberPanel } from "@/components/ui/EmberMenu";
 import {
 	SheetContent,
@@ -70,21 +70,35 @@ const movementControls = [
 	{ direction: "down", key: "S", Icon: ArrowDown },
 	{ direction: "right", key: "D", Icon: ArrowRight },
 ];
+// Opened from a hint's "More in Help": bring that topic into view.
+const ScrollToSection = ({ id }: { id?: string }) => {
+	useEffect(() => {
+		if (!id) return;
+		const frame = requestAnimationFrame(() =>
+			document.getElementById(id)?.scrollIntoView({ block: "start" }),
+		);
+		return () => cancelAnimationFrame(frame);
+	}, [id]);
+	return null;
+};
 const DungeonHelp = ({
 	monsters,
 	difficulty = 1,
 	visible,
 	finalFocus,
+	section,
 }: {
 	monsters?: readonly Monster[];
 	difficulty?: Difficulty;
 	visible?: VisibilityGrid;
 	finalFocus?: RefObject<HTMLElement | null> | false;
+	section?: string;
 }) => (
 	<SheetContent
 		finalFocus={finalFocus}
 		className="ember-menu-frame overflow-y-auto data-[side=right]:w-full sm:data-[side=right]:max-w-4xl"
 	>
+		<ScrollToSection id={section} />
 		<EmberMenuHeader
 			className="pr-12"
 			icon={<BookOpen className="size-5" />}
@@ -287,7 +301,7 @@ const DungeonHelp = ({
 						armor piece and a large XP reward, or take the ember while it
 						stands, and it follows you up every floor until it falls.
 					</li>
-					<li>
+					<li id="help-equipment">
 						<span className="font-medium text-foreground">Equipment.</span> Open
 						Character to inspect items, equip carried gear, or unequip an
 						occupied slot. Main/off hand, chest, head and two rings are
@@ -329,7 +343,7 @@ const DungeonHelp = ({
 						their attribute. Bottles stack; buying one does not apply its effect
 						until you drink it.
 					</li>
-					<li>
+					<li id="help-status-effects">
 						<span className="font-medium text-foreground">Status effects.</span>{" "}
 						Select a status icon in the player bar for its remaining duration
 						and effect. The Activity log records changes. Poison deals 1 damage
@@ -434,7 +448,7 @@ const DungeonHelp = ({
 						dungeon. At the floor-1 exit, Enter returns to town until you
 						recover the ember.
 					</li>
-					<li>
+					<li id="help-town-portals">
 						<span className="font-medium text-foreground">Town portals.</span>{" "}
 						Read a Town portal scroll in the dungeon to travel to the circle
 						west of the beacon. It costs one scroll and one originating-floor
@@ -520,6 +534,7 @@ const DungeonHelp = ({
 				difficulty={difficulty}
 			/>
 			<section
+				id="help-enemy-tactics"
 				aria-label="Enemy tactics"
 				className="grid gap-3 rounded-lg border p-4 text-sm"
 			>
@@ -588,6 +603,7 @@ const DungeonHelp = ({
 				</p>
 			</section>
 			<section
+				id="help-sarcophagi"
 				aria-label="Ancient sarcophagi"
 				className="grid gap-3 rounded-lg border p-4 text-sm"
 			>
@@ -617,6 +633,7 @@ const DungeonHelp = ({
 				</p>
 			</section>
 			<section
+				id="help-hourglass"
 				aria-label="Hourglass of Ages"
 				className="grid gap-3 rounded-lg border p-4 text-sm"
 			>
@@ -632,6 +649,7 @@ const DungeonHelp = ({
 				</p>
 			</section>
 			<section
+				id="help-runic-portal"
 				aria-label="Runic Portal"
 				className="grid gap-3 rounded-lg border p-4 text-sm"
 			>
@@ -647,6 +665,7 @@ const DungeonHelp = ({
 				</p>
 			</section>
 			<section
+				id="help-mirror"
 				aria-label="Mirror of Shadows"
 				className="grid gap-3 rounded-lg border p-4 text-sm"
 			>
@@ -670,6 +689,7 @@ const DungeonHelp = ({
 				</p>
 			</section>
 			<section
+				id="help-well"
 				aria-label="Wishing Well"
 				className="grid gap-3 rounded-lg border p-4 text-sm"
 			>
@@ -691,6 +711,7 @@ const DungeonHelp = ({
 				</p>
 			</section>
 			<section
+				id="help-forge"
 				aria-label="Forgotten Forge"
 				className="grid gap-3 rounded-lg border p-4 text-sm"
 			>

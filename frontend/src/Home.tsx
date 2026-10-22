@@ -36,6 +36,7 @@ import QuestStatus from "./components/game/QuestStatus";
 import SpellHotbarView from "./components/game/SpellHotbarView";
 import { useAdventureSession } from "./components/game/useAdventureSession";
 import { useCorridorTravel } from "./components/game/useCorridorTravel";
+import { useHints } from "./components/game/useHints";
 import { useSpellTargeting } from "./components/game/useSpellTargeting";
 import VictoryDialog from "./components/game/VictoryDialog";
 import MerchantDialog from "./components/merchant/MerchantDialog";
@@ -181,6 +182,10 @@ const Home = ({
 	const [pickupOpen, setPickupOpen] = useState(false);
 	const [merchantId, setMerchantId] = useState<string | null>(null);
 	const mapRef = useRef<HTMLElement>(null);
+	const hints = useHints(game.state, () =>
+		mapRef.current?.focus({ preventScroll: true }),
+	);
+	const [helpSection, setHelpSection] = useState<string>();
 	useEffect(() => {
 		if (
 			town ||
@@ -544,11 +549,18 @@ const Home = ({
 								setGenerationError(null);
 							}}
 							onSeedSubmit={handleSeedSubmit}
+							hints={hints}
 						/>
 					</Sheet>
 				}
 				helpAction={
-					<Sheet open={helpOpen} onOpenChange={setHelpOpen}>
+					<Sheet
+						open={helpOpen}
+						onOpenChange={(open) => {
+							setHelpOpen(open);
+							if (!open) setHelpSection(undefined);
+						}}
+					>
 						<SheetTrigger
 							render={
 								<Button
@@ -562,6 +574,7 @@ const Home = ({
 							Help
 						</SheetTrigger>
 						<DungeonHelp
+							section={helpSection}
 							finalFocus={mapInputAvailable ? mapRef : false}
 							monsters={activeMonsters}
 							difficulty={game.state.difficulty}
@@ -771,6 +784,18 @@ const Home = ({
 								corridorDescription={corridor.description}
 								targeting={!!spells.targeting}
 								onVictorySummary={() => setDismissedVictory(null)}
+								hint={
+									hints.current && {
+										current: hints.current,
+										onDismiss: hints.dismiss,
+										onMore: () => {
+											const help = hints.current?.help;
+											hints.markSeen();
+											setHelpSection(help);
+											setHelpOpen(true);
+										},
+									}
+								}
 								onReviewSarcophagus={
 									gameplayEnabled && !spells.targeting
 										? selectInteractionObject

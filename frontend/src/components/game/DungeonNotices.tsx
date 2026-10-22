@@ -1,10 +1,12 @@
 import type { GameState } from "../../domain/game/GameState";
 import { ongoingSpellPotency } from "../../domain/game/OngoingSpellPotency";
+import type { Hint } from "../../domain/hints/Hints";
 import type { Monster } from "../../domain/monsters/Monster";
 import type { DungeonObject } from "../../domain/objects/DungeonObject";
 import { atDungeonEntrance } from "../../domain/town/TownTravel";
 import ObjectContext from "../objects/ObjectContext";
 import { Button } from "../ui/button";
+import HintNotice from "./HintNotice";
 import VisibleEffects from "./VisibleEffects";
 
 type Props = {
@@ -18,6 +20,7 @@ type Props = {
 	targeting: boolean;
 	onVictorySummary: () => void;
 	onReviewSarcophagus?: (object: DungeonObject) => void;
+	hint?: { current: Hint; onDismiss: () => void; onMore: () => void } | null;
 };
 const DungeonNotices = ({
 	state,
@@ -30,6 +33,7 @@ const DungeonNotices = ({
 	targeting,
 	onVictorySummary,
 	onReviewSarcophagus,
+	hint,
 }: Props) => {
 	const town = state.town;
 	const victory = state.quest.victory;
@@ -46,6 +50,13 @@ const DungeonNotices = ({
 				tabIndex={0}
 				className="h-full overflow-y-auto px-1 py-1 focus-visible:outline-1 focus-visible:-outline-offset-1 focus-visible:outline-ring"
 			>
+				{hint && (
+					<HintNotice
+						hint={hint.current}
+						onDismiss={hint.onDismiss}
+						onMore={hint.onMore}
+					/>
+				)}
 				<VisibleEffects
 					monsterPoisonDamage={
 						ongoingSpellPotency(

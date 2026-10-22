@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/sheet";
 import DifficultyChoice from "../components/game/DifficultyChoice";
 import RunHistoryDialog from "../components/game/RunHistoryDialog";
+import type { Hints } from "../components/game/useHints";
 import {
 	CONFIGURATION_LIMITS,
 	type FogConfiguration,
@@ -42,6 +43,7 @@ type DungeonSettingsProps = {
 	onConfigInputChange: (field: ConfigurationField, value: string) => void;
 	onSeedInputChange: (value: string) => void;
 	onSeedSubmit: (event: SubmitEvent<HTMLFormElement>) => void;
+	hints?: Pick<Hints, "enabled" | "seenCount" | "setEnabled" | "reset">;
 };
 
 const DungeonSettings = ({
@@ -59,6 +61,7 @@ const DungeonSettings = ({
 	onConfigInputChange,
 	onSeedInputChange,
 	onSeedSubmit,
+	hints,
 }: DungeonSettingsProps) => {
 	const selectedDifficulty = Number(configDraft.difficulty ?? 1);
 	const inputRef = useRef<HTMLInputElement>(null);
@@ -239,6 +242,40 @@ const DungeonSettings = ({
 							Saved on this device. System follows your device’s appearance.
 						</p>
 					</div>
+					{hints && (
+						<fieldset className="grid gap-2 border-t pt-4">
+							<legend className="sr-only">Hints</legend>
+							<p aria-hidden="true" className="text-sm font-medium">
+								Hints
+							</p>
+							<Label
+								className="flex items-center gap-2"
+								htmlFor="hints-enabled"
+							>
+								<input
+									id="hints-enabled"
+									type="checkbox"
+									checked={hints.enabled}
+									onChange={(event) => hints.setEnabled(event.target.checked)}
+									className="size-4 accent-primary"
+								/>
+								Show hints for new mechanics
+							</Label>
+							<Button
+								type="button"
+								variant="outline"
+								className="justify-self-start"
+								disabled={hints.seenCount === 0}
+								onClick={hints.reset}
+							>
+								Show all hints again
+							</Button>
+							<p className="text-xs text-muted-foreground">
+								Each hint appears once, the first time you meet the mechanic.
+								Saved on this device.
+							</p>
+						</fieldset>
+					)}
 					<div className="grid gap-2 border-t pt-4">
 						<RunHistoryDialog />
 						<p className="text-xs text-muted-foreground">
