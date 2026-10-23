@@ -5,12 +5,14 @@ import {
 	createMerchantStock,
 	equipmentSalePrice,
 } from "../domain/merchant/MerchantRules";
+import { parseSave, restoreSave } from "../domain/saves/SaveFormat";
 import {
 	createTownPotionStock,
 	isTownPotionStock,
 	TOWN_POTION_OFFERS,
 	townPotionKinds,
 } from "../domain/town/TownEconomy";
+import v32 from "./fixtures/adventure-v32.json?raw";
 
 it("stocks only supported potions with finite saved ownership separate from wandering stock", () => {
 	const stock = createTownPotionStock();
@@ -18,13 +20,13 @@ it("stocks only supported potions with finite saved ownership separate from wand
 		expect.arrayContaining(
 			Object.entries(ITEM_DEFINITIONS)
 				.filter(
-					// Portable affliction remedies have no town stock in this slice.
+					// Other portable affliction remedies have no town stock.
 					([, d]) => d.type === "potion" && !("removesAfflictions" in d),
 				)
 				.map(([kind]) => kind),
 		),
 	);
-	expect(townPotionKinds).toHaveLength(8);
+	expect(townPotionKinds).toHaveLength(9);
 	for (const kind of townPotionKinds) {
 		expect(ITEM_DEFINITIONS[kind].type).toBe("potion");
 		expect(equipmentSalePrice({ id: "bottle", kind })).toBeNull();
@@ -38,7 +40,7 @@ it("stocks only supported potions with finite saved ownership separate from wand
 			(sum, offer) => sum + offer.price * offer.quantity,
 			0,
 		),
-	).toBe(15100);
+	).toBe(15400);
 });
 it("accepts actual depletion but rejects refill, fractional, missing and extra stock", () => {
 	const stock = createTownPotionStock();
@@ -53,6 +55,11 @@ it("accepts actual depletion but rejects refill, fractional, missing and extra s
 		{ ...stock, unknown: 1 },
 	])
 		expect(isTownPotionStock(invalid)).toBe(false);
+	// Saves from before Bandages joined the store lack their stock; only that kind may be absent.
+	const { bandages: _, ...older } = stock;
+	expect(isTownPotionStock(older)).toBe(true);
+	const { antidote: __, ...missing } = stock;
+	expect(isTownPotionStock(missing)).toBe(false);
 });
 
 it("prices permanent stat points at 1,500 gold with only two bottles per attribute", () => {
@@ -62,4 +69,13 @@ it("prices permanent stat points at 1,500 gold with only two bottles per attribu
 		"intelligence-potion",
 	] as const)
 		expect(TOWN_POTION_OFFERS[kind]).toEqual({ price: 1500, quantity: 2 });
+});
+
+it("sells Bandages, and stocks them in full for a save from before they were offered", () => {
+	expect(townPotionKinds).toContain("bandages");
+	expect(TOWN_POTION_OFFERS.bandages).toEqual({ price: 75, quantity: 4 });
+	expect(JSON.parse(v32).state.townPotionStock).not.toHaveProperty("bandages");
+	const parsed = parseSave(v32);
+	if (!parsed.ok) throw new Error(parsed.error);
+	expect(restoreSave(parsed.value).state.townPotionStock.bandages).toBe(4);
 });

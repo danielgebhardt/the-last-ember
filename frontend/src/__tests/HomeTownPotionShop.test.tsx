@@ -32,7 +32,7 @@ it("browses freely, confirms one real purchase, prevents repeat buying, and rest
 	const store = within(
 		await screen.findByRole("dialog", { name: "Town potion store" }),
 	);
-	expect(store.getAllByRole("listitem")).toHaveLength(8);
+	expect(store.getAllByRole("listitem")).toHaveLength(9);
 	expect(store.getByText("Gold: 300")).toBeVisible();
 	await user.keyboard("ss123 ");
 	expect(screen.getByLabelText("Turn count")).toHaveTextContent("Turn 0");

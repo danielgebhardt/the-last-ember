@@ -27,7 +27,7 @@ for (const width of [1280, 1440])
 			await page.keyboard.press("e");
 			const store = page.getByRole("dialog", { name: "Town potion store" });
 			await expect(store).toBeVisible();
-			await expect(store.getByRole("listitem")).toHaveCount(8);
+			await expect(store.getByRole("listitem")).toHaveCount(9);
 			await store
 				.getByRole("button", { name: "Buy Healing potion", exact: true })
 				.click();
