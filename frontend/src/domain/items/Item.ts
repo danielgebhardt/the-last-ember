@@ -31,6 +31,8 @@ export type ItemDefinition = {
 	goldBound?: Readonly<{ goldPerPoint: number; maxBonus: number }>;
 	// Main-hand rage: +1 attack per missingShare of maximum health lost, up to maxBonus;
 	// costs armor and weakens health potions to healingShare while wielded.
+	// Worn: every monster's detection radius shrinks by this much (never below 1).
+	stealth?: number;
 	bloodrage?: Readonly<{
 		missingShare: number;
 		maxBonus: number;
@@ -139,6 +141,20 @@ export const ITEM_DEFINITIONS = {
 		dropWeight: 0,
 		description:
 			"A notched axe that drinks its wielder's fury. Main hand: +3 attack, plus +1 for every 25% of your maximum health you are missing, up to +3 more. Swinging it two-handed costs 1 armor, and healing potions restore half as much while you hold it. Enchantment adds to its base attack.",
+	},
+	"shadowweave-cloak": {
+		specialFindOnly: true,
+		name: "Shadowweave Cloak",
+		type: "chest-armor",
+		attackBonus: 0,
+		armor: 0,
+		stealth: 2,
+		minFloor: 7,
+		maxFloor: 20,
+		foundWeight: 0,
+		dropWeight: 0,
+		description:
+			"A cloak woven from dusk itself. Chest: no armor, but every monster, the Ember Warden included, notices you from 2 tiles closer. Slip past rooms or reach the Warden while it still sleeps. Enchantment adds armor.",
 	},
 	"spellguard-shield": {
 		specialFindOnly: true,
@@ -853,6 +869,7 @@ export const RARE_EQUIPMENT_KINDS = [
 	"spellguard-shield",
 	"goldbound-blade",
 	"bloodrage-axe",
+	"shadowweave-cloak",
 ] as const;
 export type RareEquipmentKind = (typeof RARE_EQUIPMENT_KINDS)[number];
 export const isRareEquipmentKind = (kind: string): kind is RareEquipmentKind =>
@@ -890,6 +907,13 @@ export const validateItemDefinition = (definition: ItemDefinition): void => {
 			definition.goldBound.maxBonus < 1)
 	)
 		throw new RangeError("Invalid gold-bound weapon scaling.");
+	if (
+		definition.stealth !== undefined &&
+		(!Number.isSafeInteger(definition.stealth) ||
+			definition.stealth < 1 ||
+			!["chest-armor", "helmet", "shield", "ring"].includes(definition.type))
+	)
+		throw new RangeError("Invalid equipment stealth.");
 	const rage = definition.bloodrage;
 	if (
 		rage !== undefined &&

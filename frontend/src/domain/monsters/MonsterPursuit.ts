@@ -29,8 +29,11 @@ export const detectsPlayer = (
 	if (monster.floorNumber !== run.activeFloor) return false;
 	const row = run.playerCoordinate.row - monster.coordinate.row;
 	const col = run.playerCoordinate.col - monster.coordinate.col;
-	const radius =
-		MONSTER_DEFINITIONS[monster.kind].detectionRadius + rules.detectionBonus;
+	// Stealth never hides you from a monster right beside you.
+	const radius = Math.max(
+		1,
+		MONSTER_DEFINITIONS[monster.kind].detectionRadius + rules.detectionBonus,
+	);
 	return (
 		row * row + col * col <= radius * radius &&
 		hasLineOfSight(

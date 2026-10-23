@@ -24,6 +24,18 @@ export const goldBoundBonus = (
 			)
 		: 0;
 };
+// How much closer monsters must be to notice you, from all worn equipment.
+export const equipmentStealth = (
+	equipment: Readonly<Record<string, ItemInstance | null>>,
+): number =>
+	Object.values(equipment).reduce(
+		(sum, item) =>
+			sum +
+			(item
+				? ((ITEM_DEFINITIONS[item.kind] as ItemDefinition).stealth ?? 0)
+				: 0),
+		0,
+	);
 const bloodrageOf = (item: ItemInstance | null | undefined) =>
 	item ? (ITEM_DEFINITIONS[item.kind] as ItemDefinition).bloodrage : undefined;
 // The Bloodrage Axe's extra attack from missing health; zero for every other weapon.

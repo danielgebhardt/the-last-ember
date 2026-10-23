@@ -22,6 +22,7 @@ import ExitScrollIcon from "./ExitScrollIcon";
 import GoldboundBladeIcon from "./GoldboundBladeIcon";
 import PotionIcon from "./PotionIcon";
 import RingIcon from "./RingIcon";
+import ShadowweaveCloakIcon from "./ShadowweaveCloakIcon";
 import SpellguardShieldIcon from "./SpellguardShieldIcon";
 import WardingCloakIcon from "./WardingCloakIcon";
 
@@ -43,6 +44,7 @@ const icons: Record<
 	"spellguard-shield": SpellguardShieldIcon,
 	"goldbound-blade": GoldboundBladeIcon,
 	"bloodrage-axe": BloodrageAxeIcon,
+	"shadowweave-cloak": ShadowweaveCloakIcon,
 	"enchantment-scroll": ScrollText,
 	"remove-curse-scroll": Scroll,
 	"exit-scroll": ExitScrollIcon,
@@ -66,10 +68,11 @@ const icons: Record<
 	"runic-helmet": Crown,
 	"scholar-robe": Shirt,
 };
-// Rare weapons carry their own developer-chosen colors; everything else uses its type's.
+// Rare equipment carries its own developer-chosen colors; everything else uses its type's.
 const KIND_COLORS: Partial<Record<ItemKind, string>> = {
 	"goldbound-blade": "text-[#a96e00] dark:text-[#ffd166]",
 	"bloodrage-axe": "text-[#9a1831] dark:text-[#e04a65]",
+	"shadowweave-cloak": "text-[#6f57a8] dark:text-[#b7a2db]",
 };
 const isRingKind = (kind: ItemKind): kind is RingKind =>
 	ITEM_DEFINITIONS[kind].type === "ring";
