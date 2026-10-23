@@ -25,7 +25,6 @@ export type MonsterIntent =
 	| { type: "preparing-web"; target: Coordinate }
 	| { type: "preparing-hex"; target: Coordinate }
 	| { type: "preparing-blind"; target: Coordinate }
-	| { type: "preparing-theft"; target: Coordinate }
 	| {
 			type: "preparing-area";
 			target: Coordinate;

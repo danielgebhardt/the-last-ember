@@ -74,7 +74,7 @@ const SPECIAL_ACTIONS: readonly ((
 		resolveMonsterBlindingStrike(c.state, c.monster, c.detected, c.rollSource),
 	(c) => resolveMonsterSoulBolt(c.state, c.monster, c.detected),
 	// Reads the scene so a second thief this phase sees the gold the first one left.
-	(c) => resolveThiefTheft(c.scene, c.monster, c.detected),
+	(c) => resolveThiefTheft(c.scene, c.monster, c.monsters, c.detected),
 ];
 const resolveSpecialAction = (context: SpecialActionContext) => {
 	for (const resolve of SPECIAL_ACTIONS) {

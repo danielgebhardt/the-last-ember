@@ -13,6 +13,7 @@ import {
 	orthogonalDistance,
 	protectedFloorLocations,
 } from "./MonsterLocations";
+import { selectPursuitStep } from "./MonsterPursuit";
 import { selectRetreatStep } from "./MonsterRetreat";
 import { actorMaximumHealth } from "./MonsterStats";
 import type { SpecialActionOutcome } from "./MonsterTelegraphs";
@@ -141,51 +142,42 @@ export const placeTreasureThieves = (
 	return thieves.sort((a, b) => a.floorNumber - b.floorNumber);
 };
 
-// Beside you with gold to take, it marks your tile; if you are still there on its next
-// action, it takes a share of your carried gold. Stepping off, Sleep or Fear stops it.
+// While you carry gold it snatches a share the moment it reaches you, stepping in from
+// two tiles if it must, then runs from its next action. Sleep, Fear and Web stop it.
 export const resolveThiefTheft = (
 	state: GameState,
 	monster: Monster,
+	monsters: readonly Monster[],
 	detected: boolean,
 ): SpecialActionOutcome | undefined => {
-	if (!isThief(monster) || monster.theft) return undefined;
-	const turn = state.turn;
-	const player = state.run.playerCoordinate;
-	if (monster.intent.type === "preparing-theft") {
-		const gold =
-			orthogonalDistance(monster.intent.target, player) === 0 &&
-			orthogonalDistance(monster.coordinate, player) === 1
-				? stolenAmount(state.gold, monster.floorNumber)
-				: 0;
-		const idle = { ...monster, intent: { type: "idle" as const } };
-		return gold > 0
-			? {
-					monster: { ...idle, theft: { gold, turn } },
-					events: [
-						{ type: "monster-theft-hit", monster: monster.kind, gold, turn },
-					],
-					stolenGold: gold,
-				}
-			: {
-					monster: idle,
-					events: [
-						{ type: "monster-theft-avoided", monster: monster.kind, turn },
-					],
-				};
-	}
 	if (
-		monster.intent.type !== "idle" ||
+		!isThief(monster) ||
+		monster.theft ||
 		!detected ||
 		state.gold <= 0 ||
-		orthogonalDistance(monster.coordinate, player) !== 1
+		monster.intent.type !== "idle"
 	)
 		return undefined;
-	const target = { ...player };
+	const player = state.run.playerCoordinate;
+	const distance = orthogonalDistance(monster.coordinate, player);
+	const coordinate =
+		distance === 1
+			? monster.coordinate
+			: distance === 2 && !hasMonsterEffect(state, monster, "rooted")
+				? selectPursuitStep(state.run, monster, monsters)
+				: undefined;
+	if (!coordinate || orthogonalDistance(coordinate, player) !== 1)
+		return undefined;
+	const gold = stolenAmount(state.gold, monster.floorNumber);
+	const turn = state.turn;
 	return {
-		monster: { ...monster, intent: { type: "preparing-theft", target } },
-		events: [
-			{ type: "monster-theft-prepared", monster: monster.kind, target, turn },
-		],
+		monster: {
+			...monster,
+			coordinate: { ...coordinate },
+			theft: { gold, turn },
+		},
+		events: [{ type: "monster-theft-hit", monster: monster.kind, gold, turn }],
+		stolenGold: gold,
 	};
 };
 

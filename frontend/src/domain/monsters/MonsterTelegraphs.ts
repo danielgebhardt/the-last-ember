@@ -101,12 +101,6 @@ export const TARGET_TELEGRAPHS: Readonly<
 		advice:
 			"Blinding strike on its next action: move off the marked tile, or use Sleep or Fear to cancel it.",
 	},
-	"preparing-theft": {
-		owns: (definition) => definition.thief === true,
-		reaches: (monster, target) => reach(monster, target) === 1,
-		advice:
-			"Theft on its next action: step off the marked tile, or use Sleep or Fear to stop it.",
-	},
 };
 export const isTargetTelegraph = (type: string): type is TargetTelegraph =>
 	Object.hasOwn(TARGET_TELEGRAPHS, type);

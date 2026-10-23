@@ -69,7 +69,7 @@ export const monsterTraits = (kind: MonsterKind): readonly string[] => {
 		);
 	if (definition.thief)
 		traits.push(
-			`Thief: never attacks. While you carry gold it closes in, marks your tile and, on its next action, steals ${Math.round(THIEF_STEAL_SHARE * 100)}% of your carried gold (at most ${thiefStealCap(0)} gold plus 25 per floor). Step off the marked tile, or use Sleep or Fear, to stop it. With its haul it runs and slips away after ${THIEF_ESCAPE_PHASES} phases; Web and Sleep hold it. Kill it to recover everything it stole, plus its own purse and loot.`,
+			`Thief: never attacks. While you carry gold it closes in and, the moment it reaches you, snatches ${Math.round(THIEF_STEAL_SHARE * 100)}% of your carried gold (at most ${thiefStealCap(0)} gold plus 25 per floor). Sleep, Fear or Web stops it before it reaches you. With its haul it runs and slips away after ${THIEF_ESCAPE_PHASES} phases; Web and Sleep hold it. Kill it to recover everything it stole, plus its own purse and loot.`,
 		);
 	if (definition.soulBolt)
 		traits.push(

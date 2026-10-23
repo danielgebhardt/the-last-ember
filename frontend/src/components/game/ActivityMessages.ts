@@ -175,12 +175,8 @@ export const formatActivityEvent = (event: ActivityEvent): string => {
 			return `${prefix}Your Ring of Displacement flares and hurls you clear! It will not answer again on this floor.`;
 		case "mimic-revealed":
 			return `${prefix}The chest snaps open on a mouthful of teeth. It's a mimic!`;
-		case "monster-theft-prepared":
-			return `${prefix}The ${MONSTER_DEFINITIONS[event.monster].name} reaches for your purse. Step off your tile before it acts again.`;
 		case "monster-theft-hit":
 			return `${prefix}The ${MONSTER_DEFINITIONS[event.monster].name} steals ${event.gold} gold and runs!`;
-		case "monster-theft-avoided":
-			return `${prefix}The ${MONSTER_DEFINITIONS[event.monster].name} grabs at empty air.`;
 		case "monster-thief-escaped":
 			return `${prefix}The ${MONSTER_DEFINITIONS[event.monster].name} slips away with ${event.gold} of your gold.`;
 		case "monster-theft-recovered":

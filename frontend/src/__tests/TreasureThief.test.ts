@@ -4,7 +4,6 @@ import {
 	connectDungeonFloors,
 	generateDungeonRun,
 } from "../domain/dungeon/DungeonRun";
-import { FLOOR } from "../domain/dungeon/Tiles";
 import { createGameState, type GameState } from "../domain/game/GameState";
 import { damageMonster } from "../domain/game/MonsterDamage";
 import { resolvePlayerAction } from "../domain/game/PlayerActions";
@@ -58,29 +57,22 @@ const types = (state: GameState, from = 0) =>
 	state.activityHistory.entries.slice(from).map(({ event }) => event.type);
 
 describe("Treasure thief", () => {
-	it("marks your tile, then steals 15% of your carried gold if you stay, without attacking", () => {
-		const prepared = act(encounter());
-		expect(prepared.monsters[0].intent).toEqual({
-			type: "preparing-theft",
-			target: { row: 1, col: 5 },
-		});
-		expect(types(prepared)).toEqual(["monster-theft-prepared"]);
-		const robbed = act(prepared);
+	it("snatches 15% of your carried gold the moment it reaches you, without attacking", () => {
+		const robbed = act(encounter());
 		expect(robbed.gold).toBe(255);
 		expect(robbed.monsters[0]).toMatchObject({
 			intent: { type: "idle" },
-			theft: { gold: 45, turn: 2 },
+			theft: { gold: 45, turn: 1 },
 		});
-		expect(types(robbed, 1)).toEqual(["monster-theft-hit"]);
+		expect(types(robbed)).toEqual(["monster-theft-hit"]);
 		expect(robbed.player).toEqual(encounter().player);
+		// From two tiles away it steps in and steals in the same action.
+		const closing = act(encounter({ coordinate: { row: 1, col: 7 } }));
+		expect(closing.gold).toBe(255);
+		expect(closing.monsters[0].coordinate).toEqual({ row: 1, col: 6 });
 	});
 
-	it("takes nothing when you step off the marked tile, and never closes in on an empty purse", () => {
-		const prepared = act(encounter());
-		const dodged = act(prepared, { type: "move", direction: "left" });
-		expect(dodged.gold).toBe(300);
-		expect(dodged.monsters[0].theft).toBeUndefined();
-		expect(types(dodged, 1)).toContain("monster-theft-avoided");
+	it("never closes in on an empty purse, and Web holds it short of you", () => {
 		const broke = act(act(encounter({}, 0)));
 		expect(broke.monsters[0]).toMatchObject({
 			intent: { type: "idle" },
@@ -88,10 +80,14 @@ describe("Treasure thief", () => {
 		});
 		expect(broke.player).toEqual(encounter().player);
 		expect(types(broke)).toEqual([]);
+		const far = encounter({ coordinate: { row: 1, col: 7 } });
+		const held = act(applyTimedEffect(far, far.monsters[0], "rooted"));
+		expect(held.gold).toBe(300);
+		expect(held.monsters[0].coordinate).toEqual({ row: 1, col: 7 });
 	});
 
 	it("runs with its haul and slips away after 20 phases, unless Web holds it", () => {
-		let state = act(act(encounter()));
+		let state = act(encounter());
 		const start = state.monsters[0].coordinate.col;
 		state = act(state);
 		expect(state.monsters[0].coordinate.col).toBe(start + 1);
@@ -119,22 +115,9 @@ describe("Treasure thief", () => {
 		expect(types(slain)).toContain("monster-theft-recovered");
 	});
 
-	it("saves a prepared theft and a fleeing haul, and rejects a theft from any other monster", () => {
+	it("saves a fleeing haul, and rejects a theft from any other monster", () => {
 		const original = restoreSave(savedAdventure());
 		const [first] = original.state.monsters;
-		const terrain = original.state.run.floors[first.floorNumber - 1].terrain;
-		const target = [
-			{ row: -1, col: 0 },
-			{ row: 1, col: 0 },
-			{ row: 0, col: -1 },
-			{ row: 0, col: 1 },
-		]
-			.map(({ row, col }) => ({
-				row: first.coordinate.row + row,
-				col: first.coordinate.col + col,
-			}))
-			.find(({ row, col }) => terrain[row]?.[col] === FLOOR);
-		if (!target) throw new Error("Expected an open tile beside the monster");
 		const placed = thief({
 			id: `${first.floorNumber}:${THIEF_SPAWN_ID}`,
 			floorNumber: first.floorNumber,
@@ -156,26 +139,15 @@ describe("Treasure thief", () => {
 					),
 				),
 			);
-		for (const monster of [
-			{ ...placed, intent: { type: "preparing-theft" as const, target } },
-			{ ...placed, theft: { gold: 45, turn: original.state.turn } },
-		]) {
-			const parsed = save(monster);
-			if (!parsed.ok) throw new Error(parsed.error);
-			expect(
-				restoreSave(parsed.value).state.monsters.find(
-					(m) => m.id === placed.id,
-				),
-			).toEqual(monster);
-		}
+		const fleeing = {
+			...placed,
+			theft: { gold: 45, turn: original.state.turn },
+		};
+		const parsed = save(fleeing);
+		if (!parsed.ok) throw new Error(parsed.error);
 		expect(
-			save({
-				...placed,
-				kind: "goblin",
-				health: 4,
-				intent: { type: "preparing-theft", target },
-			}).ok,
-		).toBe(false);
+			restoreSave(parsed.value).state.monsters.find((m) => m.id === placed.id),
+		).toEqual(fleeing);
 		expect(
 			save({
 				...placed,
