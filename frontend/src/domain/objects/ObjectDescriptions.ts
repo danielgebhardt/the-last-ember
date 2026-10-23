@@ -94,6 +94,11 @@ const hints: Record<DungeonObjectKind, { fresh: string; spent: string }> = {
 			"Press E within reach to review the gold-for-XP offering. Escape cancels freely.",
 		spent: "Already blessed; it accepts no further offering.",
 	},
+	"cracked-wall": {
+		fresh:
+			"Press E within reach to break through. Something lies sealed behind it. One turn.",
+		spent: "Broken open; the vault behind it is yours to search.",
+	},
 	gold: {
 		fresh: "Walk onto the coins to collect them without bag space.",
 		spent: "Already collected.",

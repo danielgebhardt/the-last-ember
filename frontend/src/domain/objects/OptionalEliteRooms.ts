@@ -9,6 +9,7 @@ import {
 } from "../monsters/MonsterLocations";
 import { maximumMonsterHealth } from "../monsters/MonsterStats";
 import type { DungeonObject } from "./DungeonObject";
+import { sealedVaultTiles } from "./SecretVaults";
 
 type Geometry = Pick<DungeonFloor, "terrain" | "rooms">;
 type Chamber = { room: Room; gate: Coordinate };
@@ -80,11 +81,13 @@ export const findOptionalEliteRooms = (
 	return chambers;
 };
 
-export const sealedEliteTiles = (
+// Tiles nothing may be placed on or moved into: elite chambers behind closed gates and
+// secret vaults behind unopened cracked walls.
+export const sealedTiles = (
 	floor: Geometry & { floorNumber: number },
 	objects: readonly DungeonObject[],
 ): ReadonlySet<string> => {
-	const tiles = new Set<string>();
+	const tiles = sealedVaultTiles(floor, objects);
 	for (const object of objects) {
 		if (
 			object.floorNumber !== floor.floorNumber ||

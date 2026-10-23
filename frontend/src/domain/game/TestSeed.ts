@@ -30,6 +30,7 @@ import {
 	type DungeonObjectKind,
 	OBJECT_DEFINITIONS,
 } from "../objects/DungeonObject";
+import { carveFloorVault } from "../objects/SecretVaults";
 import type { Difficulty } from "./Difficulty";
 import { createGameState, type GameState } from "./GameState";
 import { maximumMana } from "./Mana";
@@ -53,9 +54,10 @@ export const randomAdventureSeed = (random: () => number = Math.random) => {
 // sources and monsters join the test floors without editing this file. The champion,
 // the reflection and the Ember Warden only exist through their encounters (elite gate,
 // mirror, the ember on the generated final floor).
+// A cracked wall needs solid rock behind a room, so floor 1 carves a real vault instead.
 const ENCOUNTERS = (
 	Object.keys(OBJECT_DEFINITIONS) as DungeonObjectKind[]
-).filter((kind) => kind !== "door");
+).filter((kind) => kind !== "door" && kind !== "cracked-wall");
 const AFFLICTION_SOURCES = (
 	Object.keys(MONSTER_DEFINITIONS) as MonsterKind[]
 ).filter(
@@ -84,9 +86,11 @@ type AuthoredFloor = Readonly<{
 const authoredFloor = (
 	floorNumber: number,
 	roomCount: number,
+	// Solid rock below the bottom rooms, room for a vault.
+	extraRows = 0,
 ): AuthoredFloor => {
 	const perSide = Math.ceil(roomCount / 2);
-	const rows = 2 * ROOM_SIZE + 5;
+	const rows = 2 * ROOM_SIZE + 5 + extraRows;
 	const cols = (ROOM_SIZE + 1) * perSide + 1;
 	const corridor = ROOM_SIZE + 2;
 	const terrain = Array.from({ length: rows }, () =>
@@ -154,7 +158,7 @@ const testRun = ({
 		generateDungeonRun(TEST_SEED, floorCount, dungeon),
 	);
 	const authored = [
-		authoredFloor(1, ENCOUNTERS.length + 1),
+		authoredFloor(1, ENCOUNTERS.length + 1, 4),
 		authoredFloor(2, AFFLICTION_SOURCES.length),
 		authoredFloor(3, BESTIARY.length),
 	];
@@ -294,14 +298,27 @@ export const createTestSeedState = (
 	const equipment = createStartingEquipment();
 	const maxHealth = maximumHealth(progression, equipment);
 	const knownSpells = Object.keys(SPELL_DEFINITIONS) as SpellKind[];
+	// Floor 1 always hides a vault behind its first bottom-room wall with rock behind it.
+	const vault = carveFloorVault(
+		base.run.floors[0],
+		() => 0,
+		() => 0,
+	);
 	return {
 		...base,
+		run: vault
+			? { ...base.run, floors: [vault.floor, ...base.run.floors.slice(1)] }
+			: base.run,
 		monsters: [
 			...markFirstRemedySources(content.monsters),
 			...deeper(base.monsters),
 		],
-		objects: [...content.objects, ...deeper(base.objects)],
-		floorItems: deeper(base.floorItems),
+		objects: [
+			...content.objects,
+			...(vault?.objects ?? []),
+			...deeper(base.objects),
+		],
+		floorItems: [...(vault?.floorItems ?? []), ...deeper(base.floorItems)],
 		gold: 10000,
 		progression,
 		player: { health: maxHealth, maxHealth },

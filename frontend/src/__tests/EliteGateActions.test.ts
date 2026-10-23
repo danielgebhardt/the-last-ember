@@ -13,7 +13,7 @@ import { createGameState } from "../domain/game/GameState";
 import { resolvePlayerAction } from "../domain/game/PlayerActions";
 import { coordinateKey } from "../domain/monsters/MonsterLocations";
 import { navigationRun } from "../domain/objects/NavigationTerrain";
-import { sealedEliteTiles } from "../domain/objects/OptionalEliteRooms";
+import { sealedTiles } from "../domain/objects/OptionalEliteRooms";
 import {
 	createSaveDocument,
 	parseSave,
@@ -30,7 +30,7 @@ const encounter = () => {
 	const gate = state.objects.find((o) => o.kind === "elite-door");
 	if (!gate) throw new Error("Expected seeded gate");
 	const floor = state.run.floors[gate.floorNumber - 1],
-		sealed = sealedEliteTiles(floor, state.objects);
+		sealed = sealedTiles(floor, state.objects);
 	const outside = [
 		{ row: gate.coordinate.row - 1, col: gate.coordinate.col },
 		{ row: gate.coordinate.row, col: gate.coordinate.col + 1 },

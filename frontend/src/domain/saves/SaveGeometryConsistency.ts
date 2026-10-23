@@ -6,9 +6,14 @@ import { forgeRiskyOutcome } from "../objects/ForgottenForge";
 import { mirrorShatterOutcome } from "../objects/MirrorOfShadows";
 import {
 	findOptionalEliteRooms,
-	sealedEliteTiles,
+	sealedTiles,
 } from "../objects/OptionalEliteRooms";
 import { portalDestinationFloor } from "../objects/RunicPortal";
+import {
+	blocksAsWall,
+	isCrackedWall,
+	VAULT_MIN_FLOOR,
+} from "../objects/SecretVaults";
 import { wellOutcome } from "../objects/WishingWell";
 import {
 	sameCoordinate,
@@ -86,6 +91,21 @@ export const hasConsistentGeometry = (document: SaveDocument): boolean => {
 	)
 		return false;
 	if (objects.filter((o) => o.kind === "sarcophagus").length > 1) return false;
+	// A cracked wall guards at most one vault per floor from floor 2; only a cracked wall
+	// is ever noticed, and one is opened only after it was noticed.
+	if (
+		!unique(
+			objects.filter(isCrackedWall).map((object) => object.floorNumber),
+		) ||
+		objects.some(
+			(object) =>
+				(object.noticed !== undefined && !isCrackedWall(object)) ||
+				(isCrackedWall(object) &&
+					(object.floorNumber < VAULT_MIN_FLOOR ||
+						(object.activated && !object.noticed))),
+		)
+	)
+		return false;
 	if (objects.filter((o) => o.kind === "forge").length > 1) return false;
 	if (objects.filter((o) => o.kind === "well").length > 1) return false;
 	if (objects.filter((o) => o.kind === "mirror").length > 1) return false;
@@ -166,7 +186,7 @@ export const hasConsistentGeometry = (document: SaveDocument): boolean => {
 			const floor = run.floors[object.floorNumber - 1];
 			if (
 				!floor ||
-				sealedEliteTiles(
+				sealedTiles(
 					{ ...floor, terrain: floor.terrain.map((row) => row.split("")) },
 					objects.map((object) =>
 						object.kind === "elite-door"
@@ -207,7 +227,10 @@ export const hasConsistentGeometry = (document: SaveDocument): boolean => {
 			!object.id.startsWith(
 				`floor:${object.floorNumber}:object:${object.kind}:`,
 			) ||
-			!walkable(object.floorNumber, object.coordinate) ||
+			// An unopened cracked wall stands on wall terrain; everything else on floor.
+			(blocksAsWall(object)
+				? walkable(object.floorNumber, object.coordinate)
+				: !walkable(object.floorNumber, object.coordinate)) ||
 			protectedFloorLocations(run, object.floorNumber).some((tile) =>
 				sameCoordinate(tile, object.coordinate),
 			) ||

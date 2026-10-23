@@ -1,4 +1,5 @@
 // @vitest-environment node
+
 import { describe, expect, it } from "vitest";
 import { createAdventureSession } from "../components/game/useAdventureSession";
 import {
@@ -27,6 +28,7 @@ import {
 	type DungeonObjectKind,
 	OBJECT_DEFINITIONS,
 } from "../domain/objects/DungeonObject";
+import { isCrackedWall } from "../domain/objects/SecretVaults";
 import { COMPACT_TEST_CONFIGURATION } from "./TestRunConfiguration";
 
 const session = () =>
@@ -132,11 +134,22 @@ describe("reserved test seed", () => {
 					? state.run.playerCoordinate
 					: floor.upStair?.coordinate;
 			if (!start) throw new Error(`floor ${floor.floorNumber} has no entry`);
+			// A cracked wall opens with E, so the vault behind it counts as reachable.
+			const cracks = new Set(
+				state.objects
+					.filter(
+						(o) => o.floorNumber === floor.floorNumber && isCrackedWall(o),
+					)
+					.map((o) => `${o.coordinate.row},${o.coordinate.col}`),
+			);
 			const seen = new Set<string>();
 			const queue = [start];
 			for (const point of queue) {
 				const key = `${point.row},${point.col}`;
-				if (seen.has(key) || floor.terrain[point.row]?.[point.col] !== ".")
+				if (
+					seen.has(key) ||
+					(floor.terrain[point.row]?.[point.col] !== "." && !cracks.has(key))
+				)
 					continue;
 				seen.add(key);
 				queue.push(

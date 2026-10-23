@@ -29,6 +29,7 @@ import { placeTreasureThieves } from "../monsters/TreasureThief";
 import type { DungeonObject } from "../objects/DungeonObject";
 import { spawnRunObjects } from "../objects/ObjectPlacement";
 import { addOptionalEliteRooms } from "../objects/OptionalEliteRooms";
+import { carveSecretVaults } from "../objects/SecretVaults";
 import {
 	createTownPotionStock,
 	createTownScrollStock,
@@ -138,6 +139,8 @@ export const createGameState = (
 		objects,
 		difficulty,
 	);
+	// Vaults carve solid rock last, so no other placement sees or moves around them.
+	const vaults = carveSecretVaults(run);
 	return {
 		rareEquipment: rare.allocation,
 		townEquipmentPurchases: [],
@@ -148,10 +151,10 @@ export const createGameState = (
 		townStorage: [],
 		townEquipmentStock: createTownEquipmentStock(),
 		difficulty,
-		run,
+		run: vaults.run,
 		escape: null,
 		merchantStock: createMerchantStock(),
-		objects,
+		objects: [...objects, ...vaults.objects],
 		gold: STARTING_GOLD,
 		turn: 0,
 		knownSpells: createKnownSpells(),
@@ -168,9 +171,12 @@ export const createGameState = (
 		potionHotbar: createStartingPotionHotbar(),
 		// The Warden carries the flame and drops it when it falls. The flame's tile still
 		// anchors the Warden and shapes placement, so the rest of the floor is unchanged.
-		floorItems: [...floorItems, ...rare.items].filter(
-			(entry) => !warden || entry.item.kind !== "cure",
-		),
+		floorItems: [
+			...[...floorItems, ...rare.items].filter(
+				(entry) => !warden || entry.item.kind !== "cure",
+			),
+			...vaults.floorItems,
+		],
 		monsters: [
 			...(difficulty === 1
 				? markFirstRemedySources(encounters.monsters)

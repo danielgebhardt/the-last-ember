@@ -51,8 +51,12 @@ export default async function prepareFixtures() {
 			difficulty: 1.25,
 		};
 		const fog = { ...DEFAULT_FOG_CONFIGURATION, enabled: false };
-		const run = connectDungeonFloors(generateDungeonRun(123, 5, configuration));
-		const fresh = createGameState(run, configuration.difficulty);
+		const fresh = createGameState(
+			connectDungeonFloors(generateDungeonRun(123, 5, configuration)),
+			configuration.difficulty,
+		);
+		// The adventure's own run, including any secret vaults it carved.
+		const { run } = fresh;
 		const { createTownLocation } = await load(
 			"/src/domain/town/TownLocation.ts",
 		);

@@ -1,4 +1,5 @@
 // @vitest-environment node
+
 import { expect, it } from "vitest";
 import {
 	connectDungeonFloors,
@@ -11,6 +12,7 @@ import { experienceThreshold } from "../domain/game/Progression";
 import { ITEM_DEFINITIONS } from "../domain/items/Item";
 import { protectedFloorLocations } from "../domain/monsters/MonsterLocations";
 import { objectChoices } from "../domain/objects/ObjectChoices";
+import { sealedTiles } from "../domain/objects/OptionalEliteRooms";
 import {
 	createSaveDocument,
 	parseSave,
@@ -127,7 +129,14 @@ it("rare room finds have bounded independent placement without changing terrain 
 	);
 	expect(rare.length).toBeGreaterThan(0);
 	expect(rare.length).toBeLessThan(12);
-	expect(state.run).toBe(run);
+	// Only secret vault pockets are carved, behind still-solid walls.
+	for (const [index, floor] of state.run.floors.entries()) {
+		const pocket = sealedTiles(floor, state.objects);
+		for (const [r, row] of floor.terrain.entries())
+			for (const [c, tile] of row.entries())
+				if (!pocket.has(`${r}:${c}`))
+					expect(tile).toBe(run.floors[index].terrain[r][c]);
+	}
 	expect(createGameState(run).objects).toEqual(state.objects);
 	for (const object of rare) {
 		expect(protectedFloorLocations(run, object.floorNumber)).not.toContainEqual(

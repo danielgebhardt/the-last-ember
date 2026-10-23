@@ -14,6 +14,7 @@ import { gazeIntoMirror } from "./MirrorOfShadows";
 import { describeObject } from "./ObjectDescriptions";
 import { openDiscovery } from "./RareDiscoveries";
 import { stepThroughPortal } from "./RunicPortal";
+import { hiddenCrackedWall, openCrackedWall } from "./SecretVaults";
 import { openChest } from "./TreasureChests";
 import { offerAtWell } from "./WishingWell";
 export type ObjectChoice =
@@ -51,6 +52,7 @@ export const nearbyInteractionObjects = (state: GameState) => {
 			object.floorNumber === state.run.activeFloor &&
 			orthogonalDistance(object.coordinate, state.run.playerCoordinate) <= 1 &&
 			object.kind !== "gold" &&
+			!hiddenCrackedWall(object) &&
 			objectAvailable(object),
 	);
 	const player = state.run.playerCoordinate;
@@ -116,6 +118,7 @@ export const interactObject = (
 		return drawFountain(state, object, action.choice);
 	if (object.kind === "trap") return disarmTrap(state, object);
 	if (object.kind === "chest") return openChest(state, object);
+	if (object.kind === "cracked-wall") return openCrackedWall(state, object);
 
 	if (
 		object.activated &&

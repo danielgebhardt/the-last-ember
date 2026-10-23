@@ -18,7 +18,7 @@ import {
 import { navigationRun } from "../domain/objects/NavigationTerrain";
 import {
 	findOptionalEliteRooms,
-	sealedEliteTiles,
+	sealedTiles,
 } from "../domain/objects/OptionalEliteRooms";
 import {
 	createSaveDocument,
@@ -59,7 +59,7 @@ describe("Generated optional elite rooms", () => {
 						gate.coordinate.row
 					][gate.coordinate.col],
 				).toBe("#");
-				const sealed = sealedEliteTiles(floor, state.objects);
+				const sealed = sealedTiles(floor, state.objects);
 				expect(
 					state.monsters.filter(
 						(m) =>

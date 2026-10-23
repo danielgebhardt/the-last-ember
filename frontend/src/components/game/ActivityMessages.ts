@@ -154,6 +154,10 @@ export const formatActivityEvent = (event: ActivityEvent): string => {
 			return `${prefix}The ${MONSTER_DEFINITIONS[event.monster].name}'s blinding strike misses you.`;
 		case "monster-blind-avoided":
 			return `${prefix}The ${MONSTER_DEFINITIONS[event.monster].name}'s blinding strike finds only empty air.`;
+		case "cracked-wall-noticed":
+			return `${prefix}You notice a crack running through the wall here. Something lies behind it.`;
+		case "vault-opened":
+			return `${prefix}You break through the cracked wall into a hidden vault.`;
 		case "blade-bound":
 			return `${prefix}The Hungering Blade binds to your hand. Only a Remove Curse scroll will free it.`;
 		case "blade-hungers":

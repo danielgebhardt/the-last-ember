@@ -5,6 +5,7 @@ import { orthogonalDistance } from "../../domain/monsters/MonsterLocations";
 import type { DungeonObject } from "../../domain/objects/DungeonObject";
 import { isMimicChest, MIMIC_TELL } from "../../domain/objects/MimicChests";
 import { describeObject } from "../../domain/objects/ObjectDescriptions";
+import { hiddenCrackedWall } from "../../domain/objects/SecretVaults";
 import { chestForesight } from "../../domain/objects/SeersSight";
 import { Button } from "../ui/button";
 import DungeonObjectIcon from "./DungeonObjectIcon";
@@ -22,6 +23,7 @@ const ObjectContext = ({
 		(object) =>
 			object.floorNumber === state.run.activeFloor &&
 			objectAvailable(object) &&
+			!hiddenCrackedWall(object) &&
 			!(object.kind === "gold" && object.activated) &&
 			orthogonalDistance(object.coordinate, state.run.playerCoordinate) <= 1 &&
 			(!visible || visible[object.coordinate.row]?.[object.coordinate.col]),

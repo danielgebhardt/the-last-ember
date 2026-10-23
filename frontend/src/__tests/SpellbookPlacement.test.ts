@@ -33,7 +33,9 @@ it("places each selected book once within its floor band without changing ordina
 			(entry) =>
 				!books.includes(entry) &&
 				entry.item.kind !== "cure" &&
-				entry.item.kind !== "exit-scroll",
+				entry.item.kind !== "exit-scroll" &&
+				// Secret vaults add their reward after ordinary loot.
+				!entry.item.id.includes(":object:cracked-wall:"),
 		),
 	).toEqual(
 		spawnRunItems(

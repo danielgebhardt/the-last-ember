@@ -198,6 +198,8 @@ const eventFields = {
 	"blade-bound": {},
 	"blade-hungers": {},
 	"blade-freed": {},
+	"cracked-wall-noticed": {},
+	"vault-opened": {},
 	"gold-collected": { amount: integer(1) },
 	"merchant-bought": { item: itemKind, gold: integer(1) },
 	"merchant-sold": { item: itemKind, gold: integer(1) },
@@ -510,6 +512,7 @@ const documentShape = object({
 				floorNumber,
 				coordinate,
 				activated: boolean,
+				noticed: optional((value) => value === true),
 				sarcophagusOutcome: optional(
 					oneOf(["treasure", "guardian", "both", "empty"]),
 				),

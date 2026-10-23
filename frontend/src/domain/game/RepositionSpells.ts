@@ -10,7 +10,7 @@ import {
 	protectedFloorLocations,
 } from "../monsters/MonsterLocations";
 import { navigationRun } from "../objects/NavigationTerrain";
-import { sealedEliteTiles } from "../objects/OptionalEliteRooms";
+import { sealedTiles } from "../objects/OptionalEliteRooms";
 import { appendActivityEvents } from "./ActivityHistory";
 import type { GameState } from "./GameState";
 import type { SpellKind } from "./Spells";
@@ -35,7 +35,7 @@ export const repositionSpell = (
 			protectedTiles.add(coordinateKey(monster.coordinate));
 	const terrain =
 		navigationRun(state).floors[state.run.activeFloor - 1].terrain;
-	for (const key of sealedEliteTiles(
+	for (const key of sealedTiles(
 		state.run.floors[state.run.activeFloor - 1],
 		state.objects,
 	))

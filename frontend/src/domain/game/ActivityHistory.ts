@@ -259,6 +259,7 @@ export type ActivityEvent = { turn: number } & (
 	| { type: "mimic-revealed" }
 	| { type: "ring-displaced" }
 	| { type: "blade-bound" | "blade-hungers" | "blade-freed" }
+	| { type: "cracked-wall-noticed" | "vault-opened" }
 	| { type: "experience-gained"; amount: number }
 	| { type: "level-gained"; level: number; healthGain: number }
 	| {

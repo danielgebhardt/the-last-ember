@@ -60,6 +60,7 @@ import {
 	type InteractAction,
 	interactObject,
 } from "../objects/ObjectInteraction";
+import { noticeCrackedWalls } from "../objects/SecretVaults";
 import { type SanctuaryAction, treatAtSanctuary } from "../town/Sanctuary";
 import { resolveTownAction } from "../town/TownActions";
 import {
@@ -374,12 +375,15 @@ export const resolvePlayerAction = (
 						),
 					),
 				);
-	const resolved = monsterPhase
-		? recoverManaAfterTurn(
-				advancePlayerAfflictions(monsterPhase),
-				suppressesManaRecovery(monsterPhase.afflictions),
-			)
-		: responseState;
+	// Passing close to a hidden cracked wall notices it, wherever the turn left you.
+	const resolved = noticeCrackedWalls(
+		monsterPhase
+			? recoverManaAfterTurn(
+					advancePlayerAfflictions(monsterPhase),
+					suppressesManaRecovery(monsterPhase.afflictions),
+				)
+			: responseState,
+	);
 	return {
 		state:
 			action.type === "exit-dungeon"

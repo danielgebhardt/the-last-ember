@@ -6,7 +6,7 @@ import {
 	protectedFloorLocations,
 } from "../monsters/MonsterLocations";
 import type { DungeonObject } from "../objects/DungeonObject";
-import { sealedEliteTiles } from "../objects/OptionalEliteRooms";
+import { sealedTiles } from "../objects/OptionalEliteRooms";
 import { merchantsEnabled } from "./MerchantAvailability";
 export const merchantFloors = (floorCount: number): number[] =>
 	Array.from(
@@ -50,7 +50,7 @@ export const placeMerchants = (
 				.map((o) => coordinateKey(o.coordinate)),
 		);
 		// An opened optional chamber must not become a merchant location either.
-		const sealed = sealedEliteTiles(
+		const sealed = sealedTiles(
 			floor,
 			objects.map((object) =>
 				object.kind === "elite-door" ? { ...object, activated: false } : object,

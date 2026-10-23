@@ -14,6 +14,7 @@ import {
 	isDoor,
 	objectLabel,
 } from "../../domain/objects/DungeonObject";
+import { hiddenCrackedWall } from "../../domain/objects/SecretVaults";
 import ItemIcon from "../items/ItemIcon";
 import LootPileIcon from "../items/LootPileIcon";
 import MonsterIcon from "../monsters/MonsterIcon.tsx";
@@ -301,6 +302,7 @@ const DungeonRow = memo(
 									? dungeonObjects?.find(
 											(object) =>
 												object.coordinate.col === columnIndex &&
+												!hiddenCrackedWall(object) &&
 												(seen || remembered || isDoor(object)),
 										)
 									: undefined

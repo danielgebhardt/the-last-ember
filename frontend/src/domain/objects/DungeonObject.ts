@@ -165,6 +165,17 @@ export const OBJECT_DEFINITIONS = {
 		chance: 0.12,
 		placement: "room",
 	},
+	// Carved after generation by SecretVaults, never by the room or discovery passes.
+	"cracked-wall": {
+		name: "Cracked wall",
+		freshLabel: "cracked wall",
+		usedLabel: "broken wall",
+		minFloor: 2,
+		maxFloor: 20,
+		maxPerFloor: 1,
+		chance: 0,
+		placement: "vault",
+	},
 	archive: {
 		name: "Abandoned spell archive",
 		freshLabel: "abandoned spell archive",
@@ -183,6 +194,8 @@ export type DungeonObject = Readonly<{
 	floorNumber: number;
 	coordinate: Coordinate;
 	activated: boolean;
+	// A cracked wall you have passed close to; until then it looks like any wall.
+	noticed?: true;
 	sarcophagusOutcome?: import("./AncientSarcophagi").SarcophagusOutcome;
 	forgeResult?: import("./ForgottenForge").ForgeResult;
 	wellResult?: import("./WishingWell").WellResult;

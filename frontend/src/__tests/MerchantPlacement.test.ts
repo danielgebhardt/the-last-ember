@@ -13,7 +13,7 @@ import {
 	coordinateKey,
 	protectedFloorLocations,
 } from "../domain/monsters/MonsterLocations";
-import { sealedEliteTiles } from "../domain/objects/OptionalEliteRooms";
+import { sealedTiles } from "../domain/objects/OptionalEliteRooms";
 import { COMPACT_TEST_CONFIGURATION } from "./TestRunConfiguration";
 
 describe("Wandering merchant placement", () => {
@@ -52,7 +52,7 @@ describe("Wandering merchant placement", () => {
 				protectedFloorLocations(state.run, vendor.floorNumber),
 			).not.toContainEqual(vendor.coordinate);
 			expect(
-				sealedEliteTiles(floor, objects).has(coordinateKey(vendor.coordinate)),
+				sealedTiles(floor, objects).has(coordinateKey(vendor.coordinate)),
 			).toBe(false);
 			expect(
 				[

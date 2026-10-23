@@ -15,6 +15,7 @@ import type {
 	DungeonObject,
 	DungeonObjectKind,
 } from "../../domain/objects/DungeonObject";
+import CrackedWallIcon from "./CrackedWallIcon";
 import ForgeIcon from "./ForgeIcon";
 import FountainIcon from "./FountainIcon";
 import MerchantIcon from "./MerchantIcon";
@@ -46,6 +47,7 @@ const icons: Record<
 	fountain: FountainIcon,
 	throne: ThroneIcon,
 	shrine: Landmark,
+	"cracked-wall": CrackedWallIcon,
 };
 const DungeonObjectIcon = ({ object }: { object: DungeonObject }) => {
 	if (!objectAvailable(object)) return null;
