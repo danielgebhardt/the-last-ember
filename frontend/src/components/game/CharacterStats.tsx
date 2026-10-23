@@ -52,7 +52,10 @@ const CharacterStats = ({
 		effects,
 		afflictions,
 	);
-	const combat = deriveCombatStats(equipment, progression, effects, gold);
+	const combat = deriveCombatStats(equipment, progression, effects, {
+		gold,
+		player,
+	});
 	const armor = armorContributions(equipment);
 	const accuracy = deriveAccuracy(
 		progression,
@@ -150,6 +153,7 @@ const CharacterStats = ({
 						Base {combat.baseAttack} + Strength {combat.strengthBonus} + weapon{" "}
 						{combat.weaponBonus}
 						{combat.goldBonus > 0 && ` + gold ${combat.goldBonus}`}
+						{combat.rageBonus > 0 && ` + rage ${combat.rageBonus}`}
 						{combat.perkAttack > 0 && ` + perks ${combat.perkAttack}`}
 						{by("meleeDamage") && ` · ${by("meleeDamage")} −1`}
 					</p>
@@ -176,6 +180,7 @@ const CharacterStats = ({
 					</output>
 					<p className={hint}>
 						Shield {armor.shield} + chest {armor.chest} + head {armor.head}
+						{combat.armorPenalty > 0 && ` − weapon ${combat.armorPenalty}`}
 						{equipmentBonuses(equipment).armor > 0 &&
 							` + rings ${equipmentBonuses(equipment).armor}`}
 						{playerEffectBonuses(effects).armor > 0 && " + spell 2"}

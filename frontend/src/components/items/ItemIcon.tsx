@@ -15,6 +15,7 @@ import {
 import type { ComponentType, SVGProps } from "react";
 import { ITEM_DEFINITIONS, type ItemKind } from "../../domain/items/Item";
 import type { PotionKind } from "../../domain/items/PotionHotbar";
+import BloodrageAxeIcon from "./BloodrageAxeIcon";
 import DragonMailIcon from "./DragonMailIcon";
 import EmberIcon from "./EmberIcon";
 import ExitScrollIcon from "./ExitScrollIcon";
@@ -41,6 +42,7 @@ const icons: Record<
 	"warding-cloak": WardingCloakIcon,
 	"spellguard-shield": SpellguardShieldIcon,
 	"goldbound-blade": GoldboundBladeIcon,
+	"bloodrage-axe": BloodrageAxeIcon,
 	"enchantment-scroll": ScrollText,
 	"remove-curse-scroll": Scroll,
 	"exit-scroll": ExitScrollIcon,
@@ -67,6 +69,7 @@ const icons: Record<
 // Rare weapons carry their own developer-chosen colors; everything else uses its type's.
 const KIND_COLORS: Partial<Record<ItemKind, string>> = {
 	"goldbound-blade": "text-[#a96e00] dark:text-[#ffd166]",
+	"bloodrage-axe": "text-[#9a1831] dark:text-[#e04a65]",
 };
 const isRingKind = (kind: ItemKind): kind is RingKind =>
 	ITEM_DEFINITIONS[kind].type === "ring";

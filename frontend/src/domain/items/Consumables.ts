@@ -16,6 +16,7 @@ import type { PlayerStats } from "../game/PlayerStats";
 import type { PlayerEffectKind } from "../game/TimedEffects";
 import { type Bag, removeBagItem } from "./Bag";
 import { ITEM_DEFINITIONS, type ItemKind } from "./Item";
+import { bloodrageHealing } from "./ItemValues";
 
 export type ConsumeAction = { type: "consume"; itemId: string };
 export type ConsumptionEvent =
@@ -136,7 +137,12 @@ export const consumeItem = (
 	}
 
 	const { resource } = definition.recovery;
-	const amount = definition.recovery.amount + herbalistBonus(state.progression);
+	const base = definition.recovery.amount + herbalistBonus(state.progression);
+	// A bloodrage weapon weakens health potions only.
+	const amount =
+		resource === "health"
+			? bloodrageHealing(state.equipment.mainHand, base)
+			: base;
 	const current = resource === "health" ? player.health : mana;
 	const maximum =
 		resource === "health"

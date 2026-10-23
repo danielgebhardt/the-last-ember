@@ -25,9 +25,10 @@ import { tacticalSnapshot } from "./TacticalReplayTestHelpers";
 
 const blade = { id: "blade", kind: "goldbound-blade" as const };
 const attack = (gold: number, mainHand: ItemInstance = blade) =>
-	deriveCombatStats(createEquipment(mainHand), createProgression(), [], gold)
-		.attack;
-// A goblin beside the player in a corridor, struck once by a fixed lowest-damage hit.
+	deriveCombatStats(createEquipment(mainHand), createProgression(), [], {
+		gold,
+	}).attack;
+// An ogre beside the player in a corridor, struck once by a fixed lowest-damage hit.
 const strike = (gold: number) => {
 	const base = createGameState(createCorridorEncounter());
 	const state: GameState = {

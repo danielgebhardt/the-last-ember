@@ -29,6 +29,14 @@ export type ItemDefinition = {
 	dropWeight: number;
 	// Main-hand damage that grows with carried gold: +1 per goldPerPoint, up to maxBonus.
 	goldBound?: Readonly<{ goldPerPoint: number; maxBonus: number }>;
+	// Main-hand rage: +1 attack per missingShare of maximum health lost, up to maxBonus;
+	// costs armor and weakens health potions to healingShare while wielded.
+	bloodrage?: Readonly<{
+		missingShare: number;
+		maxBonus: number;
+		armorPenalty: number;
+		healingShare: number;
+	}>;
 };
 export const ITEM_DEFINITIONS = {
 	"cure-disease-potion": {
@@ -112,6 +120,25 @@ export const ITEM_DEFINITIONS = {
 		dropWeight: 0,
 		description:
 			"A plain blade wound with gilded wire that hums near coin. Main hand: +2 attack, plus +1 for every 1,000 gold you carry, up to +4 more. Spending gold weakens it; gold in hand is its edge. Enchantment adds to the base attack.",
+	},
+	"bloodrage-axe": {
+		specialFindOnly: true,
+		name: "Bloodrage Axe",
+		type: "weapon",
+		attackBonus: 3,
+		armor: 0,
+		bloodrage: {
+			missingShare: 0.25,
+			maxBonus: 3,
+			armorPenalty: 1,
+			healingShare: 0.5,
+		},
+		minFloor: 8,
+		maxFloor: 20,
+		foundWeight: 0,
+		dropWeight: 0,
+		description:
+			"A notched axe that drinks its wielder's fury. Main hand: +3 attack, plus +1 for every 25% of your maximum health you are missing, up to +3 more. Swinging it two-handed costs 1 armor, and healing potions restore half as much while you hold it. Enchantment adds to its base attack.",
 	},
 	"spellguard-shield": {
 		specialFindOnly: true,
@@ -825,6 +852,7 @@ export const RARE_EQUIPMENT_KINDS = [
 	"warding-cloak",
 	"spellguard-shield",
 	"goldbound-blade",
+	"bloodrage-axe",
 ] as const;
 export type RareEquipmentKind = (typeof RARE_EQUIPMENT_KINDS)[number];
 export const isRareEquipmentKind = (kind: string): kind is RareEquipmentKind =>
@@ -862,6 +890,18 @@ export const validateItemDefinition = (definition: ItemDefinition): void => {
 			definition.goldBound.maxBonus < 1)
 	)
 		throw new RangeError("Invalid gold-bound weapon scaling.");
+	const rage = definition.bloodrage;
+	if (
+		rage !== undefined &&
+		(definition.type !== "weapon" ||
+			!(rage.missingShare > 0 && rage.missingShare <= 1) ||
+			!Number.isSafeInteger(rage.maxBonus) ||
+			rage.maxBonus < 1 ||
+			!Number.isSafeInteger(rage.armorPenalty) ||
+			rage.armorPenalty < 0 ||
+			!(rage.healingShare > 0 && rage.healingShare <= 1))
+	)
+		throw new RangeError("Invalid bloodrage weapon scaling.");
 	const { minFloor, maxFloor, foundWeight, dropWeight, armor, attackBonus } =
 		definition;
 	if (

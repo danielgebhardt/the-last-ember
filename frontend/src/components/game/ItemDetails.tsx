@@ -142,7 +142,9 @@ const ItemDetails = ({
 						? `Attack bonus +${itemAttackBonus(item)}${
 								"goldBound" in details && details.goldBound
 									? ` · +1 per ${details.goldBound.goldPerPoint.toLocaleString("en-US")} gold carried (max +${details.goldBound.maxBonus})`
-									: ""
+									: "bloodrage" in details && details.bloodrage
+										? ` · +1 per ${details.bloodrage.missingShare * 100}% health missing (max +${details.bloodrage.maxBonus}) · −${details.bloodrage.armorPenalty} armor · health potions restore ${Math.round(details.bloodrage.healingShare * 100)}%`
+										: ""
 							}`
 						: details.type === "ring" && "stats" in details
 							? Object.entries(details.stats)

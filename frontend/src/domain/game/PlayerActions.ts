@@ -611,12 +611,10 @@ const resolveAttack = (
 	const outcome = resolveMeleeAttack(
 		attackProfile(
 			afflictedMeleeAttack(
-				deriveCombatStats(
-					state.equipment,
-					state.progression,
-					state.effects,
-					state.gold,
-				).attack +
+				deriveCombatStats(state.equipment, state.progression, state.effects, {
+					gold: state.gold,
+					player: state.player,
+				}).attack +
 					opportunistBonus(state.progression, monster) +
 					executionerBonus(
 						state.progression,

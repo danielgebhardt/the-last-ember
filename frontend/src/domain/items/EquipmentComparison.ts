@@ -26,12 +26,10 @@ const loadoutStats = (
 	equipment: Equipment,
 ) => {
 	const { progression, effects } = context;
-	const combat = deriveCombatStats(
-		equipment,
-		progression,
-		effects,
-		context.gold,
-	);
+	const combat = deriveCombatStats(equipment, progression, effects, {
+		gold: context.gold,
+		player: context.player,
+	});
 	const accuracy = deriveAccuracy(
 		progression,
 		effects,

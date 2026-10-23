@@ -1,6 +1,8 @@
 import type { Equipment } from "../items/Equipment";
 import { equipmentBonuses } from "../items/EquipmentBonuses";
 import {
+	bloodrageArmorPenalty,
+	bloodrageBonus,
 	goldBoundBonus,
 	itemArmor,
 	itemAttackBonus,
@@ -16,11 +18,20 @@ export const deriveCombatStats = (
 	equipment: Equipment,
 	progression: Progression,
 	effects: readonly TimedEffect[] = [],
-	// Carried gold; only a gold-bound weapon reads it.
-	gold = 0,
+	// Only special weapons read these: carried gold for a gold-bound weapon, current
+	// health for a bloodrage weapon.
+	{
+		gold = 0,
+		player,
+	}: Readonly<{
+		gold?: number;
+		player?: Readonly<{ health: number; maxHealth: number }>;
+	}> = {},
 ) => {
 	const attributes = deriveAttributes(progression, effects, equipment);
 	const goldBonus = goldBoundBonus(equipment.mainHand, gold);
+	const rageBonus = bloodrageBonus(equipment.mainHand, player);
+	const armorPenalty = bloodrageArmorPenalty(equipment.mainHand);
 	const strengthBonus = attributes.strengthModifier;
 	const bonuses = equipmentBonuses(equipment);
 	const weaponBonus = itemAttackBonus(equipment.mainHand);
@@ -43,6 +54,8 @@ export const deriveCombatStats = (
 		baseAttack: BASE_PLAYER_ATTACK_DAMAGE,
 		weaponBonus,
 		goldBonus,
+		rageBonus,
+		armorPenalty,
 		strengthBonus,
 		perkAttack: perkAttack(progression),
 		attack:
@@ -50,12 +63,16 @@ export const deriveCombatStats = (
 			strengthBonus +
 			weaponBonus +
 			goldBonus +
+			rageBonus +
 			perkAttack(progression),
-		armor:
+		armor: Math.max(
+			0,
 			armor +
-			playerEffectBonuses(effects).armor +
-			bonuses.armor +
-			(hasPerk(progression, "iron-hide") ? 1 : 0),
+				playerEffectBonuses(effects).armor +
+				bonuses.armor +
+				(hasPerk(progression, "iron-hide") ? 1 : 0) -
+				armorPenalty,
+		),
 	};
 };
 
