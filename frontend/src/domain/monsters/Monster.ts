@@ -356,6 +356,21 @@ const monsterCatalog = {
 		lootPreferences: {},
 		thief: true,
 	},
+	"treasure-mimic": {
+		name: "treasure mimic",
+		minFloor: 4,
+		maxFloor: 20,
+		// Grows with depth from these floor-4 values; see MonsterStats.
+		maxHealth: 20,
+		attackDamage: 4,
+		experienceReward: 24,
+		detectionRadius: 6,
+		spawnWeight: 1,
+		// Only ever a chest that bites back.
+		spawnEnabled: false,
+		dropChance: 1,
+		lootPreferences: {},
+	},
 	"alarm-sentry": {
 		name: "alarm sentry",
 		minFloor: 3,

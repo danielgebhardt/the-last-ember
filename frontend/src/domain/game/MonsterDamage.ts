@@ -3,6 +3,7 @@ import { isWarden, wardenDrop, wardenFlameDrop } from "../monsters/EmberWarden";
 import { MONSTER_DEFINITIONS, type Monster } from "../monsters/Monster";
 import { resistedDamage } from "../monsters/MonsterResistance";
 import { goldAmount } from "../objects/Gold";
+import { mimicChestDrop } from "../objects/MimicChests";
 import { mirrorFor, reflectionDrop } from "../objects/MirrorOfShadows";
 import { type ActivityEvent, appendActivityEvents } from "./ActivityHistory";
 import type { DamageElement } from "./DamageElements";
@@ -93,6 +94,17 @@ export const damageMonster = (
 		if (flame) {
 			floorItems = [...floorItems, flame];
 			events.push({ type: "warden-fell", turn });
+		}
+		// A mimic gives back the chest it pretended to be.
+		const hoard = mimicChestDrop({ ...state, floorItems }, monster);
+		if (hoard) {
+			floorItems = [...floorItems, hoard];
+			events.push({
+				type: "monster-loot",
+				turn,
+				monster: monster.kind,
+				item: hoard.item.kind,
+			});
 		}
 		// A mirror's reflection always drops that mirror's fixed reward.
 		const mirror = mirrorFor(state.objects, monster);

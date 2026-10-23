@@ -25,6 +25,7 @@ import ShadowStalkerIcon from "./ShadowStalkerIcon";
 import SkeletonIcon from "./SkeletonIcon";
 import SoulWraithIcon from "./SoulWraithIcon";
 import SpiderIcon from "./SpiderIcon";
+import TreasureMimicIcon from "./TreasureMimicIcon";
 import TreasureThiefIcon from "./TreasureThiefIcon";
 import TrollIcon from "./TrollIcon";
 import WardenIcon from "./WardenIcon";
@@ -45,6 +46,11 @@ export const MONSTER_VISUALS: Record<
 		icon: ChampionIcon,
 		color: "text-monster-rust",
 		label: MONSTER_DEFINITIONS["iron-champion"].name,
+	},
+	"treasure-mimic": {
+		icon: TreasureMimicIcon,
+		color: "text-[#99622e] dark:text-[#d9a472]",
+		label: MONSTER_DEFINITIONS["treasure-mimic"].name,
 	},
 	"treasure-thief": {
 		icon: TreasureThiefIcon,

@@ -2,6 +2,7 @@ import { AFFLICTION_DEFINITIONS } from "../game/AfflictionDefinitions";
 import { afflictionTrait } from "../game/AfflictionText";
 import { SPELL_DEFINITIONS } from "../game/Spells";
 import { ITEM_DEFINITIONS } from "../items/Item";
+import { MIMIC_TELL } from "../objects/MimicChests";
 import {
 	MONSTER_DEFINITIONS,
 	type MonsterKind,
@@ -61,6 +62,10 @@ export const monsterTraits = (kind: MonsterKind): readonly string[] => {
 	if (definition.blindingStrike)
 		traits.push(
 			`Blinding strike: when beside you, it marks your tile instead of attacking, then strikes on its next action with a normal melee roll. A landed hit deals normal damage and Blinded (sight 2 tiles and melee to-hit −20 for 30 phases). Step off the marked tile to avoid it; Sleep or Fear cancels it. At least ${definition.blindingStrike.cooldown} phases between strikes. Cleansing potion or the sanctuary cures Blinded.`,
+		);
+	if (kind === "treasure-mimic")
+		traits.push(
+			`A treasure chest that bites. Some chests from floor ${MONSTER_DEFINITIONS["treasure-mimic"].minFloor} are mimics; the nearby notice gives a tell: "${MIMIC_TELL}" Opening one wakes it beside you. Its health and attack grow with depth. When it falls it drops the chest's loot plus its own.`,
 		);
 	if (definition.thief)
 		traits.push(

@@ -3,6 +3,7 @@ import type { GameState } from "../../domain/game/GameState";
 import { objectAvailable } from "../../domain/merchant/MerchantAvailability";
 import { orthogonalDistance } from "../../domain/monsters/MonsterLocations";
 import type { DungeonObject } from "../../domain/objects/DungeonObject";
+import { isMimicChest, MIMIC_TELL } from "../../domain/objects/MimicChests";
 import { describeObject } from "../../domain/objects/ObjectDescriptions";
 import { Button } from "../ui/button";
 import DungeonObjectIcon from "./DungeonObjectIcon";
@@ -45,7 +46,10 @@ const ObjectContext = ({
 										? "Here: "
 										: "Nearby: "}
 								</strong>
-								{describeObject(object)}
+								{describeObject(
+									object,
+									isMimicChest(state.run.seed, object) ? MIMIC_TELL : undefined,
+								)}
 								{object.kind === "sarcophagus" &&
 									!object.activated &&
 									onReviewSarcophagus && (

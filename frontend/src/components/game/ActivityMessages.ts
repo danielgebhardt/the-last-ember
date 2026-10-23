@@ -154,6 +154,8 @@ export const formatActivityEvent = (event: ActivityEvent): string => {
 			return `${prefix}The ${MONSTER_DEFINITIONS[event.monster].name}'s blinding strike misses you.`;
 		case "monster-blind-avoided":
 			return `${prefix}The ${MONSTER_DEFINITIONS[event.monster].name}'s blinding strike finds only empty air.`;
+		case "mimic-revealed":
+			return `${prefix}The chest snaps open on a mouthful of teeth. It's a mimic!`;
 		case "monster-theft-prepared":
 			return `${prefix}The ${MONSTER_DEFINITIONS[event.monster].name} reaches for your purse. Step off your tile before it acts again.`;
 		case "monster-theft-hit":

@@ -55,6 +55,7 @@ import {
 	TRAP_DISARM_EXPERIENCE,
 } from "../domain/objects/DungeonObject";
 import { FORGE_PRICES } from "../domain/objects/ForgottenForge";
+import { MIMIC_CHANCE } from "../domain/objects/MimicChests";
 import { RARE_DISCOVERY_CHANCE } from "../domain/objects/RareDiscoveryPlacement";
 import { SANCTUARY_CONDITION_FEES } from "../domain/town/Sanctuary";
 import { TOWN_SCROLL_OFFERS } from "../domain/town/TownEconomy";
@@ -625,6 +626,19 @@ const DungeonHelp = ({
 					After {THIEF_ESCAPE_PHASES} phases it slips away for good. Web and
 					Sleep hold it, so you can catch it; killing it returns everything it
 					stole, plus its own purse and loot.
+				</p>
+				<div className="flex items-center gap-2 font-medium">
+					<span className="size-5 shrink-0">
+						<MonsterIcon kind="treasure-mimic" />
+					</span>{" "}
+					Treasure mimic
+				</div>
+				<p>
+					From floor {MONSTER_DEFINITIONS["treasure-mimic"].minFloor}, about one
+					chest in {Math.round(1 / MIMIC_CHANCE)} is a mimic. Read the nearby
+					notice before opening: a mimic&apos;s lock looks newer than the wood.
+					Opening one wakes it beside you, as strong as a heroic monster of that
+					floor. When it falls it drops the chest&apos;s loot plus its own.
 				</p>
 				<p>
 					Breath attacks mark an area and show a response countdown in the

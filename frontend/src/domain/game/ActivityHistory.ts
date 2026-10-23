@@ -256,6 +256,7 @@ export type ActivityEvent = { turn: number } & (
 			monster: MonsterKind;
 	  }
 	| { type: "monster-died"; monster: MonsterKind }
+	| { type: "mimic-revealed" }
 	| { type: "experience-gained"; amount: number }
 	| { type: "level-gained"; level: number; healthGain: number }
 	| {

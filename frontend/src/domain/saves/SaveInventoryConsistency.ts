@@ -12,6 +12,7 @@ import {
 } from "../merchant/MerchantRules";
 import { isWarden } from "../monsters/EmberWarden";
 import { sarcophagusOutcome } from "../objects/AncientSarcophagi";
+import { isMimic, isMimicChest } from "../objects/MimicChests";
 import { mirrorRewardKind } from "../objects/MirrorOfShadows";
 import { chestReward } from "../objects/TreasureChests";
 import { wellReward } from "../objects/WishingWell";
@@ -81,6 +82,21 @@ export const hasConsistentInventory = (document: SaveDocument): boolean => {
 					sarcophagusOutcome(state.run.seed, owner),
 				) ||
 				chestReward(state.run.seed, owner).item.kind !== item.kind
+			)
+				return false;
+		}
+
+		// A mimic keeps its chest's loot until it falls.
+		if (item.id.includes(":object:chest:")) {
+			const owner = state.objects.find(
+				(o) => o.kind === "chest" && `${o.id}:reward` === item.id,
+			);
+			if (
+				owner &&
+				isMimicChest(state.run.seed, owner) &&
+				state.monsters.some(
+					(m) => isMimic(m) && m.floorNumber === owner.floorNumber,
+				)
 			)
 				return false;
 		}

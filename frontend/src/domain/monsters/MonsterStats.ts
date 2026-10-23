@@ -2,23 +2,40 @@ import { type Difficulty, scaleEnemyValue } from "../game/Difficulty";
 import { attackProfile, MONSTER_HIT_THRESHOLD } from "../game/MeleeRules";
 import { MONSTER_DEFINITIONS, type Monster, type MonsterKind } from "./Monster";
 
-const CHAMPION_HEALTH_PER_FLOOR = 6;
-
-// Only the optional champion grows with depth. Catalog values describe floor 8.
-const championDepth = (kind: MonsterKind, floorNumber: number): number =>
-	kind === "iron-champion"
-		? Math.max(
-				0,
-				Math.min(MONSTER_DEFINITIONS[kind].maxFloor, floorNumber) -
-					MONSTER_DEFINITIONS[kind].minFloor,
-			)
-		: 0;
+// Floors past its first floor. Catalog values describe that first floor.
+const depthBeyond = (kind: MonsterKind, floorNumber: number): number =>
+	Math.max(
+		0,
+		Math.min(MONSTER_DEFINITIONS[kind].maxFloor, floorNumber) -
+			MONSTER_DEFINITIONS[kind].minFloor,
+	);
+// Only the optional champion and the mimic grow with depth, so each stays a heroic
+// fight on whichever floor it appears.
+const DEPTH_GROWTH: Partial<
+	Record<
+		MonsterKind,
+		Readonly<{
+			health: (depth: number) => number;
+			attack: (depth: number) => number;
+		}>
+	>
+> = {
+	"iron-champion": { health: (depth) => 6 * depth, attack: (depth) => depth },
+	"treasure-mimic": {
+		health: (depth) => 3 * depth,
+		attack: (depth) => Math.round((depth * 3) / 4),
+	},
+};
+const healthGrowth = (kind: MonsterKind, floorNumber: number) =>
+	DEPTH_GROWTH[kind]?.health(depthBeyond(kind, floorNumber)) ?? 0;
+const attackGrowth = (kind: MonsterKind, floorNumber: number) =>
+	DEPTH_GROWTH[kind]?.attack(depthBeyond(kind, floorNumber)) ?? 0;
 export const monsterAttackDamage = (
 	kind: MonsterKind,
 	floorNumber = MONSTER_DEFINITIONS[kind].minFloor,
 	heroic = false,
 ): number =>
-	(MONSTER_DEFINITIONS[kind].attackDamage + championDepth(kind, floorNumber)) *
+	(MONSTER_DEFINITIONS[kind].attackDamage + attackGrowth(kind, floorNumber)) *
 	(heroic ? 2 : 1);
 
 // Base health before difficulty scaling.
@@ -27,8 +44,7 @@ const monsterBaseHealth = (
 	floorNumber = MONSTER_DEFINITIONS[kind].minFloor,
 	heroic = false,
 ): number =>
-	(MONSTER_DEFINITIONS[kind].maxHealth +
-		CHAMPION_HEALTH_PER_FLOOR * championDepth(kind, floorNumber)) *
+	(MONSTER_DEFINITIONS[kind].maxHealth + healthGrowth(kind, floorNumber)) *
 	(heroic ? 2 : 1);
 export const maximumMonsterHealth = (
 	kind: MonsterKind,

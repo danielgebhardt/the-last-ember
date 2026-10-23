@@ -192,6 +192,7 @@ const eventFields = {
 	"trap-disarmed": {},
 	"trap-sprung": { damage: integer(1, 6) },
 	"chest-opened": { item: itemKind },
+	"mimic-revealed": {},
 	"gold-collected": { amount: integer(1) },
 	"merchant-bought": { item: itemKind, gold: integer(1) },
 	"merchant-sold": { item: itemKind, gold: integer(1) },

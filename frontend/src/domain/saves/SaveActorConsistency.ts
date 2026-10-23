@@ -25,6 +25,7 @@ import {
 	sarcophagusGuardianKind,
 	sarcophagusOutcome,
 } from "../objects/AncientSarcophagi";
+import { isMimic, isMimicChest, MIMIC_SPAWN_ID } from "../objects/MimicChests";
 import {
 	MIRROR_HOSTILE_ID,
 	MIRROR_REFLECTION_ID,
@@ -122,6 +123,17 @@ export const hasConsistentActors = (document: SaveDocument): boolean => {
 							o.kind === "hourglass" &&
 							o.activated &&
 							o.floorNumber === entry.floorNumber,
+					)) &&
+				// A mimic owns its reserved ID and is its floor's opened mimic chest.
+				(entry.kind === "treasure-mimic") ===
+					entry.id.endsWith(`:${MIMIC_SPAWN_ID}`) &&
+				(!isMimic(entry) ||
+					state.objects.some(
+						(o) =>
+							o.kind === "chest" &&
+							o.activated &&
+							o.floorNumber === entry.floorNumber &&
+							isMimicChest(run.seed, o),
 					)) &&
 				// A thief owns its reserved ID; only a thief carries a haul, stolen in the past.
 				(entry.kind === "treasure-thief") ===

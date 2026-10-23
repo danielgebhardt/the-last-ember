@@ -5,6 +5,7 @@ import type { GameState } from "../game/GameState";
 import type { FloorItem } from "../items/FloorItems";
 import { selectLootKind } from "../items/Loot";
 import type { DungeonObject } from "./DungeonObject";
+import { isMimicChest, revealMimic } from "./MimicChests";
 export const chestReward = (seed: number, chest: DungeonObject): FloorItem => {
 	const random = createSeededRandom(
 		hashStringToUint32(
@@ -24,6 +25,10 @@ export const openChest = (
 	chest: DungeonObject,
 ): GameState | { error: string } => {
 	if (chest.activated) return { error: "This chest has already been opened." };
+	if (isMimicChest(state.run.seed, chest)) {
+		const revealed = revealMimic(state, chest);
+		if (revealed) return revealed;
+	}
 	const reward = chestReward(state.run.seed, chest);
 	return {
 		...state,

@@ -99,11 +99,13 @@ const hints: Record<DungeonObjectKind, { fresh: string; spent: string }> = {
 		spent: "Already collected.",
 	},
 };
+// A mimic chest adds its tell to the nearby notice; the activity log never gives it away.
 export const describeObject = (
 	object: Pick<DungeonObject, "kind" | "activated">,
+	tell?: string,
 ): string => {
 	const label = objectLabel(object);
-	return `${label[0].toUpperCase()}${label.slice(1)}. ${object.activated ? hints[object.kind].spent : hints[object.kind].fresh}`;
+	return `${label[0].toUpperCase()}${label.slice(1)}. ${object.activated ? hints[object.kind].spent : `${hints[object.kind].fresh}${tell ? ` ${tell}` : ""}`}`;
 };
 export const announceObjectArrival = (
 	before: GameState,
