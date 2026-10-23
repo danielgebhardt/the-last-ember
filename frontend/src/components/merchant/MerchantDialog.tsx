@@ -148,9 +148,18 @@ const MerchantDialog = ({
 		(item) => equipmentSalePrice(item) !== null,
 	);
 	const [saleItems, setSaleItems] = useState<readonly ItemInstance[]>(gear);
+	// A bulk sale clears its items outright; single sales keep a placeholder.
+	const [bulkSold, setBulkSold] = useState<ReadonlySet<string>>(new Set());
+	const shownSaleItems = saleItems.filter(
+		(item) =>
+			!bulkSold.has(item.id) || gear.some((copy) => copy.id === item.id),
+	);
 	useLayoutEffect(() => {
 		setSaleItems((previous) => {
-			if (!open) return previous.length ? [] : previous;
+			if (!open) {
+				setBulkSold((sold) => (sold.size ? new Set() : sold));
+				return previous.length ? [] : previous;
+			}
 			const added = state.bag.items.filter(
 				(item) =>
 					equipmentSalePrice(item) !== null &&
@@ -313,11 +322,12 @@ const MerchantDialog = ({
 							>
 								<p className="mb-2 text-xs text-muted-foreground">
 									Unequip worn gear first. Sell carried equipment only; supplies
-									and the flame stay yours. Sold slots stay until you close.
+									and the flame stay yours. A single sale leaves its slot until
+									you close; a bulk sale clears its items.
 								</p>
-								{saleItems.length > 0 && (
+								{shownSaleItems.length > 0 && (
 									<ul className="grid items-start gap-2 sm:grid-cols-2 lg:grid-cols-4">
-										{saleItems.map((original) => {
+										{shownSaleItems.map((original) => {
 											const current = gear.find(
 												(item) => item.id === original.id,
 											);
@@ -484,6 +494,13 @@ const MerchantDialog = ({
 												disabled={!onSellLower || !lowerSale.items.length}
 												onClick={() => {
 													onSellLower?.();
+													setBulkSold(
+														(sold) =>
+															new Set([
+																...sold,
+																...lowerSale.items.map((item) => item.id),
+															]),
+													);
 													setConfirmLowerSale(false);
 													setFocusAfterSale(true);
 												}}

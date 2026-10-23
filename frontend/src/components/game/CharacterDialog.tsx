@@ -407,14 +407,9 @@ const CharacterDialog = ({
 											<div ref={detailsRef} className="min-w-0">
 												<ItemDetails
 													bag={bag}
-													onCancel={() => {
-														setSelection(null);
-														bagHeadingRef.current?.focus({
-															preventScroll: true,
-														});
-													}}
 													item={selected}
 													carryingEmber={quest.cureRecovered}
+													inTown={inTown}
 													comparisonContext={comparisonContext}
 													potionHotbar={potionHotbar}
 													assignmentsEnabled={!won}

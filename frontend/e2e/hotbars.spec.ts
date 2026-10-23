@@ -122,17 +122,21 @@ test("interleaved scroll stacks keep their coordinates and selected actions acro
 		name: "The Adventurer's Ledger",
 		exact: true,
 	});
-	const scroll = character.getByRole("button", {
+	// Bag slots stay measurable while the modal enchanting dialog hides the ledger.
+	const scroll = page.getByRole("button", {
 		name: "Enchantment scroll, slot 1",
 		exact: true,
+		includeHidden: true,
 	});
-	const sword = character.getByRole("button", {
+	const sword = page.getByRole("button", {
 		name: "Iron sword +1, slot 2",
 		exact: true,
+		includeHidden: true,
 	});
-	const mana = character.getByRole("button", {
+	const mana = page.getByRole("button", {
 		name: "Mana potion, slot 3",
 		exact: true,
+		includeHidden: true,
 	});
 	await page.screenshot({
 		path: testInfo.outputPath("stacks-grid-before.png"),
@@ -142,41 +146,41 @@ test("interleaved scroll stacks keep their coordinates and selected actions acro
 	const swordBounds = await sword.boundingBox();
 	const manaBounds = await mana.boundingBox();
 	await page.screenshot({ path: testInfo.outputPath("stacks-before.png") });
+	await character
+		.getByRole("button", { name: "Read enchantment scroll", exact: true })
+		.click();
+	const enchanting = page.getByRole("dialog", {
+		name: "Enchant equipment",
+		exact: true,
+	});
 	for (const bonus of [1, 2, 3]) {
-		await character
+		await enchanting
 			.getByRole("button", {
-				name: `Enchant Main hand: Short sword${bonus > 1 ? ` +${bonus - 1}` : ""} to +${bonus}`,
+				name: `Enchant Short sword${bonus > 1 ? ` +${bonus - 1}` : ""} to +${bonus}`,
 				exact: true,
 			})
 			.press("Enter");
 		await expect(turns(page)).toHaveText(`Turn ${bonus}`);
-		await expect(
-			character.getByRole("heading", { name: "Bag", exact: true }),
-		).toBeFocused();
 		if (bonus < 3) {
+			await expect(enchanting.getByRole("status")).toHaveText(
+				`Short sword is now +${bonus}.`,
+			);
+			// The bag behind the dialog keeps the stack in place as it shrinks.
 			await expect(scroll).toHaveAttribute("aria-pressed", "true");
-			if (bonus === 1)
-				await expect(scroll).toHaveAccessibleDescription(/^2 carried/);
 			expect(await scroll.boundingBox()).toEqual(scrollBounds);
 			expect(await sword.boundingBox()).toEqual(swordBounds);
 			expect(await mana.boundingBox()).toEqual(manaBounds);
 			await page.screenshot({
 				path: testInfo.outputPath(`stacks-${3 - bonus}-remaining.png`),
 			});
-			if (bonus === 2) {
-				await character
-					.getByRole("list", { name: "Carried items" })
-					.scrollIntoViewIfNeeded();
-				await page.screenshot({
-					path: testInfo.outputPath("stacks-grid-one-remaining.png"),
-				});
-			}
 		}
 	}
-	await expect(scroll).toBeHidden();
+	// The last scroll closes the dialog and returns focus to the bag.
+	await expect(enchanting).toBeHidden();
 	await expect(
-		character.getByRole("group", { name: "Choose equipment to enchant" }),
-	).toBeHidden();
+		character.getByRole("heading", { name: "Bag", exact: true }),
+	).toBeFocused();
+	await expect(scroll).toBeHidden();
 	await expect(
 		character.getByRole("button", {
 			name: "Iron sword +1, slot 1",

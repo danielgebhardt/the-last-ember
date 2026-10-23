@@ -78,6 +78,46 @@ describe("Equipment decisions at the merchant", () => {
 			screen.queryByRole("button", { name: "Confirm bulk sale" }),
 		).not.toBeInTheDocument();
 	});
+	it("clears bulk-sold items from the list but keeps a single sale's placeholder", async () => {
+		const state = merchantState();
+		const { user, rerender, props, panel } = await setup(state);
+		const without = (...ids: string[]): GameState => ({
+			...state,
+			bag: { items: state.bag.items.filter((item) => !ids.includes(item.id)) },
+		});
+		await user.click(
+			panel.getByRole("button", { name: /Scholar robe · Sell/ }),
+		);
+		rerender(<MerchantDialog {...props} state={without("bag:tradeoff")} />);
+		expect(panel.getByRole("status")).toHaveTextContent("Sold: Scholar robe");
+		await user.click(
+			screen.getByRole("button", {
+				name: "Sell all Lower items (1) · 20 gold",
+			}),
+		);
+		await user.click(screen.getByRole("button", { name: "Confirm bulk sale" }));
+		rerender(
+			<MerchantDialog
+				{...props}
+				state={without("bag:tradeoff", "bag:lower")}
+			/>,
+		);
+		expect(panel.getAllByRole("listitem")).toHaveLength(4);
+		expect(panel.queryByText(/Short sword · Sell/)).not.toBeInTheDocument();
+		expect(panel.getAllByRole("status")).toHaveLength(1);
+	});
+	it("keeps bulk-sale items listed when the sale does not go through", async () => {
+		const { user, panel } = await setup();
+		await user.click(
+			screen.getByRole("button", {
+				name: "Sell all Lower items (1) · 20 gold",
+			}),
+		);
+		await user.click(screen.getByRole("button", { name: "Confirm bulk sale" }));
+		expect(
+			panel.getByRole("button", { name: /^Short sword · Sell/ }),
+		).toBeEnabled();
+	});
 	it("marks every carried equipment choice without hiding inferior items or selling worn gear", async () => {
 		const { panel } = await setup();
 		expect(

@@ -26,7 +26,7 @@ import {
 	type PotionHotbar,
 } from "../../domain/items/PotionHotbar";
 import ItemIcon from "../items/ItemIcon";
-import EnchantmentTargets from "./EnchantmentTargets";
+import EnchantmentDialog from "./EnchantmentDialog";
 import EquipmentPreviews from "./EquipmentPreviews";
 
 const labels = {
@@ -92,7 +92,6 @@ const ClampedDescription = ({ text }: { text: string }) => {
 const ItemDetails = ({
 	item,
 	bag = { items: [] },
-	onCancel,
 	comparisonContext,
 	equippedSlot,
 	alive,
@@ -101,10 +100,10 @@ const ItemDetails = ({
 	potionHotbar,
 	assignmentsEnabled = true,
 	carryingEmber = false,
+	inTown = false,
 }: {
 	item: ItemInstance;
 	bag?: Bag;
-	onCancel?: () => void;
 	comparisonContext: EquipmentComparisonContext;
 	equippedSlot?: EquipmentSlot;
 	alive: boolean;
@@ -113,6 +112,7 @@ const ItemDetails = ({
 	potionHotbar: PotionHotbar;
 	assignmentsEnabled?: boolean;
 	carryingEmber?: boolean;
+	inTown?: boolean;
 }) => {
 	const titleId = useId();
 	const exitRestrictionId = useId();
@@ -284,6 +284,17 @@ const ItemDetails = ({
 							</Button>
 						)}
 
+						{details.type === "enchantment" && (
+							<EnchantmentDialog
+								equipment={equipment}
+								bag={bag}
+								alive={alive}
+								inTown={inTown}
+								onAction={onAction}
+								onLastScroll={afterAction}
+							/>
+						)}
+
 						{details.type === "potion" && (
 							<Button
 								type="button"
@@ -320,17 +331,6 @@ const ItemDetails = ({
 				<p id={exitRestrictionId} className="text-sm text-muted-foreground">
 					{EXIT_SCROLL_EMBER_RESTRICTION}
 				</p>
-			)}
-
-			{details.type === "enchantment" && !equippedSlot && (
-				<EnchantmentTargets
-					scrollId={item.id}
-					equipment={equipment}
-					bag={bag}
-					alive={alive}
-					onAction={act}
-					onCancel={onCancel ?? afterAction}
-				/>
 			)}
 
 			{details.type === "potion" && !equippedSlot && (

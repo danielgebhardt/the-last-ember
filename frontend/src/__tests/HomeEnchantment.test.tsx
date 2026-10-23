@@ -36,28 +36,50 @@ it("keeps the selected scroll stack usable in its slot through 3 → 2 → 1 and
 	await user.click(
 		within(dialog).getByRole("button", { name: "Enchantment scroll, slot 1" }),
 	);
+	await user.click(
+		within(dialog).getByRole("button", { name: "Read enchantment scroll" }),
+	);
+	const enchanting = await screen.findByRole("dialog", {
+		name: "Enchant equipment",
+	});
+	expect(enchanting).toHaveTextContent("3 scrolls");
 	for (const bonus of [1, 2, 3]) {
 		await user.click(
-			within(dialog).getByRole("button", {
-				name: `Enchant Main hand: Short sword${bonus > 1 ? ` +${bonus - 1}` : ""} to +${bonus}`,
+			within(enchanting).getByRole("button", {
+				name: `Enchant Short sword${bonus > 1 ? ` +${bonus - 1}` : ""} to +${bonus}`,
 			}),
 		);
-		expect(within(dialog).getByRole("heading", { name: "Bag" })).toHaveFocus();
 		if (bonus < 3) {
+			// The dialog stays open for the next scroll and reports what changed.
+			expect(within(enchanting).getByRole("status")).toHaveTextContent(
+				`Short sword is now +${bonus}.`,
+			);
+			expect(enchanting).toHaveTextContent(
+				`${3 - bonus} ${bonus === 2 ? "scroll" : "scrolls"}`,
+			);
+			// Behind the modal dialog, the bag keeps the stack selected in its slot.
 			expect(
 				within(dialog).getByRole("button", {
 					name: "Enchantment scroll, slot 1",
+					hidden: true,
 				}),
 			).toHaveAttribute("aria-pressed", "true");
 			expect(
-				within(dialog).getByRole("button", { name: "Iron sword, slot 2" }),
-			).toBeVisible();
-		} else {
-			expect(
-				within(dialog).queryByRole("group", {
-					name: "Choose equipment to enchant",
+				within(dialog).getByRole("button", {
+					name: "Iron sword, slot 2",
+					hidden: true,
 				}),
-			).not.toBeInTheDocument();
+			).toBeInTheDocument();
+		} else {
+			// The last scroll closes the dialog and returns focus to the bag.
+			await waitFor(() =>
+				expect(
+					screen.queryByRole("dialog", { name: "Enchant equipment" }),
+				).not.toBeInTheDocument(),
+			);
+			expect(
+				within(dialog).getByRole("heading", { name: "Bag" }),
+			).toHaveFocus();
 			expect(
 				within(dialog).getByRole("button", { name: "Iron sword, slot 1" }),
 			).toBeVisible();
@@ -65,7 +87,7 @@ it("keeps the selected scroll stack usable in its slot through 3 → 2 → 1 and
 	}
 	expect(screen.getByLabelText("Turn count")).toHaveTextContent("Turn 3");
 });
-it("inspects/cancels freely and enchants a chosen equipped item with Enter, showing the bonus", async () => {
+it("opens and closes the enchanting dialog freely and enchants a chosen worn item with Enter", async () => {
 	stubDungeonRun(createCorridorEncounter());
 	const create = GameState.createGameState;
 	vi.spyOn(GameState, "createGameState").mockImplementationOnce((run) => ({
@@ -91,27 +113,43 @@ it("inspects/cancels freely and enchants a chosen equipped item with Enter, show
 	await user.click(
 		within(dialog).getByRole("button", { name: "Enchantment scroll, slot 1" }),
 	);
-	expect(screen.getByLabelText("Turn count")).toHaveTextContent("Turn 0");
-	expect(
-		within(dialog).getByRole("group", { name: "Choose equipment to enchant" }),
-	).toBeVisible();
-	await user.click(
-		within(dialog).getByRole("button", { name: "Cancel enchantment" }),
-	);
-	expect(
-		within(dialog).queryByRole("group", {
-			name: "Choose equipment to enchant",
-		}),
-	).not.toBeInTheDocument();
-	expect(screen.getByLabelText("Turn count")).toHaveTextContent("Turn 0");
-	await user.click(
-		within(dialog).getByRole("button", { name: "Enchantment scroll, slot 1" }),
-	);
-	const choice = within(dialog).getByRole("button", {
-		name: "Enchant Main hand: Short sword to +1",
+	const read = within(dialog).getByRole("button", {
+		name: "Read enchantment scroll",
 	});
-	choice.focus();
+	await user.click(read);
+	let enchanting = await screen.findByRole("dialog", {
+		name: "Enchant equipment",
+	});
+	// Worn and carried pieces are both offered, with the stat each would gain.
+	expect(
+		within(enchanting).getByRole("button", {
+			name: "Enchant Iron sword to +1",
+		}),
+	).toBeEnabled();
+	expect(enchanting).toHaveTextContent("Attack 1 → 2");
+	await user.click(within(enchanting).getByRole("button", { name: "Done" }));
+	await waitFor(() => expect(read).toHaveFocus());
+	expect(screen.getByLabelText("Turn count")).toHaveTextContent("Turn 0");
+	// Escape closes only the enchanting dialog, not the ledger.
+	await user.click(read);
+	enchanting = await screen.findByRole("dialog", { name: "Enchant equipment" });
+	await user.keyboard("{Escape}");
+	await waitFor(() =>
+		expect(
+			screen.queryByRole("dialog", { name: "Enchant equipment" }),
+		).not.toBeInTheDocument(),
+	);
+	expect(dialog).toBeInTheDocument();
+	expect(screen.getByLabelText("Turn count")).toHaveTextContent("Turn 0");
+	await user.click(read);
+	enchanting = await screen.findByRole("dialog", { name: "Enchant equipment" });
+	within(enchanting)
+		.getByRole("button", { name: "Enchant Short sword to +1" })
+		.focus();
 	await user.keyboard("{Enter}");
+	await waitFor(() =>
+		expect(within(dialog).getByRole("heading", { name: "Bag" })).toHaveFocus(),
+	);
 	expect(
 		within(dialog).getByRole("button", { name: "Main hand: Short sword +1" }),
 	).toBeVisible();
