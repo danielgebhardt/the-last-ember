@@ -42,6 +42,7 @@ import {
 	SPELL_DEFINITIONS,
 	type SpellDefinition,
 } from "../domain/game/Spells";
+import { RARE_FIND_CHANCE } from "../domain/items/RareFinds";
 import { ESCAPE_ENCOUNTER_RULES } from "../domain/monsters/EscapeEncounters";
 import type { Monster } from "../domain/monsters/Monster";
 import { MONSTER_DEFINITIONS } from "../domain/monsters/Monster";
@@ -654,10 +655,12 @@ const DungeonHelp = ({
 				<h3 className="font-medium">Rare magic-resistant equipment</h3>
 				<p>
 					Every new adventure's armor store carries one Warding Cloak and one
-					Spellguard Shield for 900 gold each. These finite store copies are
-					separate from the optional seeded dungeon find on floors 5–20.
-					Browsing, reloading and selling cannot reroll dungeon loot or restock
-					purchased copies. No rare item is required to win.
+					Spellguard Shield for 900 gold each. Separately, each third of the
+					dungeon from floor 5 has a {Math.round(RARE_FIND_CHANCE * 100)}%
+					chance to hide one rare piece, never the same kind twice, so about
+					half of all adventures have at least one to find. Browsing, reloading
+					and selling cannot reroll dungeon loot or restock purchased copies. No
+					rare item is required to win.
 				</p>
 				<p>
 					The cloak uses Chest; the shield uses Off hand. Each gives 1 armor and

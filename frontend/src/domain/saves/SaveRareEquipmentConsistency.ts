@@ -4,6 +4,9 @@ import {
 	rareEquipmentId,
 	selectRunRareEquipment,
 } from "../items/RareEquipment";
+import { rareFindId, selectRunRareFinds } from "../items/RareFinds";
+import { TOWN_EQUIPMENT_OFFERS } from "../town/TownEquipmentStock";
+import { unique } from "./SaveConsistencyHelpers";
 import type { SaveDocument } from "./SaveDocument";
 
 // The allocation survives purchase/pickup and sale, so depleted stock cannot return.
@@ -13,16 +16,28 @@ export const hasConsistentRareEquipment = ({
 	const owned = ownedItems(state);
 	const stock = state.townEquipmentStock;
 	const dungeonRare = owned.filter((i) => i.id.startsWith("rare-gear:"));
+	// A per-third find is one copy of a kind this seed selected; it never enters stock.
+	const finds = selectRunRareFinds(state.run.seed, state.run.floors.length);
+	const found = owned.filter((i) => i.id.startsWith("rare-find:"));
+	if (
+		!unique(found.map((i) => i.id)) ||
+		stock.some((i) => i.id.startsWith("rare-find:")) ||
+		found.some(
+			(i) =>
+				!isRareEquipmentKind(i.kind) ||
+				i.id !== rareFindId(i.kind) ||
+				!finds.some((find) => find.kind === i.kind),
+		)
+	)
+		return false;
+	// Any other rare copy is its kind's one town offer.
 	if (
 		[...owned, ...stock].some(
 			(i) =>
 				isRareEquipmentKind(i.kind) &&
 				!i.id.startsWith("rare-gear:") &&
-				i.id !==
-					rareEquipmentId({
-						kind: i.kind,
-						source: "town",
-					}),
+				!i.id.startsWith("rare-find:") &&
+				TOWN_EQUIPMENT_OFFERS[i.id]?.item.kind !== i.kind,
 		)
 	)
 		return false;

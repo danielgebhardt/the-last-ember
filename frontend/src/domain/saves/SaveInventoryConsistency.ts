@@ -62,14 +62,7 @@ export const hasConsistentInventory = (document: SaveDocument): boolean => {
 		)
 	)
 		return false;
-	if (
-		Object.keys(TOWN_EQUIPMENT_OFFERS).some(
-			(id) =>
-				!purchased.includes(id) &&
-				!state.townEquipmentStock.some((i) => i.id === id),
-		)
-	)
-		return false;
+	// An offer neither bought nor stocked is newer than this save; loading stocks it.
 
 	for (const item of allItems) {
 		if (item.id.includes(":object:sarcophagus:")) {

@@ -18,8 +18,9 @@ import { SPELL_DEFINITIONS } from "../game/Spells";
 import { EFFECT_DEFINITIONS, PLAYER_EFFECT_KINDS } from "../game/TimedEffects";
 import { MAX_BAG_ITEMS } from "../items/Bag";
 import { EQUIPMENT_SLOT_LABELS } from "../items/Equipment";
-import { ITEM_DEFINITIONS, RARE_EQUIPMENT_KINDS } from "../items/Item";
+import { ITEM_DEFINITIONS } from "../items/Item";
 import { isEnchantableKind, MAX_ENCHANTMENT } from "../items/ItemValues";
+import { LEGACY_RARE_KINDS } from "../items/RareEquipment";
 import { isMerchantStock } from "../merchant/MerchantRules";
 import { MONSTER_DEFINITIONS } from "../monsters/Monster";
 import {
@@ -457,7 +458,7 @@ const documentShape = object({
 			(value) =>
 				record(value) &&
 				object({
-					kind: oneOf(RARE_EQUIPMENT_KINDS),
+					kind: oneOf(LEGACY_RARE_KINDS),
 					source: oneOf(["dungeon", "town"]),
 					acquired: boolean,
 				})(value) &&

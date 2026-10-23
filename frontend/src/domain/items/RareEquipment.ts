@@ -5,16 +5,19 @@ import { createSeededRandom } from "../dungeon/Seed";
 import type { Monster } from "../monsters/Monster";
 import type { DungeonObject } from "../objects/DungeonObject";
 import type { FloorItem } from "./FloorItems";
-import {
-	ITEM_DEFINITIONS,
-	RARE_EQUIPMENT_KINDS,
-	type RareEquipmentKind,
-} from "./Item";
+import { ITEM_DEFINITIONS } from "./Item";
 import { availableItemLocations } from "./ItemPlacement";
 
 export const RARE_EQUIPMENT_CHANCE = 0.2;
+// The kinds that original selection drew from. Frozen, so adding a rare never changes
+// what an older save's seed selected.
+export const LEGACY_RARE_KINDS = [
+	"warding-cloak",
+	"spellguard-shield",
+] as const;
+type LegacyRareKind = (typeof LEGACY_RARE_KINDS)[number];
 type Selection = Readonly<{
-	kind: RareEquipmentKind;
+	kind: LegacyRareKind;
 	source: "town" | "dungeon";
 }>;
 export type RareEquipmentAllocation = Selection &
@@ -27,8 +30,8 @@ export type RareEquipmentAllocation = Selection &
 				coordinate: Coordinate;
 		  }>
 	);
-// Preserve the original kind/source draws to keep dungeon finds and v27 allocations stable.
-// New town stock is universal and independent of this selection.
+// The original single selection, kept to validate older saves that hold its allocation.
+// New adventures use RareFinds instead; town stock is universal and independent of both.
 export const selectRunRareEquipment = (
 	seed: number,
 	floorCount: number,
@@ -38,7 +41,7 @@ export const selectRunRareEquipment = (
 	);
 	if (random() >= RARE_EQUIPMENT_CHANCE) return undefined;
 	const kind = selectWeighted(
-		RARE_EQUIPMENT_KINDS.filter(
+		LEGACY_RARE_KINDS.filter(
 			(kind) => ITEM_DEFINITIONS[kind].minFloor <= floorCount,
 		).map((value) => ({ value, weight: 1 })),
 		random,

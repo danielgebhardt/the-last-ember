@@ -42,25 +42,6 @@ it("stocks both MR items on every seed without enchanted store offers", () => {
 	).toBe(true);
 	expect(createTownEquipmentStock().filter((i) => i.enchantment)).toEqual([]);
 });
-it.each([
-	[12, "warding-cloak", 10, 10, 27],
-	[10, "spellguard-shield", 18, 26, 25],
-] as const)(
-	"preserves the exact dungeon find for seed %s",
-	(seed, kind, floorNumber, row, col) => {
-		const state = createGameState(
-			connectDungeonFloors(
-				generateDungeonRun(seed, 20, DEFAULT_RUN_CONFIGURATION),
-			),
-		);
-		expect(
-			state.floorItems.find((i) => i.item.id === `rare-gear:${kind}:1`),
-		).toMatchObject({ floorNumber, coordinate: { row, col } });
-		expect(
-			state.townEquipmentStock.filter((i) => i.kind === kind),
-		).toHaveLength(1);
-	},
-);
 
 it("tracks both finite store copies independently after purchase, sale and reload", () => {
 	let state = {
@@ -101,4 +82,26 @@ it("tracks both finite store copies independently after purchase, sale and reloa
 		true,
 	);
 	expect(state.townEquipmentPurchases).toHaveLength(2);
+});
+
+it("stocks an offer newer than an older save when it loads, and never a copy already bought", () => {
+	const state = rareEquipmentAdventure("warding-cloak", "town");
+	const [newer, bought] = state.townEquipmentStock;
+	const older = {
+		...state,
+		// The save predates one offer and has already bought another.
+		townEquipmentStock: state.townEquipmentStock.filter(
+			(i) => i.id !== newer.id && i.id !== bought.id,
+		),
+		townEquipmentPurchases: [bought.id],
+	};
+	const parsed = parseSave(serializeSave(tacticalSnapshot(older)));
+	if (!parsed.ok) throw new Error(parsed.error);
+	const restored = restoreSave(parsed.value).state;
+	expect(restored.townEquipmentStock.map((i) => i.id)).toEqual(
+		state.townEquipmentStock.filter((i) => i.id !== bought.id).map((i) => i.id),
+	);
+	expect(restoreSave(parsed.value).state.townEquipmentStock).toEqual(
+		restored.townEquipmentStock,
+	);
 });

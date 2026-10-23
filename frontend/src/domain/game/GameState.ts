@@ -10,10 +10,8 @@ import {
 	createStartingPotionHotbar,
 	type PotionHotbar,
 } from "../items/PotionHotbar";
-import {
-	allocateRunRareEquipment,
-	type RareEquipmentAllocation,
-} from "../items/RareEquipment";
+import type { RareEquipmentAllocation } from "../items/RareEquipment";
+import { placeRunRareFinds } from "../items/RareFinds";
 import { spawnRunSpellbooks } from "../items/SpellbookPlacement";
 import { placeMerchants } from "../merchant/MerchantPlacement";
 import {
@@ -116,12 +114,12 @@ export const createGameState = (
 	});
 	const objects = placeMerchants({ ...encounters, run, floorItems });
 
-	const rare = allocateRunRareEquipment(
-		run,
-		encounters.monsters,
-		floorItems,
-		objects,
-	);
+	// New adventures hide rare equipment per third of the dungeon. The single seeded
+	// allocation only survives in older saves.
+	const rare = {
+		allocation: null,
+		items: placeRunRareFinds(run, encounters.monsters, floorItems, objects),
+	};
 	const warden = placeEmberWarden(
 		run,
 		encounters.monsters,

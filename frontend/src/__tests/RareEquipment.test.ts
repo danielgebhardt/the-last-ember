@@ -1,10 +1,6 @@
 // @vitest-environment node
 
 import { expect, it } from "vitest";
-import {
-	connectDungeonFloors,
-	generateDungeonRun,
-} from "../domain/dungeon/DungeonRun";
 import { hasLineOfSight } from "../domain/dungeon/Visibility";
 import {
 	deriveCombatStats,
@@ -15,10 +11,7 @@ import { resolvePlayerAction } from "../domain/game/PlayerActions";
 import { createEquipment } from "../domain/items/Equipment";
 import { compareEquipment } from "../domain/items/EquipmentComparison";
 import { eligibleLootKinds, isRareEquipmentKind } from "../domain/items/Item";
-import {
-	availableItemLocations,
-	spawnRunItems,
-} from "../domain/items/ItemPlacement";
+import { availableItemLocations } from "../domain/items/ItemPlacement";
 import { itemArmor, itemMagicResistance } from "../domain/items/ItemValues";
 import {
 	allocateRunRareEquipment,
@@ -34,7 +27,6 @@ import {
 	orthogonalDistance,
 	protectedSpawnLocations,
 } from "../domain/monsters/MonsterLocations";
-import { spawnRunMonsters } from "../domain/monsters/MonsterPlacement";
 import { springTrap } from "../domain/objects/DungeonTraps";
 import {
 	parseSave,
@@ -50,9 +42,7 @@ import { predictableAttackRolls } from "./ControlledCombatTestHelpers";
 import { createComparisonContext } from "./EquipmentComparisonTestHelpers";
 import { createCorridorEncounter } from "./MonsterEncounterTestHelpers";
 import { rareEquipmentAdventure } from "./RareEquipmentTestHelpers";
-import { withFlameOnFloor } from "./SaveTestHelpers";
 import { tacticalSnapshot } from "./TacticalReplayTestHelpers";
-import { COMPACT_TEST_CONFIGURATION } from "./TestRunConfiguration";
 
 it("adds both explicit MR bonuses once, caps with INT and never enchants MR", () => {
 	const equipment = createEquipment(
@@ -128,7 +118,8 @@ it.each(["warding-cloak", "spellguard-shield"] as const)(
 					acquired: false,
 				});
 			else expect(state.rareEquipment).toBeNull();
-			expect(withFlameOnFloor(createGameState(state.run))).toEqual(state);
+			// New adventures never mint the original allocation.
+			expect(createGameState(state.run).rareEquipment).toBeNull();
 			expect(eligibleLootKinds(5, "found")).not.toContain(kind);
 			expect(eligibleLootKinds(20, "drop")).not.toContain(kind);
 			expect(
@@ -380,35 +371,6 @@ it("rejects forged IDs, unselected kinds, duplicate rare copies, restored stock 
 		expect(parseSave(JSON.stringify(invalid)).ok).toBe(false);
 });
 
-it("keeps actual seeded rare supply sparse, diverse, safe and separate from ordinary loot across full-depth runs", () => {
-	let count = 0;
-	const diversity = new Set<string>();
-	for (let seed = 0; seed < 200; seed++) {
-		const run = connectDungeonFloors(
-			generateDungeonRun(seed, 20, COMPACT_TEST_CONFIGURATION),
-		);
-		const state = createGameState(run);
-		const rare = ownsRare(state);
-		expect(rare.length).toBeLessThanOrEqual(1);
-		for (const ordinary of spawnRunItems(run, spawnRunMonsters(run)))
-			expect(state.floorItems).toContainEqual(ordinary);
-		if (state.rareEquipment) {
-			count++;
-			diversity.add(
-				`${state.rareEquipment.kind}:${state.rareEquipment.source}`,
-			);
-			expect(rare).toHaveLength(1);
-			if (state.rareEquipment.source === "dungeon") {
-				const placed = state.floorItems.find((i) => i.item.id === rare[0].id);
-				expect(placed?.floorNumber).toBeGreaterThanOrEqual(5);
-				expect(placed?.floorNumber).toBeLessThanOrEqual(20);
-			}
-		}
-	}
-	expect(count).toBeGreaterThan(5);
-	expect(count).toBeLessThan(40);
-	expect(diversity.size).toBe(2);
-});
 it("mitigates breath once while leaving physical hits, poison application/ticks and traps unchanged", () => {
 	const state = {
 		...createGameState(createCorridorEncounter()),

@@ -31,6 +31,7 @@ import {
 	type ItemKind,
 	isRareEquipmentKind,
 } from "../../domain/items/Item";
+import { RARE_FIND_CHANCE } from "../../domain/items/RareFinds";
 import { wardenStats } from "../../domain/monsters/EmberWarden";
 import {
 	MONSTER_DEFINITIONS,
@@ -373,7 +374,12 @@ const DeveloperCatalog = ({
 									{itemBonuses(definition) && <p>{itemBonuses(definition)}</p>}
 									{isRareEquipmentKind(kind) && (
 										<p>
-											Optional seeded dungeon find. Every adventure's armor
+											Optional seeded dungeon find: each third of the dungeon
+											from floor 5 rolls {Math.round(RARE_FIND_CHANCE * 100)}%
+											for one rare piece. Every adventure's{" "}
+											{Object.values(TOWN_EQUIPMENT_OFFERS).find(
+												(offer) => offer.item.kind === kind,
+											)?.store ?? "armor"}{" "}
 											store stocks one finite copy for{" "}
 											{
 												Object.values(TOWN_EQUIPMENT_OFFERS).find(

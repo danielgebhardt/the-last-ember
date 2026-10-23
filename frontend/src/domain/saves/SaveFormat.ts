@@ -15,6 +15,7 @@ import { levelForExperience } from "../game/Progression";
 import type { ItemInstance } from "../items/Item";
 import type { RareEquipmentAllocation } from "../items/RareEquipment";
 import { navigationRun } from "../objects/NavigationTerrain";
+import { withNewTownOffers } from "../town/TownEquipmentStock";
 import type { SaveDocument } from "./SaveDocument";
 import { validateSaveDocument } from "./SaveValidation";
 
@@ -242,6 +243,10 @@ export const parseSave = (text: string): SaveResult<SaveDocument> => {
 export const restoreSave = (document: SaveDocument): RestoredAdventure => {
 	const state: GameState = {
 		...document.state,
+		townEquipmentStock: withNewTownOffers(
+			document.state.townEquipmentStock,
+			document.state.townEquipmentPurchases,
+		),
 		difficulty: document.configuration.difficulty,
 		run: {
 			...document.state.run,
