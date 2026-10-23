@@ -114,7 +114,7 @@ export const objectChoices = (
 			{
 				value: "portal-enter",
 				label: "Step through",
-				description: `Leads beside a way down: this floor's down stair or one up to ${PORTAL_FLOOR_SPAN} floors deeper, with equal odds. What waits there is unknown, and floors you skip stay unexplored for your climb home. One turn; the portal goes dark. It will not take you while you carry the Last Ember.`,
+				description: `Leads beside a way down: this floor's down stair or one up to ${PORTAL_FLOOR_SPAN} floors deeper, with equal odds. What waits there is unknown, and floors you skip stay unexplored for your climb home. One turn; the portal goes dark. It will not take you while you carry the Warden's Flame.`,
 			},
 		];
 	if (object.kind === "mirror") {

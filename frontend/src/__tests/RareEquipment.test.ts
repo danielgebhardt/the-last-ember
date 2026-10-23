@@ -50,6 +50,7 @@ import { predictableAttackRolls } from "./ControlledCombatTestHelpers";
 import { createComparisonContext } from "./EquipmentComparisonTestHelpers";
 import { createCorridorEncounter } from "./MonsterEncounterTestHelpers";
 import { rareEquipmentAdventure } from "./RareEquipmentTestHelpers";
+import { withFlameOnFloor } from "./SaveTestHelpers";
 import { tacticalSnapshot } from "./TacticalReplayTestHelpers";
 import { COMPACT_TEST_CONFIGURATION } from "./TestRunConfiguration";
 
@@ -127,7 +128,7 @@ it.each(["warding-cloak", "spellguard-shield"] as const)(
 					acquired: false,
 				});
 			else expect(state.rareEquipment).toBeNull();
-			expect(createGameState(state.run)).toEqual(state);
+			expect(withFlameOnFloor(createGameState(state.run))).toEqual(state);
 			expect(eligibleLootKinds(5, "found")).not.toContain(kind);
 			expect(eligibleLootKinds(20, "drop")).not.toContain(kind);
 			expect(

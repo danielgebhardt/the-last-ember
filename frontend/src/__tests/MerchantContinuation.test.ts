@@ -27,12 +27,15 @@ import {
 	restoreSave,
 	serializeSave,
 } from "../domain/saves/SaveFormat";
+import { withFlameOnFloor } from "./SaveTestHelpers";
 import { COMPACT_TEST_CONFIGURATION } from "./TestRunConfiguration";
 
 const configuration = { ...COMPACT_TEST_CONFIGURATION, floorCount: 20 };
 const fresh = () =>
-	createGameState(
-		connectDungeonFloors(generateDungeonRun(123, 20, configuration)),
+	withFlameOnFloor(
+		createGameState(
+			connectDungeonFloors(generateDungeonRun(123, 20, configuration)),
+		),
 	);
 const atMerchant = (state: ReturnType<typeof fresh>, floor: number) => {
 	const merchant = state.objects.find(
@@ -193,8 +196,10 @@ describe("Shared merchant economy continuation", () => {
 			rows: 60,
 			cols: 60,
 		};
-		const base = createGameState(
-			connectDungeonFloors(generateDungeonRun(123, 20, chamberConfiguration)),
+		const base = withFlameOnFloor(
+			createGameState(
+				connectDungeonFloors(generateDungeonRun(123, 20, chamberConfiguration)),
+			),
 		);
 		const encounters = addOptionalEliteRooms(base, { chance: 1 });
 		const gate = encounters.objects.find(

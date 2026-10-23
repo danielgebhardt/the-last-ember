@@ -8,16 +8,27 @@ import {
 import { createGameState } from "../domain/game/GameState";
 import { spawnRunQuestItems } from "../domain/items/CurePlacement";
 import { eligibleLootKinds } from "../domain/items/Item";
+import { spawnRunItems } from "../domain/items/ItemPlacement";
+import { isWarden } from "../domain/monsters/EmberWarden";
+import { spawnRunMonsters } from "../domain/monsters/MonsterPlacement";
 import { COMPACT_TEST_CONFIGURATION } from "./TestRunConfiguration";
 import { createThreeFloorTraversalRun, findFloorPath } from "./testhelpers";
 
 describe("Unique seeded cure placement", () => {
-	it("places one reachable cure on the final floor without occupying ordinary content or stairs", () => {
+	it("anchors one reachable flame tile on the final floor, carried by its Warden rather than placed", () => {
 		const run = connectDungeonFloors(
 			generateDungeonRun(0, 5, COMPACT_TEST_CONFIGURATION),
 		);
 		const state = createGameState(run);
-		const cures = state.floorItems.filter((x) => x.item.kind === "cure");
+		// The Warden carries the flame, so nothing lies on the floor until it falls.
+		expect(state.floorItems.some((x) => x.item.kind === "cure")).toBe(false);
+		expect(state.monsters.filter(isWarden)).toHaveLength(1);
+		const monsters = spawnRunMonsters(run);
+		const cures = spawnRunQuestItems(
+			run,
+			monsters,
+			spawnRunItems(run, monsters),
+		);
 		expect(cures).toHaveLength(1);
 		const cure = cures[0];
 		expect(cure.floorNumber).toBe(5);
@@ -34,7 +45,7 @@ describe("Unique seeded cure placement", () => {
 					x.coordinate.row === cure.coordinate.row &&
 					x.coordinate.col === cure.coordinate.col,
 			),
-		).toHaveLength(1);
+		).toHaveLength(0);
 		expect(
 			state.monsters.some(
 				(x) =>

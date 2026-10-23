@@ -74,7 +74,7 @@ export const transferFloorItem = (
 		}
 		if (found.item.kind === "cure") {
 			if (state.quest.cureRecovered)
-				return { error: "You already recovered the ember." };
+				return { error: "You already claimed the Warden's Flame." };
 			return {
 				bag: state.bag,
 				floorItems: state.floorItems.filter((entry) => entry !== found),

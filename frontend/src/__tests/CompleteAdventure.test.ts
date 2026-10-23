@@ -146,9 +146,11 @@ describe("Complete cure-and-return adventures", () => {
 			);
 		const short = make(5),
 			long = make(20);
+		// The Warden carrying the flame stands on floor twenty; no flame lies loose.
+		expect(long.floorItems.some((x) => x.item.kind === "cure")).toBe(false);
 		expect(
-			long.floorItems
-				.filter((x) => x.item.kind === "cure")
+			long.monsters
+				.filter((x) => x.kind === "ember-warden")
 				.map((x) => x.floorNumber),
 		).toEqual([20]);
 		expect(

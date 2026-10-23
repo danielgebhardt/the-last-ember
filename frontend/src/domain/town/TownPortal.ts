@@ -100,7 +100,7 @@ export const returnThroughTownPortal = (state: GameState) => {
 		state.quest.cureRecovered ||
 		state.bag.items.some((item) => item.kind === "cure")
 	)
-		return reject("The portal cannot bypass the Last Ember's homecoming.");
+		return reject("The portal cannot bypass the Warden's Flame's homecoming.");
 	const arrival = portalReturnArrival(state);
 	if (!arrival)
 		return reject(

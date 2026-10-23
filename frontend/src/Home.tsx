@@ -67,6 +67,7 @@ import { canAddToBag } from "./domain/items/Bag";
 import { emptyEquipmentSlotFor } from "./domain/items/Equipment";
 import { ITEM_DEFINITIONS } from "./domain/items/Item";
 import type { HotbarSlot } from "./domain/items/PotionHotbar";
+import { isWarden } from "./domain/monsters/EmberWarden";
 import { type DungeonObject, isDoor } from "./domain/objects/DungeonObject";
 import { isFloorRevealed } from "./domain/objects/MirrorOfShadows";
 import { objectChoices } from "./domain/objects/ObjectChoices";
@@ -163,6 +164,9 @@ const Home = ({
 	const canPlay = player.health > 0 && victory === null;
 	// Perks can't be chosen after death or victory, so the reminders stop there too.
 	const perksWaiting = canPlay ? pendingPerkCount(game.state.progression) : 0;
+	const wardenStanding = game.state.monsters.some(
+		(monster) => isWarden(monster) && monster.health > 0,
+	);
 	const { exploration } = game;
 	const [configDraft, setConfigDraft] = useState(() =>
 		configurationDraft(initialAdventure?.configuration ?? initialConfiguration),
@@ -472,6 +476,7 @@ const Home = ({
 							progression={game.state.progression}
 							onCloseRequested={() => setCharacterOpen(false)}
 							initialTab={characterTab}
+							wardenStanding={wardenStanding}
 							finalFocus={characterOpenedFromMap ? mapRef : undefined}
 							player={player}
 							won={victory !== null}
@@ -676,6 +681,7 @@ const Home = ({
 								<QuestStatus
 									quest={game.state.quest}
 									activeFloor={game.state.run.activeFloor}
+									wardenStanding={wardenStanding}
 								/>
 							</div>
 						</div>

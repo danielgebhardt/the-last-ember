@@ -1,5 +1,5 @@
 import { createMonsterDrop } from "../items/MonsterDrops";
-import { isWarden, wardenDrop } from "../monsters/EmberWarden";
+import { isWarden, wardenDrop, wardenFlameDrop } from "../monsters/EmberWarden";
 import { MONSTER_DEFINITIONS, type Monster } from "../monsters/Monster";
 import { resistedDamage } from "../monsters/MonsterResistance";
 import { goldAmount } from "../objects/Gold";
@@ -80,6 +80,11 @@ export const damageMonster = (
 		mana = gained.mana;
 		events.push(...gained.events);
 
+		const flame = wardenFlameDrop(state, monster);
+		if (flame) {
+			floorItems = [...floorItems, flame];
+			events.push({ type: "warden-fell", turn });
+		}
 		// A mirror's reflection always drops that mirror's fixed reward.
 		const mirror = mirrorFor(state.objects, monster);
 		const drop = mirror

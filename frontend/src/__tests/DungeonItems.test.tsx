@@ -28,7 +28,7 @@ describe("Floor item symbols", () => {
 				floorItems={[{ ...item, item: { id: "quest:cure", kind: "cure" } }]}
 			/>,
 		);
-		const cell = screen.getByLabelText("row1col2 - Last Ember");
+		const cell = screen.getByLabelText("row1col2 - Warden's Flame");
 		expect(cell.querySelector("svg")).toHaveClass("text-item-ember");
 		expect(cell.querySelector("svg")).toHaveAttribute("viewBox", "0 0 24 24");
 	});

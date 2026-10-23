@@ -110,6 +110,7 @@ type CharacterDialogProps = {
 	onCloseRequested: () => void;
 	finalFocus?: RefObject<HTMLElement | null>;
 	initialTab?: "character" | "progression" | "spells";
+	wardenStanding?: boolean;
 };
 
 const CharacterDialog = ({
@@ -136,6 +137,7 @@ const CharacterDialog = ({
 	onCloseRequested,
 	finalFocus,
 	initialTab = "character",
+	wardenStanding,
 }: CharacterDialogProps) => {
 	const [selection, setSelection] = useState<
 		| { source: "bag"; key: string }
@@ -386,7 +388,11 @@ const CharacterDialog = ({
 											headingRef={bagHeadingRef}
 											onSelect={(key) => setSelection({ source: "bag", key })}
 										/>
-										<QuestStatus quest={quest} pouch />
+										<QuestStatus
+											quest={quest}
+											pouch
+											wardenStanding={wardenStanding}
+										/>
 										<GroundPanel enabled={dragEnabled && !inTown}>
 											<FloorItemsView
 												compactEmpty

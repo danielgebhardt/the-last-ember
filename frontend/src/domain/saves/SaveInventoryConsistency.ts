@@ -10,6 +10,7 @@ import {
 	MERCHANT_OFFERS,
 	type MerchantSupply,
 } from "../merchant/MerchantRules";
+import { isWarden } from "../monsters/EmberWarden";
 import { sarcophagusOutcome } from "../objects/AncientSarcophagi";
 import { mirrorRewardKind } from "../objects/MirrorOfShadows";
 import { chestReward } from "../objects/TreasureChests";
@@ -178,11 +179,17 @@ export const hasConsistentInventory = (document: SaveDocument): boolean => {
 		)
 	)
 		return false;
+	// One flame: claimed, lying on the final floor, or still carried by a living Warden
+	// (older saves always placed it on the floor).
 	const cures = state.floorItems.filter((entry) => entry.item.kind === "cure");
+	const carried =
+		cures.length === 0 &&
+		state.monsters.some((monster) => isWarden(monster) && monster.health > 0);
 	if (
 		quest.cureRecovered
 			? cures.length !== 0
-			: cures.length !== 1 || cures[0].floorNumber !== quest.goalFloor
+			: !carried &&
+				(cures.length !== 1 || cures[0].floorNumber !== quest.goalFloor)
 	)
 		return false;
 	return true;

@@ -4,22 +4,24 @@ import { importAdventure, map, turns } from "./adventure-helpers.js";
 test.beforeEach(async ({ page }) => {
 	await page.goto("/");
 });
-test("The Last Ember introduces its quest and presents the historical quest item as an ember", async ({
+test("The Warden's Flame introduces its quest and presents the historical quest item as an ember", async ({
 	page,
 }, testInfo) => {
-	await expect(page).toHaveTitle("The Last Ember");
+	await expect(page).toHaveTitle("The Warden's Flame");
 	await expect(page.locator('meta[name="description"]')).toHaveAttribute(
 		"content",
-		/last ember/,
+		/defeat the corrupted Ember Warden, claim its flame/,
 	);
 	const opening = page.getByRole("dialog", {
-		name: "The Last Ember",
+		name: "The Warden's Flame",
 		exact: true,
 	});
 	await expect(opening).toContainText(
-		"The beacon above your settlement is dying.",
+		"For generations, the beacon has kept the darkness beyond your town's walls.",
 	);
-	await expect(opening).toContainText("Their equipment may prove useful.");
+	await expect(opening).toContainText(
+		"Their abandoned supplies may prove useful on your journey.",
+	);
 	await expect(opening).toContainText(
 		"Inspired by the classic roguelike Larn.",
 	);
@@ -41,14 +43,14 @@ test("The Last Ember introduces its quest and presents the historical quest item
 	await importAdventure(page, "ember-pickup");
 	await page.keyboard.press("g");
 	await expect(page.getByRole("log")).toContainText(
-		"The ember lifts easily from its cradle.",
+		"You claim the Warden's Flame.",
 	);
 	await expect(page.getByRole("log")).toContainText(
-		"Getting here was the quieter half of the journey.",
+		"you must fight your way back to the surface.",
 	);
 	await page.keyboard.press("c");
 	const pouch = page.getByLabel("Quest pouch", { exact: true });
-	await expect(pouch).toContainText("Ember protected");
+	await expect(pouch).toContainText("Flame secured");
 	await expect(pouch.locator("svg")).toHaveClass(/text-item-ember/);
 	await pouch.screenshot({ path: testInfo.outputPath("ember.png") });
 	await page.keyboard.press("Escape");
@@ -56,7 +58,7 @@ test("The Last Ember introduces its quest and presents the historical quest item
 	await expect(turns(page)).toHaveText("Turn 1");
 });
 
-test("returning the ember rekindles the beacon and preserves terminal victory behavior", async ({
+test("returning the flame rekindles the beacon and preserves terminal victory behavior", async ({
 	page,
 }, testInfo) => {
 	await importAdventure(page, "ember-homecoming");
@@ -83,14 +85,12 @@ test("returning the ember rekindles the beacon and preserves terminal victory be
 					: "d",
 	);
 	const victory = page.getByRole("dialog", {
-		name: "Adventure complete",
+		name: "The Beacon Burns Again",
 		exact: true,
 	});
+	await expect(victory).toContainText("The Warden's Flame ignites the beacon.");
 	await expect(victory).toContainText(
-		"The beacon catches. Beyond the walls, the shapes retreat.",
-	);
-	await expect(victory).toContainText(
-		"By morning, someone has complained about the smoke.",
+		"By morning, someone has already complained about the smoke.",
 	);
 	await victory.screenshot({ path: testInfo.outputPath("victory.png") });
 	await page.keyboard.press("Escape");

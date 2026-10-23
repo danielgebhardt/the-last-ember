@@ -58,10 +58,15 @@ const VictoryDialog = ({
 						tabIndex={-1}
 						className="text-xl font-semibold outline-none"
 					>
-						Adventure complete
+						{ADVENTURE_STORY.victoryHeading}
 					</Dialog.Title>
-					<Dialog.Description className="mt-2 text-sm text-muted-foreground">
-						{ADVENTURE_STORY.victory}
+					<Dialog.Description
+						render={<div />}
+						className="mt-2 grid gap-2 text-sm text-muted-foreground"
+					>
+						{ADVENTURE_STORY.victory.map((paragraph) => (
+							<p key={paragraph}>{paragraph}</p>
+						))}
 					</Dialog.Description>
 					<dl className="my-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
 						{values.map(([label, value]) => (

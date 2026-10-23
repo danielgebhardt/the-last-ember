@@ -12,7 +12,8 @@ const tileEntries = [
 	{
 		tile: ENTRANCE,
 		label: "Entrance",
-		description: "Return here with the ember to complete the adventure.",
+		description:
+			"Return here with the Warden's Flame to complete the adventure.",
 	},
 	{ tile: PLAYER, label: "Player", description: "Your current position." },
 	{

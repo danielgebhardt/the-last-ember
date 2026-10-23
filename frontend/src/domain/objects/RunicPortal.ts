@@ -74,7 +74,7 @@ export const portalLanding = (
 };
 
 export const PORTAL_EMBER_RESTRICTION =
-	"The portal will not take you while you carry the Last Ember. Walk it home.";
+	"The portal will not take you while you carry the Warden's Flame. Walk it home.";
 
 export const stepThroughPortal = (
 	state: GameState,

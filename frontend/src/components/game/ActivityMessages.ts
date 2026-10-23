@@ -44,7 +44,7 @@ export const formatActivityEvent = (event: ActivityEvent): string => {
 		case "monster-summoned":
 			return `${prefix}The ${MONSTER_DEFINITIONS[event.monster].name} calls a ${MONSTER_DEFINITIONS[event.summoned].name} to its side.`;
 		case "escape-started":
-			return `${prefix}${ADVENTURE_STORY.return} Enemies sense the ember through walls within ${ESCAPE_PURSUIT_RULES.cureSenseRadius} tiles. Keep moving toward the entrance on floor 1!`;
+			return `${prefix}${ADVENTURE_STORY.return} Enemies sense the flame through walls within ${ESCAPE_PURSUIT_RULES.cureSenseRadius} tiles. Keep moving toward the entrance on floor 1!`;
 		case "monster-awareness-changed": {
 			const definition = MONSTER_DEFINITIONS[event.monster];
 			let message = "gives up the search.";
@@ -64,9 +64,12 @@ export const formatActivityEvent = (event: ActivityEvent): string => {
 		case "storage-withdrawn":
 			return `${prefix}You ${event.type === "storage-deposited" ? "store" : "take"} ${ITEM_DEFINITIONS[event.item].name}${event.count > 1 ? ` ×${event.count}` : ""} ${event.type === "storage-deposited" ? "in" : "from"} the storage chest.`;
 		case "warden-woke":
-			return `${prefix}The Ember Warden rises from the ember's light. It guards the ember with a heavy strike and a breath of fire.`;
+			return `${prefix}${ADVENTURE_STORY.encounter} It fights with a heavy strike and a breath of fire.`;
+		case "warden-fell":
+			return `${prefix}${ADVENTURE_STORY.defeat} Press G on its tile to claim it.`;
+		// Only saves from before the Warden carried the flame can take it while it stands.
 		case "warden-enraged":
-			return `${prefix}You take the ember from its guardian. The Ember Warden roars and will follow you all the way home.`;
+			return `${prefix}You take the flame from its guardian. The Ember Warden roars and will follow you all the way home.`;
 		case "warden-followed":
 			return `${prefix}The Ember Warden climbs after you onto floor ${event.floorNumber}.`;
 		case "perk-chosen":
@@ -116,9 +119,9 @@ export const formatActivityEvent = (event: ActivityEvent): string => {
 		case "level-gained":
 			return `${prefix}You reach level ${event.level}. Maximum and current health increase by ${event.healthGain}.${(PERK_LEVELS as readonly number[]).includes(event.level) ? " A perk is waiting: choose it under Character → Progression." : ""}`;
 		case "quest-completed":
-			return `${prefix}${ADVENTURE_STORY.victory}`;
+			return `${prefix}${ADVENTURE_STORY.victory.join(" ")}`;
 		case "entrance-reminder":
-			return `${prefix}The last ember is still on floor ${event.goalFloor}. Return with it to leave.`;
+			return `${prefix}The Warden's Flame is still on floor ${event.goalFloor}. Return with it to leave.`;
 		case "exit-scroll-used":
 			return event.destination === "town"
 				? `${prefix}You read a town portal scroll on floor ${event.fromFloor}. A return portal opens in Beacon town.`
@@ -239,8 +242,7 @@ export const formatActivityEvent = (event: ActivityEvent): string => {
 		case "item-picked-up":
 			if (ITEM_DEFINITIONS[event.item].type === "spellbook")
 				return `${prefix}You read ${ITEM_DEFINITIONS[event.item].name} and learn its spell.`;
-			if (event.item === "cure")
-				return `${prefix}${ADVENTURE_STORY.pickup} Return to the entrance on floor 1.`;
+			if (event.item === "cure") return `${prefix}${ADVENTURE_STORY.pickup}`;
 			return `${prefix}You pick up ${ITEM_DEFINITIONS[event.item].name}.`;
 		case "item-dropped":
 			return `${prefix}You drop ${ITEM_DEFINITIONS[event.item].name}${event.count ? ` ×${event.count}` : ""}.`;

@@ -156,7 +156,11 @@ export const createGameState = (
 		equipment: createStartingEquipment(),
 		bag: createStartingBag(),
 		potionHotbar: createStartingPotionHotbar(),
-		floorItems: [...floorItems, ...rare.items],
+		// The Warden carries the flame and drops it when it falls. The flame's tile still
+		// anchors the Warden and shapes placement, so the rest of the floor is unchanged.
+		floorItems: [...floorItems, ...rare.items].filter(
+			(entry) => !warden || entry.item.kind !== "cure",
+		),
 		monsters: [
 			...(difficulty === 1
 				? markFirstRemedySources(encounters.monsters)

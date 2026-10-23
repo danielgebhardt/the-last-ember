@@ -225,7 +225,7 @@ const TownStorageDialog = ({
 			error={error}
 			leaveLabel="Leave storage"
 			className="h-[min(40rem,calc(100dvh-2rem))] w-[min(52rem,calc(100vw-2rem))]"
-			description={`Set items aside for this adventure. Select a stack, or drag it across, to move the whole stack; moving is free and costs no dungeon time. The chest holds ${STORAGE_CAPACITY} slots and never the Last Ember.`}
+			description={`Set items aside for this adventure. Select a stack, or drag it across, to move the whole stack; moving is free and costs no dungeon time. The chest holds ${STORAGE_CAPACITY} slots and never the Warden's Flame.`}
 		>
 			<ItemDragProvider onDrop={drop}>
 				<div className="grid min-h-0 flex-1 gap-3 sm:grid-cols-2">

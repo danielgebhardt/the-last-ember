@@ -21,7 +21,7 @@ test("a restored ember carrier cannot read an exit scroll", async ({
 		exact: true,
 	});
 	await expect(read).toBeDisabled();
-	await expect(read).toHaveAccessibleDescription(/carrying the Last Ember/);
+	await expect(read).toHaveAccessibleDescription(/carrying the Warden's Flame/);
 	await expect(turns(page)).toHaveText("Turn 0");
 	await expect(page.getByText("Floor 3 of 5", { exact: true })).toBeVisible();
 	await page.keyboard.press("Escape");
@@ -409,7 +409,7 @@ test("the Ember Warden wakes when it sees you, then telegraphs its fire breath",
 	const log = page.getByRole("log");
 	await page.keyboard.press("Space");
 	await expect(log).toContainText(
-		"The Ember Warden rises from the ember's light.",
+		"The Ember Warden rises before you, ancient fire burning within its armor.",
 	);
 	await page.keyboard.press("Space");
 	await expect(log).toContainText(

@@ -102,7 +102,7 @@ const AdventureOpening = ({
 										<Flourish className="mt-2 max-w-sm" />
 
 										<p className="mt-2 text-[11px] font-medium uppercase tracking-[0.25em] text-amber-900/70 dark:text-amber-300/70">
-											A journey beneath the dying light
+											{ADVENTURE_STORY.subtitle}
 										</p>
 									</div>
 
@@ -116,8 +116,13 @@ const AdventureOpening = ({
                               dark:from-amber-950/15 dark:to-muted/20
                            "
 									>
-										<Dialog.Description className="font-serif text-base leading-normal text-foreground/90">
-											{ADVENTURE_STORY.opening.join(" ")}
+										<Dialog.Description
+											render={<div />}
+											className="grid gap-2 font-serif text-base leading-normal text-foreground/90"
+										>
+											{ADVENTURE_STORY.opening.map((paragraph) => (
+												<p key={paragraph}>{paragraph}</p>
+											))}
 										</Dialog.Description>
 									</div>
 

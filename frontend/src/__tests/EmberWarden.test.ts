@@ -7,6 +7,8 @@ import {
 import { createGameState, type GameState } from "../domain/game/GameState";
 import { damageMonster } from "../domain/game/MonsterDamage";
 import { resolvePlayerAction } from "../domain/game/PlayerActions";
+import { spawnRunQuestItems } from "../domain/items/CurePlacement";
+import { spawnRunItems } from "../domain/items/ItemPlacement";
 import {
 	followWarden,
 	isWarden,
@@ -14,6 +16,7 @@ import {
 	wardenStats,
 } from "../domain/monsters/EmberWarden";
 import type { Monster } from "../domain/monsters/Monster";
+import { spawnRunMonsters } from "../domain/monsters/MonsterPlacement";
 import { actorMaximumHealth } from "../domain/monsters/MonsterStats";
 import { parseSave, serializeSave } from "../domain/saves/SaveFormat";
 import { bruteEncounter } from "./BruteTestHelpers";
@@ -26,6 +29,21 @@ const adventure = (seed = 123, difficulty: 1 | 1.25 = 1) =>
 		connectDungeonFloors(generateDungeonRun(seed, 5, config)),
 		difficulty,
 	);
+// Older saves placed the flame on its generated tile while the Warden stood guard.
+const legacyFlameOnFloor = (state: GameState): GameState => {
+	const monsters = spawnRunMonsters(state.run);
+	return {
+		...state,
+		floorItems: [
+			...state.floorItems,
+			...spawnRunQuestItems(
+				state.run,
+				monsters,
+				spawnRunItems(state.run, monsters),
+			),
+		],
+	};
+};
 const wardenOf = (state: GameState) => {
 	const warden = state.monsters.find(isWarden);
 	if (!warden) throw new Error("Expected an Ember Warden");
@@ -50,17 +68,17 @@ const arena = (at: { row: number; col: number }, awake = true): GameState => {
 };
 
 describe("Ember Warden", () => {
-	it("guards the ember on the final floor, dormant, with depth stats", () => {
+	it("carries the flame on the final floor, dormant, with depth stats", () => {
 		const state = adventure();
 		const warden = wardenOf(state);
-		const ember = state.floorItems.find((i) => i.item.kind === "cure");
 		expect(warden).toMatchObject({
 			id: `5:${WARDEN_SPAWN_ID}`,
 			floorNumber: 5,
 			warden: wardenStats(5),
 		});
 		expect(warden.warden?.awake).toBeUndefined();
-		expect(ember?.floorNumber).toBe(5);
+		// The flame is the Warden's: nothing lies on the floor until it falls.
+		expect(state.floorItems.some((i) => i.item.kind === "cure")).toBe(false);
 		expect(state.monsters.filter(isWarden)).toHaveLength(1);
 		expect(saves(state)).toBe(true);
 		expect(adventure()).toEqual(state);
@@ -99,8 +117,9 @@ describe("Ember Warden", () => {
 		}
 	});
 
-	it("taking the ember enrages it and it follows you up with its health", () => {
-		const start = adventure();
+	// Only saves from before the Warden carried the flame can take it while it stands.
+	it("taking a legacy floor flame enrages it and it follows you up with its health", () => {
+		const start = legacyFlameOnFloor(adventure());
 		const ember = start.floorItems.find((i) => i.item.kind === "cure");
 		if (!ember) throw new Error("Expected the ember");
 		const atEmber = {

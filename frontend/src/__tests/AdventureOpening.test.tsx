@@ -11,12 +11,17 @@ it("introduces the quest before generating or playing an adventure", async () =>
 	const generate = vi.spyOn(DungeonRun, "generateDungeonRun");
 	render(<App />);
 	const welcome = screen.getByRole("dialog", {
-		name: "The Last Ember",
+		name: "The Warden's Flame",
 	});
 	expect(welcome).toHaveTextContent(
-		"The beacon above your settlement is dying.",
+		"For generations, the beacon has kept the darkness beyond your town's walls.",
 	);
-	expect(welcome).toHaveTextContent("Their equipment may prove useful.");
+	expect(welcome).toHaveTextContent(
+		"Descend into darkness. Return with the light.",
+	);
+	expect(welcome).toHaveTextContent(
+		"Their abandoned supplies may prove useful on your journey.",
+	);
 	expect(
 		within(welcome).getByRole("button", { name: "Begin Adventure" }),
 	).toBeVisible();
@@ -41,7 +46,7 @@ it("begins a randomly seeded adventure and focuses the map", async () => {
 		expect.objectContaining({ rows: 40, cols: 40 }),
 	);
 	expect(
-		screen.queryByRole("dialog", { name: "The Last Ember" }),
+		screen.queryByRole("dialog", { name: "The Warden's Flame" }),
 	).not.toBeInTheDocument();
 	expect(screen.getByLabelText("Town map", { exact: true })).toHaveFocus();
 });

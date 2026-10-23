@@ -29,9 +29,15 @@ export const createQuest = (run: DungeonRun): QuestState => ({
 	victory: null,
 });
 
-export const questInstruction = (quest: QuestState): string =>
+// The Warden carries the flame until it falls; then the flame waits to be claimed.
+export const questInstruction = (
+	quest: QuestState,
+	wardenStanding = true,
+): string =>
 	quest.victory
-		? "Ember returned. The beacon burns again."
+		? "The flame is restored. Your town is saved."
 		: quest.cureRecovered
-			? "Hunted return: Return to the entrance on floor 1."
-			: `Recover the last ember on floor ${quest.goalFloor}.`;
+			? "Escape the depths. Return to the entrance on floor 1."
+			: wardenStanding
+				? `Defeat the Ember Warden on floor ${quest.goalFloor} and claim its flame.`
+				: `Claim the Warden's Flame on floor ${quest.goalFloor}.`;

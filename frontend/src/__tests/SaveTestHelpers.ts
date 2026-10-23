@@ -4,10 +4,31 @@ import {
 } from "../domain/dungeon/DungeonRun";
 import { updateExploration } from "../domain/dungeon/Exploration";
 import { DEFAULT_FOG_CONFIGURATION } from "../domain/dungeon/RunConfiguration";
-import { createGameState } from "../domain/game/GameState";
+import { createGameState, type GameState } from "../domain/game/GameState";
 import { resolvePlayerAction } from "../domain/game/PlayerActions";
+import { isWarden } from "../domain/monsters/EmberWarden";
 import { createSaveDocument } from "../domain/saves/SaveFormat";
 import { COMPACT_TEST_CONFIGURATION } from "./TestRunConfiguration";
+
+// The Warden has fallen where it stood and its flame waits there to be claimed: a real
+// game state that lets scenarios replace the monsters without losing the flame.
+export const withFlameOnFloor = (state: GameState): GameState => {
+	const warden = state.monsters.find(isWarden);
+	if (!warden || state.floorItems.some((entry) => entry.item.kind === "cure"))
+		return state;
+	return {
+		...state,
+		monsters: state.monsters.filter((monster) => monster !== warden),
+		floorItems: [
+			...state.floorItems,
+			{
+				item: { id: "quest:cure", kind: "cure" },
+				floorNumber: warden.floorNumber,
+				coordinate: { ...warden.coordinate },
+			},
+		],
+	};
+};
 
 const buildSavedAdventure = () => {
 	const run = connectDungeonFloors(
@@ -17,7 +38,7 @@ const buildSavedAdventure = () => {
 			COMPACT_TEST_CONFIGURATION,
 		),
 	);
-	let state = createGameState(run);
+	let state = withFlameOnFloor(createGameState(run));
 	let exploration = updateExploration(run, DEFAULT_FOG_CONFIGURATION.radius);
 	for (let i = 0; i < 3; i++) {
 		state = resolvePlayerAction(state, { type: "wait" }).state;

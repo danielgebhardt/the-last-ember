@@ -76,7 +76,7 @@ export const monsterTraits = (kind: MonsterKind): readonly string[] => {
 		);
 	if (kind === "ember-warden")
 		traits.push(
-			"Guards the ember on the final floor and sleeps until it first sees you. Alternates a marked heavy strike (step off the tile) and a fire breath with a countdown, at least 4 phases apart, with melee in between. Health and attack grow with the dungeon's depth. Take the ember while it stands and it follows you up every floor; defeat it for a +2 weapon or armor piece and a large XP reward.",
+			"Carries the Warden's Flame on the final floor and sleeps until it first sees you. Alternates a marked heavy strike (step off the tile) and a fire breath with a countdown, at least 4 phases apart, with melee in between. Health and attack grow with the dungeon's depth. Defeat it and it drops the flame where it falls, with a +2 weapon or armor piece and a large XP reward.",
 		);
 	if (definition.alarmRadius)
 		traits.push(

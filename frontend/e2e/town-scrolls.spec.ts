@@ -17,7 +17,7 @@ for (const [width, height] of [
 		await page.keyboard.press("e");
 		const shop = page.getByRole("dialog", { name: "Scroll shop" });
 		await expect(shop.getByRole("listitem")).toHaveCount(2);
-		await expect(shop).toContainText("carrying the Last Ember");
+		await expect(shop).toContainText("carrying the Warden's Flame");
 		await shop
 			.getByRole("button", { name: "Buy Town portal scroll", exact: true })
 			.click();

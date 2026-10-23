@@ -16,13 +16,16 @@ import {
 	restoreSave,
 	serializeSave,
 } from "../domain/saves/SaveFormat";
+import { withFlameOnFloor } from "./SaveTestHelpers";
 import { COMPACT_TEST_CONFIGURATION } from "./TestRunConfiguration";
 
 const configuration = { ...COMPACT_TEST_CONFIGURATION, rows: 60, cols: 60 };
 const freshAdventure = () =>
-	createGameState(
-		connectDungeonFloors(
-			generateDungeonRun(123, configuration.floorCount, configuration),
+	withFlameOnFloor(
+		createGameState(
+			connectDungeonFloors(
+				generateDungeonRun(123, configuration.floorCount, configuration),
+			),
 		),
 	);
 const resume = (state: ReturnType<typeof freshAdventure>) => {

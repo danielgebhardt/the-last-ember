@@ -13,6 +13,7 @@ import {
 	restoreSave,
 	serializeSave,
 } from "../domain/saves/SaveFormat";
+import { withFlameOnFloor } from "./SaveTestHelpers";
 import { createTestDungeonFloor } from "./testhelpers";
 
 // Valid five-floor save geometry, with a long, quiet route on floor 2. The
@@ -41,7 +42,7 @@ export const corridorContinuationAdventure = (
 			}),
 		),
 	});
-	const fresh = createGameState(run);
+	const fresh = withFlameOnFloor(createGameState(run));
 	const state = {
 		...fresh,
 		objects: [],

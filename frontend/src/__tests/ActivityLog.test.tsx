@@ -77,7 +77,7 @@ describe("Activity log presentation", () => {
 			"Dexterity increases to 12.",
 			"The orc hits you for 2 damage.",
 			"You die.",
-			"The beacon catches. Beyond the walls, the shapes retreat. By morning, someone has complained about the smoke.",
+			"The Warden's Flame ignites the beacon. Light sweeps across the town, driving the creatures back into the darkness. Bells ring. Doors open. For the first time in weeks, the people gather without fear. By morning, someone has already complained about the smoke.",
 		]);
 		expect(
 			within(entries[1]).getByText(/You reach level 2/).parentElement,
@@ -89,7 +89,8 @@ describe("Activity log presentation", () => {
 			"text-destructive",
 		);
 		expect(
-			within(entries[5]).getByText(/The beacon catches/).parentElement,
+			within(entries[5]).getByText(/The Warden's Flame ignites the beacon/)
+				.parentElement,
 		).toHaveClass("font-semibold");
 		for (const index of [1, 2, 4, 5])
 			expect(entries[index].querySelector("svg")).toHaveAttribute(

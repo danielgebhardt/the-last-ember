@@ -31,7 +31,8 @@ export const wardenStats = (depth: number) => ({
 export const isWarden = (monster: Pick<Monster, "kind">) =>
 	monster.kind === "ember-warden";
 
-// The nearest free room tile to the ember, so the guardian stands in its room.
+// The nearest free room tile to the flame's generated tile, so the guardian stands in
+// that room. The Warden then carries the flame until it falls.
 export const placeEmberWarden = (
 	run: DungeonRun,
 	monsters: readonly Monster[],
@@ -96,7 +97,8 @@ export const wakeWarden = (
 export const wardenDormant = (monster: Monster) =>
 	monster.warden !== undefined && !monster.warden.awake;
 
-// Taking the ember while the Warden stands enrages it: it wakes and follows you home.
+// Taking the flame while the Warden stands enrages it: it wakes and follows you home.
+// Only saves from before the Warden carried the flame allow this.
 export const enrageWarden = (state: GameState): GameState => {
 	const target = state.monsters.find((m) => isWarden(m) && m.health > 0);
 	const stats = target?.warden;
@@ -191,6 +193,23 @@ export const followWarden = (
 		]),
 	};
 };
+
+// The Warden carries the flame: it falls where the Warden dies. Exactly one flame exists,
+// so none drops once it is claimed or already lies somewhere (older saves placed it on
+// the final floor).
+export const wardenFlameDrop = (
+	state: Pick<GameState, "quest" | "floorItems">,
+	monster: Monster,
+): FloorItem | undefined =>
+	isWarden(monster) &&
+	!state.quest.cureRecovered &&
+	!state.floorItems.some((entry) => entry.item.kind === "cure")
+		? {
+				item: { id: "quest:cure", kind: "cure" },
+				floorNumber: monster.floorNumber,
+				coordinate: { ...monster.coordinate },
+			}
+		: undefined;
 
 // One ordinary weapon or armor piece from the final floor's found loot at +2, fixed by
 // seed, dropped where the Warden falls.

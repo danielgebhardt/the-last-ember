@@ -162,10 +162,10 @@ describe("reserved test seed", () => {
 				floor.downStair?.coordinate,
 			);
 		}
-		// Deeper floors and the ember come from ordinary generation.
+		// Deeper floors and the Warden carrying the flame come from ordinary generation.
 		expect(
-			state.floorItems.some(
-				(i) => i.item.kind === "cure" && i.floorNumber === floors.length,
+			state.monsters.some(
+				(m) => m.kind === "ember-warden" && m.floorNumber === floors.length,
 			),
 		).toBe(true);
 		expect(

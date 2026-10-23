@@ -40,7 +40,7 @@ export const travelBetweenTownAndDungeon = (
 		state.bag.items.some((item) => item.kind === "cure")
 	)
 		return reject(
-			"The ember must be returned through the floor-1 entrance. Town travel cannot bypass the ascent.",
+			"The flame must be returned through the floor-1 entrance. Town travel cannot bypass the ascent.",
 		);
 	if (action.destination === "town") {
 		if (!atDungeonEntrance(state))

@@ -43,8 +43,9 @@ const Header = ({
 				<h1
 					className="
                   font-serif text-xl font-semibold tracking-wide
+                  whitespace-nowrap
                   text-foreground dark:text-[#f5e6cd]
-                  sm:text-2xl
+                  sm:text-2xl lg:max-xl:text-xl
                "
 				>
 					{ADVENTURE_STORY.title}

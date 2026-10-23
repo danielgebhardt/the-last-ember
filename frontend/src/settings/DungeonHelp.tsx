@@ -320,15 +320,15 @@ const DungeonHelp = ({
 						free. Each chosen draw empties the fountain.
 					</li>
 					<li>
-						<span className="font-medium text-foreground">Quest.</span> Recover
-						the ember on the final floor with G, then return to the entrance on
-						floor 1. The protected quest pouch uses no bag slot; the ember
-						cannot be drunk or dropped. Step onto the entrance tile with the
-						ember to win. There is no time limit. The Ember Warden guards the
-						ember: it sleeps until it sees you, then alternates a marked heavy
-						strike and a counted-down fire breath. Defeat it for a +2 weapon or
-						armor piece and a large XP reward, or take the ember while it
-						stands, and it follows you up every floor until it falls.
+						<span className="font-medium text-foreground">Quest.</span> The
+						Ember Warden on the final floor carries the Warden&apos;s Flame. It
+						sleeps until it sees you, then alternates a marked heavy strike and
+						a counted-down fire breath. Defeat it and the flame falls where it
+						stood, with a +2 weapon or armor piece and a large XP reward. Claim
+						the flame with G when you are ready; that starts the hunted return.
+						Then return to the entrance on floor 1. The protected quest pouch
+						uses no bag slot; the flame cannot be drunk or dropped. Step onto
+						the entrance tile with the flame to win. There is no time limit.
 					</li>
 					<li id="help-equipment">
 						<span className="font-medium text-foreground">Equipment.</span> Open
@@ -480,8 +480,8 @@ const DungeonHelp = ({
 						You can also drag gear onto its sell area, then confirm the sale.
 						Town movement and shopping do not advance dungeon turns or restore
 						health or mana. Stand on the south gate and press Enter to enter the
-						dungeon. At the floor-1 exit, Enter returns to town until you
-						recover the ember.
+						dungeon. At the floor-1 exit, Enter returns to town until you claim
+						the flame.
 					</li>
 					<li id="help-town-portals">
 						<span className="font-medium text-foreground">Town portals.</span>{" "}
@@ -494,7 +494,7 @@ const DungeonHelp = ({
 						safe tile if blocked. The portal closes after return; leaving by the
 						south gate abandons it and enters floor 1. Ordinary town visits
 						leave the circle dormant. Portals cannot be used while carrying the
-						ember.
+						flame.
 					</li>
 					<li>
 						<span className="font-medium text-foreground">Sanctuary.</span>{" "}
@@ -550,12 +550,12 @@ const DungeonHelp = ({
 			>
 				<h3 className="mb-2 font-medium">Hunted return</h3>
 				<p>
-					Recovering the ember awakens up to{" "}
+					Claiming the flame awakens up to{" "}
 					{ESCAPE_ENCOUNTER_RULES.maximumNewMonsters} endgame hunters near stair
 					routes on each return floor, drawn from the floor-
 					{ESCAPE_ENCOUNTER_RULES.monsterPoolFloor} pool. Small or crowded
 					floors may have fewer. All enemies on your active floor sense the
-					ember within {ESCAPE_PURSUIT_RULES.cureSenseRadius}{" "}
+					flame within {ESCAPE_PURSUIT_RULES.cureSenseRadius}{" "}
 					horizontal/vertical steps, even through walls, and track you while in
 					range. Walls and closed doors still block attacks and movement;
 					creatures that normally open ordinary doors can spend actions opening
@@ -696,7 +696,8 @@ const DungeonHelp = ({
 					or reloading cannot change it. Stepping through uses one turn;
 					monsters on the arrival floor then act normally, and floors you skip
 					stay unexplored for your climb home. It will not take you while you
-					carry the Last Ember, and it is unrelated to Town portal scrolls.
+					carry the Warden&apos;s Flame, and it is unrelated to Town portal
+					scrolls.
 				</p>
 			</section>
 			<section

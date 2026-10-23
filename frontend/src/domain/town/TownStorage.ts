@@ -33,7 +33,7 @@ export const storageRefusal = (
 			? "That item is not in your bag."
 			: "That item is not stored.";
 	if (stack.some((item) => item.kind === "cure"))
-		return "The Last Ember never leaves your keeping.";
+		return "The Warden's Flame never leaves your keeping.";
 	if (deposit) {
 		const merges = state.townStorage.some(
 			(item) => bagItemKey(item) === action.itemKey,

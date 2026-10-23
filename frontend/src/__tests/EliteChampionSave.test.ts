@@ -16,6 +16,7 @@ import {
 	restoreSave,
 	serializeSave,
 } from "../domain/saves/SaveFormat";
+import { withFlameOnFloor } from "./SaveTestHelpers";
 import { COMPACT_TEST_CONFIGURATION } from "./TestRunConfiguration";
 
 const preparedSave = (difficulty: Difficulty) => {
@@ -27,7 +28,7 @@ const preparedSave = (difficulty: Difficulty) => {
 		difficulty,
 	};
 	const run = connectDungeonFloors(generateDungeonRun(123, 20, configuration));
-	const fresh = createGameState(run, difficulty);
+	const fresh = withFlameOnFloor(createGameState(run, difficulty));
 	const terrain = run.floors[19].terrain;
 	const offsets = [
 		{ row: 0, col: 2 },

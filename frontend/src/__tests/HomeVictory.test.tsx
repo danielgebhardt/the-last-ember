@@ -30,7 +30,7 @@ const win = async () => {
 	const user = userEvent.setup();
 	await user.keyboard("dga");
 	const dialog = await screen.findByRole("dialog", {
-		name: "Adventure complete",
+		name: "The Beacon Burns Again",
 	});
 	return { user, dialog };
 };
@@ -39,7 +39,7 @@ describe("Victory summary and ended-run controls", () => {
 		const { dialog } = await win();
 		const summary = within(dialog);
 		expect(dialog).toHaveTextContent(
-			"By morning, someone has complained about the smoke.",
+			"By morning, someone has already complained about the smoke.",
 		);
 		expect(summary.getByLabelText("Victory seed")).toHaveTextContent("123");
 		expect(summary.getByLabelText("Victory turns")).toHaveTextContent("3");
@@ -51,7 +51,7 @@ describe("Victory summary and ended-run controls", () => {
 		).toHaveTextContent("0");
 		await waitFor(() =>
 			expect(
-				summary.getByRole("heading", { name: "Adventure complete" }),
+				summary.getByRole("heading", { name: "The Beacon Burns Again" }),
 			).toHaveFocus(),
 		);
 	});
@@ -82,7 +82,7 @@ describe("Victory summary and ended-run controls", () => {
 		await user.keyboard("{Escape}");
 		await user.click(screen.getByRole("button", { name: "Victory summary" }));
 		expect(
-			await screen.findByRole("dialog", { name: "Adventure complete" }),
+			await screen.findByRole("dialog", { name: "The Beacon Burns Again" }),
 		).toBeVisible();
 	});
 	it.each(["New Dungeon", "Replay this seed"])(
@@ -92,11 +92,11 @@ describe("Victory summary and ended-run controls", () => {
 			await user.click(within(dialog).getByRole("button", { name }));
 			await waitFor(() =>
 				expect(
-					screen.queryByRole("dialog", { name: "Adventure complete" }),
+					screen.queryByRole("dialog", { name: "The Beacon Burns Again" }),
 				).not.toBeInTheDocument(),
 			);
 			expect(screen.getByLabelText("Quest objective")).toHaveTextContent(
-				"Recover the last ember",
+				"Claim the Warden's Flame",
 			);
 			expect(screen.getByLabelText("Turn count")).toHaveTextContent("Turn 0");
 			expect(
@@ -115,7 +115,7 @@ describe("Victory summary and ended-run controls", () => {
 		expect(screen.getByRole("alert")).toHaveTextContent("Enter a whole number");
 		await user.keyboard("{Escape}");
 		expect(screen.getByLabelText("Quest objective")).toHaveTextContent(
-			"Ember returned. The beacon burns again.",
+			"The flame is restored. Your town is saved.",
 		);
 		await openSettings(user);
 		await user.clear(screen.getByRole("textbox", { name: "Dungeon seed" }));
@@ -126,7 +126,7 @@ describe("Victory summary and ended-run controls", () => {
 		await user.click(screen.getByRole("button", { name: "Start from seed" }));
 		await waitForSettingsClosed();
 		expect(screen.getByLabelText("Quest objective")).toHaveTextContent(
-			"Recover the last ember",
+			"Claim the Warden's Flame",
 		);
 	});
 });

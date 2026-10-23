@@ -139,14 +139,16 @@ test("interaction hints reserve their space without resizing the dungeon", async
 	}
 });
 
-test("the wider rail keeps the floor-20 objective on one line and leaves room for XP", async ({
+test("the wider rail keeps the floor-20 objective within two lines and leaves room for XP", async ({
 	page,
 }) => {
 	await importAdventure(page, "corridor-large");
 	const objective = page
 		.getByRole("region", { name: "Adventure quest", exact: true })
 		.getByLabel("Quest objective", { exact: true });
-	await expect(objective).toHaveText("Recover the last ember on floor 20.");
+	await expect(objective).toHaveText(
+		"Defeat the Ember Warden on floor 20 and claim its flame.",
+	);
 	for (const size of [
 		{ width: 1024, height: 768 },
 		{ width: 1280, height: 720 },
@@ -155,7 +157,8 @@ test("the wider rail keeps the floor-20 objective on one line and leaves room fo
 		await page.setViewportSize(size);
 		const bounds = await objective.boundingBox();
 		if (!bounds) throw new Error("Expected objective text");
-		expect(bounds.height).toBeLessThanOrEqual(16);
+		// The Warden objective, the longest, takes at most two lines in its card.
+		expect(bounds.height).toBeLessThanOrEqual(32);
 		const xp = await page
 			.getByRole("progressbar", {
 				name: "Player experience progress",

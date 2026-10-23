@@ -6,14 +6,17 @@ type QuestStatusProps = {
 	quest: QuestState;
 	pouch?: boolean;
 	activeFloor?: number;
+	// Whether the Ember Warden still carries the flame.
+	wardenStanding?: boolean;
 };
 
 const QuestStatus = ({
 	quest,
 	pouch = false,
 	activeFloor,
+	wardenStanding = true,
 }: QuestStatusProps) => {
-	const instruction = questInstruction(quest);
+	const instruction = questInstruction(quest, wardenStanding);
 	const returnInstruction =
 		quest.cureRecovered && !quest.victory && activeFloor !== undefined
 			? activeFloor === 1
@@ -35,8 +38,8 @@ const QuestStatus = ({
 					</p>
 					<p className="text-xs text-muted-foreground">
 						{quest.cureRecovered
-							? "Ember protected — no bag slot used."
-							: "Empty — reserved for the last ember."}
+							? "Flame secured — no bag slot used."
+							: "Empty — reserved for the Warden's Flame."}
 					</p>
 					<output
 						aria-label="Quest objective"

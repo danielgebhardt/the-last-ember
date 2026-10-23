@@ -18,12 +18,15 @@ import {
 	restoreSave,
 	serializeSave,
 } from "../domain/saves/SaveFormat";
+import { withFlameOnFloor } from "./SaveTestHelpers";
 
 describe("Merchant safety net on a complete recommended adventure", () => {
 	it("offers a deliberate purchase when no supplies were found and never restocks a depleted shared line", () => {
 		const config = DEFAULT_RUN_CONFIGURATION;
-		let state = createGameState(
-			connectDungeonFloors(generateDungeonRun(123, 20, config)),
+		let state = withFlameOnFloor(
+			createGameState(
+				connectDungeonFloors(generateDungeonRun(123, 20, config)),
+			),
 		);
 		const merchant = state.objects.find(
 			(o) => o.kind === "merchant" && o.floorNumber === 5,

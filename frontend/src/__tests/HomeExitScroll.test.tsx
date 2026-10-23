@@ -101,7 +101,7 @@ it("explains and disables reading while the ember is carried, including after re
 		name: "Read town portal scroll",
 	});
 	expect(read).toBeDisabled();
-	expect(read).toHaveAccessibleDescription(/carrying the Last Ember/);
+	expect(read).toHaveAccessibleDescription(/carrying the Warden's Flame/);
 	await user.click(read);
 	expect(screen.getByLabelText("Turn count")).toHaveTextContent("Turn 28");
 	expect(

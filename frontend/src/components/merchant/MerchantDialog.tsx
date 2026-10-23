@@ -313,7 +313,7 @@ const MerchantDialog = ({
 							>
 								<p className="mb-2 text-xs text-muted-foreground">
 									Unequip worn gear first. Sell carried equipment only; supplies
-									and the ember stay yours. Sold slots stay until you close.
+									and the flame stay yours. Sold slots stay until you close.
 								</p>
 								{saleItems.length > 0 && (
 									<ul className="grid items-start gap-2 sm:grid-cols-2 lg:grid-cols-4">

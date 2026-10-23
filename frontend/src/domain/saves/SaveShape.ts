@@ -139,6 +139,7 @@ const eventFields = {
 	"portal-used": { fromFloor: floorNumber, toFloor: floorNumber },
 	"perk-chosen": { perk: oneOf(PERK_KINDS), level: integer(3, 19) },
 	"warden-woke": {},
+	"warden-fell": {},
 	"warden-enraged": {},
 	"warden-followed": { floorNumber },
 	"storage-deposited": { item: itemKind, count: integer(1) },

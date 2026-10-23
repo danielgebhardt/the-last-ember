@@ -79,7 +79,7 @@ export const townPotionDescription = (kind: TownPotion): string =>
 // Shop copy keeps what a buyer needs; item details and Catalog keep the full reading rules.
 const TOWN_SCROLL_DESCRIPTIONS: Readonly<Record<TownScroll, string>> = {
 	"exit-scroll":
-		"Read in a cleared dungeon area to open a single-use return portal in Beacon town. Stand on the town portal and press Enter to return to your exact departure location, or a nearby safe tile if blocked, for free. Cannot be used while carrying the Last Ember.",
+		"Read in a cleared dungeon area to open a single-use return portal in Beacon town. Stand on the town portal and press Enter to return to your exact departure location, or a nearby safe tile if blocked, for free. Cannot be used while carrying the Warden's Flame.",
 	"remove-curse-scroll":
 		"Lifts a Curse before the ensuing phase, restoring melee accuracy and damage. Does not cure other conditions.",
 };

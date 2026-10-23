@@ -20,11 +20,12 @@ import {
 	restoreSave,
 	serializeSave,
 } from "../domain/saves/SaveFormat";
+import { withFlameOnFloor } from "./SaveTestHelpers";
 
 const encounter = () => {
 	const config = DEFAULT_RUN_CONFIGURATION;
-	const state = createGameState(
-		connectDungeonFloors(generateDungeonRun(123, 20, config)),
+	const state = withFlameOnFloor(
+		createGameState(connectDungeonFloors(generateDungeonRun(123, 20, config))),
 	);
 	const gate = state.objects.find((o) => o.kind === "elite-door");
 	if (!gate) throw new Error("Expected seeded gate");

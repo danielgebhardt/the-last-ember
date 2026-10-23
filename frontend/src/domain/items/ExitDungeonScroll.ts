@@ -8,7 +8,7 @@ import { removeBagItem } from "./Bag";
 
 export type ExitDungeonAction = { type: "exit-dungeon"; itemId: string };
 export const EXIT_SCROLL_EMBER_RESTRICTION =
-	"Town portal scrolls cannot be used while carrying the Last Ember.";
+	"Town portal scrolls cannot be used while carrying the Warden's Flame.";
 export const PORTAL_SAFETY_RADIUS = 8;
 export const exitScrollRestriction = (state: GameState): string | null => {
 	if (state.player.health <= 0 || state.quest.victory)

@@ -20,11 +20,11 @@ Town and dungeon locations are explicit alternatives. Entering town must retain 
 
 ## Ember homecoming and recall
 
-The existing victory boundary remains authoritative: after recovering the ember, reaching the floor-1 entrance commits victory through the current domain rule. The beacon in town is its narrative destination, not a second hand-in condition or an alternate victory trigger. Do not require another walk after surviving the ascent.
+The existing victory boundary remains authoritative: after claiming the Warden's Flame, reaching the floor-1 entrance commits victory through the current domain rule. The beacon in town is its narrative destination, not a second hand-in condition or an alternate victory trigger. Do not require another walk after surviving the ascent.
 
-Town admission during an active ember return is forbidden. A carrier reaching the entrance wins through the existing boundary before any ordinary town travel can occur. Victory remains terminal; town cannot be used for healing, shopping, storing the ember or recalling around the hunted ascent. A future playable victory epilogue requires its own story.
+Town admission during an active flame return is forbidden. A carrier reaching the entrance wins through the existing boundary before any ordinary town travel can occur. Victory remains terminal; town cannot be used for healing, shopping, storing the flame or recalling around the hunted ascent. A future playable victory epilogue requires its own story.
 
-Town portal scrolls (#354, saved internally as `exit-scroll`) now create one returnable trip from a cleared dungeon area to the fixed circle west of the beacon at (8, 9). Reading spends one scroll and one originating-floor response/effect/recovery phase, then pauses the dungeon in town; fatal damage spends the scroll but leaves no portal or town location. Living enemies in line of sight within 8 tiles, or any prepared enemy attack on the active floor, prevent reading. The Last Ember always prevents use. Enter on the circle returns for free to the recorded floor and coordinate and closes the portal. If blocked by terrain, a creature or a live trap, choose a clear tile within three walkable steps in stable N/E/S/W breadth-first order. No safe tile: keep the portal open and explain the failure. Taking the south gate instead abandons the portal and enters floor 1; a blocked gate leaves everything intact. Ordinary town visits leave the circle dormant. Fresh runs/replay have no portal. Saves preserve the anchor; see [save policy](save-policy.md).
+Town portal scrolls (#354, saved internally as `exit-scroll`) now create one returnable trip from a cleared dungeon area to the fixed circle west of the beacon at (8, 9). Reading spends one scroll and one originating-floor response/effect/recovery phase, then pauses the dungeon in town; fatal damage spends the scroll but leaves no portal or town location. Living enemies in line of sight within 8 tiles, or any prepared enemy attack on the active floor, prevent reading. Carrying the Warden's Flame always prevents use. Enter on the circle returns for free to the recorded floor and coordinate and closes the portal. If blocked by terrain, a creature or a live trap, choose a clear tile within three walkable steps in stable N/E/S/W breadth-first order. No safe tile: keep the portal open and explain the failure. Taking the south gate instead abandons the portal and enters floor 1; a blocked gate leaves everything intact. Ordinary town visits leave the circle dormant. Fresh runs/replay have no portal. Saves preserve the anchor; see [save policy](save-policy.md).
 
 ## Death, replay and persistence
 
@@ -39,11 +39,11 @@ Current saves retain the played location and all owned state. They must not be m
 | Different seed, dungeon size or floor count | Identical town dimensions, terrain, signs and entrance coordinates; unchanged dungeon settings. |
 | Walk 100 town steps, inspect every closed shop, leave/re-enter or load | No free HP/MP, effect ticks, stock refill or advancement of the dungeon simulation. |
 | Failed move, invalid coordinate, building roof or closed service | Safe rejection/status message; no ownership/resource changes and no dead-end dialog. |
-| Enter from floor 1 without the ember, then return (#329) | Same dungeon actors, loot, exploration, turn and resources; deterministic valid arrival and map focus. |
+| Enter from floor 1 without the flame, then return (#329) | Same dungeon actors, loot, exploration, turn and resources; deterministic valid arrival and map focus. |
 | Carry ember, attempt recall/storage/town entry | No shortcut around the ascent; floor-1 entrance retains existing terminal victory. |
 | Load a current dungeon save, die, replay | Preserve the loaded adventure; death stays terminal; replay starts fresh. |
 | Preview the town while an adventure is running | Clearly marked preview; the adventure and its save/export remain unchanged. |
 
-Original Larn inspires the town and its shops. This authored settlement belongs to The Last Ember; taxes, interest, classes, crafting and NPC quest systems are not implied by this plan. Developer review remains final acceptance.
+Original Larn inspires the town and its shops. This authored settlement belongs to The Warden's Flame; taxes, interest, classes, crafting and NPC quest systems are not implied by this plan. Developer review remains final acceptance.
 
 The compact town uses `beacon-town:v2`; older layout identities are rejected.

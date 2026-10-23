@@ -190,15 +190,10 @@ export const hasConsistentGeometry = (document: SaveDocument): boolean => {
 			return false;
 		if (object.kind === "elite-door") {
 			const floor = run.floors[object.floorNumber - 1];
+			// Generation also kept the flame's generated tile clear, but the flame may since
+			// have been carried by the Warden, dropped where it fell or claimed. Fewer
+			// required tiles only admit more chambers, so every generated gate still passes.
 			const required = protectedFloorLocations(run, object.floorNumber);
-			required.push(
-				...state.floorItems
-					.filter(
-						(i) =>
-							i.floorNumber === object.floorNumber && i.item.kind === "cure",
-					)
-					.map((i) => i.coordinate),
-			);
 			if (
 				!floor ||
 				!findOptionalEliteRooms(

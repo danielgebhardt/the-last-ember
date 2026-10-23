@@ -78,7 +78,7 @@ it("restores ember possession and denies every scroll use without consuming or s
 	});
 	expect(result.turnAdvanced).toBe(false);
 	expect(result.state).toBe(state);
-	expect(result.error).toMatch(/ember/i);
+	expect(result.error).toMatch(/Warden's Flame/);
 });
 it.each([1, 19, 20])(
 	"rejects new scroll ownership declared as legacy v%s",

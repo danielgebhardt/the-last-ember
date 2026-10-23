@@ -74,12 +74,29 @@ const floors: DungeonFloor[] = Array.from({ length: 20 }, (_, index) => ({
 				},
 }));
 // Hold terrain and unused content fixed; vary only the seeded combat/reward streams.
-const initial = createGameState({
+const generated = createGameState({
 	seed: 0,
 	floors,
 	activeFloor: 1,
 	playerCoordinate: { row: 8, col: 10 },
 });
+// The review replaces the monsters, so the Warden has already fallen and left its
+// flame where it stood; otherwise the saved review would hold no flame.
+const fallen = generated.monsters.find((m) => m.kind === "ember-warden");
+const initial: GameState = fallen
+	? {
+			...generated,
+			monsters: generated.monsters.filter((m) => m !== fallen),
+			floorItems: [
+				...generated.floorItems,
+				{
+					item: { id: "quest:cure", kind: "cure" },
+					floorNumber: fallen.floorNumber,
+					coordinate: { ...fallen.coordinate },
+				},
+			],
+		}
+	: generated;
 export const createReviewEncounter = (
 	checkpoint: number,
 	seed: number,

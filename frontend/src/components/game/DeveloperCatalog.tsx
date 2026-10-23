@@ -478,7 +478,7 @@ const DeveloperCatalog = ({
 											Floors 5+, never the final floor. One use, one turn: lands
 											beside the down stair of this floor or up to{" "}
 											{PORTAL_FLOOR_SPAN} floors deeper, equal odds per floor,
-											fixed per portal. Refused free while carrying the ember or
+											fixed per portal. Refused free while carrying the flame or
 											without a free landing tile. Separate from town portal
 											scrolls.
 										</p>

@@ -23,6 +23,7 @@ import {
 	restoreSave,
 	serializeSave,
 } from "../domain/saves/SaveFormat";
+import { withFlameOnFloor } from "./SaveTestHelpers";
 import { COMPACT_TEST_CONFIGURATION } from "./TestRunConfiguration";
 import { createTestDungeonFloor } from "./testhelpers";
 
@@ -42,37 +43,39 @@ const seedFor = (outcome: ForgeOutcome) => {
 };
 // Six open floors; the player stands beside a forge on floor 6.
 const encounter = (seed = 0): GameState => {
-	const base = createGameState({
-		seed,
-		activeFloor: 6,
-		playerCoordinate: { row: 4, col: 4 },
-		floors: Array.from({ length: 6 }, (_, index) =>
-			createTestDungeonFloor({
-				floorNumber: index + 1,
-				rows: 15,
-				cols: 15,
-				room: { startRow: 1, endRow: 13, startCol: 1, endCol: 13 },
-				...(index > 0
-					? {
-							upStair: {
-								coordinate: { row: 1, col: 1 },
-								destinationFloor: index,
-								arrivalCoordinate: { row: 13, col: 13 },
-							},
-						}
-					: {}),
-				...(index < 5
-					? {
-							downStair: {
-								coordinate: { row: 13, col: 13 },
-								destinationFloor: index + 2,
-								arrivalCoordinate: { row: 1, col: 1 },
-							},
-						}
-					: {}),
-			}),
-		),
-	});
+	const base = withFlameOnFloor(
+		createGameState({
+			seed,
+			activeFloor: 6,
+			playerCoordinate: { row: 4, col: 4 },
+			floors: Array.from({ length: 6 }, (_, index) =>
+				createTestDungeonFloor({
+					floorNumber: index + 1,
+					rows: 15,
+					cols: 15,
+					room: { startRow: 1, endRow: 13, startCol: 1, endCol: 13 },
+					...(index > 0
+						? {
+								upStair: {
+									coordinate: { row: 1, col: 1 },
+									destinationFloor: index,
+									arrivalCoordinate: { row: 13, col: 13 },
+								},
+							}
+						: {}),
+					...(index < 5
+						? {
+								downStair: {
+									coordinate: { row: 13, col: 13 },
+									destinationFloor: index + 2,
+									arrivalCoordinate: { row: 1, col: 1 },
+								},
+							}
+						: {}),
+				}),
+			),
+		}),
+	);
 	return {
 		...base,
 		gold: 1000,

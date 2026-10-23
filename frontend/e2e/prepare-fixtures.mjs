@@ -26,6 +26,7 @@ export default async function prepareFixtures() {
 		const { rareEquipmentAdventure } = await load(
 			"/src/__tests/RareEquipmentTestHelpers.ts",
 		);
+		const { withFlameOnFloor } = await load("/src/__tests/SaveTestHelpers.ts");
 		const { sarcophagusEncounter } = await load(
 			"/src/__tests/SarcophagusTestHelpers.ts",
 		);
@@ -62,7 +63,10 @@ export default async function prepareFixtures() {
 			monsters: [],
 			player: { ...fresh.player, health: 1 },
 			floorItems: [
-				...fresh.floorItems.filter((entry) => entry.item.kind === "cure"),
+				// The Warden fell where it stood; quiet scenarios keep its flame.
+				...withFlameOnFloor(fresh).floorItems.filter(
+					(entry) => entry.item.kind === "cure",
+				),
 				{
 					item: { id: "smoke:potion", kind: "healing-potion" },
 					floorNumber: 1,
@@ -291,9 +295,11 @@ export default async function prepareFixtures() {
 			row: forgeRoom5.startRow + 1,
 			col: forgeRoom5.startCol + 1,
 		};
-		const forgeBase = createGameState(
-			{ ...forgeRun, activeFloor: 6, playerCoordinate: forgeStart },
-			forgeConfiguration.difficulty,
+		const forgeBase = withFlameOnFloor(
+			createGameState(
+				{ ...forgeRun, activeFloor: 6, playerCoordinate: forgeStart },
+				forgeConfiguration.difficulty,
+			),
 		);
 		const forgeState = {
 			...forgeBase,
@@ -318,9 +324,11 @@ export default async function prepareFixtures() {
 		};
 		// Floor 5 of the six-floor run; floor 6 is final, so the portal leads beside
 		// floor 5's own down stair.
-		const portalBase = createGameState(
-			{ ...forgeRun, activeFloor: 5, playerCoordinate: forgeStart5 },
-			forgeConfiguration.difficulty,
+		const portalBase = withFlameOnFloor(
+			createGameState(
+				{ ...forgeRun, activeFloor: 5, playerCoordinate: forgeStart5 },
+				forgeConfiguration.difficulty,
+			),
 		);
 		const portalState = {
 			...portalBase,
@@ -350,9 +358,11 @@ export default async function prepareFixtures() {
 			col: hourglassRooms[0].startCol + 1,
 		};
 		const farRoom = hourglassRooms.at(-1);
-		const hourglassBase = createGameState(
-			{ ...hourglassRun, activeFloor: 8, playerCoordinate: hourglassStart },
-			hourglassConfiguration.difficulty,
+		const hourglassBase = withFlameOnFloor(
+			createGameState(
+				{ ...hourglassRun, activeFloor: 8, playerCoordinate: hourglassStart },
+				hourglassConfiguration.difficulty,
+			),
 		);
 		const hourglassState = {
 			...hourglassBase,
@@ -510,9 +520,13 @@ export default async function prepareFixtures() {
 		};
 		const { createEquipment } = await load("/src/domain/items/Equipment.ts");
 		const merchantConfiguration = { ...configuration, floorCount: 10 };
-		const merchantFresh = createGameState(
-			connectDungeonFloors(generateDungeonRun(123, 10, merchantConfiguration)),
-			configuration.difficulty,
+		const merchantFresh = withFlameOnFloor(
+			createGameState(
+				connectDungeonFloors(
+					generateDungeonRun(123, 10, merchantConfiguration),
+				),
+				configuration.difficulty,
+			),
 		);
 		const merchant = merchantFresh.objects.find(
 			(object) => object.kind === "merchant" && object.floorNumber === 5,
@@ -675,11 +689,17 @@ export default async function prepareFixtures() {
 			})),
 		};
 		const largeFresh = createGameState(largeRun);
+		// Only the floor-20 Warden remains: it still carries the flame, so the longest
+		// objective shows while the corridors stay quiet.
+		const largeWarden = largeFresh.monsters.filter(
+			(m) => m.kind === "ember-warden",
+		);
+		if (largeWarden.length !== 1) throw new Error("Expected one Ember Warden");
 		const largeCorridor = {
 			...largeFresh,
 			objects: [],
-			monsters: [],
-			floorItems: largeFresh.floorItems.filter((x) => x.item.kind === "cure"),
+			monsters: largeWarden,
+			floorItems: [],
 		};
 		const roomCorridor = {
 			...largeCorridor,
@@ -708,6 +728,7 @@ export default async function prepareFixtures() {
 			run: { ...largeRun, activeFloor: 14 },
 			player: { ...largeFresh.player, health: 1 },
 			monsters: [
+				...largeWarden,
 				{
 					id: "14:1",
 					kind: "salamander",

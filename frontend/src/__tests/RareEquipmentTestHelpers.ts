@@ -5,6 +5,7 @@ import {
 import { createGameState } from "../domain/game/GameState";
 import type { RareEquipmentKind } from "../domain/items/Item";
 import { selectRunRareEquipment } from "../domain/items/RareEquipment";
+import { withFlameOnFloor } from "./SaveTestHelpers";
 import { COMPACT_TEST_CONFIGURATION } from "./TestRunConfiguration";
 export const rareEquipmentSeed = (
 	kind: RareEquipmentKind,
@@ -20,12 +21,14 @@ export const rareEquipmentAdventure = (
 	kind: RareEquipmentKind,
 	source: "town" | "dungeon",
 ) =>
-	createGameState(
-		connectDungeonFloors(
-			generateDungeonRun(
-				rareEquipmentSeed(kind, source),
-				5,
-				COMPACT_TEST_CONFIGURATION,
+	withFlameOnFloor(
+		createGameState(
+			connectDungeonFloors(
+				generateDungeonRun(
+					rareEquipmentSeed(kind, source),
+					5,
+					COMPACT_TEST_CONFIGURATION,
+				),
 			),
 		),
 	);

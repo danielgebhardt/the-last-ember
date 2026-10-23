@@ -40,14 +40,16 @@ describe("Visible adventure objective", () => {
 			render(<Home />, { wrapper: ThemeProvider });
 			const user = userEvent.setup();
 			expect(screen.getByLabelText("Quest objective")).toHaveTextContent(
-				"Recover the last ember on floor 3",
+				"Claim the Warden's Flame on floor 3",
 			);
 			await user.keyboard("d");
 			if (method === "keyboard") await user.keyboard("g");
 			else {
 				await user.click(screen.getByRole("button", { name: "Character" }));
 				await user.click(
-					screen.getByRole("button", { name: "Pick up Last Ember, item 1" }),
+					screen.getByRole("button", {
+						name: "Pick up Warden's Flame, item 1",
+					}),
 				);
 				await user.keyboard("{Escape}");
 			}
@@ -55,19 +57,19 @@ describe("Visible adventure objective", () => {
 				"Return to the entrance on floor 1",
 			);
 			expect(screen.getByRole("log")).toHaveTextContent(
-				"The ember lifts easily from its cradle.",
+				"You claim the Warden's Flame.",
 			);
 			await user.click(screen.getByRole("button", { name: "Character" }));
 			const panel = within(
 				await screen.findByRole("dialog", { name: "The Adventurer's Ledger" }),
 			);
 			expect(panel.getByLabelText("Quest pouch")).toHaveTextContent(
-				"Ember protected",
+				"Flame secured",
 			);
 			expect(panel.getByLabelText("Bag capacity")).toHaveTextContent("2 / 27");
 			expect(
 				panel.queryByRole("button", {
-					name: /Drink Last Ember|Drop Last Ember/,
+					name: /Drink Warden's Flame|Drop Warden's Flame/,
 				}),
 			).not.toBeInTheDocument();
 		},

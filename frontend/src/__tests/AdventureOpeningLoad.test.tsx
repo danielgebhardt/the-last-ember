@@ -54,7 +54,7 @@ it("returns from canceled loading to the opening and preserves the save slot", a
 	await user.keyboard("{Escape}");
 	await waitFor(() =>
 		expect(
-			screen.getByRole("dialog", { name: "The Last Ember" }),
+			screen.getByRole("dialog", { name: "The Warden's Flame" }),
 		).toBeVisible(),
 	);
 	expect(localStorage.getItem(LOCAL_SAVE_KEY)).toBe(text);
