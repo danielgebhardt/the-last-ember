@@ -226,9 +226,18 @@ export type ActivityEvent = { turn: number } & (
 				| "monster-prepared"
 				| "monster-web-prepared"
 				| "monster-hex-prepared"
-				| "monster-blind-prepared";
+				| "monster-blind-prepared"
+				| "monster-theft-prepared";
 			monster: MonsterKind;
 			target: Coordinate;
+	  }
+	| {
+			type:
+				| "monster-theft-hit"
+				| "monster-thief-escaped"
+				| "monster-theft-recovered";
+			monster: MonsterKind;
+			gold: number;
 	  }
 	| {
 			type:
@@ -239,6 +248,7 @@ export type ActivityEvent = { turn: number } & (
 				| "monster-hex-avoided"
 				| "monster-blind-missed"
 				| "monster-blind-avoided"
+				| "monster-theft-avoided"
 				| "monster-shot-missed"
 				| "player-missed"
 				| "monster-missed"

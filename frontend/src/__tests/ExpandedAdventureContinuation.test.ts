@@ -1,4 +1,5 @@
 // @vitest-environment node
+
 import { describe, expect, it } from "vitest";
 import {
 	connectDungeonFloors,
@@ -13,6 +14,7 @@ import { awardExperience } from "../domain/game/ExperienceRewards";
 import { createGameState } from "../domain/game/GameState";
 import { resolvePlayerAction } from "../domain/game/PlayerActions";
 import { experienceThreshold } from "../domain/game/Progression";
+import { isThief } from "../domain/monsters/TreasureThief";
 import { navigationRun } from "../domain/objects/NavigationTerrain";
 import {
 	createSaveDocument,
@@ -40,7 +42,9 @@ describe("Generated expanded adventure continuation", () => {
 			expect(
 				initial.monsters.filter(
 					(actor) =>
-						actor.kind !== "iron-champion" && actor.kind !== "ember-warden",
+						actor.kind !== "iron-champion" &&
+						actor.kind !== "ember-warden" &&
+						!isThief(actor),
 				),
 			).toHaveLength(240);
 			expect(initial.bag.items.map((item) => item.kind)).toEqual([

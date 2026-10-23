@@ -27,6 +27,7 @@ import {
 	spawnRunMonsters,
 } from "../monsters/MonsterPlacement.ts";
 import { maximumMonsterHealth } from "../monsters/MonsterStats";
+import { placeTreasureThieves } from "../monsters/TreasureThief";
 import type { DungeonObject } from "../objects/DungeonObject";
 import { spawnRunObjects } from "../objects/ObjectPlacement";
 import { addOptionalEliteRooms } from "../objects/OptionalEliteRooms";
@@ -128,6 +129,13 @@ export const createGameState = (
 		objects,
 		difficulty,
 	);
+	const thieves = placeTreasureThieves(
+		run,
+		[...encounters.monsters, ...(warden ? [warden] : [])],
+		[...floorItems, ...rare.items],
+		objects,
+		difficulty,
+	);
 	return {
 		rareEquipment: rare.allocation,
 		townEquipmentPurchases: [],
@@ -174,6 +182,8 @@ export const createGameState = (
 					}))),
 			// The ember's guardian joins after ordinary placement, so it never shifts it.
 			...(warden ? [warden] : []),
+			// Thieves join last, on their own streams, so no other placement moves.
+			...thieves,
 		],
 		activityHistory: createActivityHistory(),
 	};

@@ -47,6 +47,10 @@ import type { Monster } from "../domain/monsters/Monster";
 import { MONSTER_DEFINITIONS } from "../domain/monsters/Monster";
 import { ESCAPE_PURSUIT_RULES } from "../domain/monsters/PursuitRules";
 import {
+	THIEF_ESCAPE_PHASES,
+	THIEF_STEAL_SHARE,
+} from "../domain/monsters/TreasureThief";
+import {
 	TRAP_BLEEDING_CHANCE,
 	TRAP_DISARM_EXPERIENCE,
 } from "../domain/objects/DungeonObject";
@@ -605,6 +609,22 @@ const DungeonHelp = ({
 					the attack. Browsing menus, canceled targeting and rejected actions
 					are free. Changing floors pauses a prepared attack; it retains the
 					original target when you return.
+				</p>
+				<div className="flex items-center gap-2 font-medium">
+					<span className="size-5 shrink-0">
+						<MonsterIcon kind="treasure-thief" />
+					</span>{" "}
+					Treasure thief
+				</div>
+				<p>
+					A few thieves roam each adventure from floor{" "}
+					{MONSTER_DEFINITIONS["treasure-thief"].minFloor}. A thief never
+					attacks. While you carry gold it closes in and marks your tile; if you
+					are still there on its next action, it steals{" "}
+					{Math.round(THIEF_STEAL_SHARE * 100)}% of your carried gold and runs.
+					After {THIEF_ESCAPE_PHASES} phases it slips away for good. Web and
+					Sleep hold it, so you can catch it; killing it returns everything it
+					stole, plus its own purse and loot.
 				</p>
 				<p>
 					Breath attacks mark an area and show a response countdown in the

@@ -1,4 +1,5 @@
 // @vitest-environment node
+
 import { expect, it } from "vitest";
 import {
 	connectDungeonFloors,
@@ -9,6 +10,7 @@ import { createGameState } from "../domain/game/GameState";
 import { eligibleLootKinds, ITEM_DEFINITIONS } from "../domain/items/Item";
 import { spawnRunItems } from "../domain/items/ItemPlacement";
 import { protectedSpawnLocations } from "../domain/monsters/MonsterLocations";
+import { isThief } from "../domain/monsters/TreasureThief";
 
 it("places each selected book once within its floor band without changing ordinary generation", () => {
 	const run = connectDungeonFloors(
@@ -38,7 +40,10 @@ it("places each selected book once within its floor band without changing ordina
 			run,
 			state.monsters.filter(
 				(actor) =>
-					actor.kind !== "iron-champion" && actor.kind !== "ember-warden",
+					// Placed after loot, so ordinary items never avoid them.
+					actor.kind !== "iron-champion" &&
+					actor.kind !== "ember-warden" &&
+					!isThief(actor),
 			),
 		),
 	);

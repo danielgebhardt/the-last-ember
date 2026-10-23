@@ -65,6 +65,15 @@ export const damageMonster = (
 				goldAmount(state.run.seed, monster.floorNumber, monster.id),
 			)
 		: 0;
+	// A slain thief gives back everything it stole, on top of its own purse.
+	const recovered = rewarded ? (monster.theft?.gold ?? 0) : 0;
+	if (recovered)
+		events.push({
+			type: "monster-theft-recovered",
+			monster: monster.kind,
+			gold: recovered,
+			turn,
+		});
 	if (gold) events.push({ type: "gold-collected", amount: gold, turn });
 	let floorItems = state.floorItems;
 	let player = state.player;
@@ -120,7 +129,7 @@ export const damageMonster = (
 	return {
 		...state,
 		monsters,
-		gold: state.gold + gold,
+		gold: state.gold + gold + recovered,
 		effects: state.effects.some(
 			(effect) =>
 				effect.actorId === monster.id &&

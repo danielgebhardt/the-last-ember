@@ -14,6 +14,7 @@ import {
 	protectedFloorLocations,
 } from "./MonsterLocations";
 import { maximumMonsterHealth } from "./MonsterStats";
+import { isThief } from "./TreasureThief";
 
 export const ESCAPE_ENCOUNTER_RULES = {
 	arrivalBuffer: 3,
@@ -83,7 +84,12 @@ export const generateEscapeEncounters = (
 		candidates.length,
 		rules.maximumNewMonsters,
 		Math.ceil(candidates.length / rules.safeTilesPerMonster),
-		Math.max(0, rules.maximumLivingMonsters - living.length),
+		// A thief never fights, so it never stands in for a hunter.
+		Math.max(
+			0,
+			rules.maximumLivingMonsters -
+				living.filter((actor) => !isThief(actor)).length,
+		),
 	);
 	const existingIds = new Set(state.monsters.map((actor) => actor.id));
 	const actors: Monster[] = [];

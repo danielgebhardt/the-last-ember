@@ -25,6 +25,7 @@ import ShadowStalkerIcon from "./ShadowStalkerIcon";
 import SkeletonIcon from "./SkeletonIcon";
 import SoulWraithIcon from "./SoulWraithIcon";
 import SpiderIcon from "./SpiderIcon";
+import TreasureThiefIcon from "./TreasureThiefIcon";
 import TrollIcon from "./TrollIcon";
 import WardenIcon from "./WardenIcon";
 import WolfIcon from "./WolfIcon";
@@ -44,6 +45,11 @@ export const MONSTER_VISUALS: Record<
 		icon: ChampionIcon,
 		color: "text-monster-rust",
 		label: MONSTER_DEFINITIONS["iron-champion"].name,
+	},
+	"treasure-thief": {
+		icon: TreasureThiefIcon,
+		color: "text-[#4f7d2e] dark:text-[#8fc86a]",
+		label: MONSTER_DEFINITIONS["treasure-thief"].name,
 	},
 	"alarm-sentry": {
 		icon: SentryIcon,

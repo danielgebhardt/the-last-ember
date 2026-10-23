@@ -25,6 +25,7 @@ export type MonsterIntent =
 	| { type: "preparing-web"; target: Coordinate }
 	| { type: "preparing-hex"; target: Coordinate }
 	| { type: "preparing-blind"; target: Coordinate }
+	| { type: "preparing-theft"; target: Coordinate }
 	| {
 			type: "preparing-area";
 			target: Coordinate;
@@ -69,6 +70,8 @@ export type Monster = {
 	}>;
 	// A mirror reflection's stats, copied from the player when it was summoned.
 	reflection?: Readonly<{ maxHealth: number; attackDamage: number }>;
+	// A treasure thief's haul and the turn it stole it; it then flees until it escapes.
+	theft?: Readonly<{ gold: number; turn: number }>;
 	// Turn each cooldown telegraph last resolved; another needs more than its cooldown.
 	telegraphTurn?: Partial<Record<TelegraphCooldown, number>>;
 };
@@ -111,6 +114,8 @@ export type MonsterDefinition = {
 	soulBolt?: { range: number; cooldown: number; damage: number };
 	// Spawned only through the shared sparse affliction-source budget.
 	afflictionSource?: boolean;
+	// Never attacks: a telegraphed theft of carried gold, then flight. Placed by its own budget.
+	thief?: true;
 	regeneration?: number;
 	enemySpells?: readonly EnemySpellKind[];
 	spellInterval?: number;
@@ -147,6 +152,7 @@ export const validateMonsterDefinition = (
 		onHitAffliction,
 		onHitManaDrain,
 		afflictionSource,
+		thief,
 		webAttack,
 		hexAttack,
 		blindingStrike,
@@ -295,6 +301,20 @@ export const validateMonsterDefinition = (
 				onHitAffliction !== undefined ||
 				rangedAttackRange !== undefined ||
 				enemySpells !== undefined)) ||
+		(thief !== undefined &&
+			(thief !== true ||
+				spawnEnabled !== false ||
+				preparesAttack ||
+				rangedAttackRange !== undefined ||
+				definition.chargeRange !== undefined ||
+				definition.alarmRadius !== undefined ||
+				areaAttack ||
+				enemySpells ||
+				webAttack ||
+				hexAttack ||
+				blindingStrike ||
+				soulBolt ||
+				onHitAffliction)) ||
 		(afflictionSource !== undefined &&
 			(afflictionSource !== true ||
 				(!onHitAffliction && !hexAttack && !blindingStrike && !soulBolt) ||
@@ -320,6 +340,21 @@ const monsterCatalog = {
 		chargeRange: 4,
 		resists: ["arcane"],
 		weaknesses: ["cold"],
+	},
+	"treasure-thief": {
+		name: "treasure thief",
+		minFloor: 3,
+		maxFloor: 20,
+		maxHealth: 12,
+		// Never used: a thief steals instead of attacking.
+		attackDamage: 1,
+		experienceReward: 12,
+		detectionRadius: 8,
+		spawnWeight: 1,
+		spawnEnabled: false,
+		dropChance: 1,
+		lootPreferences: {},
+		thief: true,
 	},
 	"alarm-sentry": {
 		name: "alarm sentry",

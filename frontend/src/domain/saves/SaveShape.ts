@@ -287,6 +287,11 @@ const eventFields = {
 	"monster-web-prepared": { monster: monsterKind, target: coordinate },
 	"monster-web-hit": { monster: monsterKind },
 	"monster-web-avoided": { monster: monsterKind },
+	"monster-theft-prepared": { monster: monsterKind, target: coordinate },
+	"monster-theft-hit": { monster: monsterKind, gold: integer(1) },
+	"monster-theft-avoided": { monster: monsterKind },
+	"monster-thief-escaped": { monster: monsterKind, gold: integer(1) },
+	"monster-theft-recovered": { monster: monsterKind, gold: integer(1) },
 	"monster-hex-prepared": { monster: monsterKind, target: coordinate },
 	"monster-hex-hit": { monster: monsterKind, damage: natural },
 	"monster-hex-avoided": { monster: monsterKind },
@@ -620,6 +625,7 @@ const documentShape = object({
 				reflection: optional(
 					object({ maxHealth: integer(1), attackDamage: integer(1) }),
 				),
+				theft: optional(object({ gold: integer(1), turn: natural })),
 				// Which kinds a monster may hold is a consistency rule.
 				telegraphTurn: optional(
 					(value) =>

@@ -10,6 +10,7 @@ import { deriveAttributes } from "../domain/game/Attributes";
 import { createGameState, type GameState } from "../domain/game/GameState";
 import { resolvePlayerAction } from "../domain/game/PlayerActions";
 import { ITEM_DEFINITIONS } from "../domain/items/Item";
+import { isThief } from "../domain/monsters/TreasureThief";
 import { resolvePlayerActionWithHits } from "./ControlledCombatTestHelpers";
 import { COMPACT_TEST_CONFIGURATION } from "./TestRunConfiguration";
 import {
@@ -167,11 +168,14 @@ describe("Complete cure-and-return adventures", () => {
 					ITEM_DEFINITIONS[x.item.kind].type !== "spellbook",
 			),
 		);
-		// Each dungeon's own Warden guards its final floor.
+		// Each dungeon's own Warden guards its final floor, and thieves roam the floors
+		// before it, so both depend on depth.
 		expect(
 			long.monsters.filter(
-				(x) => x.floorNumber <= 5 && x.kind !== "ember-warden",
+				(x) => x.floorNumber <= 5 && x.kind !== "ember-warden" && !isThief(x),
 			),
-		).toEqual(short.monsters.filter((x) => x.kind !== "ember-warden"));
+		).toEqual(
+			short.monsters.filter((x) => x.kind !== "ember-warden" && !isThief(x)),
+		);
 	});
 });

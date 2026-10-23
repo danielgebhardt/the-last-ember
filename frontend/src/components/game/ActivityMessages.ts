@@ -154,6 +154,16 @@ export const formatActivityEvent = (event: ActivityEvent): string => {
 			return `${prefix}The ${MONSTER_DEFINITIONS[event.monster].name}'s blinding strike misses you.`;
 		case "monster-blind-avoided":
 			return `${prefix}The ${MONSTER_DEFINITIONS[event.monster].name}'s blinding strike finds only empty air.`;
+		case "monster-theft-prepared":
+			return `${prefix}The ${MONSTER_DEFINITIONS[event.monster].name} reaches for your purse. Step off your tile before it acts again.`;
+		case "monster-theft-hit":
+			return `${prefix}The ${MONSTER_DEFINITIONS[event.monster].name} steals ${event.gold} gold and runs!`;
+		case "monster-theft-avoided":
+			return `${prefix}The ${MONSTER_DEFINITIONS[event.monster].name} grabs at empty air.`;
+		case "monster-thief-escaped":
+			return `${prefix}The ${MONSTER_DEFINITIONS[event.monster].name} slips away with ${event.gold} of your gold.`;
+		case "monster-theft-recovered":
+			return `${prefix}You recover the ${event.gold} gold the ${MONSTER_DEFINITIONS[event.monster].name} stole.`;
 		case "monster-web-prepared":
 			return `${prefix}The ${MONSTER_DEFINITIONS[event.monster].name} readies a web at your tile. Move off it to avoid being Slowed.`;
 		case "monster-web-hit":

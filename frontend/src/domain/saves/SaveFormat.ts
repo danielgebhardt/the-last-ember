@@ -165,6 +165,7 @@ export const createSaveDocument = (
 				empowered,
 				warden,
 				reflection,
+				theft,
 				telegraphTurn,
 			}) => ({
 				id,
@@ -182,6 +183,7 @@ export const createSaveDocument = (
 				...(empowered ? { empowered } : {}),
 				...(warden ? { warden: { ...warden } } : {}),
 				...(reflection !== undefined ? { reflection: { ...reflection } } : {}),
+				...(theft !== undefined ? { theft: { ...theft } } : {}),
 				...(telegraphTurn !== undefined
 					? { telegraphTurn: { ...telegraphTurn } }
 					: {}),

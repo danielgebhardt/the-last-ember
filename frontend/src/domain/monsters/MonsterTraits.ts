@@ -11,6 +11,11 @@ import {
 	SENTRY_MAX_SUMMONS_ALIVE,
 	SENTRY_SUMMON_INTERVAL,
 } from "./MonsterAlarm";
+import {
+	THIEF_ESCAPE_PHASES,
+	THIEF_STEAL_SHARE,
+	thiefStealCap,
+} from "./TreasureThief";
 
 export const monsterTraits = (kind: MonsterKind): readonly string[] => {
 	const definition = MONSTER_DEFINITIONS[kind];
@@ -56,6 +61,10 @@ export const monsterTraits = (kind: MonsterKind): readonly string[] => {
 	if (definition.blindingStrike)
 		traits.push(
 			`Blinding strike: when beside you, it marks your tile instead of attacking, then strikes on its next action with a normal melee roll. A landed hit deals normal damage and Blinded (sight 2 tiles and melee to-hit −20 for 30 phases). Step off the marked tile to avoid it; Sleep or Fear cancels it. At least ${definition.blindingStrike.cooldown} phases between strikes. Cleansing potion or the sanctuary cures Blinded.`,
+		);
+	if (definition.thief)
+		traits.push(
+			`Thief: never attacks. While you carry gold it closes in, marks your tile and, on its next action, steals ${Math.round(THIEF_STEAL_SHARE * 100)}% of your carried gold (at most ${thiefStealCap(0)} gold plus 25 per floor). Step off the marked tile, or use Sleep or Fear, to stop it. With its haul it runs and slips away after ${THIEF_ESCAPE_PHASES} phases; Web and Sleep hold it. Kill it to recover everything it stole, plus its own purse and loot.`,
 		);
 	if (definition.soulBolt)
 		traits.push(

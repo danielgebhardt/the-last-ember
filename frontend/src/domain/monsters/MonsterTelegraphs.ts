@@ -24,6 +24,8 @@ export type SpecialActionOutcome = Readonly<{
 	affliction?: AfflictionKind;
 	// A new actor joins after this phase's actors, so it first acts next phase.
 	summoned?: Monster;
+	// Carried gold a treasure thief took.
+	stolenGold?: number;
 }>;
 // Behaviors that need a pause after resolving; the monster saves the turn. The
 // soul bolt is unprepared but shares this cooldown record.
@@ -98,6 +100,12 @@ export const TARGET_TELEGRAPHS: Readonly<
 		reaches: (monster, target) => reach(monster, target) === 1,
 		advice:
 			"Blinding strike on its next action: move off the marked tile, or use Sleep or Fear to cancel it.",
+	},
+	"preparing-theft": {
+		owns: (definition) => definition.thief === true,
+		reaches: (monster, target) => reach(monster, target) === 1,
+		advice:
+			"Theft on its next action: step off the marked tile, or use Sleep or Fear to stop it.",
 	},
 };
 export const isTargetTelegraph = (type: string): type is TargetTelegraph =>

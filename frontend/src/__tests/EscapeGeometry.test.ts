@@ -1,4 +1,5 @@
 // @vitest-environment node
+
 import { describe, expect, it } from "vitest";
 import {
 	connectDungeonFloors,
@@ -11,6 +12,7 @@ import {
 } from "../domain/dungeon/RunConfiguration";
 import { activateEscapeFloor } from "../domain/game/Escape";
 import { createGameState, type GameState } from "../domain/game/GameState";
+import { isThief } from "../domain/monsters/TreasureThief";
 import {
 	createSaveDocument,
 	parseSave,
@@ -53,7 +55,10 @@ describe("Complete return population geometry", () => {
 				);
 				expect(state.run.floors).toBe(fresh.run.floors);
 				expect(
-					state.monsters.filter((actor) => actor.floorNumber === floor).length,
+					// Thieves never fight, so they sit outside the living cap.
+					state.monsters.filter(
+						(actor) => actor.floorNumber === floor && !isThief(actor),
+					).length,
 				).toBeLessThanOrEqual(16);
 				expect(activateEscapeFloor(state, floor + 1)).toBe(state);
 			}

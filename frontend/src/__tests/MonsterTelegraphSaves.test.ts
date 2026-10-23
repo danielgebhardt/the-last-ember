@@ -1,4 +1,5 @@
 // @vitest-environment node
+
 import { describe, expect, it } from "vitest";
 import { WARDEN_SPAWN_ID, wardenStats } from "../domain/monsters/EmberWarden";
 import {
@@ -12,12 +13,13 @@ import {
 	TELEGRAPH_COOLDOWNS,
 	type TelegraphCooldown,
 } from "../domain/monsters/MonsterTelegraphs";
+import { THIEF_SPAWN_ID } from "../domain/monsters/TreasureThief";
 import { parseSave, serializeSave } from "../domain/saves/SaveFormat";
 import { savedAdventure } from "./SaveTestHelpers";
 
 const kinds = Object.keys(MONSTER_DEFINITIONS) as MonsterKind[];
 // The Warden only exists with its reserved ID and depth stats; off the final floor it
-// must be enraged. Any other kind is reshaped as is.
+// must be enraged. A thief owns its reserved ID. Any other kind is reshaped as is.
 const asKind = (monster: Monster, kind: MonsterKind): Monster =>
 	kind === "ember-warden"
 		? {
@@ -26,7 +28,9 @@ const asKind = (monster: Monster, kind: MonsterKind): Monster =>
 				id: `${monster.floorNumber}:${WARDEN_SPAWN_ID}`,
 				warden: { ...wardenStats(5), awake: true, enraged: true },
 			}
-		: { ...monster, kind };
+		: kind === "treasure-thief"
+			? { ...monster, kind, id: `${monster.floorNumber}:${THIEF_SPAWN_ID}` }
+			: { ...monster, kind };
 // One floor-2 actor (the player is on floor 1) reshaped into the kind under test.
 const withActor = (change: (monster: Monster) => Monster) => {
 	const document = savedAdventure();

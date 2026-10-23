@@ -39,6 +39,7 @@ import { actorAttackDamage, actorMaximumHealth } from "./MonsterStats";
 import type { SpecialActionOutcome } from "./MonsterTelegraphs";
 import { resolveMonsterWeb } from "./MonsterWeb";
 import { type PursuitRules, pursuitRulesFor } from "./PursuitRules";
+import { resolveThiefTheft, thiefFlight } from "./TreasureThief";
 
 type SpecialActionContext = Readonly<{
 	state: GameState;
@@ -70,6 +71,8 @@ const SPECIAL_ACTIONS: readonly ((
 	(c) =>
 		resolveMonsterBlindingStrike(c.state, c.monster, c.detected, c.rollSource),
 	(c) => resolveMonsterSoulBolt(c.state, c.monster, c.detected),
+	// Reads the scene so a second thief this phase sees the gold the first one left.
+	(c) => resolveThiefTheft(c.scene, c.monster, c.detected),
 ];
 const resolveSpecialAction = (context: SpecialActionContext) => {
 	for (const resolve of SPECIAL_ACTIONS) {
@@ -105,6 +108,7 @@ const strikesBeforeStep = (
 		state.turn % (definition.actionInterval ?? 1) !== 0 ||
 		hasMonsterEffect(state, monster, "afraid") ||
 		definition.preparesAttack ||
+		definition.thief ||
 		(definition.enemySpells && (definition.rangedAttackRange ?? 0) >= 1)
 	)
 		return false;
@@ -151,8 +155,9 @@ export const resolveMonsterPhase = (
 	const pursuitRules = pursuitRulesFor(state);
 	let player = state.player;
 	let mana = state.mana;
+	let gold = state.gold;
 	let monsters = state.monsters;
-	const effects = state.effects;
+	let effects = state.effects;
 	const events: ActivityEvent[] = [];
 	const infections: { kind: AfflictionKind; source: string }[] = [];
 	const { armor } = deriveCombatStats(
@@ -233,6 +238,21 @@ export const resolveMonsterPhase = (
 				monsters = monsters.map((actor) =>
 					actor.id === monster.id ? { ...actor, coordinate } : actor,
 				);
+			continue;
+		}
+		const flight = thiefFlight(state, navigation, monster, monsters);
+		if (flight?.type === "escaped") {
+			const escapee = monster.id;
+			monsters = monsters.filter((actor) => actor.id !== escapee);
+			effects = effects.filter((effect) => effect.actorId !== escapee);
+			events.push(flight.event);
+			continue;
+		}
+		if (flight) {
+			const moved = flight.monster;
+			monsters = monsters.map((actor) =>
+				actor.id === moved.id ? moved : actor,
+			);
 			continue;
 		}
 		const detected = detectsPlayer(navigation, monster, pursuitRules);
@@ -329,7 +349,7 @@ export const resolveMonsterPhase = (
 		}
 		const special = resolveSpecialAction({
 			state,
-			scene: { ...state, run: navigation },
+			scene: { ...state, run: navigation, gold },
 			monster,
 			monsters,
 			rollSource,
@@ -341,6 +361,7 @@ export const resolveMonsterPhase = (
 				actor.id === monster.id ? special.monster : actor,
 			);
 			if (special.summoned) monsters = [...monsters, special.summoned];
+			if (special.stolenGold) gold -= special.stolenGold;
 			events.push(...special.events);
 			const signal = special.events.find(
 				(event) => event.type === "monster-alarm-sounded",
@@ -370,6 +391,21 @@ export const resolveMonsterPhase = (
 			state.run.playerCoordinate,
 		);
 		const definition = MONSTER_DEFINITIONS[monster.kind];
+		// A thief never attacks: it closes in while you carry gold to take.
+		if (definition.thief) {
+			const coordinate =
+				detected &&
+				gold > 0 &&
+				distance > 1 &&
+				!hasMonsterEffect(state, monster, "rooted")
+					? selectPursuitStep(navigation, monster, monsters)
+					: undefined;
+			if (coordinate)
+				monsters = monsters.map((actor) =>
+					actor.id === monster.id ? { ...actor, coordinate } : actor,
+				);
+			continue;
+		}
 		const preparing = monster.intent.type === "preparing-attack";
 		if (monster.intent.type === "preparing-attack") {
 			// Resolve the old target even after the player leaves detection.
@@ -564,7 +600,8 @@ export const resolveMonsterPhase = (
 	if (
 		events.length === 0 &&
 		monsters === state.monsters &&
-		objects === state.objects
+		objects === state.objects &&
+		effects === state.effects
 	)
 		return state;
 	// Applied after the phase's hits so a lethal later hit stops infection and capacity clamps once.
@@ -574,6 +611,7 @@ export const resolveMonsterPhase = (
 			...state,
 			player,
 			mana,
+			gold,
 			objects,
 			monsters,
 			effects,

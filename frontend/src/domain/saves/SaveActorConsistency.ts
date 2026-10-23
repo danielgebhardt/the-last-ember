@@ -20,6 +20,7 @@ import {
 	TELEGRAPH_COOLDOWNS,
 	type TelegraphCooldown,
 } from "../monsters/MonsterTelegraphs";
+import { isThief, THIEF_SPAWN_ID } from "../monsters/TreasureThief";
 import {
 	sarcophagusGuardianKind,
 	sarcophagusOutcome,
@@ -122,6 +123,11 @@ export const hasConsistentActors = (document: SaveDocument): boolean => {
 							o.activated &&
 							o.floorNumber === entry.floorNumber,
 					)) &&
+				// A thief owns its reserved ID; only a thief carries a haul, stolen in the past.
+				(entry.kind === "treasure-thief") ===
+					entry.id.endsWith(`:${THIEF_SPAWN_ID}`) &&
+				(entry.theft === undefined ||
+					(isThief(entry) && entry.theft.turn <= state.turn)) &&
 				// Only a sounded sentry tracks reinforcements.
 				(entry.summons === undefined ||
 					(MONSTER_DEFINITIONS[entry.kind].alarmRadius !== undefined &&

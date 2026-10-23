@@ -11,6 +11,7 @@ export const HINT_IDS = [
 	"rare-discovery",
 	"telegraph",
 	"alarm",
+	"thief",
 	"bleeding",
 	"town-portal",
 	"bag-full",
@@ -63,6 +64,13 @@ const eventHint = (event: ActivityEvent): Hint | undefined => {
 				id: "telegraph",
 				title: "Telegraphed attack",
 				text: "A monster has marked tiles for a heavy attack. Step off the marked tiles with your next action to dodge it; it can't re-aim.",
+				help: "help-enemy-tactics",
+			};
+		case "monster-theft-hit":
+			return {
+				id: "thief",
+				title: "A thief took your gold",
+				text: "It runs and slips away after a while. Catch it with Web or Sleep, or corner it, and kill it to get your gold back with interest.",
 				help: "help-enemy-tactics",
 			};
 		case "monster-alarm-sounded":
