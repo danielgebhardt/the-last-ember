@@ -71,6 +71,8 @@ describe("Treasure thief", () => {
 		const darting = act(encounter({ coordinate: { row: 1, col: 7 } }));
 		expect(darting.gold).toBe(255);
 		expect(darting.monsters[0].coordinate).toEqual({ row: 1, col: 8 });
+		// The share has no cap, so a full purse loses real money.
+		expect(act(encounter({}, 10000)).gold).toBe(8500);
 		// Webbed beside you it still steals, but cannot spring away.
 		const near = encounter();
 		const held = act(applyTimedEffect(near, near.monsters[0], "rooted"));

@@ -30,13 +30,9 @@ const THIEF_ARRIVAL_DISTANCE = 8;
 // Phases after a theft before the thief slips away with its haul.
 export const THIEF_ESCAPE_PHASES = 20;
 export const THIEF_STEAL_SHARE = 0.15;
-export const thiefStealCap = (floorNumber: number) => 50 + floorNumber * 25;
-export const stolenAmount = (gold: number, floorNumber: number) =>
-	Math.min(
-		gold,
-		Math.max(1, Math.ceil(gold * THIEF_STEAL_SHARE)),
-		thiefStealCap(floorNumber),
-	);
+// Uncapped, so a full purse is worth chasing it for.
+export const stolenAmount = (gold: number) =>
+	Math.min(gold, Math.max(1, Math.ceil(gold * THIEF_STEAL_SHARE)));
 export const isThief = (monster: Pick<Monster, "kind">) =>
 	MONSTER_DEFINITIONS[monster.kind].thief === true;
 // Thieves' den and Gilded omens add up to two more thieves beside the floor's own, on
@@ -170,7 +166,7 @@ export const resolveThiefTheft = (
 				return step !== undefined && orthogonalDistance(step, player) === 1;
 			})());
 	if (!reaches) return undefined;
-	const gold = stolenAmount(state.gold, monster.floorNumber);
+	const gold = stolenAmount(state.gold);
 	const turn = state.turn;
 	const back = hasMonsterEffect(state, monster, "rooted")
 		? undefined

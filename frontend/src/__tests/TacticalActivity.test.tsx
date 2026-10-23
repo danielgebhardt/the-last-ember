@@ -29,6 +29,34 @@ describe("Tactical activity emphasis", () => {
 	});
 
 	it.each([
+		{
+			type: "monster-theft-hit",
+			turn: 3,
+			monster: "treasure-thief",
+			gold: 1500,
+		},
+		{
+			type: "monster-thief-escaped",
+			turn: 9,
+			monster: "treasure-thief",
+			gold: 1500,
+		},
+	] satisfies ActivityEvent[])(
+		"flags $type like a threat, so lost gold is not missed",
+		(event) => {
+			const { container } = render(<ActivityMessage event={event} />);
+			expect(container.firstElementChild).toHaveClass(
+				"border-map-threat/60",
+				"font-semibold",
+			);
+			expect(container.querySelector("svg")).toHaveAttribute(
+				"aria-hidden",
+				"true",
+			);
+		},
+	);
+
+	it.each([
 		{ type: "monster-shot-hit", turn: 2, monster: "goblin-archer", damage: 2 },
 		{ type: "monster-heavy-hit", turn: 2, monster: "dungeon-brute", damage: 5 },
 		{ type: "monster-heavy-avoided", turn: 2, monster: "dungeon-brute" },

@@ -1,5 +1,6 @@
 import {
 	Brain,
+	Coins,
 	Heart,
 	ShieldAlert,
 	Skull,
@@ -31,12 +32,17 @@ const ActivityMessage = ({
 	const danger = event.type === "player-died";
 	const growth = event.type === "attribute-gained";
 
-	// Monster telegraphs need to be immediately noticeable.
+	// Monster telegraphs and lost gold need to be immediately noticeable.
+	const theft =
+		event.type === "monster-theft-hit" ||
+		event.type === "monster-thief-escaped";
 	if (
 		event.type === "monster-prepared" ||
 		event.type === "monster-charge-prepared" ||
-		event.type === "monster-alarm-prepared"
+		event.type === "monster-alarm-prepared" ||
+		theft
 	) {
+		const Icon = theft ? Coins : TriangleAlert;
 		return (
 			<span
 				className="
@@ -46,10 +52,7 @@ const ActivityMessage = ({
                font-semibold text-map-threat
             "
 			>
-				<TriangleAlert
-					aria-hidden="true"
-					className="mt-0.5 size-3.5 shrink-0"
-				/>
+				<Icon aria-hidden="true" className="mt-0.5 size-3.5 shrink-0" />
 				<span className="min-w-0">{text}</span>
 			</span>
 		);

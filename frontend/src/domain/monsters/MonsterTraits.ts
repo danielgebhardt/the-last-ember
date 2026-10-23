@@ -12,11 +12,7 @@ import {
 	SENTRY_MAX_SUMMONS_ALIVE,
 	SENTRY_SUMMON_INTERVAL,
 } from "./MonsterAlarm";
-import {
-	THIEF_ESCAPE_PHASES,
-	THIEF_STEAL_SHARE,
-	thiefStealCap,
-} from "./TreasureThief";
+import { THIEF_ESCAPE_PHASES, THIEF_STEAL_SHARE } from "./TreasureThief";
 
 export const monsterTraits = (kind: MonsterKind): readonly string[] => {
 	const definition = MONSTER_DEFINITIONS[kind];
@@ -69,7 +65,7 @@ export const monsterTraits = (kind: MonsterKind): readonly string[] => {
 		);
 	if (definition.thief)
 		traits.push(
-			`Thief: never attacks. While you carry gold it closes in and, the moment it can reach you, darts in from up to two tiles, snatches ${Math.round(THIEF_STEAL_SHARE * 100)}% of your carried gold (at most ${thiefStealCap(0)} gold plus 25 per floor) and springs back a step. Sleep, Fear or Web stops it before it reaches you. With its haul it runs and slips away after ${THIEF_ESCAPE_PHASES} phases; Web and Sleep hold it. Kill it to recover everything it stole, plus its own purse and loot.`,
+			`Thief: never attacks. While you carry gold it closes in and, the moment it can reach you, darts in from up to two tiles, snatches ${Math.round(THIEF_STEAL_SHARE * 100)}% of your carried gold and springs back a step. Sleep, Fear or Web stops it before it reaches you. With its haul it runs and slips away after ${THIEF_ESCAPE_PHASES} phases; Web and Sleep hold it. Kill it to recover everything it stole, plus its own purse and loot.`,
 		);
 	if (definition.soulBolt)
 		traits.push(
