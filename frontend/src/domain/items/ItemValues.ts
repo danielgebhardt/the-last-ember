@@ -10,6 +10,20 @@ export const itemMagicResistance = (
 	item
 		? ((ITEM_DEFINITIONS[item.kind] as ItemDefinition).magicResistance ?? 0)
 		: 0;
+// The Goldbound Blade's extra attack from carried gold; zero for every other weapon.
+export const goldBoundBonus = (
+	item: ItemInstance | null | undefined,
+	gold: number,
+): number => {
+	const scaling =
+		item && (ITEM_DEFINITIONS[item.kind] as ItemDefinition).goldBound;
+	return scaling
+		? Math.min(
+				scaling.maxBonus,
+				Math.floor(Math.max(0, gold) / scaling.goldPerPoint),
+			)
+		: 0;
+};
 export const MAX_ENCHANTMENT = 3;
 export const isEnchantableKind = (kind: ItemKind): boolean =>
 	["weapon", "shield", "chest-armor", "helmet"].includes(

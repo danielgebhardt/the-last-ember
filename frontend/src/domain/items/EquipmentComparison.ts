@@ -17,14 +17,21 @@ import type { ItemInstance } from "./Item";
 export type EquipmentComparisonContext = Pick<
 	GameState,
 	"equipment" | "player" | "progression" | "effects" | "afflictions"
->;
+> &
+	// Carried gold, so a gold-bound weapon compares at its current edge.
+	Partial<Pick<GameState, "gold">>;
 
 const loadoutStats = (
 	context: EquipmentComparisonContext,
 	equipment: Equipment,
 ) => {
 	const { progression, effects } = context;
-	const combat = deriveCombatStats(equipment, progression, effects);
+	const combat = deriveCombatStats(
+		equipment,
+		progression,
+		effects,
+		context.gold,
+	);
 	const accuracy = deriveAccuracy(
 		progression,
 		effects,

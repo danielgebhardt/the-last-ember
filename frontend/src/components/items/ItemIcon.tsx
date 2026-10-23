@@ -18,6 +18,7 @@ import type { PotionKind } from "../../domain/items/PotionHotbar";
 import DragonMailIcon from "./DragonMailIcon";
 import EmberIcon from "./EmberIcon";
 import ExitScrollIcon from "./ExitScrollIcon";
+import GoldboundBladeIcon from "./GoldboundBladeIcon";
 import PotionIcon from "./PotionIcon";
 import RingIcon from "./RingIcon";
 import SpellguardShieldIcon from "./SpellguardShieldIcon";
@@ -39,6 +40,7 @@ const icons: Record<
 > = {
 	"warding-cloak": WardingCloakIcon,
 	"spellguard-shield": SpellguardShieldIcon,
+	"goldbound-blade": GoldboundBladeIcon,
 	"enchantment-scroll": ScrollText,
 	"remove-curse-scroll": Scroll,
 	"exit-scroll": ExitScrollIcon,
@@ -62,6 +64,10 @@ const icons: Record<
 	"runic-helmet": Crown,
 	"scholar-robe": Shirt,
 };
+// Rare weapons carry their own developer-chosen colors; everything else uses its type's.
+const KIND_COLORS: Partial<Record<ItemKind, string>> = {
+	"goldbound-blade": "text-[#a96e00] dark:text-[#ffd166]",
+};
 const isRingKind = (kind: ItemKind): kind is RingKind =>
 	ITEM_DEFINITIONS[kind].type === "ring";
 const ItemIcon = ({ kind }: { kind: ItemKind }) => {
@@ -72,7 +78,7 @@ const ItemIcon = ({ kind }: { kind: ItemKind }) => {
 		<Icon
 			aria-hidden="true"
 			focusable="false"
-			className={`size-full ${kind.startsWith("book-") ? "text-violet-700 dark:text-violet-300" : kind === "cure" ? "text-item-ember" : kind === "exit-scroll" ? "text-item-cure" : "text-item-gear"}`}
+			className={`size-full ${KIND_COLORS[kind] ?? (kind.startsWith("book-") ? "text-violet-700 dark:text-violet-300" : kind === "cure" ? "text-item-ember" : kind === "exit-scroll" ? "text-item-cure" : "text-item-gear")}`}
 		/>
 	);
 };

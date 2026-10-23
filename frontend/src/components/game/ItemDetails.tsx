@@ -139,7 +139,11 @@ const ItemDetails = ({
 				: details.type === "enchantment"
 					? "Guaranteed +1 · maximum +3 per item"
 					: details.type === "weapon"
-						? `Attack bonus +${itemAttackBonus(item)}`
+						? `Attack bonus +${itemAttackBonus(item)}${
+								"goldBound" in details && details.goldBound
+									? ` · +1 per ${details.goldBound.goldPerPoint.toLocaleString("en-US")} gold carried (max +${details.goldBound.maxBonus})`
+									: ""
+							}`
 						: details.type === "ring" && "stats" in details
 							? Object.entries(details.stats)
 									.map(([stat, bonus]) => `+${bonus} ${stat}`)

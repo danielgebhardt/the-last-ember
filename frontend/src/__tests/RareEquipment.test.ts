@@ -10,7 +10,11 @@ import { createGameState, type GameState } from "../domain/game/GameState";
 import { resolvePlayerAction } from "../domain/game/PlayerActions";
 import { createEquipment } from "../domain/items/Equipment";
 import { compareEquipment } from "../domain/items/EquipmentComparison";
-import { eligibleLootKinds, isRareEquipmentKind } from "../domain/items/Item";
+import {
+	eligibleLootKinds,
+	isRareEquipmentKind,
+	RARE_EQUIPMENT_KINDS,
+} from "../domain/items/Item";
 import { availableItemLocations } from "../domain/items/ItemPlacement";
 import { itemArmor, itemMagicResistance } from "../domain/items/ItemValues";
 import {
@@ -124,10 +128,10 @@ it.each(["warding-cloak", "spellguard-shield"] as const)(
 			expect(eligibleLootKinds(20, "drop")).not.toContain(kind);
 			expect(
 				state.townEquipmentStock.filter((i) => isRareEquipmentKind(i.kind)),
-			).toHaveLength(2);
+			).toHaveLength(RARE_EQUIPMENT_KINDS.length);
 			expect(
 				townEquipmentOffers().filter((o) => isRareEquipmentKind(o.item.kind)),
-			).toHaveLength(2);
+			).toHaveLength(RARE_EQUIPMENT_KINDS.length);
 			roundTrip(state);
 		}
 	},
@@ -274,7 +278,7 @@ it.each(["warding-cloak", "spellguard-shield"] as const)(
 		expect(ownsRare(state)).toHaveLength(0);
 		expect(
 			townEquipmentOffers().filter((o) => isRareEquipmentKind(o.item.kind)),
-		).toHaveLength(2);
+		).toHaveLength(RARE_EQUIPMENT_KINDS.length);
 		expect(
 			resolvePlayerAction(state, { type: "buy-town-equipment", offerId: id })
 				.state,

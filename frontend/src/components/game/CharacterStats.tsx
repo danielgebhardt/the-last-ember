@@ -34,6 +34,7 @@ const CharacterStats = ({
 	progression,
 	effects = [],
 	afflictions = [],
+	gold = 0,
 }: {
 	player: PlayerStats;
 	mana: number;
@@ -41,6 +42,7 @@ const CharacterStats = ({
 	progression: Progression;
 	effects?: readonly TimedEffect[];
 	afflictions?: readonly ActiveAffliction[];
+	gold?: number;
 }) => {
 	const normalMaxHealth = maximumHealth(progression, equipment);
 	const normalMaxMana = maximumMana(progression, equipment, effects);
@@ -50,7 +52,7 @@ const CharacterStats = ({
 		effects,
 		afflictions,
 	);
-	const combat = deriveCombatStats(equipment, progression, effects);
+	const combat = deriveCombatStats(equipment, progression, effects, gold);
 	const armor = armorContributions(equipment);
 	const accuracy = deriveAccuracy(
 		progression,
@@ -147,6 +149,7 @@ const CharacterStats = ({
 					<p className={hint}>
 						Base {combat.baseAttack} + Strength {combat.strengthBonus} + weapon{" "}
 						{combat.weaponBonus}
+						{combat.goldBonus > 0 && ` + gold ${combat.goldBonus}`}
 						{combat.perkAttack > 0 && ` + perks ${combat.perkAttack}`}
 						{by("meleeDamage") && ` · ${by("meleeDamage")} −1`}
 					</p>

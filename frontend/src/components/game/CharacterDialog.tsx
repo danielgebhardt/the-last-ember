@@ -337,6 +337,7 @@ const CharacterDialog = ({
 								mana={mana}
 								equipment={equipment}
 								progression={progression}
+								gold={gold}
 							/>
 						</div>
 						<div className="min-w-0 p-2 pb-3 lg:min-h-0 lg:flex-1 [@media(max-height:840px)]:pb-2">

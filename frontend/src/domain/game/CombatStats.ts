@@ -1,6 +1,10 @@
 import type { Equipment } from "../items/Equipment";
 import { equipmentBonuses } from "../items/EquipmentBonuses";
-import { itemArmor, itemAttackBonus } from "../items/ItemValues";
+import {
+	goldBoundBonus,
+	itemArmor,
+	itemAttackBonus,
+} from "../items/ItemValues";
 import { deriveAttributes } from "./Attributes";
 import { playerEffectBonuses } from "./EffectBonuses";
 import { hasPerk } from "./Perks";
@@ -12,8 +16,11 @@ export const deriveCombatStats = (
 	equipment: Equipment,
 	progression: Progression,
 	effects: readonly TimedEffect[] = [],
+	// Carried gold; only a gold-bound weapon reads it.
+	gold = 0,
 ) => {
 	const attributes = deriveAttributes(progression, effects, equipment);
+	const goldBonus = goldBoundBonus(equipment.mainHand, gold);
 	const strengthBonus = attributes.strengthModifier;
 	const bonuses = equipmentBonuses(equipment);
 	const weaponBonus = itemAttackBonus(equipment.mainHand);
@@ -35,12 +42,14 @@ export const deriveCombatStats = (
 		),
 		baseAttack: BASE_PLAYER_ATTACK_DAMAGE,
 		weaponBonus,
+		goldBonus,
 		strengthBonus,
 		perkAttack: perkAttack(progression),
 		attack:
 			BASE_PLAYER_ATTACK_DAMAGE +
 			strengthBonus +
 			weaponBonus +
+			goldBonus +
 			perkAttack(progression),
 		armor:
 			armor +

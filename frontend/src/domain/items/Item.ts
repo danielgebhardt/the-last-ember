@@ -27,6 +27,8 @@ export type ItemDefinition = {
 	maxFloor: number;
 	foundWeight: number;
 	dropWeight: number;
+	// Main-hand damage that grows with carried gold: +1 per goldPerPoint, up to maxBonus.
+	goldBound?: Readonly<{ goldPerPoint: number; maxBonus: number }>;
 };
 export const ITEM_DEFINITIONS = {
 	"cure-disease-potion": {
@@ -96,6 +98,20 @@ export const ITEM_DEFINITIONS = {
 		dropWeight: 0,
 		description:
 			"A light cloak sewn with warding stars. Chest: 1 armor and +10 percentage points MR against enemy spells/breath, capped at 50% total. Trades physical protection for wards. Does not resist poison, traps, afflictions or your own Fireball. Enchantment adds armor only.",
+	},
+	"goldbound-blade": {
+		specialFindOnly: true,
+		name: "Goldbound Blade",
+		type: "weapon",
+		attackBonus: 2,
+		armor: 0,
+		goldBound: { goldPerPoint: 1000, maxBonus: 4 },
+		minFloor: 6,
+		maxFloor: 20,
+		foundWeight: 0,
+		dropWeight: 0,
+		description:
+			"A plain blade wound with gilded wire that hums near coin. Main hand: +2 attack, plus +1 for every 1,000 gold you carry, up to +4 more. Spending gold weakens it; gold in hand is its edge. Enchantment adds to the base attack.",
 	},
 	"spellguard-shield": {
 		specialFindOnly: true,
@@ -808,6 +824,7 @@ export type ItemKind = keyof typeof ITEM_DEFINITIONS;
 export const RARE_EQUIPMENT_KINDS = [
 	"warding-cloak",
 	"spellguard-shield",
+	"goldbound-blade",
 ] as const;
 export type RareEquipmentKind = (typeof RARE_EQUIPMENT_KINDS)[number];
 export const isRareEquipmentKind = (kind: string): kind is RareEquipmentKind =>
@@ -836,6 +853,15 @@ export const validateItemDefinition = (definition: ItemDefinition): void => {
 		)
 	)
 		throw new RangeError("Invalid equipment stat bonus.");
+	if (
+		definition.goldBound !== undefined &&
+		(definition.type !== "weapon" ||
+			!Number.isSafeInteger(definition.goldBound.goldPerPoint) ||
+			definition.goldBound.goldPerPoint < 1 ||
+			!Number.isSafeInteger(definition.goldBound.maxBonus) ||
+			definition.goldBound.maxBonus < 1)
+	)
+		throw new RangeError("Invalid gold-bound weapon scaling.");
 	const { minFloor, maxFloor, foundWeight, dropWeight, armor, attackBonus } =
 		definition;
 	if (
