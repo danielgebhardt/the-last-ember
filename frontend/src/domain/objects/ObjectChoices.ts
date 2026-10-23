@@ -23,6 +23,7 @@ import {
 } from "./MirrorOfShadows";
 import type { ObjectChoice } from "./ObjectInteraction";
 import { PORTAL_FLOOR_SPAN } from "./RunicPortal";
+import { withForesight } from "./SeersSight";
 import { WELL_ODDS, WELL_OFFERINGS } from "./WishingWell";
 export type InteractionChoice = Readonly<{
 	value: ObjectChoice;
@@ -72,7 +73,7 @@ export const forgeChoices = (
 		description: `Choose to see reliable and risky forging to +${(item.enchantment ?? 0) + 1}. Choosing is free.`,
 	}));
 };
-export const objectChoices = (
+const baseObjectChoices = (
 	object: DungeonObject,
 	state?: Pick<
 		GameState,
@@ -246,4 +247,12 @@ export const objectChoices = (
 							},
 						]
 					: [];
+};
+// With foresight worn, each gamble's description also states its fixed result.
+export const objectChoices = (
+	object: DungeonObject,
+	state?: Parameters<typeof baseObjectChoices>[1],
+): readonly InteractionChoice[] => {
+	const choices = baseObjectChoices(object, state);
+	return state ? withForesight(choices, object, state) : choices;
 };

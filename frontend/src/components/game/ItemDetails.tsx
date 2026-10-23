@@ -153,7 +153,7 @@ const ItemDetails = ({
 							: details.type === "shield" ||
 									details.type === "chest-armor" ||
 									details.type === "helmet"
-								? `Armor ${itemArmor(item)}${"stealth" in details && details.stealth ? ` · monsters notice you ${details.stealth} tiles closer` : ""}`
+								? `Armor ${itemArmor(item)}${"stealth" in details && details.stealth ? ` · monsters notice you ${details.stealth} tiles closer` : ""}${"foresight" in details && details.foresight ? " · foresees gambles and mimic chests" : ""}`
 								: null;
 
 	const additionalStats =

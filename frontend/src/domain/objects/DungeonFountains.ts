@@ -8,6 +8,13 @@ import type { DungeonObject } from "./DungeonObject";
 import { objectDamage, spendObject } from "./ObjectEffects";
 import type { ObjectChoice } from "./ObjectInteraction";
 export const FOUNTAIN_RULES = { restorationChance: 0.7, damage: 3 } as const;
+// Fixed per fountain: whether a risky draw restores rather than poisons.
+export const fountainDrawRestores = (
+	seed: number,
+	object: Pick<DungeonObject, "id">,
+): boolean =>
+	createSeededRandom(hashStringToUint32(`${seed}:${object.id}:draw`))() <
+	FOUNTAIN_RULES.restorationChance;
 export const fountainRestoration = (
 	state: Pick<
 		GameState,
@@ -48,10 +55,7 @@ export const drawFountain = (
 	if (state.player.health === state.player.maxHealth && state.mana === maximum)
 		return { error: "Your health and mana are already full." };
 	const spent = spendObject(state, object);
-	const roll = createSeededRandom(
-		hashStringToUint32(`${state.run.seed}:${object.id}:draw`),
-	)();
-	if (choice === "draw" && roll >= FOUNTAIN_RULES.restorationChance) {
+	if (choice === "draw" && !fountainDrawRestores(state.run.seed, object)) {
 		const hurt = objectDamage(spent, 3, {
 			type: "fountain-poisoned",
 			damage: 3,

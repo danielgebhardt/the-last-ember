@@ -18,6 +18,38 @@ export type ThroneOutcome =
 	| "relocation"
 	| "treasure"
 	| "wound";
+// Each choice has its own stream; its first roll picks the outcome, later rolls place a
+// relocation.
+const throneStream = (
+	seed: number,
+	object: Pick<DungeonObject, "id">,
+	choice: "sit" | "pry",
+) =>
+	createSeededRandom(
+		hashStringToUint32(`${seed}:${object.id}:${choice}:outcome`),
+	);
+const throneOutcomeFor = (
+	choice: "sit" | "pry",
+	roll: number,
+): ThroneOutcome =>
+	choice === "pry"
+		? roll < 0.7
+			? "treasure"
+			: "wound"
+		: roll < 0.4
+			? "blessing"
+			: roll < 0.65
+				? "recovery"
+				: roll < 0.85
+					? "curse"
+					: "relocation";
+// Fixed per throne and choice, so it can be foreseen.
+export const throneOutcome = (
+	seed: number,
+	object: Pick<DungeonObject, "id">,
+	choice: "sit" | "pry",
+): ThroneOutcome =>
+	throneOutcomeFor(choice, throneStream(seed, object, choice)());
 export const resolveThroneChoice = (
 	state: GameState,
 	object: DungeonObject,
@@ -26,15 +58,11 @@ export const resolveThroneChoice = (
 	if (object.activated) return { error: "The throne's power is spent." };
 	if (choice !== "sit" && choice !== "pry")
 		return { error: "Choose to sit, pry treasure or leave." };
-	const random = createSeededRandom(
-		hashStringToUint32(`${state.run.seed}:${object.id}:${choice}:outcome`),
-	);
-	const roll = random();
+	const random = throneStream(state.run.seed, object, choice);
+	const outcome = throneOutcomeFor(choice, random());
 	let next = spendObject(state, object);
-	let outcome: ThroneOutcome;
 	if (choice === "pry") {
-		if (roll < 0.7) {
-			outcome = "treasure";
+		if (outcome === "treasure") {
 			const amount = 30 + object.floorNumber * 5;
 			next = {
 				...next,
@@ -44,7 +72,6 @@ export const resolveThroneChoice = (
 				]),
 			};
 		} else {
-			outcome = "wound";
 			const damage = Math.min(8, 4 + Math.floor(object.floorNumber / 5));
 			next = objectDamage(next, damage, {
 				type: "throne-wound",
@@ -52,11 +79,9 @@ export const resolveThroneChoice = (
 				turn: state.turn,
 			});
 		}
-	} else if (roll < 0.4) {
-		outcome = "blessing";
+	} else if (outcome === "blessing") {
 		next = awardExperience(next, 40 + object.floorNumber * 6);
-	} else if (roll < 0.65) {
-		outcome = "recovery";
+	} else if (outcome === "recovery") {
 		next = {
 			...next,
 			player: {
@@ -73,8 +98,7 @@ export const resolveThroneChoice = (
 				next.mana + 6,
 			),
 		};
-	} else if (roll < 0.85) {
-		outcome = "curse";
+	} else if (outcome === "curse") {
 		next = objectDamage(next, 2, {
 			type: "throne-wound",
 			damage: 2,
@@ -83,7 +107,6 @@ export const resolveThroneChoice = (
 		if (next.player.health > 0)
 			next = applyPlayerAffliction(next, "poisoned", "throne");
 	} else {
-		outcome = "relocation";
 		const floor = state.run.floors[state.run.activeFloor - 1];
 		const sealed = sealedEliteTiles(floor, state.objects);
 		const candidates = availableItemLocations(

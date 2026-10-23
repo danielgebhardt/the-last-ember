@@ -22,6 +22,7 @@ import ExitScrollIcon from "./ExitScrollIcon";
 import GoldboundBladeIcon from "./GoldboundBladeIcon";
 import PotionIcon from "./PotionIcon";
 import RingIcon from "./RingIcon";
+import SeersCircletIcon from "./SeersCircletIcon";
 import ShadowweaveCloakIcon from "./ShadowweaveCloakIcon";
 import SpellguardShieldIcon from "./SpellguardShieldIcon";
 import WardingCloakIcon from "./WardingCloakIcon";
@@ -45,6 +46,7 @@ const icons: Record<
 	"goldbound-blade": GoldboundBladeIcon,
 	"bloodrage-axe": BloodrageAxeIcon,
 	"shadowweave-cloak": ShadowweaveCloakIcon,
+	"seers-circlet": SeersCircletIcon,
 	"enchantment-scroll": ScrollText,
 	"remove-curse-scroll": Scroll,
 	"exit-scroll": ExitScrollIcon,
@@ -73,6 +75,7 @@ const KIND_COLORS: Partial<Record<ItemKind, string>> = {
 	"goldbound-blade": "text-[#a96e00] dark:text-[#ffd166]",
 	"bloodrage-axe": "text-[#9a1831] dark:text-[#e04a65]",
 	"shadowweave-cloak": "text-[#6f57a8] dark:text-[#b7a2db]",
+	"seers-circlet": "text-[#2f8f98] dark:text-[#82d7db]",
 };
 const isRingKind = (kind: ItemKind): kind is RingKind =>
 	ITEM_DEFINITIONS[kind].type === "ring";

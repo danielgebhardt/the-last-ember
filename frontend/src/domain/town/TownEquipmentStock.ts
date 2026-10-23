@@ -34,6 +34,7 @@ export const TOWN_EQUIPMENT_OFFERS: Readonly<Record<string, Offer>> =
 			offer("armor", "warding-cloak", 900),
 			offer("armor", "spellguard-shield", 900),
 			offer("armor", "shadowweave-cloak", 1100),
+			offer("armor", "seers-circlet", 1000),
 			offer("armor", "copper-ring", 150),
 			offer("weapons", "iron-sword", 250),
 			offer("weapons", "iron-sword", 250, 2),

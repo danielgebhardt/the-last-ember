@@ -31,6 +31,8 @@ export type ItemDefinition = {
 	goldBound?: Readonly<{ goldPerPoint: number; maxBonus: number }>;
 	// Main-hand rage: +1 attack per missingShare of maximum health lost, up to maxBonus;
 	// costs armor and weakens health potions to healingShare while wielded.
+	// Worn: object gambles and mimic chests show their fixed outcome before you commit.
+	foresight?: true;
 	// Worn: every monster's detection radius shrinks by this much (never below 1).
 	stealth?: number;
 	bloodrage?: Readonly<{
@@ -155,6 +157,20 @@ export const ITEM_DEFINITIONS = {
 		dropWeight: 0,
 		description:
 			"A cloak woven from dusk itself. Chest: no armor, but every monster, the Ember Warden included, notices you from 2 tiles closer. Slip past rooms or reach the Warden while it still sleeps. Enchantment adds armor.",
+	},
+	"seers-circlet": {
+		specialFindOnly: true,
+		name: "Seer's Circlet",
+		type: "helmet",
+		attackBonus: 0,
+		armor: 0,
+		foresight: true,
+		minFloor: 6,
+		maxFloor: 20,
+		foundWeight: 0,
+		dropWeight: 0,
+		description:
+			"A silver band set with a clouded eye. Head: no armor, but fountains, thrones, sarcophagi, wells and mirrors show what each choice would bring before you commit, and chests reveal whether they are mimics. Enchantment adds armor.",
 	},
 	"spellguard-shield": {
 		specialFindOnly: true,
@@ -870,6 +886,7 @@ export const RARE_EQUIPMENT_KINDS = [
 	"goldbound-blade",
 	"bloodrage-axe",
 	"shadowweave-cloak",
+	"seers-circlet",
 ] as const;
 export type RareEquipmentKind = (typeof RARE_EQUIPMENT_KINDS)[number];
 export const isRareEquipmentKind = (kind: string): kind is RareEquipmentKind =>
