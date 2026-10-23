@@ -142,8 +142,9 @@ export const placeTreasureThieves = (
 	return thieves.sort((a, b) => a.floorNumber - b.floorNumber);
 };
 
-// While you carry gold it snatches a share the moment it reaches you, stepping in from
-// two tiles if it must, then runs from its next action. Sleep, Fear and Web stop it.
+// While you carry gold it snatches a share the moment it can reach you, darting in from
+// two tiles if it must, and springs back a step in the same action, so it never lingers
+// beside you. Sleep, Fear and Web stop it.
 export const resolveThiefTheft = (
 	state: GameState,
 	monster: Monster,
@@ -160,20 +161,24 @@ export const resolveThiefTheft = (
 		return undefined;
 	const player = state.run.playerCoordinate;
 	const distance = orthogonalDistance(monster.coordinate, player);
-	const coordinate =
-		distance === 1
-			? monster.coordinate
-			: distance === 2 && !hasMonsterEffect(state, monster, "rooted")
-				? selectPursuitStep(state.run, monster, monsters)
-				: undefined;
-	if (!coordinate || orthogonalDistance(coordinate, player) !== 1)
-		return undefined;
+	const reaches =
+		distance === 1 ||
+		(distance === 2 &&
+			!hasMonsterEffect(state, monster, "rooted") &&
+			(() => {
+				const step = selectPursuitStep(state.run, monster, monsters);
+				return step !== undefined && orthogonalDistance(step, player) === 1;
+			})());
+	if (!reaches) return undefined;
 	const gold = stolenAmount(state.gold, monster.floorNumber);
 	const turn = state.turn;
+	const back = hasMonsterEffect(state, monster, "rooted")
+		? undefined
+		: selectRetreatStep(state.run, monster, monsters);
 	return {
 		monster: {
 			...monster,
-			coordinate: { ...coordinate },
+			...(back ? { coordinate: back } : {}),
 			theft: { gold, turn },
 		},
 		events: [{ type: "monster-theft-hit", monster: monster.kind, gold, turn }],

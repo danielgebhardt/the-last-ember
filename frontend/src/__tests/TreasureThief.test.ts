@@ -57,19 +57,25 @@ const types = (state: GameState, from = 0) =>
 	state.activityHistory.entries.slice(from).map(({ event }) => event.type);
 
 describe("Treasure thief", () => {
-	it("snatches 15% of your carried gold the moment it reaches you, without attacking", () => {
+	it("snatches 15% of your carried gold and springs back a step in the same action, without attacking", () => {
 		const robbed = act(encounter());
 		expect(robbed.gold).toBe(255);
 		expect(robbed.monsters[0]).toMatchObject({
 			intent: { type: "idle" },
+			coordinate: { row: 1, col: 7 },
 			theft: { gold: 45, turn: 1 },
 		});
 		expect(types(robbed)).toEqual(["monster-theft-hit"]);
 		expect(robbed.player).toEqual(encounter().player);
-		// From two tiles away it steps in and steals in the same action.
-		const closing = act(encounter({ coordinate: { row: 1, col: 7 } }));
-		expect(closing.gold).toBe(255);
-		expect(closing.monsters[0].coordinate).toEqual({ row: 1, col: 6 });
+		// From two tiles away it darts in, steals and springs back.
+		const darting = act(encounter({ coordinate: { row: 1, col: 7 } }));
+		expect(darting.gold).toBe(255);
+		expect(darting.monsters[0].coordinate).toEqual({ row: 1, col: 8 });
+		// Webbed beside you it still steals, but cannot spring away.
+		const near = encounter();
+		const held = act(applyTimedEffect(near, near.monsters[0], "rooted"));
+		expect(held.gold).toBe(255);
+		expect(held.monsters[0].coordinate).toEqual({ row: 1, col: 6 });
 	});
 
 	it("never closes in on an empty purse, and Web holds it short of you", () => {
