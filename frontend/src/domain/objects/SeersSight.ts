@@ -1,3 +1,4 @@
+import { type FloorOmen, omenFavorsWell } from "../game/Omens";
 import {
 	ITEM_DEFINITIONS,
 	type ItemDefinition,
@@ -52,6 +53,7 @@ export const foresight = (
 	seed: number,
 	object: DungeonObject,
 	choice: InteractionChoice["value"],
+	favoredWell = false,
 ): string | undefined => {
 	if (object.kind === "fountain" && choice === "draw")
 		return fountainDrawRestores(seed, object)
@@ -65,7 +67,7 @@ export const foresight = (
 		return MIRROR[mirrorShatterOutcome(seed, object)];
 	if (object.kind === "well") {
 		const offering = WELL_OFFERINGS.find((gold) => choice === `offer-${gold}`);
-		if (offering) return WELL[wellOutcome(seed, object, offering)];
+		if (offering) return WELL[wellOutcome(seed, object, offering, favoredWell)];
 	}
 	return undefined;
 };
@@ -76,12 +78,18 @@ export const withForesight = (
 	state: Readonly<{
 		equipment: Readonly<Record<string, ItemInstance | null>>;
 		run?: Readonly<{ seed: number }>;
+		omens?: readonly FloorOmen[];
 	}>,
 ): readonly InteractionChoice[] => {
 	const { run } = state;
 	if (!run || !foresees(state.equipment)) return choices;
 	return choices.map((choice) => {
-		const seen = foresight(run.seed, object, choice.value);
+		const seen = foresight(
+			run.seed,
+			object,
+			choice.value,
+			omenFavorsWell(state, object.floorNumber),
+		);
 		return seen
 			? {
 					...choice,

@@ -1,4 +1,5 @@
 import type { GameState } from "../game/GameState";
+import { omenDetectionBonus } from "../game/Omens";
 import { equipmentStealth } from "../items/ItemValues";
 
 export type PursuitRules = {
@@ -26,14 +27,16 @@ export const ESCAPE_PURSUIT_RULES: Readonly<PursuitRules> = {
 // Stealthy equipment shrinks every detection radius, on top of the escape's wider one.
 export const pursuitRulesFor = (
 	state: Pick<GameState, "escape" | "quest"> &
-		Partial<Pick<GameState, "equipment">>,
+		Partial<Pick<GameState, "equipment" | "omens" | "run">>,
 ): Readonly<PursuitRules> => {
 	const base =
 		state.escape && state.quest.cureRecovered && !state.quest.victory
 			? ESCAPE_PURSUIT_RULES
 			: PURSUIT_RULES;
-	const stealth = state.equipment ? equipmentStealth(state.equipment) : 0;
-	return stealth
-		? { ...base, detectionBonus: base.detectionBonus - stealth }
+	const shift =
+		omenDetectionBonus(state) -
+		(state.equipment ? equipmentStealth(state.equipment) : 0);
+	return shift
+		? { ...base, detectionBonus: base.detectionBonus + shift }
 		: base;
 };

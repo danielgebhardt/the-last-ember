@@ -3,6 +3,7 @@ import { hashStringToUint32 } from "../dungeon/DungeonRun";
 import { createSeededRandom } from "../dungeon/Seed";
 import { appendActivityEvents } from "../game/ActivityHistory";
 import type { GameState } from "../game/GameState";
+import { omenFavorsWell, WELL_FAVOR } from "../game/Omens";
 import {
 	ATTRIBUTE_NAMES,
 	type AttributeName,
@@ -47,16 +48,23 @@ const OFFERING_CHOICES: Record<WellOffering, ObjectChoice> = {
 const stream = (seed: number, object: Pick<DungeonObject, "id">, key: string) =>
 	createSeededRandom(hashStringToUint32(`${seed}:${object.id}:well:${key}`));
 
+// A Fortune's floor omen favors the same single roll: more rewards, fewer creatures.
 export const wellOutcome = (
 	seed: number,
 	object: Pick<DungeonObject, "id">,
 	offering: WellOffering,
+	favored = false,
 ): WellOutcome => {
 	const roll = stream(seed, object, "roll")();
 	const odds = WELL_ODDS[offering];
-	return roll < odds.positive
+	const positive = odds.positive + (favored ? WELL_FAVOR.positive : 0);
+	const negative = Math.max(
+		0,
+		odds.negative + (favored ? WELL_FAVOR.negative : 0),
+	);
+	return roll < positive
 		? "positive"
-		: roll >= 1 - odds.negative
+		: roll >= 1 - negative
 			? "negative"
 			: "neutral";
 };
@@ -105,7 +113,12 @@ export const offerAtWell = (
 	if (!offering) return { error: "Review the well's offerings first." };
 	if (state.gold < offering) return { error: "You do not have enough gold." };
 	const seed = state.run.seed;
-	const outcome = wellOutcome(seed, object, offering);
+	const outcome = wellOutcome(
+		seed,
+		object,
+		offering,
+		omenFavorsWell(state, object.floorNumber),
+	);
 	const reward = outcome === "positive" ? wellReward(seed, object) : undefined;
 	const spent = spendObject({ ...state, gold: state.gold - offering }, object);
 	let next: GameState = {

@@ -60,6 +60,11 @@ import {
 import { MAX_SEED, parseSeedInput } from "./domain/dungeon/Seed.ts";
 import type { VictorySummary } from "./domain/game/Adventure";
 import { defeatRecap } from "./domain/game/DefeatRecap";
+import {
+	OMEN_DEFINITIONS,
+	omenAt,
+	omenRevealsFloor,
+} from "./domain/game/Omens";
 import { hasPerk, pendingPerkCount } from "./domain/game/Perks";
 import { createRunRecord, runRecap } from "./domain/game/RunRecap";
 import { isTestSeed, randomAdventureSeed } from "./domain/game/TestSeed";
@@ -438,6 +443,10 @@ const Home = ({
 			<Header
 				floorNumber={town ? 0 : activeFloor.floorNumber}
 				floorCount={run.floors.length}
+				omen={(() => {
+					const kind = town ? undefined : omenAt(game.state, run.activeFloor);
+					return kind ? OMEN_DEFINITIONS[kind] : undefined;
+				})()}
 				onNewDungeon={() => setNewDungeonOpen(true)}
 				characterAction={
 					<Dialog.Root open={characterOpen} onOpenChange={setCharacterOpen}>
@@ -777,10 +786,10 @@ const Home = ({
 												? exploration.explored.get(run.activeFloor)
 												: undefined
 										}
-										revealed={isFloorRevealed(
-											game.state.objects,
-											run.activeFloor,
-										)}
+										revealed={
+											isFloorRevealed(game.state.objects, run.activeFloor) ||
+											omenRevealsFloor(game.state, run.activeFloor)
+										}
 										downStairMarked={hasPerk(
 											game.state.progression,
 											"pathfinder",

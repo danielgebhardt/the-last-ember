@@ -105,6 +105,7 @@ import {
 	resolveMeleeAttack,
 } from "./MeleeRules";
 import { damageMonster } from "./MonsterDamage";
+import { announceOmens } from "./OmenNotices";
 import { type ChoosePerkAction, choosePerk } from "./PerkChoiceAction";
 import { executionerBonus, opportunistBonus } from "./PerkEffects";
 import { levelForExperience } from "./Progression";
@@ -375,14 +376,18 @@ export const resolvePlayerAction = (
 						),
 					),
 				);
-	// Passing close to a hidden cracked wall notices it, wherever the turn left you.
-	const resolved = noticeCrackedWalls(
-		monsterPhase
-			? recoverManaAfterTurn(
-					advancePlayerAfflictions(monsterPhase),
-					suppressesManaRecovery(monsterPhase.afflictions),
-				)
-			: responseState,
+	// Passing close to a hidden cracked wall notices it, wherever the turn left you; a
+	// new floor's omen, or the next one's through the Seer's Circlet, is announced.
+	const resolved = announceOmens(
+		state,
+		noticeCrackedWalls(
+			monsterPhase
+				? recoverManaAfterTurn(
+						advancePlayerAfflictions(monsterPhase),
+						suppressesManaRecovery(monsterPhase.afflictions),
+					)
+				: responseState,
+		),
 	);
 	return {
 		state:

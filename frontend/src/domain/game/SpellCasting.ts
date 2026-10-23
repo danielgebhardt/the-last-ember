@@ -8,6 +8,7 @@ import { castAreaSpell } from "./AreaSpells";
 import type { AttackRollSource } from "./CombatRandomness";
 import type { GameState } from "./GameState";
 import { damageMonster } from "./MonsterDamage";
+import { omenSpellDamage } from "./Omens";
 import { repositionSpell } from "./RepositionSpells";
 import {
 	playerSpell,
@@ -135,7 +136,7 @@ export const castSpell = (
 	let damaged = damageMonster(
 		{ ...state, mana: state.mana - definition.cost },
 		target,
-		damage,
+		omenSpellDamage(state, damage),
 		{ type: "spell-hit", spell: action.spell },
 	);
 	if ("lifeDrain" in definition && definition.lifeDrain) {

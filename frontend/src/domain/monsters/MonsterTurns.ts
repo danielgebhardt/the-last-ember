@@ -17,6 +17,7 @@ import {
 	deriveAccuracy,
 	resolveMeleeAttack,
 } from "../game/MeleeRules";
+import { omenMeleeDamage, omenRegeneration } from "../game/Omens";
 import { arrowWardedDamage } from "../game/PerkEffects";
 import { hasMonsterEffect, monsterSkipsAction } from "../game/TimedEffects";
 import { displaceAfterHits } from "../items/RingOfDisplacement";
@@ -189,13 +190,16 @@ export const resolveMonsterPhase = (
 			monsters.find((actor) => actor.id === snapshot.id) ?? snapshot;
 		if (player.health <= 0) break;
 		const profile = MONSTER_DEFINITIONS[monster.kind];
+		// A Time-worn floor's quiet recovery joins any natural regeneration, unannounced.
+		const regeneration =
+			profile.regeneration ?? omenRegeneration(state, monster);
 		if (
-			profile.regeneration &&
+			regeneration &&
 			(monster.lastDamagedTurn == null ||
 				monster.lastDamagedTurn < state.turn - 1)
 		) {
 			const recovered = Math.min(
-				profile.regeneration,
+				regeneration,
 				actorMaximumHealth(monster, state.difficulty) - monster.health,
 			);
 			if (recovered > 0) {
@@ -203,12 +207,13 @@ export const resolveMonsterPhase = (
 				monsters = monsters.map((actor) =>
 					actor.id === monster.id ? monster : actor,
 				);
-				events.push({
-					type: "monster-regenerated",
-					monster: monster.kind,
-					recovered,
-					turn: state.turn,
-				});
+				if (profile.regeneration)
+					events.push({
+						type: "monster-regenerated",
+						monster: monster.kind,
+						recovered,
+						turn: state.turn,
+					});
 			}
 		}
 		if (monsterSkipsAction(state, monster)) continue;
@@ -531,9 +536,13 @@ export const resolveMonsterPhase = (
 			});
 			continue;
 		}
-		const damage = shooting
-			? arrowWardedDamage(state.progression, outcome.damage)
-			: outcome.damage;
+		const damage = omenMeleeDamage(
+			state,
+			monster,
+			shooting
+				? arrowWardedDamage(state.progression, outcome.damage)
+				: outcome.damage,
+		);
 		player = { ...player, health: Math.max(0, player.health - damage) };
 		events.push({
 			type: preparing

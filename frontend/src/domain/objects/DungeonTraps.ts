@@ -5,6 +5,7 @@ import { applyPlayerAffliction } from "../game/Afflictions";
 import { deriveAttributes } from "../game/Attributes";
 import { awardExperience } from "../game/ExperienceRewards";
 import type { GameState } from "../game/GameState";
+import { omenDisarmExperience } from "../game/Omens";
 import { TRAPWISE_BONUS } from "../game/PerkEffects";
 import { hasPerk } from "../game/Perks";
 import {
@@ -67,7 +68,7 @@ export const disarmTrap = (
 				{ type: "trap-disarmed", turn: state.turn },
 			]),
 		},
-		TRAP_DISARM_EXPERIENCE,
+		omenDisarmExperience(state, TRAP_DISARM_EXPERIENCE),
 	);
 };
 export const triggerArrivalTrap = (state: GameState): GameState => {

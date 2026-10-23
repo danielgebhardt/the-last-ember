@@ -53,7 +53,7 @@ const at = (p: Coordinate, d: Coordinate, steps = 1) => ({
 type Vault = Readonly<{ entrance: Coordinate; pocket: readonly Coordinate[] }>;
 // Every room side-wall tile (never a corner) with a pocket of solid rock behind it,
 // one tile of rock all around, inside the map edge.
-const vaultSites = (floor: Floor): Vault[] => {
+export const vaultSites = (floor: Floor): Vault[] => {
 	const terrain = floor.terrain;
 	const rock = (p: Coordinate) =>
 		p.row > 0 &&
@@ -152,6 +152,8 @@ export const carveFloorVault = (
 // vault, so nothing else in generation moves.
 export const carveSecretVaults = (
 	run: DungeonRun,
+	// Floors whose omen promises a vault carve one whatever their roll.
+	promised: readonly number[] = [],
 ): {
 	run: DungeonRun;
 	objects: readonly DungeonObject[];
@@ -164,7 +166,8 @@ export const carveSecretVaults = (
 		const random = createSeededRandom(
 			hashStringToUint32(`${run.seed}:${floor.floorNumber}:secret-vault`),
 		);
-		if (random() >= VAULT_CHANCE) return floor;
+		if (random() >= VAULT_CHANCE && !promised.includes(floor.floorNumber))
+			return floor;
 		const vault = carveFloorVault(
 			floor,
 			(count) => Math.floor(random() * count),

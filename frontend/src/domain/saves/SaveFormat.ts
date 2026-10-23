@@ -8,6 +8,7 @@ import type {
 } from "../dungeon/RunConfiguration";
 import { difficultyLabel } from "../game/Difficulty";
 import type { GameState } from "../game/GameState";
+import { omenSightRadius } from "../game/Omens";
 import { playerSightRadius } from "../game/PerkEffects";
 import { chosenPerks } from "../game/Perks";
 import { permanentAttributeGains } from "../game/PermanentAttributes";
@@ -81,6 +82,9 @@ export const createSaveDocument = (
 			? { displacedFloors: [...state.displacedFloors] }
 			: {}),
 		...(state.hunger ? { hunger: { fedTurn: state.hunger.fedTurn } } : {}),
+		...(state.omens?.length
+			? { omens: state.omens.map((omen) => ({ ...omen })) }
+			: {}),
 		townEquipmentStock: state.townEquipmentStock.map(savedItem),
 		townEquipmentPurchases: [...state.townEquipmentPurchases],
 		townPotionStock: { ...state.townPotionStock },
@@ -273,10 +277,13 @@ export const restoreSave = (document: SaveDocument): RestoredAdventure => {
 			rows.map((row) => [...row].map((cell) => cell === "1")),
 		]),
 	);
-	const sight = playerSightRadius(
-		document.fog.radius,
-		state.progression,
-		state.afflictions,
+	const sight = omenSightRadius(
+		state,
+		playerSightRadius(
+			document.fog.radius,
+			state.progression,
+			state.afflictions,
+		),
 	);
 	const initial = updateExploration(navigationRun(state), sight);
 	return {

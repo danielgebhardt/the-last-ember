@@ -1,4 +1,10 @@
 import { FLOOR } from "../dungeon/Tiles";
+import {
+	OMEN_DEFINITIONS,
+	OMEN_MIN_FLOOR,
+	omenAt,
+	omenFavorsWell,
+} from "../game/Omens";
 import { protectedFloorLocations } from "../monsters/MonsterLocations";
 import { sarcophagusOutcome } from "../objects/AncientSarcophagi";
 import { isDoor } from "../objects/DungeonObject";
@@ -91,6 +97,22 @@ export const hasConsistentGeometry = (document: SaveDocument): boolean => {
 	)
 		return false;
 	if (objects.filter((o) => o.kind === "sarcophagus").length > 1) return false;
+	// Omens sit on the floors between the omen floor and the Warden's, one per floor and
+	// never the same twice, each on a floor deep enough for it.
+	const omens = state.omens ?? [];
+	if (
+		!unique(omens.map((omen) => omen.floorNumber)) ||
+		!unique(omens.map((omen) => omen.kind)) ||
+		omens.some(
+			(omen) =>
+				omen.floorNumber < OMEN_MIN_FLOOR ||
+				omen.floorNumber >= run.floors.length ||
+				omen.floorNumber <
+					((OMEN_DEFINITIONS[omen.kind] as { minFloor?: number }).minFloor ??
+						OMEN_MIN_FLOOR),
+		)
+	)
+		return false;
 	// A cracked wall guards at most one vault per floor from floor 2; only a cracked wall
 	// is ever noticed, and one is opened only after it was noticed.
 	if (
@@ -152,7 +174,12 @@ export const hasConsistentGeometry = (document: SaveDocument): boolean => {
 					(object.activated
 						? !object.wellResult ||
 							object.wellResult.outcome !==
-								wellOutcome(run.seed, object, object.wellResult.offering)
+								wellOutcome(
+									run.seed,
+									object,
+									object.wellResult.offering,
+									omenFavorsWell(state, object.floorNumber),
+								)
 						: object.wellResult !== undefined)
 				: object.wellResult !== undefined
 		)
@@ -200,7 +227,8 @@ export const hasConsistentGeometry = (document: SaveDocument): boolean => {
 
 		if (
 			object.kind === "merchant" &&
-			(object.floorNumber % 5 !== 0 ||
+			((object.floorNumber % 5 !== 0 &&
+				omenAt(state, object.floorNumber) !== "merchants-rest") ||
 				object.floorNumber >= run.floors.length ||
 				object.activated ||
 				objects.filter(

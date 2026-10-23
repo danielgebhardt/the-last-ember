@@ -10,7 +10,7 @@ import { createGameState } from "../domain/game/GameState";
 import { eligibleLootKinds, ITEM_DEFINITIONS } from "../domain/items/Item";
 import { spawnRunItems } from "../domain/items/ItemPlacement";
 import { protectedSpawnLocations } from "../domain/monsters/MonsterLocations";
-import { isThief } from "../domain/monsters/TreasureThief";
+import { spawnRunMonsters } from "../domain/monsters/MonsterPlacement";
 
 it("places each selected book once within its floor band without changing ordinary generation", () => {
 	const run = connectDungeonFloors(
@@ -34,20 +34,13 @@ it("places each selected book once within its floor band without changing ordina
 				!books.includes(entry) &&
 				entry.item.kind !== "cure" &&
 				entry.item.kind !== "exit-scroll" &&
-				// Secret vaults add their reward after ordinary loot.
-				!entry.item.id.includes(":object:cracked-wall:"),
+				// Secret vaults and omens add their finds after ordinary loot.
+				!entry.item.id.includes(":object:cracked-wall:") &&
+				!entry.item.id.includes(":omen:"),
 		),
 	).toEqual(
-		spawnRunItems(
-			run,
-			state.monsters.filter(
-				(actor) =>
-					// Placed after loot, so ordinary items never avoid them.
-					actor.kind !== "iron-champion" &&
-					actor.kind !== "ember-warden" &&
-					!isThief(actor),
-			),
-		),
+		// Ordinary loot is placed around the freshly spawned creatures.
+		spawnRunItems(run, spawnRunMonsters(run)),
 	);
 	expect(eligibleLootKinds(1, "found")).not.toContain("book-ember-bolt");
 	for (const entry of books) {

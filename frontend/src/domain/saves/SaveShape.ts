@@ -10,6 +10,7 @@ import {
 import { AFFLICTION_DEFINITIONS } from "../game/AfflictionDefinitions";
 import { DAMAGE_ELEMENTS } from "../game/DamageElements";
 import { isDifficulty } from "../game/Difficulty";
+import { OMEN_KINDS } from "../game/Omens";
 import { PERK_KINDS, PERK_LEVELS } from "../game/Perks";
 import { isPermanentAttributes } from "../game/PermanentAttributes";
 import { PLAYER_AFFLICTION_LIMIT } from "../game/PlayerAfflictions";
@@ -200,6 +201,8 @@ const eventFields = {
 	"blade-freed": {},
 	"cracked-wall-noticed": {},
 	"vault-opened": {},
+	"omen-revealed": { omen: oneOf(OMEN_KINDS) },
+	"omen-foreseen": { omen: optional(oneOf(OMEN_KINDS)) },
 	"gold-collected": { amount: integer(1) },
 	"merchant-bought": { item: itemKind, gold: integer(1) },
 	"merchant-sold": { item: itemKind, gold: integer(1) },
@@ -475,6 +478,9 @@ const documentShape = object({
 		townPortal: nullable(object({ floorNumber, coordinate })),
 		displacedFloors: optional(array(floorNumber, 0, 20)),
 		hunger: optional(object({ fedTurn: natural })),
+		omens: optional(
+			array(object({ floorNumber, kind: oneOf(OMEN_KINDS) }), 0, 20),
+		),
 		town: nullable(isTownLocation),
 		townPotionStock: isTownPotionStock,
 		townScrollStock: isTownScrollStock,

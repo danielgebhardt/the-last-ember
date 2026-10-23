@@ -8,6 +8,8 @@ import { HEADER_BUTTON_PRIMARY } from "./HeaderButtonStyles";
 type HeaderProps = {
 	floorNumber: number;
 	floorCount: number;
+	// This floor's omen, shown as a badge beside the floor heading.
+	omen?: Readonly<{ name: string; description: string }>;
 	onNewDungeon: () => void;
 	characterAction?: ReactNode;
 	settingsAction?: ReactNode;
@@ -19,6 +21,7 @@ type HeaderProps = {
 const Header = ({
 	floorNumber,
 	floorCount,
+	omen,
 	onNewDungeon,
 	characterAction,
 	settingsAction,
@@ -69,6 +72,16 @@ const Header = ({
 						? "Beacon town · Level 0"
 						: `Floor ${floorNumber} of ${floorCount}`}
 				</h2>
+				{omen && floorNumber > 0 && (
+					<span
+						role="note"
+						aria-label={`Omen: ${omen.name}. ${omen.description}`}
+						title={omen.description}
+						className="whitespace-nowrap rounded-full border border-primary/40 bg-primary/10 px-2 py-0.5 text-xs font-semibold text-primary"
+					>
+						{omen.name}
+					</span>
+				)}
 			</div>
 		</div>
 

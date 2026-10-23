@@ -20,7 +20,7 @@ import {
 	TELEGRAPH_COOLDOWNS,
 	type TelegraphCooldown,
 } from "../monsters/MonsterTelegraphs";
-import { isThief, THIEF_SPAWN_ID } from "../monsters/TreasureThief";
+import { isThief, isThiefId } from "../monsters/TreasureThief";
 import {
 	sarcophagusGuardianKind,
 	sarcophagusOutcome,
@@ -136,8 +136,7 @@ export const hasConsistentActors = (document: SaveDocument): boolean => {
 							isMimicChest(run.seed, o),
 					)) &&
 				// A thief owns its reserved ID; only a thief carries a haul, stolen in the past.
-				(entry.kind === "treasure-thief") ===
-					entry.id.endsWith(`:${THIEF_SPAWN_ID}`) &&
+				(entry.kind === "treasure-thief") === isThiefId(entry.id) &&
 				(entry.theft === undefined ||
 					(isThief(entry) && entry.theft.turn <= state.turn)) &&
 				// Only a sounded sentry tracks reinforcements.

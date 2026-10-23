@@ -12,6 +12,7 @@ import {
 } from "../domain/dungeon/RunConfiguration";
 import { awardExperience } from "../domain/game/ExperienceRewards";
 import { createGameState } from "../domain/game/GameState";
+import { isOmenSpawn } from "../domain/game/Omens";
 import { resolvePlayerAction } from "../domain/game/PlayerActions";
 import { experienceThreshold } from "../domain/game/Progression";
 import { isThief } from "../domain/monsters/TreasureThief";
@@ -39,14 +40,17 @@ describe("Generated expanded adventure continuation", () => {
 			const initial = makeState();
 			expect(makeState()).toEqual(initial);
 			expect(initial.run.floors).toHaveLength(20);
+			// Twelve ordinary creatures per floor; a Quiet omen keeps half of its floor's.
+			const quiet = (initial.omens ?? []).filter((o) => o.kind === "quiet");
 			expect(
 				initial.monsters.filter(
 					(actor) =>
 						actor.kind !== "iron-champion" &&
 						actor.kind !== "ember-warden" &&
-						!isThief(actor),
+						!isThief(actor) &&
+						!isOmenSpawn(actor),
 				),
-			).toHaveLength(240);
+			).toHaveLength(240 - 6 * quiet.length);
 			expect(initial.bag.items.map((item) => item.kind)).toEqual([
 				"healing-potion",
 				"mana-potion",

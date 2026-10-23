@@ -5,6 +5,7 @@ import {
 } from "../game/CombatStats";
 import { scaleEnemyValue } from "../game/Difficulty";
 import type { GameState } from "../game/GameState";
+import { omenSpellDamage } from "../game/Omens";
 import { SPELL_DEFINITIONS } from "../game/Spells";
 import {
 	type EnemySpellKind,
@@ -64,7 +65,7 @@ export const chooseEnemySpell = (
 		type: "damage",
 		spell,
 		damage: resolveIncomingMagicDamage(
-			scaleEnemyValue(rawDamage, state.difficulty),
+			omenSpellDamage(state, scaleEnemyValue(rawDamage, state.difficulty)),
 			deriveCombatStats(state.equipment, state.progression, state.effects)
 				.magicResistance,
 		),

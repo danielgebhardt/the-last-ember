@@ -41,7 +41,10 @@ it("keeps the shared discovery pool rare, singular, deterministic and safely ins
 						),
 					)() < definition.chance,
 			);
-			const placed = state.objects.filter((o) => o.kind === kind);
+			// Omens add their own features beside the seeded ones.
+			const placed = state.objects.filter(
+				(o) => o.kind === kind && !o.id.includes(":omen-"),
+			);
 			expect(placed.length).toBeLessThanOrEqual(
 				kind === "reliquary" ? 1 : eligible.length,
 			);

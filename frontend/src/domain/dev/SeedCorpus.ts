@@ -4,6 +4,7 @@ import {
 } from "../dungeon/DungeonRun";
 import type { RunConfiguration } from "../dungeon/RunConfiguration";
 import { createGameState, type GameState } from "../game/GameState";
+import { isOmenSpawn } from "../game/Omens";
 import { generateEscapeEncounters } from "../monsters/EscapeEncounters";
 import {
 	MONSTER_DEFINITIONS,
@@ -90,8 +91,9 @@ export const recordAdventure = (state: GameState): AdventureRecord => {
 		else if (ENCOUNTER_KINDS.includes(object.kind))
 			encounters[object.kind] = (encounters[object.kind] ?? 0) + 1;
 	}
+	// The sparse budget's own sources; omen gatherings are reported with their omen.
 	const sources = state.monsters.filter(
-		(m) => monsterAffliction(m.kind) !== undefined,
+		(m) => monsterAffliction(m.kind) !== undefined && !isOmenSpawn(m),
 	);
 	return {
 		seed: state.run.seed,

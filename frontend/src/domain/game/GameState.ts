@@ -13,6 +13,7 @@ import {
 import type { RareEquipmentAllocation } from "../items/RareEquipment";
 import { placeRunRareFinds } from "../items/RareFinds";
 import { spawnRunSpellbooks } from "../items/SpellbookPlacement";
+import { merchantsEnabled } from "../merchant/MerchantAvailability";
 import { placeMerchants } from "../merchant/MerchantPlacement";
 import {
 	createMerchantStock,
@@ -48,6 +49,12 @@ import type { ActiveAffliction } from "./AfflictionDefinitions";
 import { assertDifficulty, type Difficulty } from "./Difficulty";
 import type { EscapeState } from "./Escape";
 import { maximumMana } from "./Mana";
+import {
+	applyOmenGatherings,
+	clearMerchantRooms,
+	type FloorOmen,
+	selectFloorOmens,
+} from "./Omens";
 import { createPlayerStats, type PlayerStats } from "./PlayerStats.ts";
 import { createProgression, type Progression } from "./Progression";
 import { createSpellHotbar, type SpellHotbar } from "./SpellHotbar";
@@ -59,6 +66,8 @@ export type GameState = {
 	rareEquipment: RareEquipmentAllocation | null;
 	townEquipmentPurchases: readonly string[];
 	townPortal: TownPortal | null;
+	// Floors whose omen changes how they play; absent in older adventures.
+	omens?: readonly FloorOmen[];
 	// A wielded Hungering Blade's binding and the turn of its last kill.
 	hunger?: Readonly<{ fedTurn: number }>;
 	// Floors where a Ring of Displacement has already fired this adventure.
@@ -139,8 +148,54 @@ export const createGameState = (
 		objects,
 		difficulty,
 	);
+	const ordinary =
+		difficulty === 1
+			? markFirstRemedySources(encounters.monsters)
+			: markFirstRemedySources(encounters.monsters).map((monster) => ({
+					...monster,
+					health: maximumMonsterHealth(
+						monster.kind,
+						difficulty,
+						monster.floorNumber,
+					),
+				}));
+	// Omens join after all other placement, on their own streams, so no other floor moves.
+	const omens = selectFloorOmens(run, objects, merchantsEnabled());
+	const restFloors = omens
+		.filter((omen) => omen.kind === "merchants-rest")
+		.map((omen) => omen.floorNumber);
+	const gathered = clearMerchantRooms(
+		run,
+		applyOmenGatherings(
+			run,
+			omens,
+			{
+				// The ember's guardian and the thieves join after ordinary placement, so
+				// they never shift it.
+				monsters: [...ordinary, ...(warden ? [warden] : []), ...thieves],
+				objects: placeMerchants(
+					{ run, objects, monsters: encounters.monsters, floorItems },
+					merchantsEnabled(),
+					restFloors,
+				),
+				// The Warden carries the flame and drops it when it falls. The flame's tile
+				// still anchors the Warden and shapes placement, so the rest of the floor is
+				// unchanged.
+				floorItems: [...floorItems, ...rare.items].filter(
+					(entry) => !warden || entry.item.kind !== "cure",
+				),
+			},
+			difficulty,
+		),
+		restFloors,
+	);
 	// Vaults carve solid rock last, so no other placement sees or moves around them.
-	const vaults = carveSecretVaults(run);
+	const vaults = carveSecretVaults(
+		run,
+		omens
+			.filter((omen) => omen.kind === "cracked")
+			.map((omen) => omen.floorNumber),
+	);
 	return {
 		rareEquipment: rare.allocation,
 		townEquipmentPurchases: [],
@@ -154,7 +209,8 @@ export const createGameState = (
 		run: vaults.run,
 		escape: null,
 		merchantStock: createMerchantStock(),
-		objects: [...objects, ...vaults.objects],
+		objects: [...gathered.objects, ...vaults.objects],
+		...(omens.length ? { omens } : {}),
 		gold: STARTING_GOLD,
 		turn: 0,
 		knownSpells: createKnownSpells(),
@@ -169,30 +225,9 @@ export const createGameState = (
 		equipment: createStartingEquipment(),
 		bag: createStartingBag(),
 		potionHotbar: createStartingPotionHotbar(),
-		// The Warden carries the flame and drops it when it falls. The flame's tile still
-		// anchors the Warden and shapes placement, so the rest of the floor is unchanged.
-		floorItems: [
-			...[...floorItems, ...rare.items].filter(
-				(entry) => !warden || entry.item.kind !== "cure",
-			),
-			...vaults.floorItems,
-		],
-		monsters: [
-			...(difficulty === 1
-				? markFirstRemedySources(encounters.monsters)
-				: markFirstRemedySources(encounters.monsters).map((monster) => ({
-						...monster,
-						health: maximumMonsterHealth(
-							monster.kind,
-							difficulty,
-							monster.floorNumber,
-						),
-					}))),
-			// The ember's guardian joins after ordinary placement, so it never shifts it.
-			...(warden ? [warden] : []),
-			// Thieves join last, on their own streams, so no other placement moves.
-			...thieves,
-		],
+		floorItems: [...gathered.floorItems, ...vaults.floorItems],
+		// Quiet floors may have lost a floor's first affliction carrier; mark again.
+		monsters: markFirstRemedySources(gathered.monsters),
 		activityHistory: createActivityHistory(),
 	};
 };

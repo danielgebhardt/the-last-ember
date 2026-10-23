@@ -1,10 +1,12 @@
 // @vitest-environment node
+
 import { expect, it } from "vitest";
 import {
 	connectDungeonFloors,
 	generateDungeonRun,
 } from "../domain/dungeon/DungeonRun";
 import { createGameState, type GameState } from "../domain/game/GameState";
+import { isOmenSpawn } from "../domain/game/Omens";
 import { resolvePlayerAction } from "../domain/game/PlayerActions";
 import { applyTimedEffect } from "../domain/game/TimedEffects";
 import { createMonsterDrop } from "../domain/items/MonsterDrops";
@@ -173,7 +175,10 @@ it("marks the shallowest spider of a new adventure to drop one Cleansing potion"
 				generateDungeonRun(seed, 8, COMPACT_TEST_CONFIGURATION),
 			),
 		);
-		const spiders = state.monsters.filter((m) => m.kind === "spider");
+		// A Webbed omen's spiders bring their own Cleansing potion instead.
+		const spiders = state.monsters.filter(
+			(m) => m.kind === "spider" && !isOmenSpawn(m),
+		);
 		if (!spiders.length) continue;
 		checked++;
 		const marked = spiders.filter((m) => m.remedyDrop);

@@ -1,6 +1,7 @@
 import type { ActivityEvent } from "../../domain/game/ActivityHistory.ts";
 import { ADVENTURE_STORY } from "../../domain/game/AdventureStory";
 import { AFFLICTION_DEFINITIONS } from "../../domain/game/AfflictionDefinitions";
+import { OMEN_DEFINITIONS } from "../../domain/game/Omens";
 import { PERK_DEFINITIONS, PERK_LEVELS } from "../../domain/game/Perks";
 import { PLAYER_AFFLICTION_LIMIT } from "../../domain/game/PlayerAfflictions";
 import { SPELL_DEFINITIONS } from "../../domain/game/Spells";
@@ -154,6 +155,12 @@ export const formatActivityEvent = (event: ActivityEvent): string => {
 			return `${prefix}The ${MONSTER_DEFINITIONS[event.monster].name}'s blinding strike misses you.`;
 		case "monster-blind-avoided":
 			return `${prefix}The ${MONSTER_DEFINITIONS[event.monster].name}'s blinding strike finds only empty air.`;
+		case "omen-revealed":
+			return `${prefix}Omen: ${OMEN_DEFINITIONS[event.omen].name}. ${OMEN_DEFINITIONS[event.omen].description}`;
+		case "omen-foreseen":
+			return event.omen
+				? `${prefix}Your circlet shows the floor below: ${OMEN_DEFINITIONS[event.omen].name}. ${OMEN_DEFINITIONS[event.omen].description}`
+				: `${prefix}Your circlet shows no omen on the floor below.`;
 		case "cracked-wall-noticed":
 			return `${prefix}You notice a crack running through the wall here. Something lies behind it.`;
 		case "vault-opened":

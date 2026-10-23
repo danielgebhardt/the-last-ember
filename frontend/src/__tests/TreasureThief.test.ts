@@ -197,7 +197,10 @@ describe("Treasure thief", () => {
 				generateDungeonRun(seed, 20, COMPACT_TEST_CONFIGURATION),
 			);
 			const state = createGameState(run);
-			const thieves = state.monsters.filter(isThief);
+			// Each floor's own thief; Thieves' den and Gilded omens add more on top.
+			const thieves = state.monsters.filter(
+				(m) => isThief(m) && m.id.endsWith(`:${THIEF_SPAWN_ID}`),
+			);
 			expect(thieves.length).toBeGreaterThanOrEqual(MIN_THIEVES);
 			expect(thieves.length).toBeLessThanOrEqual(MAX_THIEVES);
 			for (const placed of thieves) {
@@ -210,7 +213,11 @@ describe("Treasure thief", () => {
 					orthogonalDistance(placed.coordinate, arrival),
 				).toBeGreaterThanOrEqual(4);
 			}
-			expect(createGameState(run).monsters.filter(isThief)).toEqual(thieves);
+			expect(
+				createGameState(run).monsters.filter(
+					(m) => isThief(m) && m.id.endsWith(`:${THIEF_SPAWN_ID}`),
+				),
+			).toEqual(thieves);
 		}
 	});
 });

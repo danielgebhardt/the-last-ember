@@ -17,10 +17,12 @@ export const merchantFloors = (floorCount: number): number[] =>
 export const placeMerchants = (
 	source: Pick<GameState, "run" | "objects" | "monsters" | "floorItems">,
 	enabled = merchantsEnabled(),
+	// Every fifth floor by default; an omen can call one to its own floor.
+	floors = merchantFloors(source.run.floors.length),
 ): readonly DungeonObject[] => {
 	if (!enabled) return source.objects;
 	const objects = [...source.objects];
-	for (const floorNumber of merchantFloors(source.run.floors.length)) {
+	for (const floorNumber of floors) {
 		if (
 			objects.some(
 				(o) => o.floorNumber === floorNumber && o.kind === "merchant",

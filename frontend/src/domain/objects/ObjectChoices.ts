@@ -1,4 +1,5 @@
 import type { GameState } from "../game/GameState";
+import { omenFavorsWell, WELL_FAVOR } from "../game/Omens";
 import { createPlayerStats } from "../game/PlayerStats";
 import { createProgression } from "../game/Progression";
 import { createStartingEquipment } from "../items/Equipment";
@@ -84,7 +85,9 @@ const baseObjectChoices = (
 		| "afflictions"
 		| "difficulty"
 	> &
-		Partial<Pick<GameState, "bag" | "gold" | "mana" | "monsters" | "run">>,
+		Partial<
+			Pick<GameState, "bag" | "gold" | "mana" | "monsters" | "run" | "omens">
+		>,
 ): readonly InteractionChoice[] => {
 	if (object.kind === "hourglass") {
 		const refusal =
@@ -142,7 +145,16 @@ const baseObjectChoices = (
 	}
 	if (object.kind === "well")
 		return WELL_OFFERINGS.map((offering) => {
-			const odds = WELL_ODDS[offering];
+			// Fortune's floor favors every offering.
+			const favored = state ? omenFavorsWell(state, object.floorNumber) : false;
+			const base = WELL_ODDS[offering];
+			const odds = favored
+				? {
+						...base,
+						positive: base.positive + WELL_FAVOR.positive,
+						negative: Math.max(0, base.negative + WELL_FAVOR.negative),
+					}
+				: base;
 			const neutral = Math.round((1 - odds.positive - odds.negative) * 100);
 			return {
 				value: `offer-${offering}` as ObjectChoice,

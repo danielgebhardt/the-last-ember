@@ -7,6 +7,7 @@ import type { MonsterKind } from "../monsters/Monster.ts";
 import type { SanctuaryCondition, SanctuaryService } from "../town/Sanctuary";
 import type { AfflictionKind } from "./AfflictionDefinitions";
 import type { AreaElement, DamageElement } from "./DamageElements";
+import type { OmenKind } from "./Omens";
 import type { SpellKind } from "./Spells";
 import type { EffectKind } from "./TimedEffects";
 
@@ -260,6 +261,8 @@ export type ActivityEvent = { turn: number } & (
 	| { type: "ring-displaced" }
 	| { type: "blade-bound" | "blade-hungers" | "blade-freed" }
 	| { type: "cracked-wall-noticed" | "vault-opened" }
+	| { type: "omen-revealed"; omen: OmenKind }
+	| { type: "omen-foreseen"; omen?: OmenKind }
 	| { type: "experience-gained"; amount: number }
 	| { type: "level-gained"; level: number; healthGain: number }
 	| {

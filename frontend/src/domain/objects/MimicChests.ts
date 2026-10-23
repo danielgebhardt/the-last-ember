@@ -16,14 +16,16 @@ export const MIMIC_CHANCE = 0.125;
 export const MIMIC_TELL = "The lock looks newer than the wood.";
 
 // Fixed by seed and chest, so reloading or revisiting never changes which chest bites.
+// A Hoard omen's chest is always a mimic.
 export const isMimicChest = (
 	seed: number,
 	chest: Pick<DungeonObject, "id" | "kind" | "floorNumber">,
 ): boolean =>
 	chest.kind === "chest" &&
 	chest.floorNumber >= MONSTER_DEFINITIONS["treasure-mimic"].minFloor &&
-	createSeededRandom(hashStringToUint32(`${seed}:${chest.id}:mimic`))() <
-		MIMIC_CHANCE;
+	(chest.id.endsWith(":mimic") ||
+		createSeededRandom(hashStringToUint32(`${seed}:${chest.id}:mimic`))() <
+			MIMIC_CHANCE);
 
 export const isMimic = (monster: Pick<Monster, "kind">) =>
 	monster.kind === "treasure-mimic";

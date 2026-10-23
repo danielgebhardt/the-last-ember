@@ -34,6 +34,7 @@ import { carveFloorVault } from "../objects/SecretVaults";
 import type { Difficulty } from "./Difficulty";
 import { createGameState, type GameState } from "./GameState";
 import { maximumMana } from "./Mana";
+import type { FloorOmen } from "./Omens";
 import { maximumHealth } from "./PlayerHealth";
 import { createProgression, experienceThreshold } from "./Progression";
 import { createSpellHotbar } from "./SpellHotbar";
@@ -266,6 +267,16 @@ const testContent = (
 	return { monsters, objects };
 };
 
+// Authored floors keep no generated omens; the first generated floor always shows one, a
+// rule-only omen that needs no gathering.
+const testOmens = (generated: readonly FloorOmen[]): FloorOmen[] =>
+	generated.some((omen) => omen.floorNumber === TEST_SEED_FLOORS + 1)
+		? [...generated]
+		: [
+				...generated.filter((omen) => omen.kind !== "ember-lit"),
+				{ floorNumber: TEST_SEED_FLOORS + 1, kind: "ember-lit" },
+			];
+
 // Level 10, every spell, 10,000 gold, 20 of every potion and scroll, and one of
 // each special find.
 const STACKED = ["potion", "scroll", "enchantment"];
@@ -318,6 +329,7 @@ export const createTestSeedState = (
 			...(vault?.objects ?? []),
 			...deeper(base.objects),
 		],
+		omens: testOmens(deeper(base.omens ?? [])),
 		floorItems: [...(vault?.floorItems ?? []), ...deeper(base.floorItems)],
 		gold: 10000,
 		progression,

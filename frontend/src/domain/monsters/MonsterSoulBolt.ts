@@ -4,6 +4,7 @@ import {
 } from "../game/CombatStats";
 import { scaleEnemyValue } from "../game/Difficulty";
 import type { GameState } from "../game/GameState";
+import { omenSpellDamage } from "../game/Omens";
 import { MONSTER_DEFINITIONS, type Monster } from "./Monster";
 import { orthogonalDistance } from "./MonsterLocations";
 import {
@@ -31,7 +32,7 @@ export const resolveMonsterSoulBolt = (
 	)
 		return undefined;
 	const damage = resolveIncomingMagicDamage(
-		scaleEnemyValue(bolt.damage, state.difficulty),
+		omenSpellDamage(state, scaleEnemyValue(bolt.damage, state.difficulty)),
 		deriveCombatStats(state.equipment, state.progression, state.effects)
 			.magicResistance,
 	);

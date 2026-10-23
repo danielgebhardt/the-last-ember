@@ -3,6 +3,7 @@ import { createMonsterDrop } from "../items/MonsterDrops";
 import { isWarden, wardenDrop, wardenFlameDrop } from "../monsters/EmberWarden";
 import { MONSTER_DEFINITIONS, type Monster } from "../monsters/Monster";
 import { resistedDamage } from "../monsters/MonsterResistance";
+import { pursuitRulesFor } from "../monsters/PursuitRules";
 import { goldAmount } from "../objects/Gold";
 import { mimicChestDrop } from "../objects/MimicChests";
 import { mirrorFor, reflectionDrop } from "../objects/MirrorOfShadows";
@@ -10,6 +11,7 @@ import { type ActivityEvent, appendActivityEvents } from "./ActivityHistory";
 import type { DamageElement } from "./DamageElements";
 import { experienceReward } from "./ExperienceRewards";
 import type { GameState } from "./GameState";
+import { echoBlow, omenKillExperience, omenRegeneration } from "./Omens";
 import { scavengedGold } from "./PerkEffects";
 
 import type { SpellKind } from "./Spells";
@@ -82,9 +84,12 @@ export const damageMonster = (
 	let progression = state.progression;
 	let mana = state.mana;
 	if (rewarded) {
-		const reward =
+		const reward = omenKillExperience(
+			state,
+			monster.floorNumber,
 			MONSTER_DEFINITIONS[monster.kind].experienceReward *
-			(monster.heroic ? 2 : 1);
+				(monster.heroic ? 2 : 1),
+		);
 		const gained = experienceReward(state, reward);
 		player = gained.player;
 		progression = gained.progression;
@@ -132,7 +137,8 @@ export const damageMonster = (
 						? {
 								...actor,
 								health,
-								...(MONSTER_DEFINITIONS[actor.kind].regeneration
+								...(MONSTER_DEFINITIONS[actor.kind].regeneration ||
+								omenRegeneration(state, actor)
 									? { lastDamagedTurn: state.turn }
 									: {}),
 							}
@@ -161,6 +167,10 @@ export const damageMonster = (
 		floorItems,
 		activityHistory: appendActivityEvents(state.activityHistory, events),
 	};
-	// Any kill sates a Hungering Blade.
-	return health === 0 ? feedBlade(next, turn) : next;
+	// Any kill sates a Hungering Blade; an echoing hall calls everything near.
+	const echoed =
+		source.type === "condition-hit"
+			? next
+			: echoBlow(next, pursuitRulesFor(next).memoryPhases);
+	return health === 0 ? feedBlade(echoed, turn) : echoed;
 };

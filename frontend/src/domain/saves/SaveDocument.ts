@@ -29,6 +29,7 @@ export type SaveDocument = {
 		| "townPortal"
 		| "displacedFloors"
 		| "hunger"
+		| "omens"
 		| "townEquipmentStock"
 		| "townEquipmentPurchases"
 		| "townPotionStock"

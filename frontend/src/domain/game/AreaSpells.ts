@@ -10,6 +10,7 @@ import { appendActivityEvents } from "./ActivityHistory";
 import type { AttackRollSource } from "./CombatRandomness";
 import type { GameState } from "./GameState";
 import { damageMonster } from "./MonsterDamage";
+import { omenSpellDamage } from "./Omens";
 import { playerSpell, type SpellKind, spellPotency } from "./Spells";
 import { applyTimedEffect } from "./TimedEffects";
 
@@ -104,7 +105,10 @@ export const castAreaSpell = (
 			attackerId: `player:spell:${spell}`,
 			targetId: target.id,
 		}).damage(range.minimumDamage, range.maximumDamage);
-		next = damageMonster(next, target, damage, { type: "spell-hit", spell });
+		next = damageMonster(next, target, omenSpellDamage(state, damage), {
+			type: "spell-hit",
+			spell,
+		});
 		const survivor = next.monsters.find((monster) => monster.id === target.id);
 		if (survivor && "condition" in definition && definition.condition)
 			next = applyTimedEffect(next, survivor, definition.condition);
@@ -125,7 +129,7 @@ export const castAreaSpell = (
 			attackerId: `player:spell:${spell}`,
 			targetId: "player",
 		}).damage(range.minimumDamage, range.maximumDamage);
-		const damage = Math.min(next.player.health, rolled);
+		const damage = Math.min(next.player.health, omenSpellDamage(state, rolled));
 		const health = next.player.health - damage;
 		next = {
 			...next,

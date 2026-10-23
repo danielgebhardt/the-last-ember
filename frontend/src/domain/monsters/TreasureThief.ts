@@ -38,6 +38,15 @@ export const stolenAmount = (gold: number, floorNumber: number) =>
 	);
 export const isThief = (monster: Pick<Monster, "kind">) =>
 	MONSTER_DEFINITIONS[monster.kind].thief === true;
+// Thieves' den and Gilded omens add up to two more thieves beside the floor's own, on
+// identities clear of the other reserved ones (the mimic's follows the thief's).
+export const EXTRA_THIEF_IDS = [1000010, 1000011] as const;
+export const isThiefId = (id: string) => {
+	const index = Number(id.split(":")[1]);
+	return (
+		index === THIEF_SPAWN_ID || EXTRA_THIEF_IDS.some((extra) => extra === index)
+	);
+};
 
 // The final floor belongs to the Warden, so thieves roam the floors in between.
 const thiefFloors = (run: DungeonRun) =>

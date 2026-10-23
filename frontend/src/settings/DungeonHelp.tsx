@@ -28,6 +28,12 @@ import {
 	PLAYER_HIT_CHANCE,
 } from "../domain/game/MeleeRules";
 import {
+	OMEN_CHANCE,
+	OMEN_DEFINITIONS,
+	OMEN_KINDS,
+	OMEN_MIN_FLOOR,
+} from "../domain/game/Omens";
+import {
 	PERK_DEFINITIONS,
 	PERK_KINDS,
 	PERK_LEVELS,
@@ -647,6 +653,29 @@ const DungeonHelp = ({
 					blast resolves. Walls block the footprint; changing floors pauses the
 					warning.
 				</p>
+			</section>
+			<section
+				aria-label="Floor omens"
+				className="grid gap-3 rounded-lg border p-4 text-sm"
+			>
+				<h3 className="font-medium">Floor omens</h3>
+				<p>
+					From floor {OMEN_MIN_FLOOR}, about {Math.round(OMEN_CHANCE * 100)}% of
+					floors before the Warden's carry an omen, never the same one twice in
+					an adventure. Arriving names it, and its badge sits beside the floor
+					heading. Wearing the Seer's Circlet, step beside a down stair to see
+					the next floor's omen.
+				</p>
+				<dl className="grid gap-1 sm:grid-cols-2">
+					{OMEN_KINDS.map((kind) => (
+						<div key={kind}>
+							<dt className="font-medium">{OMEN_DEFINITIONS[kind].name}</dt>
+							<dd className="text-muted-foreground">
+								{OMEN_DEFINITIONS[kind].description}
+							</dd>
+						</div>
+					))}
+				</dl>
 			</section>
 			<section
 				aria-label="Rare magic-resistant equipment"
