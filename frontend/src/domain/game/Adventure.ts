@@ -39,5 +39,5 @@ export const questInstruction = (
 		: quest.cureRecovered
 			? "Escape the depths. Return to the entrance on floor 1."
 			: wardenStanding
-				? `Defeat the Ember Warden on floor ${quest.goalFloor} and claim its flame.`
+				? `Defeat the Ember Warden on floor ${quest.goalFloor}.`
 				: `Claim the Warden's Flame on floor ${quest.goalFloor}.`;

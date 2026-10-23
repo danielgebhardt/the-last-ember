@@ -119,7 +119,7 @@ describe("The Warden's Flame", () => {
 	it("tracks the objective from the Warden to the flame to the return", () => {
 		const start = adventure();
 		expect(questInstruction(start.quest)).toBe(
-			"Defeat the Ember Warden on floor 5 and claim its flame.",
+			"Defeat the Ember Warden on floor 5.",
 		);
 		expect(questInstruction(start.quest, false)).toBe(
 			"Claim the Warden's Flame on floor 5.",
