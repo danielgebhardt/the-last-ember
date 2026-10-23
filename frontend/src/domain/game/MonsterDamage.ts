@@ -1,3 +1,4 @@
+import { feedBlade } from "../items/HungeringBlade";
 import { createMonsterDrop } from "../items/MonsterDrops";
 import { isWarden, wardenDrop, wardenFlameDrop } from "../monsters/EmberWarden";
 import { MONSTER_DEFINITIONS, type Monster } from "../monsters/Monster";
@@ -138,7 +139,7 @@ export const damageMonster = (
 						: actor,
 				)
 			: state.monsters.filter((actor) => actor.id !== monster.id);
-	return {
+	const next: GameState = {
 		...state,
 		monsters,
 		gold: state.gold + gold + recovered,
@@ -160,4 +161,6 @@ export const damageMonster = (
 		floorItems,
 		activityHistory: appendActivityEvents(state.activityHistory, events),
 	};
+	// Any kill sates a Hungering Blade.
+	return health === 0 ? feedBlade(next, turn) : next;
 };

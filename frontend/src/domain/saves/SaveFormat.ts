@@ -80,6 +80,7 @@ export const createSaveDocument = (
 		...(state.displacedFloors?.length
 			? { displacedFloors: [...state.displacedFloors] }
 			: {}),
+		...(state.hunger ? { hunger: { fedTurn: state.hunger.fedTurn } } : {}),
 		townEquipmentStock: state.townEquipmentStock.map(savedItem),
 		townEquipmentPurchases: [...state.townEquipmentPurchases],
 		townPotionStock: { ...state.townPotionStock },

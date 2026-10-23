@@ -14,6 +14,7 @@ import {
 	replaceEquipmentSlot,
 } from "./Equipment";
 import type { EquipmentChangeEvent } from "./EquipmentChanges";
+import { isHungering } from "./HungeringBlade";
 import { ITEM_DEFINITIONS, type ItemInstance, type ItemKind } from "./Item";
 
 export type FloorItem = Readonly<{
@@ -89,7 +90,10 @@ export const transferFloorItem = (
 			].some((item) => item?.id === action.itemId)
 		)
 			return { error: "You already own that item." };
-		const slot = emptyEquipmentSlotFor(state.equipment, found.item);
+		// A Hungering Blade binds when wielded, so it is never put on without a choice.
+		const slot = isHungering(found.item)
+			? undefined
+			: emptyEquipmentSlotFor(state.equipment, found.item);
 		if (slot !== undefined)
 			return {
 				bag: state.bag,

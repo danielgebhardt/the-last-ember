@@ -4,6 +4,7 @@ import {
 	type EquipmentSlot,
 	fitsEquipmentSlot,
 } from "../items/Equipment";
+import { isHungering } from "../items/HungeringBlade";
 import { ITEM_DEFINITIONS } from "../items/Item";
 import { ownedItems } from "../items/OwnedItems";
 import {
@@ -45,6 +46,13 @@ export const hasConsistentInventory = (document: SaveDocument): boolean => {
 	)
 		return false;
 	if (!unique(allItems.map((entry) => entry.id))) return false;
+	// Only a wielded Hungering Blade is bound, fed no later than now.
+	if (
+		state.hunger &&
+		(!isHungering(state.equipment.mainHand) ||
+			state.hunger.fedTurn > state.turn)
+	)
+		return false;
 	// A Ring of Displacement fires at most once per floor of this dungeon.
 	const displaced = state.displacedFloors ?? [];
 	if (

@@ -154,6 +154,12 @@ export const formatActivityEvent = (event: ActivityEvent): string => {
 			return `${prefix}The ${MONSTER_DEFINITIONS[event.monster].name}'s blinding strike misses you.`;
 		case "monster-blind-avoided":
 			return `${prefix}The ${MONSTER_DEFINITIONS[event.monster].name}'s blinding strike finds only empty air.`;
+		case "blade-bound":
+			return `${prefix}The Hungering Blade binds to your hand. Only a Remove Curse scroll will free it.`;
+		case "blade-hungers":
+			return `${prefix}The Hungering Blade feeds on you for 1 health. Kill something to sate it.`;
+		case "blade-freed":
+			return `${prefix}The curse lifts and the Hungering Blade lets go of your hand.`;
 		case "ring-displaced":
 			return `${prefix}Your Ring of Displacement flares and hurls you clear! It will not answer again on this floor.`;
 		case "mimic-revealed":

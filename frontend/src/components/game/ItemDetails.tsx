@@ -142,9 +142,11 @@ const ItemDetails = ({
 						? `Attack bonus +${itemAttackBonus(item)}${
 								"goldBound" in details && details.goldBound
 									? ` · +1 per ${details.goldBound.goldPerPoint.toLocaleString("en-US")} gold carried (max +${details.goldBound.maxBonus})`
-									: "bloodrage" in details && details.bloodrage
-										? ` · +1 per ${details.bloodrage.missingShare * 100}% health missing (max +${details.bloodrage.maxBonus}) · −${details.bloodrage.armorPenalty} armor · health potions restore ${Math.round(details.bloodrage.healingShare * 100)}%`
-										: ""
+									: "hungering" in details && details.hungering
+										? ` · binds until Remove Curse · −1 health per ${details.hungering.phasesPerDrain} turns without a kill (never the last)`
+										: "bloodrage" in details && details.bloodrage
+											? ` · +1 per ${details.bloodrage.missingShare * 100}% health missing (max +${details.bloodrage.maxBonus}) · −${details.bloodrage.armorPenalty} armor · health potions restore ${Math.round(details.bloodrage.healingShare * 100)}%`
+											: ""
 							}`
 						: details.type === "ring" &&
 								"displacement" in details &&

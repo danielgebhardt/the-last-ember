@@ -31,6 +31,9 @@ export type ItemDefinition = {
 	goldBound?: Readonly<{ goldPerPoint: number; maxBonus: number }>;
 	// Main-hand rage: +1 attack per missingShare of maximum health lost, up to maxBonus;
 	// costs armor and weakens health potions to healingShare while wielded.
+	// Main hand: binds when wielded until Remove Curse, draining 1 health per stretch
+	// without a kill (never the last).
+	hungering?: Readonly<{ phasesPerDrain: number }>;
 	// Worn: once per floor, a near-fatal monster phase Blinks you away.
 	displacement?: true;
 	// Worn: object gambles and mimic chests show their fixed outcome before you commit.
@@ -189,6 +192,20 @@ export const ITEM_DEFINITIONS = {
 		description:
 			"A ring whose stone never sits still. Either ring: once per floor, when monsters leave you alive but below a quarter of your maximum health, it Blinks you to a tile four to ten steps away, as the spell does, at no mana cost. Where you land is not always safer.",
 	},
+	"hungering-blade": {
+		specialFindOnly: true,
+		name: "Hungering Blade",
+		type: "weapon",
+		attackBonus: 6,
+		armor: 0,
+		hungering: { phasesPerDrain: 15 },
+		minFloor: 6,
+		maxFloor: 20,
+		foundWeight: 0,
+		dropWeight: 0,
+		description:
+			"A black blade that is never full. Main hand: +6 attack, far beyond its depth. Once wielded it binds to your hand: you cannot unequip or replace it until you read a Remove Curse scroll. Every 15 turns without a kill it drains 1 health, never the last. Enchantment adds to its attack.",
+	},
 	"spellguard-shield": {
 		specialFindOnly: true,
 		name: "Spellguard Shield",
@@ -227,7 +244,7 @@ export const ITEM_DEFINITIONS = {
 		foundWeight: 0.25,
 		dropWeight: 0.25,
 		description:
-			"Lifts a Curse before the ensuing phase, restoring melee accuracy and damage. Does not cure other conditions. One effective reading consumes one scroll and one dungeon turn; reading it uncursed is free. Found on floors 6–14 and in matching chests/drops.",
+			"Lifts a Curse before the ensuing phase, restoring melee accuracy and damage, and frees a bound Hungering Blade. Does not cure other conditions. One effective reading consumes one scroll and one dungeon turn; reading it with nothing to lift is free. Found on floors 6–14 and in matching chests/drops.",
 	},
 	"enchantment-scroll": {
 		name: "Enchantment scroll",
@@ -905,6 +922,7 @@ export const RARE_EQUIPMENT_KINDS = [
 	"shadowweave-cloak",
 	"seers-circlet",
 	"ring-of-displacement",
+	"hungering-blade",
 ] as const;
 export type RareEquipmentKind = (typeof RARE_EQUIPMENT_KINDS)[number];
 export const isRareEquipmentKind = (kind: string): kind is RareEquipmentKind =>
@@ -961,6 +979,13 @@ export const validateItemDefinition = (definition: ItemDefinition): void => {
 			!(rage.healingShare > 0 && rage.healingShare <= 1))
 	)
 		throw new RangeError("Invalid bloodrage weapon scaling.");
+	if (
+		definition.hungering !== undefined &&
+		(definition.type !== "weapon" ||
+			!Number.isSafeInteger(definition.hungering.phasesPerDrain) ||
+			definition.hungering.phasesPerDrain < 1)
+	)
+		throw new RangeError("Invalid hungering weapon.");
 	const { minFloor, maxFloor, foundWeight, dropWeight, armor, attackBonus } =
 		definition;
 	if (

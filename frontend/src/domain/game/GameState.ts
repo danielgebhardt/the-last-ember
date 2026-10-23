@@ -58,6 +58,8 @@ export type GameState = {
 	rareEquipment: RareEquipmentAllocation | null;
 	townEquipmentPurchases: readonly string[];
 	townPortal: TownPortal | null;
+	// A wielded Hungering Blade's binding and the turn of its last kill.
+	hunger?: Readonly<{ fedTurn: number }>;
 	// Floors where a Ring of Displacement has already fired this adventure.
 	displacedFloors?: readonly number[];
 	townEquipmentStock: readonly ItemInstance[];

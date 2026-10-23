@@ -23,6 +23,12 @@ import {
 	transferFloorItem,
 } from "../items/FloorItems";
 import {
+	boundBladeRefusal,
+	freeBoundBlade,
+	hungerAfterTurn,
+	settleHunger,
+} from "../items/HungeringBlade";
+import {
 	assignPickedUpPotion,
 	changeHotbarAssignment,
 	HOTBAR_SLOTS,
@@ -361,9 +367,11 @@ export const resolvePlayerAction = (
 	const monsterPhase =
 		responseState.quest.victory || responseState.player.health <= 0
 			? undefined
-			: advanceTimedEffects(
-					tickAfflictionDamage(
-						resolveMonsterPhase(responseState, rollSource, scope),
+			: hungerAfterTurn(
+					advanceTimedEffects(
+						tickAfflictionDamage(
+							resolveMonsterPhase(responseState, rollSource, scope),
+						),
 					),
 				);
 	const resolved = monsterPhase
@@ -386,7 +394,16 @@ export const resolvePlayerAction = (
 };
 
 // Free assignments and hotbar aliases are handled before committing a turn.
+// Every committed effect settles a Hungering Blade's binding afterwards.
 const resolvePlayerEffect = (
+	state: GameState,
+	action: Parameters<typeof resolveCommittedEffect>[1],
+	rollSource: AttackRollSource,
+): GameState | { error: string } | undefined => {
+	const result = resolveCommittedEffect(state, action, rollSource);
+	return result && !("error" in result) ? settleHunger(state, result) : result;
+};
+const resolveCommittedEffect = (
 	state: GameState,
 	action: Exclude<
 		PlayerAction,
@@ -418,6 +435,9 @@ const resolvePlayerEffect = (
 		return "error" in cast ? cast : cast.state;
 	}
 	if (action.type === "consume") {
+		const scroll = state.bag.items.find((item) => item.id === action.itemId);
+		if (state.hunger && scroll?.kind === "remove-curse-scroll")
+			return freeBoundBlade(state, scroll);
 		const consumed = consumeItem(state, action);
 		if ("error" in consumed) return consumed;
 		return {
@@ -489,6 +509,8 @@ const resolvePlayerEffect = (
 			: transferred;
 	}
 	if (action.type === "equip" || action.type === "unequip") {
+		const refusal = boundBladeRefusal(state, action);
+		if (refusal) return { error: refusal };
 		const change = changeEquipment(state.equipment, state.bag, action);
 		if ("error" in change) return change;
 		return {

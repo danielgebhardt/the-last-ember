@@ -43,6 +43,7 @@ export const TOWN_EQUIPMENT_OFFERS: Readonly<Record<string, Offer>> =
 			offer("weapons", "battle-axe", 1100),
 			offer("weapons", "goldbound-blade", 1200),
 			offer("weapons", "bloodrage-axe", 1500),
+			offer("weapons", "hungering-blade", 1400),
 		].map((entry) => [entry.item.id, entry]),
 	);
 export const createTownEquipmentStock = (): readonly ItemInstance[] =>
