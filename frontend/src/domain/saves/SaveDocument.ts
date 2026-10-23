@@ -27,6 +27,7 @@ export type SaveDocument = {
 		| "afflictions"
 		| "rareEquipment"
 		| "townPortal"
+		| "displacedFloors"
 		| "townEquipmentStock"
 		| "townEquipmentPurchases"
 		| "townPotionStock"

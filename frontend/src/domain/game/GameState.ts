@@ -58,6 +58,8 @@ export type GameState = {
 	rareEquipment: RareEquipmentAllocation | null;
 	townEquipmentPurchases: readonly string[];
 	townPortal: TownPortal | null;
+	// Floors where a Ring of Displacement has already fired this adventure.
+	displacedFloors?: readonly number[];
 	townEquipmentStock: readonly ItemInstance[];
 	townPotionStock: TownPotionStock;
 	townScrollStock: TownScrollStock;

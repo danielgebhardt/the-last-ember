@@ -146,15 +146,19 @@ const ItemDetails = ({
 										? ` · +1 per ${details.bloodrage.missingShare * 100}% health missing (max +${details.bloodrage.maxBonus}) · −${details.bloodrage.armorPenalty} armor · health potions restore ${Math.round(details.bloodrage.healingShare * 100)}%`
 										: ""
 							}`
-						: details.type === "ring" && "stats" in details
-							? Object.entries(details.stats)
-									.map(([stat, bonus]) => `+${bonus} ${stat}`)
-									.join(" · ")
-							: details.type === "shield" ||
-									details.type === "chest-armor" ||
-									details.type === "helmet"
-								? `Armor ${itemArmor(item)}${"stealth" in details && details.stealth ? ` · monsters notice you ${details.stealth} tiles closer` : ""}${"foresight" in details && details.foresight ? " · foresees gambles and mimic chests" : ""}`
-								: null;
+						: details.type === "ring" &&
+								"displacement" in details &&
+								details.displacement
+							? "Once per floor: Blinks you away when monsters leave you below 25% health"
+							: details.type === "ring" && "stats" in details
+								? Object.entries(details.stats)
+										.map(([stat, bonus]) => `+${bonus} ${stat}`)
+										.join(" · ")
+								: details.type === "shield" ||
+										details.type === "chest-armor" ||
+										details.type === "helmet"
+									? `Armor ${itemArmor(item)}${"stealth" in details && details.stealth ? ` · monsters notice you ${details.stealth} tiles closer` : ""}${"foresight" in details && details.foresight ? " · foresees gambles and mimic chests" : ""}`
+									: null;
 
 	const additionalStats =
 		"stats" in details && details.type !== "ring"

@@ -31,6 +31,8 @@ export type ItemDefinition = {
 	goldBound?: Readonly<{ goldPerPoint: number; maxBonus: number }>;
 	// Main-hand rage: +1 attack per missingShare of maximum health lost, up to maxBonus;
 	// costs armor and weakens health potions to healingShare while wielded.
+	// Worn: once per floor, a near-fatal monster phase Blinks you away.
+	displacement?: true;
 	// Worn: object gambles and mimic chests show their fixed outcome before you commit.
 	foresight?: true;
 	// Worn: every monster's detection radius shrinks by this much (never below 1).
@@ -171,6 +173,21 @@ export const ITEM_DEFINITIONS = {
 		dropWeight: 0,
 		description:
 			"A silver band set with a clouded eye. Head: no armor, but fountains, thrones, sarcophagi, wells and mirrors show what each choice would bring before you commit, and chests reveal whether they are mimics. Enchantment adds armor.",
+	},
+	"ring-of-displacement": {
+		specialFindOnly: true,
+		name: "Ring of Displacement",
+		type: "ring",
+		attackBonus: 0,
+		armor: 0,
+		stats: {},
+		displacement: true,
+		minFloor: 8,
+		maxFloor: 20,
+		foundWeight: 0,
+		dropWeight: 0,
+		description:
+			"A ring whose stone never sits still. Either ring: once per floor, when monsters leave you alive but below a quarter of your maximum health, it Blinks you to a tile four to ten steps away, as the spell does, at no mana cost. Where you land is not always safer.",
 	},
 	"spellguard-shield": {
 		specialFindOnly: true,
@@ -887,6 +904,7 @@ export const RARE_EQUIPMENT_KINDS = [
 	"bloodrage-axe",
 	"shadowweave-cloak",
 	"seers-circlet",
+	"ring-of-displacement",
 ] as const;
 export type RareEquipmentKind = (typeof RARE_EQUIPMENT_KINDS)[number];
 export const isRareEquipmentKind = (kind: string): kind is RareEquipmentKind =>

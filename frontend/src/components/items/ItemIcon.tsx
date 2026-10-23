@@ -22,6 +22,7 @@ import ExitScrollIcon from "./ExitScrollIcon";
 import GoldboundBladeIcon from "./GoldboundBladeIcon";
 import PotionIcon from "./PotionIcon";
 import RingIcon from "./RingIcon";
+import RingOfDisplacementIcon from "./RingOfDisplacementIcon";
 import SeersCircletIcon from "./SeersCircletIcon";
 import ShadowweaveCloakIcon from "./ShadowweaveCloakIcon";
 import SpellguardShieldIcon from "./SpellguardShieldIcon";
@@ -76,13 +77,24 @@ const KIND_COLORS: Partial<Record<ItemKind, string>> = {
 	"bloodrage-axe": "text-[#9a1831] dark:text-[#e04a65]",
 	"shadowweave-cloak": "text-[#6f57a8] dark:text-[#b7a2db]",
 	"seers-circlet": "text-[#2f8f98] dark:text-[#82d7db]",
+	"ring-of-displacement": "text-[#7b8798] dark:text-[#d7deeb]",
 };
 const isRingKind = (kind: ItemKind): kind is RingKind =>
 	ITEM_DEFINITIONS[kind].type === "ring";
+// Rare rings with their own artwork; other rings share the lettered ring.
+const RING_ICONS: Partial<
+	Record<RingKind, ComponentType<SVGProps<SVGSVGElement>>>
+> = {
+	"ring-of-displacement": RingOfDisplacementIcon,
+};
 const ItemIcon = ({ kind }: { kind: ItemKind }) => {
 	if (isPotionKind(kind)) return <PotionIcon kind={kind} />;
-	if (isRingKind(kind)) return <RingIcon kind={kind} />;
-	const Icon = isBookKind(kind) ? BookOpen : icons[kind];
+	const Icon = isRingKind(kind)
+		? RING_ICONS[kind]
+		: isBookKind(kind)
+			? BookOpen
+			: icons[kind];
+	if (!Icon) return <RingIcon kind={kind} />;
 	return (
 		<Icon
 			aria-hidden="true"

@@ -45,6 +45,13 @@ export const hasConsistentInventory = (document: SaveDocument): boolean => {
 	)
 		return false;
 	if (!unique(allItems.map((entry) => entry.id))) return false;
+	// A Ring of Displacement fires at most once per floor of this dungeon.
+	const displaced = state.displacedFloors ?? [];
+	if (
+		!unique(displaced) ||
+		displaced.some((floor) => floor > state.run.floors.length)
+	)
+		return false;
 	if (!hasConsistentRareEquipment(document)) return false;
 	const purchased = state.townEquipmentPurchases;
 	if (

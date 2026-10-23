@@ -19,6 +19,7 @@ import {
 } from "../game/MeleeRules";
 import { arrowWardedDamage } from "../game/PerkEffects";
 import { hasMonsterEffect, monsterSkipsAction } from "../game/TimedEffects";
+import { displaceAfterHits } from "../items/RingOfDisplacement";
 import { navigationRun } from "../objects/NavigationTerrain";
 import { alertNearbyMonsters } from "./AlarmAlerts";
 import { wakeWarden, wardenDormant } from "./EmberWarden";
@@ -604,8 +605,9 @@ export const resolveMonsterPhase = (
 		effects === state.effects
 	)
 		return state;
-	// Applied after the phase's hits so a lethal later hit stops infection and capacity clamps once.
-	return infections.reduce(
+	// Applied after the phase's hits so a lethal later hit stops infection and capacity
+	// clamps once; a Ring of Displacement then judges the phase's outcome.
+	const afflicted = infections.reduce(
 		(next, { kind, source }) => applyPlayerAffliction(next, kind, source),
 		{
 			...state,
@@ -618,4 +620,5 @@ export const resolveMonsterPhase = (
 			activityHistory: appendActivityEvents(state.activityHistory, events),
 		},
 	);
+	return displaceAfterHits(state, afflicted);
 };

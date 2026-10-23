@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { resolvePlayerAction } from "../domain/game/PlayerActions";
 import { BAG_CAPACITY } from "../domain/items/Bag";
 import { compareEquipment } from "../domain/items/EquipmentComparison";
+import { ITEM_DEFINITIONS } from "../domain/items/Item";
 import {
 	createSaveDocument,
 	parseSave,
@@ -145,7 +146,7 @@ describe.each(["armor", "weapons"] as const)("town %s store", (store) => {
 				expect(comparison).not.toBeNull();
 				if (!comparison) throw new Error("Expected equipment comparison");
 				// Rings have two slots and cannot be enchanted, so a worn +3 copy is not stronger.
-				if (offer.item.kind === "copper-ring") continue;
+				if (ITEM_DEFINITIONS[offer.item.kind].type === "ring") continue;
 				const stronger = compareEquipment(offer.item, {
 					...state,
 					progression: { ...state.progression, experience },

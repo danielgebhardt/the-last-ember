@@ -77,6 +77,9 @@ export const createSaveDocument = (
 		townPortal: state.townPortal
 			? { ...state.townPortal, coordinate: { ...state.townPortal.coordinate } }
 			: null,
+		...(state.displacedFloors?.length
+			? { displacedFloors: [...state.displacedFloors] }
+			: {}),
 		townEquipmentStock: state.townEquipmentStock.map(savedItem),
 		townEquipmentPurchases: [...state.townEquipmentPurchases],
 		townPotionStock: { ...state.townPotionStock },

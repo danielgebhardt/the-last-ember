@@ -154,6 +154,8 @@ export const formatActivityEvent = (event: ActivityEvent): string => {
 			return `${prefix}The ${MONSTER_DEFINITIONS[event.monster].name}'s blinding strike misses you.`;
 		case "monster-blind-avoided":
 			return `${prefix}The ${MONSTER_DEFINITIONS[event.monster].name}'s blinding strike finds only empty air.`;
+		case "ring-displaced":
+			return `${prefix}Your Ring of Displacement flares and hurls you clear! It will not answer again on this floor.`;
 		case "mimic-revealed":
 			return `${prefix}The chest snaps open on a mouthful of teeth. It's a mimic!`;
 		case "monster-theft-prepared":
