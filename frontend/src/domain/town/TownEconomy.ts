@@ -74,7 +74,12 @@ export const isTownPotionStock = isStock<TownPotion>(TOWN_POTION_OFFERS, [
 export const isTownScrollStock = isStock<TownScroll>(TOWN_SCROLL_OFFERS);
 // Shop copy keeps the effect and drops dungeon-use mechanics (turn cost, stacking rules)
 // that the bag, item details and Catalog still explain in full.
+// Remedies with long dungeon-use rules get their own short shop copy.
+const TOWN_POTION_DESCRIPTIONS: Partial<Record<TownPotion, string>> = {
+	bandages: "Stops Bleeding. Does not restore health.",
+};
 export const townPotionDescription = (kind: TownPotion): string =>
+	TOWN_POTION_DESCRIPTIONS[kind] ??
 	ITEM_DEFINITIONS[kind].description
 		.replace(
 			" Each bottle stacks with previous gains, separately from level, gear and temporary buffs.",

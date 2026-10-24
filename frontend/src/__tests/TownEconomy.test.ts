@@ -10,6 +10,7 @@ import {
 	createTownPotionStock,
 	isTownPotionStock,
 	TOWN_POTION_OFFERS,
+	townPotionDescription,
 	townPotionKinds,
 } from "../domain/town/TownEconomy";
 import v32 from "./fixtures/adventure-v32.json?raw";
@@ -74,6 +75,9 @@ it("prices permanent stat points at 1,500 gold with only two bottles per attribu
 it("sells Bandages, and stocks them in full for a save from before they were offered", () => {
 	expect(townPotionKinds).toContain("bandages");
 	expect(TOWN_POTION_OFFERS.bandages).toEqual({ price: 75, quantity: 4 });
+	expect(townPotionDescription("bandages")).toBe(
+		"Stops Bleeding. Does not restore health.",
+	);
 	expect(JSON.parse(v32).state.townPotionStock).not.toHaveProperty("bandages");
 	const parsed = parseSave(v32);
 	if (!parsed.ok) throw new Error(parsed.error);
