@@ -5,44 +5,35 @@ import {
 	type DungeonObject,
 	type DungeonObjectKind,
 	objectLabel,
-	RELIQUARY_HEALTH_COST,
 	TRAP_BLEEDING_CHANCE,
 	TRAP_DISARM_EXPERIENCE,
 } from "./DungeonObject";
 
 const hints: Record<DungeonObjectKind, { fresh: string; spent: string }> = {
 	sarcophagus: {
-		fresh:
-			"Press E to review opening. May release a stronger floor-relevant Heroic enemy, treasure, both or nothing. Escape cancels freely.",
-		spent:
-			"Opened once; the tomb cannot be rerolled. Any remaining treasure is on the floor for G pickup.",
+		fresh: "Press E to look closer. It may hold treasure, a guardian, or both.",
+		spent: "Opened. Anything it held lies on the floor.",
 	},
 	hourglass: {
-		fresh:
-			"Press E to review it: full health and mana now, in exchange for permanently stronger creatures on this floor. One use.",
-		spent: "The sand has run out; the hourglass is spent.",
+		fresh: "Press E to look closer. It can restore you, at a price.",
+		spent: "The sand has run out.",
 	},
 	"runic-portal": {
-		fresh:
-			"Press E to review it: a one-way step to beside a down stair on this floor or up to four floors deeper. One use.",
-		spent: "The runes have gone dark; the portal is spent.",
+		fresh: "Press E to look closer. It leads somewhere deeper.",
+		spent: "The runes have gone dark.",
 	},
 	mirror: {
-		fresh:
-			"Press E to review its choices: reveal this floor's layout, face a hostile reflection for a reward, or shatter it for a risky prize. One use.",
-		spent:
-			"The mirror has gone dark. Anything it gave is on the floor for G pickup.",
+		fresh: "Press E to look closer. Something stirs in the glass.",
+		spent: "The mirror has gone dark. Anything it gave lies on the floor.",
 	},
 	well: {
-		fresh:
-			"Press E to review offerings: 50, 100 or 250 gold for a known chance of gear or a blessing, nothing, or a hostile creature. One offering.",
+		fresh: "Press E to make an offering.",
 		spent:
-			"The well has taken its offering; any gear it gave is on the floor for G pickup.",
+			"The well has taken its offering. Anything it gave lies on the floor.",
 	},
 	forge: {
-		fresh:
-			"Press E to review forging: improve one ordinary weapon or armor piece for gold, reliably or at a risk of destroying it. One use.",
-		spent: "The forge has gone cold; its one attempt is spent.",
+		fresh: "Press E to improve a weapon or armor piece for gold.",
+		spent: "The forge has gone cold.",
 	},
 	merchant: {
 		fresh:
@@ -51,18 +42,17 @@ const hints: Record<DungeonObjectKind, { fresh: string; spent: string }> = {
 	},
 	"elite-door": {
 		fresh:
-			"Optional elite chamber. Press E to review the danger before opening. Enemies cannot open this gate.",
+			"An optional elite chamber. Press E to look closer; monsters cannot open it.",
 		spent:
 			"Press E within reach to close an unoccupied gate. Its chamber remains optional.",
 	},
 	reliquary: {
-		fresh: `Press E to review the seal’s ${RELIQUARY_HEALTH_COST}-damage cost and rare ring reward.`,
-		spent: "Seal broken; any remaining reward is on the floor for G pickup.",
+		fresh: "Press E to look closer. A rare ring waits behind a blood seal.",
+		spent: "Seal broken. Anything left lies on the floor.",
 	},
 	archive: {
-		fresh: "Press E to search for a spellbook or mana supply.",
-		spent:
-			"Already searched; any remaining reward is on the floor for G pickup.",
+		fresh: "Press E to search for a spellbook.",
+		spent: "Already searched. Anything left lies on the floor.",
 	},
 	door: {
 		fresh: "Bump to open, or press E within reach. Enemies cannot open doors.",
@@ -80,19 +70,16 @@ const hints: Record<DungeonObjectKind, { fresh: string; spent: string }> = {
 		spent: "Already spent; it cannot hurt you again.",
 	},
 	fountain: {
-		fresh:
-			"Press E within reach to choose a safe sip or risky draw. Escape cancels freely.",
-		spent: "Dry; no more water remains.",
+		fresh: "Press E to drink.",
+		spent: "Dry.",
 	},
 	throne: {
-		fresh:
-			"Press E within reach to review the risks of sitting or prying treasure. Escape leaves it untouched.",
-		spent: "Its power is spent; it cannot grant another reward.",
+		fresh: "Press E to sit, or to pry at its jewels.",
+		spent: "Its power is spent.",
 	},
 	shrine: {
-		fresh:
-			"Press E within reach to review the gold-for-XP offering. Escape cancels freely.",
-		spent: "Already blessed; it accepts no further offering.",
+		fresh: "Press E to make an offering.",
+		spent: "Already blessed.",
 	},
 	"cracked-wall": {
 		fresh:

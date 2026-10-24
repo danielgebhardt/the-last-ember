@@ -37,7 +37,7 @@ it("shows the offering price and XP before committing one keyboard-selected barg
 	expect(
 		within(dialog).getByRole("button", { name: /Offer 15 gold/ }),
 	).toBeVisible();
-	expect(within(dialog).getByText(/Gain 24 XP/)).toBeVisible();
+	expect(within(dialog).getByText("24 experience")).toBeVisible();
 	expect(screen.getByLabelText("Player gold")).toHaveTextContent("Gold 20");
 	expect(screen.getByLabelText("Turn count")).toHaveTextContent("Turn 0");
 	await user.keyboard("1");

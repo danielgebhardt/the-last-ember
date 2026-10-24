@@ -33,7 +33,7 @@ it("E opens explicit fountain choices, Escape cancels freely, and 1 drinks while
 	const user = userEvent.setup();
 	await user.keyboard("e");
 	await screen.findByRole("dialog", { name: "Ancient fountain" });
-	expect(screen.getByText(/Otherwise take 3 damage/)).toBeVisible();
+	expect(screen.getByText("3 damage and Poison")).toBeVisible();
 	await user.keyboard("{Escape}");
 	await waitFor(() => expect(map).toHaveFocus());
 	expect(screen.getByLabelText("Turn count")).toHaveTextContent("Turn 0");

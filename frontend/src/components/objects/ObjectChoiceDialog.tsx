@@ -1,4 +1,5 @@
 import { Dialog } from "@base-ui/react/dialog";
+import { Eye, TriangleAlert } from "lucide-react";
 import { type RefObject, useLayoutEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import type { GameState } from "../../domain/game/GameState";
@@ -7,12 +8,58 @@ import {
 	OBJECT_DEFINITIONS,
 } from "../../domain/objects/DungeonObject";
 import {
+	type ChoiceOutcome,
 	forgeChoices,
+	type InteractionChoice,
+	OBJECT_FLAVOR,
 	objectChoices,
 } from "../../domain/objects/ObjectChoices";
 import { describeObject } from "../../domain/objects/ObjectDescriptions";
 import type { InteractAction } from "../../domain/objects/ObjectInteraction";
 import DungeonObjectIcon from "./DungeonObjectIcon";
+
+const TONES: Readonly<Record<ChoiceOutcome["tone"], string>> = {
+	good: "border-emerald-600/30 bg-emerald-500/10 text-emerald-800 dark:border-emerald-400/30 dark:text-emerald-300",
+	bad: "border-rose-600/30 bg-rose-500/10 text-rose-800 dark:border-rose-400/30 dark:text-rose-300",
+	neutral: "border-border bg-muted/60 text-muted-foreground",
+};
+const ChoiceDetails = ({ choice }: { choice: InteractionChoice }) => (
+	<span className="mt-1 grid gap-2">
+		<span className="block text-sm leading-snug font-normal text-muted-foreground">
+			{choice.description}
+		</span>
+		{choice.foreseen ? (
+			<span className="flex items-center gap-1.5 text-sm font-medium text-cyan-800 dark:text-cyan-300">
+				<Eye aria-hidden="true" className="size-4 shrink-0" />
+				Seer's sight: {choice.foreseen}
+			</span>
+		) : (
+			choice.outcomes && (
+				<span className="flex flex-wrap gap-1.5">
+					{choice.outcomes.map((outcome) => (
+						<span
+							key={outcome.text}
+							className={`rounded-md border px-2 py-0.5 text-xs font-medium ${TONES[outcome.tone]}`}
+						>
+							{outcome.chance !== undefined && (
+								<span className="mr-1 font-semibold tabular-nums">
+									{Math.round(outcome.chance * 100)}%
+								</span>
+							)}
+							{outcome.text}
+						</span>
+					))}
+				</span>
+			)
+		)}
+		{choice.warning && (
+			<span className="flex items-center gap-1.5 text-sm font-semibold text-destructive">
+				<TriangleAlert aria-hidden="true" className="size-4 shrink-0" />
+				{choice.warning}
+			</span>
+		)}
+	</span>
+);
 
 const ObjectChoiceDialog = ({
 	object,
@@ -99,17 +146,35 @@ const ObjectChoiceDialog = ({
 						}
 					}}
 				>
-					<Dialog.Title
-						ref={titleRef}
-						tabIndex={-1}
-						className="text-2xl font-semibold"
-					>
-						{object
-							? OBJECT_DEFINITIONS[object.kind].name
-							: "Interact with surroundings"}
-					</Dialog.Title>
-					<Dialog.Description className="text-base text-muted-foreground">
-						Choose an interaction. Inspection and canceling use no turn.
+					<div className="flex items-center gap-3">
+						{object && (
+							<span className="size-8 shrink-0">
+								<DungeonObjectIcon object={object} />
+							</span>
+						)}
+						<Dialog.Title
+							ref={titleRef}
+							tabIndex={-1}
+							className="text-2xl font-semibold outline-none"
+						>
+							{object
+								? OBJECT_DEFINITIONS[object.kind].name
+								: "Interact with surroundings"}
+						</Dialog.Title>
+					</div>
+					<Dialog.Description className="grid gap-1 text-base text-muted-foreground">
+						{object && OBJECT_FLAVOR[object.kind] && (
+							<span className="font-serif text-lg italic text-foreground/85">
+								{OBJECT_FLAVOR[object.kind]}
+							</span>
+						)}
+						<span className="text-sm">
+							{!object
+								? "Choose what to use. Choosing and canceling use no turn."
+								: forge && !forgeItem
+									? "Pick what to forge. Picking is free."
+									: "Each choice takes a turn. Walking away is free."}
+						</span>
 					</Dialog.Description>
 					{!object &&
 						targets.map((target, index) => (
@@ -144,12 +209,12 @@ const ObjectChoiceDialog = ({
 							className="h-auto justify-start gap-4 whitespace-normal p-4 text-left text-base"
 							onClick={() => choose(index)}
 						>
-							<kbd className="rounded border px-2 py-1">{index + 1}</kbd>
-							<span>
+							<kbd className="self-start rounded border px-2 py-1">
+								{index + 1}
+							</kbd>
+							<span className="min-w-0">
 								<span className="block font-medium">{choice.label}</span>
-								<span className="mt-0.5 block text-sm leading-snug font-normal text-muted-foreground">
-									{choice.description}
-								</span>
+								<ChoiceDetails choice={choice} />
 							</span>
 						</Button>
 					))}
@@ -167,7 +232,7 @@ const ObjectChoiceDialog = ({
 						</Button>
 					)}
 					<Dialog.Close render={<Button variant="ghost" />}>
-						Cancel
+						{object ? "Walk away" : "Cancel"}
 					</Dialog.Close>
 				</Dialog.Popup>
 			</Dialog.Portal>

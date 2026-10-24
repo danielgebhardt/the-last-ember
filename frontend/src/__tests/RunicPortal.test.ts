@@ -209,7 +209,10 @@ it("saves reject a destination that doesn't match the seed", () => {
 it("previews a way down without naming the floor", () => {
 	const [choice] = objectChoices(portal(), encounter());
 	expect(choice.description).toContain("up to 4 floors deeper");
-	expect(choice.description).toContain("What waits there is unknown");
+	expect(choice.outcomes).toContainEqual({
+		text: "Destination unknown",
+		tone: "neutral",
+	});
 });
 
 it("joins the discovery pool from floor 5 and never on the final floor", () => {

@@ -13,7 +13,7 @@ it.each([
 	[1, 72, 17, 19],
 	[1.25, 90, 21, 24],
 ] as const)(
-	"warns with actual stats at difficulty %s before opening and restores focus",
+	"warns of its strength at difficulty %s without exact stats, and restores focus",
 	async (difficulty, health, min, max) => {
 		stubDungeonRun(createCorridorEncounter());
 		const create = GameState.createGameState;
@@ -45,14 +45,11 @@ it.each([
 				screen.getByRole("heading", { name: "Elite chamber gate" }),
 			).toHaveFocus(),
 		);
-		expect(screen.getByText(/resists arcane/)).toBeVisible();
-		expect(
-			screen.getByText(
-				new RegExp(
-					`maximum health ${health}, melee/charge damage ${min}–${max} before armor`,
-				),
-			),
-		).toBeVisible();
+		expect(screen.getByText(/arcane barely does/)).toBeVisible();
+		// Its numbers stay a surprise.
+		const gate = screen.getByRole("dialog", { name: "Elite chamber gate" });
+		for (const stat of [health, min, max])
+			expect(gate).not.toHaveTextContent(new RegExp(`\\b${stat}\\b`));
 		await user.keyboard("{Escape}");
 		await waitFor(() => expect(map).toHaveFocus());
 		expect(screen.getByLabelText("Turn count")).toHaveTextContent("Turn 0");
@@ -87,9 +84,7 @@ it.each([
 				screen.getByRole("heading", { name: "Elite chamber gate" }),
 			).toHaveFocus(),
 		);
-		await user.click(
-			screen.getByRole("button", { name: /Open the elite gate/ }),
-		);
+		await user.click(screen.getByRole("button", { name: /Open the gate/ }));
 		await waitFor(() => expect(map).toHaveFocus());
 		expect(screen.getByLabelText("Turn count")).toHaveTextContent("Turn 3");
 	},

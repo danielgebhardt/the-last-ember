@@ -134,13 +134,16 @@ it("lists only ordinary weapons and armor below +3, then prices both services", 
 		"forge-risky",
 	]);
 	expect(services[0].label).toContain(`${FORGE_PRICES.reliable} gold`);
-	expect(services[1].description).toContain(
-		"15%: Iron sword +1 is destroyed, even if worn.",
-	);
+	expect(services[1].description).toContain("even if you are wearing it");
+	expect(services[1].outcomes).toContainEqual({
+		chance: 0.15,
+		text: "Destroyed",
+		tone: "bad",
+	});
 	expect(services[0].description).toContain("becomes +2");
-	expect(
-		forgeChoices({ ...state, gold: 100 }, "worn:sword")[0].description,
-	).toContain("Not enough gold.");
+	expect(forgeChoices({ ...state, gold: 100 }, "worn:sword")[0].warning).toBe(
+		"Not enough gold.",
+	);
 });
 
 it("reliably adds +1 for 300 gold and one turn, spending the forge", () => {

@@ -178,10 +178,16 @@ it.each([1, 10, 11, 48])(
 					chest: { id: "armor", kind: "dragon-mail" as const },
 				},
 			};
-			const description = objectChoices(state.objects[0], state)[0].description;
-			expect(description).toContain("10 damage");
-			expect(description).toContain("ignoring armor and difficulty");
-			if (health <= 10) expect(description).toContain("will kill you");
+			const [choice] = objectChoices(state.objects[0], state);
+			expect(choice.description).toContain("10 health");
+			expect(choice.description).toContain("armor cannot help");
+			expect(choice.outcomes).toContainEqual({
+				text: `Health ${health} → ${Math.max(0, health - 10)}`,
+				tone: "bad",
+			});
+			expect(choice.warning).toBe(
+				health <= 10 ? "This will kill you." : undefined,
+			);
 			const result = resolvePlayerAction(state, {
 				type: "interact",
 				choice: "unseal",

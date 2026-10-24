@@ -93,7 +93,7 @@ export const withForesight = (
 		return seen
 			? {
 					...choice,
-					description: `${choice.description} Seer's sight: ${seen}.`,
+					foreseen: `${seen[0].toUpperCase()}${seen.slice(1)}.`,
 				}
 			: choice;
 	});

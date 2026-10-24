@@ -8,7 +8,6 @@ import {
 	MIRROR_HOSTILE_ID,
 	MIRROR_REFLECTION_ID,
 	type MirrorShatterOutcome,
-	mirrorBacklash,
 	mirrorHostileKind,
 	mirrorRewardKind,
 	mirrorShatterOutcome,
@@ -67,7 +66,7 @@ const shatterSeed = (outcome: MirrorShatterOutcome) =>
 const savesCleanly = (state: GameState) =>
 	parseSave(serializeSave(tacticalSnapshot(state))).ok;
 
-it("offers three explained choices with your reflection's numbers", () => {
+it("offers three explained choices, keeping your reflection's strength a surprise", () => {
 	const state = encounter();
 	const choices = objectChoices(MIRROR, state);
 	expect(choices.map((c) => c.value)).toEqual([
@@ -76,11 +75,8 @@ it("offers three explained choices with your reflection's numbers", () => {
 		"mirror-shatter",
 	]);
 	const stats = reflectionStats(state);
-	expect(choices[1].description).toContain(`${stats.maxHealth} HP`);
-	expect(choices[2].description).toContain("60%");
-	expect(choices[2].description).toContain(
-		`${mirrorBacklash(state.player.maxHealth)} damage`,
-	);
+	expect(choices[1].description).not.toContain(String(stats.maxHealth));
+	expect(choices[2].outcomes?.map((o) => o.chance)).toEqual([0.6, 0.25, 0.15]);
 });
 
 it("reveal spends the mirror and a turn, and marks only that floor revealed", () => {

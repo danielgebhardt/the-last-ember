@@ -93,9 +93,10 @@ test("reliquary confirms its ten-health lethal sacrifice and supports free cance
 		exact: true,
 	});
 	await expect(choice).toContainText(
-		"Take 10 damage, ignoring armor and difficulty",
+		"The seal takes 10 health as its price; armor cannot help.",
 	);
-	await expect(choice).toContainText("Health 10 → 0. This will kill you.");
+	await expect(choice).toContainText("Health 10 → 0");
+	await expect(choice).toContainText("This will kill you.");
 	await page.keyboard.press("Escape");
 	await expect(map(page)).toBeFocused();
 	await expect(turns(page)).toHaveText("Turn 0");
@@ -237,8 +238,9 @@ for (const width of [1280, 1440])
 			.click();
 		await expect(dialog).toContainText("Reliable forging · 300 gold");
 		await expect(dialog).toContainText(
-			"15%: Iron sword +1 is destroyed, even if worn.",
+			"the heat may ruin Iron sword +1, even if you are wearing it",
 		);
+		await expect(dialog).toContainText("15%Destroyed");
 		await dialog
 			.getByRole("button", { name: "Choose different equipment", exact: true })
 			.click();
@@ -283,11 +285,11 @@ test("Wishing Well shows every offering's odds, cancels freely and takes one off
 	).toBeFocused();
 	for (const text of [
 		"Offer 50 gold",
-		"40% reward",
+		"40%+1 weapon or armor",
 		"Offer 100 gold",
-		"55% reward",
+		"55%+2 weapon or armor",
 		"Offer 250 gold",
-		"15% a hostile floor creature",
+		"15%A creature climbs out",
 	])
 		await expect(dialog).toContainText(text);
 	await page.keyboard.press("Escape");
@@ -324,7 +326,7 @@ test("Mirror of Shadows explains its choices and reveals the floor's layout", as
 		"Face your reflection",
 		"Shatter the mirror",
 		"60%",
-		"stay hidden until you see them",
+		"What lives in them stays hidden",
 	])
 		await expect(dialog).toContainText(text);
 	await page.keyboard.press("Escape");
@@ -357,7 +359,7 @@ test("Runic Portal previews a way down and sets you beside it for one turn", asy
 	await expect(
 		dialog.getByRole("heading", { name: "Runic Portal", exact: true }),
 	).toBeFocused();
-	await expect(dialog).toContainText("What waits there is unknown");
+	await expect(dialog).toContainText("Destination unknown");
 	await page.keyboard.press("Escape");
 	await expect(turns(page)).toHaveText("Turn 0");
 	await page.keyboard.press("e");
@@ -389,8 +391,8 @@ test("Hourglass of Ages trades a full recovery for stronger creatures", async ({
 	await expect(
 		dialog.getByRole("heading", { name: "Hourglass of Ages", exact: true }),
 	).toBeFocused();
-	await expect(dialog).toContainText("Restores you to full health and mana");
-	await expect(dialog).toContainText("(1 now)");
+	await expect(dialog).toContainText("Full health and mana");
+	await expect(dialog).toContainText("1 creature grows 50% stronger for good");
 	await page.keyboard.press("1");
 	await expect(dialog).toHaveCount(0);
 	await expect(turns(page)).toHaveText("Turn 1");
@@ -443,9 +445,11 @@ for (const size of [
 					node.ownerDocument.defaultView?.getComputedStyle(node).fontSize,
 			);
 		expect(await fontSize(offer.getByText("Offer 50 gold"))).toBe("16px");
-		expect(await fontSize(offer.getByText(/^40% reward/))).toBe("14px");
+		expect(
+			await fontSize(offer.getByText("A small coin for a small hope.")),
+		).toBe("14px");
 		await expect(
-			dialog.getByRole("button", { name: "Cancel", exact: true }),
+			dialog.getByRole("button", { name: "Walk away", exact: true }),
 		).toBeInViewport({ ratio: 1 });
 		await page.keyboard.press("Escape");
 		await expect(map(page)).toBeFocused();

@@ -4,53 +4,88 @@ import { createPlayerStats } from "../game/PlayerStats";
 import { createProgression } from "../game/Progression";
 import { createStartingEquipment } from "../items/Equipment";
 import { itemName } from "../items/ItemValues";
+import { EMPOWERED_MULTIPLIER } from "../monsters/MonsterStats";
+import { FOUNTAIN_RULES, fountainRestoration } from "./DungeonFountains";
 import {
-	EMPOWERED_MULTIPLIER,
-	maximumMonsterHealth,
-	monsterDamageRange,
-} from "../monsters/MonsterStats";
-import { fountainRestoration } from "./DungeonFountains";
-import { type DungeonObject, RELIQUARY_HEALTH_COST } from "./DungeonObject";
+	type DungeonObject,
+	type DungeonObjectKind,
+	RELIQUARY_HEALTH_COST,
+} from "./DungeonObject";
 import { shrineTerms } from "./DungeonShrines";
 import { FORGE_PRICES, forgeTargets } from "./ForgottenForge";
 import { hourglassRefusal, hourglassTargets } from "./HourglassOfAges";
 import {
-	MIRROR_BACKLASH_SHARE,
 	MIRROR_CHOICES,
 	MIRROR_REWARD_ENCHANTMENT,
 	MIRROR_SHATTER_ODDS,
-	mirrorBacklash,
-	reflectionStats,
 } from "./MirrorOfShadows";
 import type { ObjectChoice } from "./ObjectInteraction";
 import { PORTAL_FLOOR_SPAN } from "./RunicPortal";
 import { withForesight } from "./SeersSight";
 import { WELL_ODDS, WELL_OFFERINGS } from "./WishingWell";
+// What a choice can lead to, as a player weighs it; chance is omitted for a sure thing.
+export type ChoiceOutcome = Readonly<{
+	chance?: number;
+	text: string;
+	tone: "good" | "bad" | "neutral";
+}>;
 export type InteractionChoice = Readonly<{
 	value: ObjectChoice;
 	label: string;
+	// One plain sentence; the outcomes carry the odds.
 	description: string;
+	outcomes?: readonly ChoiceOutcome[];
+	// Something that stops or endangers you right now, such as too little gold.
+	warning?: string;
+	// The Seer's Circlet names the fixed result.
+	foreseen?: string;
 	itemId?: string;
 }>;
+// A line of atmosphere above an encounter's choices.
+export const OBJECT_FLAVOR: Partial<Record<DungeonObjectKind, string>> = {
+	sarcophagus:
+		"A stone coffin, its lid carved with warnings. Something was buried here with its treasure.",
+	hourglass: "Sand runs upward through the glass, slow and patient.",
+	"runic-portal": "Runes circle a doorway that opens onto somewhere deeper.",
+	mirror: "Your reflection moves a moment after you do.",
+	well: "Coins glint far below. Something down there is listening.",
+	forge: "The coals still glow, hot enough for one more job.",
+	fountain: "Cold, clear water wells up from the stone.",
+	"elite-door":
+		"Behind the bars, an iron champion stands guard over its prize.",
+	reliquary: "A rare ring lies beneath glass sealed in old blood.",
+	archive: "Shelves of crumbling books. One may still hold a spell.",
+	shrine: "A quiet altar. Gold left here returns as insight.",
+	throne: "An empty throne, still humming with old power.",
+};
+const short = (gold: number | undefined, price: number) =>
+	gold !== undefined && gold < price ? "Not enough gold." : undefined;
 const forgeServiceChoices = (
 	gold: number | undefined,
 	item?: { id: string; name: string; next: number },
 ): readonly InteractionChoice[] => {
-	const afford = (price: number) =>
-		gold !== undefined && gold < price ? " Not enough gold." : "";
-	const name = item?.name ?? "the chosen item";
+	const name = item?.name ?? "your item";
+	const next = `+${item?.next ?? "1 higher"}`;
 	return [
 		{
 			value: "forge-reliable",
 			itemId: item?.id,
 			label: `Reliable forging · ${FORGE_PRICES.reliable} gold`,
-			description: `Guaranteed: ${name} becomes +${item?.next ?? "1 higher"}. One turn; spends the forge.${afford(FORGE_PRICES.reliable)}`,
+			description: `A careful job: ${name} becomes ${next}.`,
+			outcomes: [{ text: `Becomes ${next}`, tone: "good" }],
+			warning: short(gold, FORGE_PRICES.reliable),
 		},
 		{
 			value: "forge-risky",
 			itemId: item?.id,
 			label: `Risky forging · ${FORGE_PRICES.risky} gold`,
-			description: `50%: ${name} becomes +${item?.next ?? "1 higher"}. 35%: unchanged. 15%: ${name} is destroyed, even if worn. One turn; spends the forge whatever happens.${afford(FORGE_PRICES.risky)}`,
+			description: `Cheaper, but the heat may ruin ${name}, even if you are wearing it.`,
+			outcomes: [
+				{ chance: 0.5, text: `Becomes ${next}`, tone: "good" },
+				{ chance: 0.35, text: "No change", tone: "neutral" },
+				{ chance: 0.15, text: "Destroyed", tone: "bad" },
+			],
+			warning: short(gold, FORGE_PRICES.risky),
 		},
 	];
 };
@@ -71,7 +106,7 @@ export const forgeChoices = (
 		value: "forge-select",
 		itemId: item.id,
 		label: `${location}: ${itemName(item)}`,
-		description: `Choose to see reliable and risky forging to +${(item.enchantment ?? 0) + 1}. Choosing is free.`,
+		description: `Forge it to +${(item.enchantment ?? 0) + 1}. You will see the price before paying.`,
 	}));
 };
 const baseObjectChoices = (
@@ -109,7 +144,16 @@ const baseObjectChoices = (
 			{
 				value: "hourglass-turn",
 				label: "Turn the hourglass",
-				description: `Restores you to full health and mana. In exchange, every living creature on this floor${targets !== undefined ? ` (${targets} now)` : ""} permanently gains ${Math.round((EMPOWERED_MULTIPLIER - 1) * 100)}% maximum health and attack, keeping its share of wounds. Creatures that arrive later are unaffected. One turn; monsters then act normally and can kill you. One use.${refusal ? ` ${refusal}` : ""}`,
+				description:
+					"Time bends in your favor, and against everything else on this floor.",
+				outcomes: [
+					{ text: "Full health and mana", tone: "good" },
+					{
+						text: `${targets !== undefined ? `${targets} creature${targets === 1 ? "" : "s"}` : "Every creature here"} grow${targets === 1 ? "s" : ""} ${Math.round((EMPOWERED_MULTIPLIER - 1) * 100)}% stronger for good`,
+						tone: "bad",
+					},
+				],
+				warning: refusal,
 			},
 		];
 	}
@@ -118,28 +162,43 @@ const baseObjectChoices = (
 			{
 				value: "portal-enter",
 				label: "Step through",
-				description: `Leads beside a way down: this floor's down stair or one up to ${PORTAL_FLOOR_SPAN} floors deeper, with equal odds. What waits there is unknown, and floors you skip stay unexplored for your climb home. One turn; the portal goes dark. It will not take you while you carry the Warden's Flame.`,
+				description: `A one-way trip. You arrive beside a way down, perhaps on this floor, perhaps up to ${PORTAL_FLOOR_SPAN} floors deeper.`,
+				outcomes: [
+					{ text: "Skips ahead", tone: "good" },
+					{ text: "Destination unknown", tone: "neutral" },
+					{ text: "Skipped floors stay unexplored", tone: "bad" },
+				],
 			},
 		];
 	if (object.kind === "mirror") {
-		const reflection = state && reflectionStats(state);
 		const odds = MIRROR_SHATTER_ODDS;
+		const prize = `+${MIRROR_REWARD_ENCHANTMENT} weapon or armor`;
 		return [
 			{
 				value: MIRROR_CHOICES.reveal,
 				label: "Reveal this floor",
 				description:
-					"Show the layout of every room and corridor on this floor: walls, floors, doors and stairs. Creatures, items, traps and other discoveries stay hidden until you see them. One turn; the mirror goes dark.",
+					"See the map of every room and corridor here. What lives in them stays hidden.",
+				outcomes: [{ text: "Floor map revealed", tone: "good" }],
 			},
 			{
 				value: MIRROR_CHOICES.reflection,
 				label: "Face your reflection",
-				description: `A hostile reflection steps out${reflection ? ` with ${reflection.maxHealth} HP (half your maximum) and ${reflection.attackDamage} melee damage (your minimum hit)` : " with half your maximum HP and your minimum melee damage"}, before difficulty. Defeat it for one ordinary weapon or armor piece +${MIRROR_REWARD_ENCHANTMENT} from this floor. Refused for free if it has no room to appear. One turn; the mirror goes dark.`,
+				description: "Your shadow steps out of the glass to fight you.",
+				outcomes: [
+					{ text: "A fight", tone: "bad" },
+					{ text: `Win: ${prize}`, tone: "good" },
+				],
 			},
 			{
 				value: MIRROR_CHOICES.shatter,
 				label: "Shatter the mirror",
-				description: `${Math.round(odds.item * 100)}%: one ordinary weapon or armor piece +${MIRROR_REWARD_ENCHANTMENT} from this floor. ${Math.round(odds.empty * 100)}%: nothing. ${Math.round(odds.hostile * 100)}%: a hostile floor creature emerges nearby; with no room for it, a backlash deals ${state ? mirrorBacklash(state.player.maxHealth) : `${MIRROR_BACKLASH_SHARE * 100}% of your maximum HP`} damage instead, ignoring armor and potentially fatal. One turn; the mirror is destroyed.`,
+				description: "Break it and see what falls out.",
+				outcomes: [
+					{ chance: odds.item, text: prize, tone: "good" },
+					{ chance: odds.empty, text: "Nothing", tone: "neutral" },
+					{ chance: odds.hostile, text: "A creature breaks free", tone: "bad" },
+				],
 			},
 		];
 	}
@@ -155,11 +214,29 @@ const baseObjectChoices = (
 						negative: Math.max(0, base.negative + WELL_FAVOR.negative),
 					}
 				: base;
-			const neutral = Math.round((1 - odds.positive - odds.negative) * 100);
 			return {
 				value: `offer-${offering}` as ObjectChoice,
 				label: `Offer ${offering} gold`,
-				description: `${Math.round(odds.positive * 100)}% reward: ordinary weapon or armor +${odds.enchantment} from this floor (or, 1 in 10 rewards, a permanent +1 attribute). ${neutral}% nothing. ${Math.round(odds.negative * 100)}% a hostile floor creature emerges nearby. The gold, one turn and the well are spent whatever happens.${state?.gold !== undefined && state.gold < offering ? " Not enough gold." : ""}`,
+				description:
+					offering === WELL_OFFERINGS[0]
+						? "A small coin for a small hope."
+						: offering === WELL_OFFERINGS[1]
+							? "A fair offering, and a better gift."
+							: "A generous offering the well is likely to reward.",
+				outcomes: [
+					{
+						chance: odds.positive,
+						text: `+${odds.enchantment} weapon or armor, rarely a lasting blessing`,
+						tone: "good",
+					},
+					{
+						chance: 1 - odds.positive - odds.negative,
+						text: "Nothing",
+						tone: "neutral",
+					},
+					{ chance: odds.negative, text: "A creature climbs out", tone: "bad" },
+				],
+				warning: short(state?.gold, offering),
 			};
 		});
 	if (object.kind === "forge")
@@ -170,9 +247,15 @@ const baseObjectChoices = (
 		return [
 			{
 				value: "open-sarcophagus",
-				label: "Open the sarcophagus",
+				label: "Lift the lid",
 				description:
-					"40% treasure, 25% Heroic guardian, 25% both, 10% empty. The guardian is a floor-relevant enemy with double base health and attack damage; normal difficulty, abilities and attack timing apply. Potentially fatal. One turn; monsters respond normally. One use. Treasure stays on the floor for G pickup. Escape leaves it sealed.",
+					"Its guardian, if it wakes, is twice as tough as others of its kind.",
+				outcomes: [
+					{ chance: 0.4, text: "Treasure", tone: "good" },
+					{ chance: 0.25, text: "Treasure and its guardian", tone: "neutral" },
+					{ chance: 0.25, text: "Only its guardian", tone: "bad" },
+					{ chance: 0.1, text: "Empty", tone: "neutral" },
+				],
 			},
 		];
 	if (object.kind === "fountain") {
@@ -188,77 +271,121 @@ const baseObjectChoices = (
 		return [
 			{
 				value: "sip",
-				label: "Safe sip",
-				description: `Recover up to ${terms.sip.health} health and ${terms.sip.mana} mana. Scales with capacity. One turn; empties the fountain.`,
+				label: "Take a careful sip",
+				description: "A little refreshment, no risk.",
+				outcomes: [
+					{
+						text: `Up to ${terms.sip.health} health and ${terms.sip.mana} mana`,
+						tone: "good",
+					},
+				],
 			},
 			{
 				value: "draw",
-				label: "Risky draw",
-				description: `70%: recover up to ${terms.draw.health} health and ${terms.draw.mana} mana. Otherwise take 3 damage, ignoring armor and potentially fatal, and poison for 3 turns. One turn; empties the fountain.`,
+				label: "Drink deeply",
+				description: "Much more, if the water is clean.",
+				outcomes: [
+					{
+						chance: FOUNTAIN_RULES.restorationChance,
+						text: `Up to ${terms.draw.health} health and ${terms.draw.mana} mana`,
+						tone: "good",
+					},
+					{
+						chance: 1 - FOUNTAIN_RULES.restorationChance,
+						text: `${FOUNTAIN_RULES.damage} damage and Poison`,
+						tone: "bad",
+					},
+				],
 			},
 		];
 	}
-	if (object.kind === "elite-door" && !object.activated) {
-		const difficulty = state?.difficulty ?? 1;
-		const health = maximumMonsterHealth(
-			"iron-champion",
-			difficulty,
-			object.floorNumber,
-		);
-		const damage = monsterDamageRange(
-			"iron-champion",
-			difficulty,
-			object.floorNumber,
-		);
+	if (object.kind === "elite-door" && !object.activated)
 		return [
 			{
 				value: "open-elite",
-				label: "Open the elite gate",
-				description: `Optional iron champion: maximum health ${health}, melee/charge damage ${damage.minDamage}–${damage.maxDamage} before armor. A telegraphed charge and recovery; resists arcane, vulnerable to cold. Defeat it for guaranteed depth-appropriate equipment, not necessarily an upgrade. Opening costs one turn; monsters act immediately. You can leave this chamber sealed, even during the hunted return.`,
+				label: "Open the gate",
+				description:
+					"Tougher than anything else on this floor, and it charges before it strikes. Cold hurts it; arcane barely does.",
+				outcomes: [
+					{ text: "A hard fight", tone: "bad" },
+					{ text: "Win: equipment for this depth", tone: "good" },
+				],
+			},
+		];
+	if (object.kind === "reliquary") {
+		const fatal = state && state.player.health <= RELIQUARY_HEALTH_COST;
+		return [
+			{
+				value: "unseal",
+				label: "Break the seal",
+				description: `The seal takes ${RELIQUARY_HEALTH_COST} health as its price; armor cannot help.`,
+				outcomes: [
+					{ text: "A rare ring", tone: "good" },
+					{
+						text: state
+							? `Health ${state.player.health} → ${Math.max(0, state.player.health - RELIQUARY_HEALTH_COST)}`
+							: `${RELIQUARY_HEALTH_COST} damage`,
+						tone: "bad",
+					},
+				],
+				warning: fatal ? "This will kill you." : undefined,
 			},
 		];
 	}
-	return object.kind === "reliquary"
-		? [
-				{
-					value: "unseal",
-					label: "Break the seal",
-					description: `Take ${RELIQUARY_HEALTH_COST} damage, ignoring armor and difficulty, to release a rare ring. ${state ? `Health ${state.player.health} → ${Math.max(0, state.player.health - RELIQUARY_HEALTH_COST)}. ${state.player.health <= RELIQUARY_HEALTH_COST ? "This will kill you. " : ""}` : "Potentially fatal. "}The reward stays on the floor for G pickup. One turn; one use. Surviving the sacrifice still lets monsters act.`,
-				},
-			]
-		: object.kind === "archive"
-			? [
+	if (object.kind === "archive")
+		return [
+			{
+				value: "read",
+				label: "Search the shelves",
+				description: "Look for a spellbook you have not learned yet.",
+				outcomes: [
 					{
-						value: "read",
-						label: "Search the archive",
-						description:
-							"Release a depth-appropriate unknown book from this adventure’s spell pool, or a mana potion if none fits. Reward stays on the floor. One turn; one use.",
+						text: "A new spellbook, or a mana potion if none fits",
+						tone: "good",
 					},
-				]
-			: object.kind === "shrine"
-				? [
-						{
-							value: "offer",
-							label: `Offer ${shrineTerms(object).gold} gold`,
-							description: `Gain ${shrineTerms(object).experience} XP with normal automatic level growth. One turn; one offering per shrine. Gold is spent permanently.`,
-						},
-					]
-				: object.kind === "throne"
-					? [
-							{
-								value: "sit",
-								label: "Sit on the throne",
-								description:
-									"40%: gain depth-scaled XP; 25%: restore up to 8 health/6 mana; 20%: take 2 damage and poison; 15%: relocate safely on this floor. One turn; spends the throne.",
-							},
-							{
-								value: "pry",
-								label: "Pry treasure",
-								description:
-									"70%: gain depth-scaled gold. Otherwise take 4–8 damage, potentially fatal. One turn; spends the throne.",
-							},
-						]
-					: [];
+				],
+			},
+		];
+	if (object.kind === "shrine") {
+		const terms = shrineTerms(object);
+		return [
+			{
+				value: "offer",
+				label: `Offer ${terms.gold} gold`,
+				description: "Leave your gold and listen.",
+				outcomes: [{ text: `${terms.experience} experience`, tone: "good" }],
+				warning: short(state?.gold, terms.gold),
+			},
+		];
+	}
+	if (object.kind === "throne")
+		return [
+			{
+				value: "sit",
+				label: "Sit on the throne",
+				description: "Claim the seat and see how it judges you.",
+				outcomes: [
+					{ chance: 0.4, text: "Experience", tone: "good" },
+					{ chance: 0.25, text: "Some health and mana", tone: "good" },
+					{ chance: 0.2, text: "2 damage and Poison", tone: "bad" },
+					{
+						chance: 0.15,
+						text: "Whisked elsewhere on this floor",
+						tone: "neutral",
+					},
+				],
+			},
+			{
+				value: "pry",
+				label: "Pry out its jewels",
+				description: "Its gems are worth a fortune, if it lets you take them.",
+				outcomes: [
+					{ chance: 0.7, text: "Gold", tone: "good" },
+					{ chance: 0.3, text: "4–8 damage", tone: "bad" },
+				],
+			},
+		];
+	return [];
 };
 // With foresight worn, each gamble's description also states its fixed result.
 export const objectChoices = (

@@ -13,8 +13,8 @@ test("sarcophagus risk dialog cancels freely, opens once with keyboard/mobile co
 		exact: true,
 	});
 	await expect(dialog).toBeVisible();
-	await expect(dialog).toContainText("25% Heroic guardian");
-	await expect(dialog).toContainText("Potentially fatal");
+	await expect(dialog).toContainText("25%Only its guardian");
+	await expect(dialog).toContainText("twice as tough");
 	await expect(turns(page)).toHaveText("Turn 0");
 	await page.keyboard.press("Escape");
 	await expect(map(page)).toBeFocused();
@@ -47,5 +47,5 @@ test("sarcophagus risk dialog cancels freely, opens once with keyboard/mobile co
 	await expect(turns(page)).toHaveText("Turn 1");
 	await expect(
 		page.getByRole("region", { name: "Nearby objects", exact: true }),
-	).toContainText("tomb cannot be rerolled");
+	).toContainText("Opened. Anything it held lies on the floor.");
 });

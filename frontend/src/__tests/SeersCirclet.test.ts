@@ -126,14 +126,10 @@ describe("Seer's Circlet", () => {
 			equipment: createEquipment(null, null, null, circlet),
 		};
 		expect(
-			objectChoices(throne, plain).some((c) =>
-				c.description.includes("Seer's sight"),
-			),
+			objectChoices(throne, plain).some((c) => c.foreseen !== undefined),
 		).toBe(false);
 		expect(
-			objectChoices(throne, worn).every((c) =>
-				c.description.includes("Seer's sight"),
-			),
+			objectChoices(throne, worn).every((c) => c.foreseen !== undefined),
 		).toBe(true);
 		const seed = plain.run.seed;
 		const chest = object("chest", 1);
