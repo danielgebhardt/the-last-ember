@@ -1173,6 +1173,9 @@ export default async function prepareFixtures() {
 					quest: { ...escaping.quest, cureRecovered: true },
 					escape: { startedTurn: escaping.turn, activatedFloors: [] },
 					floorItems: [],
+					// It never walked down, so an omen above would greet the climb as a first
+					// arrival; this scenario is about the hunters.
+					omens: [],
 				},
 				DEFAULT_RUN_CONFIGURATION,
 			],
