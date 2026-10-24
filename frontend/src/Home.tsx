@@ -29,6 +29,9 @@ import DungeonNotices from "./components/game/DungeonNotices";
 import GameOverDialog from "./components/game/GameOverDialog";
 import { isLowHealth } from "./components/game/HealthDisplay";
 import NewDungeonDialog from "./components/game/NewDungeonDialog";
+import OmenArrivalDialog, {
+	useOmenArrival,
+} from "./components/game/OmenArrivalDialog";
 import PickupDialog from "./components/game/PickupDialog";
 import PlayerStatus from "./components/game/PlayerStatus.tsx";
 import PotionHotbarView from "./components/game/PotionHotbarView";
@@ -208,6 +211,7 @@ const Home = ({
 	const hints = useHints(game.state, () =>
 		mapRef.current?.focus({ preventScroll: true }),
 	);
+	const omenArrival = useOmenArrival(game.state);
 	const [helpSection, setHelpSection] = useState<string>();
 	useAutosave(game.state, exploration, configuration, fogConfiguration);
 	const feedback = useCombatFeedback(
@@ -916,6 +920,12 @@ const Home = ({
 				mapRef={mapRef}
 			/>
 
+			<OmenArrivalDialog
+				omen={town ? undefined : omenArrival.omen}
+				floorNumber={run.activeFloor}
+				onClose={omenArrival.close}
+				mapRef={mapRef}
+			/>
 			<GameOverDialog
 				state={game.state}
 				open={deathOpen}

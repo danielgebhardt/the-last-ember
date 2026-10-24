@@ -350,6 +350,43 @@ export default async function prepareFixtures() {
 				(entry) => entry.item.kind === "cure",
 			),
 		};
+		// One step left of a down stair whose next floor is Ember-lit and not yet visited.
+		const omenStair = [2, 3]
+			.map((floorNumber) => ({
+				floorNumber,
+				stair: run.floors[floorNumber - 1].downStair,
+			}))
+			.find(
+				({ floorNumber, stair }) =>
+					stair &&
+					run.floors[floorNumber - 1].terrain[stair.coordinate.row]?.[
+						stair.coordinate.col - 1
+					] === ".",
+			);
+		if (!omenStair)
+			throw new Error("Expected a down stair with floor to its left");
+		const omenBase = withFlameOnFloor(
+			createGameState(
+				{
+					...run,
+					activeFloor: omenStair.floorNumber,
+					playerCoordinate: {
+						row: omenStair.stair.coordinate.row,
+						col: omenStair.stair.coordinate.col - 1,
+					},
+				},
+				configuration.difficulty,
+			),
+		);
+		const omenState = {
+			...omenBase,
+			monsters: [],
+			objects: [],
+			floorItems: omenBase.floorItems.filter(
+				(entry) => entry.item.kind === "cure",
+			),
+			omens: [{ floorNumber: omenStair.floorNumber + 1, kind: "ember-lit" }],
+		};
 		// Floor 8 of a nine-floor run: wounded beside an Hourglass of Ages, with one goblin
 		// asleep in a far room so turning it has someone to strengthen.
 		const hourglassConfiguration = { ...configuration, floorCount: 9 };
@@ -1219,6 +1256,7 @@ export default async function prepareFixtures() {
 			["forge", forgeState, forgeConfiguration],
 			["well", wellState, forgeConfiguration],
 			["hourglass", hourglassState, hourglassConfiguration],
+			["omen-arrival", omenState, configuration],
 			["ember-warden", wardenState, configuration],
 			[
 				"runic-portal",

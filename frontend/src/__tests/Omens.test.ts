@@ -5,7 +5,7 @@ import {
 	generateDungeonRun,
 } from "../domain/dungeon/DungeonRun";
 import { createGameState, type GameState } from "../domain/game/GameState";
-import { announceOmens } from "../domain/game/OmenNotices";
+import { announceOmens, firstOmenArrival } from "../domain/game/OmenNotices";
 import {
 	applyOmenGatherings,
 	clearMerchantRooms,
@@ -317,6 +317,22 @@ describe("Floor omens", () => {
 				stepped,
 			).activityHistory.entries,
 		).toEqual(before.activityHistory.entries);
+	});
+
+	it("marks only the first arrival on an omen floor for the arrival dialog", () => {
+		const base = createGameState(run20(3));
+		const omens: FloorOmen[] = [{ floorNumber: 10, kind: "ember-lit" }];
+		const above = { ...base, omens, run: { ...base.run, activeFloor: 9 } };
+		const first = announceOmens(above, at(above, 10));
+		expect(firstOmenArrival(above, first)).toBe("ember-lit");
+		// Climbing back up and down again repeats the log line, not the dialog.
+		const left = { ...first, run: { ...first.run, activeFloor: 9 } };
+		const again = announceOmens(left, at(left, 10));
+		expect(again.activityHistory.entries.at(-1)?.event.type).toBe(
+			"omen-revealed",
+		);
+		expect(firstOmenArrival(left, again)).toBeUndefined();
+		expect(firstOmenArrival(above, above)).toBeUndefined();
 	});
 
 	it("saves omens and rejects a repeated omen, a repeated floor or one too shallow", () => {

@@ -2,7 +2,7 @@ import { orthogonalDistance } from "../monsters/MonsterLocations";
 import { foresees } from "../objects/SeersSight";
 import { appendActivityEvents } from "./ActivityHistory";
 import type { GameState } from "./GameState";
-import { omenAt } from "./Omens";
+import { type OmenKind, omenAt } from "./Omens";
 
 const besideDownStair = (state: GameState) => {
 	const stair = state.run.floors[state.run.activeFloor - 1]?.downStair;
@@ -46,4 +46,26 @@ export const announceOmens = (
 				: []),
 		]),
 	};
+};
+
+// The omen of a floor reached for the first time by the change from before to after.
+// Kinds never repeat within an adventure, so an earlier notice of the same kind means a
+// return visit. Presentation only; nothing here is saved.
+export const firstOmenArrival = (
+	before: GameState,
+	after: GameState,
+): OmenKind | undefined => {
+	const entries = after.activityHistory.entries;
+	const arrival = entries.find(
+		({ id, event }) =>
+			id >= before.activityHistory.nextId && event.type === "omen-revealed",
+	);
+	if (arrival?.event.type !== "omen-revealed") return undefined;
+	const kind = arrival.event.omen;
+	return entries.some(
+		({ id, event }) =>
+			id < arrival.id && event.type === "omen-revealed" && event.omen === kind,
+	)
+		? undefined
+		: kind;
 };
