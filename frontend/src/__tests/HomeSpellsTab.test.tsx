@@ -1,4 +1,4 @@
-import { screen, waitFor, within } from "@testing-library/react";
+import { act, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import * as GameState from "../domain/game/GameState";
@@ -89,7 +89,8 @@ describe("Character and Spells tabs", () => {
 	it("supports arrow navigation between tabs without gameplay", async () => {
 		const user = setup();
 		await user.keyboard("i");
-		screen.getByRole("tab", { name: "Character" }).focus();
+		// Focusing a tab moves the tab list's highlight, a React update.
+		act(() => screen.getByRole("tab", { name: "Character" }).focus());
 		await user.keyboard("{ArrowRight}");
 		expect(screen.getByRole("tab", { name: /^Progression/ })).toHaveFocus();
 		await user.keyboard("{ArrowRight}");

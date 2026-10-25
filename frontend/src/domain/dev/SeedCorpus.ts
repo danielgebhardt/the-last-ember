@@ -135,7 +135,10 @@ export const TOWN_PRICE_REFERENCE = [
 		price: o.price,
 	})),
 	...Object.values(TOWN_EQUIPMENT_OFFERS).map((o) => ({
-		name: o.item.kind,
+		// The store sells some kinds both plain and enchanted.
+		name: o.item.enchantment
+			? `${o.item.kind} +${o.item.enchantment}`
+			: o.item.kind,
 		price: o.price,
 	})),
 	...Object.entries(SANCTUARY_CONDITION_FEES).map(([kind, price]) => ({

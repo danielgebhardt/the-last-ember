@@ -1,10 +1,4 @@
-import {
-	act,
-	fireEvent,
-	render,
-	screen,
-	waitFor,
-} from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { useState } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
@@ -189,9 +183,7 @@ describe("Account avatar and dialog", () => {
 	it("explains a failure to load sign-in", async () => {
 		const user = userEvent.setup();
 		renderMenu(() => Promise.reject(new Error("offline")));
-		await act(async () => {
-			await user.click(screen.getByRole("button", { name: "Sign in" }));
-		});
+		await user.click(screen.getByRole("button", { name: "Sign in" }));
 		expect(await screen.findByRole("alert")).toHaveTextContent(
 			/Couldn't load sign-in|Sign-in didn't work/,
 		);
