@@ -14,7 +14,6 @@ import {
 	type MinibossKind,
 	minibossId,
 	selectMiniboss,
-	withArena,
 } from "../domain/arena/Arena";
 import { ARENA_ROOMS } from "../domain/arena/ArenaLayout";
 import {
@@ -35,6 +34,11 @@ import { resolvePlayerAction } from "../domain/game/PlayerActions";
 import { createTestSeedState } from "../domain/game/TestSeed";
 import { exitScrollRestriction } from "../domain/items/ExitDungeonScroll";
 import { coordinateKey } from "../domain/monsters/MonsterLocations";
+import {
+	actorAttackDamage,
+	maximumMonsterHealth,
+	monsterAttackDamage,
+} from "../domain/monsters/MonsterStats";
 import { objectChoices } from "../domain/objects/ObjectChoices";
 import { sealedTiles } from "../domain/objects/OptionalEliteRooms";
 import { portalFloors } from "../domain/objects/RunicPortal";
@@ -431,6 +435,16 @@ describe("Arenas", () => {
 		expect(
 			state.objects.find((o) => o.id === arenaGateId(5))?.coordinate,
 		).toEqual(ARENA_DOWN_STAIR);
-		expect(withArena).toBeDefined();
+		// Each fights with the strength it has on floor 12 of a full run.
+		for (const floorNumber of [4, 5]) {
+			const miniboss = state.monsters.find(
+				(m) => m.id === minibossId(floorNumber),
+			);
+			if (!miniboss) throw new Error("Expected the test seed's miniboss");
+			expect(miniboss.health).toBe(maximumMonsterHealth(miniboss.kind, 1, 12));
+			expect(actorAttackDamage(miniboss)).toBe(
+				monsterAttackDamage(miniboss.kind, 12),
+			);
+		}
 	});
 });

@@ -269,7 +269,9 @@ const testContent = (
 };
 
 // The two floors below the authored ones are arenas, one per miniboss, so both fights
-// are a short walk away. A short test run has room for the first only.
+// are a short walk away, each at the strength it has on floor 12 of a full run. A short
+// test run has room for the first only.
+export const TEST_ARENA_STRENGTH_FLOOR = 12;
 export const TEST_ARENAS = [
 	{ floorNumber: TEST_SEED_FLOORS + 1, miniboss: "pyre-lord" },
 	{ floorNumber: TEST_SEED_FLOORS + 2, miniboss: "iron-juggernaut" },
@@ -351,7 +353,7 @@ export const createTestSeedState = (
 	return TEST_ARENAS.reduce(
 		(state, arena) =>
 			arena.floorNumber < state.run.floors.length
-				? withArena(state, arena, difficulty)
+				? withArena(state, arena, difficulty, TEST_ARENA_STRENGTH_FLOOR)
 				: state,
 		seeded,
 	);

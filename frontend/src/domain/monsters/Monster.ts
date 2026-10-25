@@ -73,6 +73,8 @@ export type Monster = {
 	theft?: Readonly<{ gold: number; turn: number }>;
 	// An arena miniboss in its second phase, reached at half health.
 	minibossPhase?: 2;
+	// Test seed only, never saved: fights with the strength of a deeper floor.
+	statFloor?: number;
 	// Turn each cooldown telegraph last resolved; another needs more than its cooldown.
 	telegraphTurn?: Partial<Record<TelegraphCooldown, number>>;
 };

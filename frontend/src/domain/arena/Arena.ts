@@ -124,6 +124,8 @@ export const withArena = (
 	state: GameState,
 	arena: Arena,
 	difficulty: Difficulty,
+	// The test seed's arenas fight at a deeper floor's strength.
+	statFloor?: number,
 ): GameState => {
 	const { floorNumber, miniboss } = arena;
 	const floors = state.run.floors;
@@ -200,9 +202,14 @@ export const withArena = (
 		kind: miniboss,
 		floorNumber,
 		coordinate: { ...ARENA_POINTS.miniboss },
-		health: maximumMonsterHealth(miniboss, difficulty, floorNumber),
+		health: maximumMonsterHealth(
+			miniboss,
+			difficulty,
+			statFloor ?? floorNumber,
+		),
 		intent: { type: "idle" },
 		lastDamagedTurn: null,
+		...(statFloor ? { statFloor } : {}),
 	};
 	// The stair down is barred where it stands, so nothing may wait on it.
 	const barred = (entry: { floorNumber: number; coordinate: Coordinate }) =>
