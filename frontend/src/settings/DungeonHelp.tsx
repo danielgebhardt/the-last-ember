@@ -19,6 +19,7 @@ import {
 import DungeonLegend from "../components/dungeon/DungeonLegend.tsx";
 import MonsterIcon from "../components/monsters/MonsterIcon";
 import ObservedCreatures from "../components/monsters/ObservedCreatures";
+import { ARENA_DEPTH_SHARE, ARENA_MIN_DEPTH } from "../domain/arena/Arena";
 import type { VisibilityGrid } from "../domain/dungeon/Visibility";
 import type { Difficulty } from "../domain/game/Difficulty";
 import { STARTING_GOLD } from "../domain/game/GameState";
@@ -683,6 +684,46 @@ const DungeonHelp = ({
 						</div>
 					))}
 				</dl>
+			</section>
+			<section
+				id="help-arenas"
+				aria-label="Arenas"
+				className="grid gap-3 rounded-lg border p-4 text-sm"
+			>
+				<h3 className="font-medium">Arenas</h3>
+				<p>
+					Adventures of {ARENA_MIN_DEPTH} floors or more route the way down
+					through one arena, about {Math.round(ARENA_DEPTH_SHARE * 100)}% of the
+					way down. An arena gate bars that floor's down stair; step into it or
+					press E to read its warning. Once you enter there is no retreat: the
+					stair back up stays sealed, no Town Portal scroll can be read, and no
+					Runic Portal carries you past an arena. The arena is the same in every
+					run: an antechamber, a hall with pillars, and a reward room behind an
+					exit that opens only when nothing in the hall is left standing.
+					Winning restores your health and mana; the reward room holds a rare
+					find, gold, and the stair down. After that the stairs work normally.
+				</p>
+				<dl className="grid gap-1 sm:grid-cols-2">
+					<div>
+						<dt className="font-medium">Pyre Lord</dt>
+						<dd className="text-muted-foreground">
+							Fire bursts mark an area around you first; leave it before they
+							land. It must see you to aim, so keep a pillar between you. At
+							half health it calls two salamanders and breathes without pause.
+						</dd>
+					</div>
+					<div>
+						<dt className="font-medium">Iron Juggernaut</dt>
+						<dd className="text-muted-foreground">
+							Charges run past you until something stops them. Slamming into
+							stone stuns it, and a stunned juggernaut takes double damage. At
+							half health it charges again without recovering.
+						</dd>
+					</div>
+				</dl>
+				<p className="text-muted-foreground">
+					Which miniboss waits is fixed by the seed.
+				</p>
 			</section>
 			<section
 				id="help-pacts"

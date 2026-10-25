@@ -67,12 +67,24 @@ describe("Rare equipment finds", () => {
 			);
 			const state = createGameState(run);
 			expect(state.rareEquipment).toBeNull();
+			// The arena replaces its floor whole, so whatever lay there is gone.
+			const arena = state.arenas?.[0]?.floorNumber;
 			for (const ordinary of spawnRunItems(run, spawnRunMonsters(run)))
-				expect(state.floorItems).toContainEqual(ordinary);
-			const placed = state.floorItems.filter((entry) =>
-				isRareEquipmentKind(entry.item.kind),
+				if (ordinary.floorNumber !== arena)
+					expect(state.floorItems).toContainEqual(ordinary);
+			const placed = state.floorItems.filter(
+				(entry) =>
+					isRareEquipmentKind(entry.item.kind) &&
+					!entry.item.id.startsWith("arena-reward:"),
 			);
-			const finds = selectRunRareFinds(seed, 20);
+			const finds = selectRunRareFinds(seed, 20).filter((find) =>
+				placed.some((entry) => entry.item.kind === find.kind),
+			);
+			for (const find of selectRunRareFinds(seed, 20))
+				if (!finds.some((kept) => kept.kind === find.kind)) {
+					expect(arena).toBeGreaterThanOrEqual(find.minFloor);
+					expect(arena).toBeLessThanOrEqual(find.maxFloor);
+				}
 			expect(placed.map((entry) => entry.item)).toEqual(
 				finds.map((find) => ({ id: rareFindId(find.kind), kind: find.kind })),
 			);

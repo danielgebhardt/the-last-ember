@@ -1,4 +1,4 @@
-import { Rat } from "lucide-react";
+import { Flame, Rat, Shield } from "lucide-react";
 import type { ComponentType, SVGProps } from "react";
 import { MONSTER_DEFINITIONS } from "../../domain/monsters/Monster";
 import type { MonsterKind } from "../../domain/monsters/Monster.ts";
@@ -46,6 +46,17 @@ export const MONSTER_VISUALS: Record<
 		icon: ChampionIcon,
 		color: "text-monster-rust",
 		label: MONSTER_DEFINITIONS["iron-champion"].name,
+	},
+	// Placeholders until drawn icons exist.
+	"pyre-lord": {
+		icon: Flame,
+		color: "text-[#c2410c] dark:text-[#fb923c]",
+		label: MONSTER_DEFINITIONS["pyre-lord"].name,
+	},
+	"iron-juggernaut": {
+		icon: Shield,
+		color: "text-[#57534e] dark:text-[#d6d3d1]",
+		label: MONSTER_DEFINITIONS["iron-juggernaut"].name,
 	},
 	"treasure-mimic": {
 		icon: TreasureMimicIcon,

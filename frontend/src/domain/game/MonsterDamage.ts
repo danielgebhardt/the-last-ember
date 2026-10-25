@@ -47,7 +47,12 @@ export const damageMonster = (
 				: spell && "element" in spell
 					? spell.element
 					: "arcane";
-	const inflicted = resistedDamage(monster.kind, damage, element);
+	// A juggernaut stunned against stone takes double damage.
+	const stunned = state.effects.some(
+		(effect) => effect.actorId === monster.id && effect.kind === "stunned",
+	);
+	const inflicted =
+		resistedDamage(monster.kind, damage, element) * (stunned ? 2 : 1);
 	const health = Math.max(0, monster.health - inflicted);
 	const events: ActivityEvent[] = [
 		{ ...source, monster: monster.kind, damage: inflicted, turn },

@@ -74,12 +74,32 @@ const floors: DungeonFloor[] = Array.from({ length: 20 }, (_, index) => ({
 				},
 }));
 // Hold terrain and unused content fixed; vary only the seeded combat/reward streams.
-const generated = createGameState({
+// The review keeps its own floors, so the arena a long adventure would hold is left out.
+const created = createGameState({
 	seed: 0,
 	floors,
 	activeFloor: 1,
 	playerCoordinate: { row: 8, col: 10 },
 });
+const generated: GameState = {
+	...created,
+	run: {
+		...created.run,
+		floors: created.run.floors.map((floor, index) =>
+			created.arenas?.some((arena) => arena.floorNumber === index + 1)
+				? floors[index]
+				: {
+						...floor,
+						upStair: floors[index].upStair,
+						downStair: floors[index].downStair,
+					},
+		),
+	},
+	arenas: undefined,
+	objects: created.objects.filter(
+		(o) => o.kind !== "arena-gate" && o.kind !== "arena-door",
+	),
+};
 // The review replaces the monsters, so the Warden has already fallen and left its
 // flame where it stood; otherwise the saved review would hold no flame.
 const fallen = generated.monsters.find((m) => m.kind === "ember-warden");

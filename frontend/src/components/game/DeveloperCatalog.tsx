@@ -16,6 +16,11 @@ import {
 	SheetTitle,
 } from "@/components/ui/sheet";
 import {
+	ARENA_DEPTH_SHARE,
+	ARENA_MIN_DEPTH,
+	MINIBOSS_KINDS,
+} from "../../domain/arena/Arena";
+import {
 	AFFLICTION_DEFINITIONS,
 	type AfflictionKind,
 } from "../../domain/game/AfflictionDefinitions";
@@ -472,6 +477,21 @@ const DeveloperCatalog = ({
 											? `${Math.round(RARE_DISCOVERY_CHANCE * 100)}% shared rare-discovery chance per adventure, ${kind === "hourglass" ? "half the weight of" : "equal weight with"} the other discoveries; at most one discovery/dungeon; omitted without safe space`
 											: `${Math.round(definition.chance * 100)}% placement chance`}
 									</p>
+									{kind === "arena-gate" && (
+										<p>
+											Adventures of {ARENA_MIN_DEPTH}+ floors: on the down stair
+											of the floor above the arena (
+											{Math.round(ARENA_DEPTH_SHARE * 100)}% depth). Confirming
+											enters; no retreat until the arena is won. Miniboss by
+											seed: {MINIBOSS_KINDS.join(", ")}.
+										</p>
+									)}
+									{kind === "arena-door" && (
+										<p>
+											The arena hall's exit; opens when no creature on the arena
+											floor is left alive, restoring full health and mana.
+										</p>
+									)}
 									{kind === "dark-altar" && (
 										<p>
 											{Math.round(ALTAR_CHANCE * 100)}% of adventures, one altar

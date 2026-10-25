@@ -9,8 +9,8 @@ const depthBeyond = (kind: MonsterKind, floorNumber: number): number =>
 		Math.min(MONSTER_DEFINITIONS[kind].maxFloor, floorNumber) -
 			MONSTER_DEFINITIONS[kind].minFloor,
 	);
-// Only the optional champion and the mimic grow with depth, so each stays a heroic
-// fight on whichever floor it appears.
+// Only the optional champion, the mimic and the minibosses grow with depth, so each
+// stays a heroic fight on whichever floor it appears.
 const DEPTH_GROWTH: Partial<
 	Record<
 		MonsterKind,
@@ -25,6 +25,8 @@ const DEPTH_GROWTH: Partial<
 		health: (depth) => 3 * depth,
 		attack: (depth) => Math.round((depth * 3) / 4),
 	},
+	"pyre-lord": { health: (depth) => 8 * depth, attack: (depth) => depth },
+	"iron-juggernaut": { health: (depth) => 9 * depth, attack: (depth) => depth },
 };
 const healthGrowth = (kind: MonsterKind, floorNumber: number) =>
 	DEPTH_GROWTH[kind]?.health(depthBeyond(kind, floorNumber)) ?? 0;

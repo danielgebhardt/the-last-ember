@@ -20,16 +20,22 @@ export type PortalDestination = Readonly<{
 type PortalFloors = Readonly<{
 	floors: readonly Readonly<{ floorNumber: number; downStair?: unknown }>[];
 }>;
+// Never onto or past an arena below the portal: the way down runs through the fight.
 export const portalFloors = (
 	run: PortalFloors,
 	portal: Pick<DungeonObject, "floorNumber">,
+	arenaFloors: readonly number[] = [],
 ): number[] =>
 	run.floors
 		.filter(
 			(f) =>
 				f.floorNumber >= portal.floorNumber &&
 				f.floorNumber <= portal.floorNumber + PORTAL_FLOOR_SPAN &&
-				f.downStair !== undefined,
+				f.downStair !== undefined &&
+				!arenaFloors.some(
+					(arena) => arena > portal.floorNumber && f.floorNumber >= arena,
+				) &&
+				!arenaFloors.includes(f.floorNumber),
 		)
 		.map((f) => f.floorNumber);
 
@@ -38,8 +44,9 @@ export const portalFloors = (
 export const portalDestinationFloor = (
 	run: PortalFloors & Readonly<{ seed: number }>,
 	portal: Pick<DungeonObject, "id" | "floorNumber">,
+	arenaFloors: readonly number[] = [],
 ): number | undefined => {
-	const floors = portalFloors(run, portal);
+	const floors = portalFloors(run, portal, arenaFloors);
 	if (!floors.length) return undefined;
 	const roll = createSeededRandom(
 		hashStringToUint32(`${run.seed}:${portal.id}:portal:destination`),
@@ -52,7 +59,11 @@ export const portalLanding = (
 	state: GameState,
 	portal: DungeonObject,
 ): PortalDestination | undefined => {
-	const floorNumber = portalDestinationFloor(state.run, portal);
+	const floorNumber = portalDestinationFloor(
+		state.run,
+		portal,
+		(state.arenas ?? []).map((arena) => arena.floorNumber),
+	);
 	const stair =
 		floorNumber === undefined
 			? undefined

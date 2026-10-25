@@ -38,7 +38,9 @@ export const formatActivityEvent = (event: ActivityEvent): string => {
 		case "monster-charge-hit":
 			return `${prefix}The ${MONSTER_DEFINITIONS[event.monster].name} charges into you for ${event.damage} damage.`;
 		case "monster-charge-ended":
-			return `${prefix}The ${MONSTER_DEFINITIONS[event.monster].name}’s charge is ${event.outcome}. It pauses to recover.`;
+			return event.outcome === "slammed"
+				? `${prefix}The ${MONSTER_DEFINITIONS[event.monster].name} slams into stone and staggers, stunned. Strike now for double damage!`
+				: `${prefix}The ${MONSTER_DEFINITIONS[event.monster].name}’s charge is ${event.outcome}. It pauses to recover.`;
 		case "monster-alarm-prepared":
 			return `${prefix}The ${MONSTER_DEFINITIONS[event.monster].name} raises its alarm. Stop it before its next action!`;
 		case "monster-alarm-sounded":
@@ -156,6 +158,12 @@ export const formatActivityEvent = (event: ActivityEvent): string => {
 			return `${prefix}The ${MONSTER_DEFINITIONS[event.monster].name}'s blinding strike misses you.`;
 		case "monster-blind-avoided":
 			return `${prefix}The ${MONSTER_DEFINITIONS[event.monster].name}'s blinding strike finds only empty air.`;
+		case "arena-entered":
+			return `${prefix}The gate grinds shut above you. Somewhere ahead, the ${MONSTER_DEFINITIONS[event.miniboss].name} stirs.`;
+		case "arena-cleared":
+			return `${prefix}The ${MONSTER_DEFINITIONS[event.miniboss].name} falls. The arena's exit opens, and its spent power restores you.`;
+		case "miniboss-enraged":
+			return `${prefix}${event.miniboss === "pyre-lord" ? "The Pyre Lord roars and calls salamanders from the flames!" : "The Iron Juggernaut stamps and lowers its head. It will charge again and again!"}`;
 		case "pact-struck":
 			return `${prefix}You accept the ${PACT_DEFINITIONS[event.pact].name}. It binds you for the rest of the run.`;
 		case "omen-revealed":

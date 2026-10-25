@@ -21,49 +21,58 @@ import { COMPACT_TEST_CONFIGURATION } from "./TestRunConfiguration";
 import { createTestDungeonFloor } from "./testhelpers";
 
 const FLOORS = 10;
-// Ten linked open floors; the player stands at 4,4 on floor 5 beside the portal.
-const encounter = (seed = 0, floorNumber = 5): GameState => ({
-	...createGameState({
+const openFloors = () =>
+	Array.from({ length: FLOORS }, (_, index) =>
+		createTestDungeonFloor({
+			floorNumber: index + 1,
+			rows: 15,
+			cols: 15,
+			room: { startRow: 1, endRow: 13, startCol: 1, endCol: 13 },
+			...(index > 0
+				? {
+						upStair: {
+							coordinate: { row: 1, col: 1 },
+							destinationFloor: index,
+							arrivalCoordinate: { row: 13, col: 13 },
+						},
+					}
+				: {}),
+			...(index < FLOORS - 1
+				? {
+						downStair: {
+							coordinate: { row: 13, col: 13 },
+							destinationFloor: index + 2,
+							arrivalCoordinate: { row: 1, col: 1 },
+						},
+					}
+				: {}),
+		}),
+	);
+// Ten linked open floors; the player stands at 4,4 on floor 5 beside the portal. The
+// floors stay open, so the arena a ten-floor adventure would hold is left out.
+const encounter = (seed = 0, floorNumber = 5): GameState => {
+	const floors = openFloors();
+	const created = createGameState({
 		seed,
 		activeFloor: floorNumber,
 		playerCoordinate: { row: 4, col: 4 },
-		floors: Array.from({ length: FLOORS }, (_, index) =>
-			createTestDungeonFloor({
-				floorNumber: index + 1,
-				rows: 15,
-				cols: 15,
-				room: { startRow: 1, endRow: 13, startCol: 1, endCol: 13 },
-				...(index > 0
-					? {
-							upStair: {
-								coordinate: { row: 1, col: 1 },
-								destinationFloor: index,
-								arrivalCoordinate: { row: 13, col: 13 },
-							},
-						}
-					: {}),
-				...(index < FLOORS - 1
-					? {
-							downStair: {
-								coordinate: { row: 13, col: 13 },
-								destinationFloor: index + 2,
-								arrivalCoordinate: { row: 1, col: 1 },
-							},
-						}
-					: {}),
-			}),
-		),
-	}),
-	monsters: [],
-	objects: [portal(floorNumber)],
-	floorItems: [
-		{
-			item: { id: "quest:cure", kind: "cure" },
-			floorNumber: FLOORS,
-			coordinate: { row: 7, col: 7 },
-		},
-	],
-});
+		floors,
+	});
+	return {
+		...created,
+		run: { ...created.run, floors },
+		arenas: undefined,
+		monsters: [],
+		objects: [portal(floorNumber)],
+		floorItems: [
+			{
+				item: { id: "quest:cure", kind: "cure" },
+				floorNumber: FLOORS,
+				coordinate: { row: 7, col: 7 },
+			},
+		],
+	};
+};
 const portal = (floorNumber = 5) => ({
 	id: `floor:${floorNumber}:object:runic-portal:1`,
 	kind: "runic-portal" as const,

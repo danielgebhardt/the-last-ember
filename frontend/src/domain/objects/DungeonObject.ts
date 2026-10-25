@@ -176,6 +176,28 @@ export const OBJECT_DEFINITIONS = {
 		chance: 0,
 		placement: "vault",
 	},
+	// Bars the stair down into an arena; see Arena.
+	"arena-gate": {
+		name: "Arena gate",
+		freshLabel: "arena gate",
+		usedLabel: "open arena gate",
+		minFloor: 5,
+		maxFloor: 11,
+		maxPerFloor: 1,
+		chance: 1,
+		placement: "arena",
+	},
+	// The arena hall's exit, locked until everything in the hall is dead.
+	"arena-door": {
+		name: "Arena exit",
+		freshLabel: "sealed arena exit",
+		usedLabel: "open arena exit",
+		minFloor: 6,
+		maxFloor: 12,
+		maxPerFloor: 1,
+		chance: 1,
+		placement: "arena",
+	},
 	// At most one per adventure, in the middle third; see DarkAltar.
 	"dark-altar": {
 		name: "Dark altar",
@@ -222,3 +244,11 @@ export const objectLabel = (
 
 export const isDoor = (object: Pick<DungeonObject, "kind">): boolean =>
 	object.kind === "door" || object.kind === "elite-door";
+// Closed doors, an arena gate not yet passed and a sealed arena exit stand as walls.
+export const blocksPassage = (
+	object: Pick<DungeonObject, "kind" | "activated">,
+): boolean =>
+	!object.activated &&
+	(isDoor(object) ||
+		object.kind === "arena-gate" ||
+		object.kind === "arena-door");

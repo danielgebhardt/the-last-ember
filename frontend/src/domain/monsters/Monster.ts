@@ -71,6 +71,8 @@ export type Monster = {
 	reflection?: Readonly<{ maxHealth: number; attackDamage: number }>;
 	// A treasure thief's haul and the turn it stole it; it then flees until it escapes.
 	theft?: Readonly<{ gold: number; turn: number }>;
+	// An arena miniboss in its second phase, reached at half health.
+	minibossPhase?: 2;
 	// Turn each cooldown telegraph last resolved; another needs more than its cooldown.
 	telegraphTurn?: Partial<Record<TelegraphCooldown, number>>;
 };
@@ -115,6 +117,10 @@ export type MonsterDefinition = {
 	afflictionSource?: boolean;
 	// Never attacks: a telegraphed theft of carried gold, then flight. Placed by its own budget.
 	thief?: true;
+	// Only an arena's miniboss; it changes phase at half health.
+	miniboss?: true;
+	// A charge that runs on past its mark until something stops it; a wall stuns it.
+	overrun?: true;
 	regeneration?: number;
 	enemySpells?: readonly EnemySpellKind[];
 	spellInterval?: number;
@@ -339,6 +345,49 @@ const monsterCatalog = {
 		chargeRange: 4,
 		resists: ["arcane"],
 		weaknesses: ["cold"],
+	},
+	// Arena minibosses grow with depth from these floor-6 values; see MonsterStats.
+	"pyre-lord": {
+		name: "Pyre Lord",
+		minFloor: 6,
+		maxFloor: 12,
+		maxHealth: 80,
+		attackDamage: 10,
+		experienceReward: 120,
+		detectionRadius: 12,
+		spawnWeight: 1,
+		spawnEnabled: false,
+		dropChance: 0,
+		lootPreferences: {},
+		resists: ["fire"],
+		weaknesses: ["cold"],
+		miniboss: true,
+		// Pillars block his line of fire.
+		areaAttack: {
+			element: "fire",
+			range: 9,
+			radius: 2,
+			minDamage: 5,
+			maxDamage: 10,
+			cooldown: 3,
+		},
+	},
+	"iron-juggernaut": {
+		name: "Iron Juggernaut",
+		minFloor: 6,
+		maxFloor: 12,
+		maxHealth: 90,
+		attackDamage: 14,
+		experienceReward: 120,
+		detectionRadius: 12,
+		spawnWeight: 1,
+		spawnEnabled: false,
+		dropChance: 0,
+		lootPreferences: {},
+		resists: ["arcane"],
+		miniboss: true,
+		chargeRange: 8,
+		overrun: true,
 	},
 	"treasure-thief": {
 		name: "treasure thief",

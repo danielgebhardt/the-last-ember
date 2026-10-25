@@ -9,6 +9,7 @@ import {
 	resolveMeleeAttack,
 } from "../game/MeleeRules";
 import { hasMonsterEffect } from "../game/TimedEffects";
+import { navigationRun } from "../objects/NavigationTerrain";
 import { MONSTER_DEFINITIONS, type Monster } from "./Monster";
 import {
 	orthogonalDistance,
@@ -16,6 +17,12 @@ import {
 } from "./MonsterLocations";
 import { actorAttackDamage } from "./MonsterStats";
 
+// Far enough to cross any hall; the line itself stops at the first wall.
+const OVERRUN_LIMIT = 64;
+const beyond = (start: Coordinate, target: Coordinate): Coordinate => ({
+	row: start.row + Math.sign(target.row - start.row) * OVERRUN_LIMIT,
+	col: start.col + Math.sign(target.col - start.col) * OVERRUN_LIMIT,
+});
 export const chargeLine = (
 	terrain: readonly (readonly string[])[],
 	start: Coordinate,
@@ -89,13 +96,20 @@ export const resolveMonsterCharge = (
 	}
 	if (intent.type !== "preparing-charge") return undefined;
 	let coordinate = monster.coordinate;
+	const overrun = MONSTER_DEFINITIONS[monster.kind].overrun === true;
+	// In its second phase a juggernaut wastes no time recovering from a missed charge.
+	const relentless = overrun && monster.minibossPhase === 2;
 	const finished = (
-		outcome: "blocked" | "avoided" | "missed" | "interrupted",
+		outcome: "blocked" | "avoided" | "missed" | "interrupted" | "slammed",
 	) => ({
+		...(outcome === "slammed" ? { stunned: true as const } : {}),
 		monster: {
 			...monster,
 			coordinate,
-			intent: { type: "recovering-charge" as const },
+			intent:
+				relentless && outcome !== "slammed"
+					? { type: "idle" as const }
+					: { type: "recovering-charge" as const },
 		},
 		events: [
 			{
@@ -113,12 +127,21 @@ export const resolveMonsterCharge = (
 		state.run,
 		state.run.activeFloor,
 	);
-	const line = chargeLine(
-		state.run.floors[state.run.activeFloor - 1].terrain,
-		monster.coordinate,
-		intent.target,
-		range,
-	);
+	// An overrunning charge keeps going past its mark, through open doors, until stone
+	// or someone stops it.
+	const line = overrun
+		? chargeLine(
+				navigationRun(state).floors[state.run.activeFloor - 1].terrain,
+				monster.coordinate,
+				beyond(monster.coordinate, intent.target),
+				OVERRUN_LIMIT,
+			)
+		: chargeLine(
+				state.run.floors[state.run.activeFloor - 1].terrain,
+				monster.coordinate,
+				intent.target,
+				range,
+			);
 	for (const point of line) {
 		if (
 			protectedTiles.some((tile) => orthogonalDistance(tile, point) === 0) ||
@@ -174,6 +197,8 @@ export const resolveMonsterCharge = (
 		}
 		coordinate = point;
 	}
+	if (overrun)
+		return finished(line.length < OVERRUN_LIMIT ? "slammed" : "avoided");
 	return finished(
 		line.length === orthogonalDistance(monster.coordinate, intent.target)
 			? "avoided"

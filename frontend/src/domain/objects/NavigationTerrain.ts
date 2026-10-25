@@ -1,6 +1,6 @@
 import type { DungeonFloor, DungeonRun } from "../dungeon/DungeonRun";
 import { WALL } from "../dungeon/Tiles";
-import { type DungeonObject, isDoor } from "./DungeonObject";
+import { blocksPassage, type DungeonObject } from "./DungeonObject";
 
 const cache = new WeakMap<
 	readonly DungeonObject[],
@@ -20,9 +20,7 @@ export const navigationRun = (state: {
 		if (cached) return cached;
 		const closed = state.objects.filter(
 			(object) =>
-				isDoor(object) &&
-				!object.activated &&
-				object.floorNumber === floor.floorNumber,
+				blocksPassage(object) && object.floorNumber === floor.floorNumber,
 		);
 		if (!closed.length) {
 			floors.set(floor, floor);

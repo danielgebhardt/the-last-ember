@@ -1,3 +1,4 @@
+import { arenaMoveRefusal, resolveArenas } from "../arena/ArenaRules";
 import {
 	MOVEMENT_OFFSETS,
 	type MovementDirection,
@@ -381,12 +382,14 @@ export const resolvePlayerAction = (
 	const resolved = announceOmens(
 		state,
 		noticeCrackedWalls(
-			monsterPhase
-				? recoverManaAfterTurn(
-						advancePlayerAfflictions(monsterPhase),
-						suppressesManaRecovery(monsterPhase.afflictions),
-					)
-				: responseState,
+			resolveArenas(
+				monsterPhase
+					? recoverManaAfterTurn(
+							advancePlayerAfflictions(monsterPhase),
+							suppressesManaRecovery(monsterPhase.afflictions),
+						)
+					: responseState,
+			),
 		),
 	);
 	return {
@@ -540,6 +543,8 @@ const resolveCommittedEffect = (
 		row: state.run.playerCoordinate.row + offset.row,
 		col: state.run.playerCoordinate.col + offset.col,
 	};
+	const refusal = arenaMoveRefusal(state, destination);
+	if (refusal) return { error: refusal };
 	const door = state.objects.find(
 		(object) =>
 			object.kind === "door" &&

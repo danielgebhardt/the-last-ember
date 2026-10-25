@@ -65,11 +65,15 @@ export const OBJECT_FLAVOR: Partial<Record<DungeonObjectKind, string>> = {
 	throne: "An empty throne, still humming with old power.",
 	"dark-altar":
 		"Black candles gutter around a stone that hums with hunger. It offers a bargain, once.",
+	"arena-gate":
+		"Iron doors bar the stair down. Beyond them something waits, and the crowd that once watched is long dead.",
 };
 // Replaces the usual "each choice takes a turn" line where the stakes differ.
 export const OBJECT_NOTE: Partial<Record<DungeonObjectKind, string>> = {
 	"dark-altar":
 		"Choose one pact. It lasts the rest of the run and cannot be undone. Walking away is free.",
+	"arena-gate":
+		"There is no retreat once you enter. Walking away is free, but this is the only way down.",
 };
 const short = (gold: number | undefined, price: number) =>
 	gold !== undefined && gold < price ? "Not enough gold." : undefined;
@@ -371,6 +375,21 @@ const baseObjectChoices = (
 			},
 		];
 	}
+	if (object.kind === "arena-gate")
+		return [
+			{
+				value: "enter-arena",
+				label: "Enter the arena",
+				description:
+					"Fight what waits inside. The doors seal behind you until it falls.",
+				outcomes: [
+					{ text: "A miniboss fight", tone: "bad" },
+					{ text: "Win: a rare find, gold and a full heal", tone: "good" },
+					{ text: "Then onward to the next floor", tone: "neutral" },
+				],
+				warning: "No retreat: no portal, no scroll, no way back.",
+			},
+		];
 	if (object.kind === "dark-altar")
 		return state?.run
 			? altarPacts(state.run.seed, object).map((kind) => {

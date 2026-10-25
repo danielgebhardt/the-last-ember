@@ -129,8 +129,11 @@ it("rare room finds have bounded independent placement without changing terrain 
 	);
 	expect(rare.length).toBeGreaterThan(0);
 	expect(rare.length).toBeLessThan(12);
-	// Only secret vault pockets are carved, behind still-solid walls.
+	// Only secret vault pockets are carved, behind still-solid walls; the arena floor is
+	// replaced whole.
 	for (const [index, floor] of state.run.floors.entries()) {
+		if (state.arenas?.some((arena) => arena.floorNumber === index + 1))
+			continue;
 		const pocket = sealedTiles(floor, state.objects);
 		for (const [r, row] of floor.terrain.entries())
 			for (const [c, tile] of row.entries())

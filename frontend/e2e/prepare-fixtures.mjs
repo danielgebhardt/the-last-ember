@@ -460,6 +460,46 @@ export default async function prepareFixtures() {
 				(entry) => entry.item.kind === "cure",
 			),
 		};
+		// Beside the arena gate on floor 5 of a ten-floor run, nothing else around; the
+		// second fixture has just entered.
+		const arenaConfiguration = { ...configuration, floorCount: 10 };
+		const arenaRun = connectDungeonFloors(
+			generateDungeonRun(123, 10, arenaConfiguration),
+		);
+		const arenaAdventure = withFlameOnFloor(
+			createGameState(arenaRun, arenaConfiguration.difficulty),
+		);
+		const gateStair = arenaAdventure.run.floors[4].downStair.coordinate;
+		const gateSide = [
+			{ row: 0, col: -1 },
+			{ row: 0, col: 1 },
+			{ row: -1, col: 0 },
+			{ row: 1, col: 0 },
+		]
+			.map((d) => ({ row: gateStair.row + d.row, col: gateStair.col + d.col }))
+			.find(
+				(p) => arenaAdventure.run.floors[4].terrain[p.row]?.[p.col] === ".",
+			);
+		if (!gateSide) throw new Error("Expected a tile beside the arena gate");
+		const gateState = {
+			...arenaAdventure,
+			run: {
+				...arenaAdventure.run,
+				activeFloor: 5,
+				playerCoordinate: gateSide,
+			},
+			monsters: arenaAdventure.monsters.filter((m) => m.floorNumber !== 5),
+			objects: arenaAdventure.objects.filter(
+				(o) => o.floorNumber !== 5 || o.kind === "arena-gate",
+			),
+		};
+		const arenaState = resolvePlayerAction(gateState, {
+			type: "interact",
+			objectId: "floor:5:object:arena-gate:1",
+			choice: "enter-arena",
+		}).state;
+		if (arenaState.run.activeFloor !== 6)
+			throw new Error("Expected the arena fixture to enter the arena");
 		// Spare gear and potions in the bag for equipment and shortcut drag.
 		const dragGear = {
 			...quiet,
@@ -764,8 +804,12 @@ export default async function prepareFixtures() {
 			(m) => m.kind === "ember-warden",
 		);
 		if (largeWarden.length !== 1) throw new Error("Expected one Ember Warden");
+		// These fixtures keep their own open floors, so the arena a twenty-floor run would
+		// hold is left out.
 		const largeCorridor = {
 			...largeFresh,
+			run: { ...largeFresh.run, floors: largeRun.floors },
+			arenas: undefined,
 			objects: [],
 			monsters: largeWarden,
 			floorItems: [],
@@ -1288,6 +1332,8 @@ export default async function prepareFixtures() {
 			["well", wellState, forgeConfiguration],
 			["hourglass", hourglassState, hourglassConfiguration],
 			["dark-altar", altarState, hourglassConfiguration],
+			["arena-gate", gateState, arenaConfiguration],
+			["arena", arenaState, arenaConfiguration],
 			["omen-arrival", omenState, configuration],
 			["ember-warden", wardenState, configuration],
 			[

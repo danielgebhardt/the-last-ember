@@ -55,6 +55,10 @@ import TownMap from "./components/town/TownMap";
 import TownStockShop from "./components/town/TownStockShop";
 import TownStorageDialog from "./components/town/TownStorageDialog";
 import {
+	MOVEMENT_OFFSETS,
+	type MovementDirection,
+} from "./domain/dungeon/DungeonRun";
+import {
 	DEFAULT_FOG_CONFIGURATION,
 	DEFAULT_RUN_CONFIGURATION,
 	type FogConfiguration,
@@ -327,6 +331,21 @@ const Home = ({
 		object.kind === "chest" &&
 		object.coordinate.row === run.playerCoordinate.row &&
 		object.coordinate.col === run.playerCoordinate.col;
+	// Stepping into an arena gate asks first, like pressing E beside it.
+	const requestMove = (direction: MovementDirection) => {
+		const offset = MOVEMENT_OFFSETS[direction];
+		const { row, col } = game.state.run.playerCoordinate;
+		const gate = game.state.objects.find(
+			(object) =>
+				object.kind === "arena-gate" &&
+				!object.activated &&
+				object.floorNumber === game.state.run.activeFloor &&
+				object.coordinate.row === row + offset.row &&
+				object.coordinate.col === col + offset.col,
+		);
+		if (gate && !game.state.town) selectInteractionObject(gate);
+		else handleActionRequested({ type: "move", direction });
+	};
 	const selectInteractionObject = (object: DungeonObject) => {
 		if (isChestOnTile(object)) {
 			if (!object.activated) {
@@ -810,9 +829,7 @@ const Home = ({
 												: undefined
 										}
 										downStair={activeFloor.downStair?.coordinate}
-										onMoveRequested={(direction) =>
-											handleActionRequested({ type: "move", direction })
-										}
+										onMoveRequested={requestMove}
 										onWaitRequested={() =>
 											handleActionRequested({ type: "wait" })
 										}

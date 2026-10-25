@@ -1,3 +1,5 @@
+import { arenaOn } from "../arena/Arena";
+import { ARENA_COLS, ARENA_ROWS } from "../arena/ArenaLayout";
 import { FLOOR } from "../dungeon/Tiles";
 import {
 	OMEN_DEFINITIONS,
@@ -41,11 +43,17 @@ export const hasConsistentGeometry = (document: SaveDocument): boolean => {
 		!walkable(1, quest.entrance)
 	)
 		return false;
+	// An arena floor keeps its own fixed size; every other floor the configured one.
+	const sizeOf = (floorNumber: number) =>
+		arenaOn(state, floorNumber)
+			? { rows: ARENA_ROWS, cols: ARENA_COLS }
+			: { rows: config.rows, cols: config.cols };
 	for (const [i, floor] of run.floors.entries()) {
+		const size = sizeOf(i + 1);
 		if (
 			floor.floorNumber !== i + 1 ||
-			floor.terrain.length !== config.rows ||
-			floor.terrain.some((row) => row.length !== config.cols)
+			floor.terrain.length !== size.rows ||
+			floor.terrain.some((row) => row.length !== size.cols)
 		)
 			return false;
 		for (const [link, destination, reverse] of [
@@ -76,8 +84,8 @@ export const hasConsistentGeometry = (document: SaveDocument): boolean => {
 		}) =>
 			r.startRow <= r.endRow &&
 			r.startCol <= r.endCol &&
-			r.endRow < config.rows &&
-			r.endCol < config.cols;
+			r.endRow < size.rows &&
+			r.endCol < size.cols;
 		if (
 			!floor.rooms.every(boundedRegion) ||
 			!floor.corridors.every((path) =>
@@ -162,7 +170,12 @@ export const hasConsistentGeometry = (document: SaveDocument): boolean => {
 				? object.floorNumber < 5 ||
 					(object.activated
 						? !destination ||
-							destination.floorNumber !== portalDestinationFloor(run, object) ||
+							destination.floorNumber !==
+								portalDestinationFloor(
+									run,
+									object,
+									(state.arenas ?? []).map((arena) => arena.floorNumber),
+								) ||
 							run.floors[destination.floorNumber - 1]?.terrain[
 								destination.coordinate.row
 							]?.[destination.coordinate.col] !== FLOOR
@@ -278,9 +291,18 @@ export const hasConsistentGeometry = (document: SaveDocument): boolean => {
 			(blocksAsWall(object)
 				? walkable(object.floorNumber, object.coordinate)
 				: !walkable(object.floorNumber, object.coordinate)) ||
-			protectedFloorLocations(run, object.floorNumber).some((tile) =>
-				sameCoordinate(tile, object.coordinate),
-			) ||
+			// The arena gate alone stands on a stair: the one it bars.
+			(object.kind === "arena-gate"
+				? !sameCoordinate(
+						run.floors[object.floorNumber - 1]?.downStair?.coordinate ?? {
+							row: -1,
+							col: -1,
+						},
+						object.coordinate,
+					)
+				: protectedFloorLocations(run, object.floorNumber).some((tile) =>
+						sameCoordinate(tile, object.coordinate),
+					)) ||
 			(object.floorNumber === 1 &&
 				sameCoordinate(object.coordinate, quest.entrance))
 		)
@@ -304,8 +326,10 @@ export const hasConsistentGeometry = (document: SaveDocument): boolean => {
 		!document.explored.every(
 			(entry) =>
 				floorAt(entry.floorNumber) &&
-				entry.rows.length === config.rows &&
-				entry.rows.every((row) => row.length === config.cols),
+				entry.rows.length === sizeOf(entry.floorNumber).rows &&
+				entry.rows.every(
+					(row) => row.length === sizeOf(entry.floorNumber).cols,
+				),
 		)
 	)
 		return false;

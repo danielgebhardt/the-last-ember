@@ -1,3 +1,9 @@
+import {
+	type Arena,
+	arenaFloorFor,
+	selectMiniboss,
+	withArena,
+} from "../arena/Arena";
 import type { DungeonRun } from "../dungeon/DungeonRun.ts";
 import { type Bag, createStartingBag } from "../items/Bag";
 import { spawnRunQuestItems } from "../items/CurePlacement";
@@ -69,6 +75,8 @@ export type GameState = {
 	townPortal: TownPortal | null;
 	// Floors whose omen changes how they play; absent in older adventures.
 	omens?: readonly FloorOmen[];
+	// Fixed arenas the way down runs through, one in long adventures.
+	arenas?: readonly Arena[];
 	// A wielded Hungering Blade's binding and the turn of its last kill.
 	hunger?: Readonly<{ fedTurn: number }>;
 	// Floors where a Ring of Displacement has already fired this adventure.
@@ -199,7 +207,7 @@ export const createGameState = (
 			.filter((omen) => omen.kind === "cracked")
 			.map((omen) => omen.floorNumber),
 	);
-	return {
+	const created: GameState = {
 		rareEquipment: rare.allocation,
 		townEquipmentPurchases: [],
 		town: null,
@@ -237,4 +245,13 @@ export const createGameState = (
 		monsters: markFirstRemedySources(gathered.monsters),
 		activityHistory: createActivityHistory(),
 	};
+	// The arena replaces its floor last, so no other floor's content moves.
+	const arenaFloorNumber = arenaFloorFor(run.floors.length);
+	return arenaFloorNumber
+		? withArena(
+				created,
+				{ floorNumber: arenaFloorNumber, miniboss: selectMiniboss(run.seed) },
+				difficulty,
+			)
+		: created;
 };

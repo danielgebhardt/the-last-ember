@@ -28,9 +28,12 @@ it("places each selected book once within its floor band without changing ordina
 	expect(books.length).toBeGreaterThanOrEqual(Math.min(3, eligible));
 	expect(books.length).toBeLessThanOrEqual(Math.min(6, eligible));
 	expect(createGameState(run)).toEqual(state);
+	// The arena replaces its floor whole, so whatever lay there is gone.
+	const arena = state.arenas?.[0]?.floorNumber;
 	expect(
 		state.floorItems.filter(
 			(entry) =>
+				entry.floorNumber !== arena &&
 				!books.includes(entry) &&
 				entry.item.kind !== "cure" &&
 				entry.item.kind !== "exit-scroll" &&
@@ -40,7 +43,9 @@ it("places each selected book once within its floor band without changing ordina
 		),
 	).toEqual(
 		// Ordinary loot is placed around the freshly spawned creatures.
-		spawnRunItems(run, spawnRunMonsters(run)),
+		spawnRunItems(run, spawnRunMonsters(run)).filter(
+			(entry) => entry.floorNumber !== arena,
+		),
 	);
 	expect(eligibleLootKinds(1, "found")).not.toContain("book-ember-bolt");
 	for (const entry of books) {

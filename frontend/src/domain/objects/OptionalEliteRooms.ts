@@ -1,3 +1,4 @@
+import { ARENA_ROOMS } from "../arena/ArenaLayout";
 import type { DungeonFloor } from "../dungeon/DungeonRun";
 import type { Coordinate } from "../dungeon/DungeonTypes";
 import type { Room } from "../dungeon/Room";
@@ -88,6 +89,26 @@ export const sealedTiles = (
 	objects: readonly DungeonObject[],
 ): ReadonlySet<string> => {
 	const tiles = sealedVaultTiles(floor, objects);
+	// An arena's reward room stays sealed until its exit opens.
+	if (
+		objects.some(
+			(o) =>
+				o.kind === "arena-door" &&
+				!o.activated &&
+				o.floorNumber === floor.floorNumber,
+		)
+	)
+		for (
+			let row = ARENA_ROOMS.reward.startRow;
+			row <= ARENA_ROOMS.reward.endRow;
+			row++
+		)
+			for (
+				let col = ARENA_ROOMS.reward.startCol;
+				col <= ARENA_ROOMS.reward.endCol;
+				col++
+			)
+				(tiles as Set<string>).add(coordinateKey({ row, col }));
 	for (const object of objects) {
 		if (
 			object.floorNumber !== floor.floorNumber ||

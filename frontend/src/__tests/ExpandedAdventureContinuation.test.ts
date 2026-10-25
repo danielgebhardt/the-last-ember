@@ -40,17 +40,21 @@ describe("Generated expanded adventure continuation", () => {
 			const initial = makeState();
 			expect(makeState()).toEqual(initial);
 			expect(initial.run.floors).toHaveLength(20);
-			// Twelve ordinary creatures per floor; a Quiet omen keeps half of its floor's.
+			// Twelve ordinary creatures per floor; a Quiet omen keeps half of its floor's,
+			// and the arena floor holds only its miniboss.
 			const quiet = (initial.omens ?? []).filter((o) => o.kind === "quiet");
+			const arena = initial.arenas?.[0]?.floorNumber;
+			expect(arena).toBe(12);
 			expect(
 				initial.monsters.filter(
 					(actor) =>
 						actor.kind !== "iron-champion" &&
 						actor.kind !== "ember-warden" &&
+						actor.floorNumber !== arena &&
 						!isThief(actor) &&
 						!isOmenSpawn(actor),
 				),
-			).toHaveLength(240 - 6 * quiet.length);
+			).toHaveLength(228 - 6 * quiet.length);
 			expect(initial.bag.items.map((item) => item.kind)).toEqual([
 				"healing-potion",
 				"mana-potion",

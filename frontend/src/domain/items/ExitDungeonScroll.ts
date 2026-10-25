@@ -1,3 +1,4 @@
+import { ARENA_SCROLL_REFUSAL, inStandingArena } from "../arena/ArenaRules";
 import { hasLineOfSight } from "../dungeon/Visibility";
 import { appendActivityEvents } from "../game/ActivityHistory";
 import type { GameState } from "../game/GameState";
@@ -20,6 +21,7 @@ export const exitScrollRestriction = (state: GameState): string | null => {
 		return EXIT_SCROLL_EMBER_RESTRICTION;
 	if (state.town || state.townPortal)
 		return "Return through or abandon your existing portal before reading another scroll.";
+	if (inStandingArena(state)) return ARENA_SCROLL_REFUSAL;
 	const terrain =
 		navigationRun(state).floors[state.run.activeFloor - 1]?.terrain;
 	if (!terrain) return "There is no dungeon here to anchor a portal.";

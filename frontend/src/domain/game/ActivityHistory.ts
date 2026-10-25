@@ -1,3 +1,4 @@
+import type { MinibossKind } from "../arena/Arena";
 import type { Coordinate } from "../dungeon/DungeonTypes";
 import type { ConsumptionEvent } from "../items/Consumables";
 import type { EquipmentChangeEvent } from "../items/EquipmentChanges";
@@ -59,7 +60,7 @@ export type ActivityEvent = { turn: number } & (
 			type: "monster-charge-ended";
 			actorId: string;
 			monster: MonsterKind;
-			outcome: "blocked" | "avoided" | "missed" | "interrupted";
+			outcome: "blocked" | "avoided" | "missed" | "interrupted" | "slammed";
 	  }
 	| { type: "escape-started" }
 	| { type: "escape-floor-activated"; floorNumber: number }
@@ -262,6 +263,10 @@ export type ActivityEvent = { turn: number } & (
 	| { type: "cracked-wall-noticed" | "vault-opened" }
 	| { type: "omen-revealed"; omen: OmenKind }
 	| { type: "pact-struck"; pact: PactKind }
+	| {
+			type: "arena-entered" | "arena-cleared" | "miniboss-enraged";
+			miniboss: MinibossKind;
+	  }
 	| { type: "omen-foreseen"; omen?: OmenKind }
 	| { type: "experience-gained"; amount: number }
 	| { type: "level-gained"; level: number; healthGain: number }

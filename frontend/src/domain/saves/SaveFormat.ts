@@ -86,6 +86,9 @@ export const createSaveDocument = (
 		...(state.omens?.length
 			? { omens: state.omens.map((omen) => ({ ...omen })) }
 			: {}),
+		...(state.arenas?.length
+			? { arenas: state.arenas.map((arena) => ({ ...arena })) }
+			: {}),
 		townEquipmentStock: state.townEquipmentStock.map(savedItem),
 		townEquipmentPurchases: [...state.townEquipmentPurchases],
 		townPotionStock: { ...state.townPotionStock },
@@ -178,6 +181,7 @@ export const createSaveDocument = (
 				warden,
 				reflection,
 				theft,
+				minibossPhase,
 				telegraphTurn,
 			}) => ({
 				id,
@@ -196,6 +200,7 @@ export const createSaveDocument = (
 				...(warden ? { warden: { ...warden } } : {}),
 				...(reflection !== undefined ? { reflection: { ...reflection } } : {}),
 				...(theft !== undefined ? { theft: { ...theft } } : {}),
+				...(minibossPhase !== undefined ? { minibossPhase } : {}),
 				...(telegraphTurn !== undefined
 					? { telegraphTurn: { ...telegraphTurn } }
 					: {}),

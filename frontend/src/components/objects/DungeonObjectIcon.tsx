@@ -1,6 +1,7 @@
 import {
 	Coins,
 	DoorClosed,
+	DoorClosedLocked,
 	DoorOpen,
 	Flame,
 	Gem,
@@ -8,6 +9,7 @@ import {
 	Landmark,
 	LibraryBig,
 	Skull,
+	Swords,
 	TriangleAlert,
 } from "lucide-react";
 import type { ComponentType, SVGProps } from "react";
@@ -51,6 +53,8 @@ const icons: Record<
 	"cracked-wall": CrackedWallIcon,
 	// Placeholder until a drawn icon exists.
 	"dark-altar": Flame,
+	"arena-gate": Swords,
+	"arena-door": DoorClosedLocked,
 };
 const DungeonObjectIcon = ({ object }: { object: DungeonObject }) => {
 	if (!objectAvailable(object)) return null;

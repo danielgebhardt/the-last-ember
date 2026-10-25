@@ -116,7 +116,11 @@ export const resolveMonsterArea = (
 	}
 	if (
 		monster.intent.type !== "idle" ||
-		!telegraphReady(monster, "breath", state.turn) ||
+		// A Pyre Lord in its second phase breathes without pause.
+		!(
+			monster.minibossPhase === 2 ||
+			telegraphReady(monster, "breath", state.turn)
+		) ||
 		!detectsPlayer(state.run, monster, rules) ||
 		orthogonalDistance(monster.coordinate, state.run.playerCoordinate) >
 			profile.range

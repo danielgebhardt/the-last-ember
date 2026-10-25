@@ -17,7 +17,10 @@ import { THIEF_SPAWN_ID } from "../domain/monsters/TreasureThief";
 import { parseSave, serializeSave } from "../domain/saves/SaveFormat";
 import { savedAdventure } from "./SaveTestHelpers";
 
-const kinds = Object.keys(MONSTER_DEFINITIONS) as MonsterKind[];
+// Minibosses only exist in their arena, which this short fixture has none of.
+const kinds = (Object.keys(MONSTER_DEFINITIONS) as MonsterKind[]).filter(
+	(kind) => !MONSTER_DEFINITIONS[kind].miniboss,
+);
 // The Warden only exists with its reserved ID and depth stats; off the final floor it
 // must be enraged. A thief owns its reserved ID. Any other kind is reshaped as is.
 const asKind = (monster: Monster, kind: MonsterKind): Monster =>

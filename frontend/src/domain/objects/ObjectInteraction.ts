@@ -1,3 +1,4 @@
+import { EXIT_REFUSAL, enterArena } from "../arena/ArenaRules";
 import { appendActivityEvents } from "../game/ActivityHistory";
 import type { GameState } from "../game/GameState";
 import type { PactKind } from "../game/Pacts";
@@ -41,7 +42,8 @@ export type ObjectChoice =
 	| "mirror-shatter"
 	| "portal-enter"
 	| "hourglass-turn"
-	| `pact-${PactKind}`;
+	| `pact-${PactKind}`
+	| "enter-arena";
 export type InteractAction = {
 	type: "interact";
 	objectId?: string;
@@ -124,6 +126,9 @@ export const interactObject = (
 	if (object.kind === "cracked-wall") return openCrackedWall(state, object);
 	if (object.kind === "dark-altar")
 		return strikePact(state, object, action.choice);
+	if (object.kind === "arena-gate")
+		return enterArena(state, object, action.choice);
+	if (object.kind === "arena-door") return { error: EXIT_REFUSAL };
 
 	if (
 		object.activated &&

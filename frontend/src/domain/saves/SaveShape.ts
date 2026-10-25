@@ -1,3 +1,4 @@
+import { MINIBOSS_KINDS } from "../arena/Arena";
 import {
 	CONFIGURATION_LIMITS,
 	FOG_RADIUS_LIMITS,
@@ -204,6 +205,9 @@ const eventFields = {
 	"vault-opened": {},
 	"omen-revealed": { omen: oneOf(OMEN_KINDS) },
 	"pact-struck": { pact: oneOf(PACT_KINDS) },
+	"arena-entered": { miniboss: oneOf(MINIBOSS_KINDS) },
+	"arena-cleared": { miniboss: oneOf(MINIBOSS_KINDS) },
+	"miniboss-enraged": { miniboss: oneOf(MINIBOSS_KINDS) },
 	"omen-foreseen": { omen: optional(oneOf(OMEN_KINDS)) },
 	"gold-collected": { amount: integer(1) },
 	"merchant-bought": { item: itemKind, gold: integer(1) },
@@ -352,7 +356,7 @@ const eventFields = {
 	"monster-charge-ended": {
 		actorId: text,
 		monster: monsterKind,
-		outcome: oneOf(["blocked", "avoided", "missed", "interrupted"]),
+		outcome: oneOf(["blocked", "avoided", "missed", "interrupted", "slammed"]),
 	},
 	"escape-floor-activated": { floorNumber },
 	"entrance-reminder": { goalFloor: floorNumber },
@@ -480,6 +484,10 @@ const documentShape = object({
 		hunger: optional(object({ fedTurn: natural })),
 		omens: optional(
 			array(object({ floorNumber, kind: oneOf(OMEN_KINDS) }), 0, 20),
+		),
+		// Where an arena may stand is a consistency rule.
+		arenas: optional(
+			array(object({ floorNumber, miniboss: oneOf(MINIBOSS_KINDS) }), 0, 1),
 		),
 		town: nullable(isTownLocation),
 		townPotionStock: isTownPotionStock,
@@ -645,6 +653,7 @@ const documentShape = object({
 					object({ maxHealth: integer(1), attackDamage: integer(1) }),
 				),
 				theft: optional(object({ gold: integer(1), turn: natural })),
+				minibossPhase: optional(oneOf([2])),
 				// Which kinds a monster may hold is a consistency rule.
 				telegraphTurn: optional(
 					(value) =>

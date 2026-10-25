@@ -1,3 +1,4 @@
+import { withArena } from "../arena/Arena";
 import {
 	connectDungeonFloors,
 	type DungeonFloor,
@@ -267,14 +268,21 @@ const testContent = (
 	return { monsters, objects };
 };
 
-// Authored floors keep no generated omens; the first generated floor always shows one, a
-// rule-only omen that needs no gathering.
+// The two floors below the authored ones are arenas, one per miniboss, so both fights
+// are a short walk away. A short test run has room for the first only.
+export const TEST_ARENAS = [
+	{ floorNumber: TEST_SEED_FLOORS + 1, miniboss: "pyre-lord" },
+	{ floorNumber: TEST_SEED_FLOORS + 2, miniboss: "iron-juggernaut" },
+] as const;
+// Authored floors and arenas keep no generated omens; the first floor after the arenas
+// always shows one, a rule-only omen that needs no gathering.
+export const TEST_OMEN_FLOOR = TEST_SEED_FLOORS + TEST_ARENAS.length + 1;
 const testOmens = (generated: readonly FloorOmen[]): FloorOmen[] =>
-	generated.some((omen) => omen.floorNumber === TEST_SEED_FLOORS + 1)
+	generated.some((omen) => omen.floorNumber === TEST_OMEN_FLOOR)
 		? [...generated]
 		: [
 				...generated.filter((omen) => omen.kind !== "ember-lit"),
-				{ floorNumber: TEST_SEED_FLOORS + 1, kind: "ember-lit" },
+				{ floorNumber: TEST_OMEN_FLOOR, kind: "ember-lit" },
 			];
 
 // Level 10, every spell, 10,000 gold, 20 of every potion and scroll, and one of
@@ -315,7 +323,7 @@ export const createTestSeedState = (
 		() => 0,
 		() => 0,
 	);
-	return {
+	const seeded: GameState = {
 		...base,
 		run: vault
 			? { ...base.run, floors: [vault.floor, ...base.run.floors.slice(1)] }
@@ -340,4 +348,11 @@ export const createTestSeedState = (
 		bag: testBag(),
 		potionHotbar: createStartingPotionHotbar(),
 	};
+	return TEST_ARENAS.reduce(
+		(state, arena) =>
+			arena.floorNumber < state.run.floors.length
+				? withArena(state, arena, difficulty)
+				: state,
+		seeded,
+	);
 };

@@ -81,6 +81,14 @@ const hints: Record<DungeonObjectKind, { fresh: string; spent: string }> = {
 		fresh: "Press E to make an offering.",
 		spent: "Already blessed.",
 	},
+	"arena-gate": {
+		fresh: "It bars the only way down. Press E to look closer.",
+		spent: "The arena is won; the stair below is open.",
+	},
+	"arena-door": {
+		fresh: "Sealed until nothing in the hall is left standing.",
+		spent: "Open. The way on lies beyond.",
+	},
 	"dark-altar": {
 		fresh:
 			"Press E to hear its bargains. Whatever you accept lasts the whole run.",

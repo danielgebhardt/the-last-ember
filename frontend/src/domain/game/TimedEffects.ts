@@ -11,6 +11,8 @@ export const EFFECT_DEFINITIONS = {
 	rooted: { name: "Webbed", duration: 3 },
 	asleep: { name: "Asleep", duration: 3 },
 	afraid: { name: "Afraid", duration: 3 },
+	// Monster-only: a juggernaut that slammed into stone; it takes double damage.
+	stunned: { name: "Stunned", duration: 2 },
 	// Monster-only: player poison is an affliction.
 	poisoned: { name: "Poisoned", duration: 6, monsterDamage: 4 },
 	renewing: { name: "Renewal", duration: 4 },
@@ -31,6 +33,7 @@ export const MONSTER_EFFECT_KINDS = [
 	"asleep",
 	"afraid",
 	"poisoned",
+	"stunned",
 ] as const;
 export type PlayerEffectKind = (typeof PLAYER_EFFECT_KINDS)[number];
 export type EffectKind = keyof typeof EFFECT_DEFINITIONS;
@@ -83,6 +86,7 @@ export const monsterSkipsAction = (
 		(effect) =>
 			effect.actorId === monster.id &&
 			(effect.kind === "asleep" ||
+				effect.kind === "stunned" ||
 				(effect.kind === "slowed" && effect.remaining % 2 === 1)),
 	);
 

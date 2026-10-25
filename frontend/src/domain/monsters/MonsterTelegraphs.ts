@@ -24,6 +24,10 @@ export type SpecialActionOutcome = Readonly<{
 	affliction?: AfflictionKind;
 	// A new actor joins after this phase's actors, so it first acts next phase.
 	summoned?: Monster;
+	// Several at once, such as a miniboss calling its second phase's creatures.
+	summons?: readonly Monster[];
+	// A juggernaut that slammed into stone is stunned.
+	stunned?: true;
 	// Carried gold a treasure thief took.
 	stolenGold?: number;
 }>;

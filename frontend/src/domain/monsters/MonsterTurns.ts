@@ -1,3 +1,4 @@
+import { resolveMinibossPhase } from "../arena/Minibosses";
 import { hashStringToUint32 } from "../dungeon/DungeonRun";
 import { createSeededRandom } from "../dungeon/Seed";
 import {
@@ -20,7 +21,11 @@ import {
 import { omenMeleeDamage, omenRegeneration } from "../game/Omens";
 import { pactSilences } from "../game/Pacts";
 import { arrowWardedDamage } from "../game/PerkEffects";
-import { hasMonsterEffect, monsterSkipsAction } from "../game/TimedEffects";
+import {
+	EFFECT_DEFINITIONS,
+	hasMonsterEffect,
+	monsterSkipsAction,
+} from "../game/TimedEffects";
 import { displaceAfterHits } from "../items/RingOfDisplacement";
 import { navigationRun } from "../objects/NavigationTerrain";
 import { alertNearbyMonsters } from "./AlarmAlerts";
@@ -334,6 +339,21 @@ export const resolveMonsterPhase = (
 				continue;
 			}
 		}
+		// A miniboss at half health spends one action changing phase, seen or not.
+		const phase =
+			monster.intent.type === "idle"
+				? resolveMinibossPhase(state, monster, monsters)
+				: undefined;
+		if (phase) {
+			monsters = [
+				...monsters.map((actor) =>
+					actor.id === monster.id ? phase.monster : actor,
+				),
+				...(phase.summons ?? []),
+			];
+			events.push(...phase.events);
+			continue;
+		}
 		if (!detected && monster.intent.type === "idle") {
 			const rooted =
 				hasMonsterEffect(state, monster, "rooted") ||
@@ -379,6 +399,20 @@ export const resolveMonsterPhase = (
 				actor.id === monster.id ? special.monster : actor,
 			);
 			if (special.summoned) monsters = [...monsters, special.summoned];
+			if (special.summons) monsters = [...monsters, ...special.summons];
+			if (special.stunned)
+				effects = [
+					...effects.filter(
+						(effect) =>
+							effect.actorId !== monster.id || effect.kind !== "stunned",
+					),
+					{
+						actorId: monster.id,
+						floorNumber: monster.floorNumber,
+						kind: "stunned",
+						remaining: EFFECT_DEFINITIONS.stunned.duration,
+					},
+				];
 			if (special.stolenGold) gold -= special.stolenGold;
 			events.push(...special.events);
 			const signal = special.events.find(
