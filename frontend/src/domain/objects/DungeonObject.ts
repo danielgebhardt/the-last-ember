@@ -198,6 +198,17 @@ export const OBJECT_DEFINITIONS = {
 		chance: 1,
 		placement: "arena",
 	},
+	// The arena reward room's rack: take one piece of its gear.
+	"arena-reward": {
+		name: "Victor's rack",
+		freshLabel: "victor's rack",
+		usedLabel: "emptied victor's rack",
+		minFloor: 6,
+		maxFloor: 12,
+		maxPerFloor: 1,
+		chance: 1,
+		placement: "arena",
+	},
 	// At most one per adventure, in the middle third; see DarkAltar.
 	"dark-altar": {
 		name: "Dark altar",

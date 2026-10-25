@@ -1,4 +1,4 @@
-import { MINIBOSS_KINDS } from "../arena/Arena";
+import { ARENA_REWARD_KINDS, MINIBOSS_KINDS } from "../arena/Arena";
 import {
 	CONFIGURATION_LIMITS,
 	FOG_RADIUS_LIMITS,
@@ -208,6 +208,7 @@ const eventFields = {
 	"arena-entered": { miniboss: oneOf(MINIBOSS_KINDS) },
 	"arena-cleared": { miniboss: oneOf(MINIBOSS_KINDS) },
 	"miniboss-enraged": { miniboss: oneOf(MINIBOSS_KINDS) },
+	"arena-reward-claimed": { item: oneOf(ARENA_REWARD_KINDS) },
 	"omen-foreseen": { omen: optional(oneOf(OMEN_KINDS)) },
 	"gold-collected": { amount: integer(1) },
 	"merchant-bought": { item: itemKind, gold: integer(1) },

@@ -500,6 +500,15 @@ export default async function prepareFixtures() {
 		}).state;
 		if (arenaState.run.activeFloor !== 6)
 			throw new Error("Expected the arena fixture to enter the arena");
+		// The arena won, standing beside the victor's rack.
+		const rackState = {
+			...arenaState,
+			run: { ...arenaState.run, playerCoordinate: { row: 7, col: 36 } },
+			monsters: arenaState.monsters.filter((m) => m.floorNumber !== 6),
+			objects: arenaState.objects.map((o) =>
+				o.kind === "arena-door" ? { ...o, activated: true } : o,
+			),
+		};
 		// Spare gear and potions in the bag for equipment and shortcut drag.
 		const dragGear = {
 			...quiet,
@@ -1334,6 +1343,7 @@ export default async function prepareFixtures() {
 			["dark-altar", altarState, hourglassConfiguration],
 			["arena-gate", gateState, arenaConfiguration],
 			["arena", arenaState, arenaConfiguration],
+			["arena-reward", rackState, arenaConfiguration],
 			["omen-arrival", omenState, configuration],
 			["ember-warden", wardenState, configuration],
 			[

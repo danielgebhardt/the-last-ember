@@ -7,9 +7,6 @@ import type { Coordinate } from "../dungeon/DungeonTypes";
 import { createSeededRandom } from "../dungeon/Seed";
 import type { Difficulty } from "../game/Difficulty";
 import type { GameState } from "../game/GameState";
-import type { FloorItem } from "../items/FloorItems";
-import { ITEM_DEFINITIONS, RARE_EQUIPMENT_KINDS } from "../items/Item";
-import { selectRunRareFinds } from "../items/RareFinds";
 import type { Monster } from "../monsters/Monster";
 import { maximumMonsterHealth } from "../monsters/MonsterStats";
 import type { DungeonObject } from "../objects/DungeonObject";
@@ -44,9 +41,19 @@ export const minibossId = (floorNumber: number) =>
 export const ARENA_UP_STAIR: Coordinate = { row: 8, col: 3 };
 export const ARENA_DOWN_STAIR: Coordinate = ARENA_POINTS.exitPortal;
 export const ARENA_REWARD_TILES = {
-	rare: { row: 7, col: 37 },
+	rack: { row: 7, col: 37 },
 	gold: { row: 9, col: 37 },
 } as const satisfies Record<string, Coordinate>;
+// The victor takes one piece of the finest gear from the rack.
+export const ARENA_REWARD_KINDS = [
+	"runeblade",
+	"tower-shield",
+	"dragon-mail",
+	"runic-helmet",
+] as const;
+export type ArenaRewardKind = (typeof ARENA_REWARD_KINDS)[number];
+export const arenaRackId = (floorNumber: number) =>
+	`floor:${floorNumber}:object:arena-reward:1`;
 export const arenaGateId = (floorNumber: number) =>
 	`floor:${floorNumber - 1}:object:arena-gate:1`;
 export const arenaDoorId = (floorNumber: number) =>
@@ -72,29 +79,6 @@ export const isArenaTerrain = (
 export const ARENA_ROOM_LIST = Object.values(ARENA_ROOMS).map((room) => ({
 	...room,
 }));
-
-// Never a find the adventure already hides, and one that can lie at this depth.
-export const arenaRewardKind = (
-	seed: number,
-	floorNumber: number,
-	depth: number,
-) => {
-	const taken = new Set(selectRunRareFinds(seed, depth).map((f) => f.kind));
-	const kinds = RARE_EQUIPMENT_KINDS.filter(
-		(kind) =>
-			!taken.has(kind) &&
-			ITEM_DEFINITIONS[kind].minFloor <= floorNumber &&
-			ITEM_DEFINITIONS[kind].maxFloor >= floorNumber,
-	);
-	return kinds.length
-		? kinds[
-				Math.floor(
-					createSeededRandom(hashStringToUint32(`${seed}:arena:reward`))() *
-						kinds.length,
-				)
-			]
-		: undefined;
-};
 
 export const arenaFloor = (
 	floorNumber: number,
@@ -197,6 +181,13 @@ export const withArena = (
 			activated: false,
 		},
 		{
+			id: arenaRackId(floorNumber),
+			kind: "arena-reward",
+			floorNumber,
+			coordinate: { ...ARENA_REWARD_TILES.rack },
+			activated: false,
+		},
+		{
 			id: arenaGoldId(floorNumber),
 			kind: "gold",
 			floorNumber,
@@ -204,16 +195,6 @@ export const withArena = (
 			activated: false,
 		},
 	];
-	const reward = arenaRewardKind(state.run.seed, floorNumber, floors.length);
-	const items: FloorItem[] = reward
-		? [
-				{
-					item: { id: arenaRewardId(floorNumber), kind: reward },
-					floorNumber,
-					coordinate: { ...ARENA_REWARD_TILES.rare },
-				},
-			]
-		: [];
 	const boss: Monster = {
 		id: minibossId(floorNumber),
 		kind: miniboss,
@@ -235,7 +216,7 @@ export const withArena = (
 			...elsewhere(state.objects).filter((o) => !barred(o)),
 			...objects,
 		],
-		floorItems: [...elsewhere(state.floorItems), ...items],
+		floorItems: elsewhere(state.floorItems),
 		monsters: [...elsewhere(state.monsters), boss],
 		...(state.omens
 			? { omens: state.omens.filter((o) => o.floorNumber !== floorNumber) }

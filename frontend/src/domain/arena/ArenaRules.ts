@@ -12,9 +12,11 @@ import type { DungeonObject } from "../objects/DungeonObject";
 import { navigationRun } from "../objects/NavigationTerrain";
 import type { ObjectChoice } from "../objects/ObjectInteraction";
 import {
+	ARENA_REWARD_KINDS,
 	arenaCleared,
 	arenaDoorId,
 	arenaOn,
+	arenaRewardId,
 	minibossId,
 	standingArena,
 } from "./Arena";
@@ -157,3 +159,32 @@ export const isMinibossOf = (
 ) =>
 	!!arenaOn(state, monster.floorNumber) &&
 	monster.id === minibossId(monster.floorNumber);
+
+// One piece from the rack, laid at your feet; the rack is then empty.
+export const claimArenaReward = (
+	state: GameState,
+	rack: DungeonObject,
+	choice: ObjectChoice | undefined,
+): GameState | { error: string } => {
+	const kind = ARENA_REWARD_KINDS.find(
+		(reward) => choice === `claim-${reward}`,
+	);
+	if (!kind) return { error: "Choose one piece from the rack." };
+	return {
+		...state,
+		objects: state.objects.map((o) =>
+			o.id === rack.id ? { ...o, activated: true } : o,
+		),
+		floorItems: [
+			...state.floorItems,
+			{
+				item: { id: arenaRewardId(rack.floorNumber), kind },
+				floorNumber: rack.floorNumber,
+				coordinate: { ...state.run.playerCoordinate },
+			},
+		],
+		activityHistory: appendActivityEvents(state.activityHistory, [
+			{ type: "arena-reward-claimed", item: kind, turn: state.turn },
+		]),
+	};
+};

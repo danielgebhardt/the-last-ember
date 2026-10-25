@@ -63,3 +63,38 @@ test("the way back up stays sealed inside the arena", async ({ page }) => {
 	).toContainText("The way back is sealed until the arena is won.");
 	await expect(turns(page)).toHaveText(turn ?? "");
 });
+
+for (const size of [
+	{ width: 1470, height: 830 },
+	{ width: 1024, height: 768 },
+])
+	test(`the victor's rack offers four pieces and gives one at ${size.width}×${size.height}`, async ({
+		page,
+	}, testInfo) => {
+		await page.setViewportSize(size);
+		await page.goto("/");
+		await importAdventure(page, "arena-reward");
+		await page.keyboard.press("e");
+		const dialog = page.getByRole("dialog", {
+			name: "Victor's rack",
+			exact: true,
+		});
+		await expect(dialog).toBeInViewport({ ratio: 1 });
+		await expect(dialog.getByRole("button", { name: /^\d / })).toHaveCount(4);
+		expect(
+			await dialog.evaluate((node) => node.scrollHeight <= node.clientHeight),
+		).toBe(true);
+		await page.screenshot({
+			path: testInfo.outputPath(`rack-${size.width}.png`),
+		});
+		await expect(
+			dialog.getByRole("heading", { name: "Victor's rack", exact: true }),
+		).toBeFocused();
+		await page.keyboard.press("3");
+		await expect(dialog).toBeHidden();
+		await expect(page.getByRole("log")).toContainText(
+			"You take the Dragon mail from the rack.",
+		);
+		await page.keyboard.press("e");
+		await expect(dialog).toBeHidden();
+	});

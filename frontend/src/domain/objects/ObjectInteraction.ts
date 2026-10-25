@@ -1,4 +1,9 @@
-import { EXIT_REFUSAL, enterArena } from "../arena/ArenaRules";
+import type { ArenaRewardKind } from "../arena/Arena";
+import {
+	claimArenaReward,
+	EXIT_REFUSAL,
+	enterArena,
+} from "../arena/ArenaRules";
 import { appendActivityEvents } from "../game/ActivityHistory";
 import type { GameState } from "../game/GameState";
 import type { PactKind } from "../game/Pacts";
@@ -43,7 +48,8 @@ export type ObjectChoice =
 	| "portal-enter"
 	| "hourglass-turn"
 	| `pact-${PactKind}`
-	| "enter-arena";
+	| "enter-arena"
+	| `claim-${ArenaRewardKind}`;
 export type InteractAction = {
 	type: "interact";
 	objectId?: string;
@@ -129,6 +135,8 @@ export const interactObject = (
 	if (object.kind === "arena-gate")
 		return enterArena(state, object, action.choice);
 	if (object.kind === "arena-door") return { error: EXIT_REFUSAL };
+	if (object.kind === "arena-reward")
+		return claimArenaReward(state, object, action.choice);
 
 	if (
 		object.activated &&

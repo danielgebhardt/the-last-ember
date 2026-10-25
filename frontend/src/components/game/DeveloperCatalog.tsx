@@ -18,6 +18,7 @@ import {
 import {
 	ARENA_DEPTH_SHARE,
 	ARENA_MIN_DEPTH,
+	ARENA_REWARD_KINDS,
 	MINIBOSS_KINDS,
 } from "../../domain/arena/Arena";
 import {
@@ -484,6 +485,15 @@ const DeveloperCatalog = ({
 											{Math.round(ARENA_DEPTH_SHARE * 100)}% depth). Confirming
 											enters; no retreat until the arena is won. Miniboss by
 											seed: {MINIBOSS_KINDS.join(", ")}.
+										</p>
+									)}
+									{kind === "arena-reward" && (
+										<p>
+											In the arena's reward room: take one of{" "}
+											{ARENA_REWARD_KINDS.map(
+												(k) => ITEM_DEFINITIONS[k].name,
+											).join(", ")}
+											; it is laid at your feet and the rack empties.
 										</p>
 									)}
 									{kind === "arena-door" && (

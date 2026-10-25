@@ -37,8 +37,6 @@ export const hasConsistentRareEquipment = ({
 				isRareEquipmentKind(i.kind) &&
 				!i.id.startsWith("rare-gear:") &&
 				!i.id.startsWith("rare-find:") &&
-				// An arena's reward is checked with its arena.
-				!i.id.startsWith("arena-reward:") &&
 				TOWN_EQUIPMENT_OFFERS[i.id]?.item.kind !== i.kind,
 		)
 	)

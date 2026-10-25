@@ -11,6 +11,7 @@ import {
 	Skull,
 	Swords,
 	TriangleAlert,
+	Trophy,
 } from "lucide-react";
 import type { ComponentType, SVGProps } from "react";
 import { objectAvailable } from "../../domain/merchant/MerchantAvailability";
@@ -55,6 +56,7 @@ const icons: Record<
 	"dark-altar": Flame,
 	"arena-gate": Swords,
 	"arena-door": DoorClosedLocked,
+	"arena-reward": Trophy,
 };
 const DungeonObjectIcon = ({ object }: { object: DungeonObject }) => {
 	if (!objectAvailable(object)) return null;

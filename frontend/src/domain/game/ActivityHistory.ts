@@ -1,4 +1,4 @@
-import type { MinibossKind } from "../arena/Arena";
+import type { ArenaRewardKind, MinibossKind } from "../arena/Arena";
 import type { Coordinate } from "../dungeon/DungeonTypes";
 import type { ConsumptionEvent } from "../items/Consumables";
 import type { EquipmentChangeEvent } from "../items/EquipmentChanges";
@@ -267,6 +267,7 @@ export type ActivityEvent = { turn: number } & (
 			type: "arena-entered" | "arena-cleared" | "miniboss-enraged";
 			miniboss: MinibossKind;
 	  }
+	| { type: "arena-reward-claimed"; item: ArenaRewardKind }
 	| { type: "omen-foreseen"; omen?: OmenKind }
 	| { type: "experience-gained"; amount: number }
 	| { type: "level-gained"; level: number; healthGain: number }

@@ -2,10 +2,12 @@
 import { describe, expect, it } from "vitest";
 import {
 	ARENA_DOWN_STAIR,
+	ARENA_REWARD_KINDS,
 	ARENA_UP_STAIR,
 	arenaDoorId,
 	arenaFloorFor,
 	arenaGateId,
+	arenaRackId,
 	arenaRewardId,
 	isArenaTerrain,
 	MINIBOSS_KINDS,
@@ -33,6 +35,7 @@ import { resolvePlayerAction } from "../domain/game/PlayerActions";
 import { createTestSeedState } from "../domain/game/TestSeed";
 import { exitScrollRestriction } from "../domain/items/ExitDungeonScroll";
 import { coordinateKey } from "../domain/monsters/MonsterLocations";
+import { objectChoices } from "../domain/objects/ObjectChoices";
 import { sealedTiles } from "../domain/objects/OptionalEliteRooms";
 import { portalFloors } from "../domain/objects/RunicPortal";
 import {
@@ -151,12 +154,8 @@ describe("Arenas", () => {
 					.filter((o) => o.floorNumber === 6)
 					.map((o) => o.kind)
 					.sort(),
-			).toEqual(["arena-door", "door", "gold"]);
-			expect(
-				state.floorItems
-					.filter((i) => i.floorNumber === 6)
-					.map((i) => i.item.id),
-			).toEqual([arenaRewardId(6)]);
+			).toEqual(["arena-door", "arena-reward", "door", "gold"]);
+			expect(state.floorItems.filter((i) => i.floorNumber === 6)).toEqual([]);
 			expect(state.omens?.some((o) => o.floorNumber === 6) ?? false).toBe(
 				false,
 			);
@@ -255,6 +254,44 @@ describe("Arenas", () => {
 		const parsed = save(won);
 		if (!parsed.ok) throw new Error(parsed.error);
 		expect(restoreSave(parsed.value).state.arenas).toEqual(won.arenas);
+		// The rack offers all four pieces; taking one lays it at your feet and empties it.
+		const rack = won.objects.find((o) => o.id === arenaRackId(6));
+		if (!rack) throw new Error("Expected the rack");
+		const beside = {
+			...won,
+			run: { ...won.run, playerCoordinate: { row: 7, col: 36 } },
+		};
+		expect(objectChoices(rack, beside).map((c) => c.value)).toEqual(
+			ARENA_REWARD_KINDS.map((kind) => `claim-${kind}`),
+		);
+		const claimed = act(beside, {
+			type: "interact",
+			objectId: rack.id,
+			choice: "claim-dragon-mail",
+		}).state;
+		expect(
+			claimed.floorItems.find((i) => i.item.id === arenaRewardId(6)),
+		).toMatchObject({
+			item: { kind: "dragon-mail" },
+			coordinate: { row: 7, col: 36 },
+		});
+		expect(
+			act(claimed, {
+				type: "interact",
+				objectId: rack.id,
+				choice: "claim-runeblade",
+			}).turnAdvanced,
+		).toBe(false);
+		expect(save(claimed).ok).toBe(true);
+		// A piece without an emptied rack is refused.
+		expect(
+			save({
+				...claimed,
+				objects: claimed.objects.map((o) =>
+					o.id === rack.id ? { ...o, activated: false } : o,
+				),
+			}).ok,
+		).toBe(false);
 		// The way back up opens too.
 		const stepped = act(won, { type: "move", direction: "right" }).state;
 		expect(

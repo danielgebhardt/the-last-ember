@@ -85,6 +85,10 @@ const hints: Record<DungeonObjectKind, { fresh: string; spent: string }> = {
 		fresh: "It bars the only way down. Press E to look closer.",
 		spent: "The arena is won; the stair below is open.",
 	},
+	"arena-reward": {
+		fresh: "Press E to choose your prize. You may take only one.",
+		spent: "You have taken your prize.",
+	},
 	"arena-door": {
 		fresh: "Sealed until nothing in the hall is left standing.",
 		spent: "Open. The way on lies beyond.",

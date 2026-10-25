@@ -158,6 +158,8 @@ export const formatActivityEvent = (event: ActivityEvent): string => {
 			return `${prefix}The ${MONSTER_DEFINITIONS[event.monster].name}'s blinding strike misses you.`;
 		case "monster-blind-avoided":
 			return `${prefix}The ${MONSTER_DEFINITIONS[event.monster].name}'s blinding strike finds only empty air.`;
+		case "arena-reward-claimed":
+			return `${prefix}You take the ${ITEM_DEFINITIONS[event.item].name} from the rack. It lies at your feet.`;
 		case "arena-entered":
 			return `${prefix}The gate grinds shut above you. Somewhere ahead, the ${MONSTER_DEFINITIONS[event.miniboss].name} stirs.`;
 		case "arena-cleared":

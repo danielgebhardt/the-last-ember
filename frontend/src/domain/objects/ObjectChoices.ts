@@ -1,3 +1,4 @@
+import { ARENA_REWARD_KINDS, type ArenaRewardKind } from "../arena/Arena";
 import type { GameState } from "../game/GameState";
 import { omenFavorsWell, WELL_FAVOR } from "../game/Omens";
 import {
@@ -8,7 +9,8 @@ import {
 } from "../game/Pacts";
 import { createPlayerStats } from "../game/PlayerStats";
 import { createProgression } from "../game/Progression";
-import { createStartingEquipment } from "../items/Equipment";
+import { createStartingEquipment, equipmentSlotFor } from "../items/Equipment";
+import { ITEM_DEFINITIONS } from "../items/Item";
 import { itemName } from "../items/ItemValues";
 import { EMPOWERED_MULTIPLIER } from "../monsters/MonsterStats";
 import { FOUNTAIN_RULES, fountainRestoration } from "./DungeonFountains";
@@ -67,6 +69,15 @@ export const OBJECT_FLAVOR: Partial<Record<DungeonObjectKind, string>> = {
 		"Black candles gutter around a stone that hums with hunger. It offers a bargain, once.",
 	"arena-gate":
 		"Iron doors bar the stair down. Beyond them something waits, and the crowd that once watched is long dead.",
+	"arena-reward":
+		"The finest arms the arena ever held, for the one who walked out.",
+};
+// The rack's pieces, each in a line; the chips carry the numbers.
+const ARENA_REWARD_LINES: Readonly<Record<ArenaRewardKind, string>> = {
+	runeblade: "An ancient blade with a strong enchanted edge.",
+	"tower-shield": "A wall of iron you can carry.",
+	"dragon-mail": "Scales no blade has ever cut through.",
+	"runic-helmet": "Carved with wards against every blow.",
 };
 // Replaces the usual "each choice takes a turn" line where the stakes differ.
 export const OBJECT_NOTE: Partial<Record<DungeonObjectKind, string>> = {
@@ -74,6 +85,8 @@ export const OBJECT_NOTE: Partial<Record<DungeonObjectKind, string>> = {
 		"Choose one pact. It lasts the rest of the run and cannot be undone. Walking away is free.",
 	"arena-gate":
 		"There is no retreat once you enter. Walking away is free, but this is the only way down.",
+	"arena-reward":
+		"Choose one; the rest stay on the rack. It lies at your feet, ready to pick up.",
 };
 const short = (gold: number | undefined, price: number) =>
 	gold !== undefined && gold < price ? "Not enough gold." : undefined;
@@ -375,6 +388,34 @@ const baseObjectChoices = (
 			},
 		];
 	}
+	if (object.kind === "arena-reward")
+		return ARENA_REWARD_KINDS.map((kind) => {
+			const definition = ITEM_DEFINITIONS[kind];
+			const worn =
+				state?.equipment[equipmentSlotFor({ id: kind, kind }) ?? "mainHand"];
+			return {
+				value: `claim-${kind}` as const,
+				label: definition.name,
+				description: ARENA_REWARD_LINES[kind],
+				outcomes: [
+					{
+						text:
+							definition.attackBonus > 0
+								? `+${definition.attackBonus} attack`
+								: `+${definition.armor} armor`,
+						tone: "good" as const,
+					},
+					...(worn
+						? [
+								{
+									text: `You wear: ${itemName(worn)}`,
+									tone: "neutral" as const,
+								},
+							]
+						: []),
+				],
+			};
+		});
 	if (object.kind === "arena-gate")
 		return [
 			{
@@ -384,7 +425,10 @@ const baseObjectChoices = (
 					"Fight what waits inside. The doors seal behind you until it falls.",
 				outcomes: [
 					{ text: "A miniboss fight", tone: "bad" },
-					{ text: "Win: a rare find, gold and a full heal", tone: "good" },
+					{
+						text: "Win: your pick of fine gear, gold and a full heal",
+						tone: "good",
+					},
 					{ text: "Then onward to the next floor", tone: "neutral" },
 				],
 				warning: "No retreat: no portal, no scroll, no way back.",

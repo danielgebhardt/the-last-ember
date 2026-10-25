@@ -700,8 +700,10 @@ const DungeonHelp = ({
 					Runic Portal carries you past an arena. The arena is the same in every
 					run: an antechamber, a hall with pillars, and a reward room behind an
 					exit that opens only when nothing in the hall is left standing.
-					Winning restores your health and mana; the reward room holds a rare
-					find, gold, and the stair down. After that the stairs work normally.
+					Winning restores your health and mana. The reward room holds gold, the
+					stair down and a rack with a Runeblade, a Tower shield, Dragon mail
+					and a Runic helmet: take one, and the rest stay behind. After that the
+					stairs work normally.
 				</p>
 				<dl className="grid gap-1 sm:grid-cols-2">
 					<div>
