@@ -3,6 +3,7 @@ import {
 	type ActiveAffliction,
 	afflictedSightRadius,
 } from "./AfflictionDefinitions";
+import { pactGold, pactPrice } from "./Pacts";
 import { hasPerk } from "./Perks";
 import type { AfflictionDefinition } from "./PlayerAfflictions";
 import type { Progression } from "./Progression";
@@ -43,21 +44,29 @@ export const arrowWardedDamage = (progression: Progression, damage: number) =>
 		: damage;
 export const fieldMedicHealing = (progression: Progression): number =>
 	hasPerk(progression, "field-medic") ? FIELD_MEDIC_HEALTH : 0;
-// Haggling never gives away more than its share: prices round up, payouts down.
+// Haggling never gives away more than its share: prices round up, payouts down. The
+// Pact of Avarice then raises every shop and merchant price.
 export const haggledPrice = (progression: Progression, price: number) =>
-	hasPerk(progression, "haggler")
-		? Math.ceil(price * (1 - HAGGLER_SHARE))
-		: price;
+	pactPrice(
+		progression,
+		hasPerk(progression, "haggler")
+			? Math.ceil(price * (1 - HAGGLER_SHARE))
+			: price,
+	);
 export const haggledSale = (progression: Progression, gold: number) =>
 	hasPerk(progression, "haggler")
 		? Math.floor(gold * (1 + HAGGLER_SHARE))
 		: gold;
 export const herbalistBonus = (progression: Progression): number =>
 	hasPerk(progression, "herbalist") ? HERBALIST_RECOVERY : 0;
+// Gold found: Scavenger, then the Pact of Avarice.
 export const scavengedGold = (progression: Progression, amount: number) =>
-	hasPerk(progression, "scavenger")
-		? Math.floor(amount * SCAVENGER_SHARE)
-		: amount;
+	pactGold(
+		progression,
+		hasPerk(progression, "scavenger")
+			? Math.floor(amount * SCAVENGER_SHARE)
+			: amount,
+	);
 
 // Antivenom shortens poison first; Resilient then trims any timed lifetime, rounding
 // up. Lingering afflictions are unaffected.

@@ -4,6 +4,7 @@ import { createSeededRandom } from "../dungeon/Seed";
 import { appendActivityEvents } from "../game/ActivityHistory";
 import type { GameState } from "../game/GameState";
 import { omenFavorsWell, WELL_FAVOR } from "../game/Omens";
+import { PACT_REFUSAL, pactSilences } from "../game/Pacts";
 import {
 	ATTRIBUTE_NAMES,
 	type AttributeName,
@@ -109,6 +110,7 @@ export const offerAtWell = (
 ): GameState | { error: string } => {
 	if (object.activated)
 		return { error: "The well has already taken an offering." };
+	if (pactSilences(state.progression)) return { error: PACT_REFUSAL };
 	const offering = WELL_OFFERINGS.find((o) => OFFERING_CHOICES[o] === choice);
 	if (!offering) return { error: "Review the well's offerings first." };
 	if (state.gold < offering) return { error: "You do not have enough gold." };

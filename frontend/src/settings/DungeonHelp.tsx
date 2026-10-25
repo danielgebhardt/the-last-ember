@@ -34,6 +34,11 @@ import {
 	OMEN_MIN_FLOOR,
 } from "../domain/game/Omens";
 import {
+	HUNTER_EXTRA_HUNTERS,
+	PACT_DEFINITIONS,
+	PACT_KINDS,
+} from "../domain/game/Pacts";
+import {
 	PERK_DEFINITIONS,
 	PERK_KINDS,
 	PERK_LEVELS,
@@ -57,6 +62,7 @@ import {
 	THIEF_ESCAPE_PHASES,
 	THIEF_STEAL_SHARE,
 } from "../domain/monsters/TreasureThief";
+import { ALTAR_CHANCE } from "../domain/objects/DarkAltar";
 import {
 	TRAP_BLEEDING_CHANCE,
 	TRAP_DISARM_EXPERIENCE,
@@ -566,13 +572,14 @@ const DungeonHelp = ({
 					{ESCAPE_ENCOUNTER_RULES.maximumNewMonsters} endgame hunters near stair
 					routes on each return floor, drawn from the floor-
 					{ESCAPE_ENCOUNTER_RULES.monsterPoolFloor} pool. Small or crowded
-					floors may have fewer. All enemies on your active floor sense the
-					flame within {ESCAPE_PURSUIT_RULES.cureSenseRadius}{" "}
-					horizontal/vertical steps, even through walls, and track you while in
-					range. Walls and closed doors still block attacks and movement;
-					creatures that normally open ordinary doors can spend actions opening
-					them. Sleep, Fear, Web and normal telegraphs still work. Keep moving:
-					revisiting or loading never creates another wave.
+					floors may have fewer; the Hunter's Pact adds {HUNTER_EXTRA_HUNTERS}{" "}
+					more. All enemies on your active floor sense the flame within{" "}
+					{ESCAPE_PURSUIT_RULES.cureSenseRadius} horizontal/vertical steps, even
+					through walls, and track you while in range. Walls and closed doors
+					still block attacks and movement; creatures that normally open
+					ordinary doors can spend actions opening them. Sleep, Fear, Web and
+					normal telegraphs still work. Keep moving: revisiting or loading never
+					creates another wave.
 				</p>
 			</section>
 			<ObservedCreatures
@@ -672,6 +679,32 @@ const DungeonHelp = ({
 							<dt className="font-medium">{OMEN_DEFINITIONS[kind].name}</dt>
 							<dd className="text-muted-foreground">
 								{OMEN_DEFINITIONS[kind].description}
+							</dd>
+						</div>
+					))}
+				</dl>
+			</section>
+			<section
+				id="help-pacts"
+				aria-label="Pacts at a dark altar"
+				className="grid gap-3 rounded-lg border p-4 text-sm"
+			>
+				<h3 className="font-medium">Pacts at a dark altar</h3>
+				<p>
+					About {Math.round(ALTAR_CHANCE * 100)}% of adventures hide one dark
+					altar in the middle third of the dungeon. Press E beside it to hear
+					three bargains. Accepting one takes a turn and binds you for the rest
+					of the run; it cannot be undone, and the altar offers nothing more.
+					Walking away is free. Your pact shows beside your turn count and in
+					the Character tab.
+				</p>
+				<dl className="grid gap-1 sm:grid-cols-2">
+					{PACT_KINDS.map((kind) => (
+						<div key={kind}>
+							<dt className="font-medium">{PACT_DEFINITIONS[kind].name}</dt>
+							<dd className="text-muted-foreground">
+								{PACT_DEFINITIONS[kind].gain};{" "}
+								{PACT_DEFINITIONS[kind].cost.toLowerCase()}.
 							</dd>
 						</div>
 					))}

@@ -20,6 +20,7 @@ import { EmberTab, EmberTabsList } from "@/components/ui/EmberTabs";
 import type { ActivityHistory } from "../../domain/game/ActivityHistory";
 import type { QuestState } from "../../domain/game/Adventure";
 import type { ActiveAffliction } from "../../domain/game/AfflictionDefinitions";
+import type { PactKind } from "../../domain/game/Pacts";
 import { pendingPerkCount } from "../../domain/game/Perks";
 import type { PlayerAction } from "../../domain/game/PlayerActions";
 import type { PlayerStats } from "../../domain/game/PlayerStats";
@@ -47,6 +48,7 @@ import CharacterStats from "./CharacterStats";
 import EquipmentView, { equipDropId } from "./EquipmentView";
 import FloorItemsView from "./FloorItemsView";
 import ItemDetails from "./ItemDetails";
+import PactBadge from "./PactBadge";
 import PerksPanel from "./PerksPanel";
 import PotionAssignments, { potionSlotFrom } from "./PotionAssignments";
 import ProgressionView from "./ProgressionView";
@@ -103,6 +105,7 @@ type CharacterDialogProps = {
 	// Items can only be dropped on the ground in the dungeon.
 	inTown?: boolean;
 	gold?: number;
+	pact?: PactKind;
 	turn: number;
 	history: ActivityHistory;
 	actionError: string;
@@ -114,6 +117,7 @@ type CharacterDialogProps = {
 };
 
 const CharacterDialog = ({
+	pact,
 	player,
 	effects = [],
 	afflictions = [],
@@ -339,6 +343,12 @@ const CharacterDialog = ({
 								progression={progression}
 								gold={gold}
 							/>
+							{pact && (
+								<p className="mt-1.5 flex min-w-0 items-center gap-2 text-xs text-muted-foreground">
+									Bound by
+									<PactBadge pact={pact} detailed />
+								</p>
+							)}
 						</div>
 						<div className="min-w-0 p-2 pb-3 lg:min-h-0 lg:flex-1 [@media(max-height:840px)]:pb-2">
 							<ItemDragProvider

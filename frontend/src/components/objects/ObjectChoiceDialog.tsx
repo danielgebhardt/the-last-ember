@@ -12,6 +12,7 @@ import {
 	forgeChoices,
 	type InteractionChoice,
 	OBJECT_FLAVOR,
+	OBJECT_NOTE,
 	objectChoices,
 } from "../../domain/objects/ObjectChoices";
 import { describeObject } from "../../domain/objects/ObjectDescriptions";
@@ -173,7 +174,8 @@ const ObjectChoiceDialog = ({
 								? "Choose what to use. Choosing and canceling use no turn."
 								: forge && !forgeItem
 									? "Pick what to forge. Picking is free."
-									: "Each choice takes a turn. Walking away is free."}
+									: (OBJECT_NOTE[object.kind] ??
+										"Each choice takes a turn. Walking away is free.")}
 						</span>
 					</Dialog.Description>
 					{!object &&

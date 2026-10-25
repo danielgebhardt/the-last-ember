@@ -1,6 +1,7 @@
 import type { Equipment } from "../items/Equipment";
 import { equipmentBonuses } from "../items/EquipmentBonuses";
 import { playerEffectBonuses } from "./EffectBonuses";
+import { pactStrength } from "./Pacts";
 import { permanentAttributeGains } from "./PermanentAttributes";
 import {
 	levelForExperience,
@@ -40,7 +41,10 @@ export const deriveAttributes = (
 		dexterity: temporary.dexterity + gear.dexterity,
 	};
 	const strength =
-		strengthAtLevel(level) + bonuses.strength + permanent.strength;
+		strengthAtLevel(level) +
+		bonuses.strength +
+		permanent.strength +
+		pactStrength(progression);
 	const dexterity =
 		dexterityAtLevel(level) + bonuses.dexterity + permanent.dexterity;
 	const intelligence =

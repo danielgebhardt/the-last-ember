@@ -2,6 +2,7 @@ import {
 	Coins,
 	DoorClosed,
 	DoorOpen,
+	Flame,
 	Gem,
 	Hourglass,
 	Landmark,
@@ -48,6 +49,8 @@ const icons: Record<
 	throne: ThroneIcon,
 	shrine: Landmark,
 	"cracked-wall": CrackedWallIcon,
+	// Placeholder until a drawn icon exists.
+	"dark-altar": Flame,
 };
 const DungeonObjectIcon = ({ object }: { object: DungeonObject }) => {
 	if (!objectAvailable(object)) return null;

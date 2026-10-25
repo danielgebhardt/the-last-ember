@@ -12,6 +12,7 @@ import type { DamageElement } from "./DamageElements";
 import { experienceReward } from "./ExperienceRewards";
 import type { GameState } from "./GameState";
 import { echoBlow, omenKillExperience, omenRegeneration } from "./Omens";
+import { pactKillExperience } from "./Pacts";
 import { scavengedGold } from "./PerkEffects";
 
 import type { SpellKind } from "./Spells";
@@ -84,11 +85,14 @@ export const damageMonster = (
 	let progression = state.progression;
 	let mana = state.mana;
 	if (rewarded) {
-		const reward = omenKillExperience(
-			state,
-			monster.floorNumber,
-			MONSTER_DEFINITIONS[monster.kind].experienceReward *
-				(monster.heroic ? 2 : 1),
+		const reward = pactKillExperience(
+			state.progression,
+			omenKillExperience(
+				state,
+				monster.floorNumber,
+				MONSTER_DEFINITIONS[monster.kind].experienceReward *
+					(monster.heroic ? 2 : 1),
+			),
 		);
 		const gained = experienceReward(state, reward);
 		player = gained.player;

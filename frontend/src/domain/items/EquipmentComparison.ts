@@ -4,7 +4,7 @@ import { deriveCombatStats } from "../game/CombatStats";
 import type { GameState } from "../game/GameState";
 import { maximumMana } from "../game/Mana";
 import { attackProfile, deriveAccuracy } from "../game/MeleeRules";
-import { maximumHealth } from "../game/PlayerHealth";
+import { maximumHealth, scaledMaximumHealth } from "../game/PlayerHealth";
 import {
 	type Equipment,
 	type EquipmentSlot,
@@ -43,7 +43,7 @@ const loadoutStats = (
 	);
 	const attributes = deriveAttributes(progression, effects, equipment);
 	return {
-		maxHealth: context.afflictions?.length
+		maxHealth: scaledMaximumHealth(progression, context.afflictions ?? [])
 			? maximumHealth(progression, equipment, context.afflictions)
 			: context.player.maxHealth +
 				equipmentBonuses(equipment).health -

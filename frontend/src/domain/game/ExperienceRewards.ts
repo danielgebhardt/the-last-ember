@@ -6,7 +6,7 @@ import {
 } from "./Attributes";
 import type { GameState } from "./GameState";
 import { growManaCapacity } from "./Mana";
-import { maximumHealth } from "./PlayerHealth";
+import { maximumHealth, scaledMaximumHealth } from "./PlayerHealth";
 import {
 	experienceThreshold,
 	gainExperience,
@@ -15,7 +15,10 @@ import {
 export const experienceReward = (state: GameState, reward: number) => {
 	const turn = state.turn;
 	const gained = gainExperience(state.progression, state.player, reward);
-	if (state.afflictions.length && gained.levels.length) {
+	if (
+		scaledMaximumHealth(state.progression, state.afflictions) &&
+		gained.levels.length
+	) {
 		const maxHealth = maximumHealth(
 			gained.progression,
 			state.equipment,

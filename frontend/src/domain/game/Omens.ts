@@ -162,6 +162,25 @@ export const omenAt = (
 ): OmenKind | undefined =>
 	state.omens?.find((omen) => omen.floorNumber === floorNumber)?.kind;
 
+// The omens a floor can hold that no other floor took.
+export const omenChoices = (
+	run: DungeonRun,
+	floorNumber: number,
+	objects: readonly DungeonObject[],
+	merchants: boolean,
+	taken: readonly FloorOmen[],
+): readonly OmenKind[] => {
+	const floor = run.floors[floorNumber - 1];
+	const context = { floor, depth: run.floors.length, objects, merchants };
+	return OMEN_KINDS.filter((kind) => {
+		const definition: OmenDefinition = OMEN_DEFINITIONS[kind];
+		return (
+			floorNumber >= (definition.minFloor ?? OMEN_MIN_FLOOR) &&
+			!taken.some((omen) => omen.kind === kind) &&
+			(definition.eligible?.(context) ?? true)
+		);
+	});
+};
 // The floors between the omen floor and the Warden's each roll once on their own stream,
 // choosing among omens they can hold that no earlier floor took.
 export const selectFloorOmens = (
@@ -180,15 +199,13 @@ export const selectFloorOmens = (
 			hashStringToUint32(`${run.seed}:${floor.floorNumber}:omen`),
 		);
 		if (random() >= OMEN_CHANCE) continue;
-		const context = { floor, depth: run.floors.length, objects, merchants };
-		const choices = OMEN_KINDS.filter((kind) => {
-			const definition: OmenDefinition = OMEN_DEFINITIONS[kind];
-			return (
-				floor.floorNumber >= (definition.minFloor ?? OMEN_MIN_FLOOR) &&
-				!omens.some((omen) => omen.kind === kind) &&
-				(definition.eligible?.(context) ?? true)
-			);
-		});
+		const choices = omenChoices(
+			run,
+			floor.floorNumber,
+			objects,
+			merchants,
+			omens,
+		);
 		if (choices.length)
 			omens.push({
 				floorNumber: floor.floorNumber,

@@ -6,6 +6,7 @@ import type {
 } from "../dungeon/RunConfiguration";
 import type { Difficulty } from "../game/Difficulty";
 import type { GameState } from "../game/GameState";
+import type { PactKind } from "../game/Pacts";
 import type { PerkChoice } from "../game/Perks";
 import type { PermanentAttributes } from "../game/PermanentAttributes";
 
@@ -65,6 +66,7 @@ export type SaveDocument = {
 			experience: number;
 			permanentAttributes: PermanentAttributes;
 			perks: PerkChoice[];
+			pact?: PactKind;
 		};
 	};
 	explored: { floorNumber: number; rows: string[] }[];

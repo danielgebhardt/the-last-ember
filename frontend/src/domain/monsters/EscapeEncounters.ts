@@ -1,6 +1,7 @@
 import type { Coordinate } from "../dungeon/DungeonTypes";
 import { createSeededRandom, hashStringToUint32 } from "../dungeon/Seed";
 import type { GameState } from "../game/GameState";
+import { pactExtraHunters } from "../game/Pacts";
 import { sealedTiles } from "../objects/OptionalEliteRooms";
 import { approachDistances } from "./EscapeApproaches";
 import {
@@ -80,10 +81,13 @@ export const generateEscapeEncounters = (
 			)
 				candidates.push(point);
 		}
+	// The Hunter's Pact sends more hunters on top of what the floor would hold.
 	const count = Math.min(
 		candidates.length,
-		rules.maximumNewMonsters,
-		Math.ceil(candidates.length / rules.safeTilesPerMonster),
+		Math.min(
+			rules.maximumNewMonsters,
+			Math.ceil(candidates.length / rules.safeTilesPerMonster),
+		) + pactExtraHunters(state.progression),
 		// A thief never fights, so it never stands in for a hunter.
 		Math.max(
 			0,

@@ -1,3 +1,4 @@
+import type { PactKind } from "./Pacts";
 import type { PerkChoice } from "./Perks";
 import {
 	createPermanentAttributes,
@@ -16,6 +17,8 @@ export type Progression = Readonly<{
 	permanentAttributes?: PermanentAttributes;
 	// Perks chosen at odd levels from 3, in level order.
 	perks?: readonly PerkChoice[];
+	// The bargain struck at a dark altar, kept for the rest of the run.
+	pact?: PactKind;
 }>;
 export const createProgression = (): Progression => ({
 	experience: 0,

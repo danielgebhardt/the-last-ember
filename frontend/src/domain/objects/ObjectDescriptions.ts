@@ -81,6 +81,11 @@ const hints: Record<DungeonObjectKind, { fresh: string; spent: string }> = {
 		fresh: "Press E to make an offering.",
 		spent: "Already blessed.",
 	},
+	"dark-altar": {
+		fresh:
+			"Press E to hear its bargains. Whatever you accept lasts the whole run.",
+		spent: "Your pact holds.",
+	},
 	"cracked-wall": {
 		fresh:
 			"Press E within reach to break through. Something lies sealed behind it. One turn.",

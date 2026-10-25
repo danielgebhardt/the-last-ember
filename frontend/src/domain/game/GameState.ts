@@ -27,6 +27,7 @@ import {
 } from "../monsters/MonsterPlacement.ts";
 import { maximumMonsterHealth } from "../monsters/MonsterStats";
 import { placeTreasureThieves } from "../monsters/TreasureThief";
+import { placeDarkAltar } from "../objects/DarkAltar";
 import type { DungeonObject } from "../objects/DungeonObject";
 import { spawnRunObjects } from "../objects/ObjectPlacement";
 import { addOptionalEliteRooms } from "../objects/OptionalEliteRooms";
@@ -189,6 +190,8 @@ export const createGameState = (
 		),
 		restFloors,
 	);
+	// A dark altar takes its own stream after every other placement.
+	const altar = placeDarkAltar(run, gathered);
 	// Vaults carve solid rock last, so no other placement sees or moves around them.
 	const vaults = carveSecretVaults(
 		run,
@@ -209,7 +212,11 @@ export const createGameState = (
 		run: vaults.run,
 		escape: null,
 		merchantStock: createMerchantStock(),
-		objects: [...gathered.objects, ...vaults.objects],
+		objects: [
+			...gathered.objects,
+			...(altar ? [altar] : []),
+			...vaults.objects,
+		],
 		...(omens.length ? { omens } : {}),
 		gold: STARTING_GOLD,
 		turn: 0,

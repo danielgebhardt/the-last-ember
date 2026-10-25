@@ -1,8 +1,10 @@
 import { appendActivityEvents } from "../game/ActivityHistory";
 import type { GameState } from "../game/GameState";
+import type { PactKind } from "../game/Pacts";
 import { objectAvailable } from "../merchant/MerchantAvailability";
 import { orthogonalDistance } from "../monsters/MonsterLocations";
 import { openSarcophagus } from "./AncientSarcophagi";
+import { strikePact } from "./DarkAltar";
 import { drawFountain } from "./DungeonFountains";
 import { isDoor } from "./DungeonObject";
 import { offerAtShrine } from "./DungeonShrines";
@@ -38,7 +40,8 @@ export type ObjectChoice =
 	| "mirror-reflection"
 	| "mirror-shatter"
 	| "portal-enter"
-	| "hourglass-turn";
+	| "hourglass-turn"
+	| `pact-${PactKind}`;
 export type InteractAction = {
 	type: "interact";
 	objectId?: string;
@@ -119,6 +122,8 @@ export const interactObject = (
 	if (object.kind === "trap") return disarmTrap(state, object);
 	if (object.kind === "chest") return openChest(state, object);
 	if (object.kind === "cracked-wall") return openCrackedWall(state, object);
+	if (object.kind === "dark-altar")
+		return strikePact(state, object, action.choice);
 
 	if (
 		object.activated &&

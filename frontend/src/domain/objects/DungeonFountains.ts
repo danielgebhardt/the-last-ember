@@ -4,6 +4,7 @@ import { appendActivityEvents } from "../game/ActivityHistory";
 import { applyPlayerAffliction } from "../game/Afflictions";
 import type { GameState } from "../game/GameState";
 import { maximumMana } from "../game/Mana";
+import { PACT_REFUSAL, pactSilences } from "../game/Pacts";
 import type { DungeonObject } from "./DungeonObject";
 import { objectDamage, spendObject } from "./ObjectEffects";
 import type { ObjectChoice } from "./ObjectInteraction";
@@ -44,6 +45,7 @@ export const drawFountain = (
 	choice?: ObjectChoice,
 ): GameState | { error: string } => {
 	if (object.activated) return { error: "This fountain is dry." };
+	if (pactSilences(state.progression)) return { error: PACT_REFUSAL };
 	if (choice !== "sip" && choice !== "draw")
 		return { error: "Choose a safe sip or risky draw." };
 	const maximum = maximumMana(

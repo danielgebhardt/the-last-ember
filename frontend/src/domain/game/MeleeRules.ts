@@ -7,6 +7,7 @@ import {
 import { deriveAttributes } from "./Attributes";
 import { resolveIncomingDamage } from "./CombatStats";
 import { assertDifficulty, scaleEnemyValue } from "./Difficulty";
+import { pactHalvesEvasion } from "./Pacts";
 import { hasPerk } from "./Perks";
 import type { PlayerStats } from "./PlayerStats";
 import type { Progression } from "./Progression";
@@ -63,10 +64,15 @@ export const deriveAccuracy = (
 		afflictionAccuracySteps(afflictions) -
 			(hasPerk(progression, "precise") ? 1 : 0),
 	);
+	// The Pact of Iron halves evasion, rounding down, but keeps the usual floor.
+	const monsterHitThreshold = pactHalvesEvasion(progression)
+		? Math.max(2, 1 + Math.floor((thresholds.monsterHitThreshold - 1) / 2))
+		: thresholds.monsterHitThreshold;
 	return {
 		...thresholds,
+		monsterHitThreshold,
 		playerHitChance: (21 - thresholds.playerHitThreshold) * 5,
-		evadeChance: (thresholds.monsterHitThreshold - 1) * 5,
+		evadeChance: (monsterHitThreshold - 1) * 5,
 	};
 };
 export type AttackProfile = {

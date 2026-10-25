@@ -5,6 +5,7 @@ import type { ActiveAffliction } from "../../domain/game/AfflictionDefinitions";
 import { afflictionImpact } from "../../domain/game/AfflictionText";
 import { type Difficulty, difficultyLabel } from "../../domain/game/Difficulty";
 import { maximumMana } from "../../domain/game/Mana";
+import type { PactKind } from "../../domain/game/Pacts";
 import type { PlayerStats } from "../../domain/game/PlayerStats";
 import {
 	levelForExperience,
@@ -15,6 +16,7 @@ import type { Equipment } from "../../domain/items/Equipment";
 import ExperienceProgress from "./ExperienceProgress";
 import HealthDisplay, { isLowHealth } from "./HealthDisplay";
 import ManaDisplay from "./ManaDisplay";
+import PactBadge from "./PactBadge";
 import StatusEffectIcons from "./StatusEffectIcons";
 
 const ResourceCard = ({
@@ -120,6 +122,7 @@ type PlayerStatusProps = {
 	afflictions?: readonly ActiveAffliction[];
 	perksWaiting?: number;
 	onPerkRequested?: () => void;
+	pact?: PactKind;
 };
 
 const PlayerStatus = ({
@@ -134,6 +137,7 @@ const PlayerStatus = ({
 	afflictions = [],
 	perksWaiting = 0,
 	onPerkRequested,
+	pact,
 }: PlayerStatusProps) => {
 	const lowHealth = isLowHealth(player);
 	const level = levelForExperience(progression.experience);
@@ -186,6 +190,7 @@ const PlayerStatus = ({
 							>
 								Turn {turn}
 							</output>
+							{pact && <PactBadge pact={pact} />}
 						</div>
 
 						{/* Second row: active status effects */}

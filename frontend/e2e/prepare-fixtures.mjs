@@ -432,6 +432,34 @@ export default async function prepareFixtures() {
 				(entry) => entry.item.kind === "cure",
 			),
 		};
+		// Beside a dark altar on floor 5 of nine (the middle third), nothing else around.
+		const altarRooms = hourglassRun.floors[4].rooms;
+		const altarStart = {
+			row: altarRooms.at(-1).startRow + 1,
+			col: altarRooms.at(-1).startCol + 1,
+		};
+		const altarBase = withFlameOnFloor(
+			createGameState(
+				{ ...hourglassRun, activeFloor: 5, playerCoordinate: altarStart },
+				hourglassConfiguration.difficulty,
+			),
+		);
+		const altarState = {
+			...altarBase,
+			objects: [
+				{
+					id: "floor:5:object:dark-altar:1",
+					kind: "dark-altar",
+					floorNumber: 5,
+					coordinate: { row: altarStart.row, col: altarStart.col + 1 },
+					activated: false,
+				},
+			],
+			monsters: [],
+			floorItems: altarBase.floorItems.filter(
+				(entry) => entry.item.kind === "cure",
+			),
+		};
 		// Spare gear and potions in the bag for equipment and shortcut drag.
 		const dragGear = {
 			...quiet,
@@ -1259,6 +1287,7 @@ export default async function prepareFixtures() {
 			["forge", forgeState, forgeConfiguration],
 			["well", wellState, forgeConfiguration],
 			["hourglass", hourglassState, hourglassConfiguration],
+			["dark-altar", altarState, hourglassConfiguration],
 			["omen-arrival", omenState, configuration],
 			["ember-warden", wardenState, configuration],
 			[

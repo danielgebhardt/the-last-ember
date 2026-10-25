@@ -9,6 +9,7 @@ import {
 } from "../items/ItemValues";
 import { deriveAttributes } from "./Attributes";
 import { playerEffectBonuses } from "./EffectBonuses";
+import { pactArmor } from "./Pacts";
 import { hasPerk } from "./Perks";
 import { BASE_PLAYER_ATTACK_DAMAGE } from "./PlayerStats";
 import type { Progression } from "./Progression";
@@ -70,7 +71,8 @@ export const deriveCombatStats = (
 			armor +
 				playerEffectBonuses(effects).armor +
 				bonuses.armor +
-				(hasPerk(progression, "iron-hide") ? 1 : 0) -
+				(hasPerk(progression, "iron-hide") ? 1 : 0) +
+				pactArmor(progression) -
 				armorPenalty,
 		),
 	};

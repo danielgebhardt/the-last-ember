@@ -23,6 +23,7 @@ import {
 	afflictionDetails,
 	afflictionFacts,
 } from "../../domain/game/AfflictionText";
+import { PACT_DEFINITIONS, PACT_KINDS } from "../../domain/game/Pacts";
 import { PERK_DEFINITIONS, PERK_KINDS } from "../../domain/game/Perks";
 import { SPELL_DEFINITIONS, type SpellKind } from "../../domain/game/Spells";
 import {
@@ -40,6 +41,7 @@ import {
 import { AFFLICTION_SOURCE_CHANCE } from "../../domain/monsters/MonsterPlacement";
 import { EMPOWERED_MULTIPLIER } from "../../domain/monsters/MonsterStats";
 import { monsterTraits } from "../../domain/monsters/MonsterTraits";
+import { ALTAR_CHANCE } from "../../domain/objects/DarkAltar";
 import {
 	type DungeonObjectKind,
 	OBJECT_DEFINITIONS,
@@ -470,6 +472,19 @@ const DeveloperCatalog = ({
 											? `${Math.round(RARE_DISCOVERY_CHANCE * 100)}% shared rare-discovery chance per adventure, ${kind === "hourglass" ? "half the weight of" : "equal weight with"} the other discoveries; at most one discovery/dungeon; omitted without safe space`
 											: `${Math.round(definition.chance * 100)}% placement chance`}
 									</p>
+									{kind === "dark-altar" && (
+										<p>
+											{Math.round(ALTAR_CHANCE * 100)}% of adventures, one altar
+											in the middle third, at least 3 steps from the arrival
+											stair. Offers 3 of {PACT_KINDS.length} pacts fixed per
+											seed; one turn, permanent, one per run:{" "}
+											{PACT_KINDS.map(
+												(pact) =>
+													`${PACT_DEFINITIONS[pact].name} (${PACT_DEFINITIONS[pact].gain}; ${PACT_DEFINITIONS[pact].cost})`,
+											).join(" · ")}
+											.
+										</p>
+									)}
 									{kind === "hourglass" && (
 										<p>
 											Floors 8+. Full health and mana; every living creature on

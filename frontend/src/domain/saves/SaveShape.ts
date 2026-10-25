@@ -11,6 +11,7 @@ import { AFFLICTION_DEFINITIONS } from "../game/AfflictionDefinitions";
 import { DAMAGE_ELEMENTS } from "../game/DamageElements";
 import { isDifficulty } from "../game/Difficulty";
 import { OMEN_KINDS } from "../game/Omens";
+import { PACT_KINDS } from "../game/Pacts";
 import { PERK_KINDS, PERK_LEVELS } from "../game/Perks";
 import { isPermanentAttributes } from "../game/PermanentAttributes";
 import { PLAYER_AFFLICTION_LIMIT } from "../game/PlayerAfflictions";
@@ -202,6 +203,7 @@ const eventFields = {
 	"cracked-wall-noticed": {},
 	"vault-opened": {},
 	"omen-revealed": { omen: oneOf(OMEN_KINDS) },
+	"pact-struck": { pact: oneOf(PACT_KINDS) },
 	"omen-foreseen": { omen: optional(oneOf(OMEN_KINDS)) },
 	"gold-collected": { amount: integer(1) },
 	"merchant-bought": { item: itemKind, gold: integer(1) },
@@ -581,6 +583,8 @@ const documentShape = object({
 				0,
 				PERK_LEVELS.length,
 			),
+			// Whether an altar offered it is a consistency rule.
+			pact: optional(oneOf(PACT_KINDS)),
 		}),
 		quest: object({
 			goalFloor: floorNumber,

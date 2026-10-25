@@ -68,6 +68,7 @@ import {
 	omenAt,
 	omenRevealsFloor,
 } from "./domain/game/Omens";
+import { pactRevealsFloors } from "./domain/game/Pacts";
 import { hasPerk, pendingPerkCount } from "./domain/game/Perks";
 import { createRunRecord, runRecap } from "./domain/game/RunRecap";
 import { isTestSeed, randomAdventureSeed } from "./domain/game/TestSeed";
@@ -344,7 +345,7 @@ const Home = ({
 			setActionError("");
 			return;
 		}
-		if (!object.activated && objectChoices(object).length)
+		if (!object.activated && objectChoices(object, game.state).length)
 			setInteractionObject(object);
 		else handleActionRequested({ type: "interact", objectId: object.id });
 		setInteractionTargets([]);
@@ -480,6 +481,7 @@ const Home = ({
 							)}
 						</Dialog.Trigger>
 						<CharacterDialog
+							pact={game.state.progression.pact}
 							afflictions={game.state.afflictions}
 							gold={game.state.gold}
 							effects={game.state.effects}
@@ -686,6 +688,7 @@ const Home = ({
 									player={player}
 									progression={game.state.progression}
 									perksWaiting={perksWaiting}
+									pact={game.state.progression.pact}
 									onPerkRequested={() => openCharacterFromMap("progression")}
 								/>
 							</div>
@@ -792,7 +795,8 @@ const Home = ({
 										}
 										revealed={
 											isFloorRevealed(game.state.objects, run.activeFloor) ||
-											omenRevealsFloor(game.state, run.activeFloor)
+											omenRevealsFloor(game.state, run.activeFloor) ||
+											pactRevealsFloors(game.state.progression)
 										}
 										downStairMarked={hasPerk(
 											game.state.progression,

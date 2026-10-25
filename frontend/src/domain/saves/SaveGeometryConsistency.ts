@@ -5,8 +5,10 @@ import {
 	omenAt,
 	omenFavorsWell,
 } from "../game/Omens";
+import { altarPacts } from "../game/Pacts";
 import { protectedFloorLocations } from "../monsters/MonsterLocations";
 import { sarcophagusOutcome } from "../objects/AncientSarcophagi";
+import { altarFloors, isDarkAltar } from "../objects/DarkAltar";
 import { isDoor } from "../objects/DungeonObject";
 import { forgeRiskyOutcome } from "../objects/ForgottenForge";
 import { mirrorShatterOutcome } from "../objects/MirrorOfShadows";
@@ -133,6 +135,23 @@ export const hasConsistentGeometry = (document: SaveDocument): boolean => {
 	if (objects.filter((o) => o.kind === "mirror").length > 1) return false;
 	if (objects.filter((o) => o.kind === "runic-portal").length > 1) return false;
 	if (objects.filter((o) => o.kind === "hourglass").length > 1) return false;
+	// One altar in the middle third; a pact only from an altar that offered it, which
+	// it then silences.
+	const altars = objects.filter(isDarkAltar);
+	const pact = state.progression.pact;
+	if (
+		altars.length > 1 ||
+		altars.some(
+			(altar) => !altarFloors(run.floors.length).includes(altar.floorNumber),
+		) ||
+		(pact === undefined
+			? altars.some((altar) => altar.activated)
+			: !altars.some(
+					(altar) =>
+						altar.activated && altarPacts(run.seed, altar).includes(pact),
+				))
+	)
+		return false;
 	if (objects.some((o) => o.kind === "hourglass" && o.floorNumber < 8))
 		return false;
 	// A used portal records the seeded floor and a walkable landing tile there.

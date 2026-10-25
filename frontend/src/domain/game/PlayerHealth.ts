@@ -4,6 +4,7 @@ import {
 	type ActiveAffliction,
 	afflictionModifiers,
 } from "./AfflictionDefinitions";
+import { pactHealthShare } from "./Pacts";
 import { hasPerk } from "./Perks";
 import { DEFAULT_PLAYER_MAX_HEALTH } from "./PlayerStats";
 import {
@@ -32,5 +33,13 @@ export const maximumHealth = (
 				: (afflictionModifiers(a.kind).maximumHealthMultiplier ?? 1)),
 		1,
 	);
-	return Math.max(1, Math.floor(normal * multiplier));
+	return Math.max(
+		1,
+		Math.floor(normal * multiplier * pactHealthShare(progression)),
+	);
 };
+// Scaled maximums don't grow by whole steps, so they are recomputed rather than added to.
+export const scaledMaximumHealth = (
+	progression: Progression,
+	afflictions: readonly ActiveAffliction[],
+) => afflictions.length > 0 || pactHealthShare(progression) !== 1;

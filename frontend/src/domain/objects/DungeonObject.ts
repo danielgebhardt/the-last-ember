@@ -176,6 +176,17 @@ export const OBJECT_DEFINITIONS = {
 		chance: 0,
 		placement: "vault",
 	},
+	// At most one per adventure, in the middle third; see DarkAltar.
+	"dark-altar": {
+		name: "Dark altar",
+		freshLabel: "dark altar",
+		usedLabel: "silent dark altar",
+		minFloor: 2,
+		maxFloor: 19,
+		maxPerFloor: 1,
+		chance: 0.5,
+		placement: "altar",
+	},
 	archive: {
 		name: "Abandoned spell archive",
 		freshLabel: "abandoned spell archive",

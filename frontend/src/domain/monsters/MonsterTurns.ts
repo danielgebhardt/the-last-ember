@@ -18,6 +18,7 @@ import {
 	resolveMeleeAttack,
 } from "../game/MeleeRules";
 import { omenMeleeDamage, omenRegeneration } from "../game/Omens";
+import { pactSilences } from "../game/Pacts";
 import { arrowWardedDamage } from "../game/PerkEffects";
 import { hasMonsterEffect, monsterSkipsAction } from "../game/TimedEffects";
 import { displaceAfterHits } from "../items/RingOfDisplacement";
@@ -84,6 +85,15 @@ const resolveSpecialAction = (context: SpecialActionContext) => {
 	return undefined;
 };
 
+// Under the Pact of Silence, thieves and alarm sentries let you pass as if unseen.
+const silenced = (state: GameState, monster: Monster) => {
+	const definition = MONSTER_DEFINITIONS[monster.kind];
+	return (
+		pactSilences(state.progression) &&
+		(definition.thief === true || definition.alarmRadius !== undefined)
+	);
+};
+
 // A step splits the phase: listed strikers act from the player's original tile
 // first, then everyone else acts after the step lands.
 export type MonsterPhaseScope = Readonly<{
@@ -111,6 +121,7 @@ const strikesBeforeStep = (
 		hasMonsterEffect(state, monster, "afraid") ||
 		definition.preparesAttack ||
 		definition.thief ||
+		silenced(state, monster) ||
 		(definition.enemySpells && (definition.rangedAttackRange ?? 0) >= 1)
 	)
 		return false;
@@ -261,6 +272,7 @@ export const resolveMonsterPhase = (
 			);
 			continue;
 		}
+		if (silenced(state, monster)) continue;
 		const detected = detectsPlayer(navigation, monster, pursuitRules);
 		const sensed = sensesCure(navigation, monster, pursuitRules);
 		if (detected || sensed) {

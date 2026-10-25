@@ -4,6 +4,7 @@ import {
 } from "../game/AfflictionDefinitions";
 import type { GameState } from "../game/GameState";
 import { maximumMana } from "../game/Mana";
+import { pactHealing } from "../game/Pacts";
 import { fieldMedicHealing, herbalistBonus } from "../game/PerkEffects";
 import {
 	type AttributeName,
@@ -138,10 +139,13 @@ export const consumeItem = (
 
 	const { resource } = definition.recovery;
 	const base = definition.recovery.amount + herbalistBonus(state.progression);
-	// A bloodrage weapon weakens health potions only.
+	// A bloodrage weapon and the Pact of Ash weaken health potions only.
 	const amount =
 		resource === "health"
-			? bloodrageHealing(state.equipment.mainHand, base)
+			? pactHealing(
+					state.progression,
+					bloodrageHealing(state.equipment.mainHand, base),
+				)
 			: base;
 	const current = resource === "health" ? player.health : mana;
 	const maximum =

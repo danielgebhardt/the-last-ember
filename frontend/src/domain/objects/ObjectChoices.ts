@@ -1,5 +1,11 @@
 import type { GameState } from "../game/GameState";
 import { omenFavorsWell, WELL_FAVOR } from "../game/Omens";
+import {
+	altarPacts,
+	PACT_DEFINITIONS,
+	PACT_REFUSAL,
+	pactSilences,
+} from "../game/Pacts";
 import { createPlayerStats } from "../game/PlayerStats";
 import { createProgression } from "../game/Progression";
 import { createStartingEquipment } from "../items/Equipment";
@@ -57,6 +63,13 @@ export const OBJECT_FLAVOR: Partial<Record<DungeonObjectKind, string>> = {
 	archive: "Shelves of crumbling books. One may still hold a spell.",
 	shrine: "A quiet altar. Gold left here returns as insight.",
 	throne: "An empty throne, still humming with old power.",
+	"dark-altar":
+		"Black candles gutter around a stone that hums with hunger. It offers a bargain, once.",
+};
+// Replaces the usual "each choice takes a turn" line where the stakes differ.
+export const OBJECT_NOTE: Partial<Record<DungeonObjectKind, string>> = {
+	"dark-altar":
+		"Choose one pact. It lasts the rest of the run and cannot be undone. Walking away is free.",
 };
 const short = (gold: number | undefined, price: number) =>
 	gold !== undefined && gold < price ? "Not enough gold." : undefined;
@@ -358,6 +371,21 @@ const baseObjectChoices = (
 			},
 		];
 	}
+	if (object.kind === "dark-altar")
+		return state?.run
+			? altarPacts(state.run.seed, object).map((kind) => {
+					const pact = PACT_DEFINITIONS[kind];
+					return {
+						value: `pact-${kind}` as const,
+						label: pact.name,
+						description: pact.sentence,
+						outcomes: [
+							{ text: pact.gain, tone: "good" as const },
+							{ text: pact.cost, tone: "bad" as const },
+						],
+					};
+				})
+			: [];
 	if (object.kind === "throne")
 		return [
 			{
@@ -392,6 +420,15 @@ export const objectChoices = (
 	object: DungeonObject,
 	state?: Parameters<typeof baseObjectChoices>[1],
 ): readonly InteractionChoice[] => {
-	const choices = baseObjectChoices(object, state);
+	const refused =
+		state &&
+		pactSilences(state.progression) &&
+		(object.kind === "fountain" || object.kind === "well");
+	const choices = refused
+		? baseObjectChoices(object, state).map((choice) => ({
+				...choice,
+				warning: PACT_REFUSAL,
+			}))
+		: baseObjectChoices(object, state);
 	return state ? withForesight(choices, object, state) : choices;
 };
