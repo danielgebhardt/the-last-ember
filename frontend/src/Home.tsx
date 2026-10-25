@@ -19,6 +19,7 @@ import FantasyRail from "@/components/ui/FantasyRail.tsx";
 import { Sheet, SheetTrigger } from "@/components/ui/sheet";
 import { HEADER_BUTTON_SECONDARY } from "@/HeaderButtonStyles.ts";
 import DungeonHelp from "@/settings/DungeonHelp.tsx";
+import AccountMenu from "./accounts/AccountMenu";
 import DungeonFrame from "./components/dungeon/DungeonFrame";
 import DungeonLayout from "./components/dungeon/DungeonLayout.tsx";
 import ActivityLog from "./components/game/ActivityLog.tsx";
@@ -194,6 +195,7 @@ const Home = ({
 	const [townShopOpen, setTownShopOpen] = useState(false);
 	const [catalogOpen, setCatalogOpen] = useState(false);
 	const [helpOpen, setHelpOpen] = useState(false);
+	const [accountOpen, setAccountOpen] = useState(false);
 	const [characterOpen, setCharacterOpen] = useState(false);
 	// The perk reminder opens Character on Progression; every other open starts on Character.
 	const [characterTab, setCharacterTab] = useState<"character" | "progression">(
@@ -401,6 +403,7 @@ const Home = ({
 		!saveOpen &&
 		!helpOpen &&
 		!catalogOpen &&
+		!accountOpen &&
 		!characterOpen &&
 		!pickupOpen &&
 		!victoryOpen;
@@ -681,6 +684,17 @@ const Home = ({
 							</Suspense>
 						</Sheet>
 					)
+				}
+				accountAction={
+					<AccountMenu
+						open={accountOpen}
+						onOpenChange={setAccountOpen}
+						finalFocus={mapInputAvailable ? mapRef : false}
+						onClosed={() => {
+							if (mapInputAvailable)
+								mapRef.current?.focus({ preventScroll: true });
+						}}
+					/>
 				}
 			/>
 

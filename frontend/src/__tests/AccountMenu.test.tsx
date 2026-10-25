@@ -1,7 +1,14 @@
-import { act, render, screen, waitFor } from "@testing-library/react";
+import {
+	act,
+	fireEvent,
+	render,
+	screen,
+	waitFor,
+} from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { useState } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import AccountPanel from "../accounts/AccountPanel";
+import AccountMenu from "../accounts/AccountMenu";
 import {
 	AccountProvider,
 	accountErrorMessage,
@@ -27,17 +34,22 @@ const fakeAccounts = () => {
 			};
 		},
 		signInWithGoogle: vi.fn(async () =>
-			emit({ uid: "g", email: "google@example.com", name: "Gwen" }),
+			emit({
+				uid: "g",
+				email: "google@example.com",
+				name: "Gwen",
+				photo: "https://example.com/gwen.png",
+			}),
 		),
 		signInWithEmail: vi.fn(async (email: string, password: string) => {
 			if (password !== "secret1")
 				throw Object.assign(new Error("bad"), {
 					code: "auth/invalid-credential",
 				});
-			emit({ uid: "e", email, name: null });
+			emit({ uid: "e", email, name: null, photo: null });
 		}),
 		createAccount: vi.fn(async (email: string) =>
-			emit({ uid: "n", email, name: null }),
+			emit({ uid: "n", email, name: null, photo: null }),
 		),
 		signOut: vi.fn(async () => emit(null)),
 		idToken: vi.fn(async () => (current ? "token" : null)),
@@ -45,58 +57,93 @@ const fakeAccounts = () => {
 	const load = vi.fn(async () => api);
 	return { api, load };
 };
-const renderPanel = (load: (() => Promise<AccountsApi>) | null) =>
+const Menu = () => {
+	const [open, setOpen] = useState(false);
+	return <AccountMenu open={open} onOpenChange={setOpen} />;
+};
+const renderMenu = (load: (() => Promise<AccountsApi>) | null) =>
 	render(
 		<AccountProvider load={load}>
-			<AccountPanel />
+			<Menu />
 		</AccountProvider>,
 	);
+const dialog = () => screen.queryByRole("dialog");
 
 afterEach(() => localStorage.clear());
 
-describe("Account panel", () => {
-	it("explains that this build has no accounts and that play is unaffected", () => {
-		renderPanel(null);
-		expect(
-			screen.getByText(
-				"Accounts aren't set up on this build. Everything plays without one.",
-			),
-		).toBeVisible();
-		expect(screen.queryByRole("button", { name: /Sign in/ })).toBeNull();
+describe("Account avatar and dialog", () => {
+	it("shows no avatar on a build without accounts", () => {
+		renderMenu(null);
+		expect(screen.queryByRole("button")).toBeNull();
 	});
 
-	it("loads Firebase only when you reach for sign-in", async () => {
+	it("loads Firebase only when you reach for the avatar", async () => {
 		const { load } = fakeAccounts();
 		const user = userEvent.setup();
-		renderPanel(load);
+		renderMenu(load);
 		expect(load).not.toHaveBeenCalled();
-		await user.click(screen.getByLabelText("Email"));
+		await user.hover(screen.getByRole("button", { name: "Sign in" }));
 		expect(load).toHaveBeenCalledTimes(1);
 	});
 
-	it("signs in with Google, remembers it on this device, and signs out", async () => {
+	it("signs in with Google, shows the photo, remembers it, and signs out", async () => {
 		const { api, load } = fakeAccounts();
 		const user = userEvent.setup();
-		renderPanel(load);
+		renderMenu(load);
+		await user.click(screen.getByRole("button", { name: "Sign in" }));
+		expect(
+			screen.getByRole("heading", { name: "Sign in to The Warden's Flame" }),
+		).toHaveFocus();
 		await user.click(
-			screen.getByRole("button", { name: "Sign in with Google" }),
+			screen.getByRole("button", { name: "Continue with Google" }),
 		);
 		expect(api.signInWithGoogle).toHaveBeenCalled();
-		expect(await screen.findByLabelText("Signed-in account")).toHaveTextContent(
-			"google@example.com",
+		// Signing in closes the dialog; the avatar now shows who you are.
+		const avatar = await screen.findByRole("button", {
+			name: "Account: google@example.com",
+		});
+		await waitFor(() => expect(dialog()).toBeNull());
+		expect(avatar.querySelector("img")).toHaveAttribute(
+			"src",
+			"https://example.com/gwen.png",
 		);
 		expect(localStorage.getItem(SIGNED_IN_KEY)).toBe("1");
+
+		await user.click(avatar);
+		expect(screen.getByRole("heading", { name: "Your account" })).toBeVisible();
+		expect(screen.getByText("Gwen")).toBeVisible();
+		expect(screen.getByLabelText("Signed-in account")).toHaveTextContent(
+			"google@example.com",
+		);
 		await user.click(screen.getByRole("button", { name: "Sign out" }));
 		expect(
-			await screen.findByRole("button", { name: "Sign in with Google" }),
+			await screen.findByRole("button", { name: "Continue with Google" }),
 		).toBeVisible();
+		expect(screen.getByRole("button", { name: "Sign in" })).toBeVisible();
 		expect(localStorage.getItem(SIGNED_IN_KEY)).toBeNull();
+	});
+
+	it("falls back to an initial when the photo can't load", async () => {
+		const { load } = fakeAccounts();
+		const user = userEvent.setup();
+		renderMenu(load);
+		await user.click(screen.getByRole("button", { name: "Sign in" }));
+		await user.click(
+			screen.getByRole("button", { name: "Continue with Google" }),
+		);
+		const avatar = await screen.findByRole("button", {
+			name: "Account: google@example.com",
+		});
+		fireEvent.error(avatar.querySelector("img") as HTMLImageElement);
+		expect(avatar.querySelector("img")).toBeNull();
+		expect(avatar).toHaveTextContent("G");
 	});
 
 	it("signs in by email, explains a wrong password, and creates an account", async () => {
 		const { api, load } = fakeAccounts();
 		const user = userEvent.setup();
-		renderPanel(load);
+		renderMenu(load);
+		await user.click(screen.getByRole("button", { name: "Sign in" }));
 		await user.type(screen.getByLabelText("Email"), " player@example.com ");
 		await user.type(screen.getByLabelText("Password"), "wrong");
 		await user.click(screen.getByRole("button", { name: "Sign in" }));
@@ -107,35 +154,42 @@ describe("Account panel", () => {
 			"player@example.com",
 			"wrong",
 		);
-		await user.click(screen.getByRole("button", { name: "Create account" }));
-		expect(await screen.findByLabelText("Signed-in account")).toHaveTextContent(
-			"player@example.com",
+		await user.click(screen.getByRole("button", { name: "Create an account" }));
+		expect(screen.getByLabelText("Password")).toHaveAttribute(
+			"autocomplete",
+			"new-password",
 		);
-		expect(screen.queryByRole("alert")).toBeNull();
+		await user.click(screen.getByRole("button", { name: "Create account" }));
+		expect(api.createAccount).toHaveBeenCalledWith(
+			"player@example.com",
+			"wrong",
+		);
+		const avatar = await screen.findByRole("button", {
+			name: "Account: player@example.com",
+		});
+		expect(avatar).toHaveTextContent("P");
+		await waitFor(() => expect(dialog()).toBeNull());
 	});
 
 	it("restores a remembered session at startup without opening sign-in", async () => {
 		const { load } = fakeAccounts();
 		localStorage.setItem(SIGNED_IN_KEY, "1");
-		renderPanel(load);
-		expect(screen.getByRole("status")).toHaveTextContent(
-			"Checking your sign-in…",
-		);
+		renderMenu(load);
+		expect(screen.getByRole("button", { name: "Account" })).toBeVisible();
 		await waitFor(() => expect(load).toHaveBeenCalledTimes(1));
-		// The session had expired: the panel offers sign-in and forgets the marker.
+		// The session had expired: the avatar offers sign-in and forgets the marker.
 		expect(
-			await screen.findByRole("button", { name: "Sign in with Google" }),
+			await screen.findByRole("button", { name: "Sign in" }),
 		).toBeVisible();
 		expect(localStorage.getItem(SIGNED_IN_KEY)).toBeNull();
+		expect(dialog()).toBeNull();
 	});
 
 	it("explains a failure to load sign-in", async () => {
 		const user = userEvent.setup();
-		renderPanel(() => Promise.reject(new Error("offline")));
+		renderMenu(() => Promise.reject(new Error("offline")));
 		await act(async () => {
-			await user.click(
-				screen.getByRole("button", { name: "Sign in with Google" }),
-			);
+			await user.click(screen.getByRole("button", { name: "Sign in" }));
 		});
 		expect(await screen.findByRole("alert")).toHaveTextContent(
 			/Couldn't load sign-in|Sign-in didn't work/,

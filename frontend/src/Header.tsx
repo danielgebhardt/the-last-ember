@@ -16,6 +16,8 @@ type HeaderProps = {
 	saveAction?: ReactNode;
 	helpAction?: ReactNode;
 	catalogAction?: ReactNode;
+	// The account avatar, last, as on most sites.
+	accountAction?: ReactNode;
 };
 
 const Header = ({
@@ -28,6 +30,7 @@ const Header = ({
 	saveAction,
 	helpAction,
 	catalogAction,
+	accountAction,
 }: HeaderProps) => (
 	<header
 		className="
@@ -97,10 +100,13 @@ const Header = ({
 			<Button
 				type="button"
 				onClick={onNewDungeon}
+				// Short on screen to leave room for the account avatar.
+				aria-label="New Dungeon"
+				title="New Dungeon"
 				className={HEADER_BUTTON_PRIMARY}
 			>
 				<RefreshCw aria-hidden="true" focusable="false" />
-				New Dungeon
+				New
 			</Button>
 
 			{characterAction}
@@ -108,6 +114,15 @@ const Header = ({
 			{settingsAction}
 			{helpAction}
 			{catalogAction}
+			{accountAction && (
+				<>
+					<span
+						aria-hidden="true"
+						className="mx-0.5 hidden h-6 w-px bg-border sm:block dark:bg-amber-700/30"
+					/>
+					{accountAction}
+				</>
+			)}
 		</nav>
 	</header>
 );

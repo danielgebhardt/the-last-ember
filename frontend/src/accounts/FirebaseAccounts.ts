@@ -17,6 +17,8 @@ export type AccountUser = Readonly<{
 	uid: string;
 	email: string | null;
 	name: string | null;
+	// The sign-in provider's profile picture (Google's), if any.
+	photo: string | null;
 }>;
 export type AccountsApi = Readonly<{
 	// Calls back with the current user at once and on every change; returns an unsubscribe.
@@ -43,7 +45,12 @@ export const createFirebaseAccounts = (
 			onAuthStateChanged(auth, (user) =>
 				listener(
 					user
-						? { uid: user.uid, email: user.email, name: user.displayName }
+						? {
+								uid: user.uid,
+								email: user.email,
+								name: user.displayName,
+								photo: user.photoURL,
+							}
 						: null,
 				),
 			),

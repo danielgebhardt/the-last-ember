@@ -81,7 +81,7 @@ Measured 2026-10-25 on the `firebase-sign-in` branch, built without Firebase set
 | Signed-out cold load received | 370 KB | 370.5 KB | ≤ 407 KB |
 | Begin Adventure ready, slow 4G, 4× CPU, cold | 2.14 s | 2.16 s | ≤ 2.35 s |
 
-The opening screen still makes four requests. Firebase Authentication sits in its own `FirebaseAccounts-*.js` chunk (103 KB raw, 30.6 KB gzip). It loads only when someone focuses or points at the Settings Account panel, or when this device remembers a signed-in session.
+The opening screen still makes four requests. Firebase Authentication sits in its own `FirebaseAccounts-*.js` chunk (103 KB raw, 30.6 KB gzip). It loads only when someone focuses or points at the header account avatar, or when this device remembers a signed-in session.
 
 ## Budget for Firebase (#420)
 
