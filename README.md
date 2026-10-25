@@ -4,7 +4,7 @@ A deterministic fantasy dungeon crawler inspired by **Larn**, built with React a
 
 Your town's protective beacon is dying. Descend into ancient ruins, defeat the corrupted Ember Warden, and recover the magical flame needed to restore its light. But the journey home may be more dangerous than the descent.
 
-The game runs entirely in the browser. The Spring Boot backend is a connectivity scaffold and is not required to play. GitHub issues and the project board track the backlog and each story's decisions.
+The game runs entirely in the browser. Optional accounts use Firebase Authentication, and small Vercel serverless functions in `frontend/api` handle anything that must be trusted (see [Accounts](#accounts)). GitHub issues and the project board track the backlog and each story's decisions.
 
 ## Run locally
 
@@ -15,12 +15,12 @@ pnpm install --frozen-lockfile
 pnpm frontend:dev
 ```
 
-Vite prints the local address. For the optional backend, install Java 21 and run `./gradlew bootRun` from `backend/` (`.\gradlew.bat bootRun` on Windows). The development proxy forwards `/initial` to port 8080; gameplay does not use it.
+Vite prints the local address.
 
 ## Current game
 
 - New adventures start in the fixed **25-column × 21-row** Beacon town with **300 gold**, a short sword, wooden shield, and starter health/mana potions. Town geography is independent of the seed and dungeon size.
-- The default dungeon is **40×40 tiles across 20 floors**, on Normal difficulty. Settings support 10–100 rows/columns and 5–20 floors; Small/Medium/Large presets are 20/40/60 tiles per side. Medium/Normal is the balancing baseline.
+- The standard dungeon is **40×40 tiles across 20 floors**, the balancing baseline. The opening dialog always starts it, at the difficulty chosen there, and those adventures are ranked. Settings can start custom adventures of 10–40 rows/columns and 5–20 floors, or from a chosen seed; those are never ranked.
 - Arrows/WASD move; Space waits. Enter on the town gate enters the dungeon; Enter at the floor-1 entrance returns to town. E inspects/interacts, G picks up loot, and Character manages gear, consumables and spells. Help contains the complete keyboard/touch controls.
 - R selects a running direction. Running follows known corridors and crosses clear rooms, spending ordinary turns. Threats, loot, objects, stairs, hazards and route decisions stop it; any key, menus or focus loss cancel it. It never resumes automatically.
 - Dungeon actions commit one world turn, including monster responses, conditions and recovery. Free inspections and rejected actions do not. Mana recovers one point every 30 committed turns. Town movement, travel and purchases do not advance dungeon time or refill resources.
@@ -42,6 +42,33 @@ Seed replay is deterministic for the same rules version, configuration and actio
 Browser Save/Load, the separate autosave and file import/export persist the actual dungeon, discovery, actors, inventory, stock, conditions, permanent attributes and portal anchor. They validate shape, bounded input and cross-field consistency before restoring. Reading the browser slot does not rewrite it. The historical storage key `larn:adventure-save` and internal item keys remain stable.
 
 [Save architecture and compatibility policy](docs/save-policy.md) describes the migration chain, frozen per-version fixtures and when a change needs a version bump.
+
+## Accounts
+
+Signing in is optional; everything plays without an account. Accounts use **Firebase Authentication** (Google, and email with a password) on the free Spark plan. Trusted server work runs in **Vercel serverless functions** under `frontend/api`: today `GET /api/account` verifies a Firebase ID token and names its user. The Firebase library loads only when someone opens sign-in or already has a session on that device, so signed-out play downloads none of it (see `docs/performance-baseline.md`).
+
+### Firebase and Vercel setup
+
+1. In the [Firebase console](https://console.firebase.google.com), the project is `wardens-flame`. Under **Settings → General → Your apps**, a web app supplies the config values.
+2. **Security → Authentication → Sign-in method:** Google and Email/Password are enabled.
+3. **Authentication → Settings → Authorized domains:** list every domain that serves the game, such as the Vercel production domain. `localhost` is there by default.
+4. In **Vercel → Settings → Environment Variables**, set:
+
+   | Name | Value |
+   |---|---|
+   | `VITE_FIREBASE_API_KEY` | web app `apiKey` |
+   | `VITE_FIREBASE_AUTH_DOMAIN` | web app `authDomain` |
+   | `VITE_FIREBASE_PROJECT_ID` | web app `projectId` |
+   | `VITE_FIREBASE_APP_ID` | web app `appId` |
+   | `FIREBASE_PROJECT_ID` | the same project ID, for the functions |
+
+   Then redeploy. These web config values are public by design.
+
+For local development, put the same values in `frontend/.env.local` (git-ignored). A build without them simply has no accounts, and Settings says so.
+
+### Emulators
+
+No test touches the live project. `pnpm --filter frontend emulators` starts the local Auth emulator for the demo project `demo-wardens-flame`. To point the app at it, also set `VITE_FIREBASE_AUTH_EMULATOR_HOST=127.0.0.1:9099`. `pnpm --filter frontend test:emulator` runs the account tests inside the emulator: signing up, out and in, and the function verifying the real token.
 
 ## Code organization
 
@@ -76,7 +103,7 @@ pnpm frontend:smoke
 
 Install Chromium once with `pnpm --dir frontend exec playwright install --only-shell chromium`. Browser scenarios use the production build and fresh contexts; Playwright generates current-format fixtures before running.
 
-For a focused change, run the relevant test files first. The normal commit hook formats/checks, runs the complete frontend suite and builds production; avoid duplicating that full pass immediately before committing. CI also checks strict types, Java tests and Chromium. Run backend tests from `backend/` with `./gradlew test` when backend code changes.
+For a focused change, run the relevant test files first. The normal commit hook formats/checks, runs the complete frontend suite and builds production; avoid duplicating that full pass immediately before committing. CI also checks strict types and Chromium.
 
 For balance and exposure, `node frontend/scripts/review-corpus.mjs` (run from `frontend/`; `--seed-count N`, `--floors N`, `--csv`) generates many adventures with the real rules and reports discovery, affliction-source, monster, return-hunter, gold and encounter rates. The Developer Catalog's **Seed report** tab runs the same report in the browser.
 

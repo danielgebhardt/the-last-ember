@@ -71,6 +71,18 @@ The app ships as one JavaScript chunk (`index-*.js`, 1,028 KB raw, 310 KB gzip).
 
 The dungeon frames load when you enter the game, not on the opening screen. At 5.8 MB together they are the next obvious saving (follow-up #427).
 
+## After Firebase sign-in (#420)
+
+Measured 2026-10-25 on the `firebase-sign-in` branch, built without Firebase settings, with the same script and profiles.
+
+| | Baseline | With accounts | Budget |
+|---|---|---|---|
+| Main JavaScript (gzip) | 309.7 KB | 310.4 KB | — |
+| Signed-out cold load received | 370 KB | 370.5 KB | ≤ 407 KB |
+| Begin Adventure ready, slow 4G, 4× CPU, cold | 2.14 s | 2.16 s | ≤ 2.35 s |
+
+The opening screen still makes four requests. Firebase Authentication sits in its own `FirebaseAccounts-*.js` chunk (103 KB raw, 30.6 KB gzip). It loads only when someone focuses or points at the Settings Account panel, or when this device remembers a signed-in session.
+
 ## Budget for Firebase (#420)
 
 - **Load Firebase only when needed:** the Firebase libraries load only when someone opens sign-in or has a signed-in session. A signed-out player never downloads them.

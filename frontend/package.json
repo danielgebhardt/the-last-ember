@@ -17,7 +17,9 @@
 		"check": "biome check .",
 		"check:fix": "biome check --write .",
 		"ci": "biome ci .",
-		"test:smoke": "pnpm build && playwright test"
+		"test:smoke": "pnpm build && playwright test",
+		"emulators": "firebase emulators:start --only auth --project demo-wardens-flame",
+		"test:emulator": "FIREBASE_PROJECT_ID=demo-wardens-flame firebase emulators:exec --only auth --project demo-wardens-flame \"vitest run api\""
 	},
 	"packageManager": "pnpm@11.25.0",
 	"dependencies": {
@@ -28,6 +30,8 @@
 		"@vercel/analytics": "^2.0.1",
 		"class-variance-authority": "^0.7.1",
 		"cn": "^0.4.0",
+		"firebase": "13.0.0",
+		"firebase-admin": "14.5.0",
 		"lucide-react": "^1.53.0",
 		"react": "^19.2.8",
 		"react-dom": "^19.2.8",
@@ -45,8 +49,8 @@
 		"@types/react": "^19.2.18",
 		"@types/react-dom": "^19.2.4",
 		"@vitejs/plugin-react": "^6.1.0",
+		"firebase-tools": "15.33.0",
 		"jsdom": "^30.0.1",
-		"msw": "^2.15.0",
 		"typescript": "~6.0.2",
 		"vite": "^8.2.2",
 		"vitest": "^4.1.11"

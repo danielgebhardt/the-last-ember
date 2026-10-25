@@ -11,14 +11,6 @@ export default defineConfig({
 			"@": fileURLToPath(new URL("./src", import.meta.url)),
 		},
 	},
-	server: {
-		proxy: {
-			"/initial": {
-				target: "http://localhost:8080",
-				changeOrigin: true,
-			},
-		},
-	},
 	test: {
 		exclude: [...configDefaults.exclude, "e2e/**"],
 		globals: true,

@@ -1,4 +1,10 @@
 packages:
   - 'frontend'
 allowBuilds:
+  # Vitest's mock server.
   msw: true
+  # Not needed: the Firebase SDK reads its config from the app, protobufjs only checks
+  # its version, and re2 is an optional native speed-up for the Firebase emulators.
+  '@firebase/util': false
+  protobufjs: false
+  re2: false

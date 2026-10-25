@@ -7,6 +7,7 @@ import "./styles/DungeonTerrain.css";
 import "./styles/CombatFeedback.css";
 import { Analytics } from "@vercel/analytics/react";
 import { useState } from "react";
+import { AccountProvider } from "./accounts/AccountProvider";
 import AdventureOpening from "./components/game/AdventureOpening";
 import { DEFAULT_FOG_CONFIGURATION } from "./domain/dungeon/RunConfiguration";
 import { type RestoredAdventure, restoreSave } from "./domain/saves/SaveFormat";
@@ -18,31 +19,33 @@ function App() {
 	const [startError, setStartError] = useState<string>();
 	return (
 		<ThemeProvider>
-			{adventure === null ? (
-				<AdventureOpening
-					onRestore={(document) => setAdventure(restoreSave(document))}
-					startError={startError}
-					onBegin={(configuration) => {
-						try {
-							const seed = randomAdventureSeed();
-							setAdventure(
-								// The opening dialog starts the only ranked adventures.
-								createAdventureSession(
-									seed,
-									configuration,
-									DEFAULT_FOG_CONFIGURATION,
-									true,
-								),
-							);
-							setStartError(undefined);
-						} catch {
-							setStartError("Could not start this adventure. Try again.");
-						}
-					}}
-				/>
-			) : (
-				<Home initialAdventure={adventure} />
-			)}
+			<AccountProvider>
+				{adventure === null ? (
+					<AdventureOpening
+						onRestore={(document) => setAdventure(restoreSave(document))}
+						startError={startError}
+						onBegin={(configuration) => {
+							try {
+								const seed = randomAdventureSeed();
+								setAdventure(
+									// The opening dialog starts the only ranked adventures.
+									createAdventureSession(
+										seed,
+										configuration,
+										DEFAULT_FOG_CONFIGURATION,
+										true,
+									),
+								);
+								setStartError(undefined);
+							} catch {
+								setStartError("Could not start this adventure. Try again.");
+							}
+						}}
+					/>
+				) : (
+					<Home initialAdventure={adventure} />
+				)}
+			</AccountProvider>
 			<Analytics />
 		</ThemeProvider>
 	);

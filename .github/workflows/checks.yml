@@ -42,33 +42,6 @@ jobs:
       - name: Production build
         run: pnpm frontend:build
 
-  backend:
-    name: Backend Java tests
-    runs-on: ubuntu-24.04
-    timeout-minutes: 10
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
-        with:
-          distribution: temurin
-          java-version: '21'
-      - uses: gradle/actions/setup-gradle@3f5f9adaf7d9fecd50b5935e54106014257a94e6 # v6.4.0
-        with:
-          cache-provider: basic
-      - name: Gradle wrapper tests
-        working-directory: backend
-        run: ./gradlew test --no-daemon --max-workers=2 --console=plain
-      - name: Java test reports
-        if: ${{ always() }}
-        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
-        with:
-          name: backend-test-reports
-          path: |
-            backend/build/reports/tests/test/
-            backend/build/test-results/test/
-          if-no-files-found: ignore
-          retention-days: 7
-
   browser:
     name: Chromium adventure smoke tests
     needs: frontend

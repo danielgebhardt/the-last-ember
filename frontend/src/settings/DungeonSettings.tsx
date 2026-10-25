@@ -11,6 +11,7 @@ import {
 	SheetDescription,
 	SheetTitle,
 } from "@/components/ui/sheet";
+import AccountPanel from "../accounts/AccountPanel";
 import DifficultyChoice from "../components/game/DifficultyChoice";
 import RunHistoryDialog from "../components/game/RunHistoryDialog";
 import type { Hints } from "../components/game/useHints";
@@ -78,12 +79,14 @@ const DungeonSettings = ({
 				heading={<SheetTitle className="ember-menu-title">Settings</SheetTitle>}
 				subtitle={
 					<SheetDescription className="ember-menu-description">
-						Choose your appearance or start a dungeon from another seed.
+						Sign in, choose your appearance, or start a dungeon from another
+						seed.
 					</SheetDescription>
 				}
 			/>
 
 			<div className="grid items-start gap-5 px-4 pb-4 sm:grid-cols-2">
+				<AccountPanel />
 				<EmberPanel className="grid content-start gap-4">
 					<p className="text-sm text-muted-foreground">
 						Current seed:{" "}
