@@ -1,0 +1,29 @@
+rules_version = '2';
+
+// Cloud saves (#421): each player owns saves/{uid}/slots/{save|autosave}. Only that
+// player can read or change them, every write advances the revision by exactly one, and
+// a slot stays under Firestore's 1 MiB document limit. Everything else is closed.
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /saves/{uid}/slots/{slot} {
+      function owner() {
+        return request.auth != null && request.auth.uid == uid;
+      }
+      function validSlot() {
+        let data = request.resource.data;
+        return slot in ['save', 'autosave']
+          && data.keys().hasOnly(['revision', 'device', 'savedAt', 'summary', 'data'])
+          && data.revision is int
+          && data.device is string && data.device.size() <= 100
+          && data.savedAt is string && data.savedAt.size() <= 40
+          && data.summary is string && data.summary.size() <= 300
+          && data.data is bytes && data.data.size() < 1000000;
+      }
+
+      allow get, delete: if owner();
+      allow create: if owner() && validSlot() && request.resource.data.revision == 1;
+      allow update: if owner() && validSlot()
+        && request.resource.data.revision == resource.data.revision + 1;
+    }
+  }
+}

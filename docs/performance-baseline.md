@@ -88,3 +88,15 @@ The opening screen still makes four requests. Firebase Authentication sits in it
 - **Load Firebase only when needed:** the Firebase libraries load only when someone opens sign-in or has a signed-in session. A signed-out player never downloads them.
 - **Signed-out cold load:** within 10% of the baseline, at most **407 KB received**, with Begin Adventure ready within **2.35 s** on the slow profile.
 - **Check:** rerun this script in #420 and record the new numbers here.
+
+## After cloud saves (#421)
+
+Measured 2026-10-25 on the `firebase-sign-in` branch, built without Firebase settings, with the same script and profiles.
+
+| | After #420 | With cloud saves | Budget |
+|---|---|---|---|
+| Main JavaScript received | 310.4 KB | 315.6 KB | — |
+| Signed-out cold load received | 370.5 KB | 375.2 KB | ≤ 407 KB |
+| Begin Adventure ready, slow 4G, 4× CPU, cold | 2.16 s | 2.18 s | ≤ 2.35 s |
+
+The main chunk grew by the sync engine, the per-account save slots and the account save dialogs, plus #420's header avatar. Firestore (the lite client) sits in its own `CloudSaves-*.js` chunk (99 KB raw, 32 KB gzip). It loads only once someone is signed in.

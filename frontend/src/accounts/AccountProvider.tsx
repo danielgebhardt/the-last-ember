@@ -6,22 +6,29 @@ import {
 	useRef,
 	useState,
 } from "react";
-import { authEmulatorHost, firebaseWebConfig } from "./AccountsConfig";
+import type { CloudStore } from "../saves/CloudStore";
+import {
+	authEmulatorHost,
+	firebaseWebConfig,
+	firestoreEmulatorHost,
+} from "./AccountsConfig";
 import type { AccountsApi, AccountUser } from "./FirebaseAccounts";
 
-// Remembered on this device after a sign-in, so a returning player's session is restored
-// at startup. Without it, Firebase only loads when someone opens sign-in.
+// The signed-in user's ID, remembered on this device so a returning player's session is
+// restored at startup and their saves are found before Firebase answers. Without it,
+// Firebase only loads when someone opens sign-in.
 export const SIGNED_IN_KEY = "larn:signed-in";
-const remembered = () => {
+export const rememberedUser = (): string | null => {
 	try {
-		return localStorage.getItem(SIGNED_IN_KEY) === "1";
+		return localStorage.getItem(SIGNED_IN_KEY) || null;
 	} catch {
-		return false;
+		return null;
 	}
 };
-const remember = (signedIn: boolean) => {
+const remembered = () => rememberedUser() !== null;
+const remember = (user: AccountUser | null) => {
 	try {
-		if (signedIn) localStorage.setItem(SIGNED_IN_KEY, "1");
+		if (user) localStorage.setItem(SIGNED_IN_KEY, user.uid);
 		else localStorage.removeItem(SIGNED_IN_KEY);
 	} catch {
 		// Signing in still works for this visit when storage is unavailable.
@@ -45,6 +52,8 @@ export type Account = Readonly<{
 	createAccount: (email: string, password: string) => Promise<void>;
 	signOut: () => Promise<void>;
 	idToken: () => Promise<string | null>;
+	// The signed-in player's cloud save slots, or null when nobody is signed in.
+	cloudStore: () => Promise<CloudStore | null>;
 }>;
 
 // Firebase error codes, in words a player can act on.
@@ -80,7 +89,11 @@ const firebaseLoader = (): AccountsLoader | undefined => {
 	if (!config) return undefined;
 	return () =>
 		import("./FirebaseAccounts").then(({ createFirebaseAccounts }) =>
-			createFirebaseAccounts(config, authEmulatorHost()),
+			createFirebaseAccounts(
+				config,
+				authEmulatorHost(),
+				firestoreEmulatorHost(),
+			),
 		);
 };
 
@@ -113,7 +126,7 @@ export const AccountProvider = ({
 					unsubscribe.current = accounts.watch((next) => {
 						setUser(next);
 						setStatus(next ? "signed-in" : "signed-out");
-						remember(next !== null);
+						remember(next);
 					});
 				},
 				() => {
@@ -163,6 +176,8 @@ export const AccountProvider = ({
 		signOut: () => run((accounts) => accounts.signOut()),
 		idToken: async () =>
 			status === "signed-in" ? (await connect()).idToken() : null,
+		cloudStore: async () =>
+			status === "signed-in" ? (await connect()).cloudStore() : null,
 	};
 	return (
 		<AccountContext.Provider value={account}>
@@ -183,6 +198,7 @@ const UNAVAILABLE: Account = {
 	createAccount: async () => {},
 	signOut: async () => {},
 	idToken: async () => null,
+	cloudStore: async () => null,
 };
 export const useAccount = (): Account =>
 	useContext(AccountContext) ?? UNAVAILABLE;

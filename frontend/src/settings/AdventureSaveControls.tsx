@@ -1,13 +1,10 @@
 import { Dialog } from "@base-ui/react/dialog";
 import { FolderOpen, History, Save } from "lucide-react";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { type SaveDocument, saveSummary } from "../domain/saves/SaveFormat";
-import {
-	readAutosave,
-	readLocalSave,
-	writeLocalSave,
-} from "../persistence/LocalAdventureSave";
+import { useSaves } from "../saves/SavesProvider";
+import SlotSyncStatus from "../saves/SlotSyncStatus";
 
 const AdventureSaveControls = ({
 	createSnapshot,
@@ -16,8 +13,16 @@ const AdventureSaveControls = ({
 	createSnapshot?: () => SaveDocument;
 	onRestore: (document: SaveDocument) => void;
 }) => {
-	const [slot, setSlot] = useState(readLocalSave);
-	const [autosave, setAutosave] = useState(readAutosave);
+	const saves = useSaves();
+	const [slot, setSlot] = useState(() => saves.read("save"));
+	const [autosave, setAutosave] = useState(() => saves.read("autosave"));
+	// Signing in or out, or a cloud copy arriving, changes what the slots hold.
+	// biome-ignore lint/correctness/useExhaustiveDependencies: owner and version mark changes.
+	useEffect(() => {
+		setSlot(saves.read("save"));
+		setAutosave(saves.read("autosave"));
+	}, [saves.owner, saves.version]);
+	const signedIn = saves.owner !== null;
 	const [feedback, setFeedback] = useState("");
 	const [pending, setPending] = useState<{
 		kind: "save" | "load";
@@ -32,7 +37,7 @@ const AdventureSaveControls = ({
 		if (!createSnapshot) return;
 		restoring.current = false;
 		initiatorRef.current = button;
-		setSlot(readLocalSave());
+		setSlot(saves.read("save"));
 		try {
 			setPending({ kind: "save", document: createSnapshot() });
 			setFeedback("");
@@ -43,7 +48,7 @@ const AdventureSaveControls = ({
 	const requestLoad = (button: HTMLButtonElement) => {
 		restoring.current = false;
 		initiatorRef.current = button;
-		const latest = readLocalSave();
+		const latest = saves.read("save");
 		setSlot(latest);
 		if (!latest.ok) {
 			setFeedback(latest.error);
@@ -59,7 +64,7 @@ const AdventureSaveControls = ({
 	const requestAutosaveLoad = (button: HTMLButtonElement) => {
 		restoring.current = false;
 		initiatorRef.current = button;
-		const latest = readAutosave();
+		const latest = saves.read("autosave");
 		setAutosave(latest);
 		if (!latest.ok || !latest.value) {
 			setFeedback(latest.ok ? "There is no autosave right now." : latest.error);
@@ -76,10 +81,14 @@ const AdventureSaveControls = ({
 			restoring.current = true;
 			onRestore(pending.document);
 		} else {
-			const result = writeLocalSave(pending.document);
+			const result = saves.write("save", pending.document);
 			if (result.ok) {
 				setSlot(result);
-				setFeedback("Adventure saved in this browser.");
+				setFeedback(
+					signedIn
+						? "Adventure saved. Its cloud status is shown above."
+						: "Adventure saved in this browser.",
+				);
 			} else setFeedback(result.error);
 		}
 		setPending(null);
@@ -87,17 +96,21 @@ const AdventureSaveControls = ({
 	return (
 		<section aria-label="Adventure saves" className="grid gap-4">
 			<section
-				aria-label="Browser save"
+				aria-label={signedIn ? "Account save" : "Browser save"}
 				className="grid gap-3 rounded-xl border border-primary/20 bg-primary/5 p-4"
 			>
 				<h3 className="flex items-center gap-2 font-medium">
 					<FolderOpen aria-hidden="true" className="size-4 text-primary" />
-					Browser save
+					{signedIn ? "Account save" : "Browser save"}
 				</h3>
 				<p className="text-xs leading-relaxed text-muted-foreground">
-					{createSnapshot
-						? "One save on this device. Saving replaces this slot; loading replaces your current adventure."
-						: "Resume the adventure saved in this browser."}
+					{signedIn
+						? createSnapshot
+							? "One save, kept in your account on every device you sign in on. Saving replaces it; loading replaces your current adventure."
+							: "Resume the adventure saved in your account."
+						: createSnapshot
+							? "One save on this device. Saving replaces this slot; loading replaces your current adventure."
+							: "Resume the adventure saved in this browser."}
 				</p>
 				<div className="rounded-lg border bg-background/70 p-3 text-xs leading-relaxed">
 					{saved ? (
@@ -114,6 +127,7 @@ const AdventureSaveControls = ({
 						<p>{slot.ok ? "No saved adventure yet." : slot.error}</p>
 					)}
 				</div>
+				<SlotSyncStatus slot="save" />
 				<div className={createSnapshot ? "grid grid-cols-2 gap-2" : "grid"}>
 					{createSnapshot && (
 						<Button onClick={(event) => requestSave(event.currentTarget)}>
@@ -141,8 +155,9 @@ const AdventureSaveControls = ({
 				</h3>
 				<p className="text-xs leading-relaxed text-muted-foreground">
 					Saved automatically on each floor change, town visit and town
-					purchase, and every 100 turns. Separate from your browser save, and
-					cleared when an adventure ends.
+					purchase, and every 100 turns. Separate from your{" "}
+					{signedIn ? "account" : "browser"} save, and cleared when an adventure
+					ends.
 				</p>
 				<div className="rounded-lg border bg-background/70 p-3 text-xs leading-relaxed">
 					{autosaved ? (
@@ -159,6 +174,7 @@ const AdventureSaveControls = ({
 						<p>{autosave.ok ? "No autosave yet." : autosave.error}</p>
 					)}
 				</div>
+				<SlotSyncStatus slot="autosave" />
 				<Button
 					variant="outline"
 					disabled={!autosaved}
@@ -205,7 +221,9 @@ const AdventureSaveControls = ({
 								: saved
 									? "Your previous saved adventure will be replaced."
 									: slot.ok
-										? "Store this adventure in your browser's single save slot."
+										? signedIn
+											? "Store this adventure in your account's save slot."
+											: "Store this adventure in your browser's single save slot."
 										: "The existing slot cannot be read. Saving will replace it."}
 						</Dialog.Description>
 						{pending && (

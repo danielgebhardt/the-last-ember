@@ -1,6 +1,6 @@
 import { Dialog } from "@base-ui/react/dialog";
 import { ArrowRight, FolderOpen, History, Shield } from "lucide-react";
-import { useId, useRef, useState } from "react";
+import { useId, useMemo, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetTrigger } from "@/components/ui/sheet";
 import {
@@ -9,7 +9,7 @@ import {
 } from "../../domain/dungeon/RunConfiguration";
 import { ADVENTURE_STORY } from "../../domain/game/AdventureStory";
 import { type SaveDocument, saveSummary } from "../../domain/saves/SaveFormat";
-import { readAutosave } from "../../persistence/LocalAdventureSave";
+import { useSaves } from "../../saves/SavesProvider";
 import AdventureSaveSheet from "./AdventureSaveSheet";
 import AppearanceChoice from "./AppearanceChoice";
 import DifficultyChoice from "./DifficultyChoice";
@@ -41,11 +41,13 @@ const AdventureOpening = ({
 }) => {
 	const [configuration, setConfiguration] = useState(initialConfiguration);
 	const [saveOpen, setSaveOpen] = useState(false);
-	// Read once: the opening screen is shown before any autosave can change.
-	const [autosave] = useState(() => {
-		const result = readAutosave();
+	// Read again when the player signs in or out, or a cloud copy arrives.
+	const saves = useSaves();
+	// biome-ignore lint/correctness/useExhaustiveDependencies: owner and version mark changes.
+	const autosave = useMemo(() => {
+		const result = saves.read("autosave");
 		return result.ok ? result.value : null;
-	});
+	}, [saves.owner, saves.version]);
 	const title = useRef<HTMLHeadingElement>(null);
 	const dungeonHeading = useId();
 

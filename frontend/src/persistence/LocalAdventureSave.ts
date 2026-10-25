@@ -65,3 +65,10 @@ export const clearAutosave = (
 		// Unavailable storage has nothing to clear.
 	}
 };
+
+// Signed-out play uses the original keys; a signed-in player's slots live under their
+// account, so a shared browser never mixes adventures.
+export const slotKey = (slot: "save" | "autosave", owner: string | null) => {
+	const key = slot === "save" ? LOCAL_SAVE_KEY : AUTOSAVE_KEY;
+	return owner ? `${key}:${owner}` : key;
+};

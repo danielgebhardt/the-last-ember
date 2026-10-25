@@ -47,12 +47,20 @@ Browser Save/Load, the separate autosave and file import/export persist the actu
 
 Signing in is optional; everything plays without an account. Accounts use **Firebase Authentication** (Google, and email with a password) on the free Spark plan. Trusted server work runs in **Vercel serverless functions** under `frontend/api`: today `GET /api/account` verifies a Firebase ID token and names its user. The Firebase library loads only when someone opens sign-in or already has a session on that device, so signed-out play downloads none of it (see `docs/performance-baseline.md`).
 
+**Cloud saves** (#421) keep a signed-in player's Save and Autosave slots in **Cloud Firestore** at `saves/{uid}/slots/{save|autosave}`. Browser storage stays the working copy, so play never waits on the network:
+
+- **Per account:** signed-in slots are stored in the browser under the player's ID, and signed-out play keeps its own guest slots.
+- **Uploads:** a few seconds after a slot is written, and when the tab is hidden. Each copy is the usual save text, gzip-compressed, with a revision number that every write advances by one.
+- **Conflicts:** when this browser and the cloud both changed, the player chooses which to keep. Otherwise a newer cloud copy simply replaces the browser's.
+- **Code:** the sync logic is in `frontend/src/saves`, and the Firestore lite client loads only once someone signs in. `frontend/firestore.rules` lets only the owner read or write their slots, and only one revision at a time.
+
 ### Firebase and Vercel setup
 
 1. In the [Firebase console](https://console.firebase.google.com), the project is `wardens-flame`. Under **Settings → General → Your apps**, a web app supplies the config values.
 2. **Security → Authentication → Sign-in method:** Google and Email/Password are enabled.
 3. **Authentication → Settings → Authorized domains:** list every domain that serves the game, such as the Vercel production domain. `localhost` is there by default.
-4. In **Vercel → Settings → Environment Variables**, set:
+4. **Firestore Database:** create the database (Standard edition, production mode, a nearby location). Then publish the rules from `frontend/firestore.rules`, either by pasting them under **Firestore → Rules** or with `pnpm exec firebase deploy --only firestore:rules --project wardens-flame` from `frontend` after `firebase login`. Publish them again whenever the file changes.
+5. In **Vercel → Settings → Environment Variables**, set:
 
    | Name | Value |
    |---|---|
@@ -68,7 +76,13 @@ For local development, put the same values in `frontend/.env.local` (git-ignored
 
 ### Emulators
 
-No test touches the live project. `pnpm --filter frontend emulators` starts the local Auth emulator for the demo project `demo-wardens-flame`. To point the app at it, also set `VITE_FIREBASE_AUTH_EMULATOR_HOST=127.0.0.1:9099`. `pnpm --filter frontend test:emulator` runs the account tests inside the emulator: signing up, out and in, and the function verifying the real token.
+No test touches the live project. `pnpm --filter frontend emulators` starts the local Auth and Firestore emulators for the demo project `demo-wardens-flame`; the Firestore emulator needs Java 11 or later. To point the app at them, also set `VITE_FIREBASE_AUTH_EMULATOR_HOST=127.0.0.1:9099` and `VITE_FIRESTORE_EMULATOR_HOST=127.0.0.1:8080`.
+
+`pnpm --filter frontend test:emulator` runs these tests inside the emulators:
+
+- signing up, out and in, and the function verifying the real token;
+- a compressed cloud save round trip, with stale revisions refused;
+- the security rules refusing another player's reads and writes.
 
 ## Code organization
 

@@ -7,6 +7,7 @@ import {
 	SheetTitle,
 } from "@/components/ui/sheet";
 import type { SaveDocument } from "../../domain/saves/SaveFormat";
+import { useSaves } from "../../saves/SavesProvider";
 import AdventureSaveControls from "../../settings/AdventureSaveControls";
 
 const AdventureSaveSheet = ({
@@ -22,6 +23,7 @@ const AdventureSaveSheet = ({
 	finalFocus?: RefObject<HTMLElement | null> | false;
 }) => {
 	const title = useRef<HTMLHeadingElement>(null);
+	const signedIn = useSaves().owner !== null;
 
 	return (
 		<SheetContent
@@ -55,9 +57,13 @@ const AdventureSaveSheet = ({
 				subtitle={
 					<SheetDescription className="ember-menu-description">
 						{createSnapshot
-							? "Save your adventure in this browser, or pick up where you left off."
+							? signedIn
+								? "Save your adventure to your account, or pick up where you left off."
+								: "Save your adventure in this browser, or pick up where you left off."
 							: (saveBlockedReason ??
-								"Continue a saved adventure from this browser.")}
+								(signedIn
+									? "Continue a saved adventure from your account."
+									: "Continue a saved adventure from this browser."))}
 					</SheetDescription>
 				}
 			/>

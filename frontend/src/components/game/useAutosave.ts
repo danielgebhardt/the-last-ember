@@ -7,10 +7,7 @@ import type {
 import type { GameState } from "../../domain/game/GameState";
 import { autosaveAction } from "../../domain/saves/Autosave";
 import { createSaveDocument } from "../../domain/saves/SaveFormat";
-import {
-	clearAutosave,
-	writeAutosave,
-} from "../../persistence/LocalAdventureSave";
+import { useSaves } from "../../saves/SavesProvider";
 
 // Writes the autosave slot after qualifying state changes. Failures are quiet: the
 // slot keeps its previous contents and play continues.
@@ -20,9 +17,10 @@ export const useAutosave = (
 	configuration: RunConfiguration,
 	fog: FogConfiguration,
 ) => {
+	const saves = useSaves();
 	const previous = useRef<GameState | null>(null);
-	const latest = useRef({ exploration, configuration, fog });
-	latest.current = { exploration, configuration, fog };
+	const latest = useRef({ exploration, configuration, fog, saves });
+	latest.current = { exploration, configuration, fog, saves };
 
 	useEffect(() => {
 		const before = previous.current;
@@ -33,11 +31,14 @@ export const useAutosave = (
 			before ?? { ...state, run: { ...state.run, floors: [] } },
 			state,
 		);
-		if (action === "clear") clearAutosave();
+		const { exploration, configuration, fog, saves } = latest.current;
+		if (action === "clear") saves.clear("autosave");
 		if (action !== "save") return;
 		try {
-			const { exploration, configuration, fog } = latest.current;
-			writeAutosave(createSaveDocument(state, exploration, configuration, fog));
+			saves.write(
+				"autosave",
+				createSaveDocument(state, exploration, configuration, fog),
+			);
 		} catch {
 			// The snapshot could not be prepared; keep the previous autosave.
 		}

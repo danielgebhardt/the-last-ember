@@ -53,6 +53,7 @@ const fakeAccounts = () => {
 		),
 		signOut: vi.fn(async () => emit(null)),
 		idToken: vi.fn(async () => (current ? "token" : null)),
+		cloudStore: vi.fn(async () => null),
 	};
 	const load = vi.fn(async () => api);
 	return { api, load };
@@ -107,7 +108,7 @@ describe("Account avatar and dialog", () => {
 			"src",
 			"https://example.com/gwen.png",
 		);
-		expect(localStorage.getItem(SIGNED_IN_KEY)).toBe("1");
+		expect(localStorage.getItem(SIGNED_IN_KEY)).toBe("g");
 
 		await user.click(avatar);
 		expect(screen.getByRole("heading", { name: "Your account" })).toBeVisible();
@@ -173,7 +174,7 @@ describe("Account avatar and dialog", () => {
 
 	it("restores a remembered session at startup without opening sign-in", async () => {
 		const { load } = fakeAccounts();
-		localStorage.setItem(SIGNED_IN_KEY, "1");
+		localStorage.setItem(SIGNED_IN_KEY, "expired-user");
 		renderMenu(load);
 		expect(screen.getByRole("button", { name: "Account" })).toBeVisible();
 		await waitFor(() => expect(load).toHaveBeenCalledTimes(1));

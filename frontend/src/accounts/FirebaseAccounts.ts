@@ -11,6 +11,7 @@ import {
 	signInWithPopup,
 	signOut,
 } from "firebase/auth";
+import type { CloudStore } from "../saves/CloudStore";
 import type { FirebaseWebConfig } from "./AccountsConfig";
 
 export type AccountUser = Readonly<{
@@ -29,13 +30,17 @@ export type AccountsApi = Readonly<{
 	signOut: () => Promise<void>;
 	// A fresh ID token for the trusted Vercel functions, or null when signed out.
 	idToken: () => Promise<string | null>;
+	// The signed-in player's cloud save slots; Firestore loads on first use.
+	cloudStore: () => Promise<CloudStore | null>;
 }>;
 
 export const createFirebaseAccounts = (
 	config: FirebaseWebConfig,
 	emulatorHost?: string,
+	firestoreHost?: string,
 ): AccountsApi => {
-	const auth = getAuth(initializeApp(config));
+	const app = initializeApp(config);
+	const auth = getAuth(app);
 	if (emulatorHost)
 		connectAuthEmulator(auth, `http://${emulatorHost}`, {
 			disableWarnings: true,
@@ -65,5 +70,11 @@ export const createFirebaseAccounts = (
 		},
 		signOut: () => signOut(auth),
 		idToken: async () => (await auth.currentUser?.getIdToken()) ?? null,
+		cloudStore: async () => {
+			const uid = auth.currentUser?.uid;
+			if (!uid) return null;
+			const { createCloudStore } = await import("./CloudSaves");
+			return createCloudStore(app, uid, firestoreHost);
+		},
 	};
 };

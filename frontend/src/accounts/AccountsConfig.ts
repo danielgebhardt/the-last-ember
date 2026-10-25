@@ -29,3 +29,12 @@ export const authEmulatorHost = (
 	env.VITE_FIREBASE_AUTH_EMULATOR_HOST
 		? env.VITE_FIREBASE_AUTH_EMULATOR_HOST
 		: undefined;
+// Development and tests only: keep cloud saves in the local Firestore emulator, e.g.
+// 127.0.0.1:8080.
+export const firestoreEmulatorHost = (
+	env: Environment = import.meta.env,
+): string | undefined =>
+	typeof env.VITE_FIRESTORE_EMULATOR_HOST === "string" &&
+	env.VITE_FIRESTORE_EMULATOR_HOST
+		? env.VITE_FIRESTORE_EMULATOR_HOST
+		: undefined;

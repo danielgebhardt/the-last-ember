@@ -3,6 +3,7 @@ import { useId, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useSaves } from "../saves/SavesProvider";
 import AccountAvatar from "./AccountAvatar";
 import { useAccount } from "./AccountProvider";
 
@@ -10,6 +11,7 @@ import { useAccount } from "./AccountProvider";
 // account, and once signed in, who you are and a way to sign out.
 const AccountPanel = () => {
 	const account = useAccount();
+	const saves = useSaves();
 	const [creating, setCreating] = useState(false);
 	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");
@@ -50,7 +52,7 @@ const AccountPanel = () => {
 						variant="outline"
 						size="lg"
 						disabled={account.busy}
-						onClick={() => account.signOut()}
+						onClick={() => saves.signOut()}
 					>
 						<LogOut aria-hidden="true" />
 						Sign out

@@ -18,8 +18,8 @@
 		"check:fix": "biome check --write .",
 		"ci": "biome ci .",
 		"test:smoke": "pnpm build && playwright test",
-		"emulators": "firebase emulators:start --only auth --project demo-wardens-flame",
-		"test:emulator": "FIREBASE_PROJECT_ID=demo-wardens-flame firebase emulators:exec --only auth --project demo-wardens-flame \"vitest run api\""
+		"emulators": "firebase emulators:start --only auth,firestore --project demo-wardens-flame",
+		"test:emulator": "FIREBASE_PROJECT_ID=demo-wardens-flame firebase emulators:exec --only auth,firestore --project demo-wardens-flame \"vitest run api CloudSaves.emulator\""
 	},
 	"packageManager": "pnpm@11.25.0",
 	"dependencies": {
