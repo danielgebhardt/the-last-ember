@@ -100,3 +100,16 @@ Measured 2026-10-25 on the `firebase-sign-in` branch, built without Firebase set
 | Begin Adventure ready, slow 4G, 4× CPU, cold | 2.16 s | 2.18 s | ≤ 2.35 s |
 
 The main chunk grew by the sync engine, the per-account save slots and the account save dialogs, plus #420's header avatar. Firestore (the lite client) sits in its own `CloudSaves-*.js` chunk (99 KB raw, 32 KB gzip). It loads only once someone is signed in.
+
+## WebP dungeon frames (#427)
+
+Both frames were re-encoded as WebP (quality 82) at their original 1672×941. The app still downloads only the frame for the current theme.
+
+| Frame | PNG | WebP |
+|---|---|---|
+| `dungeon-frame-light` | 3,084 KB | 330 KB |
+| `dungeon-frame-dark` | 2,751 KB | 265 KB |
+
+**Entering the game** (Begin Adventure, then the first floor) received 454 KB in the light theme and 389 KB in the dark theme, down from 3,208 KB and 2,875 KB. Measured 2026-10-25 in Chromium on the local preview.
+
+**Quality:** against the PNGs, the mean per-channel difference is about 3 out of 255 (PSNR 34 dB). Side-by-side crops at 2× zoom and in-game views at 1470×830, 1180×820, 1024×768 and 2560×1440 showed no visible change.

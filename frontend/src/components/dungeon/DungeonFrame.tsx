@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
-import darkDungeonBackground from "@/assets/dungeon-frame-dark.png";
-import lightDungeonBackground from "@/assets/dungeon-frame-light.png";
+import darkDungeonBackground from "@/assets/dungeon-frame-dark.webp";
+import lightDungeonBackground from "@/assets/dungeon-frame-light.webp";
 
 type DungeonFrameProps = {
 	children: ReactNode;
