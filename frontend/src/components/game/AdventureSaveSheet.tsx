@@ -55,9 +55,9 @@ const AdventureSaveSheet = ({
 				subtitle={
 					<SheetDescription className="ember-menu-description">
 						{createSnapshot
-							? "Keep your adventure here, or take a save file with you."
+							? "Save your adventure in this browser, or pick up where you left off."
 							: (saveBlockedReason ??
-								"Continue a saved adventure from this browser or a file.")}
+								"Continue a saved adventure from this browser.")}
 					</SheetDescription>
 				}
 			/>

@@ -1,5 +1,5 @@
-import { fileURLToPath } from "node:url";
 import { expect, test } from "@playwright/test";
+import { importAdventure } from "./adventure-helpers.js";
 
 for (const store of ["armor", "weapons"]) {
 	for (const width of [1280, 1440]) {
@@ -12,16 +12,7 @@ for (const store of ["armor", "weapons"]) {
 					height: width === 1280 ? 800 : 900,
 				});
 				await page.goto("/");
-				await page
-					.getByRole("button", { name: "Load an existing save", exact: true })
-					.click();
-				await page
-					.getByLabel("Import adventure file")
-					.setInputFiles(
-						fileURLToPath(
-							new URL(`.generated/town-${store}.json`, import.meta.url),
-						),
-					);
+				await importAdventure(page, `town-${store}`);
 				const map = page.getByLabel("Town map", { exact: true });
 				await expect(map).toBeFocused();
 				await page

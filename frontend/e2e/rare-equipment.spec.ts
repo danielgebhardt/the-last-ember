@@ -1,6 +1,5 @@
-import { fileURLToPath } from "node:url";
 import { expect, test } from "@playwright/test";
-import { turns } from "./adventure-helpers.js";
+import { importAdventure, turns } from "./adventure-helpers.js";
 
 for (const [fixture, name, other, slot, width] of [
 	["rare-cloak", "Warding Cloak", "Spellguard Shield", "chest", 1280],
@@ -11,14 +10,7 @@ for (const [fixture, name, other, slot, width] of [
 	}, info) => {
 		await page.setViewportSize({ width, height: width === 1280 ? 800 : 900 });
 		await page.goto("/");
-		await page
-			.getByRole("button", { name: "Load an existing save", exact: true })
-			.click();
-		await page
-			.getByLabel("Import adventure file")
-			.setInputFiles(
-				fileURLToPath(new URL(`.generated/${fixture}.json`, import.meta.url)),
-			);
+		await importAdventure(page, `${fixture}`);
 		const map = page.getByLabel("Town map", { exact: true });
 		await expect(map).toBeFocused();
 		await page.keyboard.press("e");

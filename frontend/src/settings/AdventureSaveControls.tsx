@@ -1,19 +1,8 @@
 import { Dialog } from "@base-ui/react/dialog";
-import {
-	Download,
-	FileJson,
-	FolderOpen,
-	History,
-	Save,
-	Upload,
-} from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { FolderOpen, History, Save } from "lucide-react";
+import { useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { type SaveDocument, saveSummary } from "../domain/saves/SaveFormat";
-import {
-	exportAdventureFile,
-	readAdventureFile,
-} from "../persistence/AdventureSaveFiles";
 import {
 	readAutosave,
 	readLocalSave,
@@ -37,31 +26,6 @@ const AdventureSaveControls = ({
 	const cancelRef = useRef<HTMLButtonElement>(null);
 	const initiatorRef = useRef<HTMLButtonElement | null>(null);
 	const restoring = useRef(false);
-	const fileInput = useRef<HTMLInputElement>(null);
-	const fileRead = useRef<AbortController | null>(null);
-	const [importing, setImporting] = useState(false);
-	useEffect(() => () => fileRead.current?.abort(), []);
-	const exportFile = () => {
-		if (!createSnapshot) return;
-		try {
-			const result = exportAdventureFile(createSnapshot());
-			setFeedback(result.ok ? "Save file download started." : result.error);
-		} catch {
-			setFeedback("Could not prepare this adventure for export.");
-		}
-	};
-	const importFile = async (file: File) => {
-		fileRead.current?.abort();
-		const controller = new AbortController();
-		fileRead.current = controller;
-		setImporting(true);
-		setFeedback("");
-		const result = await readAdventureFile(file, controller.signal);
-		if (controller.signal.aborted) return;
-		setImporting(false);
-		if (result.ok) onRestore(result.value);
-		else setFeedback(result.error);
-	};
 
 	const saved = slot.ok ? slot.value : null;
 	const requestSave = (button: HTMLButtonElement) => {
@@ -103,16 +67,6 @@ const AdventureSaveControls = ({
 		}
 		setPending({ kind: "load", document: latest.value });
 		setFeedback("");
-	};
-	const exportAutosave = () => {
-		const latest = readAutosave();
-		setAutosave(latest);
-		if (!latest.ok || !latest.value) {
-			setFeedback(latest.ok ? "There is no autosave right now." : latest.error);
-			return;
-		}
-		const result = exportAdventureFile(latest.value);
-		setFeedback(result.ok ? "Autosave download started." : result.error);
 	};
 	const autosaved = autosave.ok ? autosave.value : null;
 	const confirm = () => {
@@ -162,17 +116,14 @@ const AdventureSaveControls = ({
 				</div>
 				<div className={createSnapshot ? "grid grid-cols-2 gap-2" : "grid"}>
 					{createSnapshot && (
-						<Button
-							disabled={importing}
-							onClick={(event) => requestSave(event.currentTarget)}
-						>
+						<Button onClick={(event) => requestSave(event.currentTarget)}>
 							<Save aria-hidden="true" />
 							Save adventure
 						</Button>
 					)}
 					<Button
 						variant={createSnapshot ? "outline" : "default"}
-						disabled={!saved || importing}
+						disabled={!saved}
 						onClick={(event) => requestLoad(event.currentTarget)}
 					>
 						<FolderOpen aria-hidden="true" />
@@ -208,77 +159,14 @@ const AdventureSaveControls = ({
 						<p>{autosave.ok ? "No autosave yet." : autosave.error}</p>
 					)}
 				</div>
-				<div className={createSnapshot ? "grid grid-cols-2 gap-2" : "grid"}>
-					<Button
-						variant="outline"
-						disabled={!autosaved || importing}
-						onClick={(event) => requestAutosaveLoad(event.currentTarget)}
-					>
-						<FolderOpen aria-hidden="true" />
-						Load autosave
-					</Button>
-					{createSnapshot && (
-						<Button
-							variant="outline"
-							disabled={!autosaved || importing}
-							onClick={exportAutosave}
-						>
-							<Download aria-hidden="true" />
-							Export autosave
-						</Button>
-					)}
-				</div>
-			</section>
-			<section
-				aria-label="Save files"
-				className="grid gap-3 rounded-xl border bg-muted/15 p-4"
-			>
-				<h3 className="flex items-center gap-2 font-medium">
-					<FileJson
-						aria-hidden="true"
-						className="size-4 text-sky-700 dark:text-sky-300"
-					/>
-					{createSnapshot ? "Save files" : "Import a save file"}
-				</h3>
-				<p className="text-xs leading-relaxed text-muted-foreground">
-					{createSnapshot
-						? "Download a backup, or bring an adventure from another device."
-						: "Choose an adventure file to continue where you left off."}
-				</p>
-				<div className={createSnapshot ? "grid grid-cols-2 gap-2" : "grid"}>
-					{createSnapshot && (
-						<Button variant="outline" disabled={importing} onClick={exportFile}>
-							<Download aria-hidden="true" />
-							Export file
-						</Button>
-					)}
-					<Button
-						variant="outline"
-						disabled={importing}
-						onClick={() => fileInput.current?.click()}
-					>
-						<Upload aria-hidden="true" />
-						{importing ? "Reading file…" : "Import file"}
-					</Button>
-				</div>
-				<input
-					ref={fileInput}
-					type="file"
-					accept=".json,application/json"
-					aria-label="Import adventure file"
-					hidden
-					disabled={importing}
-					onChange={(event) => {
-						const file = event.currentTarget.files?.[0];
-						event.currentTarget.value = "";
-						if (file) void importFile(file);
-					}}
-				/>
-				<p className="text-xs leading-relaxed text-muted-foreground">
-					{createSnapshot
-						? "Import replaces the current adventure after validation; it does not change the browser save slot."
-						: "Import does not change the browser save slot."}
-				</p>
+				<Button
+					variant="outline"
+					disabled={!autosaved}
+					onClick={(event) => requestAutosaveLoad(event.currentTarget)}
+				>
+					<FolderOpen aria-hidden="true" />
+					Load autosave
+				</Button>
 			</section>
 			{feedback && (
 				<p

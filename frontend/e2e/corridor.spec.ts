@@ -1,6 +1,11 @@
-import { fileURLToPath } from "node:url";
 import { expect, test } from "@playwright/test";
-import { importAdventure, map, saveSheet, turns } from "./adventure-helpers.js";
+import {
+	importAdventure,
+	map,
+	reloadAdventure,
+	saveSheet,
+	turns,
+} from "./adventure-helpers.js";
 import { enterDungeonFromTown } from "./town-helpers.js";
 
 test.beforeEach(async ({ page }) => {
@@ -27,12 +32,7 @@ test("corridor running advances visible ordinary turns, stops at decisions and c
 	const canceled = await turns(page).innerText();
 	await page.waitForTimeout(350);
 	await expect(turns(page)).toHaveText(canceled);
-	await page.getByRole("button", { name: "Save/Load", exact: true }).click();
-	await page
-		.getByLabel("Import adventure file")
-		.setInputFiles(
-			fileURLToPath(new URL(".generated/corridor.json", import.meta.url)),
-		);
+	await reloadAdventure(page, "corridor");
 	await expect(map(page)).toBeFocused();
 	await expect(turns(page)).toHaveText("Turn 0");
 	await page.keyboard.press("r");
@@ -56,12 +56,7 @@ test("corridor running advances visible ordinary turns, stops at decisions and c
 	await map(page).focus();
 	await page.waitForTimeout(300);
 	await expect(turns(page)).toHaveText(paused);
-	await page.getByRole("button", { name: "Save/Load", exact: true }).click();
-	await page
-		.getByLabel("Import adventure file")
-		.setInputFiles(
-			fileURLToPath(new URL(".generated/corridor.json", import.meta.url)),
-		);
+	await reloadAdventure(page, "corridor");
 	await expect(map(page)).toBeFocused();
 	await page.waitForTimeout(300);
 	await expect(turns(page)).toHaveText("Turn 0");

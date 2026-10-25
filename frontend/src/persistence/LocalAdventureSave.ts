@@ -21,7 +21,7 @@ export const readLocalSave = (
 		return {
 			ok: false,
 			error:
-				"Browser storage is unavailable. You can still export or import a save file.",
+				"Browser storage is unavailable, so adventures can't be saved or loaded here.",
 		};
 	}
 };

@@ -2,6 +2,7 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it } from "vitest";
 import { serializeSave } from "../domain/saves/SaveFormat";
+import { LOCAL_SAVE_KEY } from "../persistence/LocalAdventureSave";
 import { ThemeProvider } from "../settings/ThemeProvider";
 import {
 	enterDungeonFromTown,
@@ -23,14 +24,13 @@ describe("Non-normal saved adventure controls", () => {
 		async (label, difficulty) => {
 			const source = savedAdventureWithPickupAndHealing();
 			source.configuration.difficulty = difficulty;
+			localStorage.setItem(LOCAL_SAVE_KEY, serializeSave(source));
 			const user = userEvent.setup();
 			render(<Home />, { wrapper: ThemeProvider });
 			await openSaveSheet(user);
-			await user.upload(
-				screen.getByLabelText("Import adventure file"),
-				new File([serializeSave(source)], "difficulty.json", {
-					type: "application/json",
-				}),
+			await user.click(screen.getByRole("button", { name: "Load adventure" }));
+			await user.click(
+				await screen.findByRole("button", { name: "Confirm load" }),
 			);
 			await waitFor(() =>
 				expect(screen.queryByRole("dialog")).not.toBeInTheDocument(),

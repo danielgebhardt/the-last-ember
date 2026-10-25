@@ -55,7 +55,7 @@ test("welcome choices and keyboard Settings apply return control to the map", as
 	await expect(turns(page)).toHaveText("Turn 1");
 });
 
-test("file import supports pickup and both hotbars without clicking the dungeon", async ({
+test("a loaded save supports pickup and both hotbars without clicking the dungeon", async ({
 	page,
 }) => {
 	await importAdventure(page);

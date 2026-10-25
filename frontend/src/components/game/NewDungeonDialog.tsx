@@ -37,7 +37,7 @@ const NewDungeonDialog = ({
 					</Dialog.Title>
 					<Dialog.Description className="mt-2 text-sm text-muted-foreground">
 						This replaces your current adventure. Unsaved progress will be lost.
-						Your browser save and exported save files will remain available.
+						Your browser save will remain available.
 					</Dialog.Description>
 					<div className="mt-5 flex flex-wrap justify-end gap-2">
 						<Button

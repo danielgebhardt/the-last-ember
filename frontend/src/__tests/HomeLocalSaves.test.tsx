@@ -59,8 +59,11 @@ describe("Confirmed local Save and Load", () => {
 			within(sheet).getByRole("button", { name: "Save adventure" }),
 		).toBeVisible();
 		expect(
-			within(sheet).getByRole("button", { name: "Import file" }),
+			within(sheet).getByRole("button", { name: "Load autosave" }),
 		).toBeVisible();
+		expect(
+			within(sheet).queryByRole("button", { name: "Import file" }),
+		).not.toBeInTheDocument();
 		expect(
 			within(sheet).queryByRole("textbox", { name: "Dungeon seed" }),
 		).not.toBeInTheDocument();

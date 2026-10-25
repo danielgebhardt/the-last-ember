@@ -73,46 +73,20 @@ it("keeps the opening intact when the local save is corrupt", async () => {
 	expect(screen.queryByRole("table")).not.toBeInTheDocument();
 });
 
-it("offers only loading and import before starting when the browser slot is empty", async () => {
+it("offers only loading before starting when the browser slot is empty", async () => {
 	render(<App />);
 	await userEvent
 		.setup()
 		.click(screen.getByRole("button", { name: "Load an existing save" }));
 	expect(screen.getByRole("dialog", { name: "Load adventure" })).toBeVisible();
 	expect(screen.getByRole("button", { name: "Load adventure" })).toBeDisabled();
-	expect(screen.getByRole("button", { name: "Import file" })).toBeEnabled();
+	expect(
+		screen.queryByRole("button", { name: "Import file" }),
+	).not.toBeInTheDocument();
 	expect(
 		screen.queryByRole("button", { name: "Save adventure" }),
 	).not.toBeInTheDocument();
 	expect(
 		screen.queryByRole("button", { name: "Export file" }),
 	).not.toBeInTheDocument();
-});
-it("imports from the load-only opening and restores immediate gameplay shortcuts", async () => {
-	const source = savedAdventureWithPickupAndHealing();
-	render(<App />);
-	const user = userEvent.setup();
-	await user.click(
-		screen.getByRole("button", { name: "Load an existing save" }),
-	);
-	await user.upload(
-		screen.getByLabelText("Import adventure file"),
-		new File([serializeSave(source)], "adventure.json", {
-			type: "application/json",
-		}),
-	);
-	await waitFor(() =>
-		expect(screen.getByLabelText("Dungeon map", { exact: true })).toHaveFocus(),
-	);
-	expect(
-		screen.queryByRole("dialog", { name: "Load adventure" }),
-	).not.toBeInTheDocument();
-	await user.keyboard("gh");
-	expect(screen.getByRole("log")).toHaveTextContent(
-		"You pick up Healing potion",
-	);
-	expect(screen.getByLabelText("Player health")).toHaveTextContent(
-		"Health 9 / 10",
-	);
-	expect(localStorage.getItem(LOCAL_SAVE_KEY)).toBeNull();
 });

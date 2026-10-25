@@ -1,5 +1,5 @@
-import { fileURLToPath } from "node:url";
 import { expect, test } from "@playwright/test";
+import { importAdventure } from "./adventure-helpers.js";
 
 for (const width of [1280, 1440]) {
 	for (const theme of ["Light", "Dark"]) {
@@ -8,16 +8,7 @@ for (const width of [1280, 1440]) {
 		}, info) => {
 			await page.setViewportSize({ width, height: width === 1280 ? 800 : 900 });
 			await page.goto("/");
-			await page
-				.getByRole("button", { name: "Load an existing save", exact: true })
-				.click();
-			await page
-				.getByLabel("Import adventure file")
-				.setInputFiles(
-					fileURLToPath(
-						new URL(".generated/town-rag-and-bone.json", import.meta.url),
-					),
-				);
+			await importAdventure(page, "town-rag-and-bone");
 			const map = page.getByLabel("Town map", { exact: true });
 			await expect(map).toBeFocused();
 			await page.getByRole("button", { name: "Settings", exact: true }).click();
