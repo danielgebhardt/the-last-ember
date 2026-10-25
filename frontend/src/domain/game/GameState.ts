@@ -16,7 +16,6 @@ import {
 	createStartingPotionHotbar,
 	type PotionHotbar,
 } from "../items/PotionHotbar";
-import type { RareEquipmentAllocation } from "../items/RareEquipment";
 import { placeRunRareFinds } from "../items/RareFinds";
 import { spawnRunSpellbooks } from "../items/SpellbookPlacement";
 import { merchantsEnabled } from "../merchant/MerchantAvailability";
@@ -70,13 +69,12 @@ import type { TimedEffect } from "./TimedEffects";
 
 export type GameState = {
 	afflictions: readonly ActiveAffliction[];
-	rareEquipment: RareEquipmentAllocation | null;
 	townEquipmentPurchases: readonly string[];
 	townPortal: TownPortal | null;
 	// Floors whose omen changes how they play; absent in older adventures.
-	omens?: readonly FloorOmen[];
+	omens: readonly FloorOmen[];
 	// Fixed arenas the way down runs through, one in long adventures.
-	arenas?: readonly Arena[];
+	arenas: readonly Arena[];
 	// A wielded Hungering Blade's binding and the turn of its last kill.
 	hunger?: Readonly<{ fedTurn: number }>;
 	// Floors where a Ring of Displacement has already fired this adventure.
@@ -137,10 +135,8 @@ export const createGameState = (
 	});
 	const objects = placeMerchants({ ...encounters, run, floorItems });
 
-	// New adventures hide rare equipment per third of the dungeon. The single seeded
-	// allocation only survives in older saves.
+	// Rare equipment hides once per third of the dungeon.
 	const rare = {
-		allocation: null,
 		items: placeRunRareFinds(run, encounters.monsters, floorItems, objects),
 	};
 	const warden = placeEmberWarden(
@@ -208,7 +204,6 @@ export const createGameState = (
 			.map((omen) => omen.floorNumber),
 	);
 	const created: GameState = {
-		rareEquipment: rare.allocation,
 		townEquipmentPurchases: [],
 		town: null,
 		townPortal: null,
@@ -225,7 +220,8 @@ export const createGameState = (
 			...(altar ? [altar] : []),
 			...vaults.objects,
 		],
-		...(omens.length ? { omens } : {}),
+		omens,
+		arenas: [],
 		gold: STARTING_GOLD,
 		turn: 0,
 		knownSpells: createKnownSpells(),

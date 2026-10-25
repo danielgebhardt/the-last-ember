@@ -10,8 +10,6 @@ import {
 	haggledSale,
 } from "../domain/game/PerkEffects";
 import {
-	isValidPerkHistory,
-	ORIGINAL_PERK_KINDS,
 	PERK_DEFINITIONS,
 	PERK_KINDS,
 	PERK_LEVELS,
@@ -22,7 +20,6 @@ import { resolvePlayerAction } from "../domain/game/PlayerActions";
 import { maximumHealth } from "../domain/game/PlayerHealth";
 import {
 	createProgression,
-	experienceThreshold,
 	type Progression,
 } from "../domain/game/Progression";
 import { isSpellTarget } from "../domain/game/SpellCasting";
@@ -36,8 +33,6 @@ import {
 	merchantPrice,
 } from "../domain/merchant/MerchantRules";
 import type { MonsterKind } from "../domain/monsters/Monster";
-import { parseSave } from "../domain/saves/SaveFormat";
-import v32 from "./fixtures/adventure-v32.json?raw";
 import { createTestDungeonFloor } from "./testhelpers";
 
 const NEW_PERKS: readonly PerkKind[] = [
@@ -97,12 +92,9 @@ const hits = () => ({
 });
 
 describe("The larger perk pool", () => {
-	it("adds two perks to each family, keeping the original pool frozen", () => {
+	it("holds five perks in each family, including the ten added in #408", () => {
 		expect(PERK_KINDS).toHaveLength(25);
-		expect(ORIGINAL_PERK_KINDS).toHaveLength(15);
-		expect(
-			PERK_KINDS.filter((perk) => !ORIGINAL_PERK_KINDS.includes(perk)),
-		).toEqual(expect.arrayContaining([...NEW_PERKS]));
+		expect(PERK_KINDS).toEqual(expect.arrayContaining([...NEW_PERKS]));
 		const families = new Map<string, number>();
 		for (const perk of PERK_KINDS) {
 			const { family } = PERK_DEFINITIONS[perk];
@@ -127,71 +119,6 @@ describe("The larger perk pool", () => {
 			// Nine choices leave sixteen perks, so late offers no longer repeat leftovers.
 			expect(PERK_KINDS.length - taken.length).toBe(16);
 		}
-	});
-});
-
-describe("Perk history from before the larger pool", () => {
-	// The first seed whose original level-three offer has a perk the current one lacks.
-	const legacy = () => {
-		for (let seed = 1; ; seed += 1) {
-			const old = perkOffers(seed, 3, [], ORIGINAL_PERK_KINDS);
-			const perk = old.find((p) => !perkOffers(seed, 3, []).includes(p));
-			if (perk) return { seed, perk };
-		}
-	};
-
-	it("accepts original-pool choices, mixed histories, and nothing offered by neither", () => {
-		const { seed, perk } = legacy();
-		const progression = (perks: Progression["perks"]) => ({
-			...createProgression(),
-			experience: 3800,
-			perks,
-		});
-		expect(isValidPerkHistory(seed, progression([{ level: 3, perk }]))).toBe(
-			true,
-		);
-		const later = perkOffers(seed, 5, [perk])[0];
-		expect(
-			isValidPerkHistory(
-				seed,
-				progression([
-					{ level: 3, perk },
-					{ level: 5, perk: later },
-				]),
-			),
-		).toBe(true);
-		const neither = PERK_KINDS.find(
-			(p) =>
-				!perkOffers(seed, 3, []).includes(p) &&
-				!perkOffers(seed, 3, [], ORIGINAL_PERK_KINDS).includes(p),
-		) as PerkKind;
-		expect(
-			isValidPerkHistory(seed, progression([{ level: 3, perk: neither }])),
-		).toBe(false);
-	});
-
-	it("loads a v32 save whose perk only the original pool offered", () => {
-		const document = JSON.parse(v32);
-		const seed: number = document.state.run.seed;
-		const perk = perkOffers(seed, 3, [], ORIGINAL_PERK_KINDS).find(
-			(p) => !perkOffers(seed, 3, []).includes(p) && p !== "tough",
-		);
-		if (!perk) throw new Error("Expected a perk only the original pool offers");
-		const progression = {
-			...document.state.progression,
-			experience: experienceThreshold(3),
-			perks: [{ level: 3, perk }],
-		};
-		const maxHealth = maximumHealth(
-			progression,
-			document.state.equipment,
-			document.state.afflictions,
-		);
-		document.state.progression = progression;
-		document.state.player = { health: maxHealth, maxHealth };
-		const parsed = parseSave(JSON.stringify(document));
-		if (!parsed.ok) throw new Error(parsed.error);
-		expect(parsed.value.state.progression.perks).toEqual([{ level: 3, perk }]);
 	});
 });
 

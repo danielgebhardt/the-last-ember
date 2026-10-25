@@ -37,7 +37,7 @@ Seed replay is deterministic for the same rules version, configuration and actio
 
 ## Saves and release compatibility
 
-**Saves from v32 onward keep loading.** A breaking format change bumps the version and adds a migration step, so older saves are upgraded on load and then validated like current ones. Versions older than v32, or newer than this build, produce an error; loading never regenerates or silently resets them. A rejected import does not replace the current adventure or browser save.
+**Saves from v33 onward keep loading.** A breaking format change bumps the version and adds a migration step, so older saves are upgraded on load and then validated like current ones. Versions older than v33, or newer than this build, produce an error; loading never regenerates or silently resets them. A rejected import does not replace the current adventure or browser save.
 
 Browser Save/Load, the separate autosave and file import/export persist the actual dungeon, discovery, actors, inventory, stock, conditions, permanent attributes and portal anchor. They validate shape, bounded input and cross-field consistency before restoring. Reading the browser slot does not rewrite it. The historical storage key `larn:adventure-save` and internal item keys remain stable.
 

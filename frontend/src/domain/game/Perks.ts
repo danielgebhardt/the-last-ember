@@ -117,25 +117,6 @@ export const PERK_DEFINITIONS = {
 export type PerkKind = keyof typeof PERK_DEFINITIONS;
 export type PerkFamily = (typeof PERK_DEFINITIONS)[PerkKind]["family"];
 export const PERK_KINDS = Object.keys(PERK_DEFINITIONS) as PerkKind[];
-// The pool before #408 added ten perks. Offers depend on the pool, so saves made with
-// it are validated against it too. Frozen: never add to or reorder this list.
-export const ORIGINAL_PERK_KINDS: readonly PerkKind[] = [
-	"brutal",
-	"precise",
-	"opportunist",
-	"tough",
-	"evasive",
-	"iron-hide",
-	"deep-reserves",
-	"spellfocus",
-	"quick-recovery",
-	"herbalist",
-	"resilient",
-	"antivenom",
-	"scavenger",
-	"trapwise",
-	"keen-eyes",
-];
 export type PerkChoice = Readonly<{ level: number; perk: PerkKind }>;
 
 // Strength grows at odd levels and Dexterity at even ones; a perk joins each odd
@@ -155,13 +136,12 @@ export const perkOffers = (
 	seed: number,
 	level: number,
 	taken: readonly PerkKind[],
-	pool: readonly PerkKind[] = PERK_KINDS,
 ): readonly PerkKind[] => {
 	const random = createSeededRandom(
 		hashStringToUint32(`${seed}:perk:${level}`),
 	);
 	const families = new Map<string, PerkKind[]>();
-	for (const perk of pool)
+	for (const perk of PERK_KINDS)
 		if (!taken.includes(perk)) {
 			const family = PERK_DEFINITIONS[perk].family;
 			families.set(family, [...(families.get(family) ?? []), perk]);
@@ -206,8 +186,7 @@ export const pendingPerkCount = (progression: Progression): number => {
 	);
 };
 
-// Every saved choice was offered at its level, in order, with no gaps. A choice may come
-// from the original pool (saves made before #408) or the current one.
+// Every saved choice was offered at its level, in order, with no gaps.
 export const isValidPerkHistory = (
 	seed: number,
 	progression: Progression,
@@ -218,13 +197,10 @@ export const isValidPerkHistory = (
 		(choice, index) =>
 			choice.level === PERK_LEVELS[index] &&
 			choice.level <= reached &&
-			[ORIGINAL_PERK_KINDS, PERK_KINDS].some((pool) =>
-				perkOffers(
-					seed,
-					choice.level,
-					chosen.slice(0, index).map((c) => c.perk),
-					pool,
-				).includes(choice.perk),
-			),
+			perkOffers(
+				seed,
+				choice.level,
+				chosen.slice(0, index).map((c) => c.perk),
+			).includes(choice.perk),
 	);
 };

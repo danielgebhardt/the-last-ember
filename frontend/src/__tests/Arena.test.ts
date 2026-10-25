@@ -131,7 +131,7 @@ describe("Arenas", () => {
 		expect(arenaFloorFor(9)).toBeUndefined();
 		expect(arenaFloorFor(10)).toBe(6);
 		expect(arenaFloorFor(20)).toBe(12);
-		expect(adventure(1, 9).arenas).toBeUndefined();
+		expect(adventure(1, 9).arenas).toEqual([]);
 		const seen = new Set<string>();
 		for (let seed = 1; seed <= 12; seed++) {
 			const state = adventure(seed);

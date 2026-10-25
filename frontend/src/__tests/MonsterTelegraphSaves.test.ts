@@ -17,31 +17,50 @@ import { THIEF_SPAWN_ID } from "../domain/monsters/TreasureThief";
 import { parseSave, serializeSave } from "../domain/saves/SaveFormat";
 import { savedAdventure } from "./SaveTestHelpers";
 
-// Minibosses only exist in their arena, which this short fixture has none of.
+// Minibosses only exist in their arena, which this short fixture has none of; their own
+// tests cover their saves.
 const kinds = (Object.keys(MONSTER_DEFINITIONS) as MonsterKind[]).filter(
 	(kind) => !MONSTER_DEFINITIONS[kind].miniboss,
 );
-// The Warden only exists with its reserved ID and depth stats; off the final floor it
-// must be enraged. A thief owns its reserved ID. Any other kind is reshaped as is.
+// The Warden only exists with its reserved ID and depth stats, and a thief owns its
+// reserved ID. Any other kind is reshaped as is.
 const asKind = (monster: Monster, kind: MonsterKind): Monster =>
 	kind === "ember-warden"
 		? {
 				...monster,
 				kind,
 				id: `${monster.floorNumber}:${WARDEN_SPAWN_ID}`,
-				warden: { ...wardenStats(5), awake: true, enraged: true },
+				warden: { ...wardenStats(5), awake: true },
 			}
 		: kind === "treasure-thief"
 			? { ...monster, kind, id: `${monster.floorNumber}:${THIEF_SPAWN_ID}` }
 			: { ...monster, kind };
-// One floor-2 actor (the player is on floor 1) reshaped into the kind under test.
+// One floor-2 actor (the player is on floor 1) reshaped into the kind under test. A
+// Warden never leaves the final floor and carries the flame, so it stands on the flame's
+// tile there and takes it back up.
 const withActor = (change: (monster: Monster) => Monster) => {
 	const document = savedAdventure();
 	const monster = document.state.monsters.find(
 		(actor) => actor.floorNumber === 2,
 	);
 	if (!monster) throw new Error("Fixture requires a floor-2 monster");
-	document.state.monsters = [change({ ...monster, health: 1 })];
+	const changed = change({ ...monster, health: 1 });
+	const flame = document.state.floorItems.find(
+		(entry) => entry.item.kind === "cure",
+	);
+	if (changed.kind === "ember-warden" && flame) {
+		document.state.monsters = [
+			{
+				...changed,
+				id: `${flame.floorNumber}:${WARDEN_SPAWN_ID}`,
+				floorNumber: flame.floorNumber,
+				coordinate: { ...flame.coordinate },
+			},
+		];
+		document.state.floorItems = document.state.floorItems.filter(
+			(entry) => entry !== flame,
+		);
+	} else document.state.monsters = [changed];
 	return document;
 };
 const reachableTarget = (monster: Monster, type: TargetTelegraph) => {
@@ -69,7 +88,11 @@ describe("registered monster telegraphs in saves", () => {
 		"round-trips %s on an owning kind and rejects it on a kind without it",
 		(type) => {
 			const rule = TARGET_TELEGRAPHS[type];
-			const owner = kinds.find((kind) => rule.owns(MONSTER_DEFINITIONS[kind]));
+			// Targets lie on floor 2, which the Warden never leaves the final floor for.
+			const owner = kinds.find(
+				(kind) =>
+					kind !== "ember-warden" && rule.owns(MONSTER_DEFINITIONS[kind]),
+			);
 			const other = kinds.find((kind) => !rule.owns(MONSTER_DEFINITIONS[kind]));
 			if (!owner || !other) throw new Error(`${type} needs both kinds`);
 			const prepare = (kind: MonsterKind) => (monster: Monster) => {

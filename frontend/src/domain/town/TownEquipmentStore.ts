@@ -3,7 +3,6 @@ import type { GameState } from "../game/GameState";
 import { haggledPrice } from "../game/PerkEffects";
 import { canAddToBag, createBag } from "../items/Bag";
 import { ownedItems } from "../items/OwnedItems";
-import { rareEquipmentId } from "../items/RareEquipment";
 import {
 	TOWN_EQUIPMENT_OFFERS,
 	type TownEquipmentStore,
@@ -67,10 +66,6 @@ export const buyTownEquipment = (
 			...state,
 			gold: state.gold - price,
 			townEquipmentPurchases: [...state.townEquipmentPurchases, item.id],
-			...(state.rareEquipment &&
-			rareEquipmentId(state.rareEquipment) === item.id
-				? { rareEquipment: { ...state.rareEquipment, acquired: true } }
-				: {}),
 			bag: createBag([...state.bag.items, { ...item }]),
 			townEquipmentStock: state.townEquipmentStock.filter(
 				(copy) => copy.id !== item.id,

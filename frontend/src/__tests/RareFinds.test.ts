@@ -8,10 +8,6 @@ import { createGameState } from "../domain/game/GameState";
 import { isRareEquipmentKind } from "../domain/items/Item";
 import { spawnRunItems } from "../domain/items/ItemPlacement";
 import {
-	LEGACY_RARE_KINDS,
-	selectRunRareEquipment,
-} from "../domain/items/RareEquipment";
-import {
 	RARE_FIND_BANDS,
 	rareFindBands,
 	rareFindId,
@@ -66,7 +62,6 @@ describe("Rare equipment finds", () => {
 				generateDungeonRun(seed, 20, COMPACT_TEST_CONFIGURATION),
 			);
 			const state = createGameState(run);
-			expect(state.rareEquipment).toBeNull();
 			// The arena replaces its floor whole, so whatever lay there is gone.
 			const arena = state.arenas?.[0]?.floorNumber;
 			for (const ordinary of spawnRunItems(run, spawnRunMonsters(run)))
@@ -95,15 +90,6 @@ describe("Rare equipment finds", () => {
 			}
 		}
 		expect(checked).toBeGreaterThan(10);
-	});
-
-	it("keeps the original single selection to its two kinds, so new rares never change older saves", () => {
-		const kinds = new Set<string>();
-		for (let seed = 0; seed < 400; seed++) {
-			const legacy = selectRunRareEquipment(seed, 20);
-			if (legacy) kinds.add(legacy.kind);
-		}
-		expect([...kinds].sort()).toEqual([...LEGACY_RARE_KINDS].sort());
 	});
 
 	it("saves a find and rejects a duplicate copy or a kind the seed never selected", () => {

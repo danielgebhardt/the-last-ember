@@ -49,26 +49,6 @@ export const TOWN_EQUIPMENT_OFFERS: Readonly<Record<string, Offer>> =
 export const createTownEquipmentStock = (): readonly ItemInstance[] =>
 	Object.values(TOWN_EQUIPMENT_OFFERS).map(({ item }) => ({ ...item }));
 export const townEquipmentOffers = () => Object.values(TOWN_EQUIPMENT_OFFERS);
-// A save from before an offer existed has neither bought nor stocked it; loading adds its
-// copy. Bought copies never return, and existing stock keeps its order and items.
-export const withNewTownOffers = (
-	stock: readonly ItemInstance[],
-	purchased: readonly string[],
-): readonly ItemInstance[] => {
-	const missing = Object.values(TOWN_EQUIPMENT_OFFERS).filter(
-		({ item }) =>
-			!purchased.includes(item.id) &&
-			!stock.some((copy) => copy.id === item.id),
-	);
-	if (!missing.length) return stock;
-	return Object.values(TOWN_EQUIPMENT_OFFERS).flatMap(({ item }) => {
-		const kept = stock.find((copy) => copy.id === item.id);
-		if (kept) return [kept];
-		return missing.some((offer) => offer.item.id === item.id)
-			? [{ ...item }]
-			: [];
-	});
-};
 export const isTownEquipmentStock = (
 	value: unknown,
 ): value is readonly ItemInstance[] =>

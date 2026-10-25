@@ -1,8 +1,10 @@
 # Save policy
 
-Outside players keep their adventures across updates. Every save from **v32** onward must keep loading.
+Outside players keep their adventures across updates. Every save from **v33** onward must keep loading.
 
-- **Supported range.** Versions from `OLDEST_SUPPORTED_SAVE_VERSION` (v32) up to the current `SAVE_FORMAT_VERSION` load. Older or future versions show "This save uses an unsupported format version."
+v33 is a clean start (#424, 2026-10-25): before cloud saves, the developer retired every older version and removed the code that only existed to keep them loading.
+
+- **Supported range.** Versions from `OLDEST_SUPPORTED_SAVE_VERSION` (v33) up to the current `SAVE_FORMAT_VERSION` load. Older or future versions show "This save uses an unsupported format version."
 - **Breaking changes bump and migrate.** When persisted state changes incompatibly:
   - increment `SAVE_FORMAT_VERSION`;
   - update the shape (`SaveShape.ts`) and document type (`SaveDocument.ts`) to the new contract;

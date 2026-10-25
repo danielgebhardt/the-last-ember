@@ -64,7 +64,7 @@ const isConsistentReinforcement = (
 };
 
 // The Ember Warden is unique, owns its reserved ID, carries the stats for this
-// dungeon's depth, and only leaves the final floor once enraged.
+// dungeon's depth, and never leaves the final floor.
 const isConsistentWarden = (entry: Monster, depth: number): boolean => {
 	const warden = entry.kind === "ember-warden";
 	if (
@@ -78,8 +78,7 @@ const isConsistentWarden = (entry: Monster, depth: number): boolean => {
 		entry.warden.depth === depth &&
 		entry.warden.maxHealth === stats.maxHealth &&
 		entry.warden.attackDamage === stats.attackDamage &&
-		(entry.floorNumber === depth || entry.warden.enraged === true) &&
-		(entry.warden.enraged !== true || entry.warden.awake === true)
+		entry.floorNumber === depth
 	);
 };
 

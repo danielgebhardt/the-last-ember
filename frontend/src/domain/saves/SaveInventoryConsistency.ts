@@ -203,17 +203,18 @@ export const hasConsistentInventory = (document: SaveDocument): boolean => {
 		)
 	)
 		return false;
-	// One flame: claimed, lying on the final floor, or still carried by a living Warden
-	// (older saves always placed it on the floor).
+	// One flame: claimed, carried by the living Warden, or dropped on the final floor
+	// where it fell.
 	const cures = state.floorItems.filter((entry) => entry.item.kind === "cure");
-	const carried =
-		cures.length === 0 &&
-		state.monsters.some((monster) => isWarden(monster) && monster.health > 0);
+	const wardenStands = state.monsters.some(
+		(monster) => isWarden(monster) && monster.health > 0,
+	);
 	if (
 		quest.cureRecovered
-			? cures.length !== 0
-			: !carried &&
-				(cures.length !== 1 || cures[0].floorNumber !== quest.goalFloor)
+			? cures.length !== 0 || wardenStands
+			: wardenStands
+				? cures.length !== 0
+				: cures.length !== 1 || cures[0].floorNumber !== quest.goalFloor
 	)
 		return false;
 	return true;

@@ -17,20 +17,12 @@ import {
 } from "../domain/items/Item";
 import { availableItemLocations } from "../domain/items/ItemPlacement";
 import { itemArmor, itemMagicResistance } from "../domain/items/ItemValues";
-import {
-	allocateRunRareEquipment,
-	rareEquipmentId,
-	selectRunRareEquipment,
-} from "../domain/items/RareEquipment";
+import { rareFindId } from "../domain/items/RareFinds";
 import { sellCarriedEquipment } from "../domain/merchant/EquipmentSales";
 import { lowerEquipmentSale } from "../domain/merchant/LowerEquipmentSales";
 import { chooseEnemySpell } from "../domain/monsters/EnemyCasting";
 import { resolveMonsterArea } from "../domain/monsters/MonsterAreaAttack";
-import {
-	coordinateKey,
-	orthogonalDistance,
-	protectedSpawnLocations,
-} from "../domain/monsters/MonsterLocations";
+import { orthogonalDistance } from "../domain/monsters/MonsterLocations";
 import { springTrap } from "../domain/objects/DungeonTraps";
 import {
 	parseSave,
@@ -80,23 +72,14 @@ it("protects an MR sidegrade from Lower classification even at the effective cap
 		compareEquipment({ id: "cloak", kind: "warding-cloak" }, context)?.label,
 	).toBe("Tradeoff");
 });
-it("uses one shared seeded selection with both kinds and both sources", () => {
-	const found = new Set<string>();
-	let count = 0;
-	for (let seed = 0; seed < 500; seed++) {
-		const selected = selectRunRareEquipment(seed, 20);
-		expect(selectRunRareEquipment(seed, 20)).toEqual(selected);
-		if (selected) {
-			count++;
-			found.add(`${selected.kind}:${selected.source}`);
-		}
-	}
-	expect(count).toBeGreaterThan(60);
-	expect(count).toBeLessThan(140);
-	expect(found.size).toBe(4);
-	expect(selectRunRareEquipment(0, 4)).toBeUndefined();
-});
-
+// The armor store's one copy of a rare kind.
+const townOfferId = (kind: string) => {
+	const id = Object.keys(TOWN_EQUIPMENT_OFFERS).find(
+		(offer) => TOWN_EQUIPMENT_OFFERS[offer].item.kind === kind,
+	);
+	if (!id) throw new Error(`Expected a town offer of ${kind}`);
+	return id;
+};
 const roundTrip = (state: GameState) => {
 	const parsed = parseSave(serializeSave(tacticalSnapshot(state)));
 	expect(parsed.ok, parsed.ok ? "" : parsed.error).toBe(true);
@@ -114,16 +97,10 @@ it.each(["warding-cloak", "spellguard-shield"] as const)(
 	(kind) => {
 		for (const source of ["town", "dungeon"] as const) {
 			const state = rareEquipmentAdventure(kind, source);
-			expect(ownsRare(state)).toHaveLength(source === "dungeon" ? 1 : 0);
-			if (source === "dungeon")
-				expect(state.rareEquipment).toMatchObject({
-					kind,
-					source,
-					acquired: false,
-				});
-			else expect(state.rareEquipment).toBeNull();
-			// New adventures never mint the original allocation.
-			expect(createGameState(state.run).rareEquipment).toBeNull();
+			// The dungeon copy is this seed's per-third find; the town copy is separate.
+			expect(ownsRare(state).filter((i) => i.kind === kind)).toEqual(
+				source === "dungeon" ? [{ id: rareFindId(kind), kind }] : [],
+			);
 			expect(eligibleLootKinds(5, "found")).not.toContain(kind);
 			expect(eligibleLootKinds(20, "drop")).not.toContain(kind);
 			expect(
@@ -136,44 +113,6 @@ it.each(["warding-cloak", "spellguard-shield"] as const)(
 		}
 	},
 );
-it("places selected dungeon loot safely, or omits without space", () => {
-	const state = rareEquipmentAdventure("warding-cloak", "dungeon");
-	const result = allocateRunRareEquipment(
-		state.run,
-		state.monsters,
-		state.floorItems.filter((i) => !i.item.id.startsWith("rare-gear:")),
-		state.objects,
-	);
-	expect(result.allocation).toMatchObject({
-		kind: "warding-cloak",
-		source: "dungeon",
-		acquired: false,
-		floorNumber: 5,
-	});
-	expect(result.items).toHaveLength(1);
-	const item = result.items[0];
-	expect(
-		[
-			...state.monsters,
-			...state.objects,
-			...state.floorItems.filter((i) => !i.item.id.startsWith("rare-gear:")),
-		]
-			.filter((e) => e.floorNumber === 5)
-			.map((e) => coordinateKey(e.coordinate)),
-	).not.toContain(coordinateKey(item.coordinate));
-	expect(
-		protectedSpawnLocations(state.run, 5).map(coordinateKey),
-	).not.toContain(coordinateKey(item.coordinate));
-	const noRooms = {
-		...state.run,
-		floors: state.run.floors.map((f) => ({ ...f, rooms: [] })),
-	};
-	// Existing reciprocal stairs preserve valid arrival geometry in this controlled no-space case.
-	expect(allocateRunRareEquipment(noRooms, [], [], [])).toEqual({
-		allocation: null,
-		items: [],
-	});
-});
 it.each(["warding-cloak", "spellguard-shield"] as const)(
 	"continues %s pickup, enchant, equip, drop and sale without changing MR or recreating it",
 	(kind) => {
@@ -190,12 +129,10 @@ it.each(["warding-cloak", "spellguard-shield"] as const)(
 			},
 			monsters: [],
 		};
-		expect(state.rareEquipment?.acquired).toBe(false);
 		state = resolvePlayerAction(roundTrip(state), {
 			type: "pickup",
 			itemId: item.id,
 		}).state;
-		expect(state.rareEquipment?.acquired).toBe(true);
 		const slot = kind === "warding-cloak" ? "chest" : "offHand";
 		if (!state.equipment[slot] || state.equipment[slot]?.id !== item.id)
 			state = resolvePlayerAction(state, {
@@ -240,7 +177,6 @@ it.each(["warding-cloak", "spellguard-shield"] as const)(
 		if ("error" in sold) throw new Error(sold.error);
 		state = roundTrip(sold);
 		expect(ownsRare(state)).toHaveLength(0);
-		expect(state.rareEquipment?.acquired).toBe(true);
 		expect(
 			resolvePlayerAction(state, { type: "pickup", itemId: item.id })
 				.turnAdvanced,
@@ -256,7 +192,7 @@ it.each(["warding-cloak", "spellguard-shield"] as const)(
 			gold: 1200,
 			town: { ...createTownLocation(), coordinate: { row: 13, col: 7 } },
 		};
-		const id = rareEquipmentId({ kind, source: "town" });
+		const id = townOfferId(kind);
 		expect(TOWN_EQUIPMENT_OFFERS[id].price).toBe(900);
 		const rejected = resolvePlayerAction(
 			{ ...state, gold: 899 },
@@ -275,7 +211,7 @@ it.each(["warding-cloak", "spellguard-shield"] as const)(
 		const sold = sellCarriedEquipment(bought.state, id);
 		if ("error" in sold) throw new Error(sold.error);
 		state = roundTrip(sold);
-		expect(ownsRare(state)).toHaveLength(0);
+		expect(ownsRare(state).filter((i) => i.id === id)).toEqual([]);
 		expect(
 			townEquipmentOffers().filter((o) => isRareEquipmentKind(o.item.kind)),
 		).toHaveLength(RARE_EQUIPMENT_KINDS.length);
@@ -342,22 +278,11 @@ it("keeps MR sidegrades out of bulk-sale quotes and preserves ordinary physical 
 		),
 	).toEqual({ type: "damage", spell: "ember-bolt", damage: 5 });
 });
-it("rejects forged IDs, unselected kinds, duplicate rare copies, restored stock and altered selection", () => {
+it("rejects forged IDs, duplicate rare copies and restored stock", () => {
 	const state = rareEquipmentAdventure("warding-cloak", "dungeon");
 	const doc = tacticalSnapshot(state);
 	const item = ownsRare(state)[0];
 	const cases = [
-		{ ...doc, state: { ...doc.state, rareEquipment: undefined } },
-		{
-			...doc,
-			state: {
-				...doc.state,
-				rareEquipment: {
-					...doc.state.rareEquipment,
-					kind: "spellguard-shield",
-				},
-			},
-		},
 		{
 			...doc,
 			state: { ...doc.state, bag: { items: [{ ...item, id: "forged" }] } },
@@ -459,10 +384,7 @@ it("mitigates breath once while leaving physical hits, poison application/ticks 
 });
 it("continues combat deterministically after saving equipped MR gear", () => {
 	let state = rareEquipmentAdventure("warding-cloak", "dungeon");
-	const allocation = state.rareEquipment;
-	if (allocation?.source !== "dungeon")
-		throw new Error("Expected dungeon allocation");
-	const id = rareEquipmentId(allocation);
+	const id = rareFindId("warding-cloak");
 	const floor = state.run.floors[0];
 	const tiles = availableItemLocations(state.run, floor, []);
 	const player = tiles.find((p) =>
@@ -498,8 +420,7 @@ it("continues combat deterministically after saving equipped MR gear", () => {
 		],
 		player: { health: 7, maxHealth: 10 },
 		floorItems: state.floorItems.filter((i) => i.item.id !== id),
-		equipment: { ...state.equipment, chest: { id, kind: allocation.kind } },
-		rareEquipment: { ...allocation, acquired: true },
+		equipment: { ...state.equipment, chest: { id, kind: "warding-cloak" } },
 	};
 	const replay = roundTrip(state);
 	for (const action of [

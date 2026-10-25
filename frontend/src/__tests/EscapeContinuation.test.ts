@@ -1,4 +1,5 @@
 // @vitest-environment node
+
 import { describe, expect, it } from "vitest";
 import {
 	connectDungeonFloors,
@@ -9,6 +10,7 @@ import { DEFAULT_FOG_CONFIGURATION } from "../domain/dungeon/RunConfiguration";
 import { activateEscapeFloor } from "../domain/game/Escape";
 import { createGameState } from "../domain/game/GameState";
 import { resolvePlayerAction } from "../domain/game/PlayerActions";
+import { isWarden } from "../domain/monsters/EmberWarden";
 import {
 	createSaveDocument,
 	parseSave,
@@ -29,6 +31,8 @@ describe("Resuming an awakened return floor", () => {
 			{
 				...fresh,
 				run: { ...fresh.run, activeFloor: 4, playerCoordinate: arrival },
+				// The Warden fell and its flame was claimed.
+				monsters: fresh.monsters.filter((actor) => !isWarden(actor)),
 				quest: { ...fresh.quest, cureRecovered: true },
 				floorItems: fresh.floorItems.filter(
 					(entry) => entry.item.kind !== "cure",

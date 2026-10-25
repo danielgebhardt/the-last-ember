@@ -182,7 +182,7 @@ it("retains the promoted stack order and deterministic next enchantment through 
 	);
 	const parsed = parseSave(serializeSave(document));
 	if (!parsed.ok) throw new Error(parsed.error);
-	expect(parsed.value.version).toBe(32);
+	expect(parsed.value.version).toBe(33);
 	const loaded = restoreSave(parsed.value).state;
 	expect(loaded).toEqual(state);
 	expect(bagSlots(loaded.bag).map(({ item }) => item.id)).toEqual([

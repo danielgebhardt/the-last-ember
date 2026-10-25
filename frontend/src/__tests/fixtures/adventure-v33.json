@@ -1,6 +1,6 @@
 {
-	"version": 32,
-	"savedAt": "2026-10-21T12:00:00.000Z",
+	"version": 33,
+	"savedAt": "2026-10-25T12:00:00.000Z",
 	"configuration": {
 		"rows": 15,
 		"cols": 15,
@@ -17,8 +17,14 @@
 	},
 	"state": {
 		"afflictions": [],
-		"rareEquipment": null,
 		"townPortal": null,
+		"omens": [
+			{
+				"floorNumber": 4,
+				"kind": "cracked"
+			}
+		],
+		"arenas": [],
 		"townEquipmentStock": [
 			{
 				"id": "town-gear:armor:leather-armor:0:1",
@@ -57,6 +63,18 @@
 				"kind": "spellguard-shield"
 			},
 			{
+				"id": "town-gear:armor:shadowweave-cloak:0:1",
+				"kind": "shadowweave-cloak"
+			},
+			{
+				"id": "town-gear:armor:seers-circlet:0:1",
+				"kind": "seers-circlet"
+			},
+			{
+				"id": "town-gear:armor:ring-of-displacement:0:1",
+				"kind": "ring-of-displacement"
+			},
+			{
 				"id": "town-gear:armor:copper-ring:0:1",
 				"kind": "copper-ring"
 			},
@@ -75,6 +93,18 @@
 			{
 				"id": "town-gear:weapons:battle-axe:0:1",
 				"kind": "battle-axe"
+			},
+			{
+				"id": "town-gear:weapons:goldbound-blade:0:1",
+				"kind": "goldbound-blade"
+			},
+			{
+				"id": "town-gear:weapons:bloodrage-axe:0:1",
+				"kind": "bloodrage-axe"
+			},
+			{
+				"id": "town-gear:weapons:hungering-blade:0:1",
+				"kind": "hungering-blade"
 			}
 		],
 		"townEquipmentPurchases": [],
@@ -84,6 +114,7 @@
 			"greater-healing-potion": 4,
 			"greater-mana-potion": 4,
 			"antidote": 4,
+			"bandages": 4,
 			"strength-potion": 2,
 			"dexterity-potion": 2,
 			"intelligence-potion": 2
@@ -343,6 +374,56 @@
 					"col": 7
 				},
 				"activated": false
+			},
+			{
+				"id": "floor:3:object:dark-altar:1",
+				"kind": "dark-altar",
+				"floorNumber": 3,
+				"coordinate": {
+					"row": 6,
+					"col": 9
+				},
+				"activated": false
+			},
+			{
+				"id": "floor:3:object:cracked-wall:1",
+				"kind": "cracked-wall",
+				"floorNumber": 3,
+				"coordinate": {
+					"row": 7,
+					"col": 8
+				},
+				"activated": false
+			},
+			{
+				"id": "floor:3:object:gold:vault",
+				"kind": "gold",
+				"floorNumber": 3,
+				"coordinate": {
+					"row": 8,
+					"col": 7
+				},
+				"activated": false
+			},
+			{
+				"id": "floor:4:object:cracked-wall:1",
+				"kind": "cracked-wall",
+				"floorNumber": 4,
+				"coordinate": {
+					"row": 5,
+					"col": 8
+				},
+				"activated": false
+			},
+			{
+				"id": "floor:4:object:gold:vault",
+				"kind": "gold",
+				"floorNumber": 4,
+				"coordinate": {
+					"row": 4,
+					"col": 9
+				},
+				"activated": false
 			}
 		],
 		"mana": 10,
@@ -398,7 +479,12 @@
 				}
 			]
 		},
-		"potionHotbar": ["healing-potion", "mana-potion", null, null],
+		"potionHotbar": [
+			"healing-potion",
+			"mana-potion",
+			"greater-healing-potion",
+			"greater-mana-potion"
+		],
 		"floorItems": [
 			{
 				"item": {
@@ -512,17 +598,6 @@
 			},
 			{
 				"item": {
-					"id": "quest:cure",
-					"kind": "cure"
-				},
-				"floorNumber": 5,
-				"coordinate": {
-					"row": 2,
-					"col": 6
-				}
-			},
-			{
-				"item": {
 					"id": "floor:4:book:book-ember-bolt",
 					"kind": "book-ember-bolt"
 				},
@@ -551,6 +626,39 @@
 				"floorNumber": 5,
 				"coordinate": {
 					"row": 13,
+					"col": 6
+				}
+			},
+			{
+				"item": {
+					"id": "floor:3:object:cracked-wall:1:reward",
+					"kind": "mana-potion"
+				},
+				"floorNumber": 3,
+				"coordinate": {
+					"row": 9,
+					"col": 9
+				}
+			},
+			{
+				"item": {
+					"id": "floor:4:object:cracked-wall:1:reward",
+					"kind": "ring-dexterity"
+				},
+				"floorNumber": 4,
+				"coordinate": {
+					"row": 3,
+					"col": 7
+				}
+			},
+			{
+				"item": {
+					"id": "quest:cure",
+					"kind": "cure"
+				},
+				"floorNumber": 5,
+				"coordinate": {
+					"row": 1,
 					"col": 6
 				}
 			}
@@ -647,7 +755,7 @@
 					"row": 3,
 					"col": 8
 				},
-				"health": 4,
+				"health": 10,
 				"lastDamagedTurn": null,
 				"remedyDrop": true,
 				"intent": {
@@ -718,7 +826,7 @@
 					"row": 6,
 					"col": 2
 				},
-				"health": 4,
+				"health": 10,
 				"lastDamagedTurn": null,
 				"intent": {
 					"type": "idle"
@@ -789,6 +897,34 @@
 					"col": 6
 				},
 				"health": 5,
+				"lastDamagedTurn": null,
+				"intent": {
+					"type": "idle"
+				}
+			},
+			{
+				"id": "3:1000006",
+				"kind": "treasure-thief",
+				"floorNumber": 3,
+				"coordinate": {
+					"row": 2,
+					"col": 11
+				},
+				"health": 12,
+				"lastDamagedTurn": null,
+				"intent": {
+					"type": "idle"
+				}
+			},
+			{
+				"id": "4:1000006",
+				"kind": "treasure-thief",
+				"floorNumber": 4,
+				"coordinate": {
+					"row": 13,
+					"col": 1
+				},
+				"health": 12,
 				"lastDamagedTurn": null,
 				"intent": {
 					"type": "idle"
@@ -992,8 +1128,8 @@
 						"##..........###",
 						"##..........###",
 						"###############",
-						"###############",
-						"###############",
+						"#######...#####",
+						"#######...#####",
 						"###############",
 						"###############",
 						"###############",
@@ -1052,8 +1188,8 @@
 						"###############",
 						"###############",
 						"###############",
-						"###############",
-						"###############",
+						"#######...#####",
+						"#######...#####",
 						"###############",
 						"#...........###",
 						"#...........###",

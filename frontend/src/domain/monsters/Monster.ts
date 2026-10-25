@@ -58,14 +58,13 @@ export type Monster = {
 	summonedBy?: string;
 	// Survived an Hourglass of Ages: ×1.5 base health and attack, never compounded.
 	empowered?: true;
-	// The Ember Warden's stats, fixed by dungeon depth when generated, so following you
-	// to shallower floors never weakens it; plus whether it has woken or been enraged.
+	// The Ember Warden's stats, fixed by dungeon depth when generated, and whether it has
+	// woken.
 	warden?: Readonly<{
 		maxHealth: number;
 		attackDamage: number;
 		depth: number;
 		awake?: true;
-		enraged?: true;
 	}>;
 	// A mirror reflection's stats, copied from the player when it was summoned.
 	reflection?: Readonly<{ maxHealth: number; attackDamage: number }>;

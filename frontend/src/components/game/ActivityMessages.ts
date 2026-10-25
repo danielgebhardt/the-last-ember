@@ -71,11 +71,6 @@ export const formatActivityEvent = (event: ActivityEvent): string => {
 			return `${prefix}${ADVENTURE_STORY.encounter} It fights with a heavy strike and a breath of fire.`;
 		case "warden-fell":
 			return `${prefix}${ADVENTURE_STORY.defeat} Press G on its tile to claim it.`;
-		// Only saves from before the Warden carried the flame can take it while it stands.
-		case "warden-enraged":
-			return `${prefix}You take the flame from its guardian. The Ember Warden roars and will follow you all the way home.`;
-		case "warden-followed":
-			return `${prefix}The Ember Warden climbs after you onto floor ${event.floorNumber}.`;
 		case "perk-chosen":
 			return `${prefix}You choose ${PERK_DEFINITIONS[event.perk].name} (level ${event.level}): ${PERK_DEFINITIONS[event.perk].effect}`;
 		case "portal-used":

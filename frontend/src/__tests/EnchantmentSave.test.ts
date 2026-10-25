@@ -35,7 +35,7 @@ describe("Versioned owned enchantments", () => {
 		];
 		const parsed = parseSave(serializeSave(document));
 		if (!parsed.ok) throw new Error(parsed.error);
-		expect(parsed.value.version).toBe(32);
+		expect(parsed.value.version).toBe(33);
 		const restored = restoreSave(parsed.value);
 		expect(restored.state.equipment.mainHand?.enchantment).toBe(2);
 		expect(restored.state.bag.items[0].enchantment).toBe(1);
@@ -105,7 +105,7 @@ describe("Versioned owned enchantments", () => {
 		for (const extra of [null, 10, { id: "extra:gear", kind: "not-a-kind" }]) {
 			const content = JSON.stringify({
 				...document,
-				version: 32,
+				version: 33,
 				state: {
 					...document.state,
 					equipment: { ...document.state.equipment, extra },

@@ -36,7 +36,6 @@ import {
 	type HotbarAction,
 	hotbarSlotContents,
 } from "../items/PotionHotbar";
-import { rareEquipmentId } from "../items/RareEquipment";
 import {
 	type BuyAction,
 	buyPotion,
@@ -45,7 +44,6 @@ import {
 	sellEquipment,
 	sellLowerEquipment,
 } from "../merchant/MerchantTrades";
-import { enrageWarden, followWarden } from "../monsters/EmberWarden";
 import type { Monster } from "../monsters/Monster.ts";
 import { actorMaximumHealth } from "../monsters/MonsterStats";
 import {
@@ -473,11 +471,6 @@ const resolveCommittedEffect = (
 		const transferred: GameState = {
 			...state,
 			bag: transfer.bag,
-			...(action.type === "pickup" &&
-			state.rareEquipment &&
-			action.itemId === rareEquipmentId(state.rareEquipment)
-				? { rareEquipment: { ...state.rareEquipment, acquired: true } }
-				: {}),
 			equipment: transfer.equipment ?? state.equipment,
 			...(transfer.equipment
 				? resourcesAfterEquipmentChange(state, transfer.equipment)
@@ -515,10 +508,7 @@ const resolveCommittedEffect = (
 				...(transfer.equipEvent ? [{ ...transfer.equipEvent, turn }] : []),
 			]),
 		};
-		// Taking the ember while its Warden stands enrages it.
-		return action.type === "pickup" && transfer.event.item === "cure"
-			? enrageWarden(transferred)
-			: transferred;
+		return transferred;
 	}
 	if (action.type === "equip" || action.type === "unequip") {
 		const refusal = boundBladeRefusal(state, action);
@@ -573,11 +563,8 @@ const resolveCommittedEffect = (
 	);
 	return monster
 		? resolveAttack(state, monster, rollSource)
-		: followWarden(
-				activateEscapeFloor(
-					announceArrival({ ...state, run }, state.run.activeFloor),
-					state.run.activeFloor,
-				),
+		: activateEscapeFloor(
+				announceArrival({ ...state, run }, state.run.activeFloor),
 				state.run.activeFloor,
 			);
 };

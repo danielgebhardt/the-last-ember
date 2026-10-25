@@ -5,7 +5,6 @@ import {
 	createMerchantStock,
 	equipmentSalePrice,
 } from "../domain/merchant/MerchantRules";
-import { parseSave, restoreSave } from "../domain/saves/SaveFormat";
 import {
 	createTownPotionStock,
 	isTownPotionStock,
@@ -13,7 +12,6 @@ import {
 	townPotionDescription,
 	townPotionKinds,
 } from "../domain/town/TownEconomy";
-import v32 from "./fixtures/adventure-v32.json?raw";
 
 it("stocks only supported potions with finite saved ownership separate from wandering stock", () => {
 	const stock = createTownPotionStock();
@@ -56,10 +54,8 @@ it("accepts actual depletion but rejects refill, fractional, missing and extra s
 		{ ...stock, unknown: 1 },
 	])
 		expect(isTownPotionStock(invalid)).toBe(false);
-	// Saves from before Bandages joined the store lack their stock; only that kind may be absent.
-	const { bandages: _, ...older } = stock;
-	expect(isTownPotionStock(older)).toBe(true);
-	const { antidote: __, ...missing } = stock;
+	// Every offered kind must be present, Bandages included.
+	const { bandages: _, ...missing } = stock;
 	expect(isTownPotionStock(missing)).toBe(false);
 });
 
@@ -72,14 +68,10 @@ it("prices permanent stat points at 1,500 gold with only two bottles per attribu
 		expect(TOWN_POTION_OFFERS[kind]).toEqual({ price: 1500, quantity: 2 });
 });
 
-it("sells Bandages, and stocks them in full for a save from before they were offered", () => {
+it("sells Bandages with short shop copy", () => {
 	expect(townPotionKinds).toContain("bandages");
 	expect(TOWN_POTION_OFFERS.bandages).toEqual({ price: 75, quantity: 4 });
 	expect(townPotionDescription("bandages")).toBe(
 		"Stops Bleeding. Does not restore health.",
 	);
-	expect(JSON.parse(v32).state.townPotionStock).not.toHaveProperty("bandages");
-	const parsed = parseSave(v32);
-	if (!parsed.ok) throw new Error(parsed.error);
-	expect(restoreSave(parsed.value).state.townPotionStock.bandages).toBe(4);
 });

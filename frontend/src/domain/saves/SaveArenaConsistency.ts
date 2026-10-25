@@ -28,7 +28,7 @@ const ARENA_OBJECTS = {
 
 // An arena stands where this seed and depth put it, with its fixed floor, objects and
 // miniboss; nothing on it but what the arena brought, and its exit open only once the
-// hall is clear. Saves from before arenas have none.
+// hall is clear. Adventures shorter than ten floors have none.
 export const hasConsistentArenas = ({ state }: SaveDocument): boolean => {
 	const { run } = state;
 	const arenas = state.arenas ?? [];

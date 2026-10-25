@@ -13,7 +13,6 @@ import {
 } from "../domain/game/PerkEffects";
 import {
 	isValidPerkHistory,
-	ORIGINAL_PERK_KINDS,
 	PERK_DEFINITIONS,
 	PERK_LEVELS,
 	type PerkKind,
@@ -245,11 +244,9 @@ describe("Perk saves", () => {
 			{ level: 3, perk: offered },
 		]);
 		expect(isValidPerkHistory(chosen.run.seed, chosen.progression)).toBe(true);
-		// Offered by neither the current pool nor the original one.
+		// Never offered at that level.
 		const unoffered = (Object.keys(PERK_DEFINITIONS) as PerkKind[]).find(
-			(perk) =>
-				!perkOffers(chosen.run.seed, 3, []).includes(perk) &&
-				!perkOffers(chosen.run.seed, 3, [], ORIGINAL_PERK_KINDS).includes(perk),
+			(perk) => !perkOffers(chosen.run.seed, 3, []).includes(perk),
 		) as PerkKind;
 		const tampered = structuredClone(document);
 		tampered.state.progression.perks = [{ level: 3, perk: unoffered }];

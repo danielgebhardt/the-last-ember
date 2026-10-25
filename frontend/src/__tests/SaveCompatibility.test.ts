@@ -6,7 +6,7 @@ import {
 	restoreSave,
 	serializeSave,
 } from "../domain/saves/SaveFormat";
-import capturedFile from "./fixtures/adventure-v32.json?raw";
+import capturedFile from "./fixtures/adventure-v33.json?raw";
 
 // Captured current-format baseline. Keep this file independent of writer changes.
 const loadCaptured = () => {

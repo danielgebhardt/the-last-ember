@@ -23,7 +23,6 @@ import { MAX_BAG_ITEMS } from "../items/Bag";
 import { EQUIPMENT_SLOT_LABELS } from "../items/Equipment";
 import { ITEM_DEFINITIONS } from "../items/Item";
 import { isEnchantableKind, MAX_ENCHANTMENT } from "../items/ItemValues";
-import { LEGACY_RARE_KINDS } from "../items/RareEquipment";
 import { isMerchantStock } from "../merchant/MerchantRules";
 import { MONSTER_DEFINITIONS } from "../monsters/Monster";
 import {
@@ -144,8 +143,6 @@ const eventFields = {
 	"perk-chosen": { perk: oneOf(PERK_KINDS), level: integer(3, 19) },
 	"warden-woke": {},
 	"warden-fell": {},
-	"warden-enraged": {},
-	"warden-followed": { floorNumber },
 	"storage-deposited": { item: itemKind, count: integer(1) },
 	"storage-withdrawn": { item: itemKind, count: integer(1) },
 	"hourglass-turned": { health: natural, mana: natural, empowered: natural },
@@ -447,7 +444,7 @@ const monsterAwareness: Schema = (value) =>
 			(value.type !== "pursuing" || integer(0, 100)(value.blocked))));
 
 const documentShape = object({
-	version: oneOf([32]),
+	version: oneOf([33]),
 	savedAt: (value) =>
 		text(value) &&
 		typeof value === "string" &&
@@ -468,27 +465,15 @@ const documentShape = object({
 			0,
 			PLAYER_AFFLICTION_LIMIT,
 		),
-		rareEquipment: nullable(
-			(value) =>
-				record(value) &&
-				object({
-					kind: oneOf(LEGACY_RARE_KINDS),
-					source: oneOf(["dungeon", "town"]),
-					acquired: boolean,
-				})(value) &&
-				(value.source === "town"
-					? value.floorNumber === undefined && value.coordinate === undefined
-					: object({ floorNumber: integer(5, 20), coordinate })(value)),
-		),
 		townPortal: nullable(object({ floorNumber, coordinate })),
 		displacedFloors: optional(array(floorNumber, 0, 20)),
 		hunger: optional(object({ fedTurn: natural })),
-		omens: optional(
-			array(object({ floorNumber, kind: oneOf(OMEN_KINDS) }), 0, 20),
-		),
+		omens: array(object({ floorNumber, kind: oneOf(OMEN_KINDS) }), 0, 20),
 		// Where an arena may stand is a consistency rule.
-		arenas: optional(
-			array(object({ floorNumber, miniboss: oneOf(MINIBOSS_KINDS) }), 0, 1),
+		arenas: array(
+			object({ floorNumber, miniboss: oneOf(MINIBOSS_KINDS) }),
+			0,
+			1,
 		),
 		town: nullable(isTownLocation),
 		townPotionStock: isTownPotionStock,
@@ -647,7 +632,6 @@ const documentShape = object({
 						attackDamage: integer(1),
 						depth: floorNumber,
 						awake: optional((value) => value === true),
-						enraged: optional((value) => value === true),
 					}),
 				),
 				reflection: optional(

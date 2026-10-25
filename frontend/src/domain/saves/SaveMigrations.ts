@@ -1,15 +1,15 @@
 import type { SaveResult } from "./SaveFormat";
 
-// Saves from this version onward keep loading after format changes. Older saves
-// predate outside players and stay unsupported.
-export const OLDEST_SUPPORTED_SAVE_VERSION = 32;
+// Saves from this version onward keep loading after format changes. Older saves were
+// retired before cloud saves (#424) and stay unsupported.
+export const OLDEST_SUPPORTED_SAVE_VERSION = 33;
 
 export type SaveJson = Record<string, unknown>;
 // Upgrades a parsed document from one version to the next. It receives its own deep
 // copy, so it may edit in place; the runner stamps the new version afterwards.
 export type SaveMigration = (document: SaveJson) => SaveJson;
 
-// Keyed by the version each step upgrades from: { 32: v32 → v33, 33: v33 → v34, … }.
+// Keyed by the version each step upgrades from: { 33: v33 → v34, 34: v34 → v35, … }.
 // Every breaking format change adds its step here, with a frozen fixture and a test.
 export const SAVE_MIGRATIONS: Readonly<Record<number, SaveMigration>> = {};
 

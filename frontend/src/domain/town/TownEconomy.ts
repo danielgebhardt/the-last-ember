@@ -40,17 +40,14 @@ const createStock = <K extends string>(offers: Offers) =>
 	Object.fromEntries(
 		Object.keys(offers).map((kind) => [kind, offers[kind].quantity]),
 	) as Readonly<Record<K, number>>;
-// Remaining copies per offered kind, between none and the authored quantity. Saves from
-// before an added offer lack its kind; restore stocks it in full.
+// Remaining copies per offered kind, between none and the authored quantity.
 const isStock =
-	<K extends string>(offers: Offers, added: readonly string[] = []) =>
+	<K extends string>(offers: Offers) =>
 	(value: unknown): value is Readonly<Record<K, number>> => {
 		if (typeof value !== "object" || value === null || Array.isArray(value))
 			return false;
 		const stock = value as Record<string, unknown>;
-		const kinds = Object.keys(offers).filter(
-			(kind) => !added.includes(kind) || Object.hasOwn(stock, kind),
-		);
+		const kinds = Object.keys(offers);
 		return (
 			Object.keys(stock).length === kinds.length &&
 			kinds.every(
@@ -68,9 +65,7 @@ export const createTownPotionStock = (): TownPotionStock =>
 	createStock<TownPotion>(TOWN_POTION_OFFERS);
 export const createTownScrollStock = (): TownScrollStock =>
 	createStock<TownScroll>(TOWN_SCROLL_OFFERS);
-export const isTownPotionStock = isStock<TownPotion>(TOWN_POTION_OFFERS, [
-	"bandages",
-]);
+export const isTownPotionStock = isStock<TownPotion>(TOWN_POTION_OFFERS);
 export const isTownScrollStock = isStock<TownScroll>(TOWN_SCROLL_OFFERS);
 // Shop copy keeps the effect and drops dungeon-use mechanics (turn cost, stacking rules)
 // that the bag, item details and Catalog still explain in full.

@@ -14,14 +14,11 @@ import { chosenPerks } from "../game/Perks";
 import { permanentAttributeGains } from "../game/PermanentAttributes";
 import { levelForExperience } from "../game/Progression";
 import type { ItemInstance } from "../items/Item";
-import type { RareEquipmentAllocation } from "../items/RareEquipment";
 import { navigationRun } from "../objects/NavigationTerrain";
-import { createTownPotionStock } from "../town/TownEconomy";
-import { withNewTownOffers } from "../town/TownEquipmentStock";
 import type { SaveDocument } from "./SaveDocument";
 import { validateSaveDocument } from "./SaveValidation";
 
-export const SAVE_FORMAT_VERSION = 32;
+export const SAVE_FORMAT_VERSION = 33;
 // Bound imported input before parsing. A maximum-size snapshot is measured in the review.
 export const MAX_SAVE_BYTES = 4 * 1024 * 1024;
 
@@ -40,19 +37,6 @@ const savedItem = (item: ItemInstance) => ({
 	id: item.id,
 	kind: item.kind,
 	...(item.enchantment !== undefined ? { enchantment: item.enchantment } : {}),
-});
-const savedRareEquipment = (
-	allocation: RareEquipmentAllocation,
-): RareEquipmentAllocation => ({
-	kind: allocation.kind,
-	acquired: allocation.acquired,
-	...(allocation.source === "dungeon"
-		? {
-				source: "dungeon",
-				floorNumber: allocation.floorNumber,
-				coordinate: { ...allocation.coordinate },
-			}
-		: { source: "town" }),
 });
 const nullableItem = (item: ItemInstance | null) =>
 	item ? savedItem(item) : null;
@@ -73,9 +57,6 @@ export const createSaveDocument = (
 			remaining: a.remaining,
 			source: a.source,
 		})),
-		rareEquipment: state.rareEquipment
-			? savedRareEquipment(state.rareEquipment)
-			: null,
 		townPortal: state.townPortal
 			? { ...state.townPortal, coordinate: { ...state.townPortal.coordinate } }
 			: null,
@@ -83,12 +64,8 @@ export const createSaveDocument = (
 			? { displacedFloors: [...state.displacedFloors] }
 			: {}),
 		...(state.hunger ? { hunger: { fedTurn: state.hunger.fedTurn } } : {}),
-		...(state.omens?.length
-			? { omens: state.omens.map((omen) => ({ ...omen })) }
-			: {}),
-		...(state.arenas?.length
-			? { arenas: state.arenas.map((arena) => ({ ...arena })) }
-			: {}),
+		omens: state.omens.map((omen) => ({ ...omen })),
+		arenas: state.arenas.map((arena) => ({ ...arena })),
 		townEquipmentStock: state.townEquipmentStock.map(savedItem),
 		townEquipmentPurchases: [...state.townEquipmentPurchases],
 		townPotionStock: { ...state.townPotionStock },
@@ -259,14 +236,6 @@ export const parseSave = (text: string): SaveResult<SaveDocument> => {
 export const restoreSave = (document: SaveDocument): RestoredAdventure => {
 	const state: GameState = {
 		...document.state,
-		townPotionStock: {
-			...createTownPotionStock(),
-			...document.state.townPotionStock,
-		},
-		townEquipmentStock: withNewTownOffers(
-			document.state.townEquipmentStock,
-			document.state.townEquipmentPurchases,
-		),
 		difficulty: document.configuration.difficulty,
 		run: {
 			...document.state.run,

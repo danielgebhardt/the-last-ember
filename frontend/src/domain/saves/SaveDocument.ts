@@ -17,7 +17,7 @@ type SavedFloor = Pick<
 	"floorNumber" | "partitions" | "rooms" | "corridors" | "upStair" | "downStair"
 > & { terrain: string[] };
 export type SaveDocument = {
-	version: 32;
+	version: 33;
 	savedAt: string;
 	configuration: RunConfiguration & {
 		difficulty: Difficulty;
@@ -26,7 +26,6 @@ export type SaveDocument = {
 	state: Pick<
 		GameState,
 		| "afflictions"
-		| "rareEquipment"
 		| "townPortal"
 		| "displacedFloors"
 		| "hunger"

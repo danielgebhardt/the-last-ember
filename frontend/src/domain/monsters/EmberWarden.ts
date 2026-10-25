@@ -2,10 +2,7 @@ import { selectWeighted } from "../content/WeightedSelection";
 import { type DungeonRun, hashStringToUint32 } from "../dungeon/DungeonRun";
 import type { Coordinate } from "../dungeon/DungeonTypes";
 import { createSeededRandom } from "../dungeon/Seed";
-import {
-	type ActivityEvent,
-	appendActivityEvents,
-} from "../game/ActivityHistory";
+import type { ActivityEvent } from "../game/ActivityHistory";
 import type { Difficulty } from "../game/Difficulty";
 import type { GameState } from "../game/GameState";
 import type { FloorItem } from "../items/FloorItems";
@@ -97,106 +94,8 @@ export const wakeWarden = (
 export const wardenDormant = (monster: Monster) =>
 	monster.warden !== undefined && !monster.warden.awake;
 
-// Taking the flame while the Warden stands enrages it: it wakes and follows you home.
-// Only saves from before the Warden carried the flame allow this.
-export const enrageWarden = (state: GameState): GameState => {
-	const target = state.monsters.find((m) => isWarden(m) && m.health > 0);
-	const stats = target?.warden;
-	if (!target || !stats || stats.enraged) return state;
-	return {
-		...state,
-		monsters: state.monsters.map((m) =>
-			m === target
-				? {
-						...m,
-						warden: { ...stats, awake: true as const, enraged: true as const },
-					}
-				: m,
-		),
-		activityHistory: appendActivityEvents(state.activityHistory, [
-			{ type: "warden-enraged", turn: state.turn },
-		]),
-	};
-};
-
-// An enraged Warden arrives on each floor you climb to, near where you arrive, with
-// its current health. It never follows you into town.
-export const followWarden = (
-	state: GameState,
-	fromFloor: number,
-): GameState => {
-	const floor = state.run.activeFloor;
-	const warden = state.monsters.find(
-		(m) => isWarden(m) && m.health > 0 && m.warden?.enraged,
-	);
-	if (
-		!warden ||
-		state.town ||
-		floor === fromFloor ||
-		warden.floorNumber === floor ||
-		state.player.health <= 0
-	)
-		return state;
-	const arrival = state.run.playerCoordinate;
-	const taken = new Set(
-		[
-			arrival,
-			...protectedFloorLocations(state.run, floor),
-			...state.monsters
-				.filter((m) => m.floorNumber === floor && m.health > 0)
-				.map((m) => m.coordinate),
-			...state.objects
-				.filter((o) => o.floorNumber === floor)
-				.map((o) => o.coordinate),
-		].map(coordinateKey),
-	);
-	// A few steps behind you, never on top of you: the nearest free tile at least 3 away.
-	const tile = reachableRoomTiles(
-		state.run,
-		floor,
-		arrival,
-		state.objects,
-	).find(
-		(t) =>
-			!taken.has(coordinateKey(t)) &&
-			Math.abs(t.row - arrival.row) + Math.abs(t.col - arrival.col) >= 3,
-	);
-	if (!tile) return state;
-	// IDs carry their floor; effects on the Warden travel with it.
-	const id = `${floor}:${WARDEN_SPAWN_ID}`;
-	return {
-		...state,
-		effects: state.effects.map((effect) =>
-			effect.actorId === warden.id
-				? { ...effect, actorId: id, floorNumber: floor }
-				: effect,
-		),
-		monsters: state.monsters.map((m) =>
-			m === warden
-				? {
-						...m,
-						id,
-						floorNumber: floor,
-						coordinate: tile,
-						intent: { type: "idle" as const },
-						awareness: {
-							type: "pursuing" as const,
-							target: { ...arrival },
-							remaining: 12,
-							blocked: 0,
-						},
-					}
-				: m,
-		),
-		activityHistory: appendActivityEvents(state.activityHistory, [
-			{ type: "warden-followed", floorNumber: floor, turn: state.turn },
-		]),
-	};
-};
-
 // The Warden carries the flame: it falls where the Warden dies. Exactly one flame exists,
-// so none drops once it is claimed or already lies somewhere (older saves placed it on
-// the final floor).
+// so none drops once it is claimed or already lies somewhere.
 export const wardenFlameDrop = (
 	state: Pick<GameState, "quest" | "floorItems">,
 	monster: Monster,

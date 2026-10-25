@@ -61,7 +61,7 @@ const encounter = (seed = 0, floorNumber = 5): GameState => {
 	return {
 		...created,
 		run: { ...created.run, floors },
-		arenas: undefined,
+		arenas: [],
 		monsters: [],
 		objects: [portal(floorNumber)],
 		floorItems: [

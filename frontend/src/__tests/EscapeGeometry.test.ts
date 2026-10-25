@@ -12,6 +12,7 @@ import {
 } from "../domain/dungeon/RunConfiguration";
 import { activateEscapeFloor } from "../domain/game/Escape";
 import { createGameState, type GameState } from "../domain/game/GameState";
+import { isWarden } from "../domain/monsters/EmberWarden";
 import { isThief } from "../domain/monsters/TreasureThief";
 import {
 	createSaveDocument,
@@ -31,8 +32,10 @@ describe("Complete return population geometry", () => {
 			const fresh = createGameState(
 				connectDungeonFloors(generateDungeonRun(123, 20, configuration)),
 			);
+			// The Warden fell and its flame was claimed.
 			let state: GameState = {
 				...fresh,
+				monsters: fresh.monsters.filter((actor) => !isWarden(actor)),
 				quest: { ...fresh.quest, cureRecovered: true },
 				floorItems: fresh.floorItems.filter(
 					(entry) => entry.item.kind !== "cure",

@@ -95,7 +95,7 @@ const generated: GameState = {
 					},
 		),
 	},
-	arenas: undefined,
+	arenas: [],
 	objects: created.objects.filter(
 		(o) => o.kind !== "arena-gate" && o.kind !== "arena-door",
 	),

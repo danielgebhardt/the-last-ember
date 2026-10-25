@@ -818,7 +818,7 @@ export default async function prepareFixtures() {
 		const largeCorridor = {
 			...largeFresh,
 			run: { ...largeFresh.run, floors: largeRun.floors },
-			arenas: undefined,
+			arenas: [],
 			objects: [],
 			monsters: largeWarden,
 			floorItems: [],
