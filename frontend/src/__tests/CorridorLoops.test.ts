@@ -72,7 +72,7 @@ describe("Bounded nearby-room loops", () => {
 		expect(dungeon.corridors.slice(0, original.length)).toEqual(original);
 		expect(dungeon.corridors.length).toBeGreaterThan(original.length);
 	});
-	it.each([10, 60, 100])(
+	it.each([10, 25, 40])(
 		"keeps generated %i-square floors connected, bounded and deterministic",
 		(size) => {
 			for (const seed of [0, 1, 123]) {

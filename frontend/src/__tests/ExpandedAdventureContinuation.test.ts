@@ -25,7 +25,7 @@ import {
 } from "../domain/saves/SaveFormat";
 
 describe("Generated expanded adventure continuation", () => {
-	it.each([60, 100])(
+	it.each([40])(
 		"retains a real %ix20-floor adventure and reproduces subsequent phases",
 		(size) => {
 			const configuration = {

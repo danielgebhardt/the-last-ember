@@ -1,5 +1,6 @@
 import { arenaOn } from "../arena/Arena";
 import { ARENA_COLS, ARENA_ROWS } from "../arena/ArenaLayout";
+import { isStandardDungeon } from "../dungeon/RunConfiguration";
 import { FLOOR } from "../dungeon/Tiles";
 import {
 	OMEN_DEFINITIONS,
@@ -38,6 +39,8 @@ export const hasConsistentGeometry = (document: SaveDocument): boolean => {
 	const { floorAt, walkable } = savedLocations(document);
 	if (
 		run.floors.length !== config.floorCount ||
+		// Only the standard dungeon is ranked.
+		(state.ranked === true && !isStandardDungeon(config)) ||
 		!walkable(run.activeFloor, run.playerCoordinate) ||
 		quest.goalFloor !== config.floorCount ||
 		!walkable(1, quest.entrance)

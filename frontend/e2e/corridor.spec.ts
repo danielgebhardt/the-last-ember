@@ -86,6 +86,8 @@ test("fog-enabled corridor running uses discovered routes and stops with map foc
 test("maximum-size corridor running follows the player and responds to cancellation", async ({
 	page,
 }, testInfo) => {
+	// The smallest supported screen, where a 40-column floor no longer fits the map.
+	await page.setViewportSize({ width: 1024, height: 768 });
 	await importAdventure(page, "corridor-large");
 	const initial = await map(page).evaluate((node) => ({
 		left: node.scrollLeft,
@@ -257,7 +259,7 @@ for (const width of [1280]) {
 		await expect(turns(page)).toHaveText("Turn 9");
 		await expect(cue).toContainText("Loot needs your attention");
 		await expect(
-			map(page).getByRole("cell", { name: /^row50col49 - player/ }),
+			map(page).getByRole("cell", { name: /^row20col25 - player/ }),
 		).toBeVisible();
 		await expect(map(page)).toBeFocused();
 		await page.screenshot({ path: info.outputPath(`room-run-${width}.png`) });
@@ -267,7 +269,7 @@ for (const width of [1280]) {
 		await expect(cue).toContainText("A room needs your attention");
 		await expect(turns(page)).toHaveText("Turn 13");
 		await expect(
-			map(page).getByRole("cell", { name: /^row50col45 - player/ }),
+			map(page).getByRole("cell", { name: /^row20col21 - player/ }),
 		).toBeVisible();
 	});
 }

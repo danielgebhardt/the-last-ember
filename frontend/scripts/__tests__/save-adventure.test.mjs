@@ -130,8 +130,8 @@ describe("Saving and resuming real adventures", () => {
 	it("fits a fully explored maximum-size adventure in a conservative 5 MiB single slot", () => {
 		const adventure = start({
 			...COMPACT_TEST_CONFIGURATION,
-			rows: 100,
-			cols: 100,
+			rows: 40,
+			cols: 40,
 			floorCount: 20,
 		});
 		adventure.exploration.explored = new Map(

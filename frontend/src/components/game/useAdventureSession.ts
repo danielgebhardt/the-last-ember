@@ -59,6 +59,7 @@ export const createAdventureSession = (
 	seed: number,
 	configuration: RunConfiguration,
 	fog: FogConfiguration,
+	ranked = false,
 ): Session => {
 	const state = isTestSeed(seed)
 		? createTestSeedState(configuration)
@@ -67,7 +68,11 @@ export const createAdventureSession = (
 				configuration.difficulty ?? 1,
 			);
 	return {
-		state: { ...state, town: createTownLocation() },
+		state: {
+			...state,
+			town: createTownLocation(),
+			...(ranked && !isTestSeed(seed) ? { ranked: true as const } : {}),
+		},
 		configuration,
 		fog,
 		exploration: updateExploration(
@@ -130,9 +135,18 @@ export const useAdventureSession = ({
 		[session.state.floorItems, session.state.town, run.activeFloor],
 	);
 
-	const start = (seed: number, configuration: RunConfiguration): boolean => {
+	const start = (
+		seed: number,
+		configuration: RunConfiguration,
+		ranked = false,
+	): boolean => {
 		try {
-			const next = createAdventureSession(seed, configuration, session.fog);
+			const next = createAdventureSession(
+				seed,
+				configuration,
+				session.fog,
+				ranked,
+			);
 			setSession(next);
 			return true;
 		} catch {

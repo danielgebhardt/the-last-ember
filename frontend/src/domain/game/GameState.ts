@@ -75,6 +75,9 @@ export type GameState = {
 	omens: readonly FloorOmen[];
 	// Fixed arenas the way down runs through, one in long adventures.
 	arenas: readonly Arena[];
+	// Started from the opening dialog: the standard dungeon with a random seed. Only
+	// ranked adventures are recorded on the leaderboards (#312, #419).
+	ranked?: true;
 	// A wielded Hungering Blade's binding and the turn of its last kill.
 	hunger?: Readonly<{ fedTurn: number }>;
 	// Floors where a Ring of Displacement has already fired this adventure.

@@ -1,4 +1,5 @@
 import { ARENA_REWARD_KINDS, MINIBOSS_KINDS } from "../arena/Arena";
+import { ARENA_COLS, ARENA_ROWS } from "../arena/ArenaLayout";
 import {
 	CONFIGURATION_LIMITS,
 	FOG_RADIUS_LIMITS,
@@ -76,7 +77,11 @@ const object =
 		Object.entries(fields).every(([key, schema]) => schema(value[key]));
 const natural = integer();
 const floorNumber = integer(1, CONFIGURATION_LIMITS.floorCount.max);
-const index = integer(0, CONFIGURATION_LIMITS.rows.max - 1);
+// A coordinate lies on a floor of the configured size or on the arena's fixed floor.
+const index = integer(
+	0,
+	Math.max(CONFIGURATION_LIMITS.rows.max, ARENA_ROWS, ARENA_COLS) - 1,
+);
 const coordinate = object({ row: index, col: index });
 const region = object({
 	startRow: index,
@@ -469,6 +474,8 @@ const documentShape = object({
 		displacedFloors: optional(array(floorNumber, 0, 20)),
 		hunger: optional(object({ fedTurn: natural })),
 		omens: array(object({ floorNumber, kind: oneOf(OMEN_KINDS) }), 0, 20),
+		// Whether a ranked adventure is the standard dungeon is a consistency rule.
+		ranked: optional((value) => value === true),
 		// Where an arena may stand is a consistency rule.
 		arenas: array(
 			object({ floorNumber, miniboss: oneOf(MINIBOSS_KINDS) }),

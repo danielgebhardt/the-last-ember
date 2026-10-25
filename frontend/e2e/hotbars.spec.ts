@@ -8,7 +8,6 @@ test.beforeEach(async ({ page }) => {
 test("fresh starts, New Dungeon and seed replay restore starter potions without locking their shortcuts", async ({
 	page,
 }) => {
-	await page.getByRole("radio", { name: /Small/ }).locator("..").click();
 	await page
 		.getByRole("button", { name: "Begin Adventure", exact: true })
 		.click();

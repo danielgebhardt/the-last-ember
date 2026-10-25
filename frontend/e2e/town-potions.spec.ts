@@ -108,7 +108,6 @@ test("a fresh town budget buys two healing potions, survives travel and resets o
 	page,
 }) => {
 	await page.goto("/");
-	await page.getByRole("radio", { name: /Small/ }).locator("..").click();
 	await page
 		.getByRole("button", { name: "Begin Adventure", exact: true })
 		.click();

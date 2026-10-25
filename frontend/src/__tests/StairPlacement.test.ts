@@ -330,7 +330,7 @@ describe("Random stair selection", () => {
 });
 
 describe("Stairs leave corridor entrances clear", () => {
-	it.each([20, 40, 60, 100])(
+	it.each([20, 30, 40])(
 		"keeps both stairs away from room mouths for reported seed at size %i",
 		(size) => {
 			const config = { ...DEFAULT_RUN_CONFIGURATION, rows: size, cols: size };

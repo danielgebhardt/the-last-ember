@@ -16,8 +16,8 @@ const returnedAdventure = () => {
 		connectDungeonFloors(
 			generateDungeonRun(123, 5, {
 				...COMPACT_TEST_CONFIGURATION,
-				rows: 60,
-				cols: 60,
+				rows: 40,
+				cols: 40,
 			}),
 		),
 	);

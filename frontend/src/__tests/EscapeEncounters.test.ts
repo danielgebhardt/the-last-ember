@@ -13,7 +13,7 @@ import {
 } from "../domain/monsters/MonsterLocations";
 import { COMPACT_TEST_CONFIGURATION } from "./TestRunConfiguration";
 
-const adventure = (size = 60, floors = 20) =>
+const adventure = (size = 40, floors = 20) =>
 	createGameState(
 		connectDungeonFloors(
 			generateDungeonRun(123, floors, {
@@ -35,7 +35,7 @@ describe("Deterministic return-floor encounters", () => {
 			state.monsters.filter((actor) => actor.floorNumber === 5),
 		);
 		expect(state).toEqual(before);
-		const shorter = adventure(60, 10);
+		const shorter = adventure(40, 10);
 		expect(generateEscapeEncounters(shorter, 5)).toEqual(actors);
 	});
 	it("reserves stair buffers, actors, objects and loot while drawing from the floor-20 pool", () => {

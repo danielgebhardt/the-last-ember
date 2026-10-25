@@ -28,7 +28,7 @@ import {
 } from "../domain/saves/SaveFormat";
 
 describe("Generated optional elite rooms", () => {
-	it.each([10, 60, 100])(
+	it.each([10, 25, 40])(
 		"keeps objectives outside sealed rooms on %ix20 maps",
 		(size) => {
 			const config = { ...DEFAULT_RUN_CONFIGURATION, rows: size, cols: size };
@@ -72,7 +72,7 @@ describe("Generated optional elite rooms", () => {
 					),
 				).toBe(true);
 			}
-			if (size === 60)
+			if (size === 40)
 				expect(state.objects.some((o) => o.kind === "elite-door")).toBe(true);
 			const document = createSaveDocument(
 				state,

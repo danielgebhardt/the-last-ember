@@ -8,8 +8,6 @@ test.beforeEach(async ({ page }) => {
 test("welcome choices and keyboard Settings apply return control to the map", async ({
 	page,
 }) => {
-	await expect(page.getByRole("radio", { name: /Medium/ })).toBeChecked();
-	await page.getByRole("radio", { name: /Small/ }).locator("..").click();
 	await page
 		.getByRole("radio", { name: /Harder/ })
 		.locator("..")
@@ -25,7 +23,7 @@ test("welcome choices and keyboard Settings apply return control to the map", as
 	await page.getByRole("button", { name: "Settings", exact: true }).click();
 	const settings = page.getByRole("dialog", { name: "Settings", exact: true });
 	await expect(settings.getByLabel("Current dungeon configuration")).toHaveText(
-		"20 rows × 20 columns · 20 floors",
+		"40 rows × 40 columns · 20 floors",
 	);
 	await settings
 		.getByRole("textbox", { name: "Dungeon seed", exact: true })

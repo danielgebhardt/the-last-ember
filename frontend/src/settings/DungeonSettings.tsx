@@ -1,6 +1,6 @@
 import { Toggle } from "@base-ui/react/toggle";
 import { ToggleGroup } from "@base-ui/react/toggle-group";
-import { Monitor, Moon, Settings2, Sun } from "lucide-react";
+import { Monitor, Moon, Settings2, Sun, TriangleAlert } from "lucide-react";
 import { type RefObject, type SubmitEvent, useRef } from "react";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { EmberMenuHeader, EmberPanel } from "@/components/ui/EmberMenu";
@@ -190,12 +190,27 @@ const DungeonSettings = ({
 						<p className="text-xs text-muted-foreground">
 							Start from seed applies these settings and restarts on floor 1.
 						</p>
+						<p
+							id="unranked-warning"
+							className="flex items-start gap-1.5 text-xs font-medium text-amber-800 dark:text-amber-300"
+						>
+							<TriangleAlert
+								aria-hidden="true"
+								className="mt-px size-3.5 shrink-0"
+							/>
+							Adventures started here aren't recorded on the leaderboards, for
+							victories or deaths.
+						</p>
 						{generationError && (
 							<p role="alert" className="text-sm text-destructive">
 								{generationError}
 							</p>
 						)}
-						<Button type="submit" variant="outline">
+						<Button
+							type="submit"
+							variant="outline"
+							aria-describedby="unranked-warning"
+						>
 							Start from seed
 						</Button>
 					</form>

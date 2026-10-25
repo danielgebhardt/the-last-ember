@@ -66,6 +66,7 @@ export const createSaveDocument = (
 		...(state.hunger ? { hunger: { fedTurn: state.hunger.fedTurn } } : {}),
 		omens: state.omens.map((omen) => ({ ...omen })),
 		arenas: state.arenas.map((arena) => ({ ...arena })),
+		...(state.ranked ? { ranked: true as const } : {}),
 		townEquipmentStock: state.townEquipmentStock.map(savedItem),
 		townEquipmentPurchases: [...state.townEquipmentPurchases],
 		townPotionStock: { ...state.townPotionStock },

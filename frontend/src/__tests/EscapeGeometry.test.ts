@@ -21,7 +21,7 @@ import {
 } from "../domain/saves/SaveFormat";
 
 describe("Complete return population geometry", () => {
-	it.each([10, 40, 60, 100])(
+	it.each([10, 25, 40])(
 		"activates each %ix20-floor return once and remains a valid saved adventure",
 		(size) => {
 			const configuration = {

@@ -26,17 +26,17 @@ function App() {
 						try {
 							const seed = randomAdventureSeed();
 							setAdventure(
+								// The opening dialog starts the only ranked adventures.
 								createAdventureSession(
 									seed,
 									configuration,
 									DEFAULT_FOG_CONFIGURATION,
+									true,
 								),
 							);
 							setStartError(undefined);
 						} catch {
-							setStartError(
-								"Could not start this adventure. Try again or choose a different size.",
-							);
+							setStartError("Could not start this adventure. Try again.");
 						}
 					}}
 				/>

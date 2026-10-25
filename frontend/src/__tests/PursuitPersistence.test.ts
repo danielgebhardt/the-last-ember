@@ -19,7 +19,7 @@ import {
 import { withFlameOnFloor } from "./SaveTestHelpers";
 import { COMPACT_TEST_CONFIGURATION } from "./TestRunConfiguration";
 
-const configuration = { ...COMPACT_TEST_CONFIGURATION, rows: 60, cols: 60 };
+const configuration = { ...COMPACT_TEST_CONFIGURATION, rows: 40, cols: 40 };
 const freshAdventure = () =>
 	withFlameOnFloor(
 		createGameState(

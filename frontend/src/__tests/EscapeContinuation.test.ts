@@ -21,7 +21,7 @@ import { COMPACT_TEST_CONFIGURATION } from "./TestRunConfiguration";
 
 describe("Resuming an awakened return floor", () => {
 	it("keeps actors and phase progress and cannot reactivate after reload", () => {
-		const configuration = { ...COMPACT_TEST_CONFIGURATION, rows: 60, cols: 60 };
+		const configuration = { ...COMPACT_TEST_CONFIGURATION, rows: 40, cols: 40 };
 		const fresh = createGameState(
 			connectDungeonFloors(generateDungeonRun(123, 5, configuration)),
 		);

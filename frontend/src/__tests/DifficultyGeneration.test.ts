@@ -19,7 +19,7 @@ const identities = (monsters: readonly Monster[]) =>
 describe("Matched difficulty generation", () => {
 	it.each([
 		["compact", 20, 5],
-		["recommended", 60, 20],
+		["recommended", 40, 20],
 	] as const)(
 		"preserves %s content and scales fresh and return actors",
 		(_label, size, floors) => {

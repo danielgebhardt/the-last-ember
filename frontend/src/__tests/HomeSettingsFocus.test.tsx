@@ -59,6 +59,6 @@ it("keeps an invalid configuration in Settings instead of restoring gameplay foc
 	expect(screen.getByRole("dialog", { name: "Settings" })).toBeVisible();
 	expect(rows).toHaveFocus();
 	expect(screen.getByRole("alert")).toHaveTextContent(
-		"Enter a whole number from 10 to 100",
+		"Enter a whole number from 10 to 40",
 	);
 });

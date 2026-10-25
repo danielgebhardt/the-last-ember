@@ -43,7 +43,7 @@ describe("Home dungeon configuration", () => {
 			);
 		expect(
 			screen.getByRole("textbox", { name: "Rows" }),
-		).toHaveAccessibleDescription(/Enter a whole number from 10 to 100/);
+		).toHaveAccessibleDescription(/Enter a whole number from 10 to 40/);
 		expect(
 			screen.getByRole("textbox", { name: "Floors" }),
 		).toHaveAccessibleDescription(/Enter a whole number from 5 to 20/);

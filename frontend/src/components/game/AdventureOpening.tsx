@@ -1,6 +1,6 @@
 import { Dialog } from "@base-ui/react/dialog";
 import { ArrowRight, FolderOpen, History, Shield } from "lucide-react";
-import { useRef, useState } from "react";
+import { useId, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetTrigger } from "@/components/ui/sheet";
 import {
@@ -11,8 +11,8 @@ import { ADVENTURE_STORY } from "../../domain/game/AdventureStory";
 import { type SaveDocument, saveSummary } from "../../domain/saves/SaveFormat";
 import { readAutosave } from "../../persistence/LocalAdventureSave";
 import AdventureSaveSheet from "./AdventureSaveSheet";
+import AppearanceChoice from "./AppearanceChoice";
 import DifficultyChoice from "./DifficultyChoice";
-import DungeonSizeChoice from "./DungeonSizeChoice";
 import EmberEmblem from "./EmberEmblem";
 import RunHistoryDialog from "./RunHistoryDialog";
 
@@ -47,6 +47,7 @@ const AdventureOpening = ({
 		return result.ok ? result.value : null;
 	});
 	const title = useRef<HTMLHeadingElement>(null);
+	const dungeonHeading = useId();
 
 	return (
 		<div className="flex min-h-dvh items-center justify-center bg-muted/30 p-3 sm:p-6">
@@ -78,7 +79,11 @@ const AdventureOpening = ({
 							className="grid gap-2.5"
 							onSubmit={(event) => {
 								event.preventDefault();
-								onBegin(configuration);
+								// Always the standard dungeon; only the difficulty is chosen here.
+								onBegin({
+									...DEFAULT_RUN_CONFIGURATION,
+									difficulty: configuration.difficulty,
+								});
 							}}
 						>
 							<div className="mb-2.5 grid gap-5 min-[900px]:grid-cols-[minmax(0,13fr)_minmax(0,7fr)] min-[900px]:gap-0">
@@ -157,15 +162,30 @@ const AdventureOpening = ({
                            dark:min-[900px]:border-amber-500/25
                         "
 								>
-									<DungeonSizeChoice
-										configuration={configuration}
-										onChange={(size) =>
-											setConfiguration((current) => ({
-												...current,
-												...size,
-											}))
-										}
-									/>
+									<section aria-labelledby={dungeonHeading}>
+										<h2
+											id={dungeonHeading}
+											className="mb-2 font-serif text-sm font-semibold text-foreground"
+										>
+											The dungeon
+										</h2>
+										<div className="grid gap-2 rounded-md border border-border bg-background/50 px-4 py-3">
+											<p className="font-serif text-base font-semibold">
+												Twenty floors deep
+											</p>
+											<p className="text-sm leading-normal text-muted-foreground">
+												Each floor is 40 × 40 tiles. The Ember Warden waits on
+												the last one, and the way home is longer than the way
+												down.
+											</p>
+										</div>
+										<p className="mt-1.5 text-[11px] leading-relaxed text-muted-foreground">
+											Want a different size, floor count or seed? Settings
+											starts custom adventures, which aren't ranked.
+										</p>
+									</section>
+
+									<AppearanceChoice />
 
 									<Flourish className="w-full" />
 
@@ -287,14 +307,7 @@ const AdventureOpening = ({
 							<RunHistoryDialog triggerClassName="h-10 w-full text-muted-foreground hover:text-foreground" />
 
 							<div className="text-center">
-								<p className="text-xs text-muted-foreground">
-									<output aria-label="Selected adventure size">
-										{configuration.rows} × {configuration.cols} tiles
-										{" · "}
-										{configuration.floorCount} floors
-									</output>
-								</p>
-								<p className="mt-0.5 text-[10px] italic text-muted-foreground/70">
+								<p className="text-[10px] italic text-muted-foreground/70">
 									Inspired by the classic roguelike Larn.
 								</p>
 							</div>

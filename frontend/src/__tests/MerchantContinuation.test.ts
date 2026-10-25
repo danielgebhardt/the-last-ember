@@ -193,23 +193,37 @@ describe("Shared merchant economy continuation", () => {
 	it("rejects imported merchants inside an elite chamber even behind an opened gate", () => {
 		const chamberConfiguration = {
 			...DEFAULT_RUN_CONFIGURATION,
-			rows: 60,
-			cols: 60,
+			rows: 40,
+			cols: 40,
 		};
-		const base = withFlameOnFloor(
-			createGameState(
-				connectDungeonFloors(generateDungeonRun(123, 20, chamberConfiguration)),
-			),
-		);
-		const encounters = addOptionalEliteRooms(base, { chance: 1 });
-		const gate = encounters.objects.find(
-			(o) => o.kind === "elite-door" && o.floorNumber === 10,
-		);
-		if (!gate) throw new Error("Expected optional floor-ten chamber");
-		const floor = base.run.floors[9],
+		// The first seed with a chamber on a merchant's floor.
+		const found = (() => {
+			for (let seed = 123; seed < 400; seed++) {
+				const base = withFlameOnFloor(
+					createGameState(
+						connectDungeonFloors(
+							generateDungeonRun(seed, 20, chamberConfiguration),
+						),
+					),
+				);
+				const encounters = addOptionalEliteRooms(base, { chance: 1 });
+				const gate = encounters.objects.find(
+					(o) =>
+						o.kind === "elite-door" &&
+						encounters.objects.some(
+							(m) => m.kind === "merchant" && m.floorNumber === o.floorNumber,
+						),
+				);
+				if (gate) return { base, encounters, gate };
+			}
+			throw new Error("Expected a chamber on a merchant's floor");
+		})();
+		const { base, encounters, gate } = found;
+		const chamberFloor = gate.floorNumber;
+		const floor = base.run.floors[chamberFloor - 1],
 			chamber = findOptionalEliteRooms(
 				floor,
-				protectedFloorLocations(base.run, 10),
+				protectedFloorLocations(base.run, chamberFloor),
 			).find((c) => coordinateKey(c.gate) === coordinateKey(gate.coordinate));
 		if (!chamber) throw new Error("Expected chamber geometry");
 		const state = {
@@ -218,7 +232,7 @@ describe("Shared merchant economy continuation", () => {
 			objects: encounters.objects.map((o) =>
 				o.id === gate.id
 					? { ...o, activated: true }
-					: o.kind === "merchant" && o.floorNumber === 10
+					: o.kind === "merchant" && o.floorNumber === chamberFloor
 						? {
 								...o,
 								coordinate: {

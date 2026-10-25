@@ -32,8 +32,8 @@ describe("Capped monster population density", () => {
 		const run = connectDungeonFloors(
 			generateDungeonRun(0, 2, {
 				...COMPACT_TEST_CONFIGURATION,
-				rows: 100,
-				cols: 100,
+				rows: 40,
+				cols: 40,
 			}),
 		);
 		const monsters = spawnRunMonsters(run);

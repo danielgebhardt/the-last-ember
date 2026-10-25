@@ -7,7 +7,6 @@ test("fixed town preview works in both themes on phone, laptop and desktop witho
 	const errors: string[] = [];
 	page.on("pageerror", (error) => errors.push(error.message));
 	await page.goto("/");
-	await page.getByRole("radio", { name: /Small/ }).locator("..").click();
 	await page
 		.getByRole("button", { name: "Begin Adventure", exact: true })
 		.click();

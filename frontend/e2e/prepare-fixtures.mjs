@@ -762,46 +762,46 @@ export default async function prepareFixtures() {
 		}
 		if (!corridorState)
 			throw new Error("Expected a quiet corridor for travel verification");
-		// A validated maximum-size adventure isolates map following and input
+		// A validated maximum-size (40×40) adventure isolates map following and input
 		// responsiveness from random rooms, loot and enemy placement.
 		const largeConfiguration = {
 			...DEFAULT_RUN_CONFIGURATION,
-			rows: 100,
-			cols: 100,
+			rows: 40,
+			cols: 40,
 			floorCount: 20,
 		};
-		const largeRoom = { startRow: 50, endRow: 50, startCol: 1, endCol: 98 };
+		const largeRoom = { startRow: 20, endRow: 20, startCol: 1, endCol: 38 };
 		const largeRun = {
 			seed: 123,
 			activeFloor: 2,
-			playerCoordinate: { row: 50, col: 40 },
+			playerCoordinate: { row: 20, col: 16 },
 			floors: Array.from({ length: 20 }, (_, index) => ({
 				floorNumber: index + 1,
-				terrain: Array.from({ length: 100 }, (_, row) =>
-					Array.from({ length: 100 }, (_, col) =>
-						row === 50 && col >= 1 && col <= 98 ? "." : "#",
+				terrain: Array.from({ length: 40 }, (_, row) =>
+					Array.from({ length: 40 }, (_, col) =>
+						row === 20 && col >= 1 && col <= 38 ? "." : "#",
 					),
 				),
 				rooms: [largeRoom],
 				corridors: [],
 				partitions: {
-					region: { startRow: 0, endRow: 99, startCol: 0, endCol: 99 },
+					region: { startRow: 0, endRow: 39, startCol: 0, endCol: 39 },
 					room: largeRoom,
 				},
 				upStair:
 					index > 0
 						? {
-								coordinate: { row: 50, col: 2 },
+								coordinate: { row: 20, col: 2 },
 								destinationFloor: index,
-								arrivalCoordinate: { row: 50, col: 90 },
+								arrivalCoordinate: { row: 20, col: 36 },
 							}
 						: undefined,
 				downStair:
 					index < 19
 						? {
-								coordinate: { row: 50, col: 90 },
+								coordinate: { row: 20, col: 36 },
 								destinationFloor: index + 2,
-								arrivalCoordinate: { row: 50, col: 2 },
+								arrivalCoordinate: { row: 20, col: 2 },
 							}
 						: undefined,
 			})),
@@ -831,7 +831,7 @@ export default async function prepareFixtures() {
 					...floor,
 					terrain: floor.terrain.map((row, r) =>
 						row.map((tile, c) =>
-							(r === 49 || r === 51) && c >= 36 && c <= 44 ? "." : tile,
+							(r === 19 || r === 21) && c >= 12 && c <= 20 ? "." : tile,
 						),
 					),
 				})),
@@ -841,7 +841,7 @@ export default async function prepareFixtures() {
 				{
 					item: { id: "room-run:stop", kind: "healing-potion" },
 					floorNumber: 2,
-					coordinate: { row: 50, col: 50 },
+					coordinate: { row: 20, col: 26 },
 				},
 			],
 		};
@@ -855,12 +855,12 @@ export default async function prepareFixtures() {
 					id: "14:1",
 					kind: "salamander",
 					floorNumber: 14,
-					coordinate: { row: 50, col: 46 },
+					coordinate: { row: 20, col: 22 },
 					health: 24,
 					lastDamagedTurn: null,
 					intent: {
 						type: "preparing-area",
-						target: { row: 50, col: 41 },
+						target: { row: 20, col: 17 },
 						radius: 1,
 						element: "fire",
 						remaining: 1,
@@ -1209,7 +1209,7 @@ export default async function prepareFixtures() {
 							id: "floor:8:object:reliquary:1",
 							kind: "reliquary",
 							floorNumber: 8,
-							coordinate: { row: 50, col: 41 },
+							coordinate: { row: 20, col: 17 },
 							activated: false,
 						},
 					],

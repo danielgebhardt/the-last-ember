@@ -261,11 +261,14 @@ const Home = ({
 		}
 	}, [game.state.activityHistory, turn]);
 
+	// Only a new dungeon after a ranked one stays ranked; replays and Settings starts
+	// never are.
 	const startRun = (
 		seed: number,
 		nextConfiguration: RunConfiguration,
+		ranked = false,
 	): boolean => {
-		if (!start(seed, nextConfiguration)) {
+		if (!start(seed, nextConfiguration, ranked)) {
 			setGenerationError(
 				"Could not create a dungeon with this seed and configuration. Try a different seed or larger dimensions.",
 			);
@@ -310,7 +313,7 @@ const Home = ({
 	const handleNewDungeon = () => {
 		const seed = randomAdventureSeed();
 
-		if (startRun(seed, configuration))
+		if (startRun(seed, configuration, game.state.ranked === true))
 			mapRef.current?.focus({ preventScroll: true });
 	};
 

@@ -36,7 +36,7 @@ import {
 } from "../domain/saves/SaveFormat";
 import { COMPACT_TEST_CONFIGURATION } from "./TestRunConfiguration";
 
-const configuration = { ...COMPACT_TEST_CONFIGURATION, rows: 50, cols: 50 };
+const configuration = { ...COMPACT_TEST_CONFIGURATION, rows: 40, cols: 40 };
 const generatedRun = (seed: number, floorCount = 5) =>
 	connectDungeonFloors(generateDungeonRun(seed, floorCount, configuration));
 
