@@ -113,3 +113,15 @@ Both frames were re-encoded as WebP (quality 82) at their original 1672×941. Th
 **Entering the game** (Begin Adventure, then the first floor) received 454 KB in the light theme and 389 KB in the dark theme, down from 3,208 KB and 2,875 KB. Measured 2026-10-25 in Chromium on the local preview.
 
 **Quality:** against the PNGs, the mean per-channel difference is about 3 out of 255 (PSNR 34 dB). Side-by-side crops at 2× zoom and in-game views at 1470×830, 1180×820, 1024×768 and 2560×1440 showed no visible change.
+
+## Run statistics (#422)
+
+Measured 2026-10-25 on `codex/run-statistics`, built with `VITE_FIREBASE_API_KEY=` (signed out, no Firebase settings), using the same five-run script and profiles.
+
+| | After #421 | With run statistics | Budget |
+|---|---|---|---|
+| Main JavaScript received | 315.6 KB | 317.2 KB | — |
+| Signed-out cold load received | 375.2 KB | 376.7 KB | ≤ 407 KB |
+| Begin Adventure ready, slow 4G, 4× CPU, cold | 2.18 s | 2.197 s | ≤ 2.35 s |
+
+Local cold readiness was 74 ms. The opening still makes four requests; neither Firebase chunk loads. The trusted statistics function and its bundled validator are server artifacts, outside `dist`, so they add no browser download. The browser addition is the account-scoped retry queue, its provider, the account switch and run identity/encounter tracking.

@@ -32,6 +32,8 @@ export type SaveDocument = {
 		| "omens"
 		| "arenas"
 		| "ranked"
+		| "runId"
+		| "encounters"
 		| "townEquipmentStock"
 		| "townEquipmentPurchases"
 		| "townPotionStock"

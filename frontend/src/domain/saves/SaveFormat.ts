@@ -67,6 +67,17 @@ export const createSaveDocument = (
 		omens: state.omens.map((omen) => ({ ...omen })),
 		arenas: state.arenas.map((arena) => ({ ...arena })),
 		...(state.ranked ? { ranked: true as const } : {}),
+		...(state.runId ? { runId: state.runId } : {}),
+		...(state.encounters
+			? {
+					encounters: {
+						...state.encounters,
+						omens: [...state.encounters.omens],
+						thieves: [...state.encounters.thieves],
+						mimicFloors: [...state.encounters.mimicFloors],
+					},
+				}
+			: {}),
 		townEquipmentStock: state.townEquipmentStock.map(savedItem),
 		townEquipmentPurchases: [...state.townEquipmentPurchases],
 		townPotionStock: { ...state.townPotionStock },

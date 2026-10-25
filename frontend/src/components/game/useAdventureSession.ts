@@ -17,6 +17,10 @@ import {
 	type PlayerAction,
 	resolvePlayerAction,
 } from "../../domain/game/PlayerActions";
+import {
+	emptyRunEncounters,
+	recordRunEncounters,
+} from "../../domain/game/RunEncounters";
 import { createTestSeedState, isTestSeed } from "../../domain/game/TestSeed";
 import { itemsAtPlayer } from "../../domain/items/FloorItems";
 import { objectAvailable } from "../../domain/merchant/MerchantAvailability";
@@ -70,6 +74,8 @@ export const createAdventureSession = (
 	return {
 		state: {
 			...state,
+			runId: crypto.randomUUID(),
+			encounters: emptyRunEncounters(0),
 			town: createTownLocation(),
 			...(ranked && !isTestSeed(seed) ? { ranked: true as const } : {}),
 		},
@@ -86,6 +92,18 @@ export const createAdventureSession = (
 	};
 };
 
+const observeSession = <T extends RestoredAdventure>(session: T): T => ({
+	...session,
+	state: {
+		...recordRunEncounters(
+			session.state,
+			session.state,
+			session.fog.enabled ? session.exploration.visible : undefined,
+		),
+		runId: session.state.runId ?? crypto.randomUUID(),
+	},
+});
+
 // One state replacement keeps terrain, resources, settings and discovery together.
 // Dialog lifecycle and focus belong to Home, not to the adventure session.
 export const useAdventureSession = ({
@@ -96,7 +114,7 @@ export const useAdventureSession = ({
 }: SessionOptions) => {
 	const [session, setSession] = useState<Session>(() =>
 		initialAdventure
-			? { ...initialAdventure, actionError: "" }
+			? observeSession({ ...initialAdventure, actionError: "" })
 			: createAdventureSession(
 					initialSeed ?? 0,
 					initialConfiguration,
@@ -154,31 +172,35 @@ export const useAdventureSession = ({
 		}
 	};
 	const restore = (document: SaveDocument) => {
-		const loaded = restoreSave(document);
+		const loaded = observeSession(restoreSave(document));
 		setSession({ ...loaded, actionError: "" });
 		return loaded;
 	};
 	const setActionError = (actionError: string) =>
 		setSession((current) => ({ ...current, actionError }));
 	const setFogEnabled = (enabled: boolean) =>
-		setSession((current) => ({ ...current, fog: { ...current.fog, enabled } }));
+		setSession((current) =>
+			observeSession({ ...current, fog: { ...current.fog, enabled } }),
+		);
 	const applyFogRadius = (radius: number) =>
-		setSession((current) => ({
-			...current,
-			fog: { ...current.fog, radius },
-			exploration: updateExploration(
-				navigationRun(current.state),
-				omenSightRadius(
-					current.state,
-					playerSightRadius(
-						radius,
-						current.state.progression,
-						current.state.afflictions,
+		setSession((current) =>
+			observeSession({
+				...current,
+				fog: { ...current.fog, radius },
+				exploration: updateExploration(
+					navigationRun(current.state),
+					omenSightRadius(
+						current.state,
+						playerSightRadius(
+							radius,
+							current.state.progression,
+							current.state.afflictions,
+						),
 					),
+					current.exploration,
 				),
-				current.exploration,
-			),
-		}));
+			}),
+		);
 	const requestAction = (action: PlayerAction) => {
 		setSession((current) => {
 			const result = resolvePlayerAction(current.state, action);
@@ -205,10 +227,15 @@ export const useAdventureSession = ({
 							current.exploration,
 						)
 					: current.exploration;
+			const observed = recordRunEncounters(
+				current.state,
+				result.state,
+				current.fog.enabled ? nextExploration.visible : undefined,
+			);
 			if (!result.turnAdvanced)
 				return {
 					...current,
-					state: result.state,
+					state: observed,
 					actionError: result.message ?? "",
 					exploration: nextExploration,
 				};
@@ -236,8 +263,8 @@ export const useAdventureSession = ({
 				...current,
 				state:
 					projected === result.state.activityHistory
-						? result.state
-						: { ...result.state, activityHistory: projected },
+						? observed
+						: { ...observed, activityHistory: projected },
 				actionError: "",
 				exploration: nextExploration,
 			};

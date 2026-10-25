@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useSaves } from "../saves/SavesProvider";
+import { useStatistics } from "../statistics/StatisticsProvider";
 import AccountAvatar from "./AccountAvatar";
 import { useAccount } from "./AccountProvider";
 
@@ -11,6 +12,7 @@ import { useAccount } from "./AccountProvider";
 // account, and once signed in, who you are and a way to sign out.
 const AccountPanel = () => {
 	const account = useAccount();
+	const statistics = useStatistics();
 	const saves = useSaves();
 	const [creating, setCreating] = useState(false);
 	const [email, setEmail] = useState("");
@@ -47,6 +49,16 @@ const AccountPanel = () => {
 							</output>
 						</div>
 					</div>
+					<label className="flex items-center gap-3 text-sm">
+						<input
+							type="checkbox"
+							role="switch"
+							aria-checked={statistics.sharing}
+							checked={statistics.sharing}
+							onChange={(event) => statistics.setSharing(event.target.checked)}
+						/>
+						Share run statistics
+					</label>
 					<Button
 						type="button"
 						variant="outline"

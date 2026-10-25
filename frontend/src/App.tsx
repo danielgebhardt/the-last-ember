@@ -1,5 +1,6 @@
 import { createAdventureSession } from "./components/game/useAdventureSession";
 import { randomAdventureSeed } from "./domain/game/TestSeed";
+import { StatisticsProvider } from "./statistics/StatisticsProvider";
 import "./App.css";
 import "./styles/Menus.css";
 import "./styles/Town.css";
@@ -84,9 +85,11 @@ function App() {
 	return (
 		<ThemeProvider>
 			<AccountProvider>
-				<SavesProvider>
-					<Adventures />
-				</SavesProvider>
+				<StatisticsProvider>
+					<SavesProvider>
+						<Adventures />
+					</SavesProvider>
+				</StatisticsProvider>
 			</AccountProvider>
 			<Analytics />
 		</ThemeProvider>

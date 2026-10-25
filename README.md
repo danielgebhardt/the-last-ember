@@ -45,7 +45,7 @@ Browser Save/Load, the separate autosave and file import/export persist the actu
 
 ## Accounts
 
-Signing in is optional; everything plays without an account. Accounts use **Firebase Authentication** (Google, and email with a password) on the free Spark plan. Trusted server work runs in **Vercel serverless functions** under `frontend/api`: today `GET /api/account` verifies a Firebase ID token and names its user. The Firebase library loads only when someone opens sign-in or already has a session on that device, so signed-out play downloads none of it (see `docs/performance-baseline.md`).
+Signing in is optional; everything plays without an account. Accounts use **Firebase Authentication** (Google, and email with a password) on the free Spark plan. Trusted server work runs in **Vercel serverless functions** under `frontend/api`: `GET /api/account` verifies a Firebase ID token; `POST /api/statistics` validates a finished save and records its run summary. The Firebase library loads only when someone opens sign-in or already has a session on that device, so signed-out play downloads none of it (see `docs/performance-baseline.md`).
 
 **Cloud saves** (#421) keep a signed-in player's Save and Autosave slots in **Cloud Firestore** at `saves/{uid}/slots/{save|autosave}`. Browser storage stays the working copy, so play never waits on the network:
 
@@ -53,6 +53,29 @@ Signing in is optional; everything plays without an account. Accounts use **Fire
 - **Uploads:** a few seconds after a slot is written, and when the tab is hidden. Each copy is the usual save text, gzip-compressed, with a revision number that every write advances by one.
 - **Conflicts:** when this browser and the cloud both changed, the player chooses which to keep. Otherwise a newer cloud copy simply replaces the browser's.
 - **Code:** the sync logic is in `frontend/src/saves`, and the Firestore lite client loads only once someone signs in. `frontend/firestore.rules` lets only the owner read or write their slots, and only one revision at a time.
+
+**Run statistics** (#422) collect wins and deaths from signed-in players. The account dialog's **Share run statistics** switch defaults on; the choice is remembered per account on this browser. Turning it off also discards queued submissions. Abandoned runs and usage counters are not collected.
+
+The browser queues the finished save locally and retries on sign-in, when connectivity returns, or at the next adventure start. Reviewing a run and starting another never waits. The function verifies the ID token, runs the same `parseSave` validation as loading, requires a finished run, and derives the summary itself. An Admin SDK `create()` at `statistics/{uid}_{runId}` makes concurrent submissions and retries harmless. Rules deny all browser reads and writes, including the player's own statistics. One accepted run costs one document write.
+
+Summaries contain configuration, standard/ranked flags, difficulty, `GAME_VERSION` (`0.3.0-alpha`, bumped by the developer per release), deploy commit when available, outcome, progress, encounters, final equipped kinds/enchantments and finish time. They contain no email, display name or full save; only the document ID identifies the account. Consistency checks catch broken and inconsistently edited saves, but cannot establish that a carefully forged consistent save was played.
+
+Encounters mean revealed omens, entering the arena, thieves first spotted and mimics revealed. Their optional saved facts survive activity-log rollover. `encountersSinceTurn` is `0` for new adventures; for an older save it identifies the load turn when tracking began. Missing facts export as empty cells (unknown), rather than fabricated zero counts. The arena summary identifies the encountered miniboss and whether it fell, even if other arena creatures remain.
+
+Run IDs are optional v33 save fields, assigned in the browser when starting or loading an adventure and retained at the next save. Frozen v33 fixtures and the supported save range remain unchanged. They never enter seeded gameplay. The build runs `scripts/build-statistics.mjs` to bundle the trusted handler and shared domain validator into `server/statistics.mjs` before Vercel traces `api/statistics.ts`. The generated bundle resolves mixed extensionless and `.ts` source imports at build time and is not committed.
+
+### Exporting statistics
+
+In **Firebase → Project settings → Service accounts**, generate a private key for the project (or use an existing suitable service account). Keep the JSON **outside this repository**. Never put a key in a `VITE_` variable, browser code, Git, or a command-line argument.
+
+```sh
+# Replace this with your private file's path, outside the checkout.
+export FIREBASE_SERVICE_ACCOUNT_FILE="$HOME/.config/wardens-flame/service-account.json"
+pnpm --filter frontend --silent stats:export > /tmp/standard-runs.csv
+pnpm --filter frontend --silent stats:export --all > /tmp/all-runs.csv
+```
+
+The script reads the credential from that path and queries standard runs by default; `--all` exports custom runs too. CSV has a stable header and quotes nested encounter/equipment values as JSON. It omits account and document IDs. Firebase rules do not restrict the Admin SDK, so access to this key is access to private project data.
 
 ### Firebase and Vercel setup
 
@@ -69,8 +92,9 @@ Signing in is optional; everything plays without an account. Accounts use **Fire
    | `VITE_FIREBASE_PROJECT_ID` | web app `projectId` |
    | `VITE_FIREBASE_APP_ID` | web app `appId` |
    | `FIREBASE_PROJECT_ID` | the same project ID, for the functions |
+   | `FIREBASE_SERVICE_ACCOUNT` | full service-account JSON, server-only; already set for Production |
 
-   Then redeploy. These web config values are public by design.
+   Then redeploy. The `VITE_` web config values are public by design; the service-account JSON is secret and must be set only as a server environment variable. Token verification needs only the project ID; statistics writes need this credential.
 
 For local development, put the same values in `frontend/.env.local` (git-ignored). A build without them simply has no accounts, and Settings says so.
 
@@ -82,7 +106,8 @@ No test touches the live project. `pnpm --filter frontend emulators` starts the 
 
 - signing up, out and in, and the function verifying the real token;
 - a compressed cloud save round trip, with stale revisions refused;
-- the security rules refusing another player's reads and writes.
+- the security rules refusing another player's reads and writes;
+- statistics token/save rejections, concurrent Admin creates retaining one summary, and all browser statistics reads, queries, creates, updates and deletes refused (owner, other player and guest).
 
 ## Code organization
 

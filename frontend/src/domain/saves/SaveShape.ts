@@ -474,8 +474,24 @@ const documentShape = object({
 		displacedFloors: optional(array(floorNumber, 0, 20)),
 		hunger: optional(object({ fedTurn: natural })),
 		omens: array(object({ floorNumber, kind: oneOf(OMEN_KINDS) }), 0, 20),
+		encounters: optional(
+			object({
+				sinceTurn: natural,
+				omens: array(oneOf(OMEN_KINDS), 0, 20),
+				thieves: array(text, 0, 60),
+				mimicFloors: array(floorNumber, 0, 20),
+				arenaEntered: boolean,
+			}),
+		),
 		// Whether a ranked adventure is the standard dungeon is a consistency rule.
 		ranked: optional((value) => value === true),
+		runId: optional(
+			(value) =>
+				typeof value === "string" &&
+				/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
+					value,
+				),
+		),
 		// Where an arena may stand is a consistency rule.
 		arenas: array(
 			object({ floorNumber, miniboss: oneOf(MINIBOSS_KINDS) }),

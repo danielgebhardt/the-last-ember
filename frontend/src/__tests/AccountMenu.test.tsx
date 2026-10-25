@@ -10,6 +10,7 @@ import {
 } from "../accounts/AccountProvider";
 import { firebaseWebConfig } from "../accounts/AccountsConfig";
 import type { AccountsApi, AccountUser } from "../accounts/FirebaseAccounts";
+import { StatisticsProvider } from "../statistics/StatisticsProvider";
 
 // A stand-in for Firebase: sign-in methods report through the watch listener.
 const fakeAccounts = () => {
@@ -59,7 +60,9 @@ const Menu = () => {
 const renderMenu = (load: (() => Promise<AccountsApi>) | null) =>
 	render(
 		<AccountProvider load={load}>
-			<Menu />
+			<StatisticsProvider>
+				<Menu />
+			</StatisticsProvider>
 		</AccountProvider>,
 	);
 const dialog = () => screen.queryByRole("dialog");
@@ -86,9 +89,11 @@ describe("Account avatar and dialog", () => {
 		const user = userEvent.setup();
 		renderMenu(load);
 		await user.click(screen.getByRole("button", { name: "Sign in" }));
-		expect(
-			screen.getByRole("heading", { name: "Sign in to The Warden's Flame" }),
-		).toHaveFocus();
+		await waitFor(() =>
+			expect(
+				screen.getByRole("heading", { name: "Sign in to The Warden's Flame" }),
+			).toHaveFocus(),
+		);
 		await user.click(
 			screen.getByRole("button", { name: "Continue with Google" }),
 		);
@@ -116,6 +121,38 @@ describe("Account avatar and dialog", () => {
 		).toBeVisible();
 		expect(screen.getByRole("button", { name: "Sign in" })).toBeVisible();
 		expect(localStorage.getItem(SIGNED_IN_KEY)).toBeNull();
+	});
+
+	it("offers a default-on statistics switch only while signed in and remembers opting out", async () => {
+		const { load } = fakeAccounts();
+		const user = userEvent.setup();
+		const view = renderMenu(load);
+		await user.click(screen.getByRole("button", { name: "Sign in" }));
+		expect(
+			screen.queryByRole("switch", { name: "Share run statistics" }),
+		).toBeNull();
+		await user.click(
+			screen.getByRole("button", { name: "Continue with Google" }),
+		);
+		const avatar = await screen.findByRole("button", {
+			name: "Account: google@example.com",
+		});
+		await waitFor(() => expect(dialog()).toBeNull());
+		await user.click(avatar);
+		const toggle = screen.getByRole("switch", { name: "Share run statistics" });
+		expect(toggle).toBeChecked();
+		await user.click(toggle);
+		expect(toggle).not.toBeChecked();
+		view.unmount();
+		renderMenu(load);
+		await user.click(
+			await screen.findByRole("button", {
+				name: "Account: google@example.com",
+			}),
+		);
+		expect(
+			screen.getByRole("switch", { name: "Share run statistics" }),
+		).not.toBeChecked();
 	});
 
 	it("falls back to an initial when the photo can't load", async () => {

@@ -2,6 +2,7 @@ import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it } from "vitest";
 import { resolvePlayerAction } from "../domain/game/PlayerActions";
+import { emptyRunEncounters } from "../domain/game/RunEncounters";
 import {
 	parseSave,
 	restoreSave,
@@ -81,9 +82,12 @@ describe("Restored tactical encounters in Home", () => {
 		if (!current) throw new Error("Confirmed save must exist.");
 		const parsed = parseSave(current);
 		if (!parsed.ok) throw new Error(parsed.error);
-		expect(restoreSave(parsed.value).state).toEqual(
-			resolvePlayerAction(state, { type: "cast", spell: "heal" }).state,
-		);
+		expect(restoreSave(parsed.value).state).toEqual({
+			...resolvePlayerAction(state, { type: "cast", spell: "heal" }).state,
+			// Browser-only metadata is added when this older snapshot is loaded.
+			runId: expect.stringMatching(/^[0-9a-f-]{36}$/),
+			encounters: emptyRunEncounters(state.turn),
+		});
 	});
 
 	it.each(["malformed intent", "bad target", "protected location"])(

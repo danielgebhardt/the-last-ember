@@ -63,11 +63,13 @@ import {
 } from "./Omens";
 import { createPlayerStats, type PlayerStats } from "./PlayerStats.ts";
 import { createProgression, type Progression } from "./Progression";
+import type { RunEncounters } from "./RunEncounters";
 import { createSpellHotbar, type SpellHotbar } from "./SpellHotbar";
 import { createKnownSpells, type SpellKind } from "./Spells";
 import type { TimedEffect } from "./TimedEffects";
 
 export type GameState = {
+	encounters?: RunEncounters;
 	afflictions: readonly ActiveAffliction[];
 	townEquipmentPurchases: readonly string[];
 	townPortal: TownPortal | null;
@@ -78,6 +80,8 @@ export type GameState = {
 	// Started from the opening dialog: the standard dungeon with a random seed. Only
 	// ranked adventures are recorded on the leaderboards (#312, #419).
 	ranked?: true;
+	// Browser identity only; never used by seeded gameplay.
+	runId?: string;
 	// A wielded Hungering Blade's binding and the turn of its last kill.
 	hunger?: Readonly<{ fedTurn: number }>;
 	// Floors where a Ring of Displacement has already fired this adventure.

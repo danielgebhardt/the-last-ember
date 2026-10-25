@@ -1,0 +1,61 @@
+import { getFirestore } from "firebase-admin/firestore";
+import { type TokenVerifier, verifiedUser } from "../api/account.ts";
+import {
+	type RunStatistics,
+	summarizeRun,
+} from "../src/domain/saves/RunStatistics.ts";
+import { parseSave } from "../src/domain/saves/SaveFormat.ts";
+import { statisticsAdmin } from "./Admin.ts";
+
+export type StatisticsWriter = (
+	id: string,
+	summary: RunStatistics,
+) => Promise<void>;
+export const writeStatistics: StatisticsWriter = async (id, summary) => {
+	await getFirestore(statisticsAdmin())
+		.collection("statistics")
+		.doc(id)
+		.create(summary);
+};
+const json = (status: number, body: unknown) =>
+	Response.json(body, { status, headers: { "cache-control": "no-store" } });
+
+export const handleStatistics = async (
+	request: Request,
+	verify?: TokenVerifier,
+	write: StatisticsWriter = writeStatistics,
+): Promise<Response> => {
+	if (request.method !== "POST") return json(405, { error: "Use POST." });
+	const user = await verifiedUser(request, verify);
+	if (user instanceof Response) return user;
+	const parsed = parseSave(await request.text());
+	if (!parsed.ok) return json(400, { error: parsed.error });
+	const document = parsed.value;
+	if (
+		!document.state.runId ||
+		(document.state.player.health > 0 && document.state.quest.victory === null)
+	)
+		return json(400, { error: "A finished run with a run ID is required." });
+	try {
+		await write(
+			`${user.uid}_${document.state.runId}`,
+			summarizeRun(document, process.env.VERCEL_GIT_COMMIT_SHA ?? null),
+		);
+	} catch (error) {
+		// Firestore create is atomic: concurrent devices and retries share one document.
+		if (
+			!(
+				typeof error === "object" &&
+				error !== null &&
+				"code" in error &&
+				error.code === 6
+			)
+		)
+			return json(503, {
+				error: "Statistics could not be stored. Retry later.",
+			});
+	}
+	return json(200, { ok: true });
+};
+export const POST = (request: Request): Promise<Response> =>
+	handleStatistics(request);

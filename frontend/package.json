@@ -5,7 +5,7 @@
 	"type": "module",
 	"scripts": {
 		"dev": "vite",
-		"build": "tsc -b && vite build",
+		"build": "node scripts/build-statistics.mjs && tsc -b && vite build",
 		"typecheck": "tsc -p tsconfig.app.json --incremental false && tsc -p tsconfig.node.json --incremental false",
 		"preview": "vite preview",
 		"test": "vitest",
@@ -19,7 +19,8 @@
 		"ci": "biome ci .",
 		"test:smoke": "pnpm build && playwright test",
 		"emulators": "firebase emulators:start --only auth,firestore --project demo-wardens-flame",
-		"test:emulator": "FIREBASE_PROJECT_ID=demo-wardens-flame firebase emulators:exec --only auth,firestore --project demo-wardens-flame \"vitest run api CloudSaves.emulator\""
+		"test:emulator": "node scripts/build-statistics.mjs && FIREBASE_PROJECT_ID=demo-wardens-flame firebase emulators:exec --only auth,firestore --project demo-wardens-flame \"vitest run api CloudSaves.emulator Statistics.emulator\"",
+		"stats:export": "node scripts/export-statistics.mjs"
 	},
 	"packageManager": "pnpm@11.25.0",
 	"dependencies": {

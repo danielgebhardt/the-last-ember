@@ -1,9 +1,52 @@
-import { sameCoordinate, savedLevel } from "./SaveConsistencyHelpers";
+import { isThiefId } from "../monsters/TreasureThief";
+import { isMimicChest } from "../objects/MimicChests";
+import { sameCoordinate, savedLevel, unique } from "./SaveConsistencyHelpers";
 import type { SaveDocument } from "./SaveDocument";
 
 export const hasConsistentHistory = (document: SaveDocument): boolean => {
 	const { state } = document;
 	const { run, quest } = state;
+	const facts = state.encounters;
+	if (
+		facts &&
+		(facts.sinceTurn > state.turn ||
+			!unique(facts.omens) ||
+			!unique(facts.thieves) ||
+			!unique(facts.mimicFloors) ||
+			facts.omens.some(
+				(kind) =>
+					!state.omens.some(
+						(omen) =>
+							omen.kind === kind &&
+							document.explored.some(
+								(floor) => floor.floorNumber === omen.floorNumber,
+							),
+					),
+			) ||
+			facts.thieves.some(
+				(id) =>
+					!/^\d+:\d+$/.test(id) ||
+					!isThiefId(id) ||
+					Number(id.split(":")[0]) < 1 ||
+					Number(id.split(":")[0]) > run.floors.length,
+			) ||
+			facts.mimicFloors.some(
+				(floor) =>
+					!state.objects.some(
+						(object) =>
+							object.floorNumber === floor &&
+							object.activated &&
+							isMimicChest(run.seed, object),
+					),
+			) ||
+			(facts.arenaEntered &&
+				!state.arenas.some((arena) =>
+					document.explored.some(
+						(floor) => floor.floorNumber === arena.floorNumber,
+					),
+				)))
+	)
+		return false;
 	const level = savedLevel(document);
 	const entries = state.activityHistory.entries;
 	if (

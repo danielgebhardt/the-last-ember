@@ -91,7 +91,9 @@ it.each([123, 987, 1172903873])(
 			/>,
 		);
 		begin();
-		let manual = initial;
+		// Start manual continuation at the same load boundary, including the browser's
+		// new run identity and encounter provenance; domain actions preserve them.
+		let manual = { ...initial, state: live.game.state };
 		for (let step = 0; step < 3; step++) {
 			const result = resolvePlayerAction(manual.state, {
 				type: "move",

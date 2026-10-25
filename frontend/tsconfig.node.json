@@ -8,7 +8,8 @@
 		"skipLibCheck": true,
 
 		/* Bundler mode */
-		"module": "nodenext",
+		"module": "esnext",
+		"moduleResolution": "bundler",
 		"allowImportingTsExtensions": true,
 		"verbatimModuleSyntax": true,
 		"moduleDetection": "force",
@@ -24,6 +25,7 @@
 		"vite.config.ts",
 		"playwright.config.ts",
 		"e2e/**/*.ts",
-		"api/**/*.ts"
+		"api/**/*.ts",
+		"server/**/*.ts"
 	]
 }
