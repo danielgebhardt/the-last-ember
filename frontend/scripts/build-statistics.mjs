@@ -5,9 +5,18 @@ import { build } from "vite";
 await build({
 	configFile: false,
 	build: {
-		ssr: "server/Statistics.ts",
+		ssr: true,
 		outDir: "server",
 		emptyOutDir: false,
-		rollupOptions: { output: { entryFileNames: "statistics.mjs" } },
+		rollupOptions: {
+			input: {
+				statistics: "server/Statistics.ts",
+				profile: "server/Profile.ts",
+			},
+			output: {
+				entryFileNames: "[name].mjs",
+				chunkFileNames: "[name]-[hash].mjs",
+			},
+		},
 	},
 });

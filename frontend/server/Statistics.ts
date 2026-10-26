@@ -1,21 +1,21 @@
-import { getFirestore } from "firebase-admin/firestore";
 import { type TokenVerifier, verifiedUser } from "../api/account.ts";
 import {
 	type RunStatistics,
 	summarizeRun,
 } from "../src/domain/saves/RunStatistics.ts";
 import { parseSave } from "../src/domain/saves/SaveFormat.ts";
-import { statisticsAdmin } from "./Admin.ts";
+import { activeAccount, database } from "./AccountData.ts";
 
 export type StatisticsWriter = (
 	id: string,
 	summary: RunStatistics,
 ) => Promise<void>;
 export const writeStatistics: StatisticsWriter = async (id, summary) => {
-	await getFirestore(statisticsAdmin())
-		.collection("statistics")
-		.doc(id)
-		.create(summary);
+	const uid = id.slice(0, -37);
+	await database().runTransaction(async (tx) => {
+		await activeAccount(tx, uid);
+		tx.create(database().doc(`statistics/${id}`), summary);
+	});
 };
 const json = (status: number, body: unknown) =>
 	Response.json(body, { status, headers: { "cache-control": "no-store" } });
@@ -42,6 +42,8 @@ export const handleStatistics = async (
 			summarizeRun(document, process.env.VERCEL_GIT_COMMIT_SHA ?? null),
 		);
 	} catch (error) {
+		if ((error as { code?: string }).code === "account-deleted")
+			return json(410, { error: "This account has been deleted." });
 		// Firestore create is atomic: concurrent devices and retries share one document.
 		if (
 			!(

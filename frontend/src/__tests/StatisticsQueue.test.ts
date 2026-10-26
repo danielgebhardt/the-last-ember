@@ -30,23 +30,27 @@ describe("Finished runs waiting in browser storage", () => {
 		await again.retry("one", token);
 		expect(send).toHaveBeenCalledTimes(2);
 	});
-	it("defaults on, persists opt-out per account, and discards pending submissions", async () => {
+	it("collects automatically even when an older browser preference was off", async () => {
+		localStorage.setItem("larn:share-statistics:one", "off");
 		const send = vi
 			.fn<typeof fetch>()
 			.mockResolvedValue(new Response(null, { status: 200 }));
 		const queue = new StatisticsQueue(localStorage, send);
-		expect(queue.enabled("one")).toBe(true);
 		queue.enqueue("one", finished());
-		queue.setEnabled("one", false);
-		const reloaded = new StatisticsQueue(localStorage, send);
-		expect(reloaded.enabled("one")).toBe(false);
-		expect(reloaded.enabled("two")).toBe(true);
-		reloaded.enqueue("one", finished());
-		await reloaded.retry("one", token);
-		reloaded.setEnabled("one", true);
-		await reloaded.retry("one", token);
+		await queue.retry("one", token);
+		expect(send).toHaveBeenCalledTimes(1);
+	});
+	it("discards pending submissions and stops new ones during account deletion", async () => {
+		const send = vi.fn<typeof fetch>();
+		const queue = new StatisticsQueue(localStorage, send);
+		queue.enqueue("one", finished());
+		queue.forget("one");
+		queue.enqueue("one", finished());
+		await queue.retry("one", token);
+		await new StatisticsQueue(localStorage, send).retry("one", token);
 		expect(send).not.toHaveBeenCalled();
 	});
+
 	it("waits for sign-in and keeps failed responses without mixing accounts", async () => {
 		const send = vi
 			.fn<typeof fetch>()

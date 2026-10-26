@@ -74,13 +74,13 @@ it("queues death without waiting, retries on online, and acknowledges only once"
 	await act(async () => result.current.retry());
 	expect(send).toHaveBeenCalledTimes(2);
 });
-it("does not submit a finished run after opting out", async () => {
+it("does not submit a finished run during account deletion", async () => {
 	localStorage.setItem(SIGNED_IN_KEY, "player");
 	const send = vi.fn<typeof fetch>();
 	vi.stubGlobal("fetch", send);
 	const { result } = renderHook(useStatistics, { wrapper: Wrapper });
 	await act(async () => {});
-	act(() => result.current.setSharing(false));
+	act(() => result.current.forget());
 	const document = savedAdventure();
 	document.state.runId = crypto.randomUUID();
 	document.state.player.health = 0;

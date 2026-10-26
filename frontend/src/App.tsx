@@ -1,3 +1,4 @@
+import { AccountProfileProvider } from "./accounts/AccountProfileProvider";
 import { createAdventureSession } from "./components/game/useAdventureSession";
 import { randomAdventureSeed } from "./domain/game/TestSeed";
 import { StatisticsProvider } from "./statistics/StatisticsProvider";
@@ -85,11 +86,13 @@ function App() {
 	return (
 		<ThemeProvider>
 			<AccountProvider>
-				<StatisticsProvider>
-					<SavesProvider>
-						<Adventures />
-					</SavesProvider>
-				</StatisticsProvider>
+				<AccountProfileProvider>
+					<StatisticsProvider>
+						<SavesProvider>
+							<Adventures />
+						</SavesProvider>
+					</StatisticsProvider>
+				</AccountProfileProvider>
 			</AccountProvider>
 			<Analytics />
 		</ThemeProvider>

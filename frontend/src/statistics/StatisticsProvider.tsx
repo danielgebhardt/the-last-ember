@@ -11,15 +11,13 @@ import type { SaveDocument } from "../domain/saves/SaveDocument";
 import { StatisticsQueue } from "./StatisticsQueue";
 
 type Statistics = {
-	sharing: boolean;
-	setSharing: (enabled: boolean) => void;
+	forget: () => void;
 	finish: (document: SaveDocument) => void;
 	retry: () => void;
 };
 const noop = () => {};
 const Context = createContext<Statistics>({
-	sharing: true,
-	setSharing: noop,
+	forget: noop,
 	finish: noop,
 	retry: noop,
 });
@@ -38,7 +36,6 @@ export const StatisticsProvider = ({ children }: { children: ReactNode }) => {
 				setItem: (key, value) => localStorage.setItem(key, value),
 			}),
 	);
-	const [, refresh] = useState(0);
 	// Match save-slot ownership while a remembered account is being restored. A
 	// finished run can wait here, but only a confirmed matching user can send it.
 	const uid =
@@ -73,12 +70,8 @@ export const StatisticsProvider = ({ children }: { children: ReactNode }) => {
 	return (
 		<Context.Provider
 			value={{
-				sharing: uid ? queue.enabled(uid) : true,
-				setSharing: (enabled) => {
-					if (uid) {
-						queue.setEnabled(uid, enabled);
-						refresh((n) => n + 1);
-					}
+				forget: () => {
+					if (uid) queue.forget(uid);
 				},
 				finish: (document) => {
 					if (uid) {

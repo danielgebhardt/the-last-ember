@@ -123,38 +123,6 @@ describe("Account avatar and dialog", () => {
 		expect(localStorage.getItem(SIGNED_IN_KEY)).toBeNull();
 	});
 
-	it("offers a default-on statistics switch only while signed in and remembers opting out", async () => {
-		const { load } = fakeAccounts();
-		const user = userEvent.setup();
-		const view = renderMenu(load);
-		await user.click(screen.getByRole("button", { name: "Sign in" }));
-		expect(
-			screen.queryByRole("switch", { name: "Share run statistics" }),
-		).toBeNull();
-		await user.click(
-			screen.getByRole("button", { name: "Continue with Google" }),
-		);
-		const avatar = await screen.findByRole("button", {
-			name: "Account: google@example.com",
-		});
-		await waitFor(() => expect(dialog()).toBeNull());
-		await user.click(avatar);
-		const toggle = screen.getByRole("switch", { name: "Share run statistics" });
-		expect(toggle).toBeChecked();
-		await user.click(toggle);
-		expect(toggle).not.toBeChecked();
-		view.unmount();
-		renderMenu(load);
-		await user.click(
-			await screen.findByRole("button", {
-				name: "Account: google@example.com",
-			}),
-		);
-		expect(
-			screen.getByRole("switch", { name: "Share run statistics" }),
-		).not.toBeChecked();
-	});
-
 	it("falls back to an initial when the photo can't load", async () => {
 		const { load } = fakeAccounts();
 		const user = userEvent.setup();

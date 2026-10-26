@@ -36,4 +36,4 @@ test-results/
 e2e/.generated/
 
 # Bundled trusted validator (generated before deployment)
-server/statistics.mjs
+server/*.mjs

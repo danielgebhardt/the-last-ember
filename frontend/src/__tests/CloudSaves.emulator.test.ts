@@ -15,6 +15,7 @@ import {
 	setDoc,
 } from "firebase/firestore/lite";
 import { describe, expect, it } from "vitest";
+import { profileActions } from "../../server/Profile.ts";
 import { createCloudStore } from "../accounts/CloudSaves";
 import { serializeSave } from "../domain/saves/SaveFormat";
 import { savedAdventure } from "./SaveTestHelpers";
@@ -45,6 +46,7 @@ const player = async () => {
 		`saver-${Date.now()}-${players}@example.com`,
 		"ember-flame",
 	);
+	await profileActions.read(user.uid);
 	return { app, uid: user.uid };
 };
 const firestore = (app: FirebaseApp) => {

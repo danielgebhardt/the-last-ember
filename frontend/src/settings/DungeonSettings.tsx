@@ -11,6 +11,7 @@ import {
 	SheetDescription,
 	SheetTitle,
 } from "@/components/ui/sheet";
+import AccountDetails from "../accounts/AccountDetails";
 import DifficultyChoice from "../components/game/DifficultyChoice";
 import RunHistoryDialog from "../components/game/RunHistoryDialog";
 import type { Hints } from "../components/game/useHints";
@@ -296,6 +297,9 @@ const DungeonSettings = ({
 						<p className="text-xs text-muted-foreground">
 							Your last finished adventures on this device, with their recaps.
 						</p>
+					</div>
+					<div className="border-t pt-4">
+						<AccountDetails />
 					</div>
 				</EmberPanel>
 			</div>

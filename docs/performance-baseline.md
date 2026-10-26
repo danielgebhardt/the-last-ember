@@ -125,3 +125,15 @@ Measured 2026-10-25 on `codex/run-statistics`, built with `VITE_FIREBASE_API_KEY
 | Begin Adventure ready, slow 4G, 4× CPU, cold | 2.18 s | 2.197 s | ≤ 2.35 s |
 
 Local cold readiness was 74 ms. The opening still makes four requests; neither Firebase chunk loads. The trusted statistics function and its bundled validator are server artifacts, outside `dist`, so they add no browser download. The browser addition is the account-scoped retry queue, its provider, the account switch and run identity/encounter tracking.
+
+## Account privacy (#423)
+
+Measured 2026-10-25 on `codex/run-statistics`, built with `VITE_FIREBASE_API_KEY=`, using the same five-run script and profiles.
+
+| | After #422 | With account privacy | Budget |
+|---|---|---|---|
+| Main JavaScript received | 317.2 KB | 319.9 KB | — |
+| Signed-out cold load received | 376.7 KB | 379.5 KB | ≤ 407 KB |
+| Begin Adventure ready, slow 4G, 4× CPU, cold | 2.197 s | 2.203 s | ≤ 2.35 s |
+
+Local cold readiness was 73 ms. The opening still makes four requests, with neither Firebase chunk loaded. The browser addition covers the profile provider, privacy note, chosen display name and deletion dialog. Profile validation and account cleanup execute in the separately bundled server function.

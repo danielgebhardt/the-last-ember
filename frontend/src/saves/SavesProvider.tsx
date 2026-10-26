@@ -6,6 +6,7 @@ import {
 	useRef,
 	useState,
 } from "react";
+import { useAccountProfile } from "../accounts/AccountProfileProvider";
 import { rememberedUser, useAccount } from "../accounts/AccountProvider";
 import type { SaveDocument, SaveResult } from "../domain/saves/SaveFormat";
 import {
@@ -95,6 +96,7 @@ const SavesContext = createContext<Saves | null>(null);
 
 export const SavesProvider = ({ children }: { children: ReactNode }) => {
 	const account = useAccount();
+	const profile = useAccountProfile();
 	const signedIn =
 		account.status === "signed-in" ? account.user?.uid : undefined;
 	// While a remembered session is checked, its slots are already this player's.
@@ -108,9 +110,9 @@ export const SavesProvider = ({ children }: { children: ReactNode }) => {
 
 	// biome-ignore lint/correctness/useExhaustiveDependencies: restart only for a new player.
 	useEffect(() => {
+		if (!signedIn || !profile.ready) return;
 		const justSignedIn = previousStatus.current === "signed-out";
 		previousStatus.current = account.status;
-		if (!signedIn) return;
 		let sync: CloudSync | null = null;
 		let stopped = false;
 		const hidden = () => {
@@ -148,7 +150,7 @@ export const SavesProvider = ({ children }: { children: ReactNode }) => {
 			document.removeEventListener("visibilitychange", hidden);
 			window.removeEventListener("online", online);
 		};
-	}, [signedIn]);
+	}, [signedIn, profile.ready]);
 
 	useEffect(() => {
 		if (!signedIn) previousStatus.current = account.status;

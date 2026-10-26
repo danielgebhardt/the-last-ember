@@ -54,7 +54,7 @@ Signing in is optional; everything plays without an account. Accounts use **Fire
 - **Conflicts:** when this browser and the cloud both changed, the player chooses which to keep. Otherwise a newer cloud copy simply replaces the browser's.
 - **Code:** the sync logic is in `frontend/src/saves`, and the Firestore lite client loads only once someone signs in. `frontend/firestore.rules` lets only the owner read or write their slots, and only one revision at a time.
 
-**Run statistics** (#422) collect wins and deaths from signed-in players. The account dialog's **Share run statistics** switch defaults on; the choice is remembered per account on this browser. Turning it off also discards queued submissions. Abandoned runs and usage counters are not collected.
+**Run statistics** (#422) automatically collect wins and deaths from signed-in players. The developer removed the sharing switch in #423; the privacy note explains collection. Abandoned runs and usage counters are not collected.
 
 The browser queues the finished save locally and retries on sign-in, when connectivity returns, or at the next adventure start. Reviewing a run and starting another never waits. The function verifies the ID token, runs the same `parseSave` validation as loading, requires a finished run, and derives the summary itself. An Admin SDK `create()` at `statistics/{uid}_{runId}` makes concurrent submissions and retries harmless. Rules deny all browser reads and writes, including the player's own statistics. One accepted run costs one document write.
 
@@ -63,6 +63,14 @@ Summaries contain configuration, standard/ranked flags, difficulty, `GAME_VERSIO
 Encounters mean revealed omens, entering the arena, thieves first spotted and mimics revealed. Their optional saved facts survive activity-log rollover. `encountersSinceTurn` is `0` for new adventures; for an older save it identifies the load turn when tracking began. Missing facts export as empty cells (unknown), rather than fabricated zero counts. The arena summary identifies the encountered miniboss and whether it fell, even if other arena creatures remain.
 
 Run IDs are optional v33 save fields, assigned in the browser when starting or loading an adventure and retained at the next save. Frozen v33 fixtures and the supported save range remain unchanged. They never enter seeded gameplay. The build runs `scripts/build-statistics.mjs` to bundle the trusted handler and shared domain validator into `server/statistics.mjs` before Vercel traces `api/statistics.ts`. The generated bundle resolves mixed extensionless and `.ts` source imports at build time and is not committed.
+
+**Accounts and privacy** (#423): the privacy note is reachable from sign-in, the account dialog and Settings, signed in or out. Players choose a public Rankings name in the account dialog or Settings: 3–24 letters/numbers/spaces/hyphens/underscores, with basic offensive-name filtering; duplicates are allowed and email is never used as a public fallback.
+
+`GET /api/profile` initializes the private account profile; `PUT` validates and saves its name. Browser writes to profiles are denied. Cloud save writes require an active profile, and sync waits for that initialization. `DELETE /api/profile` marks deletion first, removes the player's statistics and rankings in bounded batches, deletes cloud slots and Auth, then removes the profile. Trusted writers read the profile and check Auth within their transaction; rules refuse saves without an active profile, so stale sessions cannot recreate deleted data. No permanent deletion marker is retained.
+
+Deleting an account stops local sync/submissions, signs out and keeps its browser copies. The confirmation offers guest copies; replacing occupied guest slots requires an explicit checkbox. Files already copied from public Rankings cannot be recalled. A failed cloud deletion can be retried; browser copies remain intact.
+
+Trusted account functions require a server: use `vercel dev` for local account work, with the same server environment as Vercel, or point it at the demo Auth/Firestore emulators. `pnpm dev` alone serves the browser app. Production's server credential must also have Firebase Authentication administration rights for deleting users; the normal Firebase Admin service account has these. Never put server credentials in a `VITE_` variable.
 
 ### Exporting statistics
 
@@ -94,7 +102,7 @@ The script reads the credential from that path and queries standard runs by defa
    | `FIREBASE_PROJECT_ID` | the same project ID, for the functions |
    | `FIREBASE_SERVICE_ACCOUNT` | full service-account JSON, server-only; already set for Production |
 
-   Then redeploy. The `VITE_` web config values are public by design; the service-account JSON is secret and must be set only as a server environment variable. Token verification needs only the project ID; statistics writes need this credential.
+   Then redeploy. The `VITE_` web config values are public by design; the service-account JSON is secret and must be set only as a server environment variable. Token verification needs only the project ID; trusted writes and account administration need this credential.
 
 For local development, put the same values in `frontend/.env.local` (git-ignored). A build without them simply has no accounts, and Settings says so.
 
@@ -107,7 +115,8 @@ No test touches the live project. `pnpm --filter frontend emulators` starts the 
 - signing up, out and in, and the function verifying the real token;
 - a compressed cloud save round trip, with stale revisions refused;
 - the security rules refusing another player's reads and writes;
-- statistics token/save rejections, concurrent Admin creates retaining one summary, and all browser statistics reads, queries, creates, updates and deletes refused (owner, other player and guest).
+- statistics token/save rejections, concurrent Admin creates retaining one summary, and all browser statistics reads, queries, creates, updates and deletes refused (owner, other player and guest);
+- profile initialization/names, complete account deletion across multiple batches, preservation of unrelated data, and refusal of stale-session writes after deletion.
 
 ## Code organization
 
