@@ -51,8 +51,17 @@ const ObjectContext = ({
 								</strong>
 								{describeObject(
 									object,
-									chestForesight(state.run.seed, object, state.equipment) ??
-										(isMimicChest(state.run.seed, object)
+									chestForesight(
+										state.run.seed,
+										object,
+										state.equipment,
+										state.disabledFeatures,
+									) ??
+										(isMimicChest(
+											state.run.seed,
+											object,
+											state.disabledFeatures,
+										)
 											? MIMIC_TELL
 											: undefined),
 								)}

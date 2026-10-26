@@ -9,8 +9,8 @@ import { getAuth } from "firebase-admin/auth";
 export type VerifiedUser = Readonly<{
 	uid: string;
 	email: string | null;
+	developer?: true;
 }>;
-
 export type TokenVerifier = (token: string) => Promise<VerifiedUser>;
 
 const json = (status: number, body: unknown) =>
@@ -35,10 +35,10 @@ const firebaseVerifier: TokenVerifier = async (token) => {
 
 	const app = getApps()[0] ?? initializeApp({ projectId });
 	const decoded = await getAuth(app).verifyIdToken(token);
-
 	return {
 		uid: decoded.uid,
 		email: decoded.email ?? null,
+		...(decoded.developer === true ? { developer: true as const } : {}),
 	};
 };
 
@@ -101,7 +101,6 @@ export const handleAccount = async (
 	verify: TokenVerifier = firebaseVerifier,
 ): Promise<Response> => {
 	const user = await verifiedUser(request, verify);
-
 	return user instanceof Response ? user : json(200, user);
 };
 

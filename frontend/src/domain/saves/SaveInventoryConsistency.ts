@@ -101,7 +101,7 @@ export const hasConsistentInventory = (document: SaveDocument): boolean => {
 			);
 			if (
 				owner &&
-				isMimicChest(state.run.seed, owner) &&
+				isMimicChest(state.run.seed, owner, state.disabledFeatures) &&
 				state.monsters.some(
 					(m) => isMimic(m) && m.floorNumber === owner.floorNumber,
 				)

@@ -1,5 +1,8 @@
 import { AccountProfileProvider } from "./accounts/AccountProfileProvider";
 import { createAdventureSession } from "./components/game/useAdventureSession";
+import DeveloperStatisticsRoute, {
+	useDeveloperStatisticsOpen,
+} from "./developer/DeveloperStatisticsRoute";
 import { randomAdventureSeed } from "./domain/game/TestSeed";
 import { StatisticsProvider } from "./statistics/StatisticsProvider";
 import "./App.css";
@@ -28,6 +31,7 @@ import { ThemeProvider } from "./settings/ThemeProvider.tsx";
 // The opening screen or the adventure in play, and the account-driven changes between
 // them: signing out returns to the opening, and a cloud copy can replace the adventure.
 const Adventures = () => {
+	const developerPageOpen = useDeveloperStatisticsOpen();
 	const [adventure, setAdventure] = useState<RestoredAdventure | null>(null);
 	// A new key remounts Home when a different adventure replaces the one in play.
 	const [session, setSession] = useState(0);
@@ -49,9 +53,10 @@ const Adventures = () => {
 		<>
 			{adventure === null ? (
 				<AdventureOpening
+					suspended={developerPageOpen}
 					onRestore={load}
 					startError={startError}
-					onBegin={(configuration) => {
+					onBegin={(configuration, disabled) => {
 						try {
 							const seed = randomAdventureSeed();
 							play(
@@ -61,6 +66,7 @@ const Adventures = () => {
 									configuration,
 									DEFAULT_FOG_CONFIGURATION,
 									true,
+									disabled,
 								),
 							);
 							setStartError(undefined);
@@ -78,6 +84,7 @@ const Adventures = () => {
 				onLeave={() => setAdventure(null)}
 			/>
 			<CloudConflictDialog inPlay={adventure !== null} onLoad={load} />
+			<DeveloperStatisticsRoute />
 		</>
 	);
 };

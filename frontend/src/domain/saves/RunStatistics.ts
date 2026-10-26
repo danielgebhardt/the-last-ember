@@ -27,6 +27,7 @@ export const summarizeRun = (document: SaveDocument, commit: string | null) => {
 			1,
 			...document.explored.map((floor) => floor.floorNumber),
 		),
+		endedFloor: state.run.activeFloor,
 		causeOfDeath: death
 			? {
 					type: death.type,
@@ -41,6 +42,13 @@ export const summarizeRun = (document: SaveDocument, commit: string | null) => {
 		encountersSinceTurn: state.encounters?.sinceTurn ?? null,
 		omensMet: state.encounters?.omens ?? null,
 		thievesMet: state.encounters ? state.encounters.thieves.length : null,
+		thiefTake: state.encounters?.theft
+			? {
+					sinceTurn: state.encounters.theft.sinceTurn,
+					stolen: state.encounters.theft.stolen,
+					recovered: state.encounters.theft.recovered,
+				}
+			: null,
 		mimicsMet: state.encounters ? state.encounters.mimicFloors.length : null,
 		arena: arena
 			? {

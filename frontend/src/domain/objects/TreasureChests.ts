@@ -25,7 +25,7 @@ export const openChest = (
 	chest: DungeonObject,
 ): GameState | { error: string } => {
 	if (chest.activated) return { error: "This chest has already been opened." };
-	if (isMimicChest(state.run.seed, chest)) {
+	if (isMimicChest(state.run.seed, chest, state.disabledFeatures)) {
 		const revealed = revealMimic(state, chest);
 		if (revealed) return revealed;
 	}

@@ -10,10 +10,11 @@ service cloud.firestore {
       allow read: if true;
       allow write: if false;
     }
-    // Balancing data has no browser access, including the submitting player.
-    // The Admin SDK bypasses rules for create-only submissions and private export.
+    // Balancing data requires the developer claim; players cannot read their submissions.
+    // Only the Admin SDK writes summaries, bypassing browser rules.
     match /statistics/{run} {
-      allow read, write: if false;
+      allow read: if request.auth != null && request.auth.token.developer == true;
+      allow write: if false;
     }
     match /saves/{uid}/slots/{slot} {
       function owner() {

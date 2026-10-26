@@ -55,6 +55,7 @@ import TownLibraryDialog from "./components/town/TownLibraryDialog";
 import TownMap from "./components/town/TownMap";
 import TownStockShop from "./components/town/TownStockShop";
 import TownStorageDialog from "./components/town/TownStorageDialog";
+import { useDeveloperStatisticsOpen } from "./developer/DeveloperStatisticsRoute";
 import {
 	MOVEMENT_OFFSETS,
 	type MovementDirection,
@@ -68,6 +69,7 @@ import {
 import { MAX_SEED, parseSeedInput } from "./domain/dungeon/Seed.ts";
 import type { VictorySummary } from "./domain/game/Adventure";
 import { defeatRecap } from "./domain/game/DefeatRecap";
+import type { DeveloperFeature } from "./domain/game/DeveloperFeatures";
 import {
 	OMEN_DEFINITIONS,
 	omenAt,
@@ -198,6 +200,7 @@ const Home = ({
 	const [helpOpen, setHelpOpen] = useState(false);
 	const [accountOpen, setAccountOpen] = useState(false);
 	const [rankingsOpen, setRankingsOpen] = useState(false);
+	const developerStatisticsOpen = useDeveloperStatisticsOpen();
 	const [characterOpen, setCharacterOpen] = useState(false);
 	// The perk reminder opens Character on Progression; every other open starts on Character.
 	const [characterTab, setCharacterTab] = useState<"character" | "progression">(
@@ -217,6 +220,21 @@ const Home = ({
 	const [pickupOpen, setPickupOpen] = useState(false);
 	const [merchantId, setMerchantId] = useState<string | null>(null);
 	const mapRef = useRef<HTMLElement>(null);
+	const previousDeveloperPage = useRef(false);
+	useEffect(() => {
+		if (developerStatisticsOpen) {
+			setAccountOpen(false);
+			setSettingsOpen(false);
+			setRankingsOpen(false);
+			setHelpOpen(false);
+			setCatalogOpen(false);
+			setSaveOpen(false);
+			setCharacterOpen(false);
+			setNewDungeonOpen(false);
+		} else if (previousDeveloperPage.current)
+			mapRef.current?.focus({ preventScroll: true });
+		previousDeveloperPage.current = developerStatisticsOpen;
+	}, [developerStatisticsOpen]);
 	const hints = useHints(game.state, () =>
 		mapRef.current?.focus({ preventScroll: true }),
 	);
@@ -272,8 +290,9 @@ const Home = ({
 		seed: number,
 		nextConfiguration: RunConfiguration,
 		ranked = false,
+		disabled: readonly DeveloperFeature[] = [],
 	): boolean => {
-		if (!start(seed, nextConfiguration, ranked)) {
+		if (!start(seed, nextConfiguration, ranked, disabled)) {
 			setGenerationError(
 				"Could not create a dungeon with this seed and configuration. Try a different seed or larger dimensions.",
 			);
@@ -323,7 +342,10 @@ const Home = ({
 			mapRef.current?.focus({ preventScroll: true });
 	};
 
-	const handleSeedSubmit = (event: SubmitEvent<HTMLFormElement>) => {
+	const handleSeedSubmit = (
+		event: SubmitEvent<HTMLFormElement>,
+		disabled: DeveloperFeature[] = [],
+	) => {
 		event.preventDefault();
 		const seed = parseSeedInput(seedInput);
 		const parsed = parseRunConfiguration(configDraft, configuration);
@@ -333,7 +355,7 @@ const Home = ({
 		setConfigErrors(parsed.valid ? {} : parsed.errors);
 		setGenerationError(null);
 		if (seed === undefined || !parsed.valid) return;
-		if (startRun(seed, parsed.value)) setSettingsOpen(false);
+		if (startRun(seed, parsed.value, false, disabled)) setSettingsOpen(false);
 	};
 
 	const isChestOnTile = (object: DungeonObject) =>
@@ -409,6 +431,7 @@ const Home = ({
 		!catalogOpen &&
 		!accountOpen &&
 		!rankingsOpen &&
+		!developerStatisticsOpen &&
 		!characterOpen &&
 		!pickupOpen &&
 		!victoryOpen;
@@ -609,6 +632,7 @@ const Home = ({
 							<span className="sr-only xl:not-sr-only">Settings</span>
 						</SheetTrigger>
 						<DungeonSettings
+							runId={game.state.runId}
 							finalFocus={mapInputAvailable ? mapRef : false}
 							fogConfiguration={fogConfiguration}
 							onFogEnabledChange={setFogEnabled}

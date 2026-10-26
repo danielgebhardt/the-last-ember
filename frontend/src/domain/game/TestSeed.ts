@@ -32,6 +32,10 @@ import {
 	OBJECT_DEFINITIONS,
 } from "../objects/DungeonObject";
 import { carveFloorVault } from "../objects/SecretVaults";
+import {
+	applyDeveloperExclusions,
+	type DeveloperFeature,
+} from "./DeveloperFeatures";
 import type { Difficulty } from "./Difficulty";
 import { createGameState, type GameState } from "./GameState";
 import { maximumMana } from "./Mana";
@@ -305,10 +309,11 @@ const testBag = () => {
 
 export const createTestSeedState = (
 	configuration: RunConfiguration,
+	disabled: readonly DeveloperFeature[] = [],
 ): GameState => {
 	const difficulty: Difficulty = configuration.difficulty ?? 1;
 	const { run, authored } = testRun(configuration);
-	const base = createGameState(run, difficulty);
+	const base = createGameState(run, difficulty, disabled);
 	const deeper = <T extends { floorNumber: number }>(entries: readonly T[]) =>
 		entries.filter((entry) => entry.floorNumber > TEST_SEED_FLOORS);
 	const content = testContent(authored, difficulty);
@@ -320,11 +325,13 @@ export const createTestSeedState = (
 	const maxHealth = maximumHealth(progression, equipment);
 	const knownSpells = Object.keys(SPELL_DEFINITIONS) as SpellKind[];
 	// Floor 1 always hides a vault behind its first bottom-room wall with rock behind it.
-	const vault = carveFloorVault(
-		base.run.floors[0],
-		() => 0,
-		() => 0,
-	);
+	const vault = disabled.includes("vaults")
+		? undefined
+		: carveFloorVault(
+				base.run.floors[0],
+				() => 0,
+				() => 0,
+			);
 	const seeded: GameState = {
 		...base,
 		run: vault
@@ -339,7 +346,9 @@ export const createTestSeedState = (
 			...(vault?.objects ?? []),
 			...deeper(base.objects),
 		],
-		omens: testOmens(deeper(base.omens ?? [])),
+		omens: disabled.includes("omens")
+			? []
+			: testOmens(deeper(base.omens ?? [])),
 		floorItems: [...(vault?.floorItems ?? []), ...deeper(base.floorItems)],
 		gold: 10000,
 		progression,
@@ -350,11 +359,16 @@ export const createTestSeedState = (
 		bag: testBag(),
 		potionHotbar: createStartingPotionHotbar(),
 	};
-	return TEST_ARENAS.reduce(
-		(state, arena) =>
-			arena.floorNumber < state.run.floors.length
-				? withArena(state, arena, difficulty, TEST_ARENA_STRENGTH_FLOOR)
-				: state,
-		seeded,
+	return applyDeveloperExclusions(
+		disabled.includes("arena")
+			? seeded
+			: TEST_ARENAS.reduce(
+					(state, arena) =>
+						arena.floorNumber < state.run.floors.length
+							? withArena(state, arena, difficulty, TEST_ARENA_STRENGTH_FLOOR)
+							: state,
+					seeded,
+				),
+		disabled,
 	);
 };

@@ -149,3 +149,15 @@ Measured 2026-10-25 on `codex/run-statistics`, built with `VITE_FIREBASE_API_KEY
 | Begin Adventure ready, slow 4G, 4× CPU, cold | 2.203 s | 2.250 s | ≤ 2.35 s |
 
 Local cold readiness was 69 ms. The opening makes six requests: the bundler now splits shared UI code into an `input` chunk and adds its small runtime. Startup JavaScript above sums those three scripts. Neither Firebase chunk nor the lazy `RankingsSheet` chunk loads on the opening screen. The sheet itself is 8.6 KB raw / 3.2 KB gzip; the trusted query/submission function remains outside the browser build. The extra initial code includes the trigger, the separate account-scoped retry queue and the responsive header labels.
+
+## Developer tools (#426)
+
+Measured 2026-10-26 on `codex/developer-tools`, built without Firebase settings, using the same five-run script and profiles.
+
+| | After #312 | With developer tools | Budget |
+|---|---|---|---|
+| Startup JavaScript received | 328.1 KB | 332.9 KB | — |
+| Signed-out cold load received | 387.9 KB | 393.0 KB | ≤ 407 KB |
+| Begin Adventure ready, slow 4G, 4× CPU, cold | 2.250 s | 2.275 s | ≤ 2.35 s |
+
+Local cold readiness was 66 ms. The opening makes nine requests, including newly shared sheet, shadow DOM and account icon chunks. Neither Firebase chunk nor the lazy developer statistics page loads on the opening screen. The statistics page is 12.7 KB raw / 4.4 KB gzip; the Seed report also has its own lazy chunk. The protected statistics function remains outside the browser build. Startup additions include the route and role gates, generation controls and optional run metadata.

@@ -9,10 +9,16 @@ describe("Statistics CSV", () => {
 				standard: true,
 				causeOfDeath: { type: "monster-hit", monster: "goblin" },
 				equipped: { head: null },
+				endedFloor: 3,
+				thiefTake: { sinceTurn: 0, stolen: 100, recovered: 60 },
 			},
 			{ seed: 2, standard: false },
 		];
 		const csv = statisticsCsv(rows);
+		expect(csv.split("\n")[0]).toContain("endedFloor");
+		expect(csv).toContain(
+			'"{""sinceTurn"":0,""stolen"":100,""recovered"":60}"',
+		);
 		expect(csv.split("\n")).toHaveLength(3);
 		expect(csv).toContain('"1"');
 		expect(csv).not.toContain('"2"');

@@ -6,10 +6,24 @@ import type { SaveDocument } from "./SaveDocument";
 export const hasConsistentHistory = (document: SaveDocument): boolean => {
 	const { state } = document;
 	const { run, quest } = state;
+	if (
+		state.disabledFeatures?.length &&
+		(!state.developerRun ||
+			state.ranked ||
+			state.rankingVersion ||
+			!unique(state.disabledFeatures))
+	)
+		return false;
 	const facts = state.encounters;
 	if (
 		facts &&
 		(facts.sinceTurn > state.turn ||
+			(facts.theft &&
+				(facts.theft.sinceTurn > state.turn ||
+					facts.theft.sinceTurn < facts.sinceTurn ||
+					facts.theft.nextId > state.activityHistory.nextId ||
+					(facts.theft.sinceTurn === 0 &&
+						facts.theft.recovered > facts.theft.stolen))) ||
 			!unique(facts.omens) ||
 			!unique(facts.thieves) ||
 			!unique(facts.mimicFloors) ||
@@ -36,7 +50,7 @@ export const hasConsistentHistory = (document: SaveDocument): boolean => {
 						(object) =>
 							object.floorNumber === floor &&
 							object.activated &&
-							isMimicChest(run.seed, object),
+							isMimicChest(run.seed, object, state.disabledFeatures),
 					),
 			) ||
 			(facts.arenaEntered &&

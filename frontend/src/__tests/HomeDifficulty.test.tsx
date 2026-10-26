@@ -30,7 +30,7 @@ describe("Choosing adventure difficulty", () => {
 		expect(screen.getByLabelText("Adventure difficulty")).toHaveTextContent(
 			"Harder",
 		);
-		expect(create).toHaveBeenCalledWith(expect.any(Object), 1.25);
+		expect(create).toHaveBeenCalledWith(expect.any(Object), 1.25, []);
 		expect(generate.mock.lastCall?.[2]).not.toHaveProperty("difficulty");
 		expect(screen.getByLabelText("Town map", { exact: true })).toHaveFocus();
 	});

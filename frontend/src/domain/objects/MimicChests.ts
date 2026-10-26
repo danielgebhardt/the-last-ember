@@ -20,7 +20,9 @@ export const MIMIC_TELL = "The lock looks newer than the wood.";
 export const isMimicChest = (
 	seed: number,
 	chest: Pick<DungeonObject, "id" | "kind" | "floorNumber">,
+	disabledFeatures?: readonly string[],
 ): boolean =>
+	!disabledFeatures?.includes("mimics") &&
 	chest.kind === "chest" &&
 	chest.floorNumber >= MONSTER_DEFINITIONS["treasure-mimic"].minFloor &&
 	(chest.id.endsWith(":mimic") ||

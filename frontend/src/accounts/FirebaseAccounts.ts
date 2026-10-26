@@ -6,7 +6,7 @@ import {
 	createUserWithEmailAndPassword,
 	GoogleAuthProvider,
 	getAuth,
-	onAuthStateChanged,
+	onIdTokenChanged,
 	signInWithEmailAndPassword,
 	signInWithPopup,
 	signOut,
@@ -20,6 +20,7 @@ export type AccountUser = Readonly<{
 	name: string | null;
 	// The sign-in provider's profile picture (Google's), if any.
 	photo: string | null;
+	developer?: true;
 }>;
 export type AccountsApi = Readonly<{
 	// Calls back with the current user at once and on every change; returns an unsubscribe.
@@ -46,19 +47,41 @@ export const createFirebaseAccounts = (
 			disableWarnings: true,
 		});
 	return {
-		watch: (listener) =>
-			onAuthStateChanged(auth, (user) =>
-				listener(
-					user
-						? {
-								uid: user.uid,
-								email: user.email,
-								name: user.displayName,
-								photo: user.photoURL,
-							}
-						: null,
-				),
-			),
+		watch: (listener) => {
+			let visit = 0;
+			const stop = onIdTokenChanged(auth, async (user) => {
+				const current = ++visit;
+				if (!user) {
+					listener(null);
+					return;
+				}
+				try {
+					const token = await user.getIdTokenResult();
+					if (current === visit)
+						listener({
+							uid: user.uid,
+							email: user.email,
+							name: user.displayName,
+							photo: user.photoURL,
+							...(token.claims.developer === true
+								? { developer: true as const }
+								: {}),
+						});
+				} catch {
+					if (current === visit)
+						listener({
+							uid: user.uid,
+							email: user.email,
+							name: user.displayName,
+							photo: user.photoURL,
+						});
+				}
+			});
+			return () => {
+				visit++;
+				stop();
+			};
+		},
 		signInWithGoogle: async () => {
 			await signInWithPopup(auth, new GoogleAuthProvider());
 		},

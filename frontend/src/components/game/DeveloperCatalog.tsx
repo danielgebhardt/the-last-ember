@@ -2,8 +2,10 @@ import { Tabs } from "@base-ui/react/tabs";
 import { LibraryBig, Sparkles } from "lucide-react";
 import {
 	Children,
+	lazy,
 	type ReactNode,
 	type RefObject,
+	Suspense,
 	useId,
 	useState,
 } from "react";
@@ -15,6 +17,7 @@ import {
 	SheetDescription,
 	SheetTitle,
 } from "@/components/ui/sheet";
+import { useAccount } from "../../accounts/AccountProvider";
 import {
 	ARENA_DEPTH_SHARE,
 	ARENA_MIN_DEPTH,
@@ -70,7 +73,9 @@ import ItemIcon from "../items/ItemIcon";
 import MonsterIcon from "../monsters/MonsterIcon";
 import DungeonObjectIcon from "../objects/DungeonObjectIcon";
 import TownPreview from "../town/TownPreview";
-import SeedCorpusPanel from "./SeedCorpusPanel";
+
+const SeedCorpusPanel = lazy(() => import("./SeedCorpusPanel"));
+
 import { SPELL_ICONS, spellIconColor } from "./SpellVisuals";
 import { AFFLICTION_VISUALS, type StatusVisual } from "./StatusEffectIcons";
 
@@ -210,8 +215,12 @@ const DeveloperCatalog = ({
 	finalFocus?: RefObject<HTMLElement | null> | false;
 }) => {
 	const [query, setQuery] = useState("");
+	const developer = useAccount().user?.developer === true;
+	const [section, setSection] = useState("Monsters");
+	const selected =
+		section === "Seed report" && !developer ? "Monsters" : section;
 	// The town preview and the seed report have no catalog entries to filter.
-	const [filterHidden, setFilterHidden] = useState(false);
+	const filterHidden = selected === "Town" || selected === "Seed report";
 	const filterId = useId();
 	const matches = (kind: string, name: string, description = "") =>
 		`${kind} ${name} ${description}`
@@ -241,15 +250,17 @@ const DeveloperCatalog = ({
 			/>
 
 			<Tabs.Root
-				defaultValue="Monsters"
+				value={selected}
 				onValueChange={(value) => {
 					setQuery("");
-					setFilterHidden(value === "Town" || value === "Seed report");
+					setSection(String(value));
 				}}
 				className="flex min-h-0 flex-1 flex-col gap-4 px-4 pb-6"
 			>
 				<EmberTabsList aria-label="Catalog sections" className="px-2 pt-2">
-					{CATALOG_SECTIONS.map((section) => (
+					{CATALOG_SECTIONS.filter(
+						(value) => developer || value !== "Seed report",
+					).map((section) => (
 						<EmberTab key={section} value={section}>
 							{section}
 						</EmberTab>
@@ -631,12 +642,16 @@ const DeveloperCatalog = ({
 				<Tabs.Panel value="Town" className="min-h-0 flex-1 overflow-y-auto">
 					<TownPreview />
 				</Tabs.Panel>
-				<Tabs.Panel
-					value="Seed report"
-					className="min-h-0 flex-1 overflow-y-auto"
-				>
-					<SeedCorpusPanel />
-				</Tabs.Panel>
+				{developer && (
+					<Tabs.Panel
+						value="Seed report"
+						className="min-h-0 flex-1 overflow-y-auto"
+					>
+						<Suspense fallback={<p role="status">Loading seed report…</p>}>
+							<SeedCorpusPanel />
+						</Suspense>
+					</Tabs.Panel>
+				)}
 			</Tabs.Root>
 		</SheetContent>
 	);

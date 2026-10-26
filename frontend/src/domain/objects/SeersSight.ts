@@ -104,9 +104,10 @@ export const chestForesight = (
 	seed: number,
 	chest: DungeonObject,
 	equipment: Readonly<Record<string, ItemInstance | null>>,
+	disabledFeatures?: readonly string[],
 ): string | undefined =>
 	chest.kind === "chest" && !chest.activated && foresees(equipment)
-		? isMimicChest(seed, chest)
+		? isMimicChest(seed, chest, disabledFeatures)
 			? "Seer's sight: it is a mimic."
 			: "Seer's sight: an ordinary chest."
 		: undefined;

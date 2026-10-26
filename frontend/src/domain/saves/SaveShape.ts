@@ -481,6 +481,14 @@ const documentShape = object({
 				thieves: array(text, 0, 60),
 				mimicFloors: array(floorNumber, 0, 20),
 				arenaEntered: boolean,
+				theft: optional(
+					object({
+						sinceTurn: natural,
+						stolen: natural,
+						recovered: natural,
+						nextId: natural,
+					}),
+				),
 			}),
 		),
 		// Whether a ranked adventure is the standard dungeon is a consistency rule.
@@ -492,6 +500,24 @@ const documentShape = object({
 				value.length <= 40,
 		),
 		developerRun: optional((value) => value === true),
+		disabledFeatures: optional(
+			array(
+				oneOf([
+					"omens",
+					"pacts",
+					"arena",
+					"thieves",
+					"mimics",
+					"vaults",
+					"discoveries",
+					"elites",
+					"merchants",
+					"rareFinds",
+				]),
+				1,
+				10,
+			),
+		),
 		runId: optional(
 			(value) =>
 				typeof value === "string" &&

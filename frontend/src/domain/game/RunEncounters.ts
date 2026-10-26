@@ -11,6 +11,12 @@ export type RunEncounters = {
 	thieves: string[];
 	mimicFloors: number[];
 	arenaEntered: boolean;
+	theft?: {
+		sinceTurn: number;
+		stolen: number;
+		recovered: number;
+		nextId: number;
+	};
 };
 export const emptyRunEncounters = (sinceTurn: number): RunEncounters => ({
 	sinceTurn,
@@ -18,6 +24,7 @@ export const emptyRunEncounters = (sinceTurn: number): RunEncounters => ({
 	thieves: [],
 	mimicFloors: [],
 	arenaEntered: false,
+	theft: { sinceTurn, stolen: 0, recovered: 0, nextId: 0 },
 });
 
 // Observe the rendered dungeon and new events at the session boundary, before the
@@ -33,11 +40,30 @@ export const recordRunEncounters = (
 	const thieves = new Set(facts.thieves);
 	const mimicFloors = new Set(facts.mimicFloors);
 	let arenaEntered = facts.arenaEntered;
+	const theft = facts.theft ?? {
+		sinceTurn: before.turn,
+		stolen: 0,
+		recovered: 0,
+		nextId: before.activityHistory.nextId,
+	};
+	let stolen = theft.stolen,
+		recovered = theft.recovered,
+		nextId = theft.nextId;
 	for (const { id, event } of after.activityHistory.entries) {
 		if (id < before.activityHistory.nextId) continue;
 		if (event.type === "omen-revealed") omens.add(event.omen);
 		if (event.type === "mimic-revealed") mimicFloors.add(after.run.activeFloor);
 		if (event.type === "arena-entered") arenaEntered = true;
+		if (id >= theft.nextId) {
+			if (event.type === "monster-theft-hit") {
+				stolen += event.gold;
+				nextId = id + 1;
+			}
+			if (event.type === "monster-theft-recovered") {
+				recovered += event.gold;
+				nextId = id + 1;
+			}
+		}
 	}
 	if (!after.town)
 		for (const monster of after.monsters) {
@@ -54,7 +80,11 @@ export const recordRunEncounters = (
 		omens.size === previous.omens.length &&
 		thieves.size === previous.thieves.length &&
 		mimicFloors.size === previous.mimicFloors.length &&
-		arenaEntered === previous.arenaEntered
+		arenaEntered === previous.arenaEntered &&
+		previous.theft &&
+		stolen === theft.stolen &&
+		recovered === theft.recovered &&
+		theft.nextId === nextId
 	)
 		return after;
 	return {
@@ -65,6 +95,7 @@ export const recordRunEncounters = (
 			thieves: [...thieves],
 			mimicFloors: [...mimicFloors],
 			arenaEntered,
+			theft: { sinceTurn: theft.sinceTurn, stolen, recovered, nextId },
 		},
 	};
 };

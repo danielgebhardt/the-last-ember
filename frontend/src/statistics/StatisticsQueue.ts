@@ -90,6 +90,8 @@ export class StatisticsQueue {
 
 		if (
 			!id ||
+			document.state.developerRun ||
+			document.state.disabledFeatures?.length ||
 			(this.kind === "rankings" &&
 				(!document.state.ranked ||
 					!document.state.rankingVersion ||

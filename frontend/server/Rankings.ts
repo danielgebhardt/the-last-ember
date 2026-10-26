@@ -186,13 +186,17 @@ export const handleRankings = async (
 		const parsed = parseSave(await request.text());
 		if (!parsed.ok) return json(400, { error: parsed.error });
 		const { state } = parsed.value;
+		if (
+			state.developerRun ||
+			state.disabledFeatures?.length ||
+			isTestSeed(state.run.seed)
+		)
+			return json(400, {
+				error: "Developer adventures cannot enter Rankings.",
+			});
 		if (!state.ranked)
 			return json(400, {
 				error: "Adventures started in Settings are unranked.",
-			});
-		if (state.developerRun || isTestSeed(state.run.seed))
-			return json(400, {
-				error: "Developer adventures cannot enter Rankings.",
 			});
 		if (
 			!state.rankingVersion ||

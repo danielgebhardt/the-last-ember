@@ -69,6 +69,9 @@ export const createSaveDocument = (
 		...(state.ranked ? { ranked: true as const } : {}),
 		...(state.rankingVersion ? { rankingVersion: state.rankingVersion } : {}),
 		...(state.developerRun ? { developerRun: true as const } : {}),
+		...(state.disabledFeatures?.length
+			? { disabledFeatures: [...state.disabledFeatures] }
+			: {}),
 		...(state.runId ? { runId: state.runId } : {}),
 		...(state.encounters
 			? {
@@ -77,6 +80,9 @@ export const createSaveDocument = (
 						omens: [...state.encounters.omens],
 						thieves: [...state.encounters.thieves],
 						mimicFloors: [...state.encounters.mimicFloors],
+						...(state.encounters.theft
+							? { theft: { ...state.encounters.theft } }
+							: {}),
 					},
 				}
 			: {}),

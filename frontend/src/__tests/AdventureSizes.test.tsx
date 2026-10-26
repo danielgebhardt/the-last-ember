@@ -56,10 +56,13 @@ describe("The standard dungeon", () => {
 		);
 		expect(screen.getByRole("radio", { name: /Easier/ })).toBeChecked();
 		await user.click(screen.getByRole("button", { name: "Begin Adventure" }));
-		expect(begin).toHaveBeenCalledWith({
-			...DEFAULT_RUN_CONFIGURATION,
-			difficulty: 0.75,
-		});
+		expect(begin).toHaveBeenCalledWith(
+			{
+				...DEFAULT_RUN_CONFIGURATION,
+				difficulty: 0.75,
+			},
+			[],
+		);
 	});
 
 	it("switches between light and dark from the opening, and remembers it", async () => {

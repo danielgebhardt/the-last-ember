@@ -4,6 +4,19 @@ import { handleRankings } from "../../server/Rankings.ts";
 import { rankedAdventure } from "./RankingTestHelpers.ts";
 
 const verify = async () => ({ uid: "owner", email: "private@example.com" });
+it("reports developer exclusion even when the run is also unranked", async () => {
+	const document = rankedAdventure();
+	delete document.state.ranked;
+	delete document.state.rankingVersion;
+	document.state.developerRun = true;
+	const write = vi.fn();
+	const response = await handleRankings(request(document), verify, write);
+	expect(response.status).toBe(400);
+	expect(await response.json()).toMatchObject({
+		error: "Developer adventures cannot enter Rankings.",
+	});
+	expect(write).not.toHaveBeenCalled();
+});
 const request = (document: unknown, token = "token") =>
 	new Request("http://localhost/api/rankings", {
 		method: "POST",

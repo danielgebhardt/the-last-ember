@@ -52,6 +52,10 @@ import {
 } from "./ActivityHistory.ts";
 import { createQuest, type QuestState } from "./Adventure";
 import type { ActiveAffliction } from "./AfflictionDefinitions";
+import {
+	applyDeveloperExclusions,
+	type DeveloperFeature,
+} from "./DeveloperFeatures";
 import { assertDifficulty, type Difficulty } from "./Difficulty";
 import type { EscapeState } from "./Escape";
 import { maximumMana } from "./Mana";
@@ -84,6 +88,7 @@ export type GameState = {
 	rankingVersion?: string;
 	// Reserved for developer-assisted adventures; these never qualify for Rankings.
 	developerRun?: true;
+	disabledFeatures?: DeveloperFeature[];
 	// Browser identity only; never used by seeded gameplay.
 	runId?: string;
 	// A wielded Hungering Blade's binding and the turn of its last kill.
@@ -125,6 +130,7 @@ export const STARTING_GOLD = 300;
 export const createGameState = (
 	run: DungeonRun,
 	difficulty: number = 1,
+	disabled: readonly DeveloperFeature[] = [],
 ): GameState => {
 	assertDifficulty(difficulty);
 	const monsters = spawnRunMonsters(run);
@@ -223,15 +229,15 @@ export const createGameState = (
 		townStorage: [],
 		townEquipmentStock: createTownEquipmentStock(),
 		difficulty,
-		run: vaults.run,
+		run: disabled.includes("vaults") ? run : vaults.run,
 		escape: null,
 		merchantStock: createMerchantStock(),
 		objects: [
-			...gathered.objects,
+			...(disabled.includes("omens") ? objects : gathered.objects),
 			...(altar ? [altar] : []),
-			...vaults.objects,
+			...(disabled.includes("vaults") ? [] : vaults.objects),
 		],
-		omens,
+		omens: disabled.includes("omens") ? [] : omens,
 		arenas: [],
 		gold: STARTING_GOLD,
 		turn: 0,
@@ -247,18 +253,32 @@ export const createGameState = (
 		equipment: createStartingEquipment(),
 		bag: createStartingBag(),
 		potionHotbar: createStartingPotionHotbar(),
-		floorItems: [...gathered.floorItems, ...vaults.floorItems],
+		floorItems: [
+			...(disabled.includes("omens")
+				? [...floorItems, ...rare.items].filter(
+						(entry) => !warden || entry.item.kind !== "cure",
+					)
+				: gathered.floorItems),
+			...(disabled.includes("vaults") ? [] : vaults.floorItems),
+		],
 		// Quiet floors may have lost a floor's first affliction carrier; mark again.
-		monsters: markFirstRemedySources(gathered.monsters),
+		monsters: markFirstRemedySources(
+			disabled.includes("omens")
+				? [...ordinary, ...(warden ? [warden] : []), ...thieves]
+				: gathered.monsters,
+		),
 		activityHistory: createActivityHistory(),
 	};
 	// The arena replaces its floor last, so no other floor's content moves.
 	const arenaFloorNumber = arenaFloorFor(run.floors.length);
-	return arenaFloorNumber
-		? withArena(
-				created,
-				{ floorNumber: arenaFloorNumber, miniboss: selectMiniboss(run.seed) },
-				difficulty,
-			)
-		: created;
+	return applyDeveloperExclusions(
+		arenaFloorNumber && !disabled.includes("arena")
+			? withArena(
+					created,
+					{ floorNumber: arenaFloorNumber, miniboss: selectMiniboss(run.seed) },
+					difficulty,
+				)
+			: created,
+		disabled,
+	);
 };

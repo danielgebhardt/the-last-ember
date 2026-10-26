@@ -132,7 +132,7 @@ export const hasConsistentActors = (document: SaveDocument): boolean => {
 							o.kind === "chest" &&
 							o.activated &&
 							o.floorNumber === entry.floorNumber &&
-							isMimicChest(run.seed, o),
+							isMimicChest(run.seed, o, state.disabledFeatures),
 					)) &&
 				// A thief owns its reserved ID; only a thief carries a haul, stolen in the past.
 				(entry.kind === "treasure-thief") === isThiefId(entry.id) &&

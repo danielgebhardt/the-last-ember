@@ -1,13 +1,16 @@
 import { Dialog } from "@base-ui/react/dialog";
 import { ArrowRight, FolderOpen, History, Shield } from "lucide-react";
-import { useId, useMemo, useRef, useState } from "react";
+import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetTrigger } from "@/components/ui/sheet";
+import { useAccount } from "../../accounts/AccountProvider";
+import DeveloperGeneration from "../../developer/DeveloperGeneration";
 import {
 	DEFAULT_RUN_CONFIGURATION,
 	type RunConfiguration,
 } from "../../domain/dungeon/RunConfiguration";
 import { ADVENTURE_STORY } from "../../domain/game/AdventureStory";
+import type { DeveloperFeature } from "../../domain/game/DeveloperFeatures";
 import { type SaveDocument, saveSummary } from "../../domain/saves/SaveFormat";
 import { useSaves } from "../../saves/SavesProvider";
 import RankingsButton from "../../statistics/RankingsButton";
@@ -34,13 +37,23 @@ const AdventureOpening = ({
 	onRestore,
 	startError,
 	initialConfiguration = DEFAULT_RUN_CONFIGURATION,
+	suspended = false,
 }: {
-	onBegin: (configuration: RunConfiguration) => void;
+	onBegin: (
+		configuration: RunConfiguration,
+		disabled?: DeveloperFeature[],
+	) => void;
 	startError?: string;
 	initialConfiguration?: RunConfiguration;
 	onRestore: (document: SaveDocument) => void;
+	suspended?: boolean;
 }) => {
 	const [configuration, setConfiguration] = useState(initialConfiguration);
+	const [disabled, setDisabled] = useState<DeveloperFeature[]>([]);
+	const account = useAccount();
+	const developer = account.user?.developer === true;
+	// biome-ignore lint/correctness/useExhaustiveDependencies: account changes reset the developer-only draft.
+	useEffect(() => setDisabled([]), [account.user?.uid, developer]);
 	const [saveOpen, setSaveOpen] = useState(false);
 	// Read again when the player signs in or out, or a cloud copy arrives.
 	const saves = useSaves();
@@ -54,7 +67,7 @@ const AdventureOpening = ({
 
 	return (
 		<div className="flex min-h-dvh items-center justify-center bg-muted/30 p-3 sm:p-6">
-			<Dialog.Root open disablePointerDismissal>
+			<Dialog.Root open={!suspended} disablePointerDismissal>
 				<Dialog.Portal>
 					<Dialog.Backdrop className="fixed inset-0 z-50 bg-black/55 backdrop-blur-sm" />
 
@@ -83,10 +96,13 @@ const AdventureOpening = ({
 							onSubmit={(event) => {
 								event.preventDefault();
 								// Always the standard dungeon; only the difficulty is chosen here.
-								onBegin({
-									...DEFAULT_RUN_CONFIGURATION,
-									difficulty: configuration.difficulty,
-								});
+								onBegin(
+									{
+										...DEFAULT_RUN_CONFIGURATION,
+										difficulty: configuration.difficulty,
+									},
+									developer ? disabled : [],
+								);
 							}}
 						>
 							<div className="mb-2.5 grid gap-5 min-[900px]:grid-cols-[minmax(0,13fr)_minmax(0,7fr)] min-[900px]:gap-0">
@@ -189,6 +205,10 @@ const AdventureOpening = ({
 									</section>
 
 									<AppearanceChoice />
+									<DeveloperGeneration
+										disabled={disabled}
+										onChange={setDisabled}
+									/>
 
 									<Flourish className="w-full" />
 

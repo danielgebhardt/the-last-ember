@@ -18,6 +18,18 @@ afterEach(() => {
 });
 
 describe("Finished runs waiting in browser storage", () => {
+	it("never enqueues a developer adventure for either destination", async () => {
+		const document = finished();
+		document.state.developerRun = true;
+		const send = vi.fn<typeof fetch>();
+		for (const kind of ["statistics", "rankings"] as const) {
+			const queue = new StatisticsQueue(localStorage, send, kind);
+			queue.enqueue("developer", document);
+			await queue.retry("developer", token);
+		}
+		expect(send).not.toHaveBeenCalled();
+		expect(localStorage.length).toBe(0);
+	});
 	it("retains an offline run across reload, retries, and never resends an acknowledged run", async () => {
 		const expectedOfflineError = vi
 			.spyOn(console, "error")

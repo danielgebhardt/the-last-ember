@@ -78,7 +78,27 @@ Only newly started ranked adventures qualify. New sessions capture `rankingVersi
 
 The browser maintains a separate account-owned Rankings retry queue. Failed requests, offline finishes and runs waiting for a chosen name remain queued; sign-in, reconnecting, a new adventure, choosing a name and Rankings' Refresh retry them. Submission never blocks gameplay. `POST /api/rankings` verifies the token, uses `parseSave`, checks eligibility and derives the result. Its transaction snapshots the chosen name and creates one entry at `rankings/{uid}_{runId}` with a server timestamp. A retry never overwrites the entry, timestamp or name. No email is used as a public fallback. Validation checks save consistency; it does not replay an entire adventure as an anti-cheat proof.
 
-`GET /api/rankings` serves the public board and the authenticated player's personal board. Cursor paging uses the complete result order and checks the cursor's filters and owner. Personal ranks use server count queries against the same global order. `firestore.indexes.json` defines both composite indexes; deploy them and wait for them to finish building before opening Rankings in production. Rules allow public Rankings reads and deny all browser writes. Private balancing statistics remain unreadable to browsers. The sheet is loaded only when opened.
+`GET /api/rankings` serves the public board and the authenticated player's personal board. Cursor paging uses the complete result order and checks the cursor's filters and owner. Personal ranks use server count queries against the same global order. `firestore.indexes.json` defines both composite indexes; deploy them and wait for them to finish building before opening Rankings in production. Rules allow public Rankings reads and deny all browser writes. Private balancing statistics require the developer claim described below. The sheet is loaded only when opened.
+
+### Developer account and tools (#426)
+
+Developer access is the Firebase custom claim `developer: true`, never an email allowlist or a browser setting. To grant it, keep the service-account JSON outside this repository, set `FIREBASE_SERVICE_ACCOUNT_FILE` to its path (as for the statistics export), then run from `frontend`:
+
+```sh
+pnpm accounts:developer --email your-address@example.com
+```
+
+Use `--uid UID` instead of `--email EMAIL` if preferred. Add `--remove` to remove the developer claim. The script preserves other custom claims and prints only the affected UID. It requires Firebase Authentication administration rights. Sign out and back in after changing claims so the browser receives a fresh ID token. The statistics API checks both the signed claim and the current, enabled Auth account on every request. Direct Firestore rules use the claim in the current ID token, so claim removal takes effect there when that token refreshes (normally within an hour).
+
+Developer accounts get **Developer generation** in the opening and Settings. Each switch removes its feature without rerolling unrelated seeded placements. Choices reset for each new adventure and account change. All enabled preserves normal generation; any unchecked switch marks the run as a developer run, persisted with its disabled feature list. Developer runs are excluded in the browser from both submission queues, and refused by the trusted functions. Loading one without developer access preserves its actual dungeon and exclusion; it does not grant access to tools. Optional v33 fields preserve existing saves without a version bump. The test seed respects the switches and remains unsavable.
+
+Omens control both their floor effects and gatherings. Vaults remove their carved pockets and contents; disabling the arena restores that floor's ordinary seeded layout. Mimic chests become ordinary chests, including their tell and Seer's sight. The remaining content keeps its original identity and placement. Town stores and the test seed's starting kit are not per-third rare finds or wandering merchants, so those switches leave them intact.
+
+**Developer statistics**, reached from the account dialog or Settings, opens `/#developer-statistics`. It defaults to a 30-day UTC date range; clear either date for an open range. Loading reads complete, 200-summary pages once, then filters version, difficulty, standard/custom and outcome locally. It never polls; reload explicitly to include new submissions. Large all-history loads consume a read per summary, so choose a narrower date range when appropriate for the free quota. Breakdowns appear only after the complete range loads. Detail shows a run's stored summary; CSV exports precisely the filtered rows without account/document IDs, using the same columns as the command-line export.
+
+New summaries include the floor where the run ended (distinct from deepest floor reached), plus gold stolen and recovered. Thief totals survive the rolling log, with a separate tracking start turn for older adventures. Historical fields that were never recorded remain missing, rather than becoming zero. Omen frequency and thief totals use only runs tracked from turn zero; partial tracking remains visible in detail. Arena win rate means miniboss defeated among runs that entered the arena. The new fields are not spell, consumable or equipment usage counters; those remain #430.
+
+Catalog stays public. Only **Seed report** and its lazy-loaded panel require the developer claim. Statistics rules allow developer reads but no browser writes, including developer writes. The bundled `GET /api/developer-statistics` also refuses ordinary, revoked, disabled and deleted accounts. Deploy the new function/browser build and republish `firestore.rules` for this story; no additional composite indexes are needed for its date-ordered reads.
 
 ### Exporting statistics
 
@@ -123,9 +143,10 @@ No test touches the live project. `pnpm --filter frontend emulators` starts the 
 - signing up, out and in, and the function verifying the real token;
 - a compressed cloud save round trip, with stale revisions refused;
 - the security rules refusing another player's reads and writes;
-- statistics token/save rejections, concurrent Admin creates retaining one summary, and all browser statistics reads, queries, creates, updates and deletes refused (owner, other player and guest);
+- statistics token/save rejections, concurrent Admin creates retaining one summary, and ordinary-player/guest statistics reads, queries, creates, updates and deletes refused;
 - profile initialization/names, complete account deletion across multiple batches, preservation of unrelated data, and refusal of stale-session writes after deletion;
-- trusted Rankings creates/deduplication/server timestamps, public read-only rules, both boards' ordering, ties, filters and cursor pages with global ranks, and deletion of public entries.
+- trusted Rankings creates/deduplication/server timestamps, public read-only rules, both boards' ordering, ties, filters and cursor pages with global ranks, and deletion of public entries;
+- actual developer claims, protected statistics reads and UTC date paging, claim removal, ordinary/guest denial, and refusal of every browser statistics write, including developer writes.
 
 ## Code organization
 
