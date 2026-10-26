@@ -30,6 +30,9 @@ export type Saves = Readonly<{
 	// Goes up whenever a browser slot may have changed outside the game (a cloud copy
 	// arrived), so screens showing a slot read it again.
 	version: number;
+	// First cloud read for this account, before the opening offers a new adventure.
+	initialCheck: "checking" | "ready" | "unavailable";
+	retry: () => void;
 	read: (slot: SaveSlot) => SaveResult<SaveDocument | null>;
 	write: (slot: SaveSlot, document: SaveDocument) => SaveResult<SaveDocument>;
 	clear: (slot: SaveSlot) => void;
@@ -81,6 +84,8 @@ const localOnly = (
 ): Saves => ({
 	owner,
 	version: 0,
+	initialCheck: "ready",
+	retry: () => {},
 	read: (slot) => readLocalSave(storage, slotKey(slot, owner)),
 	write: (slot, document) =>
 		writeLocalSave(document, storage, slotKey(slot, owner)),
@@ -105,23 +110,52 @@ export const SavesProvider = ({ children }: { children: ReactNode }) => {
 	const [version, setVersion] = useState(0);
 	const [guestOffer, setGuestOffer] = useState<GuestOffer | null>(null);
 	const engine = useRef<CloudSync | null>(null);
+	const [initial, setInitial] = useState<{
+		uid: string;
+		state: "checking" | "ready" | "unavailable";
+	} | null>(null);
+	const retry = useRef<(() => void) | null>(null);
 	const previousStatus = useRef(account.status);
+	const guestPending = useRef<string | null>(null);
 	const refresh = () => setVersion((value) => value + 1);
 
 	// biome-ignore lint/correctness/useExhaustiveDependencies: restart only for a new player.
 	useEffect(() => {
 		if (!signedIn || !profile.ready) return;
 		const justSignedIn = previousStatus.current === "signed-out";
+		if (justSignedIn) guestPending.current = signedIn;
 		previousStatus.current = account.status;
 		let sync: CloudSync | null = null;
 		let stopped = false;
+		setInitial({ uid: signedIn, state: "checking" });
 		const hidden = () => {
 			if (document.visibilityState === "hidden") void sync?.flush();
 		};
-		const online = () => void sync?.pull();
+		const pull = async () => {
+			const current = sync;
+			if (!current || stopped) return;
+			setInitial({ uid: signedIn, state: "checking" });
+			await current.pull();
+			if (stopped) return;
+			const available = SAVE_SLOTS.every(
+				(slot) => !["offline", "error"].includes(current.state(slot).state),
+			);
+			setInitial({ uid: signedIn, state: available ? "ready" : "unavailable" });
+			if (available && guestPending.current === signedIn) {
+				guestPending.current = null;
+				const guest = newest(null);
+				if (guest) setGuestOffer({ guest, account: newest(signedIn) });
+			}
+		};
+		const online = () => void pull();
+		retry.current = online;
 		account.cloudStore().then(
 			(store) => {
-				if (stopped || !store) return;
+				if (stopped) return;
+				if (!store) {
+					setInitial({ uid: signedIn, state: "unavailable" });
+					return;
+				}
 				sync = new CloudSync({
 					uid: signedIn,
 					store,
@@ -132,13 +166,11 @@ export const SavesProvider = ({ children }: { children: ReactNode }) => {
 				});
 				engine.current = sync;
 				refresh();
-				void sync.pull().then(() => {
-					if (stopped || !justSignedIn) return;
-					const guest = newest(null);
-					if (guest) setGuestOffer({ guest, account: newest(signedIn) });
-				});
+				void pull();
 			},
-			() => {},
+			() => {
+				if (!stopped) setInitial({ uid: signedIn, state: "unavailable" });
+			},
 		);
 		document.addEventListener("visibilitychange", hidden);
 		window.addEventListener("online", online);
@@ -146,6 +178,7 @@ export const SavesProvider = ({ children }: { children: ReactNode }) => {
 			stopped = true;
 			sync?.dispose();
 			engine.current = null;
+			retry.current = null;
 			setGuestOffer(null);
 			document.removeEventListener("visibilitychange", hidden);
 			window.removeEventListener("online", online);
@@ -153,7 +186,10 @@ export const SavesProvider = ({ children }: { children: ReactNode }) => {
 	}, [signedIn, profile.ready]);
 
 	useEffect(() => {
-		if (!signedIn) previousStatus.current = account.status;
+		if (!signedIn) {
+			previousStatus.current = account.status;
+			guestPending.current = null;
+		}
 	}, [account.status, signedIn]);
 
 	const changed = (slot: SaveSlot) => {
@@ -165,6 +201,20 @@ export const SavesProvider = ({ children }: { children: ReactNode }) => {
 	const saves: Saves = {
 		...base,
 		version,
+		initialCheck:
+			account.status === "loading"
+				? "checking"
+				: !signedIn
+					? "ready"
+					: !profile.ready && profile.error
+						? "unavailable"
+						: !profile.ready || initial?.uid !== signedIn
+							? "checking"
+							: initial.state,
+		retry: () => {
+			if (!profile.ready || !engine.current) profile.reload();
+			else retry.current?.();
+		},
 		write: (slot, document) => {
 			const result = base.write(slot, document);
 			if (result.ok) changed(slot);

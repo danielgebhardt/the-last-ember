@@ -16,6 +16,7 @@ import { AccountProvider, useAccount } from "./accounts/AccountProvider";
 import AdventureOpening from "./components/game/AdventureOpening";
 import { DEFAULT_FOG_CONFIGURATION } from "./domain/dungeon/RunConfiguration";
 import {
+	createSaveDocument,
 	type RestoredAdventure,
 	restoreSave,
 	type SaveDocument,
@@ -25,13 +26,15 @@ import {
 	CloudConflictDialog,
 	GuestAdventureDialog,
 } from "./saves/AccountSaveDialogs";
-import { SavesProvider } from "./saves/SavesProvider";
+import { SavesProvider, useSaves } from "./saves/SavesProvider";
 import { ThemeProvider } from "./settings/ThemeProvider.tsx";
 
 // The opening screen or the adventure in play, and the account-driven changes between
 // them: signing out returns to the opening, and a cloud copy can replace the adventure.
-const Adventures = () => {
+export const Adventures = () => {
 	const developerPageOpen = useDeveloperStatisticsOpen();
+	const saves = useSaves();
+	const [conflictOpen, setConflictOpen] = useState(false);
 	const [adventure, setAdventure] = useState<RestoredAdventure | null>(null);
 	// A new key remounts Home when a different adventure replaces the one in play.
 	const [session, setSession] = useState(0);
@@ -45,6 +48,24 @@ const Adventures = () => {
 		previousStatus.current = status;
 	}, [status]);
 	const play = (next: RestoredAdventure) => {
+		// A loaded run does not normally autosave on mount. Make an explicitly
+		// chosen local copy dirty before a delayed cloud read can replace it.
+		if (
+			adventure === null &&
+			saves.owner &&
+			saves.initialCheck !== "ready" &&
+			next.state.player.health > 0 &&
+			next.state.quest.victory === null
+		)
+			saves.write(
+				"autosave",
+				createSaveDocument(
+					next.state,
+					next.exploration,
+					next.configuration,
+					next.fog,
+				),
+			);
 		setAdventure(next);
 		setSession((value) => value + 1);
 	};
@@ -53,7 +74,7 @@ const Adventures = () => {
 		<>
 			{adventure === null ? (
 				<AdventureOpening
-					suspended={developerPageOpen}
+					suspended={developerPageOpen || !!saves.guestOffer || conflictOpen}
 					onRestore={load}
 					startError={startError}
 					onBegin={(configuration, disabled) => {
@@ -83,7 +104,11 @@ const Adventures = () => {
 				onLoad={load}
 				onLeave={() => setAdventure(null)}
 			/>
-			<CloudConflictDialog inPlay={adventure !== null} onLoad={load} />
+			<CloudConflictDialog
+				inPlay={adventure !== null}
+				onLoad={load}
+				onActiveChange={setConflictOpen}
+			/>
 			<DeveloperStatisticsRoute />
 		</>
 	);

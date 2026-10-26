@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { type SaveDocument, saveSummary } from "../domain/saves/SaveFormat";
 import { SAVE_SLOTS } from "./CloudStore";
@@ -89,7 +89,8 @@ export const GuestAdventureDialog = ({ inPlay, onLoad, onLeave }: Props) => {
 export const CloudConflictDialog = ({
 	inPlay,
 	onLoad,
-}: Omit<Props, "onLeave">) => {
+	onActiveChange,
+}: Omit<Props, "onLeave"> & { onActiveChange?: (active: boolean) => void }) => {
 	const saves = useSaves();
 	const [dismissed, setDismissed] = useState<readonly string[]>([]);
 	const found = SAVE_SLOTS.map((slot) => ({
@@ -98,10 +99,16 @@ export const CloudConflictDialog = ({
 	})).find(
 		({ slot, sync }) =>
 			sync?.state === "conflict" &&
-			!dismissed.includes(`${slot}:${sync.cloud?.revision ?? 0}`),
+			!dismissed.includes(
+				`${saves.owner}:${slot}:${sync.cloud?.revision ?? 0}`,
+			),
 	);
 	const sync = found?.sync;
-	if (!found || sync?.state !== "conflict") return null;
+	const active = !saves.guestOffer && !!found && sync?.state === "conflict";
+	useEffect(() => {
+		onActiveChange?.(active);
+	}, [active, onActiveChange]);
+	if (!active || !found || sync?.state !== "conflict") return null;
 	const { slot } = found;
 	const local = saves.read(slot);
 	const here = local.ok ? local.value : null;
@@ -119,7 +126,7 @@ export const CloudConflictDialog = ({
 						onClick={() =>
 							setDismissed((list) => [
 								...list,
-								`${slot}:${sync.cloud?.revision ?? 0}`,
+								`${saves.owner}:${slot}:${sync.cloud?.revision ?? 0}`,
 							])
 						}
 					>

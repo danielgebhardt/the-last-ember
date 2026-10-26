@@ -45,6 +45,7 @@ const Probe = () => {
 	return (
 		<>
 			<output aria-label="Owner">{saves.owner ?? "guest"}</output>
+			<output aria-label="Initial check">{saves.initialCheck}</output>
 			<output aria-label="Save turn">
 				{save.ok && save.value ? save.value.state.turn : "none"}
 			</output>
@@ -93,6 +94,27 @@ const guestSave = (turn: number) => {
 afterEach(() => localStorage.clear());
 
 describe("Saves per account", () => {
+	it("waits for a successful check before offering guest saves, including after reconnect", async () => {
+		const { load, cloud } = accounts();
+		cloud.fail(true);
+		guestSave(7);
+		const user = userEvent.setup();
+		renderSaves(load);
+		await user.click(screen.getByRole("button", { name: "Sign in" }));
+		await waitFor(() =>
+			expect(screen.getByLabelText("Initial check")).toHaveTextContent(
+				"unavailable",
+			),
+		);
+		expect(screen.queryByRole("dialog")).toBeNull();
+		cloud.fail(false);
+		await act(async () => window.dispatchEvent(new Event("online")));
+		await screen.findByRole("dialog", {
+			name: "Keep this adventure in your account?",
+		});
+		expect(screen.getByLabelText("Initial check")).toHaveTextContent("ready");
+	});
+
 	it("keeps guest and account slots apart, and uploads the account's", async () => {
 		const { load, cloud } = accounts();
 		guestSave(7);

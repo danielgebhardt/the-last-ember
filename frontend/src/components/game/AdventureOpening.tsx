@@ -3,6 +3,7 @@ import { ArrowRight, FolderOpen, History, Shield } from "lucide-react";
 import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetTrigger } from "@/components/ui/sheet";
+import AccountMenu from "../../accounts/AccountMenu";
 import { useAccount } from "../../accounts/AccountProvider";
 import DeveloperGeneration from "../../developer/DeveloperGeneration";
 import {
@@ -55,8 +56,34 @@ const AdventureOpening = ({
 	// biome-ignore lint/correctness/useExhaustiveDependencies: account changes reset the developer-only draft.
 	useEffect(() => setDisabled([]), [account.user?.uid, developer]);
 	const [saveOpen, setSaveOpen] = useState(false);
+	const [accountOpen, setAccountOpen] = useState(false);
 	// Read again when the player signs in or out, or a cloud copy arrives.
 	const saves = useSaves();
+	const [localOwner, setLocalOwner] = useState<string | null>(null);
+	const [slow, setSlow] = useState(false);
+	const owner = account.user?.uid ?? null;
+	// biome-ignore lint/correctness/useExhaustiveDependencies: each account must explicitly choose local saves.
+	useEffect(() => {
+		setLocalOwner(null);
+	}, [owner]);
+	// biome-ignore lint/correctness/useExhaustiveDependencies: a different account gets a fresh wait period.
+	useEffect(() => {
+		setSlow(false);
+		if (saves.initialCheck !== "checking") return;
+		const timer = window.setTimeout(() => setSlow(true), 8000);
+		return () => window.clearTimeout(timer);
+	}, [saves.initialCheck, owner]);
+	const blocked =
+		account.busy ||
+		account.status === "loading" ||
+		!!saves.guestOffer ||
+		(saves.initialCheck !== "ready" && (!owner || localOwner !== owner));
+	useEffect(() => {
+		if (suspended) {
+			setAccountOpen(false);
+			setSaveOpen(false);
+		}
+	}, [suspended]);
 	// biome-ignore lint/correctness/useExhaustiveDependencies: owner and version mark changes.
 	const autosave = useMemo(() => {
 		const result = saves.read("autosave");
@@ -91,10 +118,25 @@ const AdventureOpening = ({
                      [@media(max-height:800px)]:[&_label]:py-1.5
                   "
 					>
+						{account.status !== "unavailable" && (
+							<div className="mb-3 flex flex-wrap items-center justify-between gap-2 border-b border-amber-800/15 pb-3 dark:border-amber-500/20">
+								<p className="text-xs text-muted-foreground">
+									{account.status === "signed-in"
+										? "Your adventure, on any device."
+										: "Sign in to keep your adventure on any device."}
+								</p>
+								<AccountMenu
+									opening
+									open={accountOpen}
+									onOpenChange={setAccountOpen}
+								/>
+							</div>
+						)}
 						<form
 							className="grid gap-2.5"
 							onSubmit={(event) => {
 								event.preventDefault();
+								if (blocked) return;
 								// Always the standard dungeon; only the difficulty is chosen here.
 								onBegin(
 									{
@@ -225,6 +267,47 @@ const AdventureOpening = ({
 							</div>
 
 							{/* Actions */}
+							{(saves.initialCheck !== "ready" ||
+								account.status === "loading") && (
+								<div className="grid gap-2 rounded-md border bg-background/50 p-3 text-sm">
+									<p role="status">
+										{account.status === "loading"
+											? "Checking your sign-in…"
+											: saves.initialCheck === "checking"
+												? slow
+													? "Cloud saves are taking longer than usual."
+													: "Checking cloud saves…"
+												: "Cloud saves couldn't be checked. Your saves on this device are available."}
+									</p>
+									{owner && (saves.initialCheck === "unavailable" || slow) && (
+										<div className="flex flex-wrap gap-2">
+											{saves.initialCheck === "unavailable" && (
+												<Button
+													type="button"
+													variant="outline"
+													onClick={saves.retry}
+												>
+													Retry cloud saves
+												</Button>
+											)}
+											{localOwner !== owner ? (
+												<Button
+													type="button"
+													variant="outline"
+													onClick={() => setLocalOwner(owner)}
+												>
+													Use saves on this device
+												</Button>
+											) : (
+												<p className="text-xs text-muted-foreground">
+													Using this device's saves. Cloud sync will retry when
+													available.
+												</p>
+											)}
+										</div>
+									)}
+								</div>
+							)}
 							{startError && (
 								<p role="alert" className="text-sm text-destructive">
 									{startError}
@@ -233,6 +316,7 @@ const AdventureOpening = ({
 
 							<Button
 								type="submit"
+								disabled={blocked}
 								className="
                            group h-12 w-full
                            border border-amber-700/70
@@ -262,6 +346,7 @@ const AdventureOpening = ({
 									<Button
 										type="button"
 										variant="outline"
+										disabled={blocked}
 										aria-describedby="autosave-summary"
 										onClick={() => onRestore(autosave)}
 										className="
@@ -289,6 +374,7 @@ const AdventureOpening = ({
 										render={
 											<Button
 												type="button"
+												disabled={blocked}
 												variant="outline"
 												className="
                                        h-10 w-full

@@ -161,3 +161,15 @@ Measured 2026-10-26 on `codex/developer-tools`, built without Firebase settings,
 | Begin Adventure ready, slow 4G, 4× CPU, cold | 2.250 s | 2.275 s | ≤ 2.35 s |
 
 Local cold readiness was 66 ms. The opening makes nine requests, including newly shared sheet, shadow DOM and account icon chunks. Neither Firebase chunk nor the lazy developer statistics page loads on the opening screen. The statistics page is 12.7 KB raw / 4.4 KB gzip; the Seed report also has its own lazy chunk. The protected statistics function remains outside the browser build. Startup additions include the route and role gates, generation controls and optional run metadata.
+
+## Sign-in from the opening dialog
+
+Measured 2026-10-26 on `codex/developer-tools`, using the same five-run script and profiles. This build has public demo Firebase settings, so the signed-out opening includes the new Sign in control; no session is remembered and the control is not opened or hovered during measurement.
+
+| | After #426 | With opening sign-in | Budget |
+|---|---|---|---|
+| Startup JavaScript received | 332.9 KB | 332.9 KB | — |
+| Signed-out cold load received | 393.0 KB | 393.1 KB | ≤ 407 KB |
+| Begin Adventure ready, slow 4G, 4× CPU, cold | 2.275 s | 2.274 s | ≤ 2.35 s |
+
+Local cold readiness was 66 ms. The opening still makes nine requests and neither Firebase chunk loads. The existing account dialog is reused; the added code coordinates initial cloud checking, local fallback and save-choice dialogs, including protection against late cloud responses after local play starts. Total received size rose by 0.1 KB. Signed-in save checking is exercised separately with the Auth and Firestore emulators; it is not part of this signed-out timing.
