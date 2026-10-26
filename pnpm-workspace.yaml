@@ -1,5 +1,7 @@
 packages:
   - 'frontend'
+overrides:
+  'jwks-rsa>jose': 4.15.9
 allowBuilds:
   # Vitest's mock server.
   msw: true

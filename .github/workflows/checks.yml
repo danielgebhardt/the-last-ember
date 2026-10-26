@@ -39,6 +39,8 @@ jobs:
         run: pnpm frontend:test
       - name: Strict TypeScript checks
         run: pnpm frontend:typecheck
+      - name: Serverless API smoke tests
+        run: pnpm --filter frontend test:serverless
       - name: Production build
         run: pnpm frontend:build
 
