@@ -146,12 +146,24 @@ describe("Home Help menu", () => {
 	});
 	it("suspends movement and waiting while open, then resumes both on the map", async () => {
 		const user = renderHelpRun();
-		const before = readDungeonCells();
+		const board = screen.getByRole("table", { name: "Dungeon" });
+		const before = readDungeonCells(board);
 		const log = screen.getByRole("log").textContent;
 		await openHelp(user);
+		await waitFor(() =>
+			expect(
+				screen.getByRole("heading", { name: "Help / Controls" }),
+			).toHaveFocus(),
+		);
 		await user.keyboard("{ArrowRight}d ");
+		expect(
+			screen.queryByRole("dialog", { name: "Rankings" }),
+		).not.toBeInTheDocument();
 		expect(screen.getByLabelText("Turn count")).toHaveTextContent("Turn 0");
-		expect(readDungeonCells()).toEqual(before);
+		// The modal hides the background from accessibility queries; inspect the
+		// captured board to verify that keyboard input still cannot advance it.
+		expect(board).toBeInTheDocument();
+		expect(readDungeonCells(board)).toEqual(before);
 		expect(screen.getByRole("log").textContent).toBe(log);
 		await user.keyboard("{Escape}");
 		await waitFor(() =>

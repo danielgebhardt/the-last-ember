@@ -10,6 +10,7 @@ import {
 import { ADVENTURE_STORY } from "../../domain/game/AdventureStory";
 import { type SaveDocument, saveSummary } from "../../domain/saves/SaveFormat";
 import { useSaves } from "../../saves/SavesProvider";
+import RankingsButton from "../../statistics/RankingsButton";
 import AdventureSaveSheet from "./AdventureSaveSheet";
 import AppearanceChoice from "./AppearanceChoice";
 import DifficultyChoice from "./DifficultyChoice";
@@ -306,7 +307,10 @@ const AdventureOpening = ({
 								</p>
 							)}
 
-							<RunHistoryDialog triggerClassName="h-10 w-full text-muted-foreground hover:text-foreground" />
+							<div className="grid grid-cols-2 gap-2.5">
+								<RunHistoryDialog triggerClassName="h-10 w-full text-muted-foreground hover:text-foreground" />
+								<RankingsButton />
+							</div>
 
 							<div className="text-center">
 								<p className="text-[10px] italic text-muted-foreground/70">

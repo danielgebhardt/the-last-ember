@@ -104,6 +104,7 @@ import {
 	configurationDraft,
 	parseRunConfiguration,
 } from "./settings/RunConfigurationDraft.ts";
+import RankingsButton from "./statistics/RankingsButton";
 
 const DeveloperCatalog = lazy(
 	() => import("./components/game/DeveloperCatalog"),
@@ -196,6 +197,7 @@ const Home = ({
 	const [catalogOpen, setCatalogOpen] = useState(false);
 	const [helpOpen, setHelpOpen] = useState(false);
 	const [accountOpen, setAccountOpen] = useState(false);
+	const [rankingsOpen, setRankingsOpen] = useState(false);
 	const [characterOpen, setCharacterOpen] = useState(false);
 	// The perk reminder opens Character on Progression; every other open starts on Character.
 	const [characterTab, setCharacterTab] = useState<"character" | "progression">(
@@ -245,6 +247,7 @@ const Home = ({
 		setSaveOpen(false);
 		setHelpOpen(false);
 		setCatalogOpen(false);
+		setRankingsOpen(false);
 	}, [deathOpen]);
 	// Empty loot or death ends selection; later movement must not reopen it.
 	useEffect(() => {
@@ -310,6 +313,7 @@ const Home = ({
 		setCatalogOpen(false);
 		setSaveOpen(false);
 		setSettingsOpen(false);
+		setRankingsOpen(false);
 	};
 
 	const handleNewDungeon = () => {
@@ -404,6 +408,7 @@ const Home = ({
 		!helpOpen &&
 		!catalogOpen &&
 		!accountOpen &&
+		!rankingsOpen &&
 		!characterOpen &&
 		!pickupOpen &&
 		!victoryOpen;
@@ -487,6 +492,7 @@ const Home = ({
 							}}
 							render={
 								<Button
+									title="Character"
 									type="button"
 									variant="outline"
 									className={HEADER_BUTTON_SECONDARY}
@@ -494,7 +500,7 @@ const Home = ({
 							}
 						>
 							<UserRound aria-hidden="true" focusable="false" />
-							Character
+							<span className="sr-only xl:not-sr-only">Character</span>
 							{perksWaiting > 0 && (
 								<span
 									title="A perk is waiting under Character → Progression"
@@ -548,6 +554,7 @@ const Home = ({
 						<SheetTrigger
 							render={
 								<Button
+									title="Save/Load"
 									type="button"
 									variant="outline"
 									className={HEADER_BUTTON_SECONDARY}
@@ -555,7 +562,7 @@ const Home = ({
 							}
 						>
 							<Save aria-hidden="true" focusable="false" />
-							Save/Load
+							<span className="sr-only xl:not-sr-only">Save/Load</span>
 						</SheetTrigger>
 						<AdventureSaveSheet
 							finalFocus={mapInputAvailable ? mapRef : false}
@@ -591,6 +598,7 @@ const Home = ({
 						<SheetTrigger
 							render={
 								<Button
+									title="Settings"
 									type="button"
 									variant="outline"
 									className={HEADER_BUTTON_SECONDARY}
@@ -598,7 +606,7 @@ const Home = ({
 							}
 						>
 							<Settings aria-hidden="true" focusable="false" />
-							Settings
+							<span className="sr-only xl:not-sr-only">Settings</span>
 						</SheetTrigger>
 						<DungeonSettings
 							finalFocus={mapInputAvailable ? mapRef : false}
@@ -641,6 +649,7 @@ const Home = ({
 						<SheetTrigger
 							render={
 								<Button
+									title="Help"
 									type="button"
 									variant="outline"
 									className={HEADER_BUTTON_SECONDARY}
@@ -648,7 +657,7 @@ const Home = ({
 							}
 						>
 							<HelpCircleIcon aria-hidden="true" focusable="false" />
-							Help
+							<span className="sr-only xl:not-sr-only">Help</span>
 						</SheetTrigger>
 						<DungeonHelp
 							section={helpSection}
@@ -668,6 +677,7 @@ const Home = ({
 							<SheetTrigger
 								render={
 									<Button
+										title="Catalog"
 										type="button"
 										variant="outline"
 										className={HEADER_BUTTON_SECONDARY}
@@ -675,7 +685,7 @@ const Home = ({
 								}
 							>
 								<LibraryBig aria-hidden="true" />
-								Catalog
+								<span className="sr-only xl:not-sr-only">Catalog</span>
 							</SheetTrigger>
 							<Suspense fallback={null}>
 								<DeveloperCatalog
@@ -684,6 +694,18 @@ const Home = ({
 							</Suspense>
 						</Sheet>
 					)
+				}
+				rankingsAction={
+					<RankingsButton
+						header
+						open={rankingsOpen}
+						onOpenChange={setRankingsOpen}
+						finalFocus={mapInputAvailable ? mapRef : false}
+						onClosed={() => {
+							if (mapInputAvailable)
+								mapRef.current?.focus({ preventScroll: true });
+						}}
+					/>
 				}
 				accountAction={
 					<AccountMenu

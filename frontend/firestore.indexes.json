@@ -1,0 +1,69 @@
+{
+	"indexes": [
+		{
+			"collectionGroup": "rankings",
+			"queryScope": "COLLECTION",
+			"fields": [
+				{
+					"fieldPath": "difficulty",
+					"order": "ASCENDING"
+				},
+				{
+					"fieldPath": "gameVersion",
+					"order": "ASCENDING"
+				},
+				{
+					"fieldPath": "outcomeOrder",
+					"order": "ASCENDING"
+				},
+				{
+					"fieldPath": "depthOrder",
+					"order": "ASCENDING"
+				},
+				{
+					"fieldPath": "turns",
+					"order": "ASCENDING"
+				},
+				{
+					"fieldPath": "acceptedAt",
+					"order": "ASCENDING"
+				}
+			]
+		},
+		{
+			"collectionGroup": "rankings",
+			"queryScope": "COLLECTION",
+			"fields": [
+				{
+					"fieldPath": "difficulty",
+					"order": "ASCENDING"
+				},
+				{
+					"fieldPath": "gameVersion",
+					"order": "ASCENDING"
+				},
+				{
+					"fieldPath": "uid",
+					"order": "ASCENDING"
+				},
+				{
+					"fieldPath": "outcomeOrder",
+					"order": "ASCENDING"
+				},
+				{
+					"fieldPath": "depthOrder",
+					"order": "ASCENDING"
+				},
+				{
+					"fieldPath": "turns",
+					"order": "ASCENDING"
+				},
+				{
+					"fieldPath": "acceptedAt",
+					"order": "ASCENDING"
+				}
+			]
+		}
+	],
+	"fieldOverrides": []
+}

@@ -11,6 +11,7 @@ import type {
 } from "../../domain/dungeon/RunConfiguration";
 import { appendActivityEvents } from "../../domain/game/ActivityHistory";
 import { createGameState } from "../../domain/game/GameState";
+import { GAME_VERSION } from "../../domain/game/GameVersion";
 import { omenSightRadius } from "../../domain/game/Omens";
 import { playerSightRadius } from "../../domain/game/PerkEffects";
 import {
@@ -77,7 +78,9 @@ export const createAdventureSession = (
 			runId: crypto.randomUUID(),
 			encounters: emptyRunEncounters(0),
 			town: createTownLocation(),
-			...(ranked && !isTestSeed(seed) ? { ranked: true as const } : {}),
+			...(ranked && !isTestSeed(seed)
+				? { ranked: true as const, rankingVersion: GAME_VERSION }
+				: {}),
 		},
 		configuration,
 		fog,

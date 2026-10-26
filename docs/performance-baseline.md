@@ -137,3 +137,15 @@ Measured 2026-10-25 on `codex/run-statistics`, built with `VITE_FIREBASE_API_KEY
 | Begin Adventure ready, slow 4G, 4× CPU, cold | 2.197 s | 2.203 s | ≤ 2.35 s |
 
 Local cold readiness was 73 ms. The opening still makes four requests, with neither Firebase chunk loaded. The browser addition covers the profile provider, privacy note, chosen display name and deletion dialog. Profile validation and account cleanup execute in the separately bundled server function.
+
+## Rankings (#312)
+
+Measured 2026-10-25 on `codex/run-statistics`, built with `VITE_FIREBASE_API_KEY=`, using the same five-run script and profiles.
+
+| | After #423 | With Rankings | Budget |
+|---|---|---|---|
+| Startup JavaScript received | 319.9 KB | 328.1 KB | — |
+| Signed-out cold load received | 379.5 KB | 387.9 KB | ≤ 407 KB |
+| Begin Adventure ready, slow 4G, 4× CPU, cold | 2.203 s | 2.250 s | ≤ 2.35 s |
+
+Local cold readiness was 69 ms. The opening makes six requests: the bundler now splits shared UI code into an `input` chunk and adds its small runtime. Startup JavaScript above sums those three scripts. Neither Firebase chunk nor the lazy `RankingsSheet` chunk loads on the opening screen. The sheet itself is 8.6 KB raw / 3.2 KB gzip; the trusted query/submission function remains outside the browser build. The extra initial code includes the trigger, the separate account-scoped retry queue and the responsive header labels.

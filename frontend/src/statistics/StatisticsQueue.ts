@@ -4,7 +4,6 @@ export type StatisticsStorage = Pick<
 	Storage,
 	"getItem" | "setItem" | "length" | "key"
 >;
-const prefix = (uid: string) => `larn:statistics:${uid}:`;
 const terminal = (value: string | null | undefined) =>
 	value === "sent" || value === "discarded";
 
@@ -16,9 +15,18 @@ export class StatisticsQueue {
 	private sending = new Set<string>();
 	private storage: StatisticsStorage;
 	private send: typeof fetch;
-	constructor(storage: StatisticsStorage, send: typeof fetch = fetch) {
+	private kind: "statistics" | "rankings";
+	private prefix(uid: string) {
+		return `larn:${this.kind}:${uid}:`;
+	}
+	constructor(
+		storage: StatisticsStorage,
+		send: typeof fetch = fetch,
+		kind: "statistics" | "rankings" = "statistics",
+	) {
 		this.storage = storage;
 		this.send = send;
+		this.kind = kind;
 	}
 	forget(uid: string) {
 		this.stopped.add(uid);
@@ -53,7 +61,7 @@ export class StatisticsQueue {
 			/* Memory still works for this visit. */
 		}
 		return [...keys]
-			.filter((key) => key.startsWith(prefix(uid)))
+			.filter((key) => key.startsWith(this.prefix(uid)))
 			.flatMap((key) => {
 				const text = this.read(key);
 				return text && !terminal(text) ? [[key, text] as [string, string]] : [];
@@ -63,11 +71,15 @@ export class StatisticsQueue {
 		const id = document.state.runId;
 		if (
 			!id ||
+			(this.kind === "rankings" &&
+				(!document.state.ranked ||
+					!document.state.rankingVersion ||
+					document.state.developerRun)) ||
 			this.stopped.has(uid) ||
 			(document.state.player.health > 0 && !document.state.quest.victory)
 		)
 			return;
-		const key = `${prefix(uid)}${id}`;
+		const key = `${this.prefix(uid)}${id}`;
 		if (!this.read(key)) this.write(key, JSON.stringify(document));
 	}
 	async retry(uid: string, token: () => Promise<string | null>) {
@@ -81,7 +93,7 @@ export class StatisticsQueue {
 				const bearer = await token();
 				if (!bearer || this.stopped.has(uid)) break;
 				if (terminal(this.read(key))) continue;
-				const response = await this.send("/api/statistics", {
+				const response = await this.send(`/api/${this.kind}`, {
 					method: "POST",
 					headers: {
 						authorization: `Bearer ${bearer}`,

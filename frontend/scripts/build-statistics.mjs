@@ -12,6 +12,7 @@ await build({
 			input: {
 				statistics: "server/Statistics.ts",
 				profile: "server/Profile.ts",
+				rankings: "server/Rankings.ts",
 			},
 			output: {
 				entryFileNames: "[name].mjs",

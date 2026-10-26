@@ -76,6 +76,7 @@ import { TOWN_SCROLL_OFFERS } from "../domain/town/TownEconomy";
 import { FORGE_TIER_PRICES } from "../domain/town/TownForge";
 import { LIBRARY_PRICE } from "../domain/town/TownLibrary";
 import { STORAGE_CAPACITY } from "../domain/town/TownStorage";
+import RankingsButton from "../statistics/RankingsButton";
 
 const Keycap = ({
 	children,
@@ -139,6 +140,7 @@ const DungeonHelp = ({
 	section?: string;
 }) => (
 	<SheetContent
+		initialFocus={() => document.getElementById("help-controls-title")}
 		finalFocus={finalFocus}
 		className="ember-menu-frame overflow-y-auto data-[side=right]:w-full sm:data-[side=right]:max-w-4xl"
 	>
@@ -147,7 +149,13 @@ const DungeonHelp = ({
 			className="pr-12"
 			icon={<BookOpen className="size-5" />}
 			heading={
-				<SheetTitle className="ember-menu-title">Help / Controls</SheetTitle>
+				<SheetTitle
+					id="help-controls-title"
+					tabIndex={-1}
+					className="ember-menu-title outline-none"
+				>
+					Help / Controls
+				</SheetTitle>
 			}
 			subtitle={
 				<SheetDescription className="ember-menu-description">
@@ -157,6 +165,12 @@ const DungeonHelp = ({
 		/>
 
 		<div className="grid gap-6 px-4 pb-6">
+			<EmberPanel className="flex items-center justify-between gap-4">
+				<p className="text-sm text-muted-foreground">
+					Compare standard expeditions, or revisit your own ranked runs.
+				</p>
+				<RankingsButton />
+			</EmberPanel>
 			<div className="grid items-start gap-6 md:grid-cols-2">
 				<EmberPanel
 					aria-labelledby="keyboard-controls-title"

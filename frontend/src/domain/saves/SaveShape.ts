@@ -485,6 +485,13 @@ const documentShape = object({
 		),
 		// Whether a ranked adventure is the standard dungeon is a consistency rule.
 		ranked: optional((value) => value === true),
+		rankingVersion: optional(
+			(value) =>
+				typeof value === "string" &&
+				/^[0-9]+\.[0-9]+\.[0-9]+(?:-[a-z0-9.]+)?$/.test(value) &&
+				value.length <= 40,
+		),
+		developerRun: optional((value) => value === true),
 		runId: optional(
 			(value) =>
 				typeof value === "string" &&

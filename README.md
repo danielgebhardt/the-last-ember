@@ -72,6 +72,14 @@ Deleting an account stops local sync/submissions, signs out and keeps its browse
 
 Trusted account functions require a server: use `vercel dev` for local account work, with the same server environment as Vercel, or point it at the demo Auth/Firestore emulators. `pnpm dev` alone serves the browser app. Production's server credential must also have Firebase Authentication administration rights for deleting users; the normal Firebase Admin service account has these. Never put server credentials in a `VITE_` variable.
 
+**Rankings** (#312) is available from the opening, the header and Help. Global and My runs boards filter by difficulty and game version (current by default), with 20 runs per page. Personal rows show their position on the global board. Victories lead by fewest turns; deaths follow by deepest floor, then fewest turns. Remaining ties use the first Firestore server-accepted submission time, with document ID as a stable final ordering if two commits share a timestamp. Dates show that server acceptance time, including after an offline finish.
+
+Only newly started ranked adventures qualify. New sessions capture `rankingVersion`; loading an older save never adds it, so old adventures and already-recorded statistics aren't backfilled. Settings starts, developer-assisted runs and the test seed are excluded. The optional fields preserve v33 compatibility. Keep released versions in `server/Rankings.ts`'s supported versions when advancing `GAME_VERSION`, so an adventure stays on the version's board where it started.
+
+The browser maintains a separate account-owned Rankings retry queue. Failed requests, offline finishes and runs waiting for a chosen name remain queued; sign-in, reconnecting, a new adventure, choosing a name and Rankings' Refresh retry them. Submission never blocks gameplay. `POST /api/rankings` verifies the token, uses `parseSave`, checks eligibility and derives the result. Its transaction snapshots the chosen name and creates one entry at `rankings/{uid}_{runId}` with a server timestamp. A retry never overwrites the entry, timestamp or name. No email is used as a public fallback. Validation checks save consistency; it does not replay an entire adventure as an anti-cheat proof.
+
+`GET /api/rankings` serves the public board and the authenticated player's personal board. Cursor paging uses the complete result order and checks the cursor's filters and owner. Personal ranks use server count queries against the same global order. `firestore.indexes.json` defines both composite indexes; deploy them and wait for them to finish building before opening Rankings in production. Rules allow public Rankings reads and deny all browser writes. Private balancing statistics remain unreadable to browsers. The sheet is loaded only when opened.
+
 ### Exporting statistics
 
 In **Firebase → Project settings → Service accounts**, generate a private key for the project (or use an existing suitable service account). Keep the JSON **outside this repository**. Never put a key in a `VITE_` variable, browser code, Git, or a command-line argument.
@@ -90,7 +98,7 @@ The script reads the credential from that path and queries standard runs by defa
 1. In the [Firebase console](https://console.firebase.google.com), the project is `wardens-flame`. Under **Settings → General → Your apps**, a web app supplies the config values.
 2. **Security → Authentication → Sign-in method:** Google and Email/Password are enabled.
 3. **Authentication → Settings → Authorized domains:** list every domain that serves the game, such as the Vercel production domain. `localhost` is there by default.
-4. **Firestore Database:** create the database (Standard edition, production mode, a nearby location). Then publish the rules from `frontend/firestore.rules`, either by pasting them under **Firestore → Rules** or with `pnpm exec firebase deploy --only firestore:rules --project wardens-flame` from `frontend` after `firebase login`. Publish them again whenever the file changes.
+4. **Firestore Database:** create the database (Standard edition, production mode, a nearby location). Publish the rules and indexes with `pnpm exec firebase deploy --only firestore:rules,firestore:indexes --project wardens-flame` from `frontend` after `firebase login`. Rules can also be pasted under **Firestore → Rules**. Republish whenever these files change, and wait for new indexes to finish building.
 5. In **Vercel → Settings → Environment Variables**, set:
 
    | Name | Value |
@@ -116,7 +124,8 @@ No test touches the live project. `pnpm --filter frontend emulators` starts the 
 - a compressed cloud save round trip, with stale revisions refused;
 - the security rules refusing another player's reads and writes;
 - statistics token/save rejections, concurrent Admin creates retaining one summary, and all browser statistics reads, queries, creates, updates and deletes refused (owner, other player and guest);
-- profile initialization/names, complete account deletion across multiple batches, preservation of unrelated data, and refusal of stale-session writes after deletion.
+- profile initialization/names, complete account deletion across multiple batches, preservation of unrelated data, and refusal of stale-session writes after deletion;
+- trusted Rankings creates/deduplication/server timestamps, public read-only rules, both boards' ordering, ties, filters and cursor pages with global ranks, and deletion of public entries.
 
 ## Code organization
 

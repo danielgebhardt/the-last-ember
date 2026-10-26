@@ -67,6 +67,8 @@ export const createSaveDocument = (
 		omens: state.omens.map((omen) => ({ ...omen })),
 		arenas: state.arenas.map((arena) => ({ ...arena })),
 		...(state.ranked ? { ranked: true as const } : {}),
+		...(state.rankingVersion ? { rankingVersion: state.rankingVersion } : {}),
+		...(state.developerRun ? { developerRun: true as const } : {}),
 		...(state.runId ? { runId: state.runId } : {}),
 		...(state.encounters
 			? {

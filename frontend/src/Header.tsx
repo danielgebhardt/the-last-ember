@@ -18,6 +18,7 @@ type HeaderProps = {
 	catalogAction?: ReactNode;
 	// The account avatar, last, as on most sites.
 	accountAction?: ReactNode;
+	rankingsAction?: ReactNode;
 };
 
 const Header = ({
@@ -31,6 +32,7 @@ const Header = ({
 	helpAction,
 	catalogAction,
 	accountAction,
+	rankingsAction,
 }: HeaderProps) => (
 	<header
 		className="
@@ -92,7 +94,7 @@ const Header = ({
 		<nav
 			aria-label="Game actions"
 			className="
-            flex min-w-0 flex-wrap items-center
+            flex min-w-0 flex-nowrap items-center
             justify-end gap-2
             lg:gap-2.5
          "
@@ -106,13 +108,14 @@ const Header = ({
 				className={HEADER_BUTTON_PRIMARY}
 			>
 				<RefreshCw aria-hidden="true" focusable="false" />
-				New
+				<span className="sr-only xl:not-sr-only">New</span>
 			</Button>
 
 			{characterAction}
 			{saveAction}
 			{settingsAction}
 			{helpAction}
+			{rankingsAction}
 			{catalogAction}
 			{accountAction && (
 				<>

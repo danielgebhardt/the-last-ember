@@ -80,6 +80,10 @@ export type GameState = {
 	// Started from the opening dialog: the standard dungeon with a random seed. Only
 	// ranked adventures are recorded on the leaderboards (#312, #419).
 	ranked?: true;
+	// Only new adventures receive this; loading an old save never opts it in.
+	rankingVersion?: string;
+	// Reserved for developer-assisted adventures; these never qualify for Rankings.
+	developerRun?: true;
 	// Browser identity only; never used by seeded gameplay.
 	runId?: string;
 	// A wielded Hungering Blade's binding and the turn of its last kill.

@@ -1,6 +1,6 @@
 export const HEADER_BUTTON_BASE = `
    h-9 shrink-0 gap-2 rounded-md border
-   px-3 font-medium
+   px-2 xl:px-3 font-medium
    transition-[background-color,border-color,box-shadow,color]
    duration-200
    focus-visible:ring-2 focus-visible:ring-ring
