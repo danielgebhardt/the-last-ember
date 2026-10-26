@@ -40,32 +40,78 @@ it("opts only new ranked sessions in, preserving the marker through save/load", 
 		).state.rankingVersion,
 	).toBeUndefined();
 });
+
 it("keeps an offline run until retry, including waiting for a chosen name, and records one receipt", async () => {
-	localStorage.clear();
-	const send = vi
-		.fn<typeof fetch>()
-		.mockRejectedValueOnce(Error("offline"))
-		.mockResolvedValueOnce(new Response(null, { status: 409 }))
-		.mockResolvedValue(new Response(null, { status: 200 }));
-	const document = rankedAdventure();
-	const queue = new StatisticsQueue(localStorage, send, "rankings");
-	queue.enqueue("owner", document);
-	await queue.retry("owner", async () => "token");
-	const key = `larn:rankings:owner:${document.state.runId}`;
-	expect(localStorage.getItem(key)).toContain(document.state.runId);
-	const reloaded = new StatisticsQueue(localStorage, send, "rankings");
-	await reloaded.retry("other", async () => "wrong");
-	expect(send).toHaveBeenCalledTimes(1);
-	await reloaded.retry("owner", async () => "token");
-	expect(localStorage.getItem(key)).toContain(document.state.runId);
-	await reloaded.retry("owner", async () => "token");
-	expect(localStorage.getItem(key)).toBe("sent");
-	reloaded.enqueue("owner", document);
-	await reloaded.retry("owner", async () => "token");
-	expect(send).toHaveBeenCalledTimes(3);
-	expect(send).toHaveBeenLastCalledWith("/api/rankings", expect.anything());
-	localStorage.clear();
+	const expectedOfflineError = vi
+		.spyOn(console, "error")
+		.mockImplementation(() => {});
+
+	const expectedMissingNameWarning = vi
+		.spyOn(console, "warn")
+		.mockImplementation(() => {});
+
+	try {
+		localStorage.clear();
+
+		const send = vi
+			.fn<typeof fetch>()
+			.mockRejectedValueOnce(Error("offline"))
+			.mockResolvedValueOnce(new Response(null, { status: 409 }))
+			.mockResolvedValue(new Response(null, { status: 200 }));
+
+		const document = rankedAdventure();
+		const queue = new StatisticsQueue(localStorage, send, "rankings");
+
+		queue.enqueue("owner", document);
+		await queue.retry("owner", async () => "token");
+
+		const key = `larn:rankings:owner:${document.state.runId}`;
+
+		// The offline failure is expected and must preserve the submission.
+		expect(expectedOfflineError).toHaveBeenCalledWith(
+			"[rankings] Submission retry failed:",
+			expect.objectContaining({
+				message: "offline",
+			}),
+		);
+		expect(localStorage.getItem(key)).toContain(document.state.runId);
+
+		const reloaded = new StatisticsQueue(localStorage, send, "rankings");
+
+		// A different account must not submit the original owner's run.
+		await reloaded.retry("other", async () => "wrong");
+		expect(send).toHaveBeenCalledTimes(1);
+
+		// HTTP 409 means the server needs a Rankings display name.
+		// The submission must remain pending for another retry.
+		await reloaded.retry("owner", async () => "token");
+
+		expect(expectedMissingNameWarning).toHaveBeenCalledWith(
+			"[rankings] Submission rejected (HTTP 409).",
+		);
+		expect(localStorage.getItem(key)).toContain(document.state.runId);
+
+		// The next retry succeeds and replaces the document with a receipt.
+		await reloaded.retry("owner", async () => "token");
+		expect(localStorage.getItem(key)).toBe("sent");
+
+		// The same completed run must never be sent again.
+		reloaded.enqueue("owner", document);
+		await reloaded.retry("owner", async () => "token");
+
+		expect(send).toHaveBeenCalledTimes(3);
+		expect(send).toHaveBeenLastCalledWith("/api/rankings", expect.anything());
+
+		// Confirm we captured exactly the failures this test simulated.
+		expect(expectedOfflineError).toHaveBeenCalledTimes(1);
+		expect(expectedMissingNameWarning).toHaveBeenCalledTimes(1);
+	} finally {
+		expectedOfflineError.mockRestore();
+		expectedMissingNameWarning.mockRestore();
+		localStorage.clear();
+	}
 });
+
 it("does not enqueue legacy, Settings or developer adventures, and deletion discards pending results", () => {
 	localStorage.clear();
 	const queue = new StatisticsQueue(localStorage, fetch, "rankings");

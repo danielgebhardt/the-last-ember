@@ -37,3 +37,5 @@ e2e/.generated/
 
 # Bundled trusted validator (generated before deployment)
 server/*.mjs
+.vercel
+.env*

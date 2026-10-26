@@ -3,7 +3,11 @@ import { describe, expect, it } from "vitest";
 import { handleAccount, type TokenVerifier } from "../account.ts";
 
 const verify: TokenVerifier = async (token) => {
-	if (token !== "good-token") throw new Error("invalid token");
+	if (token !== "good-token") {
+		throw Object.assign(new Error("invalid token"), {
+			code: "auth/invalid-id-token",
+		});
+	}
 	return { uid: "user-1", email: "player@example.com" };
 };
 const request = (authorization?: string) =>
@@ -31,5 +35,18 @@ describe("GET /api/account", () => {
 			uid: "user-1",
 			email: "player@example.com",
 		});
+	});
+
+	it("returns 503 when token verification fails unexpectedly", async () => {
+		const failingVerifier = async (): Promise<never> => {
+			throw new Error("Firebase verification service unavailable");
+		};
+
+		const response = await handleAccount(
+			request("Bearer bad-token"),
+			failingVerifier,
+		);
+
+		expect(response.status).toBe(503);
 	});
 });

@@ -32,48 +32,89 @@ const Wrapper = ({ children }: { children: ReactNode }) => (
 afterEach(() => {
 	localStorage.clear();
 	vi.unstubAllGlobals();
+	vi.restoreAllMocks();
 });
+
 it("queues death without waiting, retries on online, and acknowledges only once", async () => {
-	localStorage.setItem(SIGNED_IN_KEY, "player");
-	const send = vi
-		.fn<typeof fetch>()
-		.mockRejectedValueOnce(new Error("offline"))
-		.mockResolvedValue(new Response(null, { status: 200 }));
-	vi.stubGlobal("fetch", send);
-	const document = savedAdventure();
-	document.state.runId = crypto.randomUUID();
-	const adventure = restoreSave(document);
-	const { result, rerender } = renderHook(
-		({ state }) => {
-			useAutosave(
-				state,
-				adventure.exploration,
-				adventure.configuration,
-				adventure.fog,
-			);
-			return useStatistics();
-		},
-		{ wrapper: Wrapper, initialProps: { state: adventure.state } },
-	);
-	await waitFor(() =>
-		expect(localStorage.getItem(SIGNED_IN_KEY)).toBe("player"),
-	);
-	// Let the restored auth state reach the provider before the run ends.
-	await act(async () => {});
-	const dead = {
-		...adventure.state,
-		player: { ...adventure.state.player, health: 0 },
-	};
-	rerender({ state: dead });
-	await waitFor(() => expect(send).toHaveBeenCalledTimes(1));
-	expect(
-		localStorage.getItem(`larn:statistics:player:${document.state.runId}`),
-	).toContain(document.state.runId);
-	act(() => window.dispatchEvent(new Event("online")));
-	await waitFor(() => expect(send).toHaveBeenCalledTimes(2));
-	await act(async () => result.current.retry());
-	expect(send).toHaveBeenCalledTimes(2);
+	const expectedOfflineError = vi
+		.spyOn(console, "error")
+		.mockImplementation(() => {});
+
+	try {
+		localStorage.setItem(SIGNED_IN_KEY, "player");
+
+		const send = vi
+			.fn<typeof fetch>()
+			.mockRejectedValueOnce(new Error("offline"))
+			.mockResolvedValue(new Response(null, { status: 200 }));
+
+		vi.stubGlobal("fetch", send);
+
+		const document = savedAdventure();
+		document.state.runId = crypto.randomUUID();
+
+		const adventure = restoreSave(document);
+
+		const { result, rerender } = renderHook(
+			({ state }) => {
+				useAutosave(
+					state,
+					adventure.exploration,
+					adventure.configuration,
+					adventure.fog,
+				);
+
+				return useStatistics();
+			},
+			{
+				wrapper: Wrapper,
+				initialProps: { state: adventure.state },
+			},
+		);
+
+		await waitFor(() =>
+			expect(localStorage.getItem(SIGNED_IN_KEY)).toBe("player"),
+		);
+
+		// Let the restored auth state reach the provider before the run ends.
+		await act(async () => {});
+
+		const dead = {
+			...adventure.state,
+			player: {
+				...adventure.state.player,
+				health: 0,
+			},
+		};
+
+		rerender({ state: dead });
+
+		await waitFor(() => expect(send).toHaveBeenCalledTimes(1));
+
+		expect(
+			localStorage.getItem(`larn:statistics:player:${document.state.runId}`),
+		).toContain(document.state.runId);
+
+		act(() => window.dispatchEvent(new Event("online")));
+
+		await waitFor(() => expect(send).toHaveBeenCalledTimes(2));
+
+		await act(async () => result.current.retry());
+
+		expect(send).toHaveBeenCalledTimes(2);
+
+		// Verify that the expected offline failure was reported.
+		expect(expectedOfflineError).toHaveBeenCalledWith(
+			"[statistics] Submission retry failed:",
+			expect.objectContaining({
+				message: "offline",
+			}),
+		);
+	} finally {
+		expectedOfflineError.mockRestore();
+	}
 });
+
 it("does not submit a finished run during account deletion", async () => {
 	localStorage.setItem(SIGNED_IN_KEY, "player");
 	const send = vi.fn<typeof fetch>();

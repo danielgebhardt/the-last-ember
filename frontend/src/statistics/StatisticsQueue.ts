@@ -4,6 +4,7 @@ export type StatisticsStorage = Pick<
 	Storage,
 	"getItem" | "setItem" | "length" | "key"
 >;
+
 const terminal = (value: string | null | undefined) =>
 	value === "sent" || value === "discarded";
 
@@ -16,25 +17,36 @@ export class StatisticsQueue {
 	private storage: StatisticsStorage;
 	private send: typeof fetch;
 	private kind: "statistics" | "rankings";
+
 	private prefix(uid: string) {
 		return `larn:${this.kind}:${uid}:`;
 	}
+
 	constructor(
 		storage: StatisticsStorage,
 		send: typeof fetch = fetch,
 		kind: "statistics" | "rankings" = "statistics",
 	) {
 		this.storage = storage;
-		this.send = send;
+
+		// Native browser fetch must be invoked with its proper context.
+		// Wrapping it also protects callers that pass fetch directly.
+		this.send = (...args) => send(...args);
+
 		this.kind = kind;
 	}
+
 	forget(uid: string) {
 		this.stopped.add(uid);
-		for (const [key] of this.pending(uid)) this.write(key, "discarded");
+		for (const [key] of this.pending(uid)) {
+			this.write(key, "discarded");
+		}
 	}
+
 	private read(key: string): string | null {
 		const memory = this.memory.get(key);
 		if (terminal(memory)) return memory ?? null;
+
 		try {
 			const stored = this.storage.getItem(key);
 			return terminal(stored) ? stored : (memory ?? stored);
@@ -42,24 +54,29 @@ export class StatisticsQueue {
 			return memory ?? null;
 		}
 	}
+
 	private write(key: string, value: string) {
 		this.memory.set(key, value);
+
 		try {
 			this.storage.setItem(key, value);
 		} catch {
-			/* Retry from memory if storage is unavailable/full. */
+			// Retry from memory if storage is unavailable or full.
 		}
 	}
+
 	private pending(uid: string): [string, string][] {
 		const keys = new Set(this.memory.keys());
+
 		try {
 			for (let i = 0; i < this.storage.length; i++) {
 				const key = this.storage.key(i);
 				if (key) keys.add(key);
 			}
 		} catch {
-			/* Memory still works for this visit. */
+			// Memory still works for this visit.
 		}
+
 		return [...keys]
 			.filter((key) => key.startsWith(this.prefix(uid)))
 			.flatMap((key) => {
@@ -67,8 +84,10 @@ export class StatisticsQueue {
 				return text && !terminal(text) ? [[key, text] as [string, string]] : [];
 			});
 	}
+
 	enqueue(uid: string, document: SaveDocument) {
 		const id = document.state.runId;
+
 		if (
 			!id ||
 			(this.kind === "rankings" &&
@@ -77,22 +96,36 @@ export class StatisticsQueue {
 					document.state.developerRun)) ||
 			this.stopped.has(uid) ||
 			(document.state.player.health > 0 && !document.state.quest.victory)
-		)
+		) {
 			return;
+		}
+
 		const key = `${this.prefix(uid)}${id}`;
-		if (!this.read(key)) this.write(key, JSON.stringify(document));
+
+		if (!this.read(key)) {
+			this.write(key, JSON.stringify(document));
+		}
 	}
-	async retry(uid: string, token: () => Promise<string | null>) {
+
+	retry = async (
+		uid: string,
+		token: () => Promise<string | null>,
+	): Promise<void> => {
 		if (this.stopped.has(uid) || this.sending.has(uid)) return;
+
 		this.sending.add(uid);
+
 		try {
 			while (!this.stopped.has(uid)) {
 				const next = this.pending(uid)[0];
 				if (!next) break;
+
 				const [key, text] = next;
 				const bearer = await token();
+
 				if (!bearer || this.stopped.has(uid)) break;
 				if (terminal(this.read(key))) continue;
+
 				const response = await this.send(`/api/${this.kind}`, {
 					method: "POST",
 					headers: {
@@ -101,16 +134,26 @@ export class StatisticsQueue {
 					},
 					body: text,
 				});
-				if (response.ok) this.write(key, "sent");
-				else if (response.status === 410) {
+
+				if (response.ok) {
+					this.write(key, "sent");
+				} else if (response.status === 410) {
 					this.forget(uid);
 					break;
-				} else break;
+				} else {
+					// Retain the pending document for a future retry.
+					// Log only the HTTP status, not the token or save contents.
+					console.warn(
+						`[${this.kind}] Submission rejected (HTTP ${response.status}).`,
+					);
+					break;
+				}
 			}
-		} catch {
-			/* Offline and server failures wait for the next retry. */
+		} catch (error) {
+			// Preserve pending submissions and report the failure.
+			console.error(`[${this.kind}] Submission retry failed:`, error);
 		} finally {
 			this.sending.delete(uid);
 		}
-	}
+	};
 }

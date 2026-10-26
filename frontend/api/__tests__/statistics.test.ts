@@ -22,20 +22,25 @@ const request = (body: unknown = finished(), token: string | null = "token") =>
 describe("Trusted run statistics", () => {
 	it("rejects missing and invalid tokens without a write", async () => {
 		const write = vi.fn();
+
 		expect(
 			(await handleStatistics(request(undefined, null), verify, write)).status,
 		).toBe(401);
+
 		expect(
 			(
 				await handleStatistics(
 					request(),
 					async () => {
-						throw new Error("bad token");
+						throw Object.assign(new Error("bad token"), {
+							code: "auth/invalid-id-token",
+						});
 					},
 					write,
 				)
 			).status,
 		).toBe(401);
+
 		expect(write).not.toHaveBeenCalled();
 	});
 	it("rejects invalid JSON, inconsistent edits, unfinished runs, and invalid IDs", async () => {

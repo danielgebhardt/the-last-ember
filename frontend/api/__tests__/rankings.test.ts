@@ -21,12 +21,25 @@ it("requires authentication and a validated, finished, newly started ranked adve
 			await handleRankings(
 				request(good),
 				async () => {
-					throw Error("bad");
+					throw Object.assign(new Error("Invalid Firebase ID token"), {
+						code: "auth/invalid-id-token",
+					});
 				},
 				write,
 			)
 		).status,
 	).toBe(401);
+	expect(
+		(
+			await handleRankings(
+				request(good),
+				async () => {
+					throw Error("Firebase service unavailable");
+				},
+				write,
+			)
+		).status,
+	).toBe(503);
 	for (const change of [
 		(d: typeof good) => {
 			delete d.state.rankingVersion;
