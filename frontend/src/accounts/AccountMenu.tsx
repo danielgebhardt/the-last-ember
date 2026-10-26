@@ -63,7 +63,7 @@ const AccountMenu = ({
 				className={cn(
 					"inline-flex shrink-0 items-center justify-center border border-amber-900/35 bg-gradient-to-b from-card to-muted/60 text-foreground transition-[border-color,box-shadow] duration-200 outline-none hover:border-amber-700/75 hover:shadow-[0_0_10px_rgba(180,110,35,0.18)] focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background dark:border-amber-700/40 dark:from-[#28241e] dark:to-[#1d1b19] dark:text-[#e8dac7] dark:hover:border-amber-500/65",
 					opening
-						? "h-9 max-w-full gap-2 rounded-md px-3 text-sm"
+						? "h-9 min-w-0 max-w-full gap-2 rounded-md px-3 text-sm"
 						: "size-9 rounded-full",
 					!opening && signedIn && "p-0.5",
 					account.status === "loading" && "animate-pulse",

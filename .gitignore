@@ -42,3 +42,5 @@ node_modules/
 
 # Local pnpm store
 .pnpm-store/
+.vercel
+.env*

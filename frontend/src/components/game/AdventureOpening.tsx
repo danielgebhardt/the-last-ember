@@ -1,6 +1,6 @@
 import { Dialog } from "@base-ui/react/dialog";
 import { ArrowRight, FolderOpen, History, Shield } from "lucide-react";
-import { useEffect, useId, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetTrigger } from "@/components/ui/sheet";
 import AccountMenu from "../../accounts/AccountMenu";
@@ -90,7 +90,6 @@ const AdventureOpening = ({
 		return result.ok ? result.value : null;
 	}, [saves.owner, saves.version]);
 	const title = useRef<HTMLHeadingElement>(null);
-	const dungeonHeading = useId();
 
 	return (
 		<div className="flex min-h-dvh items-center justify-center bg-muted/30 p-3 sm:p-6">
@@ -118,38 +117,23 @@ const AdventureOpening = ({
                      [@media(max-height:800px)]:[&_label]:py-1.5
                   "
 					>
-						{account.status !== "unavailable" && (
-							<div className="mb-3 flex flex-wrap items-center justify-between gap-2 border-b border-amber-800/15 pb-3 dark:border-amber-500/20">
-								<p className="text-xs text-muted-foreground">
-									{account.status === "signed-in"
-										? "Your adventure, on any device."
-										: "Sign in to keep your adventure on any device."}
-								</p>
-								<AccountMenu
-									opening
-									open={accountOpen}
-									onOpenChange={setAccountOpen}
-								/>
-							</div>
-						)}
-						<form
-							className="grid gap-2.5"
-							onSubmit={(event) => {
-								event.preventDefault();
-								if (blocked) return;
-								// Always the standard dungeon; only the difficulty is chosen here.
-								onBegin(
-									{
-										...DEFAULT_RUN_CONFIGURATION,
-										difficulty: configuration.difficulty,
-									},
-									developer ? disabled : [],
-								);
-							}}
-						>
-							<div className="mb-2.5 grid gap-5 min-[900px]:grid-cols-[minmax(0,13fr)_minmax(0,7fr)] min-[900px]:gap-0">
-								{/* Branding and introduction */}
-								<div className="space-y-4 min-[900px]:pr-7 [@media(max-height:800px)]:space-y-3">
+						<div className="grid gap-5 min-[900px]:grid-cols-[minmax(0,13fr)_minmax(0,7fr)] min-[900px]:gap-0">
+							<div className="min-w-0 min-[900px]:pr-7">
+								<form
+									className="grid gap-2.5"
+									onSubmit={(event) => {
+										event.preventDefault();
+										if (blocked) return;
+										// Always the standard dungeon; only the difficulty is chosen here.
+										onBegin(
+											{
+												...DEFAULT_RUN_CONFIGURATION,
+												difficulty: configuration.difficulty,
+											},
+											developer ? disabled : [],
+										);
+									}}
+								>
 									<div className="text-center">
 										<EmberEmblem className="mx-auto size-14 [@media(max-height:800px)]:size-10" />
 
@@ -212,112 +196,17 @@ const AdventureOpening = ({
 											difference between a safe return and a lost expedition.
 										</p>
 									</div>
-								</div>
-
-								{/* Adventure settings */}
-								<div
-									className="
-                           grid content-start gap-3
-                           min-[900px]:border-l min-[900px]:border-amber-800/25
-                           min-[900px]:pl-7
-                           dark:min-[900px]:border-amber-500/25
-                        "
-								>
-									<section aria-labelledby={dungeonHeading}>
-										<h2
-											id={dungeonHeading}
-											className="mb-2 font-serif text-sm font-semibold text-foreground"
-										>
-											The dungeon
-										</h2>
-										<div className="grid gap-2 rounded-md border border-border bg-background/50 px-4 py-3">
-											<p className="font-serif text-base font-semibold">
-												Twenty floors deep
-											</p>
-											<p className="text-sm leading-normal text-muted-foreground">
-												Each floor is 40 × 40 tiles. The Ember Warden waits on
-												the last one, and the way home is longer than the way
-												down.
-											</p>
-										</div>
-										<p className="mt-1.5 text-[11px] leading-relaxed text-muted-foreground">
-											Want a different size, floor count or seed? Settings
-											starts custom adventures, which aren't ranked.
+									{/* Actions */}
+									{startError && (
+										<p role="alert" className="text-sm text-destructive">
+											{startError}
 										</p>
-									</section>
-
-									<AppearanceChoice />
-									<DeveloperGeneration
-										disabled={disabled}
-										onChange={setDisabled}
-									/>
-
-									<Flourish className="w-full" />
-
-									<DifficultyChoice
-										value={configuration.difficulty ?? 1}
-										onChange={(difficulty) =>
-											setConfiguration((current) => ({
-												...current,
-												difficulty,
-											}))
-										}
-									/>
-								</div>
-							</div>
-
-							{/* Actions */}
-							{(saves.initialCheck !== "ready" ||
-								account.status === "loading") && (
-								<div className="grid gap-2 rounded-md border bg-background/50 p-3 text-sm">
-									<p role="status">
-										{account.status === "loading"
-											? "Checking your sign-in…"
-											: saves.initialCheck === "checking"
-												? slow
-													? "Cloud saves are taking longer than usual."
-													: "Checking cloud saves…"
-												: "Cloud saves couldn't be checked. Your saves on this device are available."}
-									</p>
-									{owner && (saves.initialCheck === "unavailable" || slow) && (
-										<div className="flex flex-wrap gap-2">
-											{saves.initialCheck === "unavailable" && (
-												<Button
-													type="button"
-													variant="outline"
-													onClick={saves.retry}
-												>
-													Retry cloud saves
-												</Button>
-											)}
-											{localOwner !== owner ? (
-												<Button
-													type="button"
-													variant="outline"
-													onClick={() => setLocalOwner(owner)}
-												>
-													Use saves on this device
-												</Button>
-											) : (
-												<p className="text-xs text-muted-foreground">
-													Using this device's saves. Cloud sync will retry when
-													available.
-												</p>
-											)}
-										</div>
 									)}
-								</div>
-							)}
-							{startError && (
-								<p role="alert" className="text-sm text-destructive">
-									{startError}
-								</p>
-							)}
 
-							<Button
-								type="submit"
-								disabled={blocked}
-								className="
+									<Button
+										type="submit"
+										disabled={blocked}
+										className="
                            group h-12 w-full
                            border border-amber-700/70
                            bg-gradient-to-b from-amber-300 to-amber-500
@@ -329,27 +218,26 @@ const AdventureOpening = ({
                            dark:text-amber-100
                            dark:hover:from-[#a2631c] dark:hover:to-[#603817]
                         "
-							>
-								Begin Adventure
-								<ArrowRight
-									aria-hidden="true"
-									className="ml-1 size-4 transition-transform group-hover:translate-x-1"
-								/>
-							</Button>
-						</form>
-
-						<div className="mt-2.5 grid gap-2.5">
-							<div
-								className={`grid gap-2.5 ${autosave ? "sm:grid-cols-2" : ""}`}
-							>
-								{autosave && (
-									<Button
-										type="button"
-										variant="outline"
-										disabled={blocked}
-										aria-describedby="autosave-summary"
-										onClick={() => onRestore(autosave)}
-										className="
+									>
+										Begin Adventure
+										<ArrowRight
+											aria-hidden="true"
+											className="ml-1 size-4 transition-transform group-hover:translate-x-1"
+										/>
+									</Button>
+								</form>
+								<div className="mt-2.5 grid gap-2.5">
+									<div
+										className={`grid gap-2.5 ${autosave ? "sm:grid-cols-2" : ""}`}
+									>
+										{autosave && (
+											<Button
+												type="button"
+												variant="outline"
+												disabled={blocked}
+												aria-describedby="autosave-summary"
+												onClick={() => onRestore(autosave)}
+												className="
                                  h-10 w-full
                                  border-amber-700/50
                                  bg-amber-500/10
@@ -359,24 +247,24 @@ const AdventureOpening = ({
                                  dark:border-amber-500/50
                                  dark:hover:border-amber-400/70
                               "
-									>
-										<History
-											aria-hidden="true"
-											className="size-4 text-amber-800 dark:text-amber-400"
-										/>
-										Continue autosave
-									</Button>
-								)}
+											>
+												<History
+													aria-hidden="true"
+													className="size-4 text-amber-800 dark:text-amber-400"
+												/>
+												Continue autosave
+											</Button>
+										)}
 
-								{/* Load existing adventure */}
-								<Sheet open={saveOpen} onOpenChange={setSaveOpen}>
-									<SheetTrigger
-										render={
-											<Button
-												type="button"
-												disabled={blocked}
-												variant="outline"
-												className="
+										{/* Load existing adventure */}
+										<Sheet open={saveOpen} onOpenChange={setSaveOpen}>
+											<SheetTrigger
+												render={
+													<Button
+														type="button"
+														disabled={blocked}
+														variant="outline"
+														className="
                                        h-10 w-full
                                        border-amber-900/30
                                        bg-gradient-to-b from-card to-muted/50
@@ -387,41 +275,145 @@ const AdventureOpening = ({
                                        dark:hover:border-amber-400/60
                                        dark:hover:bg-amber-400/10
                                     "
-											/>
-										}
-									>
-										<FolderOpen
-											aria-hidden="true"
-											className="size-4 text-amber-800 dark:text-amber-400"
+													/>
+												}
+											>
+												<FolderOpen
+													aria-hidden="true"
+													className="size-4 text-amber-800 dark:text-amber-400"
+												/>
+												Load an existing save
+											</SheetTrigger>
+
+											<AdventureSaveSheet onRestore={onRestore} />
+										</Sheet>
+									</div>
+
+									{autosave && (
+										<p
+											id="autosave-summary"
+											className="-mt-1 text-center text-[11px] text-muted-foreground"
+										>
+											{saveSummary(autosave)} ·{" "}
+											<time dateTime={autosave.savedAt}>
+												{new Date(autosave.savedAt).toLocaleString()}
+											</time>
+										</p>
+									)}
+
+									<div className="grid grid-cols-2 gap-2.5 [&>button]:h-10">
+										<RunHistoryDialog triggerClassName="w-full text-muted-foreground hover:text-foreground" />
+										<RankingsButton />
+									</div>
+
+									<div className="text-center">
+										<p className="text-[10px] italic text-muted-foreground/70">
+											Inspired by the classic roguelike Larn.
+										</p>
+									</div>
+								</div>
+							</div>
+							{/* Adventure settings */}
+							<div
+								className="
+                           grid min-w-0 content-start gap-3
+                           min-[900px]:border-l min-[900px]:border-amber-800/25
+                           min-[900px]:pl-7
+                           dark:min-[900px]:border-amber-500/25
+                        "
+							>
+								{account.status !== "unavailable" && (
+									<div className="grid min-w-0 grid-cols-1 gap-2 rounded-lg border border-amber-800/20 bg-background/50 p-3 dark:border-amber-500/25">
+										<p className="text-xs text-muted-foreground">
+											{account.status === "signed-in"
+												? "Your adventure, on any device."
+												: "Sign in to keep your adventure on any device."}
+										</p>
+										<AccountMenu
+											opening
+											open={accountOpen}
+											onOpenChange={setAccountOpen}
 										/>
-										Load an existing save
-									</SheetTrigger>
+										{(saves.initialCheck !== "ready" ||
+											account.status === "loading") && (
+											<div className="grid gap-2 border-t border-border/60 pt-2 text-xs">
+												<p role="status">
+													{account.status === "loading"
+														? "Checking your sign-in…"
+														: saves.initialCheck === "checking"
+															? slow
+																? "Cloud saves are taking longer than usual."
+																: "Checking cloud saves…"
+															: "Cloud saves couldn't be checked."}
+												</p>
+												{owner &&
+													(saves.initialCheck === "unavailable" || slow) && (
+														<div className="flex flex-wrap gap-2">
+															{saves.initialCheck === "unavailable" && (
+																<Button
+																	type="button"
+																	variant="outline"
+																	size="sm"
+																	className="text-xs"
+																	onClick={saves.retry}
+																>
+																	Retry cloud saves
+																</Button>
+															)}
+															{localOwner !== owner ? (
+																<Button
+																	type="button"
+																	variant="outline"
+																	size="sm"
+																	className="text-xs"
+																	onClick={() => setLocalOwner(owner)}
+																>
+																	Use saves on this device
+																</Button>
+															) : (
+																<p className="text-xs text-muted-foreground">
+																	Using this device's saves.
+																</p>
+															)}
+														</div>
+													)}
+											</div>
+										)}
+									</div>
+								)}
+								<section aria-label="The dungeon">
+									<div className="grid gap-2 rounded-md border border-border bg-background/50 px-4 py-3">
+										<p className="font-serif text-base font-semibold">
+											Twenty floors deep
+										</p>
+										<p className="text-sm leading-normal text-muted-foreground">
+											Each floor is 40 × 40 tiles. The Ember Warden waits on the
+											last one, and the way home is longer than the way down.
+										</p>
+									</div>
+									<p className="mt-1.5 text-[11px] leading-relaxed text-muted-foreground">
+										Want a different size, floor count or seed? Settings starts
+										custom adventures, which aren't ranked.
+									</p>
+								</section>
 
-									<AdventureSaveSheet onRestore={onRestore} />
-								</Sheet>
-							</div>
+								<AppearanceChoice />
+								<DeveloperGeneration
+									disabled={disabled}
+									onChange={setDisabled}
+								/>
 
-							{autosave && (
-								<p
-									id="autosave-summary"
-									className="-mt-1 text-center text-[11px] text-muted-foreground"
-								>
-									{saveSummary(autosave)} ·{" "}
-									<time dateTime={autosave.savedAt}>
-										{new Date(autosave.savedAt).toLocaleString()}
-									</time>
-								</p>
-							)}
+								<Flourish className="w-full" />
 
-							<div className="grid grid-cols-2 gap-2.5">
-								<RunHistoryDialog triggerClassName="h-10 w-full text-muted-foreground hover:text-foreground" />
-								<RankingsButton />
-							</div>
-
-							<div className="text-center">
-								<p className="text-[10px] italic text-muted-foreground/70">
-									Inspired by the classic roguelike Larn.
-								</p>
+								<DifficultyChoice
+									value={configuration.difficulty ?? 1}
+									onChange={(difficulty) =>
+										setConfiguration((current) => ({
+											...current,
+											difficulty,
+										}))
+									}
+								/>
 							</div>
 						</div>
 					</Dialog.Popup>

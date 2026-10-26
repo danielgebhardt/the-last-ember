@@ -17,6 +17,15 @@ for (const size of [
 			await expect(dungeon).toBeVisible();
 			await expect(dungeon).toContainText("Twenty floors deep");
 			await expect(dungeon).toContainText("40 × 40 tiles");
+			const beginBounds = await opening
+				.getByRole("button", { name: "Begin Adventure", exact: true })
+				.boundingBox();
+			const dungeonBounds = await dungeon.boundingBox();
+			expect(
+				beginBounds &&
+					dungeonBounds &&
+					beginBounds.x + beginBounds.width <= dungeonBounds.x,
+			).toBe(true);
 			await expect(opening.getByRole("radio", { name: /Small/ })).toHaveCount(
 				0,
 			);
