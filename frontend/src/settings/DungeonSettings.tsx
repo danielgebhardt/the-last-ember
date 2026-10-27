@@ -54,7 +54,7 @@ type DungeonSettingsProps = {
 	onSeedInputChange: (value: string) => void;
 	onSeedSubmit: (
 		event: SubmitEvent<HTMLFormElement>,
-		disabled?: DeveloperFeature[],
+		guaranteed?: DeveloperFeature[],
 	) => void;
 	runId?: string;
 	hints?: Pick<Hints, "enabled" | "seenCount" | "setEnabled" | "reset">;
@@ -78,11 +78,11 @@ const DungeonSettings = ({
 	hints,
 	runId,
 }: DungeonSettingsProps) => {
-	const [disabled, setDisabled] = useState<DeveloperFeature[]>([]);
+	const [guaranteed, setGuaranteed] = useState<DeveloperFeature[]>([]);
 	const account = useAccount();
 	const developer = account.user?.developer === true;
 	// biome-ignore lint/correctness/useExhaustiveDependencies: each new run resets the generation draft.
-	useEffect(() => setDisabled([]), [runId, account.user?.uid, developer]);
+	useEffect(() => setGuaranteed([]), [runId, account.user?.uid, developer]);
 	const selectedDifficulty = Number(configDraft.difficulty ?? 1);
 	const inputRef = useRef<HTMLInputElement>(null);
 	const { theme, setTheme } = useTheme();
@@ -130,7 +130,9 @@ const DungeonSettings = ({
 					</p>
 					<form
 						className="grid gap-3"
-						onSubmit={(event) => onSeedSubmit(event, developer ? disabled : [])}
+						onSubmit={(event) =>
+							onSeedSubmit(event, developer ? guaranteed : [])
+						}
 					>
 						<div className="grid gap-2">
 							<Label htmlFor="dungeon-seed">Dungeon seed</Label>
@@ -229,7 +231,10 @@ const DungeonSettings = ({
 								{generationError}
 							</p>
 						)}
-						<DeveloperGeneration disabled={disabled} onChange={setDisabled} />
+						<DeveloperGeneration
+							guaranteed={guaranteed}
+							onChange={setGuaranteed}
+						/>
 						<Button
 							type="submit"
 							variant="outline"

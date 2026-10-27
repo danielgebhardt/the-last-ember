@@ -70,6 +70,7 @@ import { MAX_SEED, parseSeedInput } from "./domain/dungeon/Seed.ts";
 import type { VictorySummary } from "./domain/game/Adventure";
 import { defeatRecap } from "./domain/game/DefeatRecap";
 import type { DeveloperFeature } from "./domain/game/DeveloperFeatures";
+import { DeveloperGuaranteeError } from "./domain/game/DeveloperGuarantees";
 import {
 	OMEN_DEFINITIONS,
 	omenAt,
@@ -290,12 +291,19 @@ const Home = ({
 		seed: number,
 		nextConfiguration: RunConfiguration,
 		ranked = false,
-		disabled: readonly DeveloperFeature[] = [],
+		guaranteed: readonly DeveloperFeature[] = [],
 	): boolean => {
-		if (!start(seed, nextConfiguration, ranked, disabled)) {
-			setGenerationError(
-				"Could not create a dungeon with this seed and configuration. Try a different seed or larger dimensions.",
-			);
+		let failure = "";
+		try {
+			if (!start(seed, nextConfiguration, ranked, guaranteed))
+				failure =
+					"Could not create a dungeon with this seed and configuration. Try a different seed or larger dimensions.";
+		} catch (error) {
+			if (!(error instanceof DeveloperGuaranteeError)) throw error;
+			failure = error.message;
+		}
+		if (failure) {
+			setGenerationError(failure);
 			setSettingsOpen(true);
 			return false;
 		}
@@ -344,7 +352,7 @@ const Home = ({
 
 	const handleSeedSubmit = (
 		event: SubmitEvent<HTMLFormElement>,
-		disabled: DeveloperFeature[] = [],
+		guaranteed: DeveloperFeature[] = [],
 	) => {
 		event.preventDefault();
 		const seed = parseSeedInput(seedInput);
@@ -355,7 +363,7 @@ const Home = ({
 		setConfigErrors(parsed.valid ? {} : parsed.errors);
 		setGenerationError(null);
 		if (seed === undefined || !parsed.valid) return;
-		if (startRun(seed, parsed.value, false, disabled)) setSettingsOpen(false);
+		if (startRun(seed, parsed.value, false, guaranteed)) setSettingsOpen(false);
 	};
 
 	const isChestOnTile = (object: DungeonObject) =>

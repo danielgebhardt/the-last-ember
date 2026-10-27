@@ -28,7 +28,11 @@ it("exposes generation choices only to a developer and discards them if the role
 			</ThemeProvider>,
 		);
 	const user = userEvent.setup();
-	await user.click(screen.getByText("Developer generation"));
+	expect(
+		screen.getByRole("group", { name: "Guarantee features" }),
+	).toBeVisible();
+	for (const checkbox of screen.getAllByRole("checkbox"))
+		expect(checkbox).not.toBeChecked();
 	expect(screen.getAllByRole("checkbox")).toHaveLength(10);
 	await user.click(screen.getByRole("checkbox", { name: "Floor omens" }));
 	await user.click(screen.getByRole("button", { name: "Begin Adventure" }));

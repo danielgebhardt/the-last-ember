@@ -7,11 +7,13 @@ export const hasConsistentHistory = (document: SaveDocument): boolean => {
 	const { state } = document;
 	const { run, quest } = state;
 	if (
-		state.disabledFeatures?.length &&
+		(state.disabledFeatures?.length || state.guaranteedFeatures?.length) &&
 		(!state.developerRun ||
 			state.ranked ||
 			state.rankingVersion ||
-			!unique(state.disabledFeatures))
+			!unique(state.disabledFeatures ?? []) ||
+			!unique(state.guaranteedFeatures ?? []) ||
+			(state.disabledFeatures?.length && state.guaranteedFeatures?.length))
 	)
 		return false;
 	const facts = state.encounters;

@@ -1,9 +1,11 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import App from "../App";
+import App, { Adventures } from "../App";
+import * as Accounts from "../accounts/AccountProvider";
 import * as GameState from "../domain/game/GameState";
 import { ThemeProvider } from "../settings/ThemeProvider";
+import { developerTestAccount } from "./DeveloperTestAccount";
 import {
 	closeSettings,
 	enterDungeonFromTown,
@@ -18,6 +20,26 @@ import Home from "./TestHome";
 
 afterEach(resetHomeTestState);
 describe("Choosing adventure difficulty", () => {
+	it("explains an impossible guarantee in the opening and keeps the choices available for retry", async () => {
+		vi.spyOn(Accounts, "useAccount").mockReturnValue(developerTestAccount());
+		stubDungeonRun(createCorridorEncounter());
+		render(
+			<ThemeProvider>
+				<Adventures />
+			</ThemeProvider>,
+		);
+		const user = userEvent.setup();
+		await user.click(screen.getByRole("checkbox", { name: "The arena" }));
+		await user.click(screen.getByRole("button", { name: "Begin Adventure" }));
+		expect(screen.getByRole("alert")).toHaveTextContent(
+			/Cannot guarantee the arena/,
+		);
+		expect(screen.getByRole("checkbox", { name: "The arena" })).toBeChecked();
+		await user.click(screen.getByRole("checkbox", { name: "The arena" }));
+		await user.click(screen.getByRole("button", { name: "Begin Adventure" }));
+		expect(screen.getByLabelText("Town map", { exact: true })).toHaveFocus();
+	});
+
 	it("selects Harder before beginning, keeps generation separate and focuses the map", async () => {
 		const user = userEvent.setup();
 		const { generate } = stubDungeonRun(createCorridorEncounter());
@@ -30,7 +52,7 @@ describe("Choosing adventure difficulty", () => {
 		expect(screen.getByLabelText("Adventure difficulty")).toHaveTextContent(
 			"Harder",
 		);
-		expect(create).toHaveBeenCalledWith(expect.any(Object), 1.25, []);
+		expect(create).toHaveBeenCalledWith(expect.any(Object), 1.25, [], []);
 		expect(generate.mock.lastCall?.[2]).not.toHaveProperty("difficulty");
 		expect(screen.getByLabelText("Town map", { exact: true })).toHaveFocus();
 	});

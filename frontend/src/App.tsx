@@ -3,6 +3,7 @@ import { createAdventureSession } from "./components/game/useAdventureSession";
 import DeveloperStatisticsRoute, {
 	useDeveloperStatisticsOpen,
 } from "./developer/DeveloperStatisticsRoute";
+import { DeveloperGuaranteeError } from "./domain/game/DeveloperGuarantees";
 import { randomAdventureSeed } from "./domain/game/TestSeed";
 import { StatisticsProvider } from "./statistics/StatisticsProvider";
 import "./App.css";
@@ -77,7 +78,7 @@ export const Adventures = () => {
 					suspended={developerPageOpen || !!saves.guestOffer || conflictOpen}
 					onRestore={load}
 					startError={startError}
-					onBegin={(configuration, disabled) => {
+					onBegin={(configuration, guaranteed) => {
 						try {
 							const seed = randomAdventureSeed();
 							play(
@@ -87,12 +88,16 @@ export const Adventures = () => {
 									configuration,
 									DEFAULT_FOG_CONFIGURATION,
 									true,
-									disabled,
+									guaranteed,
 								),
 							);
 							setStartError(undefined);
-						} catch {
-							setStartError("Could not start this adventure. Try again.");
+						} catch (error) {
+							setStartError(
+								error instanceof DeveloperGuaranteeError
+									? error.message
+									: "Could not start this adventure. Try again.",
+							);
 						}
 					}}
 				/>

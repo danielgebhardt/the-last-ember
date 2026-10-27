@@ -518,6 +518,24 @@ const documentShape = object({
 				10,
 			),
 		),
+		guaranteedFeatures: optional(
+			array(
+				oneOf([
+					"omens",
+					"pacts",
+					"arena",
+					"thieves",
+					"mimics",
+					"vaults",
+					"discoveries",
+					"elites",
+					"merchants",
+					"rareFinds",
+				]),
+				1,
+				10,
+			),
+		),
 		runId: optional(
 			(value) =>
 				typeof value === "string" &&

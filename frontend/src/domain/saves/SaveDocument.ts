@@ -35,6 +35,7 @@ export type SaveDocument = {
 		| "rankingVersion"
 		| "developerRun"
 		| "disabledFeatures"
+		| "guaranteedFeatures"
 		| "runId"
 		| "encounters"
 		| "townEquipmentStock"

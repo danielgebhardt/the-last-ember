@@ -20,15 +20,19 @@ const request = (body: unknown = finished(), token: string | null = "token") =>
 	});
 
 describe("Trusted run statistics", () => {
-	it("rejects developer adventures before a trusted write", async () => {
-		const document = finished();
-		document.state.developerRun = true;
-		const write = vi.fn();
-		expect(
-			(await handleStatistics(request(document), verify, write)).status,
-		).toBe(400);
-		expect(write).not.toHaveBeenCalled();
-	});
+	it.each([true, false])(
+		"rejects guaranteed developer adventures, including a stripped marker (%s)",
+		async (marked) => {
+			const document = finished();
+			document.state.developerRun = marked ? true : undefined;
+			document.state.guaranteedFeatures = ["omens"];
+			const write = vi.fn();
+			expect(
+				(await handleStatistics(request(document), verify, write)).status,
+			).toBe(400);
+			expect(write).not.toHaveBeenCalled();
+		},
+	);
 	it("rejects missing and invalid tokens without a write", async () => {
 		const write = vi.fn();
 

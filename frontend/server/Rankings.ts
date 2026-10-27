@@ -189,6 +189,7 @@ export const handleRankings = async (
 		if (
 			state.developerRun ||
 			state.disabledFeatures?.length ||
+			state.guaranteedFeatures?.length ||
 			isTestSeed(state.run.seed)
 		)
 			return json(400, {

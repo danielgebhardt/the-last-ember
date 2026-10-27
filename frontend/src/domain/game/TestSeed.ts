@@ -36,6 +36,7 @@ import {
 	applyDeveloperExclusions,
 	type DeveloperFeature,
 } from "./DeveloperFeatures";
+import { applyDeveloperGuarantees } from "./DeveloperGuarantees";
 import type { Difficulty } from "./Difficulty";
 import { createGameState, type GameState } from "./GameState";
 import { maximumMana } from "./Mana";
@@ -310,6 +311,7 @@ const testBag = () => {
 export const createTestSeedState = (
 	configuration: RunConfiguration,
 	disabled: readonly DeveloperFeature[] = [],
+	guaranteed: readonly DeveloperFeature[] = [],
 ): GameState => {
 	const difficulty: Difficulty = configuration.difficulty ?? 1;
 	const { run, authored } = testRun(configuration);
@@ -359,16 +361,19 @@ export const createTestSeedState = (
 		bag: testBag(),
 		potionHotbar: createStartingPotionHotbar(),
 	};
-	return applyDeveloperExclusions(
-		disabled.includes("arena")
-			? seeded
-			: TEST_ARENAS.reduce(
-					(state, arena) =>
-						arena.floorNumber < state.run.floors.length
-							? withArena(state, arena, difficulty, TEST_ARENA_STRENGTH_FLOOR)
-							: state,
-					seeded,
-				),
-		disabled,
+	return applyDeveloperGuarantees(
+		applyDeveloperExclusions(
+			disabled.includes("arena")
+				? seeded
+				: TEST_ARENAS.reduce(
+						(state, arena) =>
+							arena.floorNumber < state.run.floors.length
+								? withArena(state, arena, difficulty, TEST_ARENA_STRENGTH_FLOOR)
+								: state,
+						seeded,
+					),
+			disabled,
+		),
+		guaranteed,
 	);
 };

@@ -31,7 +31,11 @@ export const handleStatistics = async (
 	const parsed = parseSave(await request.text());
 	if (!parsed.ok) return json(400, { error: parsed.error });
 	const document = parsed.value;
-	if (document.state.developerRun || document.state.disabledFeatures?.length)
+	if (
+		document.state.developerRun ||
+		document.state.disabledFeatures?.length ||
+		document.state.guaranteedFeatures?.length
+	)
 		return json(400, {
 			error: "Developer adventures do not contribute run statistics.",
 		});

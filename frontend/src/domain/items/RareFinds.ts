@@ -47,13 +47,18 @@ export const rareFindBands = (
 export const selectRunRareFinds = (
 	seed: number,
 	floorCount: number,
+	guaranteed = false,
 ): readonly RareFind[] => {
+	if (guaranteed) {
+		const normal = selectRunRareFinds(seed, floorCount);
+		if (normal.length) return normal;
+	}
 	const finds: RareFind[] = [];
 	rareFindBands(floorCount).forEach(([start, end], band) => {
 		const random = createSeededRandom(
 			hashStringToUint32(`${seed}:rare-find:${band}`),
 		);
-		if (random() >= RARE_FIND_CHANCE) return;
+		if (random() >= RARE_FIND_CHANCE && !guaranteed) return;
 		const kind = selectWeighted(
 			RARE_EQUIPMENT_KINDS.filter(
 				(kind) =>
@@ -80,9 +85,14 @@ export const placeRunRareFinds = (
 	monsters: readonly Monster[],
 	items: readonly FloorItem[],
 	objects: readonly DungeonObject[],
+	guaranteed = false,
 ): readonly FloorItem[] => {
 	const placed: FloorItem[] = [];
-	for (const find of selectRunRareFinds(run.seed, run.floors.length)) {
+	for (const find of selectRunRareFinds(
+		run.seed,
+		run.floors.length,
+		guaranteed,
+	)) {
 		const candidates = run.floors
 			.filter(
 				(floor) =>

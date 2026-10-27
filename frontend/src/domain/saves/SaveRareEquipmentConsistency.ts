@@ -12,7 +12,11 @@ export const hasConsistentRareEquipment = ({
 	const owned = ownedItems(state);
 	const stock = state.townEquipmentStock;
 	// A per-third find is one copy of a kind this seed selected; it never enters stock.
-	const finds = selectRunRareFinds(state.run.seed, state.run.floors.length);
+	const finds = selectRunRareFinds(
+		state.run.seed,
+		state.run.floors.length,
+		state.guaranteedFeatures?.includes("rareFinds"),
+	);
 	const found = owned.filter((i) => i.id.startsWith("rare-find:"));
 	if (
 		!unique(found.map((i) => i.id)) ||

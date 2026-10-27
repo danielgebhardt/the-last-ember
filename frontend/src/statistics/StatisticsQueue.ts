@@ -92,6 +92,7 @@ export class StatisticsQueue {
 			!id ||
 			document.state.developerRun ||
 			document.state.disabledFeatures?.length ||
+			document.state.guaranteedFeatures?.length ||
 			(this.kind === "rankings" &&
 				(!document.state.ranked ||
 					!document.state.rankingVersion ||

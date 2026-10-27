@@ -56,6 +56,7 @@ import {
 	applyDeveloperExclusions,
 	type DeveloperFeature,
 } from "./DeveloperFeatures";
+import { applyDeveloperGuarantees } from "./DeveloperGuarantees";
 import { assertDifficulty, type Difficulty } from "./Difficulty";
 import type { EscapeState } from "./Escape";
 import { maximumMana } from "./Mana";
@@ -89,6 +90,7 @@ export type GameState = {
 	// Reserved for developer-assisted adventures; these never qualify for Rankings.
 	developerRun?: true;
 	disabledFeatures?: DeveloperFeature[];
+	guaranteedFeatures?: DeveloperFeature[];
 	// Browser identity only; never used by seeded gameplay.
 	runId?: string;
 	// A wielded Hungering Blade's binding and the turn of its last kill.
@@ -131,6 +133,7 @@ export const createGameState = (
 	run: DungeonRun,
 	difficulty: number = 1,
 	disabled: readonly DeveloperFeature[] = [],
+	guaranteed: readonly DeveloperFeature[] = [],
 ): GameState => {
 	assertDifficulty(difficulty);
 	const monsters = spawnRunMonsters(run);
@@ -271,14 +274,20 @@ export const createGameState = (
 	};
 	// The arena replaces its floor last, so no other floor's content moves.
 	const arenaFloorNumber = arenaFloorFor(run.floors.length);
-	return applyDeveloperExclusions(
-		arenaFloorNumber && !disabled.includes("arena")
-			? withArena(
-					created,
-					{ floorNumber: arenaFloorNumber, miniboss: selectMiniboss(run.seed) },
-					difficulty,
-				)
-			: created,
-		disabled,
+	return applyDeveloperGuarantees(
+		applyDeveloperExclusions(
+			arenaFloorNumber && !disabled.includes("arena")
+				? withArena(
+						created,
+						{
+							floorNumber: arenaFloorNumber,
+							miniboss: selectMiniboss(run.seed),
+						},
+						difficulty,
+					)
+				: created,
+			disabled,
+		),
+		guaranteed,
 	);
 };

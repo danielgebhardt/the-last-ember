@@ -6,37 +6,50 @@ import {
 } from "../domain/game/DeveloperFeatures";
 
 export default function DeveloperGeneration({
-	disabled,
+	guaranteed,
 	onChange,
+	expanded = false,
 }: {
-	disabled: readonly DeveloperFeature[];
-	onChange: (disabled: DeveloperFeature[]) => void;
+	guaranteed: readonly DeveloperFeature[];
+	onChange: (selected: DeveloperFeature[]) => void;
+	expanded?: boolean;
 }) {
 	if (useAccount().user?.developer !== true) return null;
-	return (
-		<details className="rounded-lg border border-primary/30 bg-primary/5 p-3 text-left text-sm">
-			<summary className="cursor-pointer font-medium">
-				<FlaskConical
-					aria-hidden="true"
-					className="mr-2 inline size-4 text-primary"
-				/>
-				Developer generation
-			</summary>
-			<fieldset className="mt-3 grid grid-cols-2 gap-2">
-				<legend className="sr-only">Seeded features</legend>
+	const heading = (
+		<>
+			<FlaskConical
+				aria-hidden="true"
+				className="mr-2 inline size-4 text-primary"
+			/>
+			Developer generation
+		</>
+	);
+	const controls = (
+		<>
+			<p className="mt-2 text-xs leading-relaxed text-muted-foreground">
+				Unchecked features follow the seed. Select a feature to ensure it
+				appears somewhere in this adventure.
+			</p>
+			<fieldset
+				className={`mt-4 grid gap-2.5 ${expanded ? "grid-cols-1" : "grid-cols-2"}`}
+			>
+				<legend className="mb-2 text-sm font-medium">Guarantee features</legend>
 				{(
 					Object.entries(DEVELOPER_FEATURES) as [DeveloperFeature, string][]
 				).map(([key, label]) => (
-					<label key={key} className="flex items-center gap-2">
+					<label
+						key={key}
+						className="flex cursor-pointer items-center gap-2.5 !py-0 text-sm leading-5"
+					>
 						<input
 							type="checkbox"
-							className="accent-primary"
-							checked={!disabled.includes(key)}
+							className="size-4 shrink-0 accent-primary"
+							checked={guaranteed.includes(key)}
 							onChange={(event) =>
 								onChange(
 									event.target.checked
-										? disabled.filter((feature) => feature !== key)
-										: [...disabled, key],
+										? [...guaranteed, key]
+										: guaranteed.filter((feature) => feature !== key),
 								)
 							}
 						/>
@@ -44,11 +57,28 @@ export default function DeveloperGeneration({
 					</label>
 				))}
 			</fieldset>
-			<p className="mt-3 text-xs text-muted-foreground">
-				Uncheck a feature to leave it out without rerolling the others. With any
-				feature off, this adventure is a developer run and contributes neither
-				statistics nor Rankings.
+			<p className="mt-4 border-t border-primary/20 pt-3 text-xs leading-relaxed text-muted-foreground">
+				Any selection makes this a developer run, excluded from statistics and
+				Rankings.
 			</p>
+			<p className="mt-2 text-xs leading-relaxed text-muted-foreground">
+				Features still need enough floors and room to fit. If a guarantee cannot
+				fit, the adventure won’t start.
+			</p>
+		</>
+	);
+	return expanded ? (
+		<section
+			aria-label="Developer generation"
+			className="rounded-lg border border-primary/30 bg-primary/5 p-4 text-left"
+		>
+			<h2 className="text-sm font-medium">{heading}</h2>
+			{controls}
+		</section>
+	) : (
+		<details className="rounded-lg border border-primary/30 bg-primary/5 p-3 text-left text-sm">
+			<summary className="cursor-pointer font-medium">{heading}</summary>
+			{controls}
 		</details>
 	);
 }

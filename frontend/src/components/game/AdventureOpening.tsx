@@ -42,7 +42,7 @@ const AdventureOpening = ({
 }: {
 	onBegin: (
 		configuration: RunConfiguration,
-		disabled?: DeveloperFeature[],
+		guaranteed?: DeveloperFeature[],
 	) => void;
 	startError?: string;
 	initialConfiguration?: RunConfiguration;
@@ -50,11 +50,11 @@ const AdventureOpening = ({
 	suspended?: boolean;
 }) => {
 	const [configuration, setConfiguration] = useState(initialConfiguration);
-	const [disabled, setDisabled] = useState<DeveloperFeature[]>([]);
+	const [guaranteed, setGuaranteed] = useState<DeveloperFeature[]>([]);
 	const account = useAccount();
 	const developer = account.user?.developer === true;
 	// biome-ignore lint/correctness/useExhaustiveDependencies: account changes reset the developer-only draft.
-	useEffect(() => setDisabled([]), [account.user?.uid, developer]);
+	useEffect(() => setGuaranteed([]), [account.user?.uid, developer]);
 	const [saveOpen, setSaveOpen] = useState(false);
 	const [accountOpen, setAccountOpen] = useState(false);
 	// Read again when the player signs in or out, or a cloud copy arrives.
@@ -99,10 +99,10 @@ const AdventureOpening = ({
 
 					<Dialog.Popup
 						initialFocus={title}
-						className="
+						className={`
                      fixed top-1/2 left-1/2 z-50
                      max-h-[calc(100dvh-1.5rem)]
-                     w-[calc(100%-1.5rem)] max-w-[65rem]
+                     w-[calc(100%-1.5rem)] ${developer ? "max-w-[88rem]" : "max-w-[65rem]"}
                      -translate-x-1/2 -translate-y-1/2
                      overflow-y-auto rounded-xl
                      border border-amber-800/35
@@ -115,12 +115,14 @@ const AdventureOpening = ({
                      dark:from-[#302318]
                      [@media(max-height:800px)]:py-4
                      [@media(max-height:800px)]:[&_label]:py-1.5
-                  "
+                  `}
 					>
-						<div className="grid gap-5 min-[900px]:grid-cols-[minmax(0,13fr)_minmax(0,7fr)] min-[900px]:gap-0">
+						<div
+							className={`grid gap-5 min-[900px]:gap-0 ${developer ? "min-[900px]:grid-cols-[minmax(0,1.8fr)_minmax(0,1.1fr)_minmax(0,1fr)]" : "min-[900px]:grid-cols-[minmax(0,13fr)_minmax(0,7fr)]"}`}
+						>
 							<div className="min-w-0 min-[900px]:pr-7">
 								<form
-									className="grid gap-2.5"
+									className={`grid ${developer ? "gap-2 min-[1200px]:gap-2.5" : "gap-2.5"}`}
 									onSubmit={(event) => {
 										event.preventDefault();
 										if (blocked) return;
@@ -130,7 +132,7 @@ const AdventureOpening = ({
 												...DEFAULT_RUN_CONFIGURATION,
 												difficulty: configuration.difficulty,
 											},
-											developer ? disabled : [],
+											developer ? guaranteed : [],
 										);
 									}}
 								>
@@ -140,18 +142,20 @@ const AdventureOpening = ({
 										<Dialog.Title
 											ref={title}
 											tabIndex={-1}
-											className="
-                                 mt-1 font-serif text-4xl font-bold
+											className={`
+                                 mt-1 font-serif ${developer ? "text-3xl min-[1200px]:text-4xl" : "text-4xl"} font-bold
                                  tracking-wide text-amber-950 outline-none
                                  dark:text-amber-100
-                              "
+                              `}
 										>
 											{ADVENTURE_STORY.title}
 										</Dialog.Title>
 
 										<Flourish className="mt-2 max-w-sm" />
 
-										<p className="mt-2 text-[11px] font-medium uppercase tracking-[0.25em] text-amber-900/70 dark:text-amber-300/70">
+										<p
+											className={`mt-2 text-[11px] font-medium uppercase text-amber-900/70 dark:text-amber-300/70 ${developer ? "tracking-[0.15em] min-[1200px]:tracking-[0.25em]" : "tracking-[0.25em]"}`}
+										>
 											{ADVENTURE_STORY.subtitle}
 										</p>
 									</div>
@@ -168,7 +172,7 @@ const AdventureOpening = ({
 									>
 										<Dialog.Description
 											render={<div />}
-											className="grid gap-2 font-serif text-base leading-normal text-foreground/90"
+											className={`grid gap-2 font-serif leading-normal text-foreground/90 ${developer ? "text-sm min-[1200px]:text-base" : "text-base"}`}
 										>
 											{ADVENTURE_STORY.opening.map((paragraph) => (
 												<p key={paragraph}>{paragraph}</p>
@@ -190,7 +194,9 @@ const AdventureOpening = ({
 											aria-hidden="true"
 											className="mt-0.5 size-5 shrink-0 text-amber-800 dark:text-amber-400"
 										/>
-										<p className="text-[15px] leading-normal text-foreground/85">
+										<p
+											className={`leading-normal text-foreground/85 ${developer ? "text-sm min-[1200px]:text-[15px]" : "text-[15px]"}`}
+										>
 											Explore carefully. Every action gives your enemies a turn.
 											Your spells, supplies, and discoveries may be the
 											difference between a safe return and a lost expedition.
@@ -315,12 +321,12 @@ const AdventureOpening = ({
 							</div>
 							{/* Adventure settings */}
 							<div
-								className="
+								className={`
                            grid min-w-0 content-start gap-3
                            min-[900px]:border-l min-[900px]:border-amber-800/25
-                           min-[900px]:pl-7
+                           ${developer ? "min-[900px]:px-5" : "min-[900px]:pl-7"}
                            dark:min-[900px]:border-amber-500/25
-                        "
+                        `}
 							>
 								{account.status !== "unavailable" && (
 									<div className="grid min-w-0 grid-cols-1 gap-2 rounded-lg border border-amber-800/20 bg-background/50 p-3 dark:border-amber-500/25">
@@ -398,10 +404,6 @@ const AdventureOpening = ({
 								</section>
 
 								<AppearanceChoice />
-								<DeveloperGeneration
-									disabled={disabled}
-									onChange={setDisabled}
-								/>
 
 								<Flourish className="w-full" />
 
@@ -415,6 +417,15 @@ const AdventureOpening = ({
 									}
 								/>
 							</div>
+							{developer && (
+								<div className="min-w-0 min-[900px]:border-l min-[900px]:border-amber-800/20 min-[900px]:pl-5 dark:min-[900px]:border-amber-500/25">
+									<DeveloperGeneration
+										guaranteed={guaranteed}
+										onChange={setGuaranteed}
+										expanded
+									/>
+								</div>
+							)}
 						</div>
 					</Dialog.Popup>
 				</Dialog.Portal>

@@ -69,6 +69,9 @@ export const createSaveDocument = (
 		...(state.ranked ? { ranked: true as const } : {}),
 		...(state.rankingVersion ? { rankingVersion: state.rankingVersion } : {}),
 		...(state.developerRun ? { developerRun: true as const } : {}),
+		...(state.guaranteedFeatures?.length
+			? { guaranteedFeatures: [...state.guaranteedFeatures] }
+			: {}),
 		...(state.disabledFeatures?.length
 			? { disabledFeatures: [...state.disabledFeatures] }
 			: {}),

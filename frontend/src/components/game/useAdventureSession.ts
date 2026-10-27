@@ -11,6 +11,7 @@ import type {
 } from "../../domain/dungeon/RunConfiguration";
 import { appendActivityEvents } from "../../domain/game/ActivityHistory";
 import type { DeveloperFeature } from "../../domain/game/DeveloperFeatures";
+import { DeveloperGuaranteeError } from "../../domain/game/DeveloperGuarantees";
 import { createGameState } from "../../domain/game/GameState";
 import { GAME_VERSION } from "../../domain/game/GameVersion";
 import { omenSightRadius } from "../../domain/game/Omens";
@@ -66,14 +67,15 @@ export const createAdventureSession = (
 	configuration: RunConfiguration,
 	fog: FogConfiguration,
 	ranked = false,
-	disabled: readonly DeveloperFeature[] = [],
+	guaranteed: readonly DeveloperFeature[] = [],
 ): Session => {
 	const state = isTestSeed(seed)
-		? createTestSeedState(configuration, disabled)
+		? createTestSeedState(configuration, [], guaranteed)
 		: createGameState(
 				createRun(seed, configuration),
 				configuration.difficulty ?? 1,
-				disabled,
+				[],
+				guaranteed,
 			);
 	return {
 		state: {
@@ -81,7 +83,7 @@ export const createAdventureSession = (
 			runId: crypto.randomUUID(),
 			encounters: emptyRunEncounters(0),
 			town: createTownLocation(),
-			...(ranked && !disabled.length && !isTestSeed(seed)
+			...(ranked && !guaranteed.length && !isTestSeed(seed)
 				? { ranked: true as const, rankingVersion: GAME_VERSION }
 				: {}),
 		},
@@ -163,7 +165,7 @@ export const useAdventureSession = ({
 		seed: number,
 		configuration: RunConfiguration,
 		ranked = false,
-		disabled: readonly DeveloperFeature[] = [],
+		guaranteed: readonly DeveloperFeature[] = [],
 	): boolean => {
 		try {
 			const next = createAdventureSession(
@@ -171,11 +173,12 @@ export const useAdventureSession = ({
 				configuration,
 				session.fog,
 				ranked,
-				disabled,
+				guaranteed,
 			);
 			setSession(next);
 			return true;
-		} catch {
+		} catch (error) {
+			if (error instanceof DeveloperGuaranteeError) throw error;
 			return false;
 		}
 	};
