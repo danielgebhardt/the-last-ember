@@ -222,7 +222,7 @@ const EnchantmentDialog = ({
 						<p role="status" className="text-sm text-muted-foreground">
 							{enchanted
 								? `${ITEM_DEFINITIONS[enchanted.kind].name} is now +${enchanted.enchantment}.`
-									: scrolls.length
+								: scrolls.length
 										? "Choose a piece to enchant. Rings cannot be enchanted."
 										: "No enchantment scrolls left."}
 						</p>
