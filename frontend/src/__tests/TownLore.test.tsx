@@ -23,8 +23,6 @@ it("reveals and hides town conversation without changing game state", async () =
   expect(screen.queryByText(TOWN_DIALOGUE.Library, { exact: false })).toBeNull();
 });
 
-it("changes beacon inspection lore after recovering the flame", () => {
-  expect(beaconInspectionText(false)).not.toBe(beaconInspectionText(true));
-  expect(beaconInspectionText(false)).toContain("gutters");
-  expect(beaconInspectionText(true)).toContain("Warden's Flame");
+it("offers beacon lore without introducing unreachable post-victory dialogue", () => {
+  expect(beaconInspectionText()).toContain("gutters");
 });
