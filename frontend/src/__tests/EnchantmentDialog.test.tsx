@@ -15,7 +15,7 @@ const bag = {
 		{ id: "bag:ring", kind: "ring-strength" as const },
 	],
 };
-const open = async (inTown = false) => {
+const open = async () => {
 	const onAction = vi.fn(),
 		onLastScroll = vi.fn();
 	render(
@@ -23,7 +23,6 @@ const open = async (inTown = false) => {
 			equipment={equipment}
 			bag={bag}
 			alive
-			inTown={inTown}
 			onAction={onAction}
 			onLastScroll={onLastScroll}
 		/>,
@@ -72,13 +71,17 @@ describe("Enchanting equipment", () => {
 		expect(dialog.getByRole("status")).not.toHaveTextContent("now +1");
 	});
 
-	it("explains in town that scrolls need the dungeon and offers nothing to read", async () => {
-		const { dialog } = await open(true);
-		expect(
-			dialog.getByRole("button", { name: "Enchant Iron helmet to +1" }),
-		).toBeDisabled();
-		expect(dialog.getByRole("status")).toHaveTextContent(
-			"Scrolls work only in the dungeon. The town forge reforges for gold.",
-		);
-	});
-});
+	it("allows reading enchantment scrolls without a location restriction", async () => {
+		const { user, dialog, onAction, onLastScroll } = await open();
+		const target = dialog.getByRole("button", {
+			name: "Enchant Iron helmet to +1",
+		});
+		expect(target).toBeEnabled();
+		await user.click(target);
+		expect(onAction).toHaveBeenCalledExactlyOnceWith({
+			type: "enchant",
+			scrollId: "scroll",
+			targetItemId: "bag:helmet",
+		});
+		expect(onLastScroll).toHaveBeenCalledOnce();
+	});});
