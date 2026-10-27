@@ -789,7 +789,6 @@ const Home = ({
 							<DungeonFrame>
 								{town ? (
 									<TownMap
-										flameRecovered={game.state.quest.cureRecovered}
 										portalFloor={game.state.townPortal?.floorNumber}
 										travelLabel={
 											atTownPortal(game.state)
