@@ -98,7 +98,6 @@ type TownMapProps = {
 	travelLabel?: string;
 	portalFloor?: number;
 	interactionLabel?: string;
-	flameRecovered?: boolean;
 	onCharacterRequested?: () => void;
 	onPotionRequested?: (slot: HotbarSlot) => void;
 };
@@ -178,7 +177,6 @@ const TownMap = ({
 	travelLabel = "Enter dungeon",
 	portalFloor,
 	interactionLabel = "Inspect nearby",
-	flameRecovered = false,
 	onCharacterRequested,
 	onPotionRequested,
 }: TownMapProps) => {
@@ -401,7 +399,6 @@ const TownMap = ({
 				{!preview && (
 					<div className="w-full min-w-0 max-w-[480px]">
 						<TownWelcome
-							flameRecovered={flameRecovered}
 							portalNotice={townPortalMessage(
 								portalFloor
 									? { floorNumber: portalFloor, coordinate: TOWN.portal }
