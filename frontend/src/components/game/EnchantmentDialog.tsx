@@ -104,14 +104,12 @@ const EnchantmentDialog = ({
 	equipment,
 	bag,
 	alive,
-	inTown,
 	onAction,
 	onLastScroll,
 }: {
 	equipment: Equipment;
 	bag: Bag;
 	alive: boolean;
-	inTown: boolean;
 	onAction: (action: PlayerAction) => void;
 	// Reading the last scroll removes it, and this dialog with it; focus moves on first.
 	onLastScroll: () => void;
