@@ -1,4 +1,5 @@
 import { ITEM_DEFINITIONS, type ItemKind } from "../items/Item";
+import { updateCombatMetrics } from "./CombatTelemetry";
 import type { GameState } from "./GameState";
 import type { SpellKind } from "./Spells";
 
@@ -52,7 +53,7 @@ export const recordSpellUse = (
 ): GameState =>
 	state.usage
 		? {
-				...state,
+				...recordLocalUsage(state, "casts", spell),
 				usage: {
 					...state.usage,
 					casts: {
@@ -66,12 +67,13 @@ export const recordSpellUse = (
 export const recordConsumableUse = (
 	state: GameState,
 	kind: ItemKind,
+	floor?: number | null,
 ): GameState => {
 	if (!state.usage || !USAGE_CONSUMABLE_KINDS.includes(kind as ConsumableKind))
 		return state;
 	const consumed = kind as ConsumableKind;
 	return {
-		...state,
+		...recordLocalUsage(state, "consumables", consumed, floor),
 		usage: {
 			...state.usage,
 			consumables: {
@@ -87,12 +89,41 @@ export const recordConsumableUse = (
 // Two rings of the same kind count as one turn of wearing that kind, not two.
 export const recordEquippedTurn = (state: GameState): GameState => {
 	if (!state.usage) return state;
-	const equippedTurns = { ...state.usage.equippedTurns };
-	for (const kind of new Set(
+	const kinds = new Set(
 		Object.values(state.equipment).flatMap((item) =>
 			item ? [item.kind as EquipmentKind] : [],
 		),
-	))
+	);
+	const equippedTurns = { ...state.usage.equippedTurns };
+	for (const kind of kinds)
 		equippedTurns[kind] = (equippedTurns[kind] ?? 0) + 1;
-	return { ...state, usage: { ...state.usage, equippedTurns } };
+	const measured = kinds.size
+		? updateCombatMetrics(state, (m) => {
+				const local = { ...m.usage.equippedTurns };
+				for (const kind of kinds) local[kind] = (local[kind] ?? 0) + 1;
+				return { ...m, usage: { ...m.usage, equippedTurns: local } };
+			})
+		: state;
+	return { ...measured, usage: { ...state.usage, equippedTurns } };
 };
+
+const recordLocalUsage = (
+	state: GameState,
+	counter: keyof RunUsage,
+	kind: string,
+	floor?: number | null,
+): GameState =>
+	updateCombatMetrics(
+		state,
+		(m) => {
+			const counts = m.usage[counter] as Record<string, number>;
+			return {
+				...m,
+				usage: {
+					...m.usage,
+					[counter]: { ...counts, [kind]: (counts[kind] ?? 0) + 1 },
+				},
+			};
+		},
+		floor,
+	);

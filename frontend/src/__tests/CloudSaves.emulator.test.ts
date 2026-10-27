@@ -17,6 +17,10 @@ import {
 import { describe, expect, it } from "vitest";
 import { profileActions } from "../../server/Profile.ts";
 import { createCloudStore } from "../accounts/CloudSaves";
+import {
+	emptyCombatMetrics,
+	emptyCombatTelemetry,
+} from "../domain/game/CombatTelemetry";
 import { createFloorTelemetry } from "../domain/game/FloorTelemetry";
 import { resolvePlayerAction } from "../domain/game/PlayerActions";
 import {
@@ -97,7 +101,7 @@ describe.skipIf(!authHost || !firestoreHost)(
 			expect(await store.get("save")).toBeNull();
 		});
 
-		it("preserves usage and floor checkpoints through compressed cloud save and deterministic continuation", async () => {
+		it("preserves usage, checkpoints and combat counters through compressed cloud save and deterministic continuation", async () => {
 			const { app, uid } = await player();
 			const store = createCloudStore(app, uid, firestoreHost);
 			const document = savedAdventure();
@@ -109,6 +113,16 @@ describe.skipIf(!authHost || !firestoreHost)(
 			document.state.floorTelemetry = createFloorTelemetry(
 				restoreSave(document).state,
 			);
+			document.state.combatTelemetry = {
+				...emptyCombatTelemetry(),
+				floors: {
+					[document.state.run.activeFloor]: {
+						...emptyCombatMetrics(),
+						damage: { trap: 3 },
+						healing: { potion: 2 },
+					},
+				},
+			};
 			const original = restoreSave(document).state;
 			expect(
 				await store.put(
@@ -125,6 +139,7 @@ describe.skipIf(!authHost || !firestoreHost)(
 			const loaded = restoreSave(parsed.value).state;
 			expect(loaded.usage).toEqual(document.state.usage);
 			expect(loaded.floorTelemetry).toEqual(document.state.floorTelemetry);
+			expect(loaded.combatTelemetry).toEqual(document.state.combatTelemetry);
 			expect(resolvePlayerAction(loaded, { type: "wait" }).state).toEqual(
 				resolvePlayerAction(original, { type: "wait" }).state,
 			);

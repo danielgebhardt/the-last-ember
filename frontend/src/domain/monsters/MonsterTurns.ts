@@ -12,6 +12,7 @@ import {
 	createAttackRolls,
 } from "../game/CombatRandomness";
 import { deriveCombatStats } from "../game/CombatStats";
+import { recordMonsterDamageBatch } from "../game/CombatTelemetry";
 import type { GameState } from "../game/GameState";
 import {
 	attackProfile,
@@ -665,7 +666,7 @@ export const resolveMonsterPhase = (
 	const afflicted = infections.reduce(
 		(next, { kind, source }) => applyPlayerAffliction(next, kind, source),
 		{
-			...state,
+			...recordMonsterDamageBatch(state, events),
 			player,
 			mana,
 			gold,

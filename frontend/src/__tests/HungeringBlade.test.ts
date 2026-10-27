@@ -1,5 +1,6 @@
 // @vitest-environment node
 import { describe, expect, it } from "vitest";
+import { emptyCombatTelemetry } from "../domain/game/CombatTelemetry";
 import { createGameState, type GameState } from "../domain/game/GameState";
 import { damageMonster } from "../domain/game/MonsterDamage";
 import { resolvePlayerAction } from "../domain/game/PlayerActions";
@@ -61,7 +62,11 @@ describe("Hungering Blade", () => {
 	});
 
 	it("drains 1 health every 15 turns without a kill, never the last, and a kill sates it", () => {
-		const bound = wield(quiet());
+		const bound = wield({
+			...quiet(),
+			combatTelemetry: emptyCombatTelemetry(),
+		});
+		expect(wait(bound, 30).combatTelemetry?.floors[1]?.damage.blade).toBe(2);
 		expect(wait(bound, 14).player.health).toBe(20);
 		expect(wait(bound, 15).player.health).toBe(19);
 		expect(wait(bound, 30).player.health).toBe(18);

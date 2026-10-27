@@ -5,6 +5,7 @@ import {
 	type AfflictionKind,
 	afflictionModifiers,
 } from "./AfflictionDefinitions";
+import { recordDamageTaken } from "./CombatTelemetry";
 import type { GameState } from "./GameState";
 import { maximumMana } from "./Mana";
 import { perkAdjustedAffliction } from "./PerkEffects";
@@ -136,7 +137,10 @@ const conditionDamage = (
 		const damage = Math.min(next.player.health, amount);
 		const health = next.player.health - damage;
 		next = {
-			...next,
+			...recordDamageTaken(next, damage, {
+				source: "condition",
+				condition: kind,
+			}),
 			player: { ...next.player, health },
 			activityHistory: appendActivityEvents(next.activityHistory, [
 				{

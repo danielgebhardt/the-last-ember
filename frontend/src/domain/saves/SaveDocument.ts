@@ -38,6 +38,7 @@ export type SaveDocument = {
 		| "runId"
 		| "usage"
 		| "floorTelemetry"
+		| "combatTelemetry"
 		| "encounters"
 		| "townEquipmentStock"
 		| "townEquipmentPurchases"

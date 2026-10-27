@@ -8,6 +8,7 @@ import { goldAmount } from "../objects/Gold";
 import { mimicChestDrop } from "../objects/MimicChests";
 import { mirrorFor, reflectionDrop } from "../objects/MirrorOfShadows";
 import { type ActivityEvent, appendActivityEvents } from "./ActivityHistory";
+import { recordDefeat } from "./CombatTelemetry";
 import type { DamageElement } from "./DamageElements";
 import { experienceReward } from "./ExperienceRewards";
 import type { GameState } from "./GameState";
@@ -155,7 +156,7 @@ export const damageMonster = (
 				)
 			: state.monsters.filter((actor) => actor.id !== monster.id);
 	const next: GameState = {
-		...state,
+		...(health === 0 ? recordDefeat(state, monster) : state),
 		monsters,
 		gold: state.gold + gold + recovered,
 		effects: state.effects.some(

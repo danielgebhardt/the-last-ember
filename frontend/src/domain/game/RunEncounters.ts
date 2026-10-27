@@ -1,5 +1,6 @@
 import type { VisibilityGrid } from "../dungeon/Visibility";
 import { isThief } from "../monsters/TreasureThief";
+import { recordPressure } from "./CombatTelemetry";
 import type { GameState } from "./GameState";
 import type { OmenKind } from "./Omens";
 
@@ -88,7 +89,7 @@ export const recordRunEncounters = (
 	)
 		return after;
 	return {
-		...after,
+		...recordPressure(after, "thief-met", thieves.size - facts.thieves.length),
 		encounters: {
 			sinceTurn: facts.sinceTurn,
 			omens: [...omens],

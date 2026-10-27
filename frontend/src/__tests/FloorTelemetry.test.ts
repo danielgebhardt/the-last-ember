@@ -5,6 +5,7 @@ import {
 	DEFAULT_FOG_CONFIGURATION,
 	DEFAULT_RUN_CONFIGURATION,
 } from "../domain/dungeon/RunConfiguration";
+import { emptyCombatTelemetry } from "../domain/game/CombatTelemetry";
 import {
 	captureCheckpoint,
 	createFloorTelemetry,
@@ -109,6 +110,7 @@ it("closes a portal-scroll visit after its committed turn and records free retur
 	const start = track({
 		...game(),
 		bag: createBag([{ id: "portal", kind: "exit-scroll" }]),
+		combatTelemetry: emptyCombatTelemetry(),
 	});
 	const exited = act(start, { type: "exit-dungeon", itemId: "portal" });
 	expect(floor(exited, 4)?.lastExit).toEqual({
@@ -121,6 +123,16 @@ it("closes a portal-scroll visit after its committed turn and records free retur
 	expect(exited.floorTelemetry?.activeFloor).toBeNull();
 	const returned = act(exited, { type: "return-town-portal" });
 	expect(returned.turn).toBe(exited.turn);
+	expect(
+		exited.combatTelemetry?.floors[4]?.usage.consumables["exit-scroll"],
+	).toBe(1);
+	expect(exited.combatTelemetry?.town.usage.consumables).toEqual({});
+	expect(exited.combatTelemetry?.floors[4]?.pressure["town-scroll-used"]).toBe(
+		1,
+	);
+	expect(
+		returned.combatTelemetry?.floors[4]?.pressure["town-portal-returned"],
+	).toBe(1);
 	expect(floor(returned, 4)?.visits).toBe(2);
 	expect(floor(returned, 4)?.firstEntry.supplies).toEqual({ "exit-scroll": 1 });
 });

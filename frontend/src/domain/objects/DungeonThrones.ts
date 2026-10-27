@@ -2,6 +2,7 @@ import { hashStringToUint32 } from "../dungeon/DungeonRun";
 import { createSeededRandom } from "../dungeon/Seed";
 import { appendActivityEvents } from "../game/ActivityHistory";
 import { applyPlayerAffliction } from "../game/Afflictions";
+import { recordHealing } from "../game/CombatTelemetry";
 import { awardExperience } from "../game/ExperienceRewards";
 import type { GameState } from "../game/GameState";
 import { maximumMana } from "../game/Mana";
@@ -83,7 +84,7 @@ export const resolveThroneChoice = (
 		next = awardExperience(next, 40 + object.floorNumber * 6);
 	} else if (outcome === "recovery") {
 		next = {
-			...next,
+			...recordHealing(next, 8, "throne"),
 			player: {
 				...next.player,
 				health: Math.min(next.player.maxHealth, next.player.health + 8),

@@ -4,6 +4,7 @@ import {
 	type AfflictionKind,
 } from "../game/AfflictionDefinitions";
 import { removePlayerAfflictions } from "../game/Afflictions";
+import { recordHealing } from "../game/CombatTelemetry";
 import type { GameState } from "../game/GameState";
 import { maximumHealth } from "../game/PlayerHealth";
 import { canReachOpenBuilding } from "./TownServices";
@@ -124,7 +125,7 @@ export const treatAtSanctuary = (state: GameState, action: SanctuaryAction) => {
 	const treated = removePlayerAfflictions(state, quote.conditions, "Sanctuary");
 	return {
 		state: {
-			...treated,
+			...recordHealing(treated, quote.health, "sanctuary"),
 			gold: state.gold - quote.cost,
 			player: {
 				...treated.player,

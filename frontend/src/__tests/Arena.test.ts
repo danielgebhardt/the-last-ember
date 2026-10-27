@@ -28,6 +28,7 @@ import {
 } from "../domain/dungeon/DungeonRun";
 import { updateExploration } from "../domain/dungeon/Exploration";
 import { DEFAULT_FOG_CONFIGURATION } from "../domain/dungeon/RunConfiguration";
+import { emptyCombatTelemetry } from "../domain/game/CombatTelemetry";
 import { createGameState, type GameState } from "../domain/game/GameState";
 import { damageMonster } from "../domain/game/MonsterDamage";
 import { resolvePlayerAction } from "../domain/game/PlayerActions";
@@ -169,7 +170,7 @@ describe("Arenas", () => {
 	});
 
 	it("warns at the gate, then enters in one step with no way back", () => {
-		const state = atGate();
+		const state = { ...atGate(), combatTelemetry: emptyCombatTelemetry() };
 		const gate = state.objects.find((o) => o.id === arenaGateId(6));
 		if (!gate) throw new Error("Expected the gate");
 		const offset = {
@@ -188,6 +189,12 @@ describe("Arenas", () => {
 		expect(bumped.turnAdvanced).toBe(false);
 		expect(bumped.error).toBe(GATE_REFUSAL);
 		const entered = enter(state);
+		expect(entered.combatTelemetry?.floors[6]?.pressure["arena-entered"]).toBe(
+			1,
+		);
+		expect(
+			entered.combatTelemetry?.floors[5]?.pressure["arena-entered"],
+		).toBeUndefined();
 		expect(entered.run.activeFloor).toBe(6);
 		expect(entered.run.playerCoordinate).toEqual(ARENA_UP_STAIR);
 		expect(entered.objects.find((o) => o.id === gate.id)?.activated).toBe(true);
@@ -234,7 +241,10 @@ describe("Arenas", () => {
 	});
 
 	it("opens the exit and restores you when nothing in the hall stands, and saves it", () => {
-		const entered = enter(atGate());
+		const entered = enter({
+			...atGate(),
+			combatTelemetry: emptyCombatTelemetry(),
+		});
 		const wounded = {
 			...entered,
 			player: { ...entered.player, health: 1 },
@@ -246,6 +256,13 @@ describe("Arenas", () => {
 			type: "player-hit",
 		});
 		const won = act(slain).state;
+		expect(won.combatTelemetry?.floors[6]?.pressure["arena-cleared"]).toBe(1);
+		expect(won.combatTelemetry?.floors[6]?.healing.arena).toBe(
+			slain.player.maxHealth - slain.player.health,
+		);
+		expect(
+			act(won).state.combatTelemetry?.floors[6]?.pressure["arena-cleared"],
+		).toBe(1);
 		expect(won.objects.find((o) => o.id === arenaDoorId(6))?.activated).toBe(
 			true,
 		);

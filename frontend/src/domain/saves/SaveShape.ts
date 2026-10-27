@@ -10,6 +10,11 @@ import {
 	type ActivityEvent,
 } from "../game/ActivityHistory";
 import { AFFLICTION_DEFINITIONS } from "../game/AfflictionDefinitions";
+import {
+	DAMAGE_SOURCES,
+	HEALING_SOURCES,
+	PRESSURE_EVENTS,
+} from "../game/CombatTelemetry";
 import { DAMAGE_ELEMENTS } from "../game/DamageElements";
 import { isDifficulty } from "../game/Difficulty";
 import { FLOOR_EXIT_REASONS } from "../game/FloorTelemetry";
@@ -135,6 +140,39 @@ const item: Schema = (value) =>
 	(value.enchantment === undefined ||
 		(integer(1, MAX_ENCHANTMENT)(value.enchantment) &&
 			isEnchantableKind(value.kind as keyof typeof ITEM_DEFINITIONS)));
+const combatMetrics = exactObject({
+	damage: usageCounts(DAMAGE_SOURCES),
+	damageByMonster: usageCounts(Object.keys(MONSTER_DEFINITIONS)),
+	damageByCondition: usageCounts(Object.keys(AFFLICTION_DEFINITIONS)),
+	healing: usageCounts(HEALING_SOURCES),
+	defeated: usageCounts(Object.keys(MONSTER_DEFINITIONS)),
+	heroicDefeated: natural,
+	summonedDefeated: natural,
+	pressure: usageCounts(PRESSURE_EVENTS),
+	omens: usageCounts(OMEN_KINDS),
+	pacts: usageCounts(PACT_KINDS),
+	usage,
+	death: optional(
+		exactObject({
+			source: oneOf(DAMAGE_SOURCES),
+			monster: optional(oneOf(Object.keys(MONSTER_DEFINITIONS))),
+			condition: optional(oneOf(Object.keys(AFFLICTION_DEFINITIONS))),
+			spell: optional(oneOf(Object.keys(SPELL_DEFINITIONS))),
+		}),
+	),
+});
+const combatTelemetry: Schema = (value) =>
+	exactObject({
+		floors: (value) =>
+			record(value) &&
+			Object.entries(value).every(
+				([key, metrics]) =>
+					/^[1-9][0-9]?$/.test(key) &&
+					floorNumber(Number(key)) &&
+					combatMetrics(metrics),
+			),
+		town: combatMetrics,
+	})(value) && JSON.stringify(value).length <= 128 * 1024;
 const checkpoint = exactObject({
 	gameVersion: (value) =>
 		typeof value === "string" &&
@@ -592,6 +630,7 @@ const documentShape = object({
 		developerRun: optional((value) => value === true),
 		usage: optional(usage),
 		floorTelemetry: optional(floorTelemetry),
+		combatTelemetry: optional(combatTelemetry),
 		disabledFeatures: optional(
 			array(
 				oneOf([

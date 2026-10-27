@@ -8,6 +8,7 @@ import {
 import { navigationRun } from "../objects/NavigationTerrain";
 import { appendActivityEvents } from "./ActivityHistory";
 import type { AttackRollSource } from "./CombatRandomness";
+import { recordDamageTaken } from "./CombatTelemetry";
 import type { GameState } from "./GameState";
 import { damageMonster } from "./MonsterDamage";
 import { omenSpellDamage } from "./Omens";
@@ -132,7 +133,7 @@ export const castAreaSpell = (
 		const damage = Math.min(next.player.health, omenSpellDamage(state, rolled));
 		const health = next.player.health - damage;
 		next = {
-			...next,
+			...recordDamageTaken(next, damage, { source: "self-spell", spell }),
 			player: { ...next.player, health },
 			activityHistory: appendActivityEvents(next.activityHistory, [
 				{ type: "player-spell-hit", spell, damage, turn: state.turn },

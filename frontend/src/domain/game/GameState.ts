@@ -52,6 +52,7 @@ import {
 } from "./ActivityHistory.ts";
 import { createQuest, type QuestState } from "./Adventure";
 import type { ActiveAffliction } from "./AfflictionDefinitions";
+import type { CombatTelemetry } from "./CombatTelemetry";
 import {
 	applyDeveloperExclusions,
 	type DeveloperFeature,
@@ -95,6 +96,7 @@ export type GameState = {
 	runId?: string;
 	usage?: RunUsage;
 	floorTelemetry?: FloorTelemetry;
+	combatTelemetry?: CombatTelemetry;
 	// A wielded Hungering Blade's binding and the turn of its last kill.
 	hunger?: Readonly<{ fedTurn: number }>;
 	// Floors where a Ring of Displacement has already fired this adventure.

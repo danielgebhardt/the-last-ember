@@ -3,6 +3,7 @@ import { expect, it } from "vitest";
 import { formatActivityEvent } from "../components/game/ActivityMessages";
 import { updateExploration } from "../domain/dungeon/Exploration";
 import { DEFAULT_FOG_CONFIGURATION } from "../domain/dungeon/RunConfiguration";
+import { emptyCombatTelemetry } from "../domain/game/CombatTelemetry";
 import { createGameState, type GameState } from "../domain/game/GameState";
 import { resolvePlayerAction } from "../domain/game/PlayerActions";
 import type { Monster } from "../domain/monsters/Monster";
@@ -104,10 +105,13 @@ const saved = (state: GameState) =>
 	);
 
 it("restores full health and mana and empowers this floor's survivors once", () => {
-	const state = encounter();
+	const state = { ...encounter(), combatTelemetry: emptyCombatTelemetry() };
 	const result = turn(state);
 	expect(result.turnAdvanced).toBe(true);
 	const after = result.state;
+	expect(after.combatTelemetry?.floors[8]?.healing.hourglass).toBe(
+		state.player.maxHealth - state.player.health,
+	);
 	expect(after.objects[0].activated).toBe(true);
 	// Monsters act after the recovery, but the goblin is far away and can't reach you.
 	expect(after.player.health).toBe(after.player.maxHealth);

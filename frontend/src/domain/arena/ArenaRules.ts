@@ -5,6 +5,7 @@ import {
 } from "../dungeon/DungeonRun";
 import type { Coordinate } from "../dungeon/DungeonTypes";
 import { appendActivityEvents } from "../game/ActivityHistory";
+import { recordHealing, recordPressure } from "../game/CombatTelemetry";
 import type { GameState } from "../game/GameState";
 import { maximumMana } from "../game/Mana";
 import { orthogonalDistance } from "../monsters/MonsterLocations";
@@ -96,7 +97,7 @@ export const enterArena = (
 	if (!arena || moved.activeFloor === state.run.activeFloor)
 		return { error: "The arena gate will not open." };
 	return {
-		...state,
+		...recordPressure(state, "arena-entered", 1, moved.activeFloor),
 		objects,
 		run: {
 			...state.run,
@@ -135,7 +136,14 @@ export const resolveArenas = (state: GameState): GameState => {
 			next.afflictions,
 		);
 		next = {
-			...next,
+			...recordPressure(
+				recordHealing(
+					next,
+					next.player.maxHealth - next.player.health,
+					"arena",
+				),
+				"arena-cleared",
+			),
 			objects: next.objects.map((o) =>
 				o.id === arenaDoorId(arena.floorNumber) ? { ...o, activated: true } : o,
 			),

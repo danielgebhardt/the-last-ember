@@ -73,6 +73,9 @@ export const createSaveDocument = (
 			? { disabledFeatures: [...state.disabledFeatures] }
 			: {}),
 		...(state.runId ? { runId: state.runId } : {}),
+		...(state.combatTelemetry
+			? { combatTelemetry: structuredClone(state.combatTelemetry) }
+			: {}),
 		...(state.floorTelemetry
 			? { floorTelemetry: structuredClone(state.floorTelemetry) }
 			: {}),

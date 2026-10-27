@@ -95,6 +95,7 @@ import {
 } from "./Afflictions";
 import { type AttackRollSource, createAttackRolls } from "./CombatRandomness";
 import { deriveCombatStats } from "./CombatStats";
+import { recordHealing, recordPressure } from "./CombatTelemetry";
 import { activateEscapeFloor } from "./Escape";
 import { recordFinalCheckpoint, recordFloorTransition } from "./FloorTelemetry";
 import type { GameState } from "./GameState.ts";
@@ -177,8 +178,30 @@ export const resolvePlayerAction = (
 				: action.type === "interact"
 					? "runic-portal"
 					: "stairs";
+	let measured = result.state;
+	if (!state.town && result.state.town)
+		measured = recordPressure(
+			measured,
+			action.type === "exit-dungeon" ? "town-scroll-used" : "town-gate-exit",
+			1,
+			state.run.activeFloor,
+		);
+	if (action.type === "return-town-portal")
+		measured = recordPressure(measured, "town-portal-returned");
+	if (
+		!state.town &&
+		!result.state.town &&
+		reason === "stairs" &&
+		result.state.run.activeFloor < state.run.activeFloor
+	)
+		measured = recordPressure(
+			measured,
+			"upward-stairs",
+			1,
+			state.run.activeFloor,
+		);
 	const observed = recordFinalCheckpoint(
-		recordFloorTransition(state, result.state, reason),
+		recordFloorTransition(state, measured, reason),
 	);
 	return observed === result.state ? result : { ...result, state: observed };
 };
@@ -477,7 +500,7 @@ const resolveCommittedEffect = (
 		const result = readExitScroll(state, action);
 		return "error" in result
 			? result
-			: recordConsumableUse(result, "exit-scroll");
+			: recordConsumableUse(result, "exit-scroll", state.run.activeFloor);
 	}
 	if (action.type === "enchant") {
 		const result = enchantEquipment(state, action);
@@ -501,7 +524,12 @@ const resolveCommittedEffect = (
 		if ("error" in consumed) return consumed;
 		return recordConsumableUse(
 			{
-				...state,
+				...recordHealing(
+					state,
+					consumed.player.health - state.player.health,
+					"potion",
+					consumed.player.maxHealth,
+				),
 				player: consumed.player,
 				...(consumed.afflictions !== undefined
 					? { afflictions: consumed.afflictions }

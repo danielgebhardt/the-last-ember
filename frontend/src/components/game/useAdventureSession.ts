@@ -10,6 +10,7 @@ import type {
 	RunConfiguration,
 } from "../../domain/dungeon/RunConfiguration";
 import { appendActivityEvents } from "../../domain/game/ActivityHistory";
+import { emptyCombatTelemetry } from "../../domain/game/CombatTelemetry";
 import type { DeveloperFeature } from "../../domain/game/DeveloperFeatures";
 import { createFloorTelemetry } from "../../domain/game/FloorTelemetry";
 import { createGameState } from "../../domain/game/GameState";
@@ -83,6 +84,7 @@ export const createAdventureSession = (
 			runId: crypto.randomUUID(),
 			encounters: emptyRunEncounters(0),
 			floorTelemetry: createFloorTelemetry(starting),
+			combatTelemetry: emptyCombatTelemetry(),
 			...(ranked && !disabled.length && !isTestSeed(seed)
 				? { ranked: true as const, rankingVersion: GAME_VERSION }
 				: {}),

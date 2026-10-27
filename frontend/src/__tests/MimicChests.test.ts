@@ -5,6 +5,7 @@ import {
 	generateDungeonRun,
 } from "../domain/dungeon/DungeonRun";
 import { FLOOR } from "../domain/dungeon/Tiles";
+import { emptyCombatTelemetry } from "../domain/game/CombatTelemetry";
 import { createGameState, type GameState } from "../domain/game/GameState";
 import { damageMonster } from "../domain/game/MonsterDamage";
 import { resolvePlayerAction } from "../domain/game/PlayerActions";
@@ -108,7 +109,15 @@ describe("Mimic chests", () => {
 
 	it("wakes beside you instead of giving loot, then drops the chest's loot plus its own when slain", () => {
 		const { state, chest } = besideMimic();
-		const opened = open(state, chest);
+		const opened = open(
+			{ ...state, combatTelemetry: emptyCombatTelemetry() },
+			chest,
+		);
+		expect(
+			opened.combatTelemetry?.floors[chest.floorNumber]?.pressure[
+				"mimic-revealed"
+			],
+		).toBe(1);
 		expect(opened.objects.find((o) => o.id === chest.id)?.activated).toBe(true);
 		const mimic = opened.monsters.find(isMimic);
 		expect(mimic).toMatchObject({

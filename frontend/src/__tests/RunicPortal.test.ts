@@ -3,6 +3,7 @@ import { expect, it } from "vitest";
 import { formatActivityEvent } from "../components/game/ActivityMessages";
 import { updateExploration } from "../domain/dungeon/Exploration";
 import { DEFAULT_FOG_CONFIGURATION } from "../domain/dungeon/RunConfiguration";
+import { emptyCombatTelemetry } from "../domain/game/CombatTelemetry";
 import { createFloorTelemetry } from "../domain/game/FloorTelemetry";
 import { createGameState, type GameState } from "../domain/game/GameState";
 import { resolvePlayerAction } from "../domain/game/PlayerActions";
@@ -121,7 +122,14 @@ it("sets you down beside a deeper floor's down stair for one turn", () => {
 	const seed = seedFor(8);
 	const initial = encounter(seed);
 	initial.floorTelemetry = createFloorTelemetry(initial);
+	initial.combatTelemetry = emptyCombatTelemetry();
 	const result = enter(initial);
+	expect(
+		result.state.combatTelemetry?.floors[5]?.pressure["runic-portal-used"],
+	).toBe(1);
+	expect(
+		result.state.combatTelemetry?.floors[8]?.pressure["runic-portal-used"],
+	).toBeUndefined();
 	expect(
 		result.state.floorTelemetry?.floors.find((floor) => floor.floorNumber === 5)
 			?.lastExit?.reason,
@@ -154,7 +162,13 @@ it("sets you down beside a deeper floor's down stair for one turn", () => {
 });
 
 it("can lead to this floor's own way down without a floor change", () => {
-	const result = enter(encounter(seedFor(5)));
+	const result = enter({
+		...encounter(seedFor(5)),
+		combatTelemetry: emptyCombatTelemetry(),
+	});
+	expect(
+		result.state.combatTelemetry?.floors[5]?.pressure["runic-portal-used"],
+	).toBe(1);
 	expect(result.state.run.activeFloor).toBe(5);
 	expect(
 		result.state.activityHistory.entries.some(

@@ -1,6 +1,7 @@
 import { orthogonalDistance } from "../monsters/MonsterLocations";
 import { foresees } from "../objects/SeersSight";
 import { appendActivityEvents } from "./ActivityHistory";
+import { recordOmen } from "./CombatTelemetry";
 import type { GameState } from "./GameState";
 import { type OmenKind, omenAt } from "./Omens";
 
@@ -30,7 +31,7 @@ export const announceOmens = (
 	if (!here && !seen) return after;
 	const next = stair ? omenAt(after, stair.destinationFloor) : undefined;
 	return {
-		...after,
+		...(here ? recordOmen(after, here) : after),
 		activityHistory: appendActivityEvents(after.activityHistory, [
 			...(here
 				? [{ type: "omen-revealed" as const, omen: here, turn: after.turn }]

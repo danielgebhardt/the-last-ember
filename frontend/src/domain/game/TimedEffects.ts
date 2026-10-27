@@ -1,5 +1,6 @@
 import type { Monster } from "../monsters/Monster";
 import { appendActivityEvents } from "./ActivityHistory";
+import { recordHealing } from "./CombatTelemetry";
 import type { GameState } from "./GameState";
 import { maximumMana } from "./Mana";
 import { damageMonster } from "./MonsterDamage";
@@ -135,7 +136,7 @@ export const advanceTimedEffects = (state: GameState): GameState => {
 			);
 			if (recovered > 0)
 				next = {
-					...next,
+					...recordHealing(next, recovered, "renewal"),
 					player: { ...next.player, health: next.player.health + recovered },
 					activityHistory: appendActivityEvents(next.activityHistory, [
 						{

@@ -1,4 +1,5 @@
 import { appendActivityEvents } from "../game/ActivityHistory";
+import { recordHealing } from "../game/CombatTelemetry";
 import type { GameState } from "../game/GameState";
 import { maximumMana } from "../game/Mana";
 import { actorMaximumHealth } from "../monsters/MonsterStats";
@@ -57,7 +58,11 @@ export const turnHourglass = (
 	const spent = spendObject(state, object);
 	const mana = fullMana(state);
 	return {
-		...spent,
+		...recordHealing(
+			spent,
+			spent.player.maxHealth - spent.player.health,
+			"hourglass",
+		),
 		player: { ...spent.player, health: spent.player.maxHealth },
 		mana,
 		// Keep each survivor's missing fraction of its now larger maximum, rounding up.

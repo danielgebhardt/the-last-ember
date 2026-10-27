@@ -2,6 +2,7 @@ import { hashStringToUint32 } from "../dungeon/DungeonRun";
 import { createSeededRandom } from "../dungeon/Seed";
 import { appendActivityEvents } from "../game/ActivityHistory";
 import { applyPlayerAffliction } from "../game/Afflictions";
+import { recordHealing } from "../game/CombatTelemetry";
 import type { GameState } from "../game/GameState";
 import { maximumMana } from "../game/Mana";
 import { PACT_REFUSAL, pactSilences } from "../game/Pacts";
@@ -76,7 +77,7 @@ export const drawFountain = (
 		maximum - state.mana,
 	);
 	return {
-		...spent,
+		...recordHealing(spent, health, "fountain"),
 		player: { ...state.player, health: state.player.health + health },
 		mana: state.mana + mana,
 		activityHistory: appendActivityEvents(state.activityHistory, [

@@ -6,6 +6,7 @@ import { navigationRun } from "../objects/NavigationTerrain";
 import { appendActivityEvents } from "./ActivityHistory";
 import { castAreaSpell } from "./AreaSpells";
 import type { AttackRollSource } from "./CombatRandomness";
+import { recordHealing } from "./CombatTelemetry";
 import type { GameState } from "./GameState";
 import { damageMonster } from "./MonsterDamage";
 import { omenSpellDamage } from "./Omens";
@@ -66,7 +67,7 @@ export const castSpell = (
 		const turn = state.turn;
 		return {
 			state: {
-				...state,
+				...recordHealing(state, recovered, "spell"),
 				mana: state.mana - definition.cost,
 				player: { ...state.player, health: state.player.health + recovered },
 				activityHistory: appendActivityEvents(state.activityHistory, [
@@ -148,7 +149,7 @@ export const castSpell = (
 		);
 		if (recovered > 0)
 			damaged = {
-				...damaged,
+				...recordHealing(damaged, recovered, "drain-life"),
 				player: {
 					...damaged.player,
 					health: damaged.player.health + recovered,

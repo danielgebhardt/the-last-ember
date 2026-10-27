@@ -1,4 +1,5 @@
 import { appendActivityEvents } from "../game/ActivityHistory";
+import { recordDamageTaken } from "../game/CombatTelemetry";
 import type { GameState } from "../game/GameState";
 import { removeAfflictions } from "../game/PlayerAfflictions";
 import { removeBagItem } from "./Bag";
@@ -79,7 +80,7 @@ export const hungerAfterTurn = (state: GameState): GameState => {
 	const hungry = state.turn - state.hunger.fedTurn;
 	if (hungry <= 0 || hungry % drain.phasesPerDrain !== 0) return state;
 	return {
-		...state,
+		...recordDamageTaken(state, 1, { source: "blade" }),
 		player: { ...state.player, health: state.player.health - 1 },
 		activityHistory: appendActivityEvents(state.activityHistory, [
 			{ type: "blade-hungers", turn: state.turn },

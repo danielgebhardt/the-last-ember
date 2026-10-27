@@ -1,5 +1,6 @@
 // @vitest-environment node
 import { expect, it } from "vitest";
+import { emptyCombatTelemetry } from "../domain/game/CombatTelemetry";
 import { createGameState } from "../domain/game/GameState";
 import { resolvePlayerAction } from "../domain/game/PlayerActions";
 import { SPELL_DEFINITIONS } from "../domain/game/Spells";
@@ -50,6 +51,7 @@ it("drains only actual lost monster health, caps healing and resolves it before 
 	const state = {
 		...createGameState(createCorridorEncounter()),
 		player: { health: 2, maxHealth: 10 },
+		combatTelemetry: emptyCombatTelemetry(),
 		knownSpells: ["drain-life"] as const,
 		monsters: [
 			{
@@ -68,6 +70,7 @@ it("drains only actual lost monster health, caps healing and resolves it before 
 		lowRolls,
 	).state;
 	expect(after.player.health).toBe(3);
+	expect(after.combatTelemetry?.floors[1]?.healing["drain-life"]).toBe(1);
 	expect(after.monsters).toEqual([]);
 	expect(
 		after.activityHistory.entries.some(

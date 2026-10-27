@@ -95,8 +95,8 @@ Snapshots contain the game version at capture, turn, level/XP, effective STR/DEX
 chance, magic resistance, current/max HP and mana, carried gold, carried
 potion/scroll counts, and equipped kinds/enchantments. They use the existing
 combat/resource derivations. Equipment physical IDs and town stock are omitted.
-Usage remains owned by #430's counters; per-floor usage and source breakdowns
-are later slices, not independently recounted here.
+Usage remains owned by #430's counters; the combat collection slice below mirrors
+those same confirmed increments into per-floor maps.
 
 Ordinary turns do only a location/end check; they neither scan inventory nor copy
 snapshots. The number of records is capped at the configured maximum of 20 floors,
@@ -106,7 +106,70 @@ inconsistent resources/slots, invalid exit destinations and final resource/equip
 facts that differ from the saved terminal state. Derived historical values are not
 recomputed against later balance rules or level curves when loading. Tests bound the checkpoint JSON to **128 KiB** across all 20 floors.
 
-This slice saves checkpoints in browser/cloud adventures only. Adding combat and
-economy counters, and projecting floor telemetry into finished-run statistics,
-remain separate review commits. No new request or Firestore statistics write is
-introduced by capturing checkpoints. No balance rules or RNG streams change.
+Checkpoints currently save in browser/cloud adventures only. Economy counters and
+projecting floor telemetry into finished-run statistics remain separate review
+commits. No new request or Firestore statistics write is introduced by capturing
+checkpoints. No balance rules or RNG streams change.
+
+## Combat, healing and encounter counters (#433, second collection slice)
+
+New sessions also initialize optional `state.combatTelemetry`. Missing telemetry
+is unknown, including adventures created before this slice; loading never adds
+it. Present telemetry has a sparse `floors` map and separate `town` counters.
+An omitted counter/key is measured zero. A floor without a reached checkpoint is
+not applicable. Repeated visits accumulate in the same floor's counters; they do
+not replace earlier measurements or grow a visit/event log.
+
+- **Damage:** HP actually lost, after existing mitigation/resistance and capped
+  at remaining HP. Categories are melee (including withdrawal, heavy and charge
+  hits), ranged shots, enemy spells (including areas and magical telegraphs),
+  traps, conditions, object costs/backlash, the player's own spell splash, and
+  Hungering Blade drain. Enemy-kind and condition-kind breakdowns supplement the
+  categories. Dodges, resisted/mitigated amounts, and HP-capacity reductions from
+  equipment, disease or pacts are not damage measurements. Each actual lethal
+  hit records its category and available monster/condition/spell kind once on
+  that floor; it does not infer a killer from the last log message.
+- **Healing:** actual HP restored, capped at missing HP, separately for potions
+  (including remedy/Field medic healing), Heal, Renewal, Drain Life, fountains,
+  thrones, hourglasses, arena clearance and paid sanctuary treatment. Town
+  treatment and town potion healing belong to `town`, rather than the last
+  dungeon floor. Mana recovery, maximum-HP growth from progression/perks, and
+  restored capacity without healing are excluded. Same-turn damage and healing
+  are counted independently, rather than from a net HP change.
+- **Defeats:** confirmed kills by monster kind, including spell/poison kills and
+  summoned enemies, matching the game's defeat counter. Separate heroic and
+  summoned subtotals allow summoned enemies to be excluded from reward analysis.
+  A repeated hit against an already removed monster adds nothing.
+- **Encounters:** arena entry belongs to the destination arena floor; clearance
+  counts once when its exit opens. Entry plus clearance/death indicates outcome.
+  A mimic counts when revealed; a thief counts only the first time its identity
+  enters visibility, using the existing durable encounter set. Revealed omens
+  count once per floor, excluding foresight previews; pacts count when accepted.
+  The existing adventure state retains the arena/miniboss, omen and pact kinds.
+- **Travel pressure:** successful runic portal uses count on the source floor,
+  including same-floor landings. Successful town-scroll exits and town gate
+  departures also count on their source floor; portal returns count on arrival.
+  `upward-stairs` counts completed stair transitions to a lower-numbered floor,
+  providing an explicit retreat measure without guessing intent from movement.
+  Canceled/rejected travel adds nothing. A consumed scroll whose response kills
+  the player counts as usage, but not as a successful town exit.
+- **Usage:** casts, consumed items and equipped turns reuse the exact #430
+  increments. Equipment turns belong to the floor occupied after the player
+  effect and before retaliation. Town consumption is separate; a town-scroll's
+  consumption belongs to its originating dungeon floor. Identical rings still
+  count once per turn. Summing local usage never exceeds the global maps.
+
+Counters update at confirmed effects. Monster phases process their already-built
+ordered event batch before the 100-entry log truncates it; they cap hits against
+remaining HP without replaying historical events. Ordinary actions copy only the
+changed floor's bounded maps, not old checkpoints or event histories. Counter
+keys are catalog/enumeration kinds, never player names or per-hit identities.
+The existing first-seen thief identity set is reused, not duplicated.
+
+Browser/cloud saves carry the same counters with no extra writes or requests.
+Validation accepts only known keys and safe nonnegative integers, checks source
+subtotals, death state, floor limits, and local/global usage consistency. A
+catalog-wide, twenty-floor plus town counter fixture is below **128 KiB**; the
+counter field also has a 128 KiB validation ceiling. This is separate from the
+checkpoint budget. The final submission slice will test the combined save and
+Firestore document budgets before projecting these fields into statistics.

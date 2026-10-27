@@ -1,6 +1,7 @@
 import { type DungeonRun, hashStringToUint32 } from "../dungeon/DungeonRun";
 import { createSeededRandom } from "../dungeon/Seed";
 import { appendActivityEvents } from "../game/ActivityHistory";
+import { recordPact } from "../game/CombatTelemetry";
 import { awardExperience } from "../game/ExperienceRewards";
 import type { GameState } from "../game/GameState";
 import { growManaCapacity } from "../game/Mana";
@@ -155,7 +156,7 @@ export const strikePact = (
 		state.afflictions,
 	);
 	const bound: GameState = {
-		...state,
+		...recordPact(state, kind),
 		progression,
 		player: {
 			maxHealth,

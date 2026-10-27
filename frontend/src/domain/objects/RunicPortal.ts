@@ -2,6 +2,7 @@ import { hashStringToUint32 } from "../dungeon/DungeonRun";
 import type { Coordinate } from "../dungeon/DungeonTypes";
 import { createSeededRandom } from "../dungeon/Seed";
 import { appendActivityEvents } from "../game/ActivityHistory";
+import { recordPressure } from "../game/CombatTelemetry";
 import type { GameState } from "../game/GameState";
 import { sarcophagusSpawn } from "./AncientSarcophagi";
 import type { DungeonObject } from "./DungeonObject";
@@ -104,7 +105,7 @@ export const stepThroughPortal = (
 	const spent = spendObject(state, object);
 	const fromFloor = state.run.activeFloor;
 	return {
-		...spent,
+		...recordPressure(spent, "runic-portal-used"),
 		objects: spent.objects.map((o) =>
 			o.id === object.id
 				? {

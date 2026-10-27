@@ -1,6 +1,7 @@
 import { hashStringToUint32 } from "../dungeon/DungeonRun";
 import { createSeededRandom } from "../dungeon/Seed";
 import { appendActivityEvents } from "../game/ActivityHistory";
+import { recordPressure } from "../game/CombatTelemetry";
 import type { GameState } from "../game/GameState";
 import type { FloorItem } from "../items/FloorItems";
 import { MONSTER_DEFINITIONS, type Monster } from "../monsters/Monster";
@@ -64,7 +65,7 @@ export const revealMimic = (
 		lastDamagedTurn: null,
 	};
 	return {
-		...state,
+		...recordPressure(state, "mimic-revealed"),
 		objects: state.objects.map((object) =>
 			object.id === chest.id ? { ...object, activated: true } : object,
 		),
