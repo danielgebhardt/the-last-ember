@@ -154,7 +154,7 @@ const EnchantmentDialog = ({
 							key={item.id}
 							item={item}
 							slot={slot}
-							disabled={!alive || inTown || !scrolls.length}
+							disabled={!alive || !scrolls.length}
 							onEnchant={() => enchant(item)}
 						/>
 					))}
@@ -199,7 +199,7 @@ const EnchantmentDialog = ({
 						}
 						subtitle={
 							<Dialog.Description className="ember-menu-description">
-								Each scroll adds a guaranteed +1, up to +3, and takes one turn.
+								Each scroll adds a guaranteed +1, up to +3. Reading is free in town; in the dungeon, it takes one turn.
 								Weapons gain attack; shields, chest pieces and helmets gain
 								armor.
 							</Dialog.Description>
@@ -222,8 +222,6 @@ const EnchantmentDialog = ({
 						<p role="status" className="text-sm text-muted-foreground">
 							{enchanted
 								? `${ITEM_DEFINITIONS[enchanted.kind].name} is now +${enchanted.enchantment}.`
-								: inTown
-									? "Scrolls work only in the dungeon. The town forge reforges for gold."
 									: scrolls.length
 										? "Choose a piece to enchant. Rings cannot be enchanted."
 										: "No enchantment scrolls left."}
