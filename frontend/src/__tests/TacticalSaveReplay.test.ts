@@ -11,7 +11,6 @@ import {
 	restoreSave,
 	serializeSave,
 } from "../domain/saves/SaveFormat";
-import { readAdventureFile } from "../persistence/AdventureSaveFiles";
 import {
 	LOCAL_SAVE_KEY,
 	readLocalSave,
@@ -57,15 +56,13 @@ describe("Tactical save and deterministic continuation", () => {
 		},
 		{ name: "after mixed kills and recovery", state: afterMixedEncounter },
 	])(
-		"continues identically through local load and file import $name",
+		"continues identically through local load and serialized save $name",
 		async ({ state }) => {
 			let uninterrupted = state();
 			const snapshot = tacticalSnapshot(uninterrupted);
 			expect(writeLocalSave(snapshot).ok).toBe(true);
 			const local = readLocalSave();
-			const imported = await readAdventureFile(
-				new File([serializeSave(snapshot)], "tactics.json"),
-			);
+			const imported = parseSave(serializeSave(snapshot));
 			if (!local.ok || !local.value || !imported.ok)
 				throw new Error("Valid tactical saves must load.");
 			let loaded = restoreSave(local.value).state;
@@ -134,7 +131,7 @@ describe("Tactical save and deterministic continuation", () => {
 		"out-of-bounds target",
 		"protected actor location",
 	])(
-		"rejects %s through both adapters without replacing the slot or current state",
+		"rejects %s through local storage and save parsing without replacing the slot or current state",
 		async (fault) => {
 			const current = preparedMixedEncounter();
 			const previous = tacticalSnapshot(current);
@@ -156,11 +153,7 @@ describe("Tactical save and deterministic continuation", () => {
 			}
 			expect(writeLocalSave(invalid).ok).toBe(false);
 			expect(
-				(
-					await readAdventureFile(
-						new File([serializeSave(invalid)], "invalid.json"),
-					)
-				).ok,
+				parseSave(serializeSave(invalid)).ok,
 			).toBe(false);
 			expect(localStorage.getItem(LOCAL_SAVE_KEY)).toBe(bytes);
 			expect(current).toEqual(restoreSave(previous).state);
