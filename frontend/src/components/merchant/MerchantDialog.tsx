@@ -35,6 +35,7 @@ import {
 import EquipmentPreviews from "../game/EquipmentPreviews";
 import ItemIcon from "../items/ItemIcon";
 import MerchantIcon from "../objects/MerchantIcon";
+import TownTalk from "../town/TownTalk";
 
 const SALE_DROP_ID = "sale";
 // Lets a sale button also be dragged onto the sell area; it stays a normal button.
@@ -234,6 +235,7 @@ const MerchantDialog = ({
 							Close
 						</Dialog.Close>
 					</header>
+					{inTown && <TownTalk location="The Rag & Bone" />}
 					<ItemDragProvider
 						onDrop={(source, targetId) => {
 							if (targetId === SALE_DROP_ID && source.item) {

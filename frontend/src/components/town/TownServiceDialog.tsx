@@ -1,6 +1,7 @@
 import { Dialog } from "@base-ui/react/dialog";
 import type { ReactNode, Ref, RefObject } from "react";
 import { Button } from "../ui/button";
+import TownTalk from "./TownTalk";
 
 // Shared town service frame: title with gold top-right, a description, the service body,
 // a status line and the Leave button. Held Enter/Space never repeats a purchase.
@@ -66,6 +67,7 @@ const TownServiceDialog = ({
 				<Dialog.Description className="shrink-0 text-sm text-muted-foreground">
 					{description}
 				</Dialog.Description>
+				<TownTalk location={title} />
 				{children}
 				{error && (
 					<p role="status" className="shrink-0 text-sm text-muted-foreground">

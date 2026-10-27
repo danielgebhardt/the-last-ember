@@ -7,6 +7,9 @@ import { isTownWalkable, TOWN } from "./TownDefinition";
 import { type AdventureLocation, isTownLocation } from "./TownLocation";
 import { DORMANT_PORTAL_MESSAGE } from "./TownPortal";
 
+export const beaconInspectionText = () =>
+	"The beacon’s flame gutters against the dark. Nobody remembers who first lit it; everyone knows what happens if it dies.";
+
 export type TownAction =
 	| { type: "move"; direction: MovementDirection }
 	| { type: "inspect" };
@@ -50,9 +53,7 @@ export const resolveTownAction = (
 		if (distance(location.coordinate, TOWN.portal) <= 1)
 			return unchanged(portalMessage);
 		if (distance(location.coordinate, TOWN.beacon) <= 1)
-			return unchanged(
-				"The beacon is dying. No one has volunteered to tell it.",
-			);
+			return unchanged(beaconInspectionText());
 		if (distance(location.coordinate, TOWN.gate) <= 1)
 			return unchanged(gateMessage);
 		return unchanged(
