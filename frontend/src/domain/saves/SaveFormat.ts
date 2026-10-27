@@ -73,6 +73,15 @@ export const createSaveDocument = (
 			? { disabledFeatures: [...state.disabledFeatures] }
 			: {}),
 		...(state.runId ? { runId: state.runId } : {}),
+		...(state.usage
+			? {
+					usage: {
+						casts: { ...state.usage.casts },
+						consumables: { ...state.usage.consumables },
+						equippedTurns: { ...state.usage.equippedTurns },
+					},
+				}
+			: {}),
 		...(state.encounters
 			? {
 					encounters: {

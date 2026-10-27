@@ -108,6 +108,11 @@ import { announceOmens } from "./OmenNotices";
 import { type ChoosePerkAction, choosePerk } from "./PerkChoiceAction";
 import { executionerBonus, opportunistBonus } from "./PerkEffects";
 import { levelForExperience } from "./Progression";
+import {
+	recordConsumableUse,
+	recordEquippedTurn,
+	recordSpellUse,
+} from "./RunUsage";
 import { type CastAction, castSpell } from "./SpellCasting";
 import {
 	assignSpell,
@@ -364,8 +369,9 @@ export const resolvePlayerAction = (
 	if ("error" in result)
 		return { state, turnAdvanced: false, error: result.error };
 	// A scroll's committed response happens on the originating floor before town freezes it.
-	const responseState =
-		action.type === "exit-dungeon" ? { ...result, town: null } : result;
+	const responseState = recordEquippedTurn(
+		action.type === "exit-dungeon" ? { ...result, town: null } : result,
+	);
 	const monsterPhase =
 		responseState.quest.victory || responseState.player.health <= 0
 			? undefined
@@ -435,36 +441,49 @@ const resolveCommittedEffect = (
 	rollSource: AttackRollSource,
 ): GameState | { error: string } | undefined => {
 	const turn = state.turn;
-	if (action.type === "exit-dungeon") return readExitScroll(state, action);
-	if (action.type === "enchant") return enchantEquipment(state, action);
+	if (action.type === "exit-dungeon") {
+		const result = readExitScroll(state, action);
+		return "error" in result
+			? result
+			: recordConsumableUse(result, "exit-scroll");
+	}
+	if (action.type === "enchant") {
+		const result = enchantEquipment(state, action);
+		return "error" in result
+			? result
+			: recordConsumableUse(result, "enchantment-scroll");
+	}
 	if (action.type === "buy") return buyPotion(state, action);
 	if (action.type === "sell") return sellEquipment(state, action);
 	if (action.type === "sell-lower") return sellLowerEquipment(state, action);
 	if (action.type === "interact") return interactObject(state, action);
 	if (action.type === "cast") {
 		const cast = castSpell(state, action, rollSource);
-		return "error" in cast ? cast : cast.state;
+		return "error" in cast ? cast : recordSpellUse(cast.state, action.spell);
 	}
 	if (action.type === "consume") {
 		const scroll = state.bag.items.find((item) => item.id === action.itemId);
 		if (state.hunger && scroll?.kind === "remove-curse-scroll")
-			return freeBoundBlade(state, scroll);
+			return recordConsumableUse(freeBoundBlade(state, scroll), scroll.kind);
 		const consumed = consumeItem(state, action);
 		if ("error" in consumed) return consumed;
-		return {
-			...state,
-			player: consumed.player,
-			...(consumed.afflictions !== undefined
-				? { afflictions: consumed.afflictions }
-				: {}),
-			progression: consumed.progression ?? state.progression,
-			mana: consumed.mana,
-			bag: consumed.bag,
-			effects: consumed.effects,
-			activityHistory: appendActivityEvents(state.activityHistory, [
-				{ ...consumed.event, turn },
-			]),
-		};
+		return recordConsumableUse(
+			{
+				...state,
+				player: consumed.player,
+				...(consumed.afflictions !== undefined
+					? { afflictions: consumed.afflictions }
+					: {}),
+				progression: consumed.progression ?? state.progression,
+				mana: consumed.mana,
+				bag: consumed.bag,
+				effects: consumed.effects,
+				activityHistory: appendActivityEvents(state.activityHistory, [
+					{ ...consumed.event, turn },
+				]),
+			},
+			consumed.event.item,
+		);
 	}
 	if (action.type === "pickup" || action.type === "drop") {
 		const transfer = transferFloorItem(state, action);

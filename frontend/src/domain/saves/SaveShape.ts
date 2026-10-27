@@ -18,6 +18,10 @@ import { PERK_KINDS, PERK_LEVELS } from "../game/Perks";
 import { isPermanentAttributes } from "../game/PermanentAttributes";
 import { PLAYER_AFFLICTION_LIMIT } from "../game/PlayerAfflictions";
 import { MAX_PLAYER_LEVEL } from "../game/Progression";
+import {
+	USAGE_CONSUMABLE_KINDS,
+	USAGE_EQUIPMENT_KINDS,
+} from "../game/RunUsage";
 import { SPELL_DEFINITIONS } from "../game/Spells";
 import { EFFECT_DEFINITIONS, PLAYER_EFFECT_KINDS } from "../game/TimedEffects";
 import { MAX_BAG_ITEMS } from "../items/Bag";
@@ -76,6 +80,22 @@ const object =
 		record(value) &&
 		Object.entries(fields).every(([key, schema]) => schema(value[key]));
 const natural = integer();
+// Catalog-limited keys and safe integers bound usage independently of run length.
+const usageCounts =
+	(kinds: readonly string[]): Schema =>
+	(value) =>
+		record(value) &&
+		Object.entries(value).every(
+			([kind, count]) => kinds.includes(kind) && natural(count),
+		);
+const usage: Schema = (value) =>
+	record(value) &&
+	Object.keys(value).length === 3 &&
+	object({
+		casts: usageCounts(Object.keys(SPELL_DEFINITIONS)),
+		consumables: usageCounts(USAGE_CONSUMABLE_KINDS),
+		equippedTurns: usageCounts(USAGE_EQUIPMENT_KINDS),
+	})(value);
 const floorNumber = integer(1, CONFIGURATION_LIMITS.floorCount.max);
 // A coordinate lies on a floor of the configured size or on the arena's fixed floor.
 const index = integer(
@@ -500,6 +520,7 @@ const documentShape = object({
 				value.length <= 40,
 		),
 		developerRun: optional((value) => value === true),
+		usage: optional(usage),
 		disabledFeatures: optional(
 			array(
 				oneOf([

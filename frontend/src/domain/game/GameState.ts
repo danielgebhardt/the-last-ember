@@ -68,6 +68,7 @@ import {
 import { createPlayerStats, type PlayerStats } from "./PlayerStats.ts";
 import { createProgression, type Progression } from "./Progression";
 import type { RunEncounters } from "./RunEncounters";
+import { emptyRunUsage, type RunUsage } from "./RunUsage";
 import { createSpellHotbar, type SpellHotbar } from "./SpellHotbar";
 import { createKnownSpells, type SpellKind } from "./Spells";
 import type { TimedEffect } from "./TimedEffects";
@@ -91,6 +92,7 @@ export type GameState = {
 	disabledFeatures?: DeveloperFeature[];
 	// Browser identity only; never used by seeded gameplay.
 	runId?: string;
+	usage?: RunUsage;
 	// A wielded Hungering Blade's binding and the turn of its last kill.
 	hunger?: Readonly<{ fedTurn: number }>;
 	// Floors where a Ring of Displacement has already fired this adventure.
@@ -221,6 +223,7 @@ export const createGameState = (
 			.map((omen) => omen.floorNumber),
 	);
 	const created: GameState = {
+		usage: emptyRunUsage(),
 		townEquipmentPurchases: [],
 		town: null,
 		townPortal: null,

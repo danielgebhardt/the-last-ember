@@ -7,6 +7,15 @@ export const hasConsistentHistory = (document: SaveDocument): boolean => {
 	const { state } = document;
 	const { run, quest } = state;
 	if (
+		state.usage &&
+		(Object.values(state.usage.casts).reduce((sum, count) => sum + count, 0) >
+			state.turn ||
+			Object.values(state.usage.equippedTurns).some(
+				(count) => count > state.turn,
+			))
+	)
+		return false;
+	if (
 		state.disabledFeatures?.length &&
 		(!state.developerRun ||
 			state.ranked ||

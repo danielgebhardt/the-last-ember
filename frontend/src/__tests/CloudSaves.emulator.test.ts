@@ -17,7 +17,12 @@ import {
 import { describe, expect, it } from "vitest";
 import { profileActions } from "../../server/Profile.ts";
 import { createCloudStore } from "../accounts/CloudSaves";
-import { serializeSave } from "../domain/saves/SaveFormat";
+import { resolvePlayerAction } from "../domain/game/PlayerActions";
+import {
+	parseSave,
+	restoreSave,
+	serializeSave,
+} from "../domain/saves/SaveFormat";
 import { savedAdventure } from "./SaveTestHelpers";
 
 // Set by `firebase emulators:exec`; the app's own types don't include Node's.
@@ -91,6 +96,34 @@ describe.skipIf(!authHost || !firestoreHost)(
 			expect(await store.get("save")).toBeNull();
 		});
 
+		it("preserves all usage counters through compressed cloud save and deterministic continuation", async () => {
+			const { app, uid } = await player();
+			const store = createCloudStore(app, uid, firestoreHost);
+			const document = savedAdventure();
+			document.state.usage = {
+				casts: { protection: 1 },
+				consumables: { "healing-potion": 2, "enchantment-scroll": 1 },
+				equippedTurns: { "short-sword": 2 },
+			};
+			const original = restoreSave(document).state;
+			expect(
+				await store.put(
+					"save",
+					{ ...copy(document.state.turn), text: serializeSave(document) },
+					0,
+				),
+			).toMatchObject({ ok: true });
+			const cloud = await store.get("save");
+			if (!cloud) throw Error("Expected cloud save");
+			const parsed = parseSave(cloud.text);
+			expect(parsed.ok).toBe(true);
+			if (!parsed.ok) return;
+			const loaded = restoreSave(parsed.value).state;
+			expect(loaded.usage).toEqual(document.state.usage);
+			expect(resolvePlayerAction(loaded, { type: "wait" }).state).toEqual(
+				resolvePlayerAction(original, { type: "wait" }).state,
+			);
+		});
 		it("lets nobody else read or write a player's saves", async () => {
 			const owner = await player();
 			await createCloudStore(owner.app, owner.uid, firestoreHost).put(
