@@ -8,13 +8,15 @@ import {
 export default function DeveloperGeneration({
 	disabled,
 	onChange,
+	expanded = false,
 }: {
 	disabled: readonly DeveloperFeature[];
 	onChange: (disabled: DeveloperFeature[]) => void;
+	expanded?: boolean;
 }) {
 	if (useAccount().user?.developer !== true) return null;
 	return (
-		<details className="rounded-lg border border-primary/30 bg-primary/5 p-3 text-left text-sm">
+		<details open={expanded} className="rounded-lg border border-primary/30 bg-primary/5 p-3 text-left text-sm">
 			<summary className="cursor-pointer font-medium">
 				<FlaskConical
 					aria-hidden="true"
