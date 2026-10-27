@@ -18,5 +18,4 @@ export const townDialogue = (location: string): string | undefined =>
     ? TOWN_DIALOGUE[location as TownDialogueLocation]
     : undefined;
 
-export const beaconInspectionText = (): string =>
-  "The beacon’s flame gutters against the dark. Nobody remembers who first lit it; everyone knows what happens if it dies.";
+export { beaconInspectionText } from "../../domain/town/TownActions";
