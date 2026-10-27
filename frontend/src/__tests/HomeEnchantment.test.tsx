@@ -1,11 +1,17 @@
 import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, expect, it, vi } from "vitest";
+import { createAdventureSession } from "../components/game/useAdventureSession";
+import { DEFAULT_FOG_CONFIGURATION } from "../domain/dungeon/RunConfiguration";
 import * as GameState from "../domain/game/GameState";
+import { createBag } from "../domain/items/Bag";
+import { createTownLocation } from "../domain/town/TownLocation";
+import RealHome from "../Home";
 import { ThemeProvider } from "../settings/ThemeProvider";
 import { resetHomeTestState, stubDungeonRun } from "./HomeTestHelpers";
 import { createCorridorEncounter } from "./MonsterEncounterTestHelpers";
 import Home from "./TestHome";
+import { COMPACT_TEST_CONFIGURATION } from "./TestRunConfiguration";
 
 afterEach(resetHomeTestState);
 it("keeps the selected scroll stack usable in its slot through 3 → 2 → 1 and clears it after the last use", async () => {
@@ -164,4 +170,46 @@ it("opens and closes the enchanting dialog freely and enchants a chosen worn ite
 	expect(screen.getByRole("log")).toHaveTextContent(
 		"Enchanted Short sword to +1.",
 	);
+});
+
+it("reads enchantment scrolls in town without advancing the turn", async () => {
+	const initial = createAdventureSession(
+		123,
+		COMPACT_TEST_CONFIGURATION,
+		DEFAULT_FOG_CONFIGURATION,
+	);
+	const state = {
+		...initial.state,
+		town: createTownLocation(),
+		bag: createBag([
+			...initial.state.bag.items,
+			{ id: "town:enchantment", kind: "enchantment-scroll" },
+		]),
+	};
+	render(<RealHome initialAdventure={{ ...initial, state }} />, {
+		wrapper: ThemeProvider,
+	});
+	const user = userEvent.setup();
+	await user.click(screen.getByRole("button", { name: "Character" }));
+	const ledger = within(
+		await screen.findByRole("dialog", { name: "The Adventurer's Ledger" }),
+	);
+	await user.click(
+		ledger.getByRole("button", { name: /Enchantment scroll, slot/ }),
+	);
+	await user.click(
+		ledger.getByRole("button", { name: "Read enchantment scroll" }),
+	);
+	const enchanting = within(
+		await screen.findByRole("dialog", { name: "Enchant equipment" }),
+	);
+	const target = enchanting.getByRole("button", {
+		name: "Enchant Short sword to +1",
+	});
+	expect(target).toBeEnabled();
+	await user.click(target);
+	expect(screen.getByLabelText("Turn count")).toHaveTextContent("Turn 0");
+	expect(
+		ledger.queryByRole("button", { name: /Enchantment scroll, slot/ }),
+	).not.toBeInTheDocument();
 });

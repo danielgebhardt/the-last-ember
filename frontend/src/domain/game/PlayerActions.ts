@@ -276,7 +276,8 @@ export const resolvePlayerAction = (
 		if (
 			action.type === "equip" ||
 			action.type === "unequip" ||
-			action.type === "consume"
+			action.type === "consume" ||
+			action.type === "enchant"
 		) {
 			const result = resolvePlayerEffect(state, action, rollSource);
 			return result && "error" in result

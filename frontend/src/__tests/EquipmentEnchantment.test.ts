@@ -6,6 +6,7 @@ import { bagSlots } from "../domain/items/Bag";
 import { compareEquipment } from "../domain/items/EquipmentComparison";
 import { ITEM_DEFINITIONS, type ItemKind } from "../domain/items/Item";
 import { equipmentSalePrice } from "../domain/merchant/MerchantRules";
+import { createTownLocation } from "../domain/town/TownLocation";
 import { resolvePlayerActionWithHits as resolvePlayerAction } from "./ControlledCombatTestHelpers";
 import { createCorridorEncounter } from "./MonsterEncounterTestHelpers";
 
@@ -102,6 +103,23 @@ describe("Bounded equipment enchantment", () => {
 			).toBe(owned);
 		}
 		expect(resolvePlayerAction(state, enchant).state).toBe(state);
+	});
+	it("enchanting in town consumes one scroll without spending a turn", () => {
+		const initial = encounter();
+		const state = { ...initial, town: createTownLocation() };
+		const result = resolvePlayerAction(state, enchant);
+		expect(result.turnAdvanced).toBe(false);
+		expect(result.state.turn).toBe(state.turn);
+		expect(result.state.town).toEqual(state.town);
+		expect(result.state.equipment.mainHand?.enchantment).toBe(1);
+		expect(result.state.bag.items).toHaveLength(3);
+		expect(state.equipment.mainHand?.enchantment).toBeUndefined();
+		const invalid = resolvePlayerAction(result.state, {
+			...enchant,
+			scrollId: "not-owned",
+		});
+		expect(invalid.turnAdvanced).toBe(false);
+		expect(invalid.state).toBe(result.state);
 	});
 	it("applies new armor before the same turn's enemy response", () => {
 		const state = {
