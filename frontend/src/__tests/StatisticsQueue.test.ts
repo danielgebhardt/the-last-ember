@@ -42,7 +42,13 @@ describe("Finished runs waiting in browser storage", () => {
 				.mockResolvedValue(new Response(null, { status: 200 }));
 
 			const queue = new StatisticsQueue(localStorage, send);
-			queue.enqueue("one", finished());
+			const document = finished();
+			document.state.usage = {
+				casts: { protection: 1 },
+				consumables: { "healing-potion": 2, "enchantment-scroll": 1 },
+				equippedTurns: { "short-sword": 3 },
+			};
+			queue.enqueue("one", document);
 
 			await queue.retry("one", token);
 
@@ -63,6 +69,10 @@ describe("Finished runs waiting in browser storage", () => {
 			await reloaded.retry("one", token);
 
 			expect(send).toHaveBeenCalledTimes(2);
+			for (const [, options] of send.mock.calls)
+				expect(JSON.parse(String(options?.body)).state.usage).toEqual(
+					document.state.usage,
+				);
 
 			expect(
 				JSON.parse(String(send.mock.calls[1][1]?.body)).state.player.health,

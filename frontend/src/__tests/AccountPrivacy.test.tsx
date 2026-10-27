@@ -22,6 +22,9 @@ it("explains automatic statistics, public names and deletion while signed out", 
 		"automatically contribute run summaries",
 	);
 	expect(screen.getByRole("dialog")).toHaveTextContent(
+		"spell, consumable and equipment usage",
+	);
+	expect(screen.getByRole("dialog")).toHaveTextContent(
 		"Your email is never shown",
 	);
 	await user.click(screen.getByRole("button", { name: "Done" }));

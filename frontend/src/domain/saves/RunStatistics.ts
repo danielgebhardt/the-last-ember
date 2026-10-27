@@ -39,6 +39,15 @@ export const summarizeRun = (document: SaveDocument, commit: string | null) => {
 		level: levelForExperience(state.progression.experience),
 		gold: state.gold,
 		monstersDefeated: state.monstersDefeated,
+		// Project only validated counters; never accept a client-provided summary.
+		// Null means unknown, whereas empty maps mean measured zero usage.
+		usage: state.usage
+			? {
+					casts: { ...state.usage.casts },
+					consumables: { ...state.usage.consumables },
+					equippedTurns: { ...state.usage.equippedTurns },
+				}
+			: null,
 		encountersSinceTurn: state.encounters?.sinceTurn ?? null,
 		omensMet: state.encounters?.omens ?? null,
 		thievesMet: state.encounters ? state.encounters.thieves.length : null,

@@ -58,11 +58,12 @@ export default function PrivacyNote() {
 								What the game keeps
 							</h3>
 							<p>
-								Your Save and Autosave can sync privately across your devices.
-								Signed-in victories and deaths automatically contribute run
-								summaries for balancing: dungeon settings, progress, encounters
-								and final equipment. Ranked runs appear publicly under your
-								chosen display name, grouped by difficulty and game version.
+								Save and Autosave can sync privately across devices. Signed-in
+								wins and deaths automatically contribute run summaries for
+								balancing: settings, progress, encounters, final gear, and
+								spell, consumable and equipment usage. Ranked runs appear
+								publicly under your chosen display name, by difficulty and game
+								version.
 							</p>
 						</EmberPanel>
 						<EmberPanel>

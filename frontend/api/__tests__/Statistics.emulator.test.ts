@@ -72,6 +72,11 @@ describe.skipIf(!authHost || !firestoreHost)(
 				const document = savedAdventure();
 				document.state.runId = crypto.randomUUID();
 				document.state.player.health = 0;
+				document.state.usage = {
+					casts: { protection: 1 },
+					consumables: { "healing-potion": 2, "enchantment-scroll": 1 },
+					equippedTurns: { "short-sword": 3 },
+				};
 				const id = `${users[0].uid}_${document.state.runId}`;
 				const token = await users[0].getIdToken();
 				const request = () =>
@@ -103,9 +108,11 @@ describe.skipIf(!authHost || !firestoreHost)(
 					seed: 123,
 					outcome: "died",
 					turns: 3,
+					usage: document.state.usage,
 				});
 				const before = (await admin.doc(id).get()).data();
 				document.state.gold += 10;
+				document.state.usage.consumables["healing-potion"] = 3;
 				expect((await POST(request())).status).toBe(200);
 				expect((await admin.doc(id).get()).data()).toEqual(before);
 				for (const app of apps) {

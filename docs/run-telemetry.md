@@ -1,6 +1,6 @@
 # Run telemetry
 
-## Usage counters (#430, collection slice)
+## Usage counters (#430)
 
 New adventures own an optional `state.usage` field. Its maps use catalog kinds,
 not physical item IDs, and do not affect gameplay or seeded randomness. Counters
@@ -32,7 +32,31 @@ Maps have no per-turn or per-instance entries, so their size is bounded by the
 catalog rather than play duration. A test limits the JSON usage field to **8 KiB**
 even with every catalog kind populated at the largest safe integer.
 
-This first slice persists usage in adventures. Adding it to the server-derived
-finished-run statistics document is the next #430 commit. CSV changes and a new
-statistics frontend are outside the agreed collection scope. #433 will add floor
-context, availability and economy measurements, including store purchases/sales.
+## Finished-run collection
+
+The existing statistics function validates the finished save and projects its
+usage maps into `statistics/{uid}_{runId}` alongside the other summary fields.
+A proposed client summary is ignored. `usage: null` means untracked; empty maps
+mean tracked zero. Historical Firestore documents may have no `usage` field at all.
+Developer-assisted runs remain excluded. Existing token, ownership and completion
+checks apply unchanged. Consistency validation cannot prove that a carefully
+fabricated but internally consistent save was actually played.
+
+The existing offline queue retains the complete save and retries it unchanged.
+An atomic Admin create keeps the first accepted summary, so duplicate requests
+cannot increase or replace counters. Browser writes to statistics remain denied.
+There is still one statistics document write per accepted run and no new endpoint,
+per-action request, polling or client-writable statistics data.
+
+A catalog-wide valid fixture with maximum safe counters keeps the entire summary
+below **16 KiB**. At the existing 200-row developer page size that is about 3.2 MiB
+before response wrappers; #433 must revisit response budgets when adding floor
+records. This complements the 8 KiB usage-field budget and the existing 4 MiB
+uncompressed save/request limit.
+
+Deploy the browser and bundled statistics function together. No new rules, indexes
+or Firebase credentials are needed. CSV changes and a new statistics frontend are
+outside the agreed collection scope. #433 will add floor context, availability
+and economy measurements, including store purchases/sales. Zero usage alone does
+not imply rejection: the player may never have obtained the item or learned the
+spell.
