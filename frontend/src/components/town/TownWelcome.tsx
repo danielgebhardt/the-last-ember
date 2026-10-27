@@ -14,7 +14,6 @@ type TownWelcomeProps = {
 	enabled: boolean;
 	interactionLabel: string;
 	portalNotice?: string;
-	flameRecovered?: boolean;
 };
 
 const TownWelcome = ({
@@ -22,7 +21,6 @@ const TownWelcome = ({
 	enabled,
 	interactionLabel,
 	portalNotice,
-	flameRecovered = false,
 }: TownWelcomeProps) => {
 	const titleId = useId();
 	const [inspectingBeacon, setInspectingBeacon] = useState(false);
@@ -154,7 +152,7 @@ const TownWelcome = ({
 			</Button>
 			{inspectingBeacon && (
 				<p role="status" className="mt-1 italic text-muted-foreground">
-					{beaconInspectionText(flameRecovered)}
+					{beaconInspectionText()}
 				</p>
 			)}
 		</div>
