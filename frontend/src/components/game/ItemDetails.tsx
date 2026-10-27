@@ -100,7 +100,6 @@ const ItemDetails = ({
 	potionHotbar,
 	assignmentsEnabled = true,
 	carryingEmber = false,
-	inTown = false,
 }: {
 	item: ItemInstance;
 	bag?: Bag;
@@ -112,7 +111,6 @@ const ItemDetails = ({
 	potionHotbar: PotionHotbar;
 	assignmentsEnabled?: boolean;
 	carryingEmber?: boolean;
-	inTown?: boolean;
 }) => {
 	const titleId = useId();
 	const exitRestrictionId = useId();
@@ -301,7 +299,6 @@ const ItemDetails = ({
 								equipment={equipment}
 								bag={bag}
 								alive={alive}
-								inTown={inTown}
 								onAction={onAction}
 								onLastScroll={afterAction}
 							/>
