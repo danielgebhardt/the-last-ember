@@ -5,8 +5,7 @@ import {
 	Map as MapIcon,
 	Search,
 } from "lucide-react";
-import { useId, useState } from "react";
-import { beaconInspectionText } from "./TownLore";
+import { useId } from "react";
 import { Button } from "../ui/button";
 
 type TownWelcomeProps = {
@@ -23,7 +22,6 @@ const TownWelcome = ({
 	portalNotice,
 }: TownWelcomeProps) => {
 	const titleId = useId();
-	const [inspectingBeacon, setInspectingBeacon] = useState(false);
 	return (
 		<aside
 			aria-labelledby={titleId}
@@ -143,20 +141,7 @@ const TownWelcome = ({
 					{portalNotice}
 				</p>
 			)}
-			{/* Optional lore; inspecting never dispatches a dungeon action. */}
-		<div className="mt-2 text-xs">
-			<Button type="button" size="sm" variant="outline"
-				aria-expanded={inspectingBeacon}
-				onClick={() => setInspectingBeacon((value) => !value)}>
-				{inspectingBeacon ? "Close beacon inspection" : "Inspect beacon"}
-			</Button>
-			{inspectingBeacon && (
-				<p role="status" className="mt-1 italic text-muted-foreground">
-					{beaconInspectionText()}
-				</p>
-			)}
-		</div>
-		{/* Town Directory */}
+			{/* Town Directory */}
 			<Button
 				type="button"
 				variant="outline"
