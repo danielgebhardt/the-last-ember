@@ -2,7 +2,7 @@ import { ITEM_DEFINITIONS, type ItemKind } from "../items/Item";
 import type { GameState } from "./GameState";
 import type { SpellKind } from "./Spells";
 
-type ConsumableKind = {
+export type ConsumableKind = {
 	[K in ItemKind]: (typeof ITEM_DEFINITIONS)[K]["type"] extends
 		| "potion"
 		| "scroll"

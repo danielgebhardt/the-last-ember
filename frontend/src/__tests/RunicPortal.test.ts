@@ -3,6 +3,7 @@ import { expect, it } from "vitest";
 import { formatActivityEvent } from "../components/game/ActivityMessages";
 import { updateExploration } from "../domain/dungeon/Exploration";
 import { DEFAULT_FOG_CONFIGURATION } from "../domain/dungeon/RunConfiguration";
+import { createFloorTelemetry } from "../domain/game/FloorTelemetry";
 import { createGameState, type GameState } from "../domain/game/GameState";
 import { resolvePlayerAction } from "../domain/game/PlayerActions";
 import { objectChoices } from "../domain/objects/ObjectChoices";
@@ -118,7 +119,14 @@ it("leads to this floor or one of the next four, each equally likely", () => {
 
 it("sets you down beside a deeper floor's down stair for one turn", () => {
 	const seed = seedFor(8);
-	const result = enter(encounter(seed));
+	const initial = encounter(seed);
+	initial.floorTelemetry = createFloorTelemetry(initial);
+	const result = enter(initial);
+	expect(
+		result.state.floorTelemetry?.floors.find((floor) => floor.floorNumber === 5)
+			?.lastExit?.reason,
+	).toBe("runic-portal");
+	expect(result.state.floorTelemetry?.activeFloor).toBe(8);
 	expect(result.turnAdvanced).toBe(true);
 	const { run } = result.state;
 	expect(run.activeFloor).toBe(8);

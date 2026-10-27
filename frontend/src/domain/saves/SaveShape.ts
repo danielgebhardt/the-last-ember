@@ -12,6 +12,7 @@ import {
 import { AFFLICTION_DEFINITIONS } from "../game/AfflictionDefinitions";
 import { DAMAGE_ELEMENTS } from "../game/DamageElements";
 import { isDifficulty } from "../game/Difficulty";
+import { FLOOR_EXIT_REASONS } from "../game/FloorTelemetry";
 import { OMEN_KINDS } from "../game/Omens";
 import { PACT_KINDS } from "../game/Pacts";
 import { PERK_KINDS, PERK_LEVELS } from "../game/Perks";
@@ -79,6 +80,12 @@ const object =
 	(value) =>
 		record(value) &&
 		Object.entries(fields).every(([key, schema]) => schema(value[key]));
+const exactObject =
+	(fields: Record<string, Schema>): Schema =>
+	(value) =>
+		object(fields)(value) &&
+		record(value) &&
+		Object.keys(value).every((key) => Object.hasOwn(fields, key));
 const natural = integer();
 // Catalog-limited keys and safe integers bound usage independently of run length.
 const usageCounts =
@@ -128,6 +135,69 @@ const item: Schema = (value) =>
 	(value.enchantment === undefined ||
 		(integer(1, MAX_ENCHANTMENT)(value.enchantment) &&
 			isEnchantableKind(value.kind as keyof typeof ITEM_DEFINITIONS)));
+const checkpoint = exactObject({
+	gameVersion: (value) =>
+		typeof value === "string" &&
+		value.length <= 40 &&
+		/^[0-9]+\.[0-9]+\.[0-9]+(?:-[a-z0-9.]+)?$/.test(value),
+	turn: natural,
+	level: integer(1, MAX_PLAYER_LEVEL),
+	experience: natural,
+	attributes: exactObject({
+		strength: natural,
+		dexterity: natural,
+		intelligence: natural,
+	}),
+	attack: natural,
+	armor: natural,
+	evadeChance: integer(0, 100),
+	magicResistance: integer(0, 50),
+	health: natural,
+	maxHealth: integer(1),
+	mana: natural,
+	maxMana: integer(1),
+	gold: natural,
+	supplies: usageCounts(USAGE_CONSUMABLE_KINDS),
+	equipment: exactObject(
+		Object.fromEntries(
+			Object.keys(EQUIPMENT_SLOT_LABELS).map((key) => [
+				key,
+				nullable(
+					exactObject({
+						kind: oneOf(USAGE_EQUIPMENT_KINDS),
+						enchantment: integer(0, MAX_ENCHANTMENT),
+					}),
+				),
+			]),
+		),
+	),
+});
+const floorTelemetry = exactObject({
+	activeFloor: nullable(floorNumber),
+	floors: array(
+		exactObject({
+			floorNumber,
+			visits: integer(1),
+			firstEntry: checkpoint,
+			lastExit: optional(
+				exactObject({
+					toFloor: nullable(floorNumber),
+					reason: oneOf(FLOOR_EXIT_REASONS),
+					snapshot: checkpoint,
+				}),
+			),
+		}),
+		0,
+		CONFIGURATION_LIMITS.floorCount.max,
+	),
+	final: optional(
+		exactObject({
+			floorNumber: nullable(floorNumber),
+			outcome: oneOf(["won", "died"]),
+			snapshot: checkpoint,
+		}),
+	),
+});
 const stair = object({
 	coordinate,
 	destinationFloor: floorNumber,
@@ -521,6 +591,7 @@ const documentShape = object({
 		),
 		developerRun: optional((value) => value === true),
 		usage: optional(usage),
+		floorTelemetry: optional(floorTelemetry),
 		disabledFeatures: optional(
 			array(
 				oneOf([

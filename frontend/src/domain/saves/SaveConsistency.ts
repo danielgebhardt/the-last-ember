@@ -2,6 +2,7 @@ import { isTownLocation } from "../town/TownLocation";
 import { hasConsistentActors } from "./SaveActorConsistency";
 import { hasConsistentArenas } from "./SaveArenaConsistency";
 import type { SaveDocument } from "./SaveDocument";
+import { hasConsistentFloorTelemetry } from "./SaveFloorTelemetryConsistency";
 import { hasConsistentGeometry } from "./SaveGeometryConsistency";
 import { hasConsistentHistory } from "./SaveHistoryConsistency";
 import { hasConsistentInventory } from "./SaveInventoryConsistency";
@@ -16,6 +17,7 @@ export const isConsistentSave = (document: SaveDocument): boolean =>
 	hasConsistentArenas(document) &&
 	hasConsistentActors(document) &&
 	hasConsistentHistory(document) &&
+	hasConsistentFloorTelemetry(document) &&
 	hasConsistentTown(document) &&
 	hasConsistentEscape(document);
 

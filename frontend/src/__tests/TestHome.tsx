@@ -1,6 +1,7 @@
 import { type ComponentProps, useState } from "react";
 import { createAdventureSession } from "../components/game/useAdventureSession";
 import { DEFAULT_FOG_CONFIGURATION } from "../domain/dungeon/RunConfiguration";
+import { createFloorTelemetry } from "../domain/game/FloorTelemetry";
 import Home from "../Home";
 import { COMPACT_TEST_CONFIGURATION } from "./TestRunConfiguration";
 
@@ -14,7 +15,11 @@ const TestHome = (props: ComponentProps<typeof Home>) => {
 			props.initialConfiguration ?? COMPACT_TEST_CONFIGURATION,
 			props.initialFogConfiguration ?? DEFAULT_FOG_CONFIGURATION,
 		);
-		return { ...fresh, state: { ...fresh.state, town: null } };
+		const dungeon = { ...fresh.state, town: null };
+		return {
+			...fresh,
+			state: { ...dungeon, floorTelemetry: createFloorTelemetry(dungeon) },
+		};
 	});
 	return (
 		<Home

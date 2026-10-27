@@ -60,3 +60,53 @@ outside the agreed collection scope. #433 will add floor context, availability
 and economy measurements, including store purchases/sales. Zero usage alone does
 not imply rejection: the player may never have obtained the item or learned the
 spell.
+
+## Floor checkpoints (#433, first collection slice)
+
+New sessions also own optional `state.floorTelemetry`. It starts empty in town;
+looking at the dungeon map before descending does not count as reaching a floor.
+Older saves without this field continue without fabricated checkpoint history.
+It uses existing v33 save paths and does not change the supported save range.
+
+Each reached floor has one record, sorted by floor number: `firstEntry`, `visits`,
+and an optional `lastExit`. Revisiting increments `visits` without replacing the
+first entry. Only the latest exit is retained. One separate `final` checkpoint
+records victory or death; it does not invent a normal floor exit. `activeFloor`
+is null in town or after the run ends. An absent exit/final means not applicable,
+not a zero-valued resource measurement. A null final floor denotes town.
+
+Boundary definitions:
+
+- **Stairs and runic portals:** the old floor's exit is the state before the
+  transition action. The new floor's first entry is after that action's effects
+  (including withdrawal/arrival effects), before the destination's monster phase.
+  Resource changes during the transition therefore lie between those checkpoints.
+  A runic portal landing on its own floor is not an exit or a revisit.
+- **Town gate:** leaving or entering is a free boundary and does not add a dungeon
+  turn. Town movement, purchases and treatment create no floor checkpoints.
+- **Town portal scroll:** the exit is captured after its committed dungeon response
+  turn, including consumed supplies, damage and recovery. If that response kills
+  the player, capture a death checkpoint on the originating floor instead.
+  Returning through the portal is a free entry/revisit.
+- **Final:** capture the actual terminal state once after resolution, including a
+  death on arrival or a homecoming victory. Further actions do not update it.
+
+Snapshots contain the game version at capture, turn, level/XP, effective STR/DEX/INT, attack, armor, evasion
+chance, magic resistance, current/max HP and mana, carried gold, carried
+potion/scroll counts, and equipped kinds/enchantments. They use the existing
+combat/resource derivations. Equipment physical IDs and town stock are omitted.
+Usage remains owned by #430's counters; per-floor usage and source breakdowns
+are later slices, not independently recounted here.
+
+Ordinary turns do only a location/end check; they neither scan inventory nor copy
+snapshots. The number of records is capped at the configured maximum of 20 floors,
+with two snapshots per floor and at most one final snapshot, regardless of visit
+count. Checkpoint validation rejects duplicate/out-of-range floors, future turns,
+inconsistent resources/slots, invalid exit destinations and final resource/equipment
+facts that differ from the saved terminal state. Derived historical values are not
+recomputed against later balance rules or level curves when loading. Tests bound the checkpoint JSON to **128 KiB** across all 20 floors.
+
+This slice saves checkpoints in browser/cloud adventures only. Adding combat and
+economy counters, and projecting floor telemetry into finished-run statistics,
+remain separate review commits. No new request or Firestore statistics write is
+introduced by capturing checkpoints. No balance rules or RNG streams change.

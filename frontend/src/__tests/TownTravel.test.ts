@@ -207,6 +207,10 @@ describe("deliberate town travel", () => {
 		expect(travel(loaded.state, "dungeon").state).toEqual({
 			...state,
 			town: null,
+			floorTelemetry: expect.objectContaining({
+				activeFloor: 1,
+				floors: [expect.objectContaining({ floorNumber: 1, visits: 1 })],
+			}),
 		});
 	});
 	it("rejects malformed, ended or ember-carrying town saves and historical claims of town ownership", () => {

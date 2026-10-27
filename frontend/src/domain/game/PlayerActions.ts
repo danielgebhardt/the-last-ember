@@ -96,6 +96,7 @@ import {
 import { type AttackRollSource, createAttackRolls } from "./CombatRandomness";
 import { deriveCombatStats } from "./CombatStats";
 import { activateEscapeFloor } from "./Escape";
+import { recordFinalCheckpoint, recordFloorTransition } from "./FloorTelemetry";
 import type { GameState } from "./GameState.ts";
 import { recoverManaAfterTurn } from "./Mana";
 import {
@@ -159,6 +160,33 @@ export const resolvePlayerAction = (
 	state: GameState,
 	action: PlayerAction,
 	rollSource: AttackRollSource = createAttackRolls,
+): ActionResolution => {
+	const result = resolveAction(state, action, rollSource);
+	if (
+		result.error ||
+		result.state === state ||
+		state.player.health <= 0 ||
+		state.quest.victory
+	)
+		return result;
+	const reason =
+		action.type === "exit-dungeon"
+			? "town-scroll"
+			: action.type === "travel"
+				? "town-gate"
+				: action.type === "interact"
+					? "runic-portal"
+					: "stairs";
+	const observed = recordFinalCheckpoint(
+		recordFloorTransition(state, result.state, reason),
+	);
+	return observed === result.state ? result : { ...result, state: observed };
+};
+
+const resolveAction = (
+	state: GameState,
+	action: PlayerAction,
+	rollSource: AttackRollSource,
 ): ActionResolution => {
 	if (state.quest.victory)
 		return {
@@ -269,7 +297,7 @@ export const resolvePlayerAction = (
 				turnAdvanced: false,
 				error: "You have no carried copies of that potion.",
 			};
-		return resolvePlayerAction(
+		return resolveAction(
 			state,
 			{ type: "consume", itemId: item.id },
 			rollSource,
@@ -369,8 +397,12 @@ export const resolvePlayerAction = (
 	if ("error" in result)
 		return { state, turnAdvanced: false, error: result.error };
 	// A scroll's committed response happens on the originating floor before town freezes it.
-	const responseState = recordEquippedTurn(
-		action.type === "exit-dungeon" ? { ...result, town: null } : result,
+	const responseState = recordFloorTransition(
+		state,
+		recordEquippedTurn(
+			action.type === "exit-dungeon" ? { ...result, town: null } : result,
+		),
+		action.type === "interact" ? "runic-portal" : "stairs",
 	);
 	const monsterPhase =
 		responseState.quest.victory || responseState.player.health <= 0

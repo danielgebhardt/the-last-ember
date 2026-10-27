@@ -11,6 +11,7 @@ import type {
 } from "../../domain/dungeon/RunConfiguration";
 import { appendActivityEvents } from "../../domain/game/ActivityHistory";
 import type { DeveloperFeature } from "../../domain/game/DeveloperFeatures";
+import { createFloorTelemetry } from "../../domain/game/FloorTelemetry";
 import { createGameState } from "../../domain/game/GameState";
 import { GAME_VERSION } from "../../domain/game/GameVersion";
 import { omenSightRadius } from "../../domain/game/Omens";
@@ -75,12 +76,13 @@ export const createAdventureSession = (
 				configuration.difficulty ?? 1,
 				disabled,
 			);
+	const starting = { ...state, town: createTownLocation() };
 	return {
 		state: {
-			...state,
+			...starting,
 			runId: crypto.randomUUID(),
 			encounters: emptyRunEncounters(0),
-			town: createTownLocation(),
+			floorTelemetry: createFloorTelemetry(starting),
 			...(ranked && !disabled.length && !isTestSeed(seed)
 				? { ranked: true as const, rankingVersion: GAME_VERSION }
 				: {}),

@@ -17,6 +17,7 @@ import {
 import { describe, expect, it } from "vitest";
 import { profileActions } from "../../server/Profile.ts";
 import { createCloudStore } from "../accounts/CloudSaves";
+import { createFloorTelemetry } from "../domain/game/FloorTelemetry";
 import { resolvePlayerAction } from "../domain/game/PlayerActions";
 import {
 	parseSave,
@@ -96,7 +97,7 @@ describe.skipIf(!authHost || !firestoreHost)(
 			expect(await store.get("save")).toBeNull();
 		});
 
-		it("preserves all usage counters through compressed cloud save and deterministic continuation", async () => {
+		it("preserves usage and floor checkpoints through compressed cloud save and deterministic continuation", async () => {
 			const { app, uid } = await player();
 			const store = createCloudStore(app, uid, firestoreHost);
 			const document = savedAdventure();
@@ -105,6 +106,9 @@ describe.skipIf(!authHost || !firestoreHost)(
 				consumables: { "healing-potion": 2, "enchantment-scroll": 1 },
 				equippedTurns: { "short-sword": 2 },
 			};
+			document.state.floorTelemetry = createFloorTelemetry(
+				restoreSave(document).state,
+			);
 			const original = restoreSave(document).state;
 			expect(
 				await store.put(
@@ -120,6 +124,7 @@ describe.skipIf(!authHost || !firestoreHost)(
 			if (!parsed.ok) return;
 			const loaded = restoreSave(parsed.value).state;
 			expect(loaded.usage).toEqual(document.state.usage);
+			expect(loaded.floorTelemetry).toEqual(document.state.floorTelemetry);
 			expect(resolvePlayerAction(loaded, { type: "wait" }).state).toEqual(
 				resolvePlayerAction(original, { type: "wait" }).state,
 			);

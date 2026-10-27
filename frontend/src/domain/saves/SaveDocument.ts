@@ -37,6 +37,7 @@ export type SaveDocument = {
 		| "disabledFeatures"
 		| "runId"
 		| "usage"
+		| "floorTelemetry"
 		| "encounters"
 		| "townEquipmentStock"
 		| "townEquipmentPurchases"
