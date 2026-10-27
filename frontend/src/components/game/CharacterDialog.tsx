@@ -420,7 +420,6 @@ const CharacterDialog = ({
 													bag={bag}
 													item={selected}
 													carryingEmber={quest.cureRecovered}
-													inTown={inTown}
 													comparisonContext={comparisonContext}
 													potionHotbar={potionHotbar}
 													assignmentsEnabled={!won}
