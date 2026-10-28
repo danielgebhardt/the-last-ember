@@ -1,3 +1,4 @@
+import type { MinibossKind } from "../../domain/arena/Arena";
 import type { ActivityEvent } from "../../domain/game/ActivityHistory.ts";
 import { ADVENTURE_STORY } from "../../domain/game/AdventureStory";
 import { AFFLICTION_DEFINITIONS } from "../../domain/game/AfflictionDefinitions";
@@ -15,6 +16,14 @@ import { ESCAPE_PURSUIT_RULES } from "../../domain/monsters/PursuitRules";
 import { OBJECT_DEFINITIONS } from "../../domain/objects/DungeonObject";
 import { describeObject } from "../../domain/objects/ObjectDescriptions";
 import { sanctuaryConditionName } from "../../domain/town/Sanctuary";
+
+const MINIBOSS_ENRAGED: Readonly<Record<MinibossKind, string>> = {
+	"pyre-lord": "The Pyre Lord roars and calls salamanders from the flames!",
+	"iron-juggernaut":
+		"The Iron Juggernaut stamps and lowers its head. It will charge again and again!",
+	broodmother:
+		"The Broodmother shrieks. Every egg sac bursts at once, and her webs come without pause!",
+};
 
 export const formatActivityEvent = (event: ActivityEvent): string => {
 	const prefix = `Turn ${event.turn} — `;
@@ -160,7 +169,13 @@ export const formatActivityEvent = (event: ActivityEvent): string => {
 		case "arena-cleared":
 			return `${prefix}The ${MONSTER_DEFINITIONS[event.miniboss].name} falls. The arena's exit opens, and its spent power restores you.`;
 		case "miniboss-enraged":
-			return `${prefix}${event.miniboss === "pyre-lord" ? "The Pyre Lord roars and calls salamanders from the flames!" : "The Iron Juggernaut stamps and lowers its head. It will charge again and again!"}`;
+			return `${prefix}${MINIBOSS_ENRAGED[event.miniboss]}`;
+		case "egg-sac-broken":
+			return `${prefix}You tear the egg sac open. Nothing will hatch from it now.`;
+		case "egg-sacs-burned":
+			return `${prefix}${event.count === 1 ? "The flames burn an egg sac." : `The flames burn ${event.count} egg sacs.`} Nothing will hatch from ${event.count === 1 ? "it" : "them"} now.`;
+		case "brood-hatched":
+			return `${prefix}${event.count === 1 ? "An egg sac splits, and a spiderling scuttles out!" : `${event.count} egg sacs split, and spiderlings scuttle out!`}`;
 		case "pact-struck":
 			return `${prefix}You accept the ${PACT_DEFINITIONS[event.pact].name}. It binds you for the rest of the run.`;
 		case "omen-revealed":

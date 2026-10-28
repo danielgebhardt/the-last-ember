@@ -354,6 +354,10 @@ export const resolveMonsterPhase = (
 				),
 				...(phase.summons ?? []),
 			];
+			if (phase.objects) {
+				objects = phase.objects;
+				navigation = navigationRun({ run: state.run, objects });
+			}
 			events.push(...phase.events);
 			continue;
 		}

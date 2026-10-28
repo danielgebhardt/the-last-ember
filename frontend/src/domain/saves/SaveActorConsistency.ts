@@ -1,3 +1,4 @@
+import { isArenaSpawnId } from "../arena/Arena";
 import { hasLineOfSight } from "../dungeon/Visibility";
 import { WARDEN_SPAWN_ID, wardenStats } from "../monsters/EmberWarden";
 import {
@@ -47,6 +48,8 @@ const isConsistentReinforcement = (
 	monsters: readonly Monster[],
 ): boolean => {
 	const index = Number(entry.id.split(":")[1]);
+	// An arena's calls are checked with the arena.
+	if (isArenaSpawnId(entry.id)) return entry.summonedBy !== undefined;
 	if (index < SENTRY_SUMMON_ID_BASE) return entry.summonedBy === undefined;
 	const offset = index - SENTRY_SUMMON_ID_BASE;
 	const sentryId = `${entry.floorNumber}:${Math.floor(offset / 1000)}`;
@@ -138,10 +141,11 @@ export const hasConsistentActors = (document: SaveDocument): boolean => {
 				(entry.kind === "treasure-thief") === isThiefId(entry.id) &&
 				(entry.theft === undefined ||
 					(isThief(entry) && entry.theft.turn <= state.turn)) &&
-				// Only a sounded sentry tracks reinforcements.
+				// Only a sounded sentry tracks reinforcements, and the Broodmother her brood.
 				(entry.summons === undefined ||
-					(MONSTER_DEFINITIONS[entry.kind].alarmRadius !== undefined &&
-						entry.alarmUsed === true &&
+					((entry.kind === "broodmother" ||
+						(MONSTER_DEFINITIONS[entry.kind].alarmRadius !== undefined &&
+							entry.alarmUsed === true)) &&
 						entry.summons.turn <= state.turn)) &&
 				isConsistentReinforcement(entry, state.monsters) &&
 				// Only a mirror's reflection choice summons a reflection, with saved stats.

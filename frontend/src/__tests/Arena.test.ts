@@ -9,6 +9,8 @@ import {
 	arenaGateId,
 	arenaRackId,
 	arenaRewardId,
+	arenaSpawnId,
+	eggSacId,
 	isArenaTerrain,
 	MINIBOSS_KINDS,
 	type MinibossKind,
@@ -20,14 +22,17 @@ import {
 	ARENA_SCROLL_REFUSAL,
 	EXIT_REFUSAL,
 	GATE_REFUSAL,
+	resolveArenas,
 	SEALED_STAIR_REFUSAL,
 } from "../domain/arena/ArenaRules";
+import { BROOD_HATCH_INTERVAL } from "../domain/arena/Brood";
 import {
 	connectDungeonFloors,
 	generateDungeonRun,
 } from "../domain/dungeon/DungeonRun";
 import { updateExploration } from "../domain/dungeon/Exploration";
 import { DEFAULT_FOG_CONFIGURATION } from "../domain/dungeon/RunConfiguration";
+import { castAreaSpell } from "../domain/game/AreaSpells";
 import { emptyCombatTelemetry } from "../domain/game/CombatTelemetry";
 import { createFloorTelemetry } from "../domain/game/FloorTelemetry";
 import { createGameState, type GameState } from "../domain/game/GameState";
@@ -35,12 +40,14 @@ import { damageMonster } from "../domain/game/MonsterDamage";
 import { resolvePlayerAction } from "../domain/game/PlayerActions";
 import { createTestSeedState } from "../domain/game/TestSeed";
 import { exitScrollRestriction } from "../domain/items/ExitDungeonScroll";
+import type { Monster } from "../domain/monsters/Monster";
 import { coordinateKey } from "../domain/monsters/MonsterLocations";
 import {
 	actorAttackDamage,
 	maximumMonsterHealth,
 	monsterAttackDamage,
 } from "../domain/monsters/MonsterStats";
+import { telegraphReady } from "../domain/monsters/MonsterTelegraphs";
 import { objectChoices } from "../domain/objects/ObjectChoices";
 import { sealedTiles } from "../domain/objects/OptionalEliteRooms";
 import { portalFloors } from "../domain/objects/RunicPortal";
@@ -160,7 +167,18 @@ describe("Arenas", () => {
 					.filter((o) => o.floorNumber === 6)
 					.map((o) => o.kind)
 					.sort(),
-			).toEqual(["arena-door", "arena-reward", "door", "gold"]);
+			).toEqual(
+				[
+					"arena-door",
+					"arena-reward",
+					"door",
+					"gold",
+					// The Broodmother's hall also holds her four egg sacs.
+					...(selectMiniboss(seed) === "broodmother"
+						? Array(4).fill("egg-sac")
+						: []),
+				].sort(),
+			);
 			expect(state.floorItems.filter((i) => i.floorNumber === 6)).toEqual([]);
 			expect(state.omens?.some((o) => o.floorNumber === 6) ?? false).toBe(
 				false,
@@ -485,6 +503,13 @@ describe("Arenas", () => {
 			floorNumber: 5,
 			miniboss: "iron-juggernaut",
 		});
+		expect(state.arenas).toContainEqual({
+			floorNumber: 6,
+			miniboss: "broodmother",
+		});
+		expect(
+			state.objects.filter((o) => o.kind === "egg-sac" && o.floorNumber === 6),
+		).toHaveLength(4);
 		expect(isArenaTerrain(state.run.floors[3].terrain)).toBe(true);
 		expect(isArenaTerrain(state.run.floors[4].terrain)).toBe(true);
 		// Each arena's gate bars the stair down into it.
@@ -495,7 +520,7 @@ describe("Arenas", () => {
 			state.objects.find((o) => o.id === arenaGateId(5))?.coordinate,
 		).toEqual(ARENA_DOWN_STAIR);
 		// Each fights with the strength it has on floor 12 of a full run.
-		for (const floorNumber of [4, 5]) {
+		for (const floorNumber of [4, 5, 6]) {
 			const miniboss = state.monsters.find(
 				(m) => m.id === minibossId(floorNumber),
 			);
@@ -505,5 +530,147 @@ describe("Arenas", () => {
 				monsterAttackDamage(miniboss.kind, 12),
 			);
 		}
+	});
+});
+
+describe("Broodmother", () => {
+	const withMother = (state: GameState, change: Partial<Monster>) => ({
+		...state,
+		monsters: state.monsters.map((m) =>
+			m.id === minibossId(6) ? { ...m, ...change } : m,
+		),
+	});
+	const hunting = (state: GameState) =>
+		withMother(state, {
+			awareness: {
+				type: "pursuing",
+				target: state.run.playerCoordinate,
+				remaining: 10,
+				blocked: 0,
+			},
+		});
+	const sac = (state: GameState, index: number) =>
+		state.objects.find((o) => o.id === eggSacId(6, index));
+	const brood = (state: GameState) =>
+		state.monsters.filter((m) => m.kind === "spiderling");
+	// Far from her, so she neither sees nor reaches you unless told she hunts.
+	const hall = () =>
+		inHall("broodmother", { row: 2, col: 12 }, { row: 13, col: 31 });
+
+	it("hatches one spiderling per unbroken sac every six turns once she hunts you", () => {
+		expect(resolveArenas(hall())).toEqual(hall());
+		const clock = resolveArenas(hunting(hall()));
+		expect(boss(clock)?.summons).toEqual({ count: 0, turn: clock.turn });
+		expect(brood(resolveArenas({ ...clock, turn: clock.turn + 5 }))).toEqual(
+			[],
+		);
+		const due = resolveArenas({
+			...clock,
+			turn: clock.turn + BROOD_HATCH_INTERVAL,
+		});
+		expect(brood(due).map((m) => m.id)).toEqual(
+			[1, 2, 3, 4].map((count) => arenaSpawnId(6, count)),
+		);
+		expect(brood(due).every((m) => m.summonedBy === minibossId(6))).toBe(true);
+		expect(boss(due)?.summons).toEqual({ count: 4, turn: due.turn });
+		expect(due.activityHistory.entries.at(-1)?.event).toMatchObject({
+			type: "brood-hatched",
+			count: 4,
+		});
+		expect(save(due).ok).toBe(true);
+		// A forged hatchling, or a sac moved off its tile, is rejected.
+		expect(
+			save({
+				...due,
+				monsters: due.monsters.map((m) =>
+					m.kind === "spiderling" ? { ...m, summonedBy: undefined } : m,
+				),
+			}).ok,
+		).toBe(false);
+		expect(
+			save({
+				...due,
+				objects: due.objects.map((o) =>
+					o.id === eggSacId(6, 0)
+						? { ...o, coordinate: { row: 5, col: 16 } }
+						: o,
+				),
+			}).ok,
+		).toBe(false);
+	});
+
+	it("breaking a sac with E takes a turn and stops it hatching", () => {
+		const beside = {
+			...hall(),
+			run: { ...hall().run, playerCoordinate: { row: 3, col: 16 } },
+		};
+		const broken = act(beside, {
+			type: "interact",
+			objectId: eggSacId(6, 0),
+		});
+		expect(broken.turnAdvanced).toBe(true);
+		expect(sac(broken.state, 0)?.activated).toBe(true);
+		const clock = resolveArenas(hunting(broken.state));
+		const due = resolveArenas({
+			...clock,
+			turn: clock.turn + BROOD_HATCH_INTERVAL,
+		});
+		expect(brood(due)).toHaveLength(3);
+		expect(save(due).ok).toBe(true);
+	});
+
+	it("a Fireball whose blast covers a sac burns it", () => {
+		const clock = resolveArenas(hunting(hall()));
+		const due = resolveArenas({
+			...clock,
+			turn: clock.turn + BROOD_HATCH_INTERVAL,
+		});
+		// The first hatchling waits just above the first sac.
+		const target = brood(due)[0];
+		expect(target.coordinate).toEqual({ row: 3, col: 16 });
+		const cast = castAreaSpell(
+			{ ...due, mana: 50 },
+			"fireball",
+			target.coordinate,
+			hit,
+		);
+		if ("error" in cast) throw new Error(cast.error);
+		expect(sac(cast.state, 0)?.activated).toBe(true);
+		expect([1, 2, 3].map((index) => sac(cast.state, index)?.activated)).toEqual(
+			[false, false, false],
+		);
+		expect(
+			cast.state.activityHistory.entries.some(
+				({ event }) => event.type === "egg-sacs-burned" && event.count === 1,
+			),
+		).toBe(true);
+	});
+
+	it("at half health every unbroken sac bursts at once and she webs without pause, once", () => {
+		const mother = boss(hall());
+		if (!mother) throw new Error("Expected the Broodmother");
+		const halved = withMother(hall(), {
+			health: Math.floor(mother.health / 2),
+		});
+		const burst = act({
+			...halved,
+			objects: halved.objects.map((o) =>
+				o.id === eggSacId(6, 3) ? { ...o, activated: true } : o,
+			),
+		}).state;
+		expect(boss(burst)?.minibossPhase).toBe(2);
+		expect(brood(burst)).toHaveLength(3);
+		expect([0, 1, 2, 3].every((index) => sac(burst, index)?.activated)).toBe(
+			true,
+		);
+		const webbed = withMother(burst, {
+			telegraphTurn: { web: burst.turn },
+		});
+		const enraged = boss(webbed);
+		if (!enraged) throw new Error("Expected the Broodmother");
+		expect(telegraphReady(enraged, "web", burst.turn + 1)).toBe(true);
+		expect(save(burst).ok).toBe(true);
+		// Once only.
+		expect(brood(act(burst).state)).toHaveLength(3);
 	});
 });

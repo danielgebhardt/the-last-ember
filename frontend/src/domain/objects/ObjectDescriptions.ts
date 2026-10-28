@@ -89,6 +89,11 @@ const hints: Record<DungeonObjectKind, { fresh: string; spent: string }> = {
 		fresh: "Press E to choose your prize. You may take only one.",
 		spent: "You have taken your prize.",
 	},
+	"egg-sac": {
+		fresh:
+			"Something moves inside. Press E to break it before it hatches; fire burns it too.",
+		spent: "Broken. Nothing will hatch from it now.",
+	},
 	"arena-door": {
 		fresh: "Sealed until nothing in the hall is left standing.",
 		spent: "Open. The way on lies beyond.",

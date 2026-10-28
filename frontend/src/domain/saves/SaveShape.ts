@@ -1,4 +1,8 @@
-import { ARENA_REWARD_KINDS, MINIBOSS_KINDS } from "../arena/Arena";
+import {
+	ARENA_REWARD_KINDS,
+	EGG_SAC_TILES,
+	MINIBOSS_KINDS,
+} from "../arena/Arena";
 import { ARENA_COLS, ARENA_ROWS } from "../arena/ArenaLayout";
 import {
 	CONFIGURATION_LIMITS,
@@ -382,6 +386,9 @@ const eventFields = {
 	"arena-cleared": { miniboss: oneOf(MINIBOSS_KINDS) },
 	"miniboss-enraged": { miniboss: oneOf(MINIBOSS_KINDS) },
 	"arena-reward-claimed": { item: oneOf(ARENA_REWARD_KINDS) },
+	"egg-sac-broken": {},
+	"egg-sacs-burned": { count: integer(1, EGG_SAC_TILES.length) },
+	"brood-hatched": { count: integer(1, EGG_SAC_TILES.length) },
 	"omen-foreseen": { omen: optional(oneOf(OMEN_KINDS)) },
 	"gold-collected": { amount: integer(1) },
 	"merchant-bought": { item: itemKind, gold: integer(1) },

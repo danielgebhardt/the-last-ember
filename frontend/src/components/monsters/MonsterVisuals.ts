@@ -1,4 +1,4 @@
-import { Flame, Rat, Shield } from "lucide-react";
+import { Bug, Flame, Rat, Shield } from "lucide-react";
 import type { ComponentType, SVGProps } from "react";
 import { MONSTER_DEFINITIONS } from "../../domain/monsters/Monster";
 import type { MonsterKind } from "../../domain/monsters/Monster.ts";
@@ -25,6 +25,7 @@ import ShadowStalkerIcon from "./ShadowStalkerIcon";
 import SkeletonIcon from "./SkeletonIcon";
 import SoulWraithIcon from "./SoulWraithIcon";
 import SpiderIcon from "./SpiderIcon";
+import SpiderlingIcon from "./SpiderlingIcon";
 import TreasureMimicIcon from "./TreasureMimicIcon";
 import TreasureThiefIcon from "./TreasureThiefIcon";
 import TrollIcon from "./TrollIcon";
@@ -57,6 +58,16 @@ export const MONSTER_VISUALS: Record<
 		icon: Shield,
 		color: "text-[#57534e] dark:text-[#d6d3d1]",
 		label: MONSTER_DEFINITIONS["iron-juggernaut"].name,
+	},
+	broodmother: {
+		icon: Bug,
+		color: "text-[#7e22ce] dark:text-[#d8b4fe]",
+		label: MONSTER_DEFINITIONS.broodmother.name,
+	},
+	spiderling: {
+		icon: SpiderlingIcon,
+		color: "text-[#a78bfa] dark:text-[#c4b5fd]",
+		label: MONSTER_DEFINITIONS.spiderling.name,
 	},
 	"treasure-mimic": {
 		icon: TreasureMimicIcon,

@@ -18,7 +18,11 @@ export const ARENA_DEPTH_SHARE = 0.6;
 export const arenaFloorFor = (depth: number): number | undefined =>
 	depth >= ARENA_MIN_DEPTH ? Math.round(depth * ARENA_DEPTH_SHARE) : undefined;
 
-export const MINIBOSS_KINDS = ["pyre-lord", "iron-juggernaut"] as const;
+export const MINIBOSS_KINDS = [
+	"pyre-lord",
+	"iron-juggernaut",
+	"broodmother",
+] as const;
 export type MinibossKind = (typeof MINIBOSS_KINDS)[number];
 export type Arena = Readonly<{ floorNumber: number; miniboss: MinibossKind }>;
 export const isMinibossKind = (kind: string): kind is MinibossKind =>
@@ -36,6 +40,24 @@ export const MINIBOSS_ID = 1000020;
 export const MINIBOSS_SUMMON_IDS = [1000021, 1000022] as const;
 export const minibossId = (floorNumber: number) =>
 	`${floorNumber}:${MINIBOSS_ID}`;
+// What a miniboss calls over the fight (hatched or raised), numbered by its summons count.
+export const ARENA_SPAWN_ID_BASE = 1100000;
+export const arenaSpawnId = (floorNumber: number, count: number) =>
+	`${floorNumber}:${ARENA_SPAWN_ID_BASE + count}`;
+export const isArenaSpawnId = (id: string) => {
+	const index = Number(id.split(":")[1]);
+	return index > ARENA_SPAWN_ID_BASE && index < ARENA_SPAWN_ID_BASE + 100000;
+};
+
+// The Broodmother's egg sacs, one beside each corner pillar of the hall.
+export const EGG_SAC_TILES: readonly Coordinate[] = [
+	{ row: 4, col: 16 },
+	{ row: 4, col: 26 },
+	{ row: 12, col: 16 },
+	{ row: 12, col: 26 },
+];
+export const eggSacId = (floorNumber: number, index: number) =>
+	`floor:${floorNumber}:object:egg-sac:${index + 1}`;
 
 // The arena's stairs: you arrive on the sealed up stair; the way on lies in the reward room.
 export const ARENA_UP_STAIR: Coordinate = { row: 8, col: 3 };
@@ -196,6 +218,15 @@ export const withArena = (
 			coordinate: { ...ARENA_REWARD_TILES.gold },
 			activated: false,
 		},
+		...(miniboss === "broodmother"
+			? EGG_SAC_TILES.map((coordinate, index) => ({
+					id: eggSacId(floorNumber, index),
+					kind: "egg-sac" as const,
+					floorNumber,
+					coordinate: { ...coordinate },
+					activated: false,
+				}))
+			: []),
 	];
 	const boss: Monster = {
 		id: minibossId(floorNumber),

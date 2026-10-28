@@ -1,3 +1,4 @@
+import { BROOD_HATCH_INTERVAL } from "../arena/Brood";
 import { AFFLICTION_DEFINITIONS } from "../game/AfflictionDefinitions";
 import { afflictionTrait } from "../game/AfflictionText";
 import { SPELL_DEFINITIONS } from "../game/Spells";
@@ -71,6 +72,14 @@ export const monsterTraits = (kind: MonsterKind): readonly string[] => {
 	if (kind === "iron-juggernaut")
 		traits.push(
 			`Arena miniboss. Its charge runs on past your tile until something stops it. If it slams into stone it is stunned for ${EFFECT_DEFINITIONS.stunned.duration} phases and takes double damage, so stand in front of a wall or pillar and step aside. At half health it no longer recovers after a charge that misses. Its health and attack grow with depth.`,
+		);
+	if (kind === "broodmother")
+		traits.push(
+			`Arena miniboss. Four egg sacs stand beside the hall's pillars; while she hunts you, each unbroken sac hatches a spiderling every ${BROOD_HATCH_INTERVAL} turns. Press E beside a sac to break it, or burn it with a Fireball. At half health every sac left bursts at once and her webs come without pause. Her health and attack grow with depth.`,
+		);
+	if (kind === "spiderling")
+		traits.push(
+			"Hatched from the Broodmother's egg sacs. It grows with its mother's floor and gives no experience or loot.",
 		);
 	if (definition.thief)
 		traits.push(

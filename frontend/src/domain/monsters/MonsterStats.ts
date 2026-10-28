@@ -9,8 +9,8 @@ const depthBeyond = (kind: MonsterKind, floorNumber: number): number =>
 		Math.min(MONSTER_DEFINITIONS[kind].maxFloor, floorNumber) -
 			MONSTER_DEFINITIONS[kind].minFloor,
 	);
-// Only the optional champion, the mimic and the minibosses grow with depth, so each
-// stays a heroic fight on whichever floor it appears.
+// Only the optional champion, the mimic, the minibosses and the brood grow with depth,
+// so each stays a heroic fight on whichever floor it appears.
 const DEPTH_GROWTH: Partial<
 	Record<
 		MonsterKind,
@@ -27,6 +27,12 @@ const DEPTH_GROWTH: Partial<
 	},
 	"pyre-lord": { health: (depth) => 8 * depth, attack: (depth) => depth },
 	"iron-juggernaut": { health: (depth) => 9 * depth, attack: (depth) => depth },
+	broodmother: { health: (depth) => 7 * depth, attack: (depth) => depth },
+	// The brood grows with its mother's floor, so a deep hall's hatchlings still bite.
+	spiderling: {
+		health: (depth) => depth,
+		attack: (depth) => Math.round(depth / 2),
+	},
 };
 const healthGrowth = (kind: MonsterKind, floorNumber: number) =>
 	DEPTH_GROWTH[kind]?.health(depthBeyond(kind, floorNumber)) ?? 0;

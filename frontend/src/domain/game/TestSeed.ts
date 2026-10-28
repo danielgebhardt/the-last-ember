@@ -1,4 +1,4 @@
-import { withArena } from "../arena/Arena";
+import { MINIBOSS_KINDS, withArena } from "../arena/Arena";
 import {
 	connectDungeonFloors,
 	type DungeonFloor,
@@ -272,14 +272,14 @@ const testContent = (
 	return { monsters, objects };
 };
 
-// The two floors below the authored ones are arenas, one per miniboss, so both fights
-// are a short walk away, each at the strength it has on floor 12 of a full run. A short
-// test run has room for the first only.
+// The floors below the authored ones are arenas, one per miniboss, so every fight is a
+// short walk away, each at the strength it has on floor 12 of a full run. A short test
+// run has room for the first ones only.
 export const TEST_ARENA_STRENGTH_FLOOR = 12;
-export const TEST_ARENAS = [
-	{ floorNumber: TEST_SEED_FLOORS + 1, miniboss: "pyre-lord" },
-	{ floorNumber: TEST_SEED_FLOORS + 2, miniboss: "iron-juggernaut" },
-] as const;
+export const TEST_ARENAS = MINIBOSS_KINDS.map((miniboss, index) => ({
+	floorNumber: TEST_SEED_FLOORS + 1 + index,
+	miniboss,
+}));
 // Authored floors and arenas keep no generated omens; the first floor after the arenas
 // always shows one, a rule-only omen that needs no gathering.
 export const TEST_OMEN_FLOOR = TEST_SEED_FLOORS + TEST_ARENAS.length + 1;

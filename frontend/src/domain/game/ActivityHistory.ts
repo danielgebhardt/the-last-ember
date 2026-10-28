@@ -267,6 +267,8 @@ export type ActivityEvent = { turn: number } & (
 			miniboss: MinibossKind;
 	  }
 	| { type: "arena-reward-claimed"; item: ArenaRewardKind }
+	| { type: "egg-sac-broken" }
+	| { type: "egg-sacs-burned" | "brood-hatched"; count: number }
 	| { type: "omen-foreseen"; omen?: OmenKind }
 	| { type: "experience-gained"; amount: number }
 	| { type: "level-gained"; level: number; healthGain: number }

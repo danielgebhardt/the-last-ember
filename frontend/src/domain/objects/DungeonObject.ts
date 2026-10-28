@@ -209,6 +209,17 @@ export const OBJECT_DEFINITIONS = {
 		chance: 1,
 		placement: "arena",
 	},
+	// The Broodmother's hall: each hatches spiderlings until broken or burned; see Brood.
+	"egg-sac": {
+		name: "Egg sac",
+		freshLabel: "egg sac",
+		usedLabel: "broken egg sac",
+		minFloor: 6,
+		maxFloor: 12,
+		maxPerFloor: 4,
+		chance: 1,
+		placement: "arena",
+	},
 	// At most one per adventure, in the middle third; see DarkAltar.
 	"dark-altar": {
 		name: "Dark altar",

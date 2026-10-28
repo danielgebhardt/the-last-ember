@@ -1,3 +1,4 @@
+import { burnEggSacs } from "../arena/Brood";
 import type { Coordinate, Dungeon } from "../dungeon/DungeonTypes";
 import { FLOOR } from "../dungeon/Tiles";
 import { hasLineOfSight } from "../dungeon/Visibility";
@@ -87,6 +88,7 @@ export const castAreaSpell = (
 		.sort((a, b) => a.id.localeCompare(b.id, undefined, { numeric: true }));
 	if (!targets.length) return { error: "No monsters within the spell area." };
 	let next = { ...state, mana: state.mana - definition.cost };
+	if (definition.element === "fire") next = burnEggSacs(next, area);
 	// Potency is fixed before any kills can increase the caster's level.
 	for (const target of targets) {
 		const multiplier =

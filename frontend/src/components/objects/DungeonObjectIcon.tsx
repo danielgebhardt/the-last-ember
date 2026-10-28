@@ -3,6 +3,7 @@ import {
 	DoorClosed,
 	DoorClosedLocked,
 	DoorOpen,
+	Egg,
 	Flame,
 	Gem,
 	Hourglass,
@@ -57,6 +58,7 @@ const icons: Record<
 	"arena-gate": Swords,
 	"arena-door": DoorClosedLocked,
 	"arena-reward": Trophy,
+	"egg-sac": Egg,
 };
 const DungeonObjectIcon = ({ object }: { object: DungeonObject }) => {
 	if (!objectAvailable(object)) return null;

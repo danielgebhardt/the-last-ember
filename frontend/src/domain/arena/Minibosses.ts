@@ -8,7 +8,8 @@ import {
 } from "../monsters/MonsterStats";
 import type { SpecialActionOutcome } from "../monsters/MonsterTelegraphs";
 import { navigationRun } from "../objects/NavigationTerrain";
-import { MINIBOSS_SUMMON_IDS } from "./Arena";
+import { MINIBOSS_SUMMON_IDS, type MinibossKind } from "./Arena";
+import { burstSacs } from "./Brood";
 
 const SIDES: readonly Coordinate[] = [
 	{ row: -1, col: 0 },
@@ -22,7 +23,8 @@ const SIDES: readonly Coordinate[] = [
 ];
 
 // At half health a miniboss spends one action changing phase. The Pyre Lord calls two
-// salamanders and breathes without pause; the Juggernaut charges again without recovering.
+// salamanders and breathes without pause; the Juggernaut charges again without recovering;
+// every unbroken sac of the Broodmother's bursts and she webs without pause.
 export const resolveMinibossPhase = (
 	state: GameState,
 	monster: Monster,
@@ -42,10 +44,14 @@ export const resolveMinibossPhase = (
 	const events = [
 		{
 			type: "miniboss-enraged" as const,
-			miniboss: monster.kind as "pyre-lord" | "iron-juggernaut",
+			miniboss: monster.kind as MinibossKind,
 			turn: state.turn,
 		},
 	];
+	if (monster.kind === "broodmother") {
+		const burst = burstSacs(state, enraged);
+		return { ...burst, events };
+	}
 	if (monster.kind !== "pyre-lord") return { monster: enraged, events };
 	const terrain = navigationRun(state).floors[monster.floorNumber - 1].terrain;
 	const taken = (point: Coordinate) =>

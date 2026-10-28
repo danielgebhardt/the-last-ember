@@ -4,6 +4,7 @@ import {
 	EXIT_REFUSAL,
 	enterArena,
 } from "../arena/ArenaRules";
+import { breakEggSac } from "../arena/Brood";
 import { appendActivityEvents } from "../game/ActivityHistory";
 import type { GameState } from "../game/GameState";
 import type { PactKind } from "../game/Pacts";
@@ -137,6 +138,7 @@ export const interactObject = (
 	if (object.kind === "arena-door") return { error: EXIT_REFUSAL };
 	if (object.kind === "arena-reward")
 		return claimArenaReward(state, object, action.choice);
+	if (object.kind === "egg-sac") return breakEggSac(state, object);
 
 	if (
 		object.activated &&

@@ -20,6 +20,7 @@ import DungeonLegend from "../components/dungeon/DungeonLegend.tsx";
 import MonsterIcon from "../components/monsters/MonsterIcon";
 import ObservedCreatures from "../components/monsters/ObservedCreatures";
 import { ARENA_DEPTH_SHARE, ARENA_MIN_DEPTH } from "../domain/arena/Arena";
+import { BROOD_HATCH_INTERVAL } from "../domain/arena/Brood";
 import type { VisibilityGrid } from "../domain/dungeon/Visibility";
 import type { Difficulty } from "../domain/game/Difficulty";
 import { STARTING_GOLD } from "../domain/game/GameState";
@@ -734,6 +735,16 @@ const DungeonHelp = ({
 							Charges run past you until something stops them. Slamming into
 							stone stuns it, and a stunned juggernaut takes double damage. At
 							half health it charges again without recovering.
+						</dd>
+					</div>
+					<div>
+						<dt className="font-medium">Broodmother</dt>
+						<dd className="text-muted-foreground">
+							Four egg sacs beside the pillars each hatch a spiderling every{" "}
+							{BROOD_HATCH_INTERVAL} turns while she hunts you. Press E beside a
+							sac to break it, or burn it with a Fireball. Her webs Slow you if
+							you stay put. At half health every sac left bursts at once and she
+							webs without pause. Unbroken sacs don't keep the exit shut.
 						</dd>
 					</div>
 				</dl>

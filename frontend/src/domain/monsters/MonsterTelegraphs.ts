@@ -1,6 +1,7 @@
 import type { Coordinate } from "../dungeon/DungeonTypes";
 import type { ActivityEvent } from "../game/ActivityHistory";
 import type { AfflictionKind } from "../game/AfflictionDefinitions";
+import type { DungeonObject } from "../objects/DungeonObject";
 import {
 	MONSTER_DEFINITIONS,
 	type Monster,
@@ -30,6 +31,8 @@ export type SpecialActionOutcome = Readonly<{
 	stunned?: true;
 	// Carried gold a treasure thief took.
 	stolenGold?: number;
+	// Objects the action changed, such as egg sacs bursting.
+	objects?: readonly DungeonObject[];
 }>;
 // Behaviors that need a pause after resolving; the monster saves the turn. The
 // soul bolt is unprepared but shares this cooldown record.
@@ -131,6 +134,8 @@ export const telegraphReady = (
 ): boolean => {
 	const last = monster.telegraphTurn?.[kind];
 	const cooldown = TELEGRAPH_COOLDOWNS[kind](MONSTER_DEFINITIONS[monster.kind]);
+	// A Broodmother in her second phase webs without pause.
+	if (kind === "web" && monster.minibossPhase === 2) return true;
 	return last === undefined || cooldown === undefined || turn - last > cooldown;
 };
 export const resolvedTelegraph = (
