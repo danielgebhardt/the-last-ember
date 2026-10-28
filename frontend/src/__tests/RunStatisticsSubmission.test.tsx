@@ -93,6 +93,9 @@ it("queues death without waiting, retries on online, and acknowledges only once"
 
 		expect(
 			localStorage.getItem(`larn:statistics:player:${document.state.runId}`),
+		).toBe("pending");
+		expect(
+			localStorage.getItem(`larn:finished-run:player:${document.state.runId}`),
 		).toContain(document.state.runId);
 
 		act(() => window.dispatchEvent(new Event("online")));

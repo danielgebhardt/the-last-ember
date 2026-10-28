@@ -2,14 +2,30 @@ import type { SaveDocument } from "../domain/saves/SaveDocument";
 
 export type StatisticsStorage = Pick<
 	Storage,
-	"getItem" | "setItem" | "length" | "key"
+	"getItem" | "setItem" | "removeItem" | "length" | "key"
 >;
+
+const KINDS = ["statistics", "rankings"] as const;
+// Late-game saves with full telemetry approach 500 KB, so a few runs at most may
+// wait beside the player's own saves.
+export const MAX_WAITING_RUNS = 3;
 
 const terminal = (value: string | null | undefined) =>
 	value === "sent" || value === "discarded";
+// Entries queued before documents were shared hold the document itself.
+const inline = (value: string | null | undefined) => !!value?.startsWith("{");
+const finishedAt = (text: string) => {
+	try {
+		return String(JSON.parse(text).savedAt ?? "");
+	} catch {
+		return "";
+	}
+};
 
-// One storage entry per account/run prevents independent tabs overwriting each
-// other's pending saves. Acknowledged/discarded entries retain only a receipt.
+// One status entry per destination/account/run prevents independent tabs
+// overwriting each other's pending runs; acknowledged/discarded entries retain
+// only a receipt. Both destinations share one stored document per run, removed
+// once neither still needs it.
 export class StatisticsQueue {
 	private memory = new Map<string, string>();
 	private stopped = new Set<string>();
@@ -18,8 +34,11 @@ export class StatisticsQueue {
 	private send: typeof fetch;
 	private kind: "statistics" | "rankings";
 
-	private prefix(uid: string) {
-		return `larn:${this.kind}:${uid}:`;
+	private prefix(uid: string, kind: string = this.kind) {
+		return `larn:${kind}:${uid}:`;
+	}
+	private documentKey(uid: string, id: string) {
+		return `${this.prefix(uid, "finished-run")}${id}`;
 	}
 
 	constructor(
@@ -39,7 +58,7 @@ export class StatisticsQueue {
 	forget(uid: string) {
 		this.stopped.add(uid);
 		for (const [key] of this.pending(uid)) {
-			this.write(key, "discarded");
+			this.resolve(uid, key, "discarded");
 		}
 	}
 
@@ -65,7 +84,17 @@ export class StatisticsQueue {
 		}
 	}
 
-	private pending(uid: string): [string, string][] {
+	private remove(key: string) {
+		this.memory.delete(key);
+
+		try {
+			this.storage.removeItem(key);
+		} catch {
+			// Nothing further to release.
+		}
+	}
+
+	private keys() {
 		const keys = new Set(this.memory.keys());
 
 		try {
@@ -77,12 +106,63 @@ export class StatisticsQueue {
 			// Memory still works for this visit.
 		}
 
-		return [...keys]
+		return [...keys];
+	}
+
+	// Record a destination's outcome, then drop the shared document once no
+	// destination still waits for it.
+	private resolve(uid: string, key: string, outcome: "sent" | "discarded") {
+		this.write(key, outcome);
+		const id = key.slice(this.prefix(uid).length);
+		if (
+			KINDS.every((kind) => {
+				const status = this.read(`${this.prefix(uid, kind)}${id}`);
+				return !status || terminal(status);
+			})
+		)
+			this.remove(this.documentKey(uid, id));
+	}
+
+	private pending(uid: string): [string, string][] {
+		return this.keys()
 			.filter((key) => key.startsWith(this.prefix(uid)))
 			.flatMap((key) => {
-				const text = this.read(key);
-				return text && !terminal(text) ? [[key, text] as [string, string]] : [];
+				const status = this.read(key);
+				if (!status || terminal(status)) return [];
+				const text = inline(status)
+					? status
+					: this.read(
+							this.documentKey(uid, key.slice(this.prefix(uid).length)),
+						);
+				if (text) return [[key, text] as [string, string]];
+				// Nothing left to send for this run.
+				this.resolve(uid, key, "discarded");
+				return [];
 			});
+	}
+
+	// Discard the earliest-finished runs beyond the limit, for every destination.
+	private bound(uid: string) {
+		const waiting = new Map<string, string>();
+		for (const key of this.keys()) {
+			const prefix = [...KINDS, "finished-run"]
+				.map((kind) => this.prefix(uid, kind))
+				.find((prefix) => key.startsWith(prefix));
+			const value = this.read(key);
+			if (prefix && value && (inline(value) || prefix.includes("finished-run")))
+				waiting.set(key.slice(prefix.length), value);
+		}
+		const oldest = [...waiting]
+			.sort(([, a], [, b]) => finishedAt(b).localeCompare(finishedAt(a)))
+			.slice(MAX_WAITING_RUNS);
+		for (const [id] of oldest) {
+			for (const kind of KINDS) {
+				const key = `${this.prefix(uid, kind)}${id}`;
+				const status = this.read(key);
+				if (status && !terminal(status)) this.resolve(uid, key, "discarded");
+			}
+			this.remove(this.documentKey(uid, id));
+		}
 	}
 
 	enqueue(uid: string, document: SaveDocument) {
@@ -105,7 +185,10 @@ export class StatisticsQueue {
 		const key = `${this.prefix(uid)}${id}`;
 
 		if (!this.read(key)) {
-			this.write(key, JSON.stringify(document));
+			const shared = this.documentKey(uid, id);
+			if (!this.read(shared)) this.write(shared, JSON.stringify(document));
+			this.write(key, "pending");
+			this.bound(uid);
 		}
 	}
 
@@ -141,7 +224,7 @@ export class StatisticsQueue {
 				});
 
 				if (response.ok) {
-					this.write(key, "sent");
+					this.resolve(uid, key, "sent");
 				} else if (response.status === 410) {
 					this.forget(uid);
 					break;

@@ -66,6 +66,7 @@ it("keeps an offline run until retry, including waiting for a chosen name, and r
 		await queue.retry("owner", async () => "token");
 
 		const key = `larn:rankings:owner:${document.state.runId}`;
+		const stored = `larn:finished-run:owner:${document.state.runId}`;
 
 		// The offline failure is expected and must preserve the submission.
 		expect(expectedOfflineError).toHaveBeenCalledWith(
@@ -74,7 +75,8 @@ it("keeps an offline run until retry, including waiting for a chosen name, and r
 				message: "offline",
 			}),
 		);
-		expect(localStorage.getItem(key)).toContain(document.state.runId);
+		expect(localStorage.getItem(key)).toBe("pending");
+		expect(localStorage.getItem(stored)).toContain(document.state.runId);
 
 		const reloaded = new StatisticsQueue(localStorage, send, "rankings");
 
@@ -89,7 +91,8 @@ it("keeps an offline run until retry, including waiting for a chosen name, and r
 		expect(expectedMissingNameWarning).toHaveBeenCalledWith(
 			"[rankings] Submission rejected (HTTP 409).",
 		);
-		expect(localStorage.getItem(key)).toContain(document.state.runId);
+		expect(localStorage.getItem(key)).toBe("pending");
+		expect(localStorage.getItem(stored)).toContain(document.state.runId);
 
 		// The next retry succeeds and replaces the document with a receipt.
 		await reloaded.retry("owner", async () => "token");

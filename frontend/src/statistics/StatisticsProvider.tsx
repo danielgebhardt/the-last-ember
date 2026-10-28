@@ -9,7 +9,18 @@ import {
 import { useAccountProfile } from "../accounts/AccountProfileProvider";
 import { rememberedUser, useAccount } from "../accounts/AccountProvider";
 import type { SaveDocument } from "../domain/saves/SaveDocument";
-import { StatisticsQueue } from "./StatisticsQueue";
+import { StatisticsQueue, type StatisticsStorage } from "./StatisticsQueue";
+
+// Resolve localStorage on each call: it can be replaced or unavailable.
+const browserStorage: StatisticsStorage = {
+	getItem: (key) => localStorage.getItem(key),
+	get length() {
+		return localStorage.length;
+	},
+	key: (index) => localStorage.key(index),
+	setItem: (key, value) => localStorage.setItem(key, value),
+	removeItem: (key) => localStorage.removeItem(key),
+};
 
 type Statistics = {
 	forget: () => void;
@@ -27,31 +38,9 @@ export const StatisticsProvider = ({ children }: { children: ReactNode }) => {
 	const profile = useAccountProfile();
 	const current = useRef(account);
 	current.current = account;
-	const [queue] = useState(
-		() =>
-			new StatisticsQueue({
-				getItem: (key) => localStorage.getItem(key),
-				get length() {
-					return localStorage.length;
-				},
-				key: (index) => localStorage.key(index),
-				setItem: (key, value) => localStorage.setItem(key, value),
-			}),
-	);
+	const [queue] = useState(() => new StatisticsQueue(browserStorage));
 	const [rankings] = useState(
-		() =>
-			new StatisticsQueue(
-				{
-					getItem: (key) => localStorage.getItem(key),
-					get length() {
-						return localStorage.length;
-					},
-					key: (index) => localStorage.key(index),
-					setItem: (key, value) => localStorage.setItem(key, value),
-				},
-				fetch,
-				"rankings",
-			),
+		() => new StatisticsQueue(browserStorage, fetch, "rankings"),
 	);
 	// Match save-slot ownership while a remembered account is being restored. A
 	// finished run can wait here, but only a confirmed matching user can send it.

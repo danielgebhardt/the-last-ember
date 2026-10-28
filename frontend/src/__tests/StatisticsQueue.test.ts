@@ -323,6 +323,96 @@ describe("Finished runs waiting in browser storage", () => {
 		},
 	);
 
+	it("stores a ranked run's document once until both destinations resolve it", async () => {
+		const expectedWarning = vi
+			.spyOn(console, "warn")
+			.mockImplementation(() => {});
+
+		try {
+			const document = finished();
+			document.state.ranked = true;
+			document.state.rankingVersion = "0.3.0-alpha";
+			let rankings = 503;
+			const send = vi.fn<typeof fetch>().mockImplementation(
+				async (url) =>
+					new Response(null, {
+						status: String(url).endsWith("rankings") ? rankings : 200,
+					}),
+			);
+			const statistics = new StatisticsQueue(localStorage, send);
+			const ranked = new StatisticsQueue(localStorage, send, "rankings");
+			statistics.enqueue("one", document);
+			ranked.enqueue("one", document);
+
+			const documents = () =>
+				Object.keys(localStorage).filter((key) =>
+					localStorage.getItem(key)?.startsWith("{"),
+				);
+			expect(documents()).toHaveLength(1);
+
+			await statistics.retry("one", token);
+			await ranked.retry("one", token);
+			expect(documents()).toHaveLength(1);
+
+			rankings = 200;
+			await new StatisticsQueue(localStorage, send, "rankings").retry(
+				"one",
+				token,
+			);
+			expect(documents()).toHaveLength(0);
+			expect(send.mock.calls[0][1]?.body).toBe(send.mock.calls[2][1]?.body);
+			for (const kind of ["statistics", "rankings"])
+				expect(
+					localStorage.getItem(`larn:${kind}:one:${document.state.runId}`),
+				).toBe("sent");
+		} finally {
+			expectedWarning.mockRestore();
+		}
+	});
+
+	it("still submits a run queued before documents were shared", async () => {
+		const document = finished();
+		const text = JSON.stringify(document);
+		localStorage.setItem(`larn:statistics:one:${document.state.runId}`, text);
+		const send = vi
+			.fn<typeof fetch>()
+			.mockResolvedValue(new Response(null, { status: 200 }));
+
+		await new StatisticsQueue(localStorage, send).retry("one", token);
+
+		expect(send).toHaveBeenCalledTimes(1);
+		expect(send.mock.calls[0][1]?.body).toBe(text);
+		expect(
+			localStorage.getItem(`larn:statistics:one:${document.state.runId}`),
+		).toBe("sent");
+	});
+
+	it("keeps only the three most recently finished runs waiting", async () => {
+		const send = vi
+			.fn<typeof fetch>()
+			.mockResolvedValue(new Response(null, { status: 200 }));
+		const queue = new StatisticsQueue(localStorage, send);
+		const runs = [4, 1, 3, 2].map((day) => {
+			const document = finished();
+			document.state.runId = `0000000${day}-c956-4320-a766-139bb6485111`;
+			document.savedAt = `2026-10-0${day}T12:00:00.000Z`;
+			queue.enqueue("one", document);
+			return document;
+		});
+
+		await queue.retry("one", token);
+
+		const sent = send.mock.calls.map(
+			([, init]) => JSON.parse(String(init?.body)).state.runId,
+		);
+		expect(sent.sort()).toEqual(
+			[runs[0], runs[2], runs[3]].map((run) => run.state.runId).sort(),
+		);
+		expect(
+			localStorage.getItem(`larn:statistics:one:${runs[1].state.runId}`),
+		).toBe("discarded");
+	});
+
 	it("stops at an unavailable server or a missing display name", async () => {
 		const expectedWarning = vi
 			.spyOn(console, "warn")
