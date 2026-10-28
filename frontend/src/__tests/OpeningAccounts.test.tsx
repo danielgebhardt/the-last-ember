@@ -203,7 +203,7 @@ it("returns to the opening after choosing a conflicting account copy", async () 
 	});
 	expect(conflict).toBeVisible();
 	await user.click(
-		within(conflict).getByRole("button", { name: "Use the other device's" }),
+		within(conflict).getByRole("button", { name: /^Use the other device's:/ }),
 	);
 	await waitFor(() => expect(opening()).toBeVisible());
 	expect(screen.queryByLabelText("Dungeon map", { exact: true })).toBeNull();
@@ -231,14 +231,14 @@ it("shows the guest choice before an account conflict when both need a decision"
 	});
 	expect(screen.getAllByRole("dialog")).toHaveLength(1);
 	await user.click(
-		within(guest).getByRole("button", { name: "Keep my account's" }),
+		within(guest).getByRole("button", { name: /^Keep my account's:/ }),
 	);
 	const conflict = await screen.findByRole("dialog", {
 		name: "Your adventure changed on another device",
 	});
 	expect(screen.getAllByRole("dialog")).toHaveLength(1);
 	await user.click(
-		within(conflict).getByRole("button", { name: "Use the other device's" }),
+		within(conflict).getByRole("button", { name: /^Use the other device's:/ }),
 	);
 	await waitFor(() => expect(opening()).toBeVisible());
 	expect(screen.queryByLabelText("Dungeon map", { exact: true })).toBeNull();
@@ -316,7 +316,7 @@ it("protects a resumed local copy from a newer cloud response that arrives after
 	expect(conflict).toHaveTextContent("Turn 25");
 	expect(conflict).toHaveTextContent("Turn 40");
 	await user.click(
-		within(conflict).getByRole("button", { name: "Keep this device's" }),
+		within(conflict).getByRole("button", { name: /^Keep this device's:/ }),
 	);
 	await waitFor(() =>
 		expect(screen.getByLabelText("Turn count")).toHaveTextContent("Turn 25"),

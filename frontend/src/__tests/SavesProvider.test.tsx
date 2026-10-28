@@ -1,4 +1,4 @@
-import { act, render, screen, waitFor } from "@testing-library/react";
+import { act, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { AccountProvider, useAccount } from "../accounts/AccountProvider";
@@ -10,6 +10,7 @@ import {
 	GuestAdventureDialog,
 } from "../saves/AccountSaveDialogs";
 import { SavesProvider, useSaves } from "../saves/SavesProvider";
+import AdventureSaveControls from "../settings/AdventureSaveControls";
 import { memoryCloud } from "./MemoryCloud";
 import { savedAdventure } from "./SaveTestHelpers";
 
@@ -180,11 +181,13 @@ describe("Saves per account", () => {
 		const user = userEvent.setup();
 		renderSaves(load);
 		await user.click(screen.getByRole("button", { name: "Sign in" }));
-		await screen.findByRole("dialog", {
+		const comparison = await screen.findByRole("dialog", {
 			name: "Your account already has an adventure",
 		});
+		// No safe action to focus: the dialog itself takes focus, never a copy.
+		await waitFor(() => expect(comparison).toHaveFocus());
 		await user.click(
-			screen.getByRole("button", { name: "Keep this device's" }),
+			screen.getByRole("button", { name: /^Keep this device's:/ }),
 		);
 		expect(screen.getByLabelText("Save turn")).toHaveTextContent("8");
 		await act(async () => {
@@ -235,6 +238,23 @@ describe("Saves per account", () => {
 		});
 		expect(dialog).toHaveTextContent("Turn 40 on the iPad");
 		expect(dialog).toHaveTextContent("Turn 25");
+		// Enter on arrival must never discard a copy.
+		await waitFor(() =>
+			expect(
+				screen.getByRole("button", { name: "Decide later" }),
+			).toHaveFocus(),
+		);
+		// Only the later copy (this browser's, saved after the iPad's) is marked.
+		expect(
+			screen.getByRole("button", {
+				name: /^Keep this device's: This device, newer, /,
+			}),
+		).toBeVisible();
+		expect(
+			screen.getByRole("button", {
+				name: /^Use the other device's: Other device, Turn 40 on the iPad, saved /,
+			}),
+		).not.toHaveTextContent("Newer");
 		await user.click(screen.getByRole("button", { name: "Decide later" }));
 		expect(screen.getByLabelText("Save sync")).toHaveTextContent("conflict");
 		expect(screen.getByLabelText("Save turn")).toHaveTextContent("25");
@@ -270,7 +290,9 @@ describe("Saves per account", () => {
 			await screen.findByRole("dialog", {
 				name: "Your adventure changed on another device",
 			});
-			await user.click(screen.getByRole("button", { name: choice }));
+			await user.click(
+				screen.getByRole("button", { name: new RegExp(`^${choice}:`) }),
+			);
 			await waitFor(() =>
 				expect(screen.getByLabelText("Save sync")).toHaveTextContent("synced"),
 			);
@@ -282,4 +304,76 @@ describe("Saves per account", () => {
 			);
 		},
 	);
+
+	it("settles a conflicted slot in Save/Load before it can save or load again", async () => {
+		const cloud = memoryCloud();
+		const theirs = savedAdventure();
+		theirs.state.turn = 40;
+		await cloud.store.put(
+			"save",
+			{
+				device: "ipad",
+				savedAt: "2026-10-01T00:00:00.000Z",
+				summary: "Seed 123 · Floor 3 of 5 · Level 2 · Turn 40 · Normal",
+				text: serializeSave(theirs),
+			},
+			0,
+		);
+		localStorage.setItem("larn:signed-in", "u1");
+		const mine = savedAdventure();
+		mine.state.turn = 25;
+		localStorage.setItem(slotKey("save", "u1"), serializeSave(mine));
+		localStorage.setItem(slotKey("autosave", "u1"), serializeSave(mine));
+		const { api } = accounts(cloud);
+		await api.signInWithGoogle();
+		const user = userEvent.setup();
+		render(
+			<AccountProvider load={async () => api}>
+				<SavesProvider>
+					<AdventureSaveControls
+						createSnapshot={() => savedAdventure()}
+						onRestore={() => {}}
+					/>
+				</SavesProvider>
+			</AccountProvider>,
+		);
+		const account = screen.getByRole("region", { name: "Account save" });
+		const other = await within(account).findByRole("button", {
+			name: /^Use the other device's: Other device, Floor 3 of 5 · Level 2, Turn 40 · Normal · Seed 123, saved /,
+		});
+		expect(other).toBeVisible();
+		expect(
+			within(account).getByText(
+				"Choose a copy above to save or load this slot again.",
+			),
+		).toBeVisible();
+		expect(
+			within(account).getByRole("button", { name: "Save adventure" }),
+		).toBeDisabled();
+		expect(
+			within(account).getByRole("button", { name: "Load adventure" }),
+		).toBeDisabled();
+		// The autosave agrees with the cloud, so it stays usable.
+		const autosave = screen.getByRole("region", { name: "Autosave" });
+		await waitFor(() =>
+			expect(
+				within(autosave).getByRole("button", { name: "Load autosave" }),
+			).toBeEnabled(),
+		);
+
+		await user.click(
+			within(account).getByRole("button", { name: /^Keep this device's:/ }),
+		);
+		await waitFor(() =>
+			expect(
+				within(account).getByRole("button", { name: "Load adventure" }),
+			).toBeEnabled(),
+		);
+		expect(
+			within(account).getByRole("button", { name: "Save adventure" }),
+		).toBeEnabled();
+		expect(
+			within(account).queryByRole("button", { name: /device's:/ }),
+		).toBeNull();
+	});
 });

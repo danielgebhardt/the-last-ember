@@ -33,6 +33,14 @@ const AdventureSaveControls = ({
 	const restoring = useRef(false);
 
 	const saved = slot.ok ? slot.value : null;
+	// A slot whose copies disagree is settled by choosing one before it saves or loads.
+	const saveConflict = saves.sync("save")?.state === "conflict";
+	const autosaveConflict = saves.sync("autosave")?.state === "conflict";
+	const choosing = (
+		<p className="text-xs text-muted-foreground">
+			Choose a copy above to save or load this slot again.
+		</p>
+	);
 	const requestSave = (button: HTMLButtonElement) => {
 		if (!createSnapshot) return;
 		restoring.current = false;
@@ -112,32 +120,38 @@ const AdventureSaveControls = ({
 							? "One save on this device. Saving replaces this slot; loading replaces your current adventure."
 							: "Resume the adventure saved in this browser."}
 				</p>
-				<div className="rounded-lg border bg-background/70 p-3 text-xs leading-relaxed">
-					{saved ? (
-						<>
-							<p className="font-medium">{saveSummary(saved)}</p>
-							<time
-								dateTime={saved.savedAt}
-								className="mt-1 block text-muted-foreground"
-							>
-								{new Date(saved.savedAt).toLocaleString()}
-							</time>
-						</>
-					) : (
-						<p>{slot.ok ? "No saved adventure yet." : slot.error}</p>
-					)}
-				</div>
+				{!saveConflict && (
+					<div className="rounded-lg border bg-background/70 p-3 text-xs leading-relaxed">
+						{saved ? (
+							<>
+								<p className="font-medium">{saveSummary(saved)}</p>
+								<time
+									dateTime={saved.savedAt}
+									className="mt-1 block text-muted-foreground"
+								>
+									{new Date(saved.savedAt).toLocaleString()}
+								</time>
+							</>
+						) : (
+							<p>{slot.ok ? "No saved adventure yet." : slot.error}</p>
+						)}
+					</div>
+				)}
 				<SlotSyncStatus slot="save" />
+				{saveConflict && choosing}
 				<div className={createSnapshot ? "grid grid-cols-2 gap-2" : "grid"}>
 					{createSnapshot && (
-						<Button onClick={(event) => requestSave(event.currentTarget)}>
+						<Button
+							disabled={saveConflict}
+							onClick={(event) => requestSave(event.currentTarget)}
+						>
 							<Save aria-hidden="true" />
 							Save adventure
 						</Button>
 					)}
 					<Button
 						variant={createSnapshot ? "outline" : "default"}
-						disabled={!saved}
+						disabled={!saved || saveConflict}
 						onClick={(event) => requestLoad(event.currentTarget)}
 					>
 						<FolderOpen aria-hidden="true" />
@@ -159,25 +173,28 @@ const AdventureSaveControls = ({
 					{signedIn ? "account" : "browser"} save, and cleared when an adventure
 					ends.
 				</p>
-				<div className="rounded-lg border bg-background/70 p-3 text-xs leading-relaxed">
-					{autosaved ? (
-						<>
-							<p className="font-medium">{saveSummary(autosaved)}</p>
-							<time
-								dateTime={autosaved.savedAt}
-								className="mt-1 block text-muted-foreground"
-							>
-								{new Date(autosaved.savedAt).toLocaleString()}
-							</time>
-						</>
-					) : (
-						<p>{autosave.ok ? "No autosave yet." : autosave.error}</p>
-					)}
-				</div>
+				{!autosaveConflict && (
+					<div className="rounded-lg border bg-background/70 p-3 text-xs leading-relaxed">
+						{autosaved ? (
+							<>
+								<p className="font-medium">{saveSummary(autosaved)}</p>
+								<time
+									dateTime={autosaved.savedAt}
+									className="mt-1 block text-muted-foreground"
+								>
+									{new Date(autosaved.savedAt).toLocaleString()}
+								</time>
+							</>
+						) : (
+							<p>{autosave.ok ? "No autosave yet." : autosave.error}</p>
+						)}
+					</div>
+				)}
 				<SlotSyncStatus slot="autosave" />
+				{autosaveConflict && choosing}
 				<Button
 					variant="outline"
-					disabled={!autosaved}
+					disabled={!autosaved || autosaveConflict}
 					onClick={(event) => requestAutosaveLoad(event.currentTarget)}
 				>
 					<FolderOpen aria-hidden="true" />

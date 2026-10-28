@@ -1,8 +1,12 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { type SaveDocument, saveSummary } from "../domain/saves/SaveFormat";
 import { SAVE_SLOTS } from "./CloudStore";
-import SaveChoiceDialog, { SaveCopy } from "./SaveChoiceDialog";
+import SaveChoiceDialog, {
+	isNewer,
+	SaveChoice,
+	SaveCopy,
+} from "./SaveChoiceDialog";
 import { useSaves } from "./SavesProvider";
 
 type Props = Readonly<{
@@ -55,31 +59,29 @@ export const GuestAdventureDialog = ({ inPlay, onLoad, onLeave }: Props) => {
 	return (
 		<SaveChoiceDialog
 			open
+			wide
 			title="Your account already has an adventure"
 			description="Choose which one to keep in your account. The other stays on this device for signed-out play."
-			actions={
-				<>
-					<Button
-						variant="outline"
-						onClick={() => {
-							saves.settleGuest(false);
-							if (inPlay) onLoad(account);
-						}}
-					>
-						Keep my account's
-					</Button>
-					<Button onClick={() => saves.settleGuest(true)}>
-						Keep this device's
-					</Button>
-				</>
-			}
 		>
-			<SaveCopy
+			<SaveChoice
 				label="In your account"
 				summary={saveSummary(account)}
 				savedAt={account.savedAt}
+				newer={isNewer(account.savedAt, offer.guest.savedAt)}
+				action={inPlay ? "Play my account's" : "Keep my account's"}
+				onChoose={() => {
+					saves.settleGuest(false);
+					if (inPlay) onLoad(account);
+				}}
 			/>
-			{guest}
+			<SaveChoice
+				label="On this device"
+				summary={saveSummary(offer.guest)}
+				savedAt={offer.guest.savedAt}
+				newer={isNewer(offer.guest.savedAt, account.savedAt)}
+				action="Keep this device's"
+				onChoose={() => saves.settleGuest(true)}
+			/>
 		</SaveChoiceDialog>
 	);
 };
@@ -92,6 +94,7 @@ export const CloudConflictDialog = ({
 	onActiveChange,
 }: Omit<Props, "onLeave"> & { onActiveChange?: (active: boolean) => void }) => {
 	const saves = useSaves();
+	const later = useRef<HTMLButtonElement>(null);
 	const [dismissed, setDismissed] = useState<readonly string[]>([]);
 	const found = SAVE_SLOTS.map((slot) => ({
 		slot,
@@ -117,55 +120,51 @@ export const CloudConflictDialog = ({
 	return (
 		<SaveChoiceDialog
 			open
+			wide
+			initialFocus={later}
 			title="Your adventure changed on another device"
-			description={`Your ${slot === "save" ? "save" : "autosave"} was updated on this device and on another one. Choose which to keep; the other is replaced.`}
+			description={`Your ${slot === "save" ? "save" : "autosave"} was updated on this device and on another one. Choose the one to keep; the other is replaced.`}
 			actions={
-				<>
-					<Button
-						variant="ghost"
-						onClick={() =>
-							setDismissed((list) => [
-								...list,
-								`${saves.owner}:${slot}:${sync.cloud?.revision ?? 0}`,
-							])
-						}
-					>
-						Decide later
-					</Button>
-					<Button
-						variant="outline"
-						onClick={async () => {
-							await saves.resolve(slot, "cloud");
-							const taken = saves.read(slot);
-							if (loads && taken.ok && taken.value) onLoad(taken.value);
-						}}
-					>
-						{loads ? "Load the other device's" : "Use the other device's"}
-					</Button>
-					<Button onClick={() => saves.resolve(slot, "browser")}>
-						Keep this device's
-					</Button>
-				</>
+				<Button
+					ref={later}
+					variant="ghost"
+					onClick={() =>
+						setDismissed((list) => [
+							...list,
+							`${saves.owner}:${slot}:${sync.cloud?.revision ?? 0}`,
+						])
+					}
+				>
+					Decide later
+				</Button>
 			}
 		>
-			{here && (
-				<SaveCopy
-					label="This device"
-					summary={saveSummary(here)}
-					savedAt={here.savedAt}
-				/>
-			)}
-			{sync.cloud ? (
-				<SaveCopy
-					label="Other device"
-					summary={sync.cloud.summary}
-					savedAt={sync.cloud.savedAt}
-				/>
-			) : (
-				<p className="text-sm text-muted-foreground">
-					The other device ended or removed this adventure.
-				</p>
-			)}
+			<SaveChoice
+				label="This device"
+				summary={here ? saveSummary(here) : undefined}
+				savedAt={here?.savedAt}
+				newer={isNewer(here?.savedAt, sync.cloud?.savedAt)}
+				action="Keep this device's"
+				onChoose={() => saves.resolve(slot, "browser")}
+			/>
+			<SaveChoice
+				label="Other device"
+				summary={sync.cloud?.summary}
+				savedAt={sync.cloud?.savedAt}
+				newer={isNewer(sync.cloud?.savedAt, here?.savedAt)}
+				action={
+					!sync.cloud
+						? "Remove it here too"
+						: loads
+							? "Load the other device's"
+							: "Use the other device's"
+				}
+				onChoose={async () => {
+					await saves.resolve(slot, "cloud");
+					const taken = saves.read(slot);
+					if (loads && taken.ok && taken.value) onLoad(taken.value);
+				}}
+			/>
 		</SaveChoiceDialog>
 	);
 };
