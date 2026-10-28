@@ -12,6 +12,7 @@ import type {
 import { appendActivityEvents } from "../../domain/game/ActivityHistory";
 import { emptyCombatTelemetry } from "../../domain/game/CombatTelemetry";
 import type { DeveloperFeature } from "../../domain/game/DeveloperFeatures";
+import { initializeEconomyTelemetry } from "../../domain/game/EconomyTelemetry";
 import { createFloorTelemetry } from "../../domain/game/FloorTelemetry";
 import { createGameState } from "../../domain/game/GameState";
 import { GAME_VERSION } from "../../domain/game/GameVersion";
@@ -77,7 +78,10 @@ export const createAdventureSession = (
 				configuration.difficulty ?? 1,
 				disabled,
 			);
-	const starting = { ...state, town: createTownLocation() };
+	const starting = initializeEconomyTelemetry({
+		...state,
+		town: createTownLocation(),
+	});
 	return {
 		state: {
 			...starting,

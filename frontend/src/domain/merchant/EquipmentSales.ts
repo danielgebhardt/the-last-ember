@@ -1,4 +1,5 @@
 import { appendActivityEvents } from "../game/ActivityHistory";
+import { recordTrade } from "../game/EconomyTelemetry";
 import type { GameState } from "../game/GameState";
 import { createBag } from "../items/Bag";
 import { lowerEquipmentSale } from "./LowerEquipmentSales";
@@ -14,7 +15,17 @@ export const sellLowerCarriedEquipment = (
 		return { error: "You cannot carry more gold." };
 	const soldIds = new Set(sale.items.map((item) => item.id));
 	return {
-		...state,
+		...sale.items.reduce(
+			(next, item) =>
+				recordTrade(
+					next,
+					"sales",
+					state.town ? "town-salvage" : "dungeon-merchant",
+					item.kind,
+					equipmentSaleGold(item, state.progression) ?? 0,
+				),
+			state,
+		),
 		gold: state.gold + sale.gold,
 		bag: createBag(state.bag.items.filter((item) => !soldIds.has(item.id))),
 		activityHistory: appendActivityEvents(
@@ -43,7 +54,13 @@ export const sellCarriedEquipment = (
 	if (!Number.isSafeInteger(state.gold + gold))
 		return { error: "You cannot carry more gold." };
 	return {
-		...state,
+		...recordTrade(
+			state,
+			"sales",
+			state.town ? "town-salvage" : "dungeon-merchant",
+			item.kind,
+			gold,
+		),
 		gold: state.gold + gold,
 		bag: createBag(state.bag.items.filter((copy) => copy.id !== item.id)),
 		activityHistory: appendActivityEvents(state.activityHistory, [

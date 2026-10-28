@@ -5,6 +5,7 @@ import {
 } from "../game/AfflictionDefinitions";
 import { removePlayerAfflictions } from "../game/Afflictions";
 import { recordHealing } from "../game/CombatTelemetry";
+import { recordGoldOut } from "../game/EconomyTelemetry";
 import type { GameState } from "../game/GameState";
 import { maximumHealth } from "../game/PlayerHealth";
 import { canReachOpenBuilding } from "./TownServices";
@@ -125,7 +126,11 @@ export const treatAtSanctuary = (state: GameState, action: SanctuaryAction) => {
 	const treated = removePlayerAfflictions(state, quote.conditions, "Sanctuary");
 	return {
 		state: {
-			...recordHealing(treated, quote.health, "sanctuary"),
+			...recordGoldOut(
+				recordHealing(treated, quote.health, "sanctuary"),
+				quote.cost,
+				`sanctuary-${quote.service}`,
+			),
 			gold: state.gold - quote.cost,
 			player: {
 				...treated.player,

@@ -106,9 +106,9 @@ inconsistent resources/slots, invalid exit destinations and final resource/equip
 facts that differ from the saved terminal state. Derived historical values are not
 recomputed against later balance rules or level curves when loading. Tests bound the checkpoint JSON to **128 KiB** across all 20 floors.
 
-Checkpoints currently save in browser/cloud adventures only. Economy counters and
-projecting floor telemetry into finished-run statistics remain separate review
-commits. No new request or Firestore statistics write is introduced by capturing
+Checkpoints currently save in browser/cloud adventures only. Projecting floor
+telemetry into finished-run statistics remains a separate review commit.
+No new request or Firestore statistics write is introduced by capturing
 checkpoints. No balance rules or RNG streams change.
 
 ## Combat, healing and encounter counters (#433, second collection slice)
@@ -173,3 +173,64 @@ catalog-wide, twenty-floor plus town counter fixture is below **128 KiB**; the
 counter field also has a 128 KiB validation ceiling. This is separate from the
 checkpoint budget. The final submission slice will test the combined save and
 Firestore document budgets before projecting these fields into statistics.
+
+## Acquisitions and economy (#433, third collection slice)
+
+New sessions initialize optional `state.economyTelemetry`. Starting gold, owned
+kit and known spells are recorded separately from subsequent acquisition and
+income. Per-floor maps accumulate across revisits; town has separate maps. Empty
+or omitted keys within present telemetry mean measured zero; missing telemetry
+means unknown. Older saves never start collecting implicitly. This optional v33
+addition keeps existing saves and frozen fixtures unchanged.
+
+- **Acquired items:** one per physical copy on first successful ownership,
+  including automatic equipment pickup, purchased supplies/gear, learned books
+  and the claimed Flame. Items left on the ground, unopened rewards and unbought
+  offers are not counted as acquired. Starting kit is in `initialItems`, rather
+  than attributed to a dungeon floor. Acquisition indicates access to an item,
+  not necessarily deliberate interest in using it.
+- **Repeat handling:** a `telemetryAcquired: true` annotation travels with a
+  counted physical item through equipment, enchantments, floor drops and town
+  storage. Re-picking, withdrawing or re-equipping it does not add acquisitions.
+  Stack copies retain their individual annotations. Consumed, sold or destroyed
+  items need no retained ID ledger, so history does not grow by physical identity.
+  Old untracked adventures do not add annotations. Gameplay never reads them.
+- **Spell availability:** `initialSpells` records starting knowledge; `learned`
+  records successful new learning by spell kind on the pickup floor or in town's
+  library. Library learning also records the book kind as acquired, with its
+  payment under the library service. It creates no physical carried book.
+- **Purchases and sales:** each store/item pair retains total physical quantity
+  and actual gold paid or received, after existing price modifiers and enchants.
+  Stores distinguish dungeon merchants, town potions, scrolls, weapons, armor
+  and salvage. Bulk sales add each confirmed copy, retaining quantities even for
+  identical kinds. Rejected, stale, unaffordable or canceled transactions add
+  nothing. Sales do not count as acquisitions; forging/enchanting an existing
+  copy does not create another acquisition.
+- **Gold inflows:** floor piles (including vault piles), monster rewards, throne
+  treasure, sales, and recovered theft gold have separate keys. Recovery is an
+  inflow returning existing wealth, not new earnings. Generated item drops and
+  object rewards add no gold until an actual gold effect or sale occurs.
+- **Gold outflows:** item purchases, theft, town forging, library learning,
+  sanctuary treatment by service/condition, reliable/risky dungeon forging,
+  shrine offerings and well offerings have separate keys. A risky forge's full
+  payment counts for all outcomes. Theft is a loss, not shopping expenditure.
+  All values use existing committed amounts, never inferred catalog prices.
+
+Validation checks known catalog/source/store keys, safe nonnegative counters,
+legal store/item categories and town/floor context, trade gold subtotals,
+acquisition annotations and learned-spell consistency. The gold equation is
+`initialGold + sum(goldIn) - sum(goldOut) = current gold`; purchases/sales are
+breakdowns of their matching inflow/outflow categories, not additional flows.
+Historical receipts retain their captured amounts and validate store categories,
+not today's stock or prices. Remaining counted physical copies cannot exceed
+recorded first acquisitions.
+Checks occur during existing save validation, not as new per-turn work.
+
+Collection adds no network or storage calls and does not change prices, rewards,
+stock, loot, seeded randomness or combat. Browser and compressed cloud saves
+preserve the same counters and annotations. A catalog-wide fixture with all 20
+floor maps, every applicable store/item pair and maximum safe values stays under
+**256 KiB**, also enforced as the economy field's validation ceiling. Only new
+sessions initialize this field; no save-version bump or historical backfill is
+needed. Finished-run statistics projection and combined payload/API response
+budgets remain the next review slice.

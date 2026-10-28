@@ -3,6 +3,7 @@ import { hasConsistentActors } from "./SaveActorConsistency";
 import { hasConsistentArenas } from "./SaveArenaConsistency";
 import { hasConsistentCombatTelemetry } from "./SaveCombatTelemetryConsistency";
 import type { SaveDocument } from "./SaveDocument";
+import { hasConsistentEconomyTelemetry } from "./SaveEconomyTelemetryConsistency";
 import { hasConsistentFloorTelemetry } from "./SaveFloorTelemetryConsistency";
 import { hasConsistentGeometry } from "./SaveGeometryConsistency";
 import { hasConsistentHistory } from "./SaveHistoryConsistency";
@@ -20,6 +21,7 @@ export const isConsistentSave = (document: SaveDocument): boolean =>
 	hasConsistentHistory(document) &&
 	hasConsistentFloorTelemetry(document) &&
 	hasConsistentCombatTelemetry(document) &&
+	hasConsistentEconomyTelemetry(document) &&
 	hasConsistentTown(document) &&
 	hasConsistentEscape(document);
 

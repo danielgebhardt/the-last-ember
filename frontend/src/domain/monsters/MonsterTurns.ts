@@ -13,6 +13,7 @@ import {
 } from "../game/CombatRandomness";
 import { deriveCombatStats } from "../game/CombatStats";
 import { recordMonsterDamageBatch } from "../game/CombatTelemetry";
+import { recordGoldOut } from "../game/EconomyTelemetry";
 import type { GameState } from "../game/GameState";
 import {
 	attackProfile,
@@ -175,6 +176,7 @@ export const resolveMonsterPhase = (
 	let player = state.player;
 	let mana = state.mana;
 	let gold = state.gold;
+	let stolenGold = 0;
 	let monsters = state.monsters;
 	let effects = state.effects;
 	const events: ActivityEvent[] = [];
@@ -414,7 +416,10 @@ export const resolveMonsterPhase = (
 						remaining: EFFECT_DEFINITIONS.stunned.duration,
 					},
 				];
-			if (special.stolenGold) gold -= special.stolenGold;
+			if (special.stolenGold) {
+				gold -= special.stolenGold;
+				stolenGold += special.stolenGold;
+			}
 			events.push(...special.events);
 			const signal = special.events.find(
 				(event) => event.type === "monster-alarm-sounded",
@@ -666,7 +671,11 @@ export const resolveMonsterPhase = (
 	const afflicted = infections.reduce(
 		(next, { kind, source }) => applyPlayerAffliction(next, kind, source),
 		{
-			...recordMonsterDamageBatch(state, events),
+			...recordGoldOut(
+				recordMonsterDamageBatch(state, events),
+				stolenGold,
+				"theft",
+			),
 			player,
 			mana,
 			gold,

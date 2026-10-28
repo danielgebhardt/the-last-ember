@@ -3,6 +3,7 @@ import { createSeededRandom } from "../dungeon/Seed";
 import { appendActivityEvents } from "../game/ActivityHistory";
 import { applyPlayerAffliction } from "../game/Afflictions";
 import { recordHealing } from "../game/CombatTelemetry";
+import { recordGoldIn } from "../game/EconomyTelemetry";
 import { awardExperience } from "../game/ExperienceRewards";
 import type { GameState } from "../game/GameState";
 import { maximumMana } from "../game/Mana";
@@ -66,7 +67,7 @@ export const resolveThroneChoice = (
 		if (outcome === "treasure") {
 			const amount = 30 + object.floorNumber * 5;
 			next = {
-				...next,
+				...recordGoldIn(next, amount, "throne"),
 				gold: next.gold + amount,
 				activityHistory: appendActivityEvents(next.activityHistory, [
 					{ type: "gold-collected", amount, turn: state.turn },

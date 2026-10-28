@@ -1,9 +1,11 @@
 // @vitest-environment node
+
 import { describe, expect, it } from "vitest";
 import {
 	connectDungeonFloors,
 	generateDungeonRun,
 } from "../domain/dungeon/DungeonRun";
+import { initializeEconomyTelemetry } from "../domain/game/EconomyTelemetry";
 import { createGameState, type GameState } from "../domain/game/GameState";
 import { damageMonster } from "../domain/game/MonsterDamage";
 import { resolvePlayerAction } from "../domain/game/PlayerActions";
@@ -58,7 +60,8 @@ const types = (state: GameState, from = 0) =>
 
 describe("Treasure thief", () => {
 	it("snatches 15% of your carried gold and springs back a step in the same action, without attacking", () => {
-		const robbed = act(encounter());
+		const robbed = act(initializeEconomyTelemetry(encounter()));
+		expect(robbed.economyTelemetry?.floors[1]?.goldOut.theft).toBe(45);
 		expect(robbed.gold).toBe(255);
 		expect(robbed.monsters[0]).toMatchObject({
 			intent: { type: "idle" },

@@ -17,6 +17,11 @@ import {
 } from "../game/CombatTelemetry";
 import { DAMAGE_ELEMENTS } from "../game/DamageElements";
 import { isDifficulty } from "../game/Difficulty";
+import {
+	EXPENSE_SOURCES,
+	INCOME_SOURCES,
+	TRADE_STORES,
+} from "../game/EconomyTelemetry";
 import { FLOOR_EXIT_REASONS } from "../game/FloorTelemetry";
 import { OMEN_KINDS } from "../game/Omens";
 import { PACT_KINDS } from "../game/Pacts";
@@ -135,11 +140,49 @@ const monsterKind = oneOf(Object.keys(MONSTER_DEFINITIONS));
 const spellKind = oneOf(Object.keys(SPELL_DEFINITIONS));
 const slot = oneOf(Object.keys(EQUIPMENT_SLOT_LABELS));
 const item: Schema = (value) =>
-	object({ id: text, kind: itemKind })(value) &&
+	object({
+		id: text,
+		kind: itemKind,
+		telemetryAcquired: optional((value) => value === true),
+	})(value) &&
 	record(value) &&
 	(value.enchantment === undefined ||
 		(integer(1, MAX_ENCHANTMENT)(value.enchantment) &&
 			isEnchantableKind(value.kind as keyof typeof ITEM_DEFINITIONS)));
+const tradeTotals = exactObject({ quantity: integer(1), gold: integer(1) });
+const tradeMap: Schema = (value) =>
+	record(value) &&
+	Object.entries(value).every(
+		([store, items]) =>
+			TRADE_STORES.includes(store as (typeof TRADE_STORES)[number]) &&
+			record(items) &&
+			Object.entries(items).every(
+				([kind, totals]) => itemKind(kind) && tradeTotals(totals),
+			),
+	);
+const economyMetrics = exactObject({
+	acquired: usageCounts(Object.keys(ITEM_DEFINITIONS)),
+	learned: usageCounts(Object.keys(SPELL_DEFINITIONS)),
+	goldIn: usageCounts(INCOME_SOURCES),
+	goldOut: usageCounts(EXPENSE_SOURCES),
+	purchases: tradeMap,
+	sales: tradeMap,
+});
+const economyTelemetry: Schema = (value) =>
+	exactObject({
+		initialGold: natural,
+		initialItems: usageCounts(Object.keys(ITEM_DEFINITIONS)),
+		initialSpells: usageCounts(Object.keys(SPELL_DEFINITIONS)),
+		floors: (value) =>
+			record(value) &&
+			Object.entries(value).every(
+				([key, metrics]) =>
+					/^[1-9][0-9]?$/.test(key) &&
+					floorNumber(Number(key)) &&
+					economyMetrics(metrics),
+			),
+		town: economyMetrics,
+	})(value) && JSON.stringify(value).length <= 256 * 1024;
 const combatMetrics = exactObject({
 	damage: usageCounts(DAMAGE_SOURCES),
 	damageByMonster: usageCounts(Object.keys(MONSTER_DEFINITIONS)),
@@ -631,6 +674,7 @@ const documentShape = object({
 		usage: optional(usage),
 		floorTelemetry: optional(floorTelemetry),
 		combatTelemetry: optional(combatTelemetry),
+		economyTelemetry: optional(economyTelemetry),
 		disabledFeatures: optional(
 			array(
 				oneOf([

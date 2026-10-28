@@ -933,6 +933,8 @@ export type ItemInstance = Readonly<{
 	id: string;
 	kind: ItemKind;
 	enchantment?: number;
+	// First ownership counted by optional run telemetry; no gameplay reads this.
+	telemetryAcquired?: true;
 }>;
 
 export type LootSource = "found" | "drop";

@@ -1,6 +1,7 @@
 import { hashStringToUint32 } from "../dungeon/DungeonRun";
 import { createSeededRandom } from "../dungeon/Seed";
 import { appendActivityEvents } from "../game/ActivityHistory";
+import { recordGoldIn } from "../game/EconomyTelemetry";
 import type { GameState } from "../game/GameState";
 import { scavengedGold } from "../game/PerkEffects";
 export const goldAmount = (
@@ -33,7 +34,7 @@ export const collectGoldAtPlayer = (state: GameState): GameState => {
 		0,
 	);
 	return {
-		...state,
+		...recordGoldIn(state, amount, "floor-gold"),
 		gold: state.gold + amount,
 		objects: state.objects.map((object) =>
 			finds.includes(object) ? { ...object, activated: true } : object,

@@ -1,4 +1,5 @@
 import type { Coordinate } from "../dungeon/DungeonTypes";
+import { markAcquiredItem } from "../game/EconomyTelemetry";
 import type { GameState } from "../game/GameState";
 import type { SpellKind } from "../game/Spells";
 import {
@@ -97,7 +98,11 @@ export const transferFloorItem = (
 		if (slot !== undefined)
 			return {
 				bag: state.bag,
-				equipment: replaceEquipmentSlot(state.equipment, slot, found.item),
+				equipment: replaceEquipmentSlot(
+					state.equipment,
+					slot,
+					markAcquiredItem(state, found.item),
+				),
 				floorItems: state.floorItems.filter((entry) => entry !== found),
 				event: { type: "item-picked-up", item: found.item.kind },
 				equipEvent: { type: "item-equipped", item: found.item.kind, slot },
@@ -107,7 +112,7 @@ export const transferFloorItem = (
 				error: "Your bag is full. Make room before picking up an item.",
 			};
 		return {
-			bag: createBag([...state.bag.items, found.item]),
+			bag: createBag([...state.bag.items, markAcquiredItem(state, found.item)]),
 			floorItems: state.floorItems.filter((entry) => entry !== found),
 			event: { type: "item-picked-up", item: found.item.kind },
 		};

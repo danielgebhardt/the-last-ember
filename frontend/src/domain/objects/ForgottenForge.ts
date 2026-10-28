@@ -1,6 +1,7 @@
 import { hashStringToUint32 } from "../dungeon/DungeonRun";
 import { createSeededRandom } from "../dungeon/Seed";
 import { appendActivityEvents } from "../game/ActivityHistory";
+import { recordGoldOut } from "../game/EconomyTelemetry";
 import type { GameState } from "../game/GameState";
 import { createBag } from "../items/Bag";
 import type { Equipment, EquipmentSlot } from "../items/Equipment";
@@ -84,7 +85,7 @@ export const operateForge = (
 	// Derived capacity follows the changed loadout before monsters respond.
 	const resources = resourcesAfterEquipmentChange(state, equipment);
 	return {
-		...spent,
+		...recordGoldOut(spent, price, `dungeon-forge-${service}`),
 		...resources,
 		gold: state.gold - price,
 		equipment,

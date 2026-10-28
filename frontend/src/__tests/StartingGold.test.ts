@@ -51,7 +51,10 @@ describe("starting town budget", () => {
 			});
 			expect(result.error).toBeUndefined();
 			expect(result.state.gold).toBe(300 - offer.price);
-			expect(result.state.bag.items).toContainEqual(offer.item);
+			expect(result.state.bag.items).toContainEqual({
+				...offer.item,
+				telemetryAcquired: true,
+			});
 			expect(result.state.equipment).toBe(state.equipment);
 			expect(result.turnAdvanced).toBe(false);
 		},

@@ -1,5 +1,7 @@
 // @vitest-environment node
+
 import { describe, expect, it, vi } from "vitest";
+import { initializeEconomyTelemetry } from "../domain/game/EconomyTelemetry";
 import { createGameState } from "../domain/game/GameState";
 import { BAG_CAPACITY, createBag } from "../domain/items/Bag";
 import * as Availability from "../domain/merchant/MerchantAvailability";
@@ -30,7 +32,7 @@ const buy = {
 };
 describe("Merchant purchases", () => {
 	it("transfers one unique bottle, charges gold, decrements shared stock and auto-assigns a shortcut", () => {
-		const before = shop(),
+		const before = initializeEconomyTelemetry(shop()),
 			first = resolvePlayerAction(before, buy),
 			second = resolvePlayerAction(first.state, buy);
 		expect(first.turnAdvanced).toBe(true);
@@ -40,6 +42,14 @@ describe("Merchant purchases", () => {
 		expect(first.state.bag.items).toHaveLength(1);
 		expect(first.state.potionHotbar[0]).toBe("healing-potion");
 		expect(second.state.bag.items).toHaveLength(2);
+		expect(
+			second.state.economyTelemetry?.floors[1]?.purchases["dungeon-merchant"]?.[
+				"healing-potion"
+			],
+		).toEqual({ quantity: 2, gold: 300 });
+		expect(
+			second.state.economyTelemetry?.floors[1]?.acquired["healing-potion"],
+		).toBe(2);
 		expect(new Set(second.state.bag.items.map((i) => i.id)).size).toBe(2);
 		expect(second.state.merchantStock["healing-potion"]).toBe(8);
 		expect(before.merchantStock["healing-potion"]).toBe(10);

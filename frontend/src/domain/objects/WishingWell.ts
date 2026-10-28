@@ -2,6 +2,7 @@ import { selectWeighted } from "../content/WeightedSelection";
 import { hashStringToUint32 } from "../dungeon/DungeonRun";
 import { createSeededRandom } from "../dungeon/Seed";
 import { appendActivityEvents } from "../game/ActivityHistory";
+import { recordGoldOut } from "../game/EconomyTelemetry";
 import type { GameState } from "../game/GameState";
 import { omenFavorsWell, WELL_FAVOR } from "../game/Omens";
 import { PACT_REFUSAL, pactSilences } from "../game/Pacts";
@@ -122,7 +123,10 @@ export const offerAtWell = (
 		omenFavorsWell(state, object.floorNumber),
 	);
 	const reward = outcome === "positive" ? wellReward(seed, object) : undefined;
-	const spent = spendObject({ ...state, gold: state.gold - offering }, object);
+	const spent = spendObject(
+		{ ...recordGoldOut(state, offering, "well"), gold: state.gold - offering },
+		object,
+	);
 	let next: GameState = {
 		...spent,
 		objects: spent.objects.map((o) =>

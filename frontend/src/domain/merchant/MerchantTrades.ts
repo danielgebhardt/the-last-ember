@@ -1,4 +1,9 @@
 import { appendActivityEvents } from "../game/ActivityHistory";
+import {
+	markAcquiredItem,
+	recordAcquisition,
+	recordTrade,
+} from "../game/EconomyTelemetry";
 import type { GameState } from "../game/GameState";
 import { canAddToBag, createBag } from "../items/Bag";
 import { ownedItems } from "../items/OwnedItems";
@@ -53,9 +58,15 @@ export const buyPotion = (
 	if (!canAddToBag(state.bag, item))
 		return { error: "Your bag is full. Make room before buying a new supply." };
 	return {
-		...state,
+		...recordTrade(
+			recordAcquisition(state, item.kind),
+			"purchases",
+			"dungeon-merchant",
+			item.kind,
+			price,
+		),
 		gold: state.gold - price,
-		bag: createBag([...state.bag.items, item]),
+		bag: createBag([...state.bag.items, markAcquiredItem(state, item)]),
 		merchantStock: { ...state.merchantStock, [action.kind]: count - 1 },
 		potionHotbar: assignPickedUpPotion(
 			state.potionHotbar,

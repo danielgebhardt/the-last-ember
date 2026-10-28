@@ -1,6 +1,7 @@
 import { type DungeonRun, hashStringToUint32 } from "../dungeon/DungeonRun";
 import { createSeededRandom } from "../dungeon/Seed";
 import { appendActivityEvents } from "../game/ActivityHistory";
+import { recordAcquisition, recordGoldOut } from "../game/EconomyTelemetry";
 import type { GameState } from "../game/GameState";
 import type { Progression } from "../game/Progression";
 import {
@@ -105,7 +106,11 @@ export const learnAtLibrary = (
 	if (refusal) return reject("You do not have enough gold.");
 	return {
 		state: {
-			...state,
+			...recordGoldOut(
+				recordAcquisition(state, offer.book),
+				LIBRARY_PRICE,
+				"library",
+			),
 			gold: state.gold - LIBRARY_PRICE,
 			knownSpells: [...state.knownSpells, offer.spell],
 			activityHistory: appendActivityEvents(state.activityHistory, [

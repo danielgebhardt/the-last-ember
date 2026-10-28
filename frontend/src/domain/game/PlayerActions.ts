@@ -96,6 +96,7 @@ import {
 import { type AttackRollSource, createAttackRolls } from "./CombatRandomness";
 import { deriveCombatStats } from "./CombatStats";
 import { recordHealing, recordPressure } from "./CombatTelemetry";
+import { recordPickupAcquisition } from "./EconomyTelemetry";
 import { activateEscapeFloor } from "./Escape";
 import { recordFinalCheckpoint, recordFloorTransition } from "./FloorTelemetry";
 import type { GameState } from "./GameState.ts";
@@ -549,7 +550,9 @@ const resolveCommittedEffect = (
 		const transfer = transferFloorItem(state, action);
 		if ("error" in transfer) return transfer;
 		const transferred: GameState = {
-			...state,
+			...(action.type === "pickup"
+				? recordPickupAcquisition(state, action.itemId)
+				: state),
 			bag: transfer.bag,
 			equipment: transfer.equipment ?? state.equipment,
 			...(transfer.equipment

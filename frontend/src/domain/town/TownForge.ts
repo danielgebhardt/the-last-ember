@@ -1,4 +1,5 @@
 import { appendActivityEvents } from "../game/ActivityHistory";
+import { recordGoldOut } from "../game/EconomyTelemetry";
 import type { GameState } from "../game/GameState";
 import { createBag } from "../items/Bag";
 import type { Equipment, EquipmentSlot } from "../items/Equipment";
@@ -92,7 +93,7 @@ export const reforgeAtTown = (state: GameState, action: TownForgeAction) => {
 	) as Record<EquipmentSlot, Equipment[EquipmentSlot]>;
 	return {
 		state: {
-			...state,
+			...recordGoldOut(state, action.price, "town-forge"),
 			...resourcesAfterEquipmentChange(state, nextEquipment),
 			gold: state.gold - action.price,
 			equipment: nextEquipment,

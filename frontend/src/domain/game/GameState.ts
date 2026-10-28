@@ -58,6 +58,7 @@ import {
 	type DeveloperFeature,
 } from "./DeveloperFeatures";
 import { assertDifficulty, type Difficulty } from "./Difficulty";
+import type { EconomyTelemetry } from "./EconomyTelemetry";
 import type { EscapeState } from "./Escape";
 import type { FloorTelemetry } from "./FloorTelemetry";
 import { maximumMana } from "./Mana";
@@ -97,6 +98,7 @@ export type GameState = {
 	usage?: RunUsage;
 	floorTelemetry?: FloorTelemetry;
 	combatTelemetry?: CombatTelemetry;
+	economyTelemetry?: EconomyTelemetry;
 	// A wielded Hungering Blade's binding and the turn of its last kill.
 	hunger?: Readonly<{ fedTurn: number }>;
 	// Floors where a Ring of Displacement has already fired this adventure.

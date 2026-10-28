@@ -21,9 +21,11 @@ import {
 	emptyCombatMetrics,
 	emptyCombatTelemetry,
 } from "../domain/game/CombatTelemetry";
+import { initializeEconomyTelemetry } from "../domain/game/EconomyTelemetry";
 import { createFloorTelemetry } from "../domain/game/FloorTelemetry";
 import { resolvePlayerAction } from "../domain/game/PlayerActions";
 import {
+	createSaveDocument,
 	parseSave,
 	restoreSave,
 	serializeSave,
@@ -101,10 +103,10 @@ describe.skipIf(!authHost || !firestoreHost)(
 			expect(await store.get("save")).toBeNull();
 		});
 
-		it("preserves usage, checkpoints and combat counters through compressed cloud save and deterministic continuation", async () => {
+		it("preserves usage, checkpoints, combat and economy counters through compressed cloud save and deterministic continuation", async () => {
 			const { app, uid } = await player();
 			const store = createCloudStore(app, uid, firestoreHost);
-			const document = savedAdventure();
+			let document = savedAdventure();
 			document.state.usage = {
 				casts: { protection: 1 },
 				consumables: { "healing-potion": 2, "enchantment-scroll": 1 },
@@ -123,7 +125,14 @@ describe.skipIf(!authHost || !firestoreHost)(
 					},
 				},
 			};
-			const original = restoreSave(document).state;
+			const restored = restoreSave(document);
+			const original = initializeEconomyTelemetry(restored.state);
+			document = createSaveDocument(
+				original,
+				restored.exploration,
+				restored.configuration,
+				restored.fog,
+			);
 			expect(
 				await store.put(
 					"save",
@@ -140,6 +149,8 @@ describe.skipIf(!authHost || !firestoreHost)(
 			expect(loaded.usage).toEqual(document.state.usage);
 			expect(loaded.floorTelemetry).toEqual(document.state.floorTelemetry);
 			expect(loaded.combatTelemetry).toEqual(document.state.combatTelemetry);
+			expect(loaded.economyTelemetry).toEqual(document.state.economyTelemetry);
+			expect(loaded.bag).toEqual(document.state.bag);
 			expect(resolvePlayerAction(loaded, { type: "wait" }).state).toEqual(
 				resolvePlayerAction(original, { type: "wait" }).state,
 			);

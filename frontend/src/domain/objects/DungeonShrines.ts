@@ -1,4 +1,5 @@
 import { appendActivityEvents } from "../game/ActivityHistory";
+import { recordGoldOut } from "../game/EconomyTelemetry";
 import { awardExperience } from "../game/ExperienceRewards";
 import type { GameState } from "../game/GameState";
 import type { DungeonObject } from "./DungeonObject";
@@ -22,7 +23,7 @@ export const offerAtShrine = (
 		return { error: `This offering requires ${terms.gold} gold.` };
 	const spent = spendObject(state, object);
 	const paid = {
-		...spent,
+		...recordGoldOut(spent, terms.gold, "shrine"),
 		gold: state.gold - terms.gold,
 		activityHistory: appendActivityEvents(state.activityHistory, [
 			{ type: "shrine-offered", gold: terms.gold, turn: state.turn },

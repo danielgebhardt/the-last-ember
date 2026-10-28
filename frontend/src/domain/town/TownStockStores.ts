@@ -1,4 +1,9 @@
 import { appendActivityEvents } from "../game/ActivityHistory";
+import {
+	markAcquiredItem,
+	recordAcquisition,
+	recordTrade,
+} from "../game/EconomyTelemetry";
 import type { GameState } from "../game/GameState";
 import { haggledPrice } from "../game/PerkEffects";
 import { canAddToBag, createBag } from "../items/Bag";
@@ -84,10 +89,16 @@ export const buyTownStock = (state: GameState, action: BuyTownStockAction) => {
 		return reject(`Your bag is full. Make room for a new ${store.noun} kind.`);
 	return {
 		state: {
-			...state,
+			...recordTrade(
+				recordAcquisition(state, item.kind),
+				"purchases",
+				action.type === "buy-town-potion" ? "town-potions" : "town-scrolls",
+				item.kind,
+				price,
+			),
 			gold: state.gold - price,
 			[store.stock]: { ...stock, [action.kind]: count - 1 },
-			bag: createBag([...state.bag.items, item]),
+			bag: createBag([...state.bag.items, markAcquiredItem(state, item)]),
 			potionHotbar: assignPickedUpPotion(
 				state.potionHotbar,
 				state.bag,

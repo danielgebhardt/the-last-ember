@@ -37,6 +37,7 @@ const savedItem = (item: ItemInstance) => ({
 	id: item.id,
 	kind: item.kind,
 	...(item.enchantment !== undefined ? { enchantment: item.enchantment } : {}),
+	...(item.telemetryAcquired ? { telemetryAcquired: true as const } : {}),
 });
 const nullableItem = (item: ItemInstance | null) =>
 	item ? savedItem(item) : null;
@@ -73,6 +74,9 @@ export const createSaveDocument = (
 			? { disabledFeatures: [...state.disabledFeatures] }
 			: {}),
 		...(state.runId ? { runId: state.runId } : {}),
+		...(state.economyTelemetry
+			? { economyTelemetry: structuredClone(state.economyTelemetry) }
+			: {}),
 		...(state.combatTelemetry
 			? { combatTelemetry: structuredClone(state.combatTelemetry) }
 			: {}),

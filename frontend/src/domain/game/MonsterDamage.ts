@@ -10,6 +10,7 @@ import { mirrorFor, reflectionDrop } from "../objects/MirrorOfShadows";
 import { type ActivityEvent, appendActivityEvents } from "./ActivityHistory";
 import { recordDefeat } from "./CombatTelemetry";
 import type { DamageElement } from "./DamageElements";
+import { recordGoldIn } from "./EconomyTelemetry";
 import { experienceReward } from "./ExperienceRewards";
 import type { GameState } from "./GameState";
 import { echoBlow, omenKillExperience, omenRegeneration } from "./Omens";
@@ -156,7 +157,17 @@ export const damageMonster = (
 				)
 			: state.monsters.filter((actor) => actor.id !== monster.id);
 	const next: GameState = {
-		...(health === 0 ? recordDefeat(state, monster) : state),
+		...recordGoldIn(
+			recordGoldIn(
+				health === 0 ? recordDefeat(state, monster) : state,
+				gold,
+				"monster-reward",
+				monster.floorNumber,
+			),
+			recovered,
+			"theft-recovery",
+			monster.floorNumber,
+		),
 		monsters,
 		gold: state.gold + gold + recovered,
 		effects: state.effects.some(

@@ -1,5 +1,7 @@
 // @vitest-environment node
+
 import { expect, it } from "vitest";
+import { initializeEconomyTelemetry } from "../domain/game/EconomyTelemetry";
 import type { GameState } from "../domain/game/GameState";
 import { permanentAttributeGains } from "../domain/game/PermanentAttributes";
 import { resolvePlayerAction } from "../domain/game/PlayerActions";
@@ -82,8 +84,9 @@ it("a gear reward leaves an enchanted floor-pool item by tier and spends gold, t
 			wellOutcome(s, WELL, 100) === "positive" &&
 			wellReward(s, WELL)?.type === "gear",
 	);
-	const state = encounter(seed);
+	const state = initializeEconomyTelemetry(encounter(seed));
 	const result = offer(state, 100);
+	expect(result.state.economyTelemetry?.floors[4]?.goldOut.well).toBe(100);
 	expect(result.turnAdvanced).toBe(true);
 	expect(result.state.gold).toBe(900);
 	const reward = wellReward(seed, WELL);

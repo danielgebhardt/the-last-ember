@@ -39,6 +39,7 @@ export type SaveDocument = {
 		| "usage"
 		| "floorTelemetry"
 		| "combatTelemetry"
+		| "economyTelemetry"
 		| "encounters"
 		| "townEquipmentStock"
 		| "townEquipmentPurchases"

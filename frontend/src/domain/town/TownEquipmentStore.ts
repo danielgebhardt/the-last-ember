@@ -1,4 +1,9 @@
 import { appendActivityEvents } from "../game/ActivityHistory";
+import {
+	markAcquiredItem,
+	recordAcquisition,
+	recordTrade,
+} from "../game/EconomyTelemetry";
 import type { GameState } from "../game/GameState";
 import { haggledPrice } from "../game/PerkEffects";
 import { canAddToBag, createBag } from "../items/Bag";
@@ -63,10 +68,16 @@ export const buyTownEquipment = (
 		return reject("That copy already belongs to this adventure.");
 	return {
 		state: {
-			...state,
+			...recordTrade(
+				recordAcquisition(state, item.kind),
+				"purchases",
+				store === "weapons" ? "town-weapons" : "town-armor",
+				item.kind,
+				price,
+			),
 			gold: state.gold - price,
 			townEquipmentPurchases: [...state.townEquipmentPurchases, item.id],
-			bag: createBag([...state.bag.items, { ...item }]),
+			bag: createBag([...state.bag.items, markAcquiredItem(state, item)]),
 			townEquipmentStock: state.townEquipmentStock.filter(
 				(copy) => copy.id !== item.id,
 			),

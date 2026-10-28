@@ -1,4 +1,5 @@
 // @vitest-environment node
+
 import { expect, it } from "vitest";
 import {
 	connectDungeonFloors,
@@ -6,6 +7,7 @@ import {
 } from "../domain/dungeon/DungeonRun";
 import { updateExploration } from "../domain/dungeon/Exploration";
 import { DEFAULT_FOG_CONFIGURATION } from "../domain/dungeon/RunConfiguration";
+import { initializeEconomyTelemetry } from "../domain/game/EconomyTelemetry";
 import { createGameState, type GameState } from "../domain/game/GameState";
 import { resolvePlayerAction } from "../domain/game/PlayerActions";
 import { createBag } from "../domain/items/Bag";
@@ -147,14 +149,18 @@ it("lists only ordinary weapons and armor below +3, then prices both services", 
 });
 
 it("reliably adds +1 for 300 gold and one turn, spending the forge", () => {
-	const state = encounter();
+	const state = initializeEconomyTelemetry(encounter());
 	const result = forge(state, "forge-reliable", "worn:sword");
 	expect(result.turnAdvanced).toBe(true);
 	expect(result.state.gold).toBe(700);
+	expect(
+		result.state.economyTelemetry?.floors[6]?.goldOut["dungeon-forge-reliable"],
+	).toBe(300);
 	expect(result.state.equipment.mainHand).toEqual({
 		id: "worn:sword",
 		kind: "iron-sword",
 		enchantment: 2,
+		telemetryAcquired: true,
 	});
 	expect(result.state.objects[0]).toMatchObject({
 		activated: true,
@@ -317,4 +323,17 @@ it("draws at most one rare discovery in about 60% of adventures, forges only fro
 			["sarcophagus", "forge"].includes(o.kind),
 		).length,
 	).toBeLessThanOrEqual(1);
+});
+
+it("records the paid risky service once regardless of its outcome", () => {
+	for (const outcome of ["improved", "unchanged", "destroyed"] as const) {
+		const state = initializeEconomyTelemetry(encounter(seedFor(outcome)));
+		const result = forge(state, "forge-risky", "worn:sword").state;
+		expect(
+			result.economyTelemetry?.floors[6]?.goldOut["dungeon-forge-risky"],
+		).toBe(FORGE_PRICES.risky);
+		expect(forge(result, "forge-risky", "bag:axe").state.economyTelemetry).toBe(
+			result.economyTelemetry,
+		);
+	}
 });

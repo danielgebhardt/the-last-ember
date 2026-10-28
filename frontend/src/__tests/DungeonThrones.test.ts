@@ -1,5 +1,7 @@
 // @vitest-environment node
+
 import { expect, it } from "vitest";
+import { initializeEconomyTelemetry } from "../domain/game/EconomyTelemetry";
 import { createGameState } from "../domain/game/GameState";
 import { resolvePlayerAction } from "../domain/game/PlayerActions";
 import { createCorridorEncounter } from "./MonsterEncounterTestHelpers";
@@ -66,7 +68,10 @@ it("sitting has fixed bounded blessing, recovery, curse or legal relocation outc
 it("prying either grants gold or a bounded wound once, including across turns", () => {
 	const seen = new Set<string>();
 	for (let seed = 0; seed < 20; seed++) {
-		const state = { ...encounter(), run: { ...encounter().run, seed } };
+		const state = initializeEconomyTelemetry({
+			...encounter(),
+			run: { ...encounter().run, seed },
+		});
 		const result = resolvePlayerAction(state, {
 			type: "interact",
 			choice: "pry",
@@ -76,6 +81,9 @@ it("prying either grants gold or a bounded wound once, including across turns", 
 			{ type: "interact", choice: "pry" },
 		).state;
 		expect(result.gold).toBe(replay.gold);
+		expect(result.economyTelemetry?.floors[1]?.goldIn.throne ?? 0).toBe(
+			result.gold - state.gold,
+		);
 		expect(result.player).toEqual(replay.player);
 		expect(result.objects[0].activated).toBe(true);
 		seen.add(result.gold > state.gold ? "gold" : "wound");
