@@ -1,9 +1,24 @@
 import { minibossId } from "../arena/Arena";
 import { isStandardDungeon } from "../dungeon/RunConfiguration";
 import { defeatRecap } from "../game/DefeatRecap";
-import { GAME_VERSION } from "../game/GameVersion";
+import { GAME_VERSIONS } from "../game/GameVersion";
 import { levelForExperience } from "../game/Progression";
 import type { SaveDocument } from "./SaveDocument";
+
+// The release an adventure started on: a run finished offline may be submitted
+// after a deploy. Adventures older than floor telemetry all started on the first
+// release, and an unreleased label never reaches the version filters.
+const startedOn = (state: SaveDocument["state"]) => {
+	// Floor records are ordered by floor number, not by entry.
+	const first = [...(state.floorTelemetry?.floors ?? [])].sort(
+		(a, b) => a.firstEntry.turn - b.firstEntry.turn,
+	)[0];
+	return (
+		[state.rankingVersion, first?.firstEntry.gameVersion].find(
+			(version) => version && GAME_VERSIONS.includes(version),
+		) ?? GAME_VERSIONS[0]
+	);
+};
 
 export const summarizeRun = (document: SaveDocument, commit: string | null) => {
 	const { state, configuration } = document;
@@ -19,7 +34,7 @@ export const summarizeRun = (document: SaveDocument, commit: string | null) => {
 		standard: isStandardDungeon(configuration),
 		ranked: state.ranked === true,
 		difficulty: configuration.difficulty,
-		gameVersion: GAME_VERSION,
+		gameVersion: startedOn(state),
 		commit,
 		outcome: state.quest.victory ? "won" : "died",
 		turns: state.turn,
