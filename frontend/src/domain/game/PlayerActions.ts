@@ -58,6 +58,7 @@ import { announceObjectArrival } from "../objects/ObjectDescriptions";
 import {
 	type InteractAction,
 	interactObject,
+	nearbyInteractionObject,
 } from "../objects/ObjectInteraction";
 import { noticeCrackedWalls } from "../objects/SecretVaults";
 import { type SanctuaryAction, treatAtSanctuary } from "../town/Sanctuary";
@@ -98,7 +99,11 @@ import { deriveCombatStats } from "./CombatStats";
 import { recordHealing, recordPressure } from "./CombatTelemetry";
 import { recordPickupAcquisition } from "./EconomyTelemetry";
 import { activateEscapeFloor } from "./Escape";
-import { recordFinalCheckpoint, recordFloorTransition } from "./FloorTelemetry";
+import {
+	type FloorExitReason,
+	recordFinalCheckpoint,
+	recordFloorTransition,
+} from "./FloorTelemetry";
 import type { GameState } from "./GameState.ts";
 import { recoverManaAfterTurn } from "./Mana";
 import {
@@ -158,6 +163,18 @@ export type ActionResolution = {
 	error?: string;
 };
 
+// How a committed action leaves the floor, judged before it resolves.
+const exitReason = (state: GameState, action: PlayerAction): FloorExitReason =>
+	action.type === "exit-dungeon"
+		? "town-scroll"
+		: action.type === "travel"
+			? "town-gate"
+			: action.type !== "interact"
+				? "stairs"
+				: nearbyInteractionObject(state, action.objectId)?.kind === "arena-gate"
+					? "arena-gate"
+					: "runic-portal";
+
 export const resolvePlayerAction = (
 	state: GameState,
 	action: PlayerAction,
@@ -171,14 +188,7 @@ export const resolvePlayerAction = (
 		state.quest.victory
 	)
 		return result;
-	const reason =
-		action.type === "exit-dungeon"
-			? "town-scroll"
-			: action.type === "travel"
-				? "town-gate"
-				: action.type === "interact"
-					? "runic-portal"
-					: "stairs";
+	const reason = exitReason(state, action);
 	let measured = result.state;
 	if (!state.town && result.state.town)
 		measured = recordPressure(
@@ -426,7 +436,7 @@ const resolveAction = (
 		recordEquippedTurn(
 			action.type === "exit-dungeon" ? { ...result, town: null } : result,
 		),
-		action.type === "interact" ? "runic-portal" : "stairs",
+		exitReason(state, action),
 	);
 	const monsterPhase =
 		responseState.quest.victory || responseState.player.health <= 0

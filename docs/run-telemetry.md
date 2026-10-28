@@ -109,7 +109,9 @@ not a zero-valued resource measurement. A null final floor denotes town.
 
 Boundary definitions:
 
-- **Stairs and runic portals:** the old floor's exit is the state before the
+- **Stairs, runic portals and the arena gate:** each exit records its own reason
+  (`stairs`, `runic-portal`, `arena-gate`); confirming at the gate takes the stair
+  down to the arena in the same step. The old floor's exit is the state before the
   transition action. The new floor's first entry is after that action's effects
   (including withdrawal/arrival effects), before the destination's monster phase.
   Resource changes during the transition therefore lie between those checkpoints.

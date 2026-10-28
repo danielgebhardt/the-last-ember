@@ -29,6 +29,7 @@ import {
 import { updateExploration } from "../domain/dungeon/Exploration";
 import { DEFAULT_FOG_CONFIGURATION } from "../domain/dungeon/RunConfiguration";
 import { emptyCombatTelemetry } from "../domain/game/CombatTelemetry";
+import { createFloorTelemetry } from "../domain/game/FloorTelemetry";
 import { createGameState, type GameState } from "../domain/game/GameState";
 import { damageMonster } from "../domain/game/MonsterDamage";
 import { resolvePlayerAction } from "../domain/game/PlayerActions";
@@ -238,6 +239,20 @@ describe("Arenas", () => {
 		expect(act(atExit, { type: "move", direction: "right" }).error).toBe(
 			EXIT_REFUSAL,
 		);
+	});
+
+	it("records entering through the gate as an arena-gate exit, not a portal", () => {
+		const gate = atGate();
+		const entered = enter({
+			...gate,
+			floorTelemetry: createFloorTelemetry(gate),
+		});
+		expect(entered.run.activeFloor).toBe(6);
+		expect(
+			entered.floorTelemetry?.floors.find((floor) => floor.floorNumber === 5)
+				?.lastExit,
+		).toMatchObject({ toFloor: 6, reason: "arena-gate" });
+		expect(save(entered).ok).toBe(true);
 	});
 
 	it("opens the exit and restores you when nothing in the hall stands, and saves it", () => {

@@ -37,6 +37,7 @@ export type RunCheckpoint = {
 export const FLOOR_EXIT_REASONS = [
 	"stairs",
 	"runic-portal",
+	"arena-gate",
 	"town-gate",
 	"town-scroll",
 ] as const;
