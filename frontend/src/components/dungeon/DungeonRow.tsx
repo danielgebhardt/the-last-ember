@@ -72,22 +72,17 @@ const DungeonCell = memo(function DungeonCell({
 	chargeThreatened?: boolean;
 	inSpellArea?: boolean;
 }) {
-	const showsPile =
-		itemKind !== undefined &&
-		itemCount > 1 &&
-		!monsterKind &&
-		!(dungeonObject && isDoor(dungeonObject));
+	const showsPile = itemKind !== undefined && itemCount > 1 && !monsterKind;
+	// Treasure shows over anything it lies on, so a drop in a doorway isn't hidden.
 	const description = monsterKind
 		? `${heroic ? "Heroic " : ""}${empowered ? "Empowered " : ""}${MONSTER_VISUALS[monsterKind].label}${heroic ? ". Double base health and attack damage; ordinary abilities and timing." : ""}${empowered ? ". Strengthened by the Hourglass of Ages: half again its health and attack." : ""}`
-		: dungeonObject && isDoor(dungeonObject)
-			? objectLabel(dungeonObject)
-			: itemKind
-				? `${ITEM_DEFINITIONS[itemKind].name}${itemCount > 1 ? ` and ${itemCount - 1} more item${itemCount > 2 ? "s" : ""}` : ""}`
-				: dungeonObject
-					? objectLabel(dungeonObject)
-					: tile === undefined
-						? "undiscovered"
-						: TILE_LABELS[tile];
+		: itemKind
+			? `${ITEM_DEFINITIONS[itemKind].name}${itemCount > 1 ? ` and ${itemCount - 1} more item${itemCount > 2 ? "s" : ""}` : ""}${dungeonObject && isDoor(dungeonObject) ? ", lying in the doorway" : ""}`
+			: dungeonObject
+				? objectLabel(dungeonObject)
+				: tile === undefined
+					? "undiscovered"
+					: TILE_LABELS[tile];
 	const label =
 		visibility === "remembered" ? `remembered ${description}` : description;
 	const texture = tile === undefined ? undefined : TILE_TERRAIN_CLASSES[tile];
@@ -142,8 +137,6 @@ const DungeonCell = memo(function DungeonCell({
 				) : (
 					<MonsterIcon kind={monsterKind} />
 				)
-			) : dungeonObject && isDoor(dungeonObject) ? (
-				<DungeonObjectIcon object={dungeonObject} />
 			) : itemKind ? (
 				showsPile ? (
 					<LootPileIcon count={itemCount} />

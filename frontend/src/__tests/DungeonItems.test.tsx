@@ -145,9 +145,33 @@ describe("Floor item symbols", () => {
 				]}
 			/>,
 		);
-		const door = screen.getByLabelText("row1col2 - closed door");
-		expect(door).toBeVisible();
-		expect(door).not.toHaveAttribute("title");
-		expect(screen.queryByText("2")).not.toBeInTheDocument();
+		// Loot dropped in a doorway shows instead of the door it lies on.
+		const doorway = screen.getByLabelText(
+			"row1col2 - Iron sword and 1 more item, lying in the doorway",
+		);
+		expect(within(doorway).getByText("2")).toBeVisible();
+		expect(doorway).toHaveAttribute(
+			"title",
+			"2 items on this tile. Press G to choose one.",
+		);
+	});
+	it("shows treasure on a door tile, and the door once it is taken", () => {
+		const door = {
+			id: "door:1",
+			kind: "door" as const,
+			floorNumber: 1,
+			coordinate: item.coordinate,
+			activated: false,
+		};
+		const { rerender } = render(
+			<DungeonLayout {...props} dungeonObjects={[door]} />,
+		);
+		expect(
+			screen.getByLabelText("row1col2 - Iron sword, lying in the doorway"),
+		).toBeVisible();
+		rerender(
+			<DungeonLayout {...props} floorItems={[]} dungeonObjects={[door]} />,
+		);
+		expect(screen.getByLabelText("row1col2 - closed door")).toBeVisible();
 	});
 });
