@@ -364,6 +364,33 @@ describe("Arenas", () => {
 		expect(save(dodged).ok).toBe(true);
 	});
 
+	it("Iron Juggernaut: steps into your column to charge instead of trailing one over", () => {
+		// One column over and five rows down; plain pursuit would walk straight up col 25.
+		const start = inHall(
+			"iron-juggernaut",
+			{ row: 2, col: 24 },
+			{ row: 7, col: 25 },
+		);
+		const lined = act(start).state;
+		expect(boss(lined)?.coordinate).toEqual({ row: 7, col: 24 });
+		expect(boss(lined)?.intent.type).toBe("idle");
+		expect(boss(act(lined).state)?.intent).toEqual({
+			type: "preparing-charge",
+			target: { row: 2, col: 24 },
+		});
+		expect(save(lined).ok).toBe(true);
+		// Other chargers keep plain pursuit.
+		for (const kind of ["horned-charger", "iron-champion"] as const) {
+			const other = {
+				...start,
+				monsters: start.monsters.map((m) =>
+					m.id === minibossId(6) ? { ...m, kind } : m,
+				),
+			};
+			expect(boss(act(other).state)?.coordinate).toEqual({ row: 6, col: 25 });
+		}
+	});
+
 	it("both minibosses change phase once at half health; the Pyre Lord calls two salamanders", () => {
 		const pyre = inHall("pyre-lord", { row: 3, col: 12 }, { row: 13, col: 28 });
 		const lord = boss(pyre);

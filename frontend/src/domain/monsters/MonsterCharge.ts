@@ -1,3 +1,4 @@
+import type { DungeonRun } from "../dungeon/DungeonRun";
 import type { Coordinate } from "../dungeon/DungeonTypes";
 import type { ActivityEvent } from "../game/ActivityHistory";
 import type { AttackRollSource } from "../game/CombatRandomness";
@@ -12,6 +13,7 @@ import { hasMonsterEffect } from "../game/TimedEffects";
 import { navigationRun } from "../objects/NavigationTerrain";
 import { MONSTER_DEFINITIONS, type Monster } from "./Monster";
 import {
+	coordinateKey,
 	orthogonalDistance,
 	protectedFloorLocations,
 } from "./MonsterLocations";
@@ -40,6 +42,59 @@ export const chargeLine = (
 		points.push(point);
 	}
 	return points;
+};
+// Only the Iron Juggernaut hunts for a charging line: its arena fight is built on the
+// charge, while ordinary chargers simply close in. When it can't charge or strike, it
+// takes a step that leaves it in line with the player, a clear 2 to range tiles away,
+// nearest first. Undefined means ordinary pursuit.
+export const selectChargeApproach = (
+	run: DungeonRun,
+	monster: Monster,
+	actors: readonly Monster[],
+): Coordinate | undefined => {
+	const range = MONSTER_DEFINITIONS[monster.kind].chargeRange;
+	if (monster.kind !== "iron-juggernaut" || !range) return undefined;
+	const terrain = run.floors[run.activeFloor - 1].terrain;
+	const target = run.playerCoordinate;
+	const blocked = new Set(
+		protectedFloorLocations(run, run.activeFloor).map(coordinateKey),
+	);
+	for (const actor of actors)
+		if (
+			actor.health > 0 &&
+			actor.floorNumber === run.activeFloor &&
+			actor.id !== monster.id
+		)
+			blocked.add(coordinateKey(actor.coordinate));
+	// The same neighbor order as pursuit breaks ties.
+	const steps = [
+		{ row: -1, col: 0 },
+		{ row: 0, col: 1 },
+		{ row: 1, col: 0 },
+		{ row: 0, col: -1 },
+	]
+		.map((offset) => ({
+			row: monster.coordinate.row + offset.row,
+			col: monster.coordinate.col + offset.col,
+		}))
+		.filter((step) => {
+			const distance = orthogonalDistance(step, target);
+			return (
+				terrain[step.row]?.[step.col] === "." &&
+				!blocked.has(coordinateKey(step)) &&
+				distance >= 2 &&
+				distance <= range &&
+				chargeLine(terrain, step, target, range).length === distance
+			);
+		});
+	return steps.reduce<Coordinate | undefined>(
+		(best, step) =>
+			!best ||
+			orthogonalDistance(step, target) < orthogonalDistance(best, target)
+				? step
+				: best,
+		undefined,
+	);
 };
 export const resolveMonsterCharge = (
 	state: GameState,

@@ -38,7 +38,7 @@ import { resolveMonsterAlarm } from "./MonsterAlarm";
 import { resolveMonsterArea } from "./MonsterAreaAttack";
 import { advanceUnseenPursuit } from "./MonsterAwareness";
 import { resolveMonsterBlindingStrike } from "./MonsterBlindingStrike";
-import { resolveMonsterCharge } from "./MonsterCharge";
+import { resolveMonsterCharge, selectChargeApproach } from "./MonsterCharge";
 import { doorPlanningRun, monsterDoorToOpen } from "./MonsterDoors";
 import { resolveMonsterHex } from "./MonsterHex";
 import { orthogonalDistance } from "./MonsterLocations";
@@ -550,7 +550,8 @@ export const resolveMonsterPhase = (
 			const coordinate =
 				hasMonsterEffect(state, monster, "rooted") || profile.stationary
 					? undefined
-					: selectPursuitStep(navigation, monster, monsters);
+					: (detected && selectChargeApproach(navigation, monster, monsters)) ||
+						selectPursuitStep(navigation, monster, monsters);
 			if (coordinate)
 				monsters = monsters.map((actor) =>
 					actor.id === monster.id ? { ...actor, coordinate } : actor,
