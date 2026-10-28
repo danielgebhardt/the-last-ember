@@ -1,7 +1,7 @@
 import { expect, test } from "@playwright/test";
 import {
 	analyticsResult,
-	progressionFixtures,
+	itemUsageFixtures,
 } from "../src/__tests/AnalyticsTestFixtures";
 import type { AnalyticsFilters } from "../src/developer/StatisticsAnalytics";
 import { filterStatistics } from "../src/developer/StatisticsData";
@@ -32,7 +32,7 @@ for (const size of [
 			await page.route("**/api/profile", (route) =>
 				route.fulfill({ json: { displayName: null } }),
 			);
-			const fixtures = progressionFixtures();
+			const fixtures = itemUsageFixtures();
 			let aggregates = 0,
 				details = 0;
 			await page.route("**/api/developer-statistics?*", (route) => {
@@ -172,6 +172,72 @@ for (const size of [
 				.click();
 			await expect(floorInspect).toBeFocused();
 			await sheet.getByRole("tab", { name: "Overview", exact: true }).click();
+			await sheet
+				.getByRole("tab", {
+					name: "Equipment, spells and consumables",
+					exact: true,
+				})
+				.click();
+			await sheet.getByLabel("Find kind", { exact: true }).fill("short sword");
+			await expect(
+				sheet.getByRole("row", { name: /Short sword/ }),
+			).toContainText("50% · 1/2");
+			await expect(
+				sheet.getByRole("row", { name: /Short sword/ }),
+			).toContainText("1 unused");
+			await expect(
+				sheet.getByRole("row", { name: /Short sword/ }),
+			).toContainText("1 unknown");
+			expect(
+				await sheet.evaluate((node) => node.scrollWidth <= node.clientWidth),
+			).toBe(true);
+			await sheet
+				.getByRole("heading", { name: "Equipment comparisons", exact: true })
+				.scrollIntoViewIfNeeded();
+			await page.screenshot({ path: testInfo.outputPath("equipment.png") });
+			await sheet.getByLabel("Find kind", { exact: true }).fill("");
+			await sheet
+				.getByLabel("Show comparisons", { exact: true })
+				.selectOption("unused");
+			await sheet
+				.getByLabel("Sort comparisons", { exact: true })
+				.selectOption("rate");
+			await sheet
+				.getByLabel("Sort direction", { exact: true })
+				.selectOption("asc");
+			await expect(
+				sheet.getByRole("row", { name: /Spellguard Shield/ }),
+			).toContainText("0% · 0/1");
+			await sheet
+				.getByLabel("Comparison category", { exact: true })
+				.selectOption("spells");
+			await expect(sheet.getByRole("row", { name: /Fireball/ })).toContainText(
+				"1 unused",
+			);
+			await sheet
+				.getByRole("heading", { name: "Spells comparisons", exact: true })
+				.scrollIntoViewIfNeeded();
+			await page.screenshot({ path: testInfo.outputPath("spells.png") });
+			await sheet
+				.getByLabel("Comparison category", { exact: true })
+				.selectOption("consumables");
+			await expect(
+				sheet.getByRole("row", { name: /Enchantment scroll/ }),
+			).toContainText("1 unused");
+			await sheet
+				.getByLabel("Comparison category", { exact: true })
+				.selectOption("equipment");
+			await sheet
+				.getByLabel("Show comparisons", { exact: true })
+				.selectOption("all");
+			await sheet
+				.getByRole("button", { name: "Next kinds", exact: true })
+				.click();
+			await sheet
+				.getByRole("button", { name: "Previous kinds", exact: true })
+				.click();
+			expect(aggregates).toBe(1);
+			expect(details).toBe(2);
 			await sheet.getByLabel("Version", { exact: true }).selectOption("all");
 			await expect(sheet.getByRole("status")).toContainText("Filters changed");
 			expect(aggregates).toBe(1);

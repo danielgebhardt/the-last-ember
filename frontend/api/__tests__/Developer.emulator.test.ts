@@ -93,6 +93,26 @@ describe.skipIf(!authHost || !host)(
 						};
 						combat.town.healing = { sanctuary: 10000 };
 					}
+					row.summary.usage = {
+						casts: { heal: 2 },
+						equippedTurns: { "short-sword": 10 },
+						consumables: { "healing-potion": 1 },
+					};
+					const access = row.summary.telemetry?.economy;
+					if (access) {
+						access.initialItems = { "short-sword": 1, "healing-potion": 1 };
+						access.initialSpells = { heal: 1 };
+						access.town.acquired = { "spellguard-shield": 1 };
+						access.town.learned = { fireball: 1 };
+						access.floors[2] = {
+							acquired: { "enchantment-scroll": 1 },
+							learned: { fireball: 1 },
+							goldIn: {},
+							goldOut: {},
+							purchases: {},
+							sales: {},
+						};
+					}
 					batch.create(database().doc(`statistics/${id}`), {
 						...row.summary,
 						seed: i,
@@ -171,6 +191,40 @@ describe.skipIf(!authHost || !host)(
 				});
 				expect(aggregate.floors[1].damage).toMatchObject({ n: 134, total: 0 });
 				expect(JSON.stringify(aggregate)).not.toContain("damageByMonster");
+				expect(aggregate.items.equipment.coverage).toEqual({
+					selected: 201,
+					access: 134,
+					usage: 201,
+					both: 134,
+				});
+				expect(
+					aggregate.items.equipment.rows.find(
+						(r: { kind: string }) => r.kind === "short-sword",
+					),
+				).toMatchObject({
+					accessRuns: 134,
+					users: 201,
+					total: 2010,
+					eligibleOwners: 134,
+					eligibleUsers: 134,
+					rate: 1,
+					medianPerOwner: { value: 10, n: 134 },
+				});
+				expect(
+					aggregate.items.spells.rows.find(
+						(r: { kind: string }) => r.kind === "fireball",
+					),
+				).toMatchObject({ accessRuns: 134, unusedOwners: 134, rate: 0 });
+				expect(
+					aggregate.items.equipment.rows.find(
+						(r: { kind: string }) => r.kind === "spellguard-shield",
+					),
+				).toMatchObject({ accessRuns: 134, unusedOwners: 134 });
+				expect(
+					aggregate.items.consumables.rows.find(
+						(r: { kind: string }) => r.kind === "enchantment-scroll",
+					),
+				).toMatchObject({ accessRuns: 134, unusedOwners: 134 });
 				expect(aggregate.rows).toHaveLength(201);
 				expect(
 					aggregate.rows.every(

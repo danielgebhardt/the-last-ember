@@ -19,6 +19,7 @@ import {
 } from "./StatisticsAnalytics";
 import type { MetadataEntry } from "./StatisticsData";
 import StatisticsFloorProgression from "./StatisticsFloorProgression";
+import StatisticsItemUsage from "./StatisticsItemUsage";
 import StatisticsOverview from "./StatisticsOverview";
 
 const inputClass =
@@ -324,13 +325,8 @@ export default function DeveloperStatisticsPage() {
 				<EmberTabsList aria-label="Statistics views">
 					<EmberTab value="overview">Overview</EmberTab>
 					<EmberTab value="floors">Floor progression</EmberTab>
-					<EmberTab value="items" disabled>
-						Equipment, spells and consumables
-					</EmberTab>
+					<EmberTab value="items">Equipment, spells and consumables</EmberTab>
 				</EmberTabsList>
-				<p className="mt-2 text-xs text-muted-foreground">
-					Equipment, spell and consumable comparisons follow in checkpoint 3.
-				</p>
 
 				<p className="text-xs text-muted-foreground">
 					These are finished, submitted runs. Abandoned, signed-out and
@@ -408,6 +404,9 @@ export default function DeveloperStatisticsPage() {
 								onInspect={(entry) => void inspect(entry)}
 								onFloorChange={() => closeDetail()}
 							/>
+						</Tabs.Panel>
+						<Tabs.Panel value="items" keepMounted>
+							<StatisticsItemUsage items={result.items} />
 						</Tabs.Panel>
 						<div className="overflow-x-auto rounded-lg border">
 							<table className="w-full text-left text-sm tabular-nums">

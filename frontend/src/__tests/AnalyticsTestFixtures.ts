@@ -1,4 +1,5 @@
 import { aggregateFloors } from "../developer/FloorProgression";
+import { aggregateItemUsage } from "../developer/ItemUsage";
 import {
 	type AnalyticsResult,
 	aggregateOverview,
@@ -174,6 +175,7 @@ export const analyticsResult = (
 		),
 		overview,
 		floors: aggregateFloors(entries, observations, overview.reach),
+		items: aggregateItemUsage(entries, observations),
 	};
 };
 
@@ -218,5 +220,46 @@ export const progressionFixtures = () => {
 		}
 		telemetry.combat.town.healing = { sanctuary: 999 };
 	});
+	return rows;
+};
+
+export const itemUsageFixtures = () => {
+	const rows = progressionFixtures();
+	for (const index of [0, 1]) {
+		const access = rows[index].summary.telemetry?.economy;
+		if (!access) throw Error("Expected access fixture");
+		access.initialItems = { "short-sword": 1, "healing-potion": 2 };
+		access.initialSpells = { heal: 1 };
+	}
+	rows[0].summary.usage = {
+		equippedTurns: { "short-sword": 10 },
+		casts: { heal: 2 },
+		consumables: { "healing-potion": 1 },
+	};
+	rows[1].summary.usage = null;
+	const usageOnly = rows[2].summary.telemetry;
+	if (!usageOnly) throw Error("Expected telemetry fixture");
+	usageOnly.economy = null;
+	rows[2].summary.usage = {
+		equippedTurns: { "short-sword": 5 },
+		casts: { heal: 3 },
+		consumables: { "healing-potion": 2 },
+	};
+	const acquired = rows[3].summary.telemetry?.economy;
+	if (!acquired) throw Error("Expected acquisition fixture");
+	acquired.town.acquired = {
+		"short-sword": 2,
+		"spellguard-shield": 1,
+		"healing-potion": 3,
+	};
+	acquired.town.learned = { heal: 1 };
+	acquired.floors[3] = {
+		acquired: { "short-sword": 1, "enchantment-scroll": 1 },
+		learned: { fireball: 1 },
+		goldIn: {},
+		goldOut: {},
+		purchases: {},
+		sales: {},
+	};
 	return rows;
 };

@@ -1,6 +1,12 @@
 import type { FloorRecord } from "../domain/game/FloorTelemetry";
 import { GAME_VERSION } from "../domain/game/GameVersion";
+import type { RunUsage } from "../domain/game/RunUsage";
 import type { FloorAggregate, FloorCombat } from "./FloorProgression";
+import type {
+	AccessTelemetry,
+	UsageCategory,
+	UsageComparison,
+} from "./ItemUsage";
 import {
 	type MetadataEntry,
 	type StatisticsFilters,
@@ -24,17 +30,23 @@ export type AnalyticsObservation = {
 	id: string;
 	floors: FloorRecord[] | null;
 	usage: boolean;
+	usageData: Partial<RunUsage> | null;
 	combat: boolean;
 	combatFloors: FloorCombat | null;
 	economy: boolean;
+	access: AccessTelemetry | null;
 };
 type ProjectedTelemetry = {
-	usage?: { casts?: unknown } | null;
+	usage?: {
+		casts?: unknown;
+		consumables?: unknown;
+		equippedTurns?: unknown;
+	} | null;
 	telemetry?: {
 		schemaVersion?: number;
 		checkpoints?: { floors?: FloorRecord[] } | null;
 		combat?: { town?: { damage?: unknown }; floors?: FloorCombat } | null;
-		economy?: { initialItems?: unknown } | null;
+		economy?: AccessTelemetry | null;
 	} | null;
 };
 export const observationFromDocument = (
@@ -43,13 +55,21 @@ export const observationFromDocument = (
 ): AnalyticsObservation => {
 	const telemetry =
 		document.telemetry?.schemaVersion === 1 ? document.telemetry : null;
+	const usageData: Partial<RunUsage> = {};
+	for (const key of ["casts", "consumables", "equippedTurns"] as const) {
+		const value = document.usage?.[key];
+		if (value !== null && typeof value === "object" && !Array.isArray(value))
+			usageData[key] = value;
+	}
 	return {
 		id,
 		floors: telemetry?.checkpoints?.floors ?? null,
-		usage: document.usage?.casts != null,
+		usage: usageData.casts != null,
+		usageData: document.usage ? usageData : null,
 		combat: telemetry?.combat?.town?.damage != null,
 		combatFloors: telemetry?.combat?.floors ?? null,
 		economy: telemetry?.economy?.initialItems != null,
+		access: telemetry?.economy ?? null,
 	};
 };
 export const median = (values: readonly number[]) => {
@@ -129,6 +149,7 @@ export type AnalyticsResult = {
 	rows: MetadataEntry[];
 	overview: Overview;
 	floors: FloorAggregate[];
+	items: Record<UsageCategory, UsageComparison>;
 };
 export type AnalyticsIncomplete = {
 	complete: false;

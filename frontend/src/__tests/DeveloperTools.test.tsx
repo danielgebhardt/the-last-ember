@@ -7,10 +7,15 @@ import DeveloperCatalog from "../components/game/DeveloperCatalog";
 import { Sheet } from "../components/ui/sheet";
 import DeveloperStatisticsRoute from "../developer/DeveloperStatisticsRoute";
 import { analyticsDefaults } from "../developer/StatisticsAnalytics";
+import { filterStatistics } from "../developer/StatisticsData";
 import { GAME_VERSION } from "../domain/game/GameVersion";
 import { summarizeRun } from "../domain/saves/RunStatistics";
 import { ThemeProvider } from "../settings/ThemeProvider";
-import { analyticsResult, analyticsRun } from "./AnalyticsTestFixtures";
+import {
+	analyticsResult,
+	analyticsRun,
+	itemUsageFixtures,
+} from "./AnalyticsTestFixtures";
 import { developerTestAccount } from "./DeveloperTestAccount";
 import { savedAdventure } from "./SaveTestHelpers";
 import { trackedFinishedRun } from "./TelemetryTestHelpers";
@@ -386,4 +391,88 @@ it("keeps unknown floor measurements, measured zero and unreached floors visuall
 		screen.getByRole("button", { name: /^Select floor 2:.*Not applicable/ }),
 	).toHaveTextContent("—");
 	expect(send).toHaveBeenCalledTimes(2);
+});
+
+it("compares access and usage with explicit denominators, sorting and unused filtering without more fetches", async () => {
+	vi.spyOn(Accounts, "useAccount").mockReturnValue(developerTestAccount());
+	history.replaceState(null, "", "/#developer-statistics");
+	const entries = filterStatistics(itemUsageFixtures(), analyticsDefaults());
+	const send = vi
+		.fn<typeof fetch>()
+		.mockResolvedValue(Response.json(analyticsResult(entries)));
+	vi.stubGlobal("fetch", send);
+	render(<DeveloperStatisticsRoute />);
+	const user = userEvent.setup();
+	await user.click(
+		await screen.findByRole("button", { name: "Load statistics" }),
+	);
+	await user.click(
+		screen.getByRole("tab", { name: "Equipment, spells and consumables" }),
+	);
+	await user.type(screen.getByLabelText("Find kind"), "short sword");
+	const sword = screen.getByRole("row", { name: /Short sword/ });
+	expect(sword).toHaveTextContent("3/3");
+	expect(sword).toHaveTextContent("2/3");
+	expect(sword).toHaveTextContent("50% · 1/2");
+	expect(sword).toHaveTextContent("1 unused");
+	expect(sword).toHaveTextContent("1 unknown");
+	await user.clear(screen.getByLabelText("Find kind"));
+	await user.selectOptions(
+		screen.getByLabelText("Show comparisons"),
+		"unknown",
+	);
+	expect(screen.getAllByRole("row", { name: /Short sword/ })).toHaveLength(1);
+	await user.selectOptions(screen.getByLabelText("Show comparisons"), "unused");
+	await user.selectOptions(screen.getByLabelText("Sort comparisons"), "rate");
+	await user.selectOptions(screen.getByLabelText("Sort direction"), "asc");
+	expect(
+		screen.getByRole("row", { name: /Spellguard shield/i }),
+	).toHaveTextContent("0% · 0/1");
+	await user.selectOptions(
+		screen.getByLabelText("Comparison category"),
+		"spells",
+	);
+	expect(screen.getByRole("row", { name: /Fireball/ })).toHaveTextContent(
+		"1 unused",
+	);
+	await user.selectOptions(
+		screen.getByLabelText("Comparison category"),
+		"consumables",
+	);
+	expect(
+		screen.getByRole("row", { name: /Enchantment scroll/ }),
+	).toHaveTextContent("1 unused");
+	expect(send).toHaveBeenCalledTimes(1);
+});
+it("shows unknown usage for an owner with no usage records and not-applicable rates for zero owners", async () => {
+	vi.spyOn(Accounts, "useAccount").mockReturnValue(developerTestAccount());
+	history.replaceState(null, "", "/#developer-statistics");
+	const owner = itemUsageFixtures()[1];
+	vi.stubGlobal(
+		"fetch",
+		vi.fn().mockResolvedValue(Response.json(analyticsResult([owner]))),
+	);
+	render(<DeveloperStatisticsRoute />);
+	const user = userEvent.setup();
+	await user.click(
+		await screen.findByRole("button", { name: "Load statistics" }),
+	);
+	await user.click(
+		screen.getByRole("tab", { name: "Equipment, spells and consumables" }),
+	);
+	await user.type(screen.getByLabelText("Find kind"), "short sword");
+	expect(screen.getByRole("row", { name: /Short sword/ })).toHaveTextContent(
+		"Unknown",
+	);
+	expect(screen.getByRole("row", { name: /Short sword/ })).toHaveTextContent(
+		"0 unused",
+	);
+	expect(screen.getByRole("row", { name: /Short sword/ })).toHaveTextContent(
+		"1 unknown",
+	);
+	await user.clear(screen.getByLabelText("Find kind"));
+	await user.type(screen.getByLabelText("Find kind"), "spellguard");
+	expect(
+		screen.getByRole("row", { name: /Spellguard shield/i }),
+	).toHaveTextContent("Not applicable");
 });

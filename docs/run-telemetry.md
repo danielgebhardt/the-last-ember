@@ -269,9 +269,9 @@ under the combined budgets above.
 
 ## Developer dashboard (#434)
 
-Checkpoints 1–2 add Overview and Floor progression to the existing lazy developer
-statistics page. Equipment/spell/consumable comparisons and readable full run
-inspection remain checkpoints 3–4. Inspect still fetches a single private detail
+Checkpoints 1–3 add Overview, Floor progression and Equipment/spells/consumables
+to the existing lazy developer statistics page. Readable full run inspection
+remains checkpoint 4. Inspect still fetches a single private detail
 on demand, with cancellation and retry. Statistics CSV export and its obsolete
 CLI/helper are removed; Seed report CSV and the path-based developer-account
 administration script are independent and remain available.
@@ -287,13 +287,15 @@ never substitute an older version.
 One read-only Firestore transaction holds a consistent snapshot across metadata
 pages and selected-document batches. Metadata queries use existing finish-date
 ordering/indexes; other filters run on the server. Reads project metadata without
-usage/equipment, then only the selected runs' checkpoint-floor array and small
-group-presence fields (`usage.casts`, combat town damage, economy initial items),
+usage/equipment, then only the selected runs' checkpoint-floor array, global
+usage maps, combat coverage marker (town damage), initial items and spells,
+town acquisitions/learning and per-floor acquisitions/learning,
 plus damage/healing maps projected individually for each of the twenty supported
 floor keys. Monster, encounter and usage breakdowns in combat are not fetched.
 Arrays cannot be projected by element, so unused checkpoint members are discarded
 server-side. No adventure saves or full telemetry documents reach the browser.
-Later slices extend the same projection/aggregation contract with their measures.
+Store receipts and gold-flow maps remain outside aggregate reads; existing
+single-run Inspect retains those facts for checkpoint 4.
 
 Per load: at most **2,000** scanned metadata rows (plus one lookahead), **500**
 selected runs, **4 MiB** metadata input, **32 MiB** projected telemetry input and
@@ -365,3 +367,37 @@ Counters are summed as safe integers; a total outside the exact numeric range
 refuses the selection rather than displaying rounded counters. Existing read,
 byte and deadline limits still apply to the expanded response. No collection,
 save format, indexing, infrastructure or production-data changes are needed.
+
+
+### Equipment, spells and consumables (checkpoint 3)
+
+The third view compares every catalog kind, including rare equipment, using the
+same loaded aggregate. Category, name search, unused/unknown-owner filters,
+sorting and pagination are local; none makes another data request. No chart or
+runtime dependency is added. Compact percentage bars have readable count/rate
+values in the comparison table.
+
+Access means initial ownership/knowledge OR at least one recorded subsequent
+acquisition/learning, including town and all dungeon floors. Each run counts once
+per kind regardless of physical copies. Purchases are already acquisitions and
+are not added again; acquired books do not imply knowledge without learning.
+Access does not mean generated, seen, offered or affordable. The dashboard never
+infers access from usage or final equipment, and never infers effectiveness.
+
+Per category, show selected, access-covered, usage-covered and intersection counts.
+Owned/known-run counts use access coverage. Used-run counts and recorded totals
+use usage coverage, even when the corresponding access history is unknown.
+For rates, the numerator is used runs and the denominator is owners/knowers within
+the intersection of the required coverage. Median usage per covered owner uses
+that same owner cohort, including measured zeros. It is not the median among users.
+A known owner lacking usage contributes to **unknown usage**, never unused.
+No eligible owners gives not applicable when access is known; missing required
+history stays unknown. Empty maps in tracked groups are measured zero.
+
+Equipment use is at least one recorded committed dungeon turn equipped, preserving
+one credit per kind per turn for identical rings. It says nothing about briefly
+equipping in town or damage/mitigation efficiency. Spell counts are successful
+casts, not targets hit. Consumables count actual consumption, including effective
+town use and enchantment scrolls. Recorded totals are safely summed integers;
+overflow refuses the entire selection. Existing byte/read/deadline limits apply
+to this expanded projection and response, with no new collection or infrastructure.

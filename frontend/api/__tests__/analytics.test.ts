@@ -54,6 +54,9 @@ it("filters paged metadata before batched telemetry reads and calculates a cohor
 	for (const [i, row] of rows.entries()) {
 		const point = row.summary.telemetry?.checkpoints?.floors[0].firstEntry;
 		if (point) point.level = i + 1;
+		if (row.summary.usage) row.summary.usage.equippedTurns["short-sword"] = i;
+		const access = row.summary.telemetry?.economy;
+		if (access) access.initialItems = { "short-sword": 1 };
 	}
 	const reader = readerFor(rows);
 	const result = await collectAnalytics(
@@ -69,6 +72,16 @@ it("filters paged metadata before batched telemetry reads and calculates a cohor
 		value: 104.5,
 		n: 202,
 		notApplicable: 0,
+	});
+	expect(
+		result.items.equipment.rows.find((r) => r.kind === "short-sword"),
+	).toMatchObject({
+		accessRuns: 202,
+		eligibleOwners: 202,
+		users: 202,
+		total: 20907,
+		rate: 1,
+		medianPerOwner: { value: 103.5, n: 202 },
 	});
 	expect(reader.page).toHaveBeenCalledTimes(2);
 	expect(reader.telemetry).toHaveBeenCalledTimes(21);

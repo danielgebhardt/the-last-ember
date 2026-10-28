@@ -185,3 +185,24 @@ Measured 2026-10-27 on `codex/run-telemetry`, including the finished-run project
 | Begin Adventure ready, slow 4G, 4× CPU, cold | 2.274 s | 2.324 s | ≤ 2.35 s |
 
 Local cold readiness was 70 ms; warm readiness was 39 ms. Slow-4G warm readiness was 577 ms, and all images were shown after 2.584 s cold / 716 ms warm. The opening makes eleven requests; neither Firebase chunk nor the lazy developer statistics page loads, and no telemetry API request is made. The statistics page is 13.9 KB raw / 4.7 KB gzip and loads only when opened. Trusted validation and Firestore projection remain outside the browser build. Gameplay records bounded maps at existing action/transition boundaries and submits only through the existing finished-run queue; there are no added per-action network or storage calls.
+
+## Developer dashboard checkpoints 1–3 (#434)
+
+Measured 2026-10-28 on `codex/developer-analytics-dashboard`, including Overview,
+Floor progression and item/spell/consumable comparisons, using the same five-run
+script and profiles against the production build. Fresh contexts were signed out;
+developer tools and sign-in were not opened. This includes both earlier dashboard
+checkpoints since the telemetry baseline, rather than isolating checkpoint 3.
+
+| | Telemetry baseline | Dashboard build | Budget |
+|---|---|---|---|
+| Signed-out cold load received | 401.7 KB | 401.2 KB | ≤ 407 KB |
+| Begin Adventure ready, slow 4G, 4× CPU, cold | 2.324 s | 2.311 s | ≤ 2.35 s |
+
+Local readiness was 69 ms cold / 46 ms warm. Slow-4G warm readiness was 575 ms;
+all images were shown after 2.589 s cold / 707 ms warm. Startup still makes eleven
+requests. Shared chunk boundaries changed, but neither Firebase nor the developer
+statistics chunk loads at startup, and no developer-statistics request is made.
+The developer page is about 36.7 KB raw / 9.7 KB gzip and remains lazy. The larger
+page contains the three views and their local comparison controls; server-side
+aggregation and private telemetry observations remain outside the browser bundle.

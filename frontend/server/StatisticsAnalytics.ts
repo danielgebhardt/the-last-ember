@@ -1,5 +1,6 @@
 import { FieldPath } from "firebase-admin/firestore";
 import { aggregateFloors } from "../src/developer/FloorProgression.ts";
+import { aggregateItemUsage } from "../src/developer/ItemUsage.ts";
 import {
 	type AnalyticsFilters,
 	type AnalyticsIncomplete,
@@ -35,11 +36,19 @@ export const ANALYTICS_METADATA_FIELDS = STATISTICS_LIST_FIELDS.filter(
 // Empty maps survive projection and mean tracked zero. The nested fields act as
 // group-presence markers. Project only damage/healing for the bounded floor keys.
 export const ANALYTICS_TELEMETRY_FIELDS = [
-	"usage.casts",
+	"usage",
 	"telemetry.schemaVersion",
 	"telemetry.checkpoints.floors",
 	"telemetry.combat.town.damage",
 	"telemetry.economy.initialItems",
+	"telemetry.economy.initialSpells",
+	"telemetry.economy.town.acquired",
+	"telemetry.economy.town.learned",
+	...Array.from({ length: MAX_FLOORS }, (_, i) =>
+		["acquired", "learned"].map(
+			(field) => `telemetry.economy.floors.${i + 1}.${field}`,
+		),
+	).flat(),
 	...Array.from({ length: MAX_FLOORS }, (_, i) =>
 		["damage", "healing"].map(
 			(field) => `telemetry.combat.floors.${i + 1}.${field}`,
@@ -169,6 +178,7 @@ export const collectAnalytics = async (
 			rows,
 			overview,
 			floors: aggregateFloors(rows, observations, overview.reach),
+			items: aggregateItemUsage(rows, observations),
 		};
 		check();
 		if (statisticsBytes(result) > MAX_STATISTICS_RESPONSE_BYTES)
