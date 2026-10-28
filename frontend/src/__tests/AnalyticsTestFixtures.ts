@@ -1,0 +1,173 @@
+import {
+	type AnalyticsResult,
+	aggregateOverview,
+	analyticsDefaults,
+	observationFromDocument,
+} from "../developer/StatisticsAnalytics";
+import type { StatisticsEntry } from "../developer/StatisticsData";
+import type { RunCheckpoint } from "../domain/game/FloorTelemetry";
+import { GAME_VERSION } from "../domain/game/GameVersion";
+
+// Local summaries only: never submitted or written to a live project.
+export const checkpoint = (turn = 0): RunCheckpoint => ({
+	gameVersion: GAME_VERSION,
+	turn,
+	level: 1,
+	experience: 0,
+	attributes: { strength: 10, dexterity: 10, intelligence: 10 },
+	attack: 5,
+	armor: 0,
+	evadeChance: 0,
+	magicResistance: 0,
+	health: 10,
+	maxHealth: 10,
+	mana: 5,
+	maxMana: 5,
+	gold: 0,
+	supplies: {},
+	equipment: {
+		mainHand: null,
+		offHand: null,
+		chest: null,
+		head: null,
+		leftRing: null,
+		rightRing: null,
+	},
+});
+export const analyticsRun = (
+	id: string,
+	floors: number[] | null,
+	overrides: Partial<StatisticsEntry["summary"]> = {},
+): StatisticsEntry => ({
+	id,
+	summary: {
+		seed: Number(id.replaceAll(/\D/g, "")) || 123,
+		rows: 40,
+		columns: 40,
+		floorCount: 20,
+		standard: true,
+		ranked: true,
+		difficulty: 1,
+		gameVersion: GAME_VERSION,
+		commit: null,
+		outcome: "died",
+		turns: 100,
+		deepestFloor: 20,
+		endedFloor: floors?.at(-1) ?? null,
+		causeOfDeath: null,
+		level: 1,
+		gold: 0,
+		monstersDefeated: 0,
+		encountersSinceTurn: 0,
+		omensMet: [],
+		thievesMet: 0,
+		thiefTake: { sinceTurn: 0, stolen: 0, recovered: 0 },
+		mimicsMet: 0,
+		arena: null,
+		pact: null,
+		equipped: {},
+		finishedAt: "2026-10-27T12:00:00.000Z",
+		usage: { casts: {}, consumables: {}, equippedTurns: {} },
+		telemetry:
+			floors === null
+				? null
+				: {
+						schemaVersion: 1,
+						checkpoints: {
+							activeFloor: null,
+							floors: floors.map((floorNumber) => ({
+								floorNumber,
+								visits: floorNumber === 1 ? 3 : 1,
+								firstEntry: checkpoint(floorNumber),
+								...(floorNumber === 1
+									? {
+											lastExit: {
+												toFloor: null,
+												reason: "town-scroll" as const,
+												snapshot: checkpoint(90),
+											},
+										}
+									: {}),
+							})),
+						},
+						combat: {
+							floors: {},
+							town: {
+								damage: {},
+								damageByMonster: {},
+								damageByCondition: {},
+								healing: {},
+								defeated: {},
+								heroicDefeated: 0,
+								summonedDefeated: 0,
+								pressure: {},
+								omens: {},
+								pacts: {},
+								usage: { casts: {}, consumables: {}, equippedTurns: {} },
+							},
+						},
+						economy: {
+							initialGold: 0,
+							initialItems: {},
+							initialSpells: {},
+							floors: {},
+							town: {
+								acquired: {},
+								learned: {},
+								goldIn: {},
+								goldOut: {},
+								purchases: {},
+								sales: {},
+							},
+						},
+					},
+		...overrides,
+	},
+});
+export const analyticsFixtures = () => [
+	analyticsRun(
+		"run1",
+		Array.from({ length: 20 }, (_, i) => i + 1),
+		{ outcome: "won", turns: 1000, endedFloor: null },
+	),
+	analyticsRun("run2", [1, 2], { turns: 20 }),
+	analyticsRun("run3", [1, 2, 10, 18], { turns: 900 }),
+	analyticsRun("run4", [1, 3], { endedFloor: null, turns: 200 }),
+	analyticsRun("run5", null, {
+		gameVersion: "older",
+		usage: null,
+		encountersSinceTurn: null,
+		omensMet: null,
+		endedFloor: undefined,
+	}),
+	analyticsRun("run6", [1, 5], {
+		standard: false,
+		rows: 20,
+		columns: 20,
+		floorCount: 5,
+		difficulty: 1.25,
+	}),
+];
+
+// A complete aggregate response for UI/browser tests, without raw telemetry.
+export const analyticsResult = (
+	entries = analyticsFixtures(),
+	filters = analyticsDefaults(),
+): AnalyticsResult => ({
+	complete: true,
+	filters,
+	scanned: entries.length,
+	selected: entries.length,
+	loadedAt: "2026-10-28T01:00:00.000Z",
+	versions: [...new Set(entries.map((r) => r.summary.gameVersion))],
+	rows: entries.map(
+		({
+			id,
+			summary: { usage: _u, telemetry: _t, equipped: _e, ...summary },
+		}) => ({ id, summary }),
+	),
+	overview: aggregateOverview(
+		entries,
+		entries.map((r) => observationFromDocument(r.id, r.summary)),
+	),
+});

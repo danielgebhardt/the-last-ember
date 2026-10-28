@@ -75,7 +75,7 @@ are separate; a `null` final floor denotes termination in town.
   `telemetry` through Firestore field projection. Cursor lookup fetches only
   `finishedAt`. Inspect fetches one full private document on demand, with the same
   current-developer authorization, no caching/polling and cancellation/retry.
-  Filters, breakdowns and CSV retain their existing fields and behavior.
+  The legacy list API remains available; the dashboard aggregation below uses a separate bounded read mode.
 
 These budgets leave room below [Firestore's 1 MiB document limit](https://firebase.google.com/docs/firestore/quotas)
 (including its field-name/storage overhead) and [Vercel's 4.5 MB function payload limit](https://vercel.com/docs/functions/limitations).
@@ -91,7 +91,7 @@ Deploy browser and bundled functions together. Publish `firestore.indexes.json`
 (`firebase deploy --only firestore:indexes` from `frontend`) to exempt the
 `statistics.telemetry` map and its nested fields from indexing; no new query uses
 those fields. Existing developer-read-only rules remain unchanged. No new
-credentials are needed. There are no new CSV columns or analytics views.
+credentials are needed. Collection itself adds no analytics views.
 
 ## Floor checkpoints (#433)
 
@@ -265,3 +265,68 @@ floor maps, every applicable store/item pair and maximum safe values stays under
 sessions initialize this field; no save-version bump or historical backfill is
 needed. Finished runs project these groups into the private statistics document
 under the combined budgets above.
+
+
+## Developer dashboard (#434)
+
+Checkpoint 1 adds the Overview to the existing lazy developer statistics page.
+Floor progression, equipment/spell/consumable comparisons and readable full run
+inspection remain checkpoints 2–4. Inspect still fetches a single private detail
+on demand, with cancellation and retry. Statistics CSV export and its obsolete
+CLI/helper are removed; Seed report CSV and the path-based developer-account
+administration script are independent and remain available.
+
+`GET /api/developer-statistics?aggregate=overview` reuses signed-token plus current
+developer-role checks and `no-store`. Dates are inclusive UTC finish dates;
+`version`, `difficulty`, `standard` and `outcome` select the cohort. Defaults are
+30 UTC calendar dates including today, application `GAME_VERSION`, Normal,
+standard 40×40×20 and all outcomes. Clear either date for an open boundary.
+Filter edits require explicit reload and hide stale aggregates. Empty results
+never substitute an older version.
+
+One read-only Firestore transaction holds a consistent snapshot across metadata
+pages and selected-document batches. Metadata queries use existing finish-date
+ordering/indexes; other filters run on the server. Reads project metadata without
+usage/equipment, then only the selected runs' checkpoint-floor array and small
+group-presence fields (`usage.casts`, combat town damage, economy initial items).
+Arrays cannot be projected by element, so unused checkpoint members are discarded
+server-side. No adventure saves or full telemetry documents reach the browser.
+Later slices extend the same projection/aggregation contract with their measures.
+
+Per load: at most **2,000** scanned metadata rows (plus one lookahead), **500**
+selected runs, **4 MiB** metadata input, **32 MiB** projected telemetry input and
+**4 MiB** response JSON. Metadata pages contain at most 200 records; selected reads
+use batches of ten. Byte limits are checked after each bounded batch, so a batch
+can cross the input threshold before loading stops. The **20-second application
+work deadline** bounds the aggregate response and scheduling of further reads.
+The Admin transaction API provides no per-call cancellation: an already-started
+RPC can settle after timeout or browser cancellation, but no later batch starts.
+These are refusal limits, never sampling: a capped/failed/stopped load publishes
+no partial aggregates. Narrow the selection and load again.
+
+Cost is approximately one document read per date-matching metadata record plus
+one per selected run, with lookahead and empty-query overhead. Projection reduces
+bytes, not billed document reads. Filter changes repeat those reads. There are no
+permanent rollup writes, new services, composite indexes, rules changes or nested
+telemetry indexes; no infrastructure deployment is needed. Deploy browser and
+bundled function together through the normal release process. Representative
+fixtures stay in local tests/emulators; production volume is not required.
+
+Medians use the full selected observations, never page medians. The overview's
+deepest-floor median and reach counts use actual first-entry checkpoints, not
+`deepestFloor` from explored map previews. The retained run list labels that older
+summary field **Deepest mapped**. Each floor counts a run once even with revisits;
+custom selections show actual observed floor numbers. Reach percentages use all
+selected submitted runs and are a minimum observed fraction when historical reach
+is unknown; no checkpoint coverage means unknown, not measured zero. A tracked
+run with no dungeon entry has deepest floor zero. Town deaths remain separate
+from unknown historical end locations.
+
+Coverage is per group, with a separate availability/usage intersection. Missing
+groups are unknown, tracked empty maps are zero, zero denominators and unreached
+floors are not applicable. Finished/submitted runs exclude missing submissions,
+abandoned and signed-out adventures; reach is not a population survival curve.
+Mixed versions/configurations are flagged, and associations do not establish
+causal balance effects. First-entry/latest-exit differences are not total time,
+damage, healing or consumption; later progression views must use accumulated
+counters and per-observation resource percentages. Town counters stay separate.

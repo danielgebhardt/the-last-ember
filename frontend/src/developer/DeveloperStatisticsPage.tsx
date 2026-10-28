@@ -1,92 +1,43 @@
-import { Download, FlaskConical, Search, X } from "lucide-react";
-import { useEffect, useMemo, useRef, useState } from "react";
-import { statisticsCsv } from "../../scripts/statistics-csv.mjs";
+import { Tabs } from "@base-ui/react/tabs";
+import { FlaskConical, Search, X } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import { useAccount } from "../accounts/AccountProvider";
 import { Button } from "../components/ui/button";
 import { EmberMenuHeader, EmberPanel } from "../components/ui/EmberMenu";
+import { EmberTab, EmberTabsList } from "../components/ui/EmberTabs";
 import {
 	SheetContent,
 	SheetDescription,
 	SheetTitle,
 } from "../components/ui/sheet";
 import { DIFFICULTY_PRESETS } from "../domain/game/Difficulty";
+import { GAME_VERSION } from "../domain/game/GameVersion";
 import {
-	filterStatistics,
-	type StatisticsEntry,
-	type StatisticsFilters,
-	statisticsBreakdowns,
-} from "./StatisticsData";
+	type AnalyticsFilters,
+	type AnalyticsResult,
+	analyticsDefaults,
+} from "./StatisticsAnalytics";
+import type { MetadataEntry } from "./StatisticsData";
+import StatisticsOverview from "./StatisticsOverview";
 
-const label = (value: string) => value.replaceAll("-", " ");
 const inputClass =
-	"h-9 rounded-md border bg-background px-2 text-sm text-foreground";
-const Counts = ({
-	title,
-	rows,
-	note,
-}: {
-	title: string;
-	rows: readonly (readonly [string, number])[];
-	note?: string;
-}) => (
-	<EmberPanel>
-		<h3 className="font-serif text-base font-semibold">{title}</h3>
-		{note && <p className="mt-1 text-xs text-muted-foreground">{note}</p>}
-		<dl className="mt-3 grid gap-2">
-			{rows.length ? (
-				rows.map(([key, count]) => (
-					<div
-						key={key}
-						className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 text-sm"
-					>
-						<dt className="truncate capitalize">{label(key)}</dt>
-						<dd className="tabular-nums">{count}</dd>
-						<div
-							aria-hidden="true"
-							className="col-span-2 h-1.5 overflow-hidden rounded-full bg-muted"
-						>
-							<div
-								className="h-full rounded-full bg-primary/65"
-								style={{
-									width: `${(100 * count) / Math.max(...rows.map((r) => r[1]), 1)}%`,
-								}}
-							/>
-						</div>
-					</div>
-				))
-			) : (
-				<p className="text-sm text-muted-foreground">No recorded encounters.</p>
-			)}
-		</dl>
-	</EmberPanel>
-);
+	"h-9 min-w-0 rounded-md border bg-background px-2 text-sm text-foreground";
 export default function DeveloperStatisticsPage() {
 	const account = useAccount(),
 		current = useRef(account);
 	current.current = account;
 	const uid = account.user?.uid;
 	const title = useRef<HTMLHeadingElement>(null),
-		abort = useRef<AbortController | null>(null);
-	const detailAbort = useRef<AbortController | null>(null);
-	const [from, setFrom] = useState(() =>
-		new Date(Date.now() - 30 * 86400000).toISOString().slice(0, 10),
-	);
-	const [to, setTo] = useState(() => new Date().toISOString().slice(0, 10));
-	const [entries, setEntries] = useState<StatisticsEntry[]>([]);
+		abort = useRef<AbortController | null>(null),
+		detailAbort = useRef<AbortController | null>(null);
+	const [filters, setFilters] = useState(analyticsDefaults);
+	const [result, setResult] = useState<AnalyticsResult | null>(null);
 	const [loading, setLoading] = useState(false),
-		[loaded, setLoaded] = useState(false),
 		[error, setError] = useState<string | null>(null);
-	const [filters, setFilters] = useState<StatisticsFilters>({
-		version: "all",
-		difficulty: "all",
-		standard: "all",
-		outcome: "all",
-	});
 	const [page, setPage] = useState(0),
-		[detail, setDetail] = useState<StatisticsEntry | null>(null);
+		[detail, setDetail] = useState<MetadataEntry | null>(null);
 	const [detailLoading, setDetailLoading] = useState(false),
 		[detailError, setDetailError] = useState<string | null>(null);
-	const [loadedRange, setLoadedRange] = useState("");
 	useEffect(
 		() => () => {
 			abort.current?.abort();
@@ -100,7 +51,7 @@ export default function DeveloperStatisticsPage() {
 		setDetailLoading(false);
 		setDetailError(null);
 	};
-	const inspect = async (entry: StatisticsEntry) => {
+	const inspect = async (entry: MetadataEntry) => {
 		detailAbort.current?.abort();
 		const controller = new AbortController();
 		detailAbort.current = controller;
@@ -145,93 +96,65 @@ export default function DeveloperStatisticsPage() {
 			if (!controller.signal.aborted) setDetailLoading(false);
 		}
 	};
-	const rows = useMemo(
-		() => filterStatistics(entries, filters),
-		[entries, filters],
-	);
-	const counts = useMemo(
-		() => statisticsBreakdowns(rows.map((r) => r.summary)),
-		[rows],
-	);
+
+	const rows = result?.rows ?? [];
+	const stale =
+		result !== null &&
+		JSON.stringify(filters) !== JSON.stringify(result.filters);
+	const change = (key: keyof AnalyticsFilters, value: string) => {
+		abort.current?.abort();
+		setLoading(false);
+		setError(null);
+		setFilters((old) => ({ ...old, [key]: value }));
+		setPage(0);
+		closeDetail();
+	};
 	const load = async () => {
 		abort.current?.abort();
 		const controller = new AbortController();
 		abort.current = controller;
 		setLoading(true);
-		setLoaded(false);
+		setResult(null);
 		setError(null);
-		setEntries([]);
 		setPage(0);
 		closeDetail();
+		const active = () =>
+			!controller.signal.aborted &&
+			current.current.user?.uid === uid &&
+			current.current.user?.developer === true;
 		try {
-			let after: string | null = null;
-			const all: StatisticsEntry[] = [];
-			do {
-				const token = await current.current.idToken();
-				if (
-					controller.signal.aborted ||
-					current.current.user?.uid !== uid ||
-					current.current.user?.developer !== true
-				)
-					return;
-				const params = new URLSearchParams();
-				if (from) params.set("from", from);
-				if (to) params.set("to", to);
-				if (after) params.set("after", after);
-				const response = await fetch(`/api/developer-statistics?${params}`, {
+			const token = await current.current.idToken();
+			if (!active()) return;
+			const response = await fetch(
+				`/api/developer-statistics?${new URLSearchParams({ aggregate: "overview", ...filters })}`,
+				{
 					headers: { authorization: `Bearer ${token}` },
 					signal: controller.signal,
-				});
-				const data = await response.json();
-				if (!response.ok)
-					throw Error(data.error ?? "Statistics could not be loaded.");
-				if (
-					controller.signal.aborted ||
-					current.current.user?.uid !== uid ||
-					current.current.user?.developer !== true
-				)
-					return;
-				all.push(...data.rows);
-				setEntries([...all]);
-				after = data.next;
-			} while (after);
-			setLoaded(true);
-			setLoadedRange(
-				`${from || "the beginning"} through ${to || "today"} (UTC)`,
+				},
 			);
+			const data = await response.json();
+			if (!active()) return;
+			if (!response.ok || data.complete !== true)
+				throw Error(
+					`${data.error ?? "Statistics could not be loaded. Try again."}${typeof data.scanned === "number" ? ` Incomplete: ${data.scanned} scanned, ${data.selected} selected; no aggregates published.` : ""}`,
+				);
+			setResult(data);
 		} catch (failure) {
-			if (!controller.signal.aborted)
+			if (active())
 				setError(
 					failure instanceof Error
 						? failure.message
-						: "Couldn't load statistics.",
+						: "Statistics could not be loaded. Try again.",
 				);
 		} finally {
-			if (!controller.signal.aborted) setLoading(false);
+			if (active()) setLoading(false);
 		}
 	};
-	const download = () => {
-		const blob = new Blob(
-			[
-				statisticsCsv(
-					rows.map((r) => r.summary),
-					true,
-				),
-			],
-			{ type: "text/csv;charset=utf-8" },
-		);
-		const url = URL.createObjectURL(blob),
-			a = document.createElement("a");
-		a.href = url;
-		a.download = "run-statistics.csv";
-		a.click();
-		URL.revokeObjectURL(url);
-	};
-	const change = (key: keyof StatisticsFilters, value: string) => {
-		setFilters((old) => ({ ...old, [key]: value }));
-		setPage(0);
-		closeDetail();
-	};
+	const versions = [
+		...new Set([GAME_VERSION, filters.version, ...(result?.versions ?? [])]),
+	]
+		.filter((v) => v !== "all")
+		.sort();
 	if (account.user?.developer !== true) return null;
 	return (
 		<SheetContent
@@ -252,7 +175,7 @@ export default function DeveloperStatisticsPage() {
 				}
 				subtitle={
 					<SheetDescription className="ember-menu-description">
-						Study recorded adventures. Developer runs never enter this data.
+						Progression and usage in finished, submitted adventures.
 					</SheetDescription>
 				}
 			/>
@@ -260,34 +183,94 @@ export default function DeveloperStatisticsPage() {
 				<EmberPanel>
 					<form
 						className="flex flex-wrap items-end gap-3"
-						onSubmit={(event) => {
-							event.preventDefault();
+						onSubmit={(e) => {
+							e.preventDefault();
 							void load();
 						}}
 					>
-						<label className="grid gap-1 text-xs font-medium">
-							From (UTC)
-							<input
-								aria-label="From date (UTC)"
-								type="date"
-								className={inputClass}
-								value={from}
-								onChange={(e) => setFrom(e.target.value)}
-							/>
-						</label>
-						<label className="grid gap-1 text-xs font-medium">
-							Through (UTC)
-							<input
-								aria-label="Through date (UTC)"
-								type="date"
-								className={inputClass}
-								value={to}
-								onChange={(e) => setTo(e.target.value)}
-							/>
-						</label>
+						{(
+							[
+								["from", "From date (UTC)"],
+								["to", "Through date (UTC)"],
+							] as const
+						).map(([key, name]) => (
+							<label key={key} className="grid gap-1 text-xs font-medium">
+								{name}
+								<input
+									aria-label={name}
+									type="date"
+									className={inputClass}
+									value={filters[key]}
+									onChange={(e) => change(key, e.target.value)}
+								/>
+							</label>
+						))}
+						{(
+							[
+								{
+									key: "version",
+									name: "Version",
+									options: [
+										["all", "All versions"],
+										...versions.map((v) => [
+											v,
+											v === GAME_VERSION ? `${v} (current)` : v,
+										]),
+									],
+								},
+								{
+									key: "difficulty",
+									name: "Difficulty",
+									options: [
+										["all", "All difficulties"],
+										...Object.values(DIFFICULTY_PRESETS).map((d) => [
+											String(d.multiplier),
+											d.label,
+										]),
+									],
+								},
+								{
+									key: "standard",
+									name: "Dungeon",
+									options: [
+										["all", "Standard and custom"],
+										["standard", "Standard 40×40×20"],
+										["custom", "Custom"],
+									],
+								},
+								{
+									key: "outcome",
+									name: "Outcome",
+									options: [
+										["all", "All outcomes"],
+										["won", "Victory"],
+										["died", "Death"],
+									],
+								},
+							] as const
+						).map((filter) => (
+							<label
+								key={filter.key}
+								className="grid min-w-0 gap-1 text-xs font-medium"
+							>
+								{filter.name}
+								<select
+									aria-label={filter.name}
+									className={inputClass}
+									value={filters[filter.key]}
+									onChange={(e) => change(filter.key, e.target.value)}
+								>
+									{filter.options.map(([value, name]) => (
+										<option key={value} value={value}>
+											{name}
+										</option>
+									))}
+								</select>
+							</label>
+						))}
 						<Button type="submit" disabled={loading}>
 							<Search aria-hidden="true" />
-							{loaded ? "Reload summaries" : "Load statistics"}
+							{result ? "Refresh statistics" : "Load statistics"}
 						</Button>
 						{loading && (
 							<Button
@@ -297,7 +280,7 @@ export default function DeveloperStatisticsPage() {
 									abort.current?.abort();
 									setLoading(false);
 									setError(
-										"Loading stopped. Load statistics again for a complete date range.",
+										"Loading stopped. Load again for a complete selection.",
 									);
 								}}
 							>
@@ -305,12 +288,42 @@ export default function DeveloperStatisticsPage() {
 							</Button>
 						)}
 						<p className="w-full text-xs text-muted-foreground">
-							Reads summaries once per date range, in 200-run pages. The
-							remaining filters work locally. Clear dates for all history;
-							loading a large history uses more Firestore reads.
+							Finish dates use UTC, including the whole through-date. Clear
+							dates for open ranges. Each load scans at most 2,000 metadata
+							records and includes at most 500 selected runs; broad selections
+							cost more Firestore reads. Change filters and load explicitly; no
+							polling.
 						</p>
 					</form>
 				</EmberPanel>
+				<Tabs.Root value="overview">
+					<EmberTabsList aria-label="Statistics views">
+						<EmberTab value="overview">Overview</EmberTab>
+						<EmberTab value="floors" disabled>
+							Floor progression
+						</EmberTab>
+						<EmberTab value="items" disabled>
+							Equipment, spells and consumables
+						</EmberTab>
+					</EmberTabsList>
+					<Tabs.Panel value="overview">
+						<p className="mt-2 text-xs text-muted-foreground">
+							Floor progression and item comparisons follow in checkpoints 2 and
+							3.
+						</p>
+					</Tabs.Panel>
+				</Tabs.Root>
+				<p className="text-xs text-muted-foreground">
+					These are finished, submitted runs. Abandoned, signed-out and
+					offline/unsubmitted adventures can be absent. Floor reach is not a
+					population survival probability; associations do not establish a
+					balance effect.
+				</p>
+				{loading && (
+					<p role="status" className="text-sm">
+						Loading the complete selection…
+					</p>
+				)}
 				{error && (
 					<p
 						role="alert"
@@ -319,180 +332,55 @@ export default function DeveloperStatisticsPage() {
 						{error}
 					</p>
 				)}
-				{loading && (
-					<p role="status" className="text-sm text-muted-foreground">
-						Loading… {entries.length} summaries received. Breakdowns will appear
-						when the date range is complete.
+				{stale && (
+					<p role="status" className="text-sm">
+						Filters changed. Load statistics to update this selection.
 					</p>
 				)}
-				{loaded && (
+				{result && !stale && (
 					<>
 						<p className="text-xs text-muted-foreground">
-							Loaded {entries.length} summaries for {loadedRange}. Change dates
-							and reload to choose another range.
+							Complete selection: {result.selected} selected / {result.scanned}{" "}
+							scanned · {result.filters.from || "the beginning"} through{" "}
+							{result.filters.to || "today"} (UTC) · loaded{" "}
+							{result.loadedAt.replace("T", " ").slice(0, 19)} UTC.
 						</p>
-						<EmberPanel className="flex flex-wrap items-end gap-3">
-							{(
-								[
-									{
-										key: "version",
-										name: "Version",
-										options: [
-											["all", "All versions"],
-											...[...new Set(entries.map((r) => r.summary.gameVersion))]
-												.sort()
-												.map((v) => [v, v]),
-										],
-									},
-									{
-										key: "difficulty",
-										name: "Difficulty",
-										options: [
-											["all", "All difficulties"],
-											...Object.values(DIFFICULTY_PRESETS).map((d) => [
-												String(d.multiplier),
-												d.label,
-											]),
-										],
-									},
-									{
-										key: "standard",
-										name: "Dungeon",
-										options: [
-											["all", "Standard and custom"],
-											["standard", "Standard"],
-											["custom", "Custom"],
-										],
-									},
-									{
-										key: "outcome",
-										name: "Outcome",
-										options: [
-											["all", "Wins and deaths"],
-											["won", "Victory"],
-											["died", "Death"],
-										],
-									},
-								] as const
-							).map((filter) => (
-								<label
-									key={filter.key}
-									className="grid gap-1 text-xs font-medium"
-								>
-									{filter.name}
-									<select
-										aria-label={filter.name}
-										className={inputClass}
-										value={filters[filter.key]}
-										onChange={(e) => change(filter.key, e.target.value)}
-									>
-										{filter.options.map(([value, name]) => (
-											<option key={value} value={value}>
-												{name}
-											</option>
-										))}
-									</select>
-								</label>
-							))}
-							<Button type="button" variant="outline" onClick={download}>
-								<Download aria-hidden="true" />
-								Export filtered CSV
-							</Button>
-						</EmberPanel>
-						<div className="grid grid-cols-3 gap-3">
-							{[
-								["Recorded runs", counts.total],
-								["Victories", counts.wins],
-								["Deaths", counts.total - counts.wins],
-							].map(([name, value]) => (
-								<EmberPanel key={name} className="py-3">
-									<p className="text-xs text-muted-foreground">{name}</p>
-									<p className="mt-1 font-serif text-2xl font-semibold tabular-nums text-primary">
-										{value}
-									</p>
-								</EmberPanel>
-							))}
-						</div>
-						<div className="grid gap-4 md:grid-cols-2">
-							<Counts
-								title="Deaths by floor"
-								rows={counts.deathFloors}
-								note="Floor where the run ended; older summaries may not record it."
-							/>
-							<Counts title="Causes of death" rows={counts.deathCauses} />
+						{(result.overview.mixedVersions ||
+							result.overview.mixedConfigurations) && (
+							<p role="status" className="text-sm text-primary">
+								This selection mixes{" "}
+								{result.overview.mixedVersions ? "game versions" : ""}
+								{result.overview.mixedVersions &&
+								result.overview.mixedConfigurations
+									? " and "
+									: ""}
+								{result.overview.mixedConfigurations
+									? "dungeon configurations"
+									: ""}
+								. Interpret pooled results with care.
+							</p>
+						)}
+						{!rows.length && (
 							<EmberPanel>
-								<h3 className="font-serif text-base font-semibold">
-									Arena win rate
+								<h3 className="font-serif text-lg">
+									No runs match these filters
 								</h3>
-								<p className="mt-1 text-xs text-muted-foreground">
-									Miniboss defeated among runs that entered the arena.
-								</p>
-								<dl className="mt-3 grid gap-3">
-									{counts.arenas.length ? (
-										counts.arenas.map(([boss, { met, defeated }]) => (
-											<div
-												key={boss}
-												className="flex justify-between gap-3 text-sm"
-											>
-												<dt className="capitalize">{label(boss)}</dt>
-												<dd className="tabular-nums">
-													{defeated}/{met} ·{" "}
-													{Math.round((100 * defeated) / met)}%
-												</dd>
-											</div>
-										))
-									) : (
-										<p className="text-sm text-muted-foreground">
-											No recorded arena entries.
-										</p>
-									)}
-								</dl>
-							</EmberPanel>
-							<Counts title="Pact choices" rows={counts.pacts} />
-							<Counts
-								title="Omen frequency"
-								rows={counts.omens}
-								note={`Runs revealing each omen, among ${counts.omenRuns} runs tracked from turn zero. Partial older tracking is excluded.`}
-							/>
-							<EmberPanel>
-								<h3 className="font-serif text-base font-semibold">
-									The thief’s take
-								</h3>
-								{counts.theft.runs > 0 ? (
-									<>
-										<p className="mt-1 text-xs text-muted-foreground">
-											From {counts.theft.runs} runs with complete gold tracking.
-										</p>
-										<dl className="mt-3 grid gap-2 text-sm">
-											{[
-												["Gold stolen", counts.theft.stolen],
-												["Gold recovered", counts.theft.recovered],
-												[
-													"Unrecovered",
-													counts.theft.stolen - counts.theft.recovered,
-												],
-											].map(([name, value]) => (
-												<div key={name} className="flex justify-between gap-3">
-													<dt>{name}</dt>
-													<dd className="tabular-nums">
-														{value.toLocaleString()}
-													</dd>
-												</div>
-											))}
-										</dl>
-									</>
-								) : (
-									<p className="mt-2 text-sm text-muted-foreground">
-										No complete gold tracking in this date range yet.
-									</p>
-								)}
 								<p className="mt-2 text-sm text-muted-foreground">
-									Older summaries did not record gold totals. Partial tracking
-									is available in run detail and excluded from this breakdown.
+									No older version was substituted. Choose All versions, change
+									difficulty or dungeon, or broaden the dates and load again.
 								</p>
+								<Button
+									type="button"
+									variant="outline"
+									className="mt-3"
+									onClick={() => change("version", "all")}
+								>
+									Choose all versions
+								</Button>
 							</EmberPanel>
-						</div>
-						<div className="overflow-hidden rounded-lg border">
+						)}
+						<StatisticsOverview counts={result.overview} />
+						<div className="overflow-x-auto rounded-lg border">
 							<table className="w-full text-left text-sm tabular-nums">
 								<caption className="sr-only">Recorded run summaries</caption>
 								<thead className="bg-muted/50 text-xs text-muted-foreground">
@@ -501,7 +389,7 @@ export default function DeveloperStatisticsPage() {
 											"Seed",
 											"Version",
 											"Outcome",
-											"Deepest",
+											"Deepest mapped",
 											"Turns",
 											"Level",
 											"Finished (UTC)",
@@ -557,7 +445,7 @@ export default function DeveloperStatisticsPage() {
 						</div>
 						<div className="flex items-center justify-between gap-3 text-xs text-muted-foreground">
 							<p>
-								{rows.length} matching / {entries.length} loaded
+								{rows.length} matching / {result.scanned} scanned
 							</p>
 							<div className="flex items-center gap-2">
 								<Button

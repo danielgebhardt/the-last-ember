@@ -1,6 +1,11 @@
 import { FieldPath } from "firebase-admin/firestore";
 import type { TokenVerifier } from "../api/account.ts";
 import {
+	type AnalyticsFilters,
+	analyticsDefaults,
+} from "../src/developer/StatisticsAnalytics.ts";
+import { DIFFICULTY_PRESETS } from "../src/domain/game/Difficulty.ts";
+import {
 	MAX_STATISTICS_RESPONSE_BYTES,
 	STATISTICS_LIST_FIELDS,
 	statisticsBytes,
@@ -8,6 +13,7 @@ import {
 } from "../src/domain/saves/RunStatistics.ts";
 import { database } from "./AccountData.ts";
 import { verifiedDeveloper } from "./Developer.ts";
+import { readAnalytics } from "./StatisticsAnalytics.ts";
 
 export type StatisticsQuery = {
 	from?: string;
@@ -85,6 +91,7 @@ export const handleDeveloperStatistics = async (
 	verify?: TokenVerifier,
 	read = readStatistics,
 	currentRole?: (uid: string) => Promise<boolean>,
+	aggregate = readAnalytics,
 ): Promise<Response> => {
 	const json = (status: number, body: unknown) =>
 		Response.json(body, { status, headers: { "cache-control": "no-store" } });
@@ -96,6 +103,48 @@ export const handleDeveloperStatistics = async (
 		const from = date(params.get("from")),
 			to = date(params.get("to"));
 		if (from && to && from > to) throw invalid();
+		if (params.has("aggregate")) {
+			if (
+				params.get("aggregate") !== "overview" ||
+				params.has("id") ||
+				params.has("after")
+			)
+				throw invalid();
+			const defaults = analyticsDefaults();
+			const filters: AnalyticsFilters = {
+				from: params.has("from") ? (from ?? "") : defaults.from,
+				to: params.has("to") ? (to ?? "") : defaults.to,
+				version: params.get("version") ?? defaults.version,
+				difficulty: params.get("difficulty") ?? defaults.difficulty,
+				standard: params.get("standard") ?? defaults.standard,
+				outcome: params.get("outcome") ?? defaults.outcome,
+			};
+			if (
+				!filters.version ||
+				filters.version.length > 100 ||
+				![
+					"all",
+					...Object.values(DIFFICULTY_PRESETS).map((d) => String(d.multiplier)),
+				].includes(filters.difficulty) ||
+				!["all", "standard", "custom"].includes(filters.standard) ||
+				!["all", "won", "died"].includes(filters.outcome)
+			)
+				throw invalid();
+			const result = await aggregate(filters, request.signal);
+			if (statisticsBytes(result) > MAX_STATISTICS_RESPONSE_BYTES)
+				return json(422, {
+					complete: false,
+					error:
+						"The result exceeded 4 MiB. Narrow the selection and load again.",
+				});
+			return json(result.complete ? 200 : 422, result);
+		}
+		if (
+			["version", "difficulty", "standard", "outcome"].some((key) =>
+				params.has(key),
+			)
+		)
+			throw invalid();
 		const id = params.get("id"),
 			after = params.get("after") ?? undefined;
 		if (id !== null && (!validId(id) || from || to || after)) throw invalid();

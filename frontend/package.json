@@ -20,7 +20,6 @@
 		"test:smoke": "pnpm build && playwright test",
 		"emulators": "firebase emulators:start --only auth,firestore --project demo-wardens-flame",
 		"test:emulator": "node scripts/build-statistics.mjs && FIREBASE_PROJECT_ID=demo-wardens-flame firebase emulators:exec --only auth,firestore --project demo-wardens-flame \"vitest run api CloudSaves.emulator Statistics.emulator\"",
-		"stats:export": "node scripts/export-statistics.mjs",
 		"accounts:developer": "node scripts/developer-account.mjs",
 		"test:serverless": "node scripts/build-statistics.mjs && node scripts/__tests__/serverless-smoke.mjs"
 	},

@@ -101,7 +101,7 @@ export const MAX_STATISTICS_LIST_ROW_BYTES = 16 * 1024;
 export const MAX_STATISTICS_RESPONSE_BYTES = 4 * 1024 * 1024;
 export const statisticsBytes = (value: unknown) =>
 	new TextEncoder().encode(JSON.stringify(value)).byteLength;
-// Keep list/CSV/filter reads small; full private telemetry is fetched on Inspect.
+// Keep list/filter reads small; full private telemetry is fetched on Inspect.
 export const STATISTICS_LIST_FIELDS = [
 	"seed",
 	"rows",

@@ -6,8 +6,11 @@ import AdventureOpening from "../components/game/AdventureOpening";
 import DeveloperCatalog from "../components/game/DeveloperCatalog";
 import { Sheet } from "../components/ui/sheet";
 import DeveloperStatisticsRoute from "../developer/DeveloperStatisticsRoute";
+import { analyticsDefaults } from "../developer/StatisticsAnalytics";
+import { GAME_VERSION } from "../domain/game/GameVersion";
 import { summarizeRun } from "../domain/saves/RunStatistics";
 import { ThemeProvider } from "../settings/ThemeProvider";
+import { analyticsResult, analyticsRun } from "./AnalyticsTestFixtures";
 import { developerTestAccount } from "./DeveloperTestAccount";
 import { savedAdventure } from "./SaveTestHelpers";
 import { trackedFinishedRun } from "./TelemetryTestHelpers";
@@ -85,91 +88,57 @@ it("refuses direct URL access without the claim before making a statistics reque
 	).toBeVisible();
 	expect(send).not.toHaveBeenCalled();
 });
-it("loads complete date pages once, filters locally, opens run detail, and exports the filtered data", async () => {
+it("loads one server aggregate with visible defaults, requires reload after filter changes, and preserves Inspect", async () => {
 	vi.spyOn(Accounts, "useAccount").mockReturnValue(developerTestAccount());
 	history.replaceState(null, "", "/#developer-statistics");
-	const base = summarizeRun(savedAdventure(), null),
-		send = vi
-			.fn<typeof fetch>()
-			.mockResolvedValueOnce(
-				Response.json({
-					rows: [
-						{
-							id: "one",
-							summary: {
-								...base,
-								seed: 123,
-								outcome: "died",
-								standard: true,
-								gameVersion: "old",
-							},
-						},
-					],
-					next: "next",
-				}),
-			)
-			.mockResolvedValueOnce(
-				Response.json({
-					rows: [
-						{
-							id: "two",
-							summary: {
-								...base,
-								seed: 456,
-								outcome: "won",
-								standard: false,
-								gameVersion: "current",
-							},
-						},
-					],
-					next: null,
-				}),
-			)
-			.mockResolvedValueOnce(
-				Response.json({
-					rows: [
-						{
-							id: "two",
-							summary: {
-								...summarizeRun(trackedFinishedRun(), null),
-								seed: 456,
-							},
-						},
-					],
-					next: null,
-				}),
-			);
+	const one = analyticsRun("one", [1, 2], { seed: 123 }),
+		two = analyticsRun("two", [1, 20], { seed: 456, outcome: "won" });
+	const send = vi
+		.fn<typeof fetch>()
+		.mockResolvedValueOnce(Response.json(analyticsResult([one, two])))
+		.mockResolvedValueOnce(
+			Response.json(
+				analyticsResult([two], { ...analyticsDefaults(), outcome: "won" }),
+			),
+		)
+		.mockResolvedValueOnce(
+			Response.json({
+				rows: [
+					{
+						...two,
+						summary: { ...summarizeRun(trackedFinishedRun(), null), seed: 456 },
+					},
+				],
+				next: null,
+			}),
+		);
 	vi.stubGlobal("fetch", send);
-	const create = vi.fn(() => "blob:csv");
-	vi.stubGlobal(
-		"URL",
-		class extends URL {
-			static createObjectURL = create;
-			static revokeObjectURL = vi.fn();
-		},
-	);
-	vi.spyOn(HTMLAnchorElement.prototype, "click").mockImplementation(() => {});
 	render(<DeveloperStatisticsRoute />);
 	const user = userEvent.setup();
-	await user.click(
-		await screen.findByRole("button", { name: "Load statistics" }),
-	);
+	await screen.findByLabelText("Version");
+	expect(screen.getByLabelText("Version")).toHaveValue(GAME_VERSION);
+	expect(screen.getByLabelText("Difficulty")).toHaveValue("1");
+	expect(screen.getByLabelText("Dungeon")).toHaveValue("standard");
+	expect(screen.getByLabelText("Outcome")).toHaveValue("all");
+	expect(send).not.toHaveBeenCalled();
+	await user.click(screen.getByRole("button", { name: "Load statistics" }));
 	await screen.findByRole("table", { name: "Recorded run summaries" });
-	expect(send).toHaveBeenCalledTimes(2);
-	expect(send.mock.calls[1][0]).toContain("after=next");
+	expect(send).toHaveBeenCalledTimes(1);
+	expect(send.mock.calls[0][0]).toContain("aggregate=overview");
+	expect(screen.queryByRole("button", { name: /CSV/ })).toBeNull();
 	await user.selectOptions(screen.getByLabelText("Outcome"), "won");
-	expect(screen.queryByRole("button", { name: "Inspect run 123" })).toBeNull();
-	expect(screen.getByRole("button", { name: "Inspect run 456" })).toBeVisible();
-	expect(send).toHaveBeenCalledTimes(2);
-	await user.click(screen.getByRole("button", { name: "Inspect run 456" }));
-	expect(screen.getByText(/Run detail · Seed 456/)).toBeVisible();
+	expect(screen.getByRole("status")).toHaveTextContent("Filters changed");
+	expect(screen.queryByRole("table")).toBeNull();
+	expect(send).toHaveBeenCalledTimes(1);
+	await user.click(screen.getByRole("button", { name: "Refresh statistics" }));
+	await user.click(
+		await screen.findByRole("button", { name: "Inspect run 456" }),
+	);
 	await waitFor(() =>
 		expect(screen.getByText(/"schemaVersion": 1/)).toBeVisible(),
 	);
 	expect(send).toHaveBeenCalledTimes(3);
 	expect(send.mock.calls[2][0]).toContain("id=two");
-	await user.click(screen.getByRole("button", { name: "Export filtered CSV" }));
-	expect(create).toHaveBeenCalledTimes(1);
 });
 it("aborts a developer data response when that account is replaced", async () => {
 	const account = vi
@@ -218,7 +187,7 @@ it("retries failed detail and cancels late detail when filters or authorization 
 	let complete: ((response: Response) => void) | undefined;
 	const send = vi
 		.fn<typeof fetch>()
-		.mockResolvedValueOnce(Response.json({ rows: [row], next: null }))
+		.mockResolvedValueOnce(Response.json(analyticsResult([row])))
 		.mockResolvedValueOnce(
 			Response.json({ error: "Temporarily unavailable" }, { status: 503 }),
 		)
@@ -263,4 +232,59 @@ it("retries failed detail and cancels late detail when filters or authorization 
 	expect(
 		screen.getByRole("heading", { name: "Developer access required" }),
 	).toBeVisible();
+});
+
+it("shows honest current-version empty results and explicit broadening without an automatic request", async () => {
+	vi.spyOn(Accounts, "useAccount").mockReturnValue(developerTestAccount());
+	history.replaceState(null, "", "/#developer-statistics");
+	const send = vi
+		.fn<typeof fetch>()
+		.mockResolvedValue(Response.json(analyticsResult([])));
+	vi.stubGlobal("fetch", send);
+	render(<DeveloperStatisticsRoute />);
+	const user = userEvent.setup();
+	await user.click(
+		await screen.findByRole("button", { name: "Load statistics" }),
+	);
+	expect(await screen.findByText("No runs match these filters")).toBeVisible();
+	expect(screen.getByLabelText("Version")).toHaveValue(GAME_VERSION);
+	await user.click(screen.getByRole("button", { name: "Choose all versions" }));
+	expect(screen.getByLabelText("Version")).toHaveValue("all");
+	expect(send).toHaveBeenCalledTimes(1);
+});
+it("withholds aggregates on failure or stop, and permits retry", async () => {
+	vi.spyOn(Accounts, "useAccount").mockReturnValue(developerTestAccount());
+	history.replaceState(null, "", "/#developer-statistics");
+	const send = vi
+		.fn<typeof fetch>()
+		.mockResolvedValueOnce(
+			Response.json(
+				{
+					complete: false,
+					error: "Narrow the selection",
+					scanned: 2001,
+					selected: 25,
+				},
+				{ status: 422 },
+			),
+		)
+		.mockImplementationOnce(() => new Promise(() => {}))
+		.mockResolvedValueOnce(Response.json(analyticsResult([])));
+	vi.stubGlobal("fetch", send);
+	render(<DeveloperStatisticsRoute />);
+	const user = userEvent.setup();
+	await user.click(
+		await screen.findByRole("button", { name: "Load statistics" }),
+	);
+	expect(await screen.findByRole("alert")).toHaveTextContent(
+		"Incomplete: 2001 scanned, 25 selected",
+	);
+	expect(screen.queryByLabelText("Overview results")).toBeNull();
+	await user.click(screen.getByRole("button", { name: "Load statistics" }));
+	await waitFor(() => expect(send).toHaveBeenCalledTimes(2));
+	await user.click(screen.getByRole("button", { name: "Stop" }));
+	expect(send.mock.calls[1][1]?.signal?.aborted).toBe(true);
+	expect(screen.getByRole("alert")).toHaveTextContent("Loading stopped");
+	await user.click(screen.getByRole("button", { name: "Load statistics" }));
+	await screen.findByLabelText("Overview results");
 });

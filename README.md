@@ -62,7 +62,7 @@ The browser queues the finished save locally and retries on sign-in, when connec
 
 Summaries contain configuration, standard/ranked flags, difficulty, `GAME_VERSION` (`0.3.0-alpha`, bumped by the developer per release), deploy commit when available, outcome, progress, encounters, final equipped kinds/enchantments and finish time. They contain no email, display name or full save; only the document ID identifies the account. Consistency checks catch broken and inconsistently edited saves, but cannot establish that a carefully forged consistent save was played.
 
-**Run telemetry** (#430, #433) adds successful casts, consumed potions/scrolls, turns wearing each equipment kind, bounded floor-entry/exit/final checkpoints, combat/healing/encounter counters, acquisitions, learned spells, store purchases/sales and gold flows to newly started adventures. All fields survive browser/cloud save and load and use the existing finished-run submission, without additional per-action API or storage calls. Absent groups mean unknown; empty maps in a tracked group mean measured zero. No historical backfill is performed. See [run telemetry definitions](docs/run-telemetry.md) for counting rules, schema and size budgets. This is collection for later analysis; the existing filters and CSV columns are preserved.
+**Run telemetry** (#430, #433) adds successful casts, consumed potions/scrolls, turns wearing each equipment kind, bounded floor-entry/exit/final checkpoints, combat/healing/encounter counters, acquisitions, learned spells, store purchases/sales and gold flows to newly started adventures. All fields survive browser/cloud save and load and use the existing finished-run submission, without additional per-action API or storage calls. Absent groups mean unknown; empty maps in a tracked group mean measured zero. No historical backfill is performed. See [run telemetry definitions](docs/run-telemetry.md) for counting rules, schema and size budgets. The developer Overview now summarizes selected submitted runs; detailed progression and item comparisons follow in #434.
 
 Deploy the browser and bundled functions together. Deploy `frontend/firestore.indexes.json` with `firebase deploy --only firestore:indexes` from `frontend`: the new `statistics.telemetry` map is exempt from indexing because it is read as detail, not queried. This avoids indexing its nested counters. No new rules or credentials are required for telemetry; keep the existing developer-read-only statistics rules deployed.
 
@@ -88,7 +88,7 @@ The browser maintains a separate account-owned Rankings retry queue. Failed requ
 
 ### Developer account and tools (#426)
 
-Developer access is the Firebase custom claim `developer: true`, never an email allowlist or a browser setting. To grant it, keep the service-account JSON outside this repository, set `FIREBASE_SERVICE_ACCOUNT_FILE` to its path (as for the statistics export), then run from `frontend`:
+Developer access is the Firebase custom claim `developer: true`, never an email allowlist or a browser setting. To grant it, keep the service-account JSON outside this repository, set `FIREBASE_SERVICE_ACCOUNT_FILE` to its path, then run from `frontend`:
 
 ```sh
 pnpm accounts:developer --email your-address@example.com
@@ -100,24 +100,13 @@ Developer accounts get **Developer generation** in the opening and Settings. Eac
 
 Omens control both their floor effects and gatherings. Vaults remove their carved pockets and contents; disabling the arena restores that floor's ordinary seeded layout. Mimic chests become ordinary chests, including their tell and Seer's sight. The remaining content keeps its original identity and placement. Town stores and the test seed's starting kit are not per-third rare finds or wandering merchants, so those switches leave them intact.
 
-**Developer statistics**, reached from the account dialog or Settings, opens `/#developer-statistics`. It defaults to a 30-day UTC date range; clear either date for an open range. Loading reads complete, 200-summary pages once with the telemetry field omitted, then filters version, difficulty, standard/custom and outcome locally. It never polls; reload explicitly to include new submissions. Large all-history loads consume a read per summary, so choose a narrower date range when appropriate for the free quota. Breakdowns appear only after the complete range loads. Inspect makes one authenticated request for that run's complete stored detail, including telemetry; it supports retry and cancels stale requests. CSV exports precisely the filtered rows without account/document IDs, using the same columns as the command-line export.
+**Developer statistics**, reached from the account dialog or Settings at `/#developer-statistics`, now provides an Overview with submitted-run totals, win/death rates, medians, observed floor reach, death breakdowns and per-group coverage. Existing encounters, pacts and theft are available in an expandable section. Floor progression and item comparisons follow in #434 checkpoints 2 and 3; readable full run inspection follows in checkpoint 4. The current Inspect request and raw stored detail remain available meanwhile.
 
-New summaries include the floor where the run ended (distinct from deepest floor reached), plus gold stolen and recovered. Thief totals survive the rolling log, with a separate tracking start turn for older adventures. Historical fields that were never recorded remain missing, rather than becoming zero. Omen frequency and thief totals use only runs tracked from turn zero; partial tracking remains visible in detail. Arena win rate means miniboss defeated among runs that entered the arena. The new fields are not spell, consumable or equipment usage counters; those remain #430.
+Defaults are the last 30 UTC calendar dates including today, the application's current game version, Normal, standard 40×40×20, and all outcomes. All filters are visible before loading. Change filters and explicitly Load/Refresh; empty current-version results never fall back to older versions. Tabs, tables and run-list pagination reuse loaded results; nothing polls. The server aggregates a complete selection rather than downloading full telemetry to the browser. See [Run telemetry](docs/run-telemetry.md#developer-dashboard-434) for budgets, read cost and interpretation limits.
 
-Catalog stays public. Only **Seed report** and its lazy-loaded panel require the developer claim. Statistics rules allow developer reads but no browser writes, including developer writes. The bundled `GET /api/developer-statistics` also refuses ordinary, revoked, disabled and deleted accounts. Deploy the new function/browser build and republish `firestore.rules` for this story; no additional composite indexes are needed for its date-ordered reads.
+New summaries include the floor where the run ended (distinct from deepest floor reached), plus gold stolen and recovered. Thief totals survive the rolling log, with a separate tracking start turn for older adventures. Historical fields that were never recorded remain missing, rather than becoming zero. Omen frequency and thief totals use only runs tracked from turn zero; partial tracking remains visible in detail. Arena win rate means miniboss defeated among runs that entered the arena. Usage, checkpoint, combat and economy collection is documented in [Run telemetry](docs/run-telemetry.md).
 
-### Exporting statistics
-
-In **Firebase → Project settings → Service accounts**, generate a private key for the project (or use an existing suitable service account). Keep the JSON **outside this repository**. Never put a key in a `VITE_` variable, browser code, Git, or a command-line argument.
-
-```sh
-# Replace this with your private file's path, outside the checkout.
-export FIREBASE_SERVICE_ACCOUNT_FILE="$HOME/.config/wardens-flame/service-account.json"
-pnpm --filter frontend --silent stats:export > /tmp/standard-runs.csv
-pnpm --filter frontend --silent stats:export --all > /tmp/all-runs.csv
-```
-
-The script reads the credential from that path and queries standard runs by default; `--all` exports custom runs too. CSV has a stable header and quotes nested encounter/equipment values as JSON. It omits account and document IDs. Firebase rules do not restrict the Admin SDK, so access to this key is access to private project data.
+Catalog stays public. Only **Seed report** and its lazy-loaded panel require the developer claim. Statistics rules allow developer reads but no browser writes, including developer writes. The bundled `GET /api/developer-statistics` also refuses ordinary, revoked, disabled and deleted accounts. Deploy the updated function and browser together through the normal release process. Existing developer rules and date-order indexes suffice; #434 requires no rules or index deployment.
 
 ### Firebase and Vercel setup
 

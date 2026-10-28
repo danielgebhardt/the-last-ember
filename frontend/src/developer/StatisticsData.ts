@@ -3,11 +3,16 @@ export type StatisticsSummary = Omit<
 	RunStatistics,
 	"endedFloor" | "thiefTake" | "usage" | "telemetry"
 > & {
-	endedFloor?: number;
+	endedFloor?: number | null;
 	thiefTake?: RunStatistics["thiefTake"];
 	usage?: RunStatistics["usage"];
 	telemetry?: RunStatistics["telemetry"];
 };
+export type StatisticsMetadata = Omit<
+	StatisticsSummary,
+	"usage" | "telemetry" | "equipped"
+>;
+export type MetadataEntry = { id: string; summary: StatisticsMetadata };
 export type StatisticsEntry = { id: string; summary: StatisticsSummary };
 export type StatisticsFilters = {
 	version: string;
@@ -15,8 +20,8 @@ export type StatisticsFilters = {
 	standard: string;
 	outcome: string;
 };
-export const filterStatistics = (
-	entries: readonly StatisticsEntry[],
+export const filterStatistics = <T extends MetadataEntry>(
+	entries: readonly T[],
 	filters: StatisticsFilters,
 ) =>
 	entries.filter(
@@ -35,10 +40,10 @@ export const counted = (values: readonly string[]) =>
 			return all;
 		}, {}),
 	).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
-export const statisticsBreakdowns = (rows: readonly StatisticsSummary[]) => {
+export const statisticsBreakdowns = (rows: readonly StatisticsMetadata[]) => {
 	const deaths = rows.filter((r) => r.outcome === "died");
 	const tracked = rows.filter(
-		(r) => r.encountersSinceTurn === 0 && r.omensMet !== null,
+		(r) => r.encountersSinceTurn === 0 && r.omensMet != null,
 	);
 	const arenas = new Map<string, { met: number; defeated: number }>();
 	for (const row of rows)
@@ -64,7 +69,11 @@ export const statisticsBreakdowns = (rows: readonly StatisticsSummary[]) => {
 		wins: rows.length - deaths.length,
 		deathFloors: counted(
 			deaths.map((r) =>
-				r.endedFloor ? `Floor ${r.endedFloor}` : "Not recorded",
+				r.endedFloor === null
+					? "Town"
+					: r.endedFloor === undefined
+						? "Unknown"
+						: `Floor ${r.endedFloor}`,
 			),
 		),
 		deathCauses: counted(
@@ -77,7 +86,7 @@ export const statisticsBreakdowns = (rows: readonly StatisticsSummary[]) => {
 								("spell" in cause && cause.spell) ||
 								cause.type,
 						)
-					: "Not recorded";
+					: "Unknown";
 			}),
 		),
 		arenas: [...arenas.entries()].sort((a, b) => a[0].localeCompare(b[0])),

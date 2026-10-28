@@ -22,6 +22,7 @@ import {
 	database,
 	deleteAccountData,
 } from "../../server/AccountData.ts";
+import { analyticsRun } from "../../src/__tests/AnalyticsTestFixtures.ts";
 
 const projectId = process.env.FIREBASE_PROJECT_ID ?? "demo-wardens-flame",
 	authHost = process.env.FIREBASE_AUTH_EMULATOR_HOST,
@@ -83,13 +84,9 @@ describe.skipIf(!authHost || !host)(
 					const id = `${users[0].uid}_${crypto.randomUUID()}`;
 					ids.push(id);
 					batch.create(database().doc(`statistics/${id}`), {
+						...analyticsRun(String(i), i % 3 === 0 ? null : [1, 2]).summary,
 						seed: i,
-						telemetry: {
-							schemaVersion: 1,
-							checkpoints: null,
-							combat: null,
-							economy: null,
-						},
+
 						standard: true,
 						finishedAt:
 							i === 201
@@ -112,7 +109,7 @@ describe.skipIf(!authHost || !host)(
 				expect(detail.status).toBe(200);
 				expect((await detail.json()).rows[0]).toMatchObject({
 					id: ids[0],
-					summary: { telemetry: { schemaVersion: 1 } },
+					summary: { telemetry: null },
 				});
 				expect((await GET(request(tokens[1], detailQuery))).status).toBe(403);
 				expect((await GET(request(tokens[0], "id=missing"))).status).toBe(404);
@@ -131,6 +128,53 @@ describe.skipIf(!authHost || !host)(
 				expect(
 					new Set([...first.rows, ...second.rows].map((row) => row.id)).size,
 				).toBe(201);
+				const aggregateQuery =
+					"aggregate=overview&from=2040-01-01&to=2040-01-01&version=all&difficulty=all&standard=all&outcome=all";
+				const aggregateResponse = await GET(request(tokens[0], aggregateQuery));
+				expect(aggregateResponse.status).toBe(200);
+				const aggregate = await aggregateResponse.json();
+				expect(aggregate).toMatchObject({
+					complete: true,
+					scanned: 201,
+					selected: 201,
+					overview: {
+						total: 201,
+						turns: { value: 100, n: 201 },
+						coverage: {
+							checkpoints: 134,
+							combat: 134,
+							economy: 134,
+							usage: 201,
+							availabilityAndUsage: 134,
+						},
+					},
+				});
+				expect(aggregate.rows).toHaveLength(201);
+				expect(
+					aggregate.rows.every(
+						(r: { summary: object }) =>
+							!("telemetry" in r.summary) && !("usage" in r.summary),
+					),
+				).toBe(true);
+				expect(aggregate.overview.reach[0]).toMatchObject({
+					floor: 1,
+					reached: 134,
+					total: 201,
+					observed: 134,
+				});
+				expect((await GET(request(tokens[1], aggregateQuery))).status).toBe(
+					403,
+				);
+				expect(
+					(
+						await GET(
+							request(
+								tokens[0],
+								aggregateQuery.replace("outcome=all", "outcome=won"),
+							),
+						)
+					).status,
+				).toBe(200);
 				for (const [i, app] of apps.entries()) {
 					const db = getFirestore(app);
 					const [hostname, port] = (host ?? "").split(":");
@@ -165,10 +209,17 @@ describe.skipIf(!authHost || !host)(
 				// API checks the current Auth claim as well as the signed token, so removal
 				// is immediate here even while an old ID token still has developer=true.
 				expect((await GET(request(tokens[0]))).status).toBe(403);
+				expect((await GET(request(tokens[0], aggregateQuery))).status).toBe(
+					403,
+				);
 				await users[0].getIdToken(true);
 				await expect(
 					getDoc(doc(getFirestore(apps[0]), "statistics", ids[0])),
 				).rejects.toMatchObject({ code: "permission-denied" });
+				await authAdmin().deleteUser(users[0].uid);
+				expect((await GET(request(tokens[0], aggregateQuery))).status).toBe(
+					401,
+				);
 			} finally {
 				const batch = database().batch();
 				for (const id of ids) batch.delete(database().doc(`statistics/${id}`));

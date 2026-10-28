@@ -75,7 +75,7 @@ it("uses actual end floors, distinguishes missing old fields, and gives each bre
 	]);
 	expect(result.deathFloors).toEqual([
 		["Floor 2", 1],
-		["Not recorded", 1],
+		["Unknown", 1],
 	]);
 	expect(result.arenas).toEqual([["pyre-lord", { met: 2, defeated: 1 }]]);
 	expect(result.omens).toEqual([["dark", 1]]);
