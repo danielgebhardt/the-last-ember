@@ -1,4 +1,9 @@
-import { type TokenVerifier, verifiedUser } from "../api/account.ts";
+import {
+	errorCode,
+	json,
+	type TokenVerifier,
+	verifiedUser,
+} from "../api/account.ts";
 import {
 	MAX_STATISTICS_BYTES,
 	MAX_STATISTICS_LIST_ROW_BYTES,
@@ -21,8 +26,6 @@ export const writeStatistics: StatisticsWriter = async (id, summary) => {
 		tx.create(database().doc(`statistics/${id}`), summary);
 	});
 };
-const json = (status: number, body: unknown) =>
-	Response.json(body, { status, headers: { "cache-control": "no-store" } });
 
 export const handleStatistics = async (
 	request: Request,
@@ -64,17 +67,10 @@ export const handleStatistics = async (
 			});
 		await write(`${user.uid}_${document.state.runId}`, summary);
 	} catch (error) {
-		if ((error as { code?: string }).code === "account-deleted")
+		if (errorCode(error) === "account-deleted")
 			return json(410, { error: "This account has been deleted." });
 		// Firestore create is atomic: concurrent devices and retries share one document.
-		if (
-			!(
-				typeof error === "object" &&
-				error !== null &&
-				"code" in error &&
-				error.code === 6
-			)
-		)
+		if (errorCode(error) !== 6)
 			return json(503, {
 				error: "Statistics could not be stored. Retry later.",
 			});

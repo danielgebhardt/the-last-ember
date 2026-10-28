@@ -13,7 +13,8 @@ export type VerifiedUser = Readonly<{
 }>;
 export type TokenVerifier = (token: string) => Promise<VerifiedUser>;
 
-const json = (status: number, body: unknown) =>
+// Every endpoint's responses are private to the caller and never cached.
+export const json = (status: number, body: unknown) =>
 	new Response(JSON.stringify(body), {
 		status,
 		headers: {
@@ -21,6 +22,12 @@ const json = (status: number, body: unknown) =>
 			"cache-control": "no-store",
 		},
 	});
+
+// The code a Firebase, Firestore or endpoint error carries, if any.
+export const errorCode = (error: unknown) =>
+	typeof error === "object" && error !== null && "code" in error
+		? error.code
+		: undefined;
 
 // Verifying a token needs the Firebase project ID.
 // With FIREBASE_AUTH_EMULATOR_HOST set, the Admin SDK accepts

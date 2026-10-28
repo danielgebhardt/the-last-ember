@@ -1,5 +1,5 @@
 import { FieldPath } from "firebase-admin/firestore";
-import type { TokenVerifier } from "../api/account.ts";
+import { errorCode, json, type TokenVerifier } from "../api/account.ts";
 import {
 	type AnalyticsFilters,
 	analyticsDefaults,
@@ -93,8 +93,6 @@ export const handleDeveloperStatistics = async (
 	currentRole?: (uid: string) => Promise<boolean>,
 	aggregate = readAnalytics,
 ): Promise<Response> => {
-	const json = (status: number, body: unknown) =>
-		Response.json(body, { status, headers: { "cache-control": "no-store" } });
 	if (request.method !== "GET") return json(405, { error: "Use GET." });
 	const user = await verifiedDeveloper(request, verify, currentRole);
 	if (user instanceof Response) return user;
@@ -155,15 +153,12 @@ export const handleDeveloperStatistics = async (
 			throw Error("Statistics response exceeds its byte budget");
 		return json(200, result);
 	} catch (error) {
-		return json(
-			(error as { code?: string }).code === "invalid-query" ? 400 : 503,
-			{
-				error:
-					(error as { code?: string }).code === "invalid-query"
-						? (error as Error).message
-						: "Statistics could not be loaded. Try again.",
-			},
-		);
+		return json(errorCode(error) === "invalid-query" ? 400 : 503, {
+			error:
+				errorCode(error) === "invalid-query"
+					? (error as Error).message
+					: "Statistics could not be loaded. Try again.",
+		});
 	}
 };
 export const GET = (request: Request) => handleDeveloperStatistics(request);

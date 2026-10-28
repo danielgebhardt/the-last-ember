@@ -4,7 +4,12 @@ import {
 	FieldValue,
 	type Query,
 } from "firebase-admin/firestore";
-import { type TokenVerifier, verifiedUser } from "../api/account.ts";
+import {
+	errorCode,
+	json,
+	type TokenVerifier,
+	verifiedUser,
+} from "../api/account.ts";
 import { displayNameError } from "../src/accounts/DisplayName.ts";
 import {
 	type Difficulty,
@@ -20,8 +25,6 @@ import type {
 } from "../src/statistics/Rankings.ts";
 import { activeAccount, database } from "./AccountData.ts";
 
-const json = (status: number, body: unknown) =>
-	Response.json(body, { status, headers: { "cache-control": "no-store" } });
 export type RankingsWriter = (
 	uid: string,
 	runId: string,
@@ -221,7 +224,7 @@ export const handleRankings = async (
 		});
 		return json(200, { ok: true });
 	} catch (error) {
-		const code = (error as { code?: string }).code;
+		const code = errorCode(error);
 		if (code === "no-display-name")
 			return json(409, {
 				error:

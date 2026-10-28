@@ -4,6 +4,7 @@ import {
 	getFirestore,
 	type Transaction,
 } from "firebase-admin/firestore";
+import { errorCode } from "../api/account.ts";
 import { statisticsAdmin } from "./Admin.ts";
 export const database = () => getFirestore(statisticsAdmin());
 export const authAdmin = () => getAuth(statisticsAdmin());
@@ -20,8 +21,7 @@ export const activeAccount = async (transaction: Transaction, uid: string) => {
 	try {
 		await authAdmin().getUser(uid);
 	} catch (error) {
-		if ((error as { code?: string }).code === "auth/user-not-found")
-			throw accountGone();
+		if (errorCode(error) === "auth/user-not-found") throw accountGone();
 		throw error;
 	}
 	return profile;
@@ -61,8 +61,7 @@ export const deleteAccountData = async (uid: string) => {
 	try {
 		await authAdmin().deleteUser(uid);
 	} catch (error) {
-		if ((error as { code?: string }).code !== "auth/user-not-found")
-			throw error;
+		if (errorCode(error) !== "auth/user-not-found") throw error;
 	}
 	await profile.delete();
 };

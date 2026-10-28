@@ -1,12 +1,15 @@
-import { type TokenVerifier, verifiedUser } from "../api/account.ts";
+import {
+	errorCode,
+	json,
+	type TokenVerifier,
+	verifiedUser,
+} from "../api/account.ts";
 import {
 	displayNameError,
 	normalizeDisplayName,
 } from "../src/accounts/DisplayName.ts";
 import { activeAccount, database, deleteAccountData } from "./AccountData.ts";
 
-const json = (status: number, body: unknown) =>
-	Response.json(body, { status, headers: { "cache-control": "no-store" } });
 export type ProfileActions = {
 	read: (uid: string) => Promise<string | null>;
 	name: (uid: string, name: string) => Promise<void>;
@@ -65,7 +68,7 @@ export const handleProfile = async (
 		}
 		return json(200, { displayName: await actions.read(user.uid) });
 	} catch (error) {
-		if ((error as { code?: string }).code === "account-deleted")
+		if (errorCode(error) === "account-deleted")
 			return json(410, {
 				error: "This account is being deleted. Retry deletion or sign out.",
 			});
