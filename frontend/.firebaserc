@@ -1,5 +1,6 @@
 {
 	"projects": {
-		"default": "demo-wardens-flame"
+		"default": "demo-wardens-flame",
+		"production": "wardens-flame"
 	}
 }
