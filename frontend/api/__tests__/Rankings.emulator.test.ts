@@ -77,7 +77,8 @@ describe.skipIf(!authHost || !host)("Trusted Rankings in the emulators", () => {
 				displayName: "Ember Walker",
 				outcome: "died",
 				difficulty: 1,
-				gameVersion: GAME_VERSION,
+				// The board the adventure started on, not the server's release.
+				gameVersion: document.state.rankingVersion,
 			});
 			expect(before?.acceptedAt.toMillis()).toBeGreaterThan(Date.now() - 60000);
 			expect(JSON.stringify(before)).not.toContain("@example.com");

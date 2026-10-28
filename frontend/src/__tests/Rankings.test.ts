@@ -5,6 +5,7 @@ import {
 	DEFAULT_FOG_CONFIGURATION,
 	DEFAULT_RUN_CONFIGURATION,
 } from "../domain/dungeon/RunConfiguration";
+import { GAME_VERSION } from "../domain/game/GameVersion";
 import {
 	createSaveDocument,
 	parseSave,
@@ -20,7 +21,7 @@ it("opts only new ranked sessions in, preserving the marker through save/load", 
 		DEFAULT_FOG_CONFIGURATION,
 		true,
 	);
-	expect(session.state.rankingVersion).toBe("0.3.0-alpha");
+	expect(session.state.rankingVersion).toBe(GAME_VERSION);
 	const document = createSaveDocument(
 		session.state,
 		session.exploration,
@@ -30,7 +31,7 @@ it("opts only new ranked sessions in, preserving the marker through save/load", 
 	const parsed = parseSave(JSON.stringify(document));
 	expect(parsed.ok).toBe(true);
 	if (parsed.ok)
-		expect(restoreSave(parsed.value).state.rankingVersion).toBe("0.3.0-alpha");
+		expect(restoreSave(parsed.value).state.rankingVersion).toBe(GAME_VERSION);
 	expect(restoreSave(savedAdventure()).state.rankingVersion).toBeUndefined();
 	expect(
 		createAdventureSession(

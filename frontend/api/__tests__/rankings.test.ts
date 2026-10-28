@@ -1,6 +1,7 @@
 // @vitest-environment node
 import { expect, it, vi } from "vitest";
 import { handleRankings } from "../../server/Rankings.ts";
+import { GAME_VERSION } from "../../src/domain/game/GameVersion.ts";
 import { rankedAdventure } from "./RankingTestHelpers.ts";
 
 const verify = async () => ({ uid: "owner", email: "private@example.com" });
@@ -184,7 +185,8 @@ it("validates filters and authenticates personal paging as the token owner", asy
 	).toBe(200);
 	expect(read).toHaveBeenLastCalledWith({
 		difficulty: 1,
-		version: "0.3.0-alpha",
+		// Without a version, a board shows the current release.
+		version: GAME_VERSION,
 	});
 	expect(
 		(await handleRankings(get("board=personal", ""), verify, undefined, read))
@@ -202,7 +204,8 @@ it("validates filters and authenticates personal paging as the token owner", asy
 	).toBe(200);
 	expect(read).toHaveBeenLastCalledWith({
 		difficulty: 1.25,
-		version: "0.3.0-alpha",
+		// Without a version, a board shows the current release.
+		version: GAME_VERSION,
 		after: "page",
 		uid: "owner",
 	});
