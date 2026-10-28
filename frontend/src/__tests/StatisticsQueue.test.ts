@@ -278,4 +278,73 @@ describe("Finished runs waiting in browser storage", () => {
 			expectedWarning.mockRestore();
 		}
 	});
+
+	it.each(["statistics", "rankings"] as const)(
+		"submits later %s runs past one the server rejects",
+		async (kind) => {
+			const expectedWarning = vi
+				.spyOn(console, "warn")
+				.mockImplementation(() => {});
+
+			try {
+				const rejected = finished();
+				const accepted = finished();
+				accepted.state.runId = "f2703081-c956-4320-a766-139bb6485111";
+				for (const document of [rejected, accepted]) {
+					document.state.ranked = true;
+					document.state.rankingVersion = "0.3.0-alpha";
+				}
+				const send = vi
+					.fn<typeof fetch>()
+					.mockImplementation(async (_url, init) =>
+						String(init?.body).includes(rejected.state.runId ?? "")
+							? new Response(null, { status: 400 })
+							: new Response(null, { status: 200 }),
+					);
+
+				const queue = new StatisticsQueue(localStorage, send, kind);
+				queue.enqueue("one", rejected);
+				queue.enqueue("one", accepted);
+				await queue.retry("one", token);
+
+				expect(send).toHaveBeenCalledTimes(2);
+				expect(
+					localStorage.getItem(`larn:${kind}:one:${accepted.state.runId}`),
+				).toBe("sent");
+				expect(
+					localStorage.getItem(`larn:${kind}:one:${rejected.state.runId}`),
+				).not.toBe("sent");
+
+				await queue.retry("one", token);
+				expect(send).toHaveBeenCalledTimes(3);
+			} finally {
+				expectedWarning.mockRestore();
+			}
+		},
+	);
+
+	it("stops at an unavailable server or a missing display name", async () => {
+		const expectedWarning = vi
+			.spyOn(console, "warn")
+			.mockImplementation(() => {});
+
+		try {
+			for (const status of [503, 409]) {
+				localStorage.clear();
+				const second = finished();
+				second.state.runId = "f2703081-c956-4320-a766-139bb6485111";
+				const send = vi
+					.fn<typeof fetch>()
+					.mockResolvedValue(new Response(null, { status }));
+				const queue = new StatisticsQueue(localStorage, send);
+				queue.enqueue("one", finished());
+				queue.enqueue("one", second);
+				await queue.retry("one", token);
+
+				expect(send).toHaveBeenCalledTimes(1);
+			}
+		} finally {
+			expectedWarning.mockRestore();
+		}
+	});
 });

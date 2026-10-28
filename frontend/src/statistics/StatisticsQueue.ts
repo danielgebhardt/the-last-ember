@@ -117,9 +117,12 @@ export class StatisticsQueue {
 
 		this.sending.add(uid);
 
+		// A rejected run stays pending for a later visit, but must not hold back the
+		// runs finished after it.
+		const skipped = new Set<string>();
 		try {
 			while (!this.stopped.has(uid)) {
-				const next = this.pending(uid)[0];
+				const next = this.pending(uid).find(([key]) => !skipped.has(key));
 				if (!next) break;
 
 				const [key, text] = next;
@@ -148,7 +151,10 @@ export class StatisticsQueue {
 					console.warn(
 						`[${this.kind}] Submission rejected (HTTP ${response.status}).`,
 					);
-					break;
+					// Only a rejection of this run's contents moves on; outages, auth and a
+					// missing display name affect every run alike.
+					if (![400, 413, 422].includes(response.status)) break;
+					skipped.add(key);
 				}
 			}
 		} catch (error) {
