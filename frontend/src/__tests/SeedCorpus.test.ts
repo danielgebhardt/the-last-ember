@@ -6,6 +6,7 @@ import {
 	recordAdventure,
 	seedCorpusReport,
 	summarizeCorpus,
+	TOWN_PRICE_REFERENCE,
 } from "../domain/dev/SeedCorpus";
 import { MONSTER_DEFINITIONS } from "../domain/monsters/Monster";
 import { OBJECT_DEFINITIONS } from "../domain/objects/DungeonObject";
@@ -64,5 +65,10 @@ describe("seed corpus report", () => {
 		const lines = corpusCsv(records).split("\n");
 		expect(lines[0]).toMatch(/^seed,discovery,/);
 		expect(lines).toHaveLength(records.length + 1);
+	});
+	it("lists each town price once, though a store stocks several copies", () => {
+		const names = TOWN_PRICE_REFERENCE.map((entry) => entry.name);
+		expect(names).toContain("iron-sword");
+		expect(new Set(names).size).toBe(names.length);
 	});
 });

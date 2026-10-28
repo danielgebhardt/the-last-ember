@@ -150,7 +150,13 @@ export const TOWN_PRICE_REFERENCE = [
 		price,
 	})),
 	{ name: "library book", price: LIBRARY_PRICE },
-].sort((a, b) => a.price - b.price);
+]
+	// A store stocking several copies of one kind lists it once.
+	.filter(
+		(entry, index, all) =>
+			all.findIndex((other) => other.name === entry.name) === index,
+	)
+	.sort((a, b) => a.price - b.price);
 
 export type CorpusSummary = ReturnType<typeof summarizeCorpus>;
 export const summarizeCorpus = (records: readonly AdventureRecord[]) => {
