@@ -44,7 +44,10 @@ it("loads personal pages with authorization, shows global ranks, and resets pagi
 				),
 			],
 			next: params.has("after") ? null : "second",
-			versions: ["0.3.0-alpha", "0.3.0-alpha.0"],
+			// Only a board's first page carries the version list.
+			...(params.has("after")
+				? {}
+				: { versions: ["0.3.0-alpha", "0.3.0-alpha.0"] }),
 		});
 	});
 	vi.stubGlobal("fetch", send);
@@ -66,6 +69,9 @@ it("loads personal pages with authorization, shows global ranks, and resets pagi
 	expect(screen.getByText("#7", { exact: true })).toBeVisible();
 	await user.click(screen.getByRole("button", { name: "Next" }));
 	await screen.findByText("#32", { exact: true });
+	expect(
+		screen.getByRole("option", { name: "0.3.0-alpha.0" }),
+	).toBeInTheDocument();
 	await user.selectOptions(
 		screen.getByLabelText("Difficulty", { exact: true }),
 		"1.25",

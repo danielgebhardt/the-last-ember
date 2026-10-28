@@ -179,6 +179,7 @@ describe.skipIf(!authHost || !host)("Trusted Rankings in the emulators", () => {
 			expect(global.rows.map((r) => r.rank)).toEqual(
 				Array.from({ length: 20 }, (_, i) => i + 1),
 			);
+			expect(global.versions).toContain(GAME_VERSION);
 			const second = await readRankings({
 				...filters,
 				after: global.next ?? undefined,
@@ -186,6 +187,8 @@ describe.skipIf(!authHost || !host)("Trusted Rankings in the emulators", () => {
 			expect(second.rows).toHaveLength(11);
 			expect(second.rows[0].rank).toBe(21);
 			expect(second.next).toBeNull();
+			// Only a board's first page carries the version list.
+			expect(second.versions).toBeUndefined();
 			const personal = await readRankings({ ...filters, uid });
 			expect(
 				personal.rows.slice(0, 3).map((r) => [r.displayName, r.rank]),

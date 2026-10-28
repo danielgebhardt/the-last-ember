@@ -21,5 +21,6 @@ export type RankingRow = Pick<
 export type RankingsPage = {
 	rows: RankingRow[];
 	next: string | null;
-	versions: string[];
+	// Only a board's first page carries the version list.
+	versions?: string[];
 };

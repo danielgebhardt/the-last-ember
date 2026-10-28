@@ -129,13 +129,16 @@ export const readRankings = async ({
 			acceptedAt: doc.get("acceptedAt").toDate().toISOString() as string,
 		})),
 	);
+	const next = page.size > 20 ? (docs.at(-1)?.id ?? null) : null;
+	// Later pages keep the list the first page returned.
+	if (after) return { rows, next };
 	const versions = await database()
 		.collection("rankingVersions")
 		.orderBy(FieldPath.documentId())
 		.get();
 	return {
 		rows,
-		next: page.size > 20 ? (docs.at(-1)?.id ?? null) : null,
+		next,
 		versions: [
 			...new Set([GAME_VERSION, ...versions.docs.map((doc) => doc.id)]),
 		],

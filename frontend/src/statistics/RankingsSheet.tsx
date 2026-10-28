@@ -85,7 +85,7 @@ export default function RankingsSheet({
 				if (!controller.signal.aborted) {
 					setResult(data);
 					setResultOwner(uid);
-					setVersions(data.versions);
+					if (data.versions) setVersions(data.versions);
 				}
 			} catch (failure) {
 				if (!controller.signal.aborted)
