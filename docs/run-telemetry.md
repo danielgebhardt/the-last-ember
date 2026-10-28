@@ -269,11 +269,19 @@ under the combined budgets above.
 
 ## Developer dashboard (#434)
 
-Checkpoints 1–3 add Overview, Floor progression and Equipment/spells/consumables
-to the existing lazy developer statistics page. Readable full run inspection
-remains checkpoint 4. Inspect still fetches a single private detail
-on demand, with cancellation and retry. Statistics CSV export and its obsolete
-CLI/helper are removed; Seed report CSV and the path-based developer-account
+The existing lazy developer statistics page provides Overview, Floor progression,
+Equipment/spells/consumables and readable individual-run inspection. Inspect
+fetches one private detail on demand, with cancellation and retry. It displays
+configuration, outcome, final statistics/equipment, group-specific coverage,
+whole-run usage, starting ownership/knowledge and a floor/town selector. The
+selector shows observed visits, first-entry/latest-exit resources and equipment,
+accumulated damage/healing/local usage, acquisitions/learning, gold flows and
+purchase/sale receipts. A separate terminal snapshot is never presented as an
+exit. Missing history remains unknown; empty tracked maps mean zero; missing
+exits and absent terminal observations within tracked history are N/A. Loading
+and failed detail reads never present list metadata as missing telemetry. The
+explorer is a checkpoint summary, not a replay or complete visit log. Statistics
+CSV export and its obsolete CLI/helper are removed; Seed report CSV and the path-based developer-account
 administration script are independent and remain available.
 
 `GET /api/developer-statistics?aggregate=overview` reuses signed-token plus current
@@ -295,7 +303,7 @@ floor keys. Monster, encounter and usage breakdowns in combat are not fetched.
 Arrays cannot be projected by element, so unused checkpoint members are discarded
 server-side. No adventure saves or full telemetry documents reach the browser.
 Store receipts and gold-flow maps remain outside aggregate reads; existing
-single-run Inspect retains those facts for checkpoint 4.
+single-run Inspect displays those facts for the selected floor or town.
 
 Per load: at most **2,000** scanned metadata rows (plus one lookahead), **500**
 selected runs, **4 MiB** metadata input, **32 MiB** projected telemetry input and

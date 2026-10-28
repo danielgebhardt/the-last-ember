@@ -140,7 +140,7 @@ it("loads one server aggregate with visible defaults, requires reload after filt
 		await screen.findByRole("button", { name: "Inspect run 456" }),
 	);
 	await waitFor(() =>
-		expect(screen.getByText(/"schemaVersion": 1/)).toBeVisible(),
+		expect(screen.getByRole("heading", { name: "Run summary" })).toBeVisible(),
 	);
 	expect(send).toHaveBeenCalledTimes(3);
 	expect(send.mock.calls[2][0]).toContain("id=two");
@@ -220,7 +220,9 @@ it("retries failed detail and cancels late detail when filters or authorization 
 	expect(await screen.findByRole("alert")).toHaveTextContent(
 		"Temporarily unavailable",
 	);
+	expect(screen.queryByLabelText("Readable run detail")).toBeNull();
 	await user.click(screen.getByRole("button", { name: "Retry detail" }));
+	expect(screen.queryByLabelText("Readable run detail")).toBeNull();
 	await waitFor(() => expect(complete).toBeDefined());
 	await user.selectOptions(screen.getByLabelText("Outcome"), "died");
 	expect(send.mock.calls[2][1]?.signal?.aborted).toBe(true);

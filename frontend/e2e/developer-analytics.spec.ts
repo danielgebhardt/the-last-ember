@@ -1,6 +1,7 @@
 import { expect, test } from "@playwright/test";
 import {
 	analyticsResult,
+	checkpoint,
 	itemUsageFixtures,
 } from "../src/__tests/AnalyticsTestFixtures";
 import type { AnalyticsFilters } from "../src/developer/StatisticsAnalytics";
@@ -33,6 +34,18 @@ for (const size of [
 				route.fulfill({ json: { displayName: null } }),
 			);
 			const fixtures = itemUsageFixtures();
+			const telemetry = fixtures[0].summary.telemetry;
+			if (!telemetry?.checkpoints || !telemetry.economy)
+				throw Error("Fixture missing telemetry");
+			telemetry.checkpoints.final = {
+				floorNumber: null,
+				outcome: "won",
+				snapshot: checkpoint(1000),
+			};
+			telemetry.economy.town.purchases = {
+				"town-potions": { "healing-potion": { quantity: 2, gold: 30 } },
+			};
+			telemetry.economy.town.goldOut = { purchases: 30 };
 			let aggregates = 0,
 				details = 0;
 			await page.route("**/api/developer-statistics?*", (route) => {
@@ -104,8 +117,38 @@ for (const size of [
 				.getByRole("button", { name: "Inspect run 1", exact: true })
 				.click();
 			await expect(sheet.getByText(/Run detail · Seed 1$/)).toBeVisible();
-			await expect(sheet.locator("pre")).toContainText('"schemaVersion": 1');
+			await expect(
+				sheet.getByRole("heading", { name: "Run summary", exact: true }),
+			).toBeVisible();
+			await sheet.getByLabel("Run location", { exact: true }).selectOption("1");
+			await expect(
+				sheet.getByRole("heading", { name: "First entry", exact: true }),
+			).toBeVisible();
+			await sheet
+				.getByRole("heading", { name: "First entry", exact: true })
+				.scrollIntoViewIfNeeded();
+			await page.screenshot({
+				path: testInfo.outputPath("run-checkpoint.png"),
+			});
 			expect(aggregates).toBe(1);
+			expect(details).toBe(1);
+			await sheet
+				.getByLabel("Run location", { exact: true })
+				.selectOption("town");
+			const purchases = sheet.getByText(
+				"town potions · Healing potion: 2 for 30 gold",
+				{ exact: true },
+			);
+			await purchases.scrollIntoViewIfNeeded();
+			await expect(purchases).toBeVisible();
+			await page.screenshot({ path: testInfo.outputPath("run-economy.png") });
+			await sheet
+				.getByRole("heading", { name: "Terminal snapshot", exact: true })
+				.evaluate((node) => node.scrollIntoView({ block: "start" }));
+			await page.screenshot({ path: testInfo.outputPath("run-terminal.png") });
+			expect(
+				await sheet.evaluate((node) => node.scrollWidth <= node.clientWidth),
+			).toBe(true);
 			expect(details).toBe(1);
 			await sheet
 				.getByRole("button", { name: "Close run detail", exact: true })

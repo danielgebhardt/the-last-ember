@@ -17,10 +17,11 @@ import {
 	type AnalyticsResult,
 	analyticsDefaults,
 } from "./StatisticsAnalytics";
-import type { MetadataEntry } from "./StatisticsData";
+import type { MetadataEntry, StatisticsEntry } from "./StatisticsData";
 import StatisticsFloorProgression from "./StatisticsFloorProgression";
 import StatisticsItemUsage from "./StatisticsItemUsage";
 import StatisticsOverview from "./StatisticsOverview";
+import StatisticsRunDetail from "./StatisticsRunDetail";
 
 const inputClass =
 	"h-9 min-w-0 rounded-md border bg-background px-2 text-sm text-foreground";
@@ -41,6 +42,9 @@ export default function DeveloperStatisticsPage() {
 		[error, setError] = useState<string | null>(null);
 	const [page, setPage] = useState(0),
 		[detail, setDetail] = useState<MetadataEntry | null>(null);
+	const [loadedDetail, setLoadedDetail] = useState<StatisticsEntry | null>(
+		null,
+	);
 	const [detailLoading, setDetailLoading] = useState(false),
 		[detailError, setDetailError] = useState<string | null>(null);
 	useEffect(
@@ -56,6 +60,7 @@ export default function DeveloperStatisticsPage() {
 	const closeDetail = (restoreFocus = false) => {
 		detailAbort.current?.abort();
 		setDetail(null);
+		setLoadedDetail(null);
 		setDetailLoading(false);
 		setDetailError(null);
 		if (restoreFocus)
@@ -74,6 +79,7 @@ export default function DeveloperStatisticsPage() {
 		const controller = new AbortController();
 		detailAbort.current = controller;
 		setDetail(entry);
+		setLoadedDetail(null);
 		setDetailLoading(true);
 		setDetailError(null);
 		try {
@@ -102,7 +108,7 @@ export default function DeveloperStatisticsPage() {
 				return;
 			if (data.rows?.[0]?.id !== entry.id)
 				throw Error("This run is no longer available.");
-			setDetail(data.rows[0]);
+			setLoadedDetail(data.rows[0]);
 		} catch (failure) {
 			if (!controller.signal.aborted)
 				setDetailError(
@@ -539,9 +545,12 @@ export default function DeveloperStatisticsPage() {
 										</Button>
 									</div>
 								)}
-								<pre className="mt-3 max-h-96 overflow-auto whitespace-pre-wrap break-words rounded-lg bg-muted/40 p-3 text-xs">
-									{JSON.stringify(detail.summary, null, 2)}
-								</pre>
+								{loadedDetail && (
+									<StatisticsRunDetail
+										key={loadedDetail.id}
+										summary={loadedDetail.summary}
+									/>
+								)}
 							</EmberPanel>
 						)}
 					</>
