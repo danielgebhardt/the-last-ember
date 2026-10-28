@@ -1,4 +1,5 @@
 import { FieldPath } from "firebase-admin/firestore";
+import { aggregateFloors } from "../src/developer/FloorProgression.ts";
 import {
 	type AnalyticsFilters,
 	type AnalyticsIncomplete,
@@ -11,6 +12,7 @@ import {
 	filterStatistics,
 	type MetadataEntry,
 } from "../src/developer/StatisticsData.ts";
+import { MAX_FLOORS } from "../src/domain/dungeon/RunConfiguration.ts";
 import {
 	MAX_STATISTICS_RESPONSE_BYTES,
 	STATISTICS_LIST_FIELDS,
@@ -31,13 +33,18 @@ export const ANALYTICS_METADATA_FIELDS = STATISTICS_LIST_FIELDS.filter(
 	(f) => f !== "usage" && f !== "equipped",
 );
 // Empty maps survive projection and mean tracked zero. The nested fields act as
-// group-presence markers; later slices extend this projection with their measures.
+// group-presence markers. Project only damage/healing for the bounded floor keys.
 export const ANALYTICS_TELEMETRY_FIELDS = [
 	"usage.casts",
 	"telemetry.schemaVersion",
 	"telemetry.checkpoints.floors",
 	"telemetry.combat.town.damage",
 	"telemetry.economy.initialItems",
+	...Array.from({ length: MAX_FLOORS }, (_, i) =>
+		["damage", "healing"].map(
+			(field) => `telemetry.combat.floors.${i + 1}.${field}`,
+		),
+	).flat(),
 ];
 export type AnalyticsReader = {
 	page: (after: string | undefined, limit: number) => Promise<MetadataEntry[]>;
@@ -151,6 +158,7 @@ export const collectAnalytics = async (
 				if (document) observations.push(observationFromDocument(id, document));
 		}
 		check();
+		const overview = aggregateOverview(rows, observations);
 		const result: AnalyticsResult = {
 			complete: true,
 			filters,
@@ -159,7 +167,8 @@ export const collectAnalytics = async (
 			loadedAt: new Date(now()).toISOString(),
 			versions: [...versions].sort(),
 			rows,
-			overview: aggregateOverview(rows, observations),
+			overview,
+			floors: aggregateFloors(rows, observations, overview.reach),
 		};
 		check();
 		if (statisticsBytes(result) > MAX_STATISTICS_RESPONSE_BYTES)

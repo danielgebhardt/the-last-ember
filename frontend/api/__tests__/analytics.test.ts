@@ -51,6 +51,10 @@ it("filters paged metadata before batched telemetry reads and calculates a cohor
 			gameVersion: i < 3 ? "excluded" : "selected",
 		}),
 	);
+	for (const [i, row] of rows.entries()) {
+		const point = row.summary.telemetry?.checkpoints?.floors[0].firstEntry;
+		if (point) point.level = i + 1;
+	}
 	const reader = readerFor(rows);
 	const result = await collectAnalytics(
 		{ ...filters, version: "selected" },
@@ -61,6 +65,11 @@ it("filters paged metadata before batched telemetry reads and calculates a cohor
 	expect(result.scanned).toBe(205);
 	expect(result.selected).toBe(202);
 	expect(result.overview.turns).toEqual({ value: 103.5, n: 202 });
+	expect(result.floors[0].entry.level).toEqual({
+		value: 104.5,
+		n: 202,
+		notApplicable: 0,
+	});
 	expect(reader.page).toHaveBeenCalledTimes(2);
 	expect(reader.telemetry).toHaveBeenCalledTimes(21);
 	const ids = vi.mocked(reader.telemetry).mock.calls.flatMap(([ids]) => ids);
@@ -277,4 +286,21 @@ it("enforces the API's 4 MiB ceiling even if an aggregate reader returns an over
 	);
 	expect(response.status).toBe(422);
 	expect(await response.text()).toContain("exceeded 4 MiB");
+});
+
+it("fits a complete 500-run twenty-floor cohort with maximum account/run ID lengths inside the response budget", async () => {
+	const rows = Array.from({ length: 500 }, (_, i) =>
+		analyticsRun(
+			`${"u".repeat(128)}_${String(i).padStart(36, "0")}`,
+			Array.from({ length: 20 }, (_, floor) => floor + 1),
+		),
+	);
+	const result = await collectAnalytics(filters, readerFor(rows));
+	expect(result).toMatchObject({ complete: true, scanned: 500, selected: 500 });
+	if (!result.complete) throw Error(result.error);
+	expect(result.floors).toHaveLength(20);
+	expect(result.floors[19].entry.level.n).toBe(500);
+	expect(
+		new TextEncoder().encode(JSON.stringify(result)).byteLength,
+	).toBeLessThan(4 * 1024 * 1024);
 });

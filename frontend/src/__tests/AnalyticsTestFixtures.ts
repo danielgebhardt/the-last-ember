@@ -1,3 +1,4 @@
+import { aggregateFloors } from "../developer/FloorProgression";
 import {
 	type AnalyticsResult,
 	aggregateOverview,
@@ -153,21 +154,69 @@ export const analyticsFixtures = () => [
 export const analyticsResult = (
 	entries = analyticsFixtures(),
 	filters = analyticsDefaults(),
-): AnalyticsResult => ({
-	complete: true,
-	filters,
-	scanned: entries.length,
-	selected: entries.length,
-	loadedAt: "2026-10-28T01:00:00.000Z",
-	versions: [...new Set(entries.map((r) => r.summary.gameVersion))],
-	rows: entries.map(
-		({
-			id,
-			summary: { usage: _u, telemetry: _t, equipped: _e, ...summary },
-		}) => ({ id, summary }),
-	),
-	overview: aggregateOverview(
-		entries,
-		entries.map((r) => observationFromDocument(r.id, r.summary)),
-	),
-});
+): AnalyticsResult => {
+	const observations = entries.map((r) =>
+		observationFromDocument(r.id, r.summary),
+	);
+	const overview = aggregateOverview(entries, observations);
+	return {
+		complete: true,
+		filters,
+		scanned: entries.length,
+		selected: entries.length,
+		loadedAt: "2026-10-28T01:00:00.000Z",
+		versions: [...new Set(entries.map((r) => r.summary.gameVersion))],
+		rows: entries.map(
+			({
+				id,
+				summary: { usage: _u, telemetry: _t, equipped: _e, ...summary },
+			}) => ({ id, summary }),
+		),
+		overview,
+		floors: aggregateFloors(entries, observations, overview.reach),
+	};
+};
+
+export const progressionFixtures = () => {
+	const rows = analyticsFixtures();
+	rows.forEach((row, index) => {
+		const telemetry = row.summary.telemetry;
+		if (!telemetry?.checkpoints || !telemetry.combat) return;
+		for (const floor of telemetry.checkpoints.floors) {
+			const maxHealth = 20 + index * 15 + floor.floorNumber * 2,
+				maxMana = index === 1 ? 0 : 10 + floor.floorNumber;
+			floor.firstEntry = {
+				...floor.firstEntry,
+				level: floor.floorNumber + index,
+				experience: floor.floorNumber ** 2 * 20,
+				health: Math.floor(maxHealth * (0.4 + index * 0.08)),
+				maxHealth,
+				mana: Math.floor(maxMana * 0.5),
+				maxMana,
+				gold: floor.floorNumber * 20 + index,
+				supplies: {
+					"healing-potion": floor.floorNumber % 4,
+					"exit-scroll": floor.floorNumber % 3,
+				},
+				attributes: {
+					strength: 10 + floor.floorNumber,
+					dexterity: 10 + index,
+					intelligence: 10 + floor.floorNumber,
+				},
+				armor: floor.floorNumber,
+				evadeChance: 20,
+				magicResistance: 15,
+			};
+			telemetry.combat.floors[floor.floorNumber] = {
+				...telemetry.combat.town,
+				damage: {
+					melee: floor.floorNumber * (index + 1) * 2,
+					trap: floor.floorNumber % 3,
+				},
+				healing: { potion: floor.floorNumber * (index + 1) },
+			};
+		}
+		telemetry.combat.town.healing = { sanctuary: 999 };
+	});
+	return rows;
+};

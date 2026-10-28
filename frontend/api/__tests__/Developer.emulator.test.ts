@@ -83,8 +83,18 @@ describe.skipIf(!authHost || !host)(
 				for (let i = 0; i < 202; i++) {
 					const id = `${users[0].uid}_${crypto.randomUUID()}`;
 					ids.push(id);
+					const row = analyticsRun(String(i), i % 3 === 0 ? null : [1, 2]);
+					const combat = row.summary.telemetry?.combat;
+					if (combat) {
+						combat.floors[1] = {
+							...combat.town,
+							damage: { melee: 3 },
+							healing: { potion: 2 },
+						};
+						combat.town.healing = { sanctuary: 10000 };
+					}
 					batch.create(database().doc(`statistics/${id}`), {
-						...analyticsRun(String(i), i % 3 === 0 ? null : [1, 2]).summary,
+						...row.summary,
 						seed: i,
 
 						standard: true,
@@ -149,6 +159,18 @@ describe.skipIf(!authHost || !host)(
 						},
 					},
 				});
+				expect(aggregate.floors[0]).toMatchObject({
+					floor: 1,
+					entry: { healthPercent: { value: 100, n: 134 } },
+					damage: { n: 134, total: 402, bySource: { melee: 402 } },
+					healing: {
+						n: 134,
+						total: 268,
+						bySource: { potion: 268, sanctuary: 0 },
+					},
+				});
+				expect(aggregate.floors[1].damage).toMatchObject({ n: 134, total: 0 });
+				expect(JSON.stringify(aggregate)).not.toContain("damageByMonster");
 				expect(aggregate.rows).toHaveLength(201);
 				expect(
 					aggregate.rows.every(

@@ -1,7 +1,7 @@
 import { expect, test } from "@playwright/test";
 import {
-	analyticsFixtures,
 	analyticsResult,
+	progressionFixtures,
 } from "../src/__tests/AnalyticsTestFixtures";
 import type { AnalyticsFilters } from "../src/developer/StatisticsAnalytics";
 import { filterStatistics } from "../src/developer/StatisticsData";
@@ -32,7 +32,7 @@ for (const size of [
 			await page.route("**/api/profile", (route) =>
 				route.fulfill({ json: { displayName: null } }),
 			);
-			const fixtures = analyticsFixtures();
+			const fixtures = progressionFixtures();
 			let aggregates = 0,
 				details = 0;
 			await page.route("**/api/developer-statistics?*", (route) => {
@@ -110,6 +110,68 @@ for (const size of [
 			await sheet
 				.getByRole("button", { name: "Close run detail", exact: true })
 				.click();
+			await sheet
+				.getByRole("tab", { name: "Floor progression", exact: true })
+				.click();
+			const floorSelect = sheet.getByLabel("Selected floor", { exact: true });
+			await floorSelect.focus();
+			await page.keyboard.press("2");
+			await page.keyboard.press("Enter");
+			await floorSelect.selectOption("2");
+			await expect(
+				sheet.getByRole("heading", { name: "Floor 2 detail", exact: true }),
+			).toBeVisible();
+			await sheet
+				.getByLabel("Progression metric", { exact: true })
+				.selectOption("manaPercent");
+			await sheet
+				.getByText("Progression values and samples", { exact: true })
+				.focus();
+			await page.keyboard.press("Enter");
+			await expect(
+				sheet.getByRole("table", {
+					name: "First-entry Mana (% max) by floor",
+					exact: true,
+				}),
+			).toBeVisible();
+			expect(aggregates).toBe(1);
+			expect(details).toBe(1);
+			expect(
+				await sheet.evaluate((node) => node.scrollWidth <= node.clientWidth),
+			).toBe(true);
+			await page.screenshot({ path: testInfo.outputPath("progression.png") });
+			await sheet.getByRole("button", { name: /^Select floor 20:/ }).click();
+			await expect(
+				sheet.getByRole("heading", { name: "Floor 20 detail", exact: true }),
+			).toBeVisible();
+			await sheet
+				.getByRole("heading", { name: "Floor 20 detail", exact: true })
+				.scrollIntoViewIfNeeded();
+			await page.screenshot({ path: testInfo.outputPath("floor-detail.png") });
+			await sheet
+				.getByRole("heading", { name: "Damage received", exact: true })
+				.scrollIntoViewIfNeeded();
+			await page.screenshot({
+				path: testInfo.outputPath("floor-counters.png"),
+			});
+			const floorInspect = sheet.getByRole("button", {
+				name: "Inspect floor 20 run 1",
+				exact: true,
+			});
+			await floorInspect.click();
+			await expect(
+				sheet.getByRole("heading", {
+					name: "Run detail · Seed 1",
+					exact: true,
+				}),
+			).toBeFocused();
+			expect(details).toBe(2);
+			expect(aggregates).toBe(1);
+			await sheet
+				.getByRole("button", { name: "Close run detail", exact: true })
+				.click();
+			await expect(floorInspect).toBeFocused();
+			await sheet.getByRole("tab", { name: "Overview", exact: true }).click();
 			await sheet.getByLabel("Version", { exact: true }).selectOption("all");
 			await expect(sheet.getByRole("status")).toContainText("Filters changed");
 			expect(aggregates).toBe(1);

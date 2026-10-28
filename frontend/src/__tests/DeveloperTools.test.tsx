@@ -288,3 +288,102 @@ it("withholds aggregates on failure or stop, and permits retry", async () => {
 	await user.click(screen.getByRole("button", { name: "Load statistics" }));
 	await screen.findByLabelText("Overview results");
 });
+
+it("selects floors and metrics locally, preserves the selection across tabs, and focuses explicit run inspection", async () => {
+	vi.spyOn(Accounts, "useAccount").mockReturnValue(developerTestAccount());
+	history.replaceState(null, "", "/#developer-statistics");
+	const one = analyticsRun("one", [1, 2], { seed: 1 }),
+		two = analyticsRun("two", [1], { seed: 2 });
+	const send = vi
+		.fn<typeof fetch>()
+		.mockResolvedValueOnce(Response.json(analyticsResult([one, two])))
+		.mockResolvedValueOnce(Response.json({ rows: [one], next: null }));
+	vi.stubGlobal("fetch", send);
+	render(<DeveloperStatisticsRoute />);
+	const user = userEvent.setup();
+	await user.click(
+		await screen.findByRole("button", { name: "Load statistics" }),
+	);
+	await user.click(screen.getByRole("tab", { name: "Floor progression" }));
+	await screen.findByRole("heading", { name: "Floor 1 detail" });
+	await user.selectOptions(screen.getByLabelText("Selected floor"), "2");
+	expect(screen.getByRole("heading", { name: "Floor 2 detail" })).toBeVisible();
+	expect(
+		screen.getByRole("button", { name: /^Select floor 2:/ }),
+	).toHaveAttribute("aria-pressed", "true");
+	await user.selectOptions(
+		screen.getByLabelText("Progression metric"),
+		"level",
+	);
+	await user.click(screen.getByRole("tab", { name: "Overview" }));
+	await user.click(screen.getByRole("tab", { name: "Floor progression" }));
+	expect(screen.getByLabelText("Selected floor")).toHaveValue("2");
+	expect(screen.getByLabelText("Progression metric")).toHaveValue("level");
+	expect(send).toHaveBeenCalledTimes(1);
+	const inspect = screen.getByRole("button", { name: "Inspect floor 2 run 1" });
+	await user.click(inspect);
+	expect(
+		await screen.findByRole("heading", { name: "Run detail · Seed 1" }),
+	).toHaveFocus();
+	await waitFor(() => expect(send).toHaveBeenCalledTimes(2));
+	expect(send.mock.calls[1][0]).toContain("id=one");
+	await user.click(screen.getByRole("button", { name: "Close run detail" }));
+	expect(inspect).toHaveFocus();
+	let release: ((value: Response) => void) | undefined;
+	send.mockImplementationOnce(
+		() =>
+			new Promise((resolve) => {
+				release = resolve;
+			}),
+	);
+	await user.click(inspect);
+	await waitFor(() => expect(release).toBeDefined());
+	await user.selectOptions(screen.getByLabelText("Selected floor"), "3");
+	expect(send.mock.calls[2][1]?.signal?.aborted).toBe(true);
+	await act(async () => release?.(Response.json({ rows: [one], next: null })));
+	expect(
+		screen.queryByRole("heading", { name: "Run detail · Seed 1" }),
+	).toBeNull();
+	expect(screen.getByLabelText("Selected floor")).toHaveFocus();
+	await user.click(screen.getByRole("button", { name: /^Select floor 4:/ }));
+	expect(screen.getByRole("heading", { name: "Floor 4 detail" })).toBeVisible();
+	expect(
+		screen.getByText("No observed runs reached this floor."),
+	).toBeVisible();
+	expect(send).toHaveBeenCalledTimes(3);
+});
+
+it("keeps unknown floor measurements, measured zero and unreached floors visually distinct", async () => {
+	vi.spyOn(Accounts, "useAccount").mockReturnValue(developerTestAccount());
+	history.replaceState(null, "", "/#developer-statistics");
+	const send = vi
+		.fn<typeof fetch>()
+		.mockResolvedValueOnce(
+			Response.json(analyticsResult([analyticsRun("old", null)])),
+		)
+		.mockResolvedValueOnce(
+			Response.json(analyticsResult([analyticsRun("zero", [1])])),
+		);
+	vi.stubGlobal("fetch", send);
+	render(<DeveloperStatisticsRoute />);
+	const user = userEvent.setup();
+	await user.click(
+		await screen.findByRole("button", { name: "Load statistics" }),
+	);
+	await user.click(screen.getByRole("tab", { name: "Floor progression" }));
+	expect(
+		screen.getByRole("button", { name: /^Select floor 1:.*Unknown/ }),
+	).toHaveTextContent("?");
+	await user.click(screen.getByRole("button", { name: "Refresh statistics" }));
+	await screen.findByRole("heading", { name: "Floor 1 detail" });
+	await user.selectOptions(screen.getByLabelText("Progression metric"), "gold");
+	expect(
+		screen.getByRole("button", {
+			name: /^Select floor 1:.*Carried gold 0, n=1/,
+		}),
+	).toHaveTextContent("0");
+	expect(
+		screen.getByRole("button", { name: /^Select floor 2:.*Not applicable/ }),
+	).toHaveTextContent("—");
+	expect(send).toHaveBeenCalledTimes(2);
+});

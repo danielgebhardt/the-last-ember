@@ -18,6 +18,7 @@ import {
 	analyticsDefaults,
 } from "./StatisticsAnalytics";
 import type { MetadataEntry } from "./StatisticsData";
+import StatisticsFloorProgression from "./StatisticsFloorProgression";
 import StatisticsOverview from "./StatisticsOverview";
 
 const inputClass =
@@ -30,6 +31,9 @@ export default function DeveloperStatisticsPage() {
 	const title = useRef<HTMLHeadingElement>(null),
 		abort = useRef<AbortController | null>(null),
 		detailAbort = useRef<AbortController | null>(null);
+	const [view, setView] = useState("overview");
+	const detailTitle = useRef<HTMLHeadingElement>(null),
+		detailOrigin = useRef<HTMLElement | null>(null);
 	const [filters, setFilters] = useState(analyticsDefaults);
 	const [result, setResult] = useState<AnalyticsResult | null>(null);
 	const [loading, setLoading] = useState(false),
@@ -45,13 +49,26 @@ export default function DeveloperStatisticsPage() {
 		},
 		[],
 	);
-	const closeDetail = () => {
+	useEffect(() => {
+		if (detail?.id) detailTitle.current?.focus();
+	}, [detail?.id]);
+	const closeDetail = (restoreFocus = false) => {
 		detailAbort.current?.abort();
 		setDetail(null);
 		setDetailLoading(false);
 		setDetailError(null);
+		if (restoreFocus)
+			(detailOrigin.current?.isConnected
+				? detailOrigin.current
+				: title.current
+			)?.focus();
 	};
 	const inspect = async (entry: MetadataEntry) => {
+		if (detail?.id !== entry.id)
+			detailOrigin.current =
+				document.activeElement instanceof HTMLElement
+					? document.activeElement
+					: null;
 		detailAbort.current?.abort();
 		const controller = new AbortController();
 		detailAbort.current = controller;
@@ -179,7 +196,14 @@ export default function DeveloperStatisticsPage() {
 					</SheetDescription>
 				}
 			/>
-			<div className="grid gap-4 px-4 pb-6">
+			<Tabs.Root
+				className="grid gap-4 px-4 pb-6"
+				value={view}
+				onValueChange={(value) => {
+					setView(String(value));
+					closeDetail();
+				}}
+			>
 				<EmberPanel>
 					<form
 						className="flex flex-wrap items-end gap-3"
@@ -296,23 +320,18 @@ export default function DeveloperStatisticsPage() {
 						</p>
 					</form>
 				</EmberPanel>
-				<Tabs.Root value="overview">
-					<EmberTabsList aria-label="Statistics views">
-						<EmberTab value="overview">Overview</EmberTab>
-						<EmberTab value="floors" disabled>
-							Floor progression
-						</EmberTab>
-						<EmberTab value="items" disabled>
-							Equipment, spells and consumables
-						</EmberTab>
-					</EmberTabsList>
-					<Tabs.Panel value="overview">
-						<p className="mt-2 text-xs text-muted-foreground">
-							Floor progression and item comparisons follow in checkpoints 2 and
-							3.
-						</p>
-					</Tabs.Panel>
-				</Tabs.Root>
+
+				<EmberTabsList aria-label="Statistics views">
+					<EmberTab value="overview">Overview</EmberTab>
+					<EmberTab value="floors">Floor progression</EmberTab>
+					<EmberTab value="items" disabled>
+						Equipment, spells and consumables
+					</EmberTab>
+				</EmberTabsList>
+				<p className="mt-2 text-xs text-muted-foreground">
+					Equipment, spell and consumable comparisons follow in checkpoint 3.
+				</p>
+
 				<p className="text-xs text-muted-foreground">
 					These are finished, submitted runs. Abandoned, signed-out and
 					offline/unsubmitted adventures can be absent. Floor reach is not a
@@ -379,7 +398,17 @@ export default function DeveloperStatisticsPage() {
 								</Button>
 							</EmberPanel>
 						)}
-						<StatisticsOverview counts={result.overview} />
+						<Tabs.Panel value="overview" keepMounted>
+							<StatisticsOverview counts={result.overview} />
+						</Tabs.Panel>
+						<Tabs.Panel value="floors" keepMounted>
+							<StatisticsFloorProgression
+								floors={result.floors}
+								rows={rows}
+								onInspect={(entry) => void inspect(entry)}
+								onFloorChange={() => closeDetail()}
+							/>
+						</Tabs.Panel>
 						<div className="overflow-x-auto rounded-lg border">
 							<table className="w-full text-left text-sm tabular-nums">
 								<caption className="sr-only">Recorded run summaries</caption>
@@ -472,14 +501,18 @@ export default function DeveloperStatisticsPage() {
 						{detail && (
 							<EmberPanel>
 								<div className="flex items-center justify-between gap-2">
-									<h3 className="font-serif text-base font-semibold">
+									<h3
+										ref={detailTitle}
+										tabIndex={-1}
+										className="font-serif text-base font-semibold outline-none"
+									>
 										Run detail · Seed {detail.summary.seed}
 									</h3>
 									<Button
 										type="button"
 										variant="ghost"
 										aria-label="Close run detail"
-										onClick={closeDetail}
+										onClick={() => closeDetail(true)}
 									>
 										<X aria-hidden="true" />
 									</Button>
@@ -514,7 +547,7 @@ export default function DeveloperStatisticsPage() {
 						)}
 					</>
 				)}
-			</div>
+			</Tabs.Root>
 		</SheetContent>
 	);
 }

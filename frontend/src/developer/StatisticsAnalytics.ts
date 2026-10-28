@@ -1,5 +1,6 @@
 import type { FloorRecord } from "../domain/game/FloorTelemetry";
 import { GAME_VERSION } from "../domain/game/GameVersion";
+import type { FloorAggregate, FloorCombat } from "./FloorProgression";
 import {
 	type MetadataEntry,
 	type StatisticsFilters,
@@ -24,6 +25,7 @@ export type AnalyticsObservation = {
 	floors: FloorRecord[] | null;
 	usage: boolean;
 	combat: boolean;
+	combatFloors: FloorCombat | null;
 	economy: boolean;
 };
 type ProjectedTelemetry = {
@@ -31,7 +33,7 @@ type ProjectedTelemetry = {
 	telemetry?: {
 		schemaVersion?: number;
 		checkpoints?: { floors?: FloorRecord[] } | null;
-		combat?: { town?: { damage?: unknown } } | null;
+		combat?: { town?: { damage?: unknown }; floors?: FloorCombat } | null;
 		economy?: { initialItems?: unknown } | null;
 	} | null;
 };
@@ -46,6 +48,7 @@ export const observationFromDocument = (
 		floors: telemetry?.checkpoints?.floors ?? null,
 		usage: document.usage?.casts != null,
 		combat: telemetry?.combat?.town?.damage != null,
+		combatFloors: telemetry?.combat?.floors ?? null,
 		economy: telemetry?.economy?.initialItems != null,
 	};
 };
@@ -125,6 +128,7 @@ export type AnalyticsResult = {
 	versions: string[];
 	rows: MetadataEntry[];
 	overview: Overview;
+	floors: FloorAggregate[];
 };
 export type AnalyticsIncomplete = {
 	complete: false;

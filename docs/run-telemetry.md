@@ -269,9 +269,9 @@ under the combined budgets above.
 
 ## Developer dashboard (#434)
 
-Checkpoint 1 adds the Overview to the existing lazy developer statistics page.
-Floor progression, equipment/spell/consumable comparisons and readable full run
-inspection remain checkpoints 2–4. Inspect still fetches a single private detail
+Checkpoints 1–2 add Overview and Floor progression to the existing lazy developer
+statistics page. Equipment/spell/consumable comparisons and readable full run
+inspection remain checkpoints 3–4. Inspect still fetches a single private detail
 on demand, with cancellation and retry. Statistics CSV export and its obsolete
 CLI/helper are removed; Seed report CSV and the path-based developer-account
 administration script are independent and remain available.
@@ -288,7 +288,9 @@ One read-only Firestore transaction holds a consistent snapshot across metadata
 pages and selected-document batches. Metadata queries use existing finish-date
 ordering/indexes; other filters run on the server. Reads project metadata without
 usage/equipment, then only the selected runs' checkpoint-floor array and small
-group-presence fields (`usage.casts`, combat town damage, economy initial items).
+group-presence fields (`usage.casts`, combat town damage, economy initial items),
+plus damage/healing maps projected individually for each of the twenty supported
+floor keys. Monster, encounter and usage breakdowns in combat are not fetched.
 Arrays cannot be projected by element, so unused checkpoint members are discarded
 server-side. No adventure saves or full telemetry documents reach the browser.
 Later slices extend the same projection/aggregation contract with their measures.
@@ -330,3 +332,36 @@ Mixed versions/configurations are flagged, and associations do not establish
 causal balance effects. First-entry/latest-exit differences are not total time,
 damage, healing or consumption; later progression views must use accumulated
 counters and per-observation resource percentages. Town counters stay separate.
+
+
+### Floor progression (checkpoint 2)
+
+Both views share the same complete aggregate response; choosing a tab, floor,
+metric or floor-run page makes no network request. Explicit Inspect is still one
+single-run detail request. Detail focuses its heading and returns focus on close;
+floor/filter changes cancel stale detail without stealing control focus.
+
+First-entry medians cover level/XP, current/maximum HP and mana, per-run resource
+percentages, gold, carried potion/scroll quantities (including enchantment
+scrolls), STR/DEX/INT, attack, armor, evasion and magic resistance. Values use
+captured derivations; the dashboard never recomputes historical balance rules.
+Each metric carries its own n. A zero maximum excludes that resource percentage
+as not applicable, rather than recording 0% or dividing cohort totals. Missing
+measurements remain unknown. Select secondary attributes/defenses in the chart
+or expand their selected-floor table. Chart values also have a keyboard-readable
+table, and bar selection has an equivalent floor selector.
+
+Floor damage/healing are labelled **totals of actual HP**, by captured source,
+from the intersection of runs with first-entry evidence for that floor and combat
+coverage. Sparse maps in tracked groups count as zero; missing groups are excluded
+and their counts remain visible. Accumulated maps include all revisits, and town
+healing never contributes to a dungeon floor. No first-entry/latest-exit difference
+is used as time, damage, healing or consumption. No reached-floor counter history
+is fabricated for older runs without checkpoint coverage. A zero sample is unknown
+for missing history, or not applicable when no observed run reached that floor.
+Custom selections retain their actual observed floor numbers.
+
+Counters are summed as safe integers; a total outside the exact numeric range
+refuses the selection rather than displaying rounded counters. Existing read,
+byte and deadline limits still apply to the expanded response. No collection,
+save format, indexing, infrastructure or production-data changes are needed.
