@@ -1,11 +1,12 @@
 import type { RunStatistics } from "../domain/saves/RunStatistics";
 export type StatisticsSummary = Omit<
 	RunStatistics,
-	"endedFloor" | "thiefTake" | "usage"
+	"endedFloor" | "thiefTake" | "usage" | "telemetry"
 > & {
 	endedFloor?: number;
 	thiefTake?: RunStatistics["thiefTake"];
 	usage?: RunStatistics["usage"];
+	telemetry?: RunStatistics["telemetry"];
 };
 export type StatisticsEntry = { id: string; summary: StatisticsSummary };
 export type StatisticsFilters = {

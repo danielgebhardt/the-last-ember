@@ -61,9 +61,10 @@ export default function PrivacyNote() {
 								Save and Autosave can sync privately across devices. Signed-in
 								wins and deaths automatically contribute run summaries for
 								balancing: settings, progress, encounters, final gear, and
-								spell, consumable and equipment usage. Ranked runs appear
-								publicly under your chosen display name, by difficulty and game
-								version.
+								spell, consumable and equipment usage. New adventures also
+								record floor checkpoints, damage and healing, acquired items,
+								purchases, sales and gold flows. Ranked runs appear publicly
+								under your chosen display name, by difficulty and game version.
 							</p>
 						</EmberPanel>
 						<EmberPanel>

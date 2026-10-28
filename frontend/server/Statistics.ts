@@ -1,6 +1,10 @@
 import { type TokenVerifier, verifiedUser } from "../api/account.ts";
 import {
+	MAX_STATISTICS_BYTES,
+	MAX_STATISTICS_LIST_ROW_BYTES,
 	type RunStatistics,
+	statisticsBytes,
+	statisticsListSummary,
 	summarizeRun,
 } from "../src/domain/saves/RunStatistics.ts";
 import { parseSave } from "../src/domain/saves/SaveFormat.ts";
@@ -41,10 +45,19 @@ export const handleStatistics = async (
 	)
 		return json(400, { error: "A finished run with a run ID is required." });
 	try {
-		await write(
-			`${user.uid}_${document.state.runId}`,
-			summarizeRun(document, process.env.VERCEL_GIT_COMMIT_SHA ?? null),
+		const summary = summarizeRun(
+			document,
+			process.env.VERCEL_GIT_COMMIT_SHA ?? null,
 		);
+		if (
+			statisticsBytes(summary) > MAX_STATISTICS_BYTES ||
+			statisticsBytes(statisticsListSummary(summary)) >
+				MAX_STATISTICS_LIST_ROW_BYTES
+		)
+			return json(400, {
+				error: "Run statistics exceed the supported size budget.",
+			});
+		await write(`${user.uid}_${document.state.runId}`, summary);
 	} catch (error) {
 		if ((error as { code?: string }).code === "account-deleted")
 			return json(410, { error: "This account has been deleted." });

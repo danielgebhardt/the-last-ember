@@ -173,3 +173,15 @@ Measured 2026-10-26 on `codex/developer-tools`, using the same five-run script a
 | Begin Adventure ready, slow 4G, 4× CPU, cold | 2.275 s | 2.274 s | ≤ 2.35 s |
 
 Local cold readiness was 66 ms. The opening still makes nine requests and neither Firebase chunk loads. The existing account dialog is reused; the added code coordinates initial cloud checking, local fallback and save-choice dialogs, including protection against late cloud responses after local play starts. Total received size rose by 0.1 KB. Signed-in save checking is exercised separately with the Auth and Firestore emulators; it is not part of this signed-out timing.
+
+## Run usage and floor telemetry (#430, #433)
+
+Measured 2026-10-27 on `codex/run-telemetry`, including the finished-run projection slice, using the same five-run script and profiles. Fresh browser contexts were signed out; sign-in and developer tools were not opened or hovered. This includes intervening game changes since the previous baseline, so it is not a controlled comparison of telemetry alone.
+
+| | Opening sign-in baseline | Current build | Budget |
+|---|---|---|---|
+| Startup JavaScript received | 332.9 KB | 341.9 KB | — |
+| Signed-out cold load received | 393.1 KB | 401.7 KB | ≤ 407 KB |
+| Begin Adventure ready, slow 4G, 4× CPU, cold | 2.274 s | 2.324 s | ≤ 2.35 s |
+
+Local cold readiness was 70 ms; warm readiness was 39 ms. Slow-4G warm readiness was 577 ms, and all images were shown after 2.584 s cold / 716 ms warm. The opening makes eleven requests; neither Firebase chunk nor the lazy developer statistics page loads, and no telemetry API request is made. The statistics page is 13.9 KB raw / 4.7 KB gzip and loads only when opened. Trusted validation and Firestore projection remain outside the browser build. Gameplay records bounded maps at existing action/transition boundaries and submits only through the existing finished-run queue; there are no added per-action network or storage calls.

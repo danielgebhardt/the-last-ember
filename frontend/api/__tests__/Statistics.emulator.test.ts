@@ -19,7 +19,8 @@ import {
 import { getFirestore as adminFirestore } from "firebase-admin/firestore";
 import { describe, expect, it } from "vitest";
 import { statisticsAdmin } from "../../server/Admin.ts";
-import { savedAdventure } from "../../src/__tests/SaveTestHelpers.ts";
+import { largeTelemetryRun } from "../../src/__tests/TelemetryTestHelpers.ts";
+import { summarizeRun } from "../../src/domain/saves/RunStatistics.ts";
 
 const authHost = process.env.FIREBASE_AUTH_EMULATOR_HOST;
 const firestoreHost = process.env.FIRESTORE_EMULATOR_HOST;
@@ -69,14 +70,8 @@ describe.skipIf(!authHost || !firestoreHost)(
 							).user,
 						);
 				}
-				const document = savedAdventure();
+				const document = largeTelemetryRun();
 				document.state.runId = crypto.randomUUID();
-				document.state.player.health = 0;
-				document.state.usage = {
-					casts: { protection: 1 },
-					consumables: { "healing-potion": 2, "enchantment-scroll": 1 },
-					equippedTurns: { "short-sword": 3 },
-				};
 				const id = `${users[0].uid}_${document.state.runId}`;
 				const token = await users[0].getIdToken();
 				const request = () =>
@@ -107,12 +102,12 @@ describe.skipIf(!authHost || !firestoreHost)(
 				expect((await admin.doc(id).get()).data()).toMatchObject({
 					seed: 123,
 					outcome: "died",
-					turns: 3,
+					turns: document.state.turn,
+					telemetry: summarizeRun(document, null).telemetry,
 					usage: document.state.usage,
 				});
 				const before = (await admin.doc(id).get()).data();
-				document.state.gold += 10;
-				document.state.usage.consumables["healing-potion"] = 3;
+				document.savedAt = "2026-10-28T00:00:00.000Z";
 				expect((await POST(request())).status).toBe(200);
 				expect((await admin.doc(id).get()).data()).toEqual(before);
 				for (const app of apps) {

@@ -67,6 +67,7 @@ export default function DeveloperStatisticsPage() {
 	const uid = account.user?.uid;
 	const title = useRef<HTMLHeadingElement>(null),
 		abort = useRef<AbortController | null>(null);
+	const detailAbort = useRef<AbortController | null>(null);
 	const [from, setFrom] = useState(() =>
 		new Date(Date.now() - 30 * 86400000).toISOString().slice(0, 10),
 	);
@@ -83,8 +84,67 @@ export default function DeveloperStatisticsPage() {
 	});
 	const [page, setPage] = useState(0),
 		[detail, setDetail] = useState<StatisticsEntry | null>(null);
+	const [detailLoading, setDetailLoading] = useState(false),
+		[detailError, setDetailError] = useState<string | null>(null);
 	const [loadedRange, setLoadedRange] = useState("");
-	useEffect(() => () => abort.current?.abort(), []);
+	useEffect(
+		() => () => {
+			abort.current?.abort();
+			detailAbort.current?.abort();
+		},
+		[],
+	);
+	const closeDetail = () => {
+		detailAbort.current?.abort();
+		setDetail(null);
+		setDetailLoading(false);
+		setDetailError(null);
+	};
+	const inspect = async (entry: StatisticsEntry) => {
+		detailAbort.current?.abort();
+		const controller = new AbortController();
+		detailAbort.current = controller;
+		setDetail(entry);
+		setDetailLoading(true);
+		setDetailError(null);
+		try {
+			const token = await current.current.idToken();
+			if (
+				controller.signal.aborted ||
+				current.current.user?.uid !== uid ||
+				!current.current.user?.developer
+			)
+				return;
+			const response = await fetch(
+				`/api/developer-statistics?${new URLSearchParams({ id: entry.id })}`,
+				{
+					headers: { authorization: `Bearer ${token}` },
+					signal: controller.signal,
+				},
+			);
+			const data = await response.json();
+			if (!response.ok)
+				throw Error(data.error ?? "Run detail could not be loaded.");
+			if (
+				controller.signal.aborted ||
+				current.current.user?.uid !== uid ||
+				!current.current.user?.developer
+			)
+				return;
+			if (data.rows?.[0]?.id !== entry.id)
+				throw Error("This run is no longer available.");
+			setDetail(data.rows[0]);
+		} catch (failure) {
+			if (!controller.signal.aborted)
+				setDetailError(
+					failure instanceof Error
+						? failure.message
+						: "Run detail could not be loaded.",
+				);
+		} finally {
+			if (!controller.signal.aborted) setDetailLoading(false);
+		}
+	};
 	const rows = useMemo(
 		() => filterStatistics(entries, filters),
 		[entries, filters],
@@ -102,7 +162,7 @@ export default function DeveloperStatisticsPage() {
 		setError(null);
 		setEntries([]);
 		setPage(0);
-		setDetail(null);
+		closeDetail();
 		try {
 			let after: string | null = null;
 			const all: StatisticsEntry[] = [];
@@ -170,7 +230,7 @@ export default function DeveloperStatisticsPage() {
 	const change = (key: keyof StatisticsFilters, value: string) => {
 		setFilters((old) => ({ ...old, [key]: value }));
 		setPage(0);
-		setDetail(null);
+		closeDetail();
 	};
 	if (account.user?.developer !== true) return null;
 	return (
@@ -479,7 +539,8 @@ export default function DeveloperStatisticsPage() {
 													size="sm"
 													variant="ghost"
 													aria-label={`Inspect run ${entry.summary.seed}`}
-													onClick={() => setDetail(entry)}
+													disabled={detailLoading && detail?.id === entry.id}
+													onClick={() => void inspect(entry)}
 												>
 													Inspect
 												</Button>
@@ -530,11 +591,34 @@ export default function DeveloperStatisticsPage() {
 										type="button"
 										variant="ghost"
 										aria-label="Close run detail"
-										onClick={() => setDetail(null)}
+										onClick={closeDetail}
 									>
 										<X aria-hidden="true" />
 									</Button>
 								</div>
+								{detailLoading && (
+									<p
+										role="status"
+										className="mt-3 text-sm text-muted-foreground"
+									>
+										Loading run detail…
+									</p>
+								)}
+								{detailError && (
+									<div className="mt-3 flex items-center gap-3">
+										<p role="alert" className="text-sm text-destructive">
+											{detailError}
+										</p>
+										<Button
+											type="button"
+											size="sm"
+											variant="outline"
+											onClick={() => void inspect(detail)}
+										>
+											Retry detail
+										</Button>
+									</div>
+								)}
 								<pre className="mt-3 max-h-96 overflow-auto whitespace-pre-wrap break-words rounded-lg bg-muted/40 p-3 text-xs">
 									{JSON.stringify(detail.summary, null, 2)}
 								</pre>

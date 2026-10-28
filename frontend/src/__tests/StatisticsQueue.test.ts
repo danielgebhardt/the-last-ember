@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { StatisticsQueue } from "../statistics/StatisticsQueue";
 import { savedAdventure } from "./SaveTestHelpers";
+import { trackedFinishedRun } from "./TelemetryTestHelpers";
 
 const finished = () => {
 	const document = savedAdventure();
@@ -42,7 +43,7 @@ describe("Finished runs waiting in browser storage", () => {
 				.mockResolvedValue(new Response(null, { status: 200 }));
 
 			const queue = new StatisticsQueue(localStorage, send);
-			const document = finished();
+			const document = trackedFinishedRun();
 			document.state.usage = {
 				casts: { protection: 1 },
 				consumables: { "healing-potion": 2, "enchantment-scroll": 1 },
@@ -69,6 +70,14 @@ describe("Finished runs waiting in browser storage", () => {
 			await reloaded.retry("one", token);
 
 			expect(send).toHaveBeenCalledTimes(2);
+			expect(send.mock.calls[0][1]?.body).toBe(send.mock.calls[1][1]?.body);
+			const submitted = JSON.parse(String(send.mock.calls[1][1]?.body)).state;
+			expect(submitted.floorTelemetry).toEqual(document.state.floorTelemetry);
+			expect(submitted.combatTelemetry).toEqual(document.state.combatTelemetry);
+			expect(submitted.economyTelemetry).toEqual(
+				document.state.economyTelemetry,
+			);
+
 			for (const [, options] of send.mock.calls)
 				expect(JSON.parse(String(options?.body)).state.usage).toEqual(
 					document.state.usage,

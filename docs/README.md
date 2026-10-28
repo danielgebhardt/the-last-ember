@@ -6,6 +6,7 @@ Current references:
 
 - [Working agreement](ai-working-agreement.md) and [Definition of Done](definition-of-done.md)
 - [Save policy](save-policy.md): the current version only, with a version bump on breaking changes
+- [Run telemetry](run-telemetry.md): usage, checkpoints, combat, economy and finished-run collection budgets
 - [Afflictions](afflictions.md): conditions, cures, sources and the shared rules
 - [Town rules and travel](town-rules.md), [authored layout](town-layout.md), [town economy](town-economy.md)
 

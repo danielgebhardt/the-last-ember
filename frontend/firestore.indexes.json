@@ -65,5 +65,11 @@
 			]
 		}
 	],
-	"fieldOverrides": []
+	"fieldOverrides": [
+		{
+			"collectionGroup": "statistics",
+			"fieldPath": "telemetry",
+			"indexes": []
+		}
+	]
 }

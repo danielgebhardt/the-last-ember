@@ -84,6 +84,12 @@ describe.skipIf(!authHost || !host)(
 					ids.push(id);
 					batch.create(database().doc(`statistics/${id}`), {
 						seed: i,
+						telemetry: {
+							schemaVersion: 1,
+							checkpoints: null,
+							combat: null,
+							economy: null,
+						},
 						standard: true,
 						finishedAt:
 							i === 201
@@ -96,6 +102,21 @@ describe.skipIf(!authHost || !host)(
 				expect(response.status).toBe(200);
 				const first = await response.json();
 				expect(first.rows).toHaveLength(200);
+				expect(
+					first.rows.every(
+						(row: { summary: object }) => !("telemetry" in row.summary),
+					),
+				).toBe(true);
+				const detailQuery = `id=${ids[0]}`;
+				const detail = await GET(request(tokens[0], detailQuery));
+				expect(detail.status).toBe(200);
+				expect((await detail.json()).rows[0]).toMatchObject({
+					id: ids[0],
+					summary: { telemetry: { schemaVersion: 1 } },
+				});
+				expect((await GET(request(tokens[1], detailQuery))).status).toBe(403);
+				expect((await GET(request(tokens[0], "id=missing"))).status).toBe(404);
+
 				expect(first.next).toBeTruthy();
 				const second = await (
 					await GET(
@@ -140,6 +161,7 @@ describe.skipIf(!authHost || !host)(
 				await authAdmin().setCustomUserClaims(users[0].uid, {
 					anotherClaim: true,
 				});
+				expect((await GET(request(tokens[0], detailQuery))).status).toBe(403);
 				// API checks the current Auth claim as well as the signed token, so removal
 				// is immediate here even while an old ID token still has developer=true.
 				expect((await GET(request(tokens[0]))).status).toBe(403);

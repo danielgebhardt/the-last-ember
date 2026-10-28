@@ -39,6 +39,21 @@ export const summarizeRun = (document: SaveDocument, commit: string | null) => {
 		level: levelForExperience(state.progression.experience),
 		gold: state.gold,
 		monstersDefeated: state.monstersDefeated,
+		telemetry:
+			state.floorTelemetry || state.combatTelemetry || state.economyTelemetry
+				? {
+						schemaVersion: 1 as const,
+						checkpoints: state.floorTelemetry
+							? structuredClone(state.floorTelemetry)
+							: null,
+						combat: state.combatTelemetry
+							? structuredClone(state.combatTelemetry)
+							: null,
+						economy: state.economyTelemetry
+							? structuredClone(state.economyTelemetry)
+							: null,
+					}
+				: null,
 		// Project only validated counters; never accept a client-provided summary.
 		// Null means unknown, whereas empty maps mean measured zero usage.
 		usage: state.usage
@@ -80,3 +95,45 @@ export const summarizeRun = (document: SaveDocument, commit: string | null) => {
 	};
 };
 export type RunStatistics = ReturnType<typeof summarizeRun>;
+
+export const MAX_STATISTICS_BYTES = 512 * 1024;
+export const MAX_STATISTICS_LIST_ROW_BYTES = 16 * 1024;
+export const MAX_STATISTICS_RESPONSE_BYTES = 4 * 1024 * 1024;
+export const statisticsBytes = (value: unknown) =>
+	new TextEncoder().encode(JSON.stringify(value)).byteLength;
+// Keep list/CSV/filter reads small; full private telemetry is fetched on Inspect.
+export const STATISTICS_LIST_FIELDS = [
+	"seed",
+	"rows",
+	"columns",
+	"floorCount",
+	"standard",
+	"ranked",
+	"difficulty",
+	"gameVersion",
+	"commit",
+	"outcome",
+	"turns",
+	"deepestFloor",
+	"endedFloor",
+	"causeOfDeath",
+	"level",
+	"gold",
+	"monstersDefeated",
+	"usage",
+	"encountersSinceTurn",
+	"omensMet",
+	"thievesMet",
+	"thiefTake",
+	"mimicsMet",
+	"arena",
+	"pact",
+	"equipped",
+	"finishedAt",
+] as const satisfies readonly (keyof RunStatistics)[];
+export const statisticsListSummary = (summary: object) =>
+	Object.fromEntries(
+		STATISTICS_LIST_FIELDS.filter((key) => Object.hasOwn(summary, key)).map(
+			(key) => [key, (summary as Record<string, unknown>)[key]],
+		),
+	);

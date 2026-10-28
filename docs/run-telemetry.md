@@ -48,20 +48,52 @@ cannot increase or replace counters. Browser writes to statistics remain denied.
 There is still one statistics document write per accepted run and no new endpoint,
 per-action request, polling or client-writable statistics data.
 
-A catalog-wide valid fixture with maximum safe counters keeps the entire summary
-below **16 KiB**. At the existing 200-row developer page size that is about 3.2 MiB
-before response wrappers; #433 must revisit response budgets when adding floor
-records. This complements the 8 KiB usage-field budget and the existing 4 MiB
-uncompressed save/request limit.
+The Firestore document adds `telemetry: { schemaVersion: 1, checkpoints, combat,
+economy }`, copying the validated `floorTelemetry`, `combatTelemetry` and
+`economyTelemetry` groups described below. Each missing group becomes `null`;
+all groups absent yields `telemetry: null`. Historical documents may omit it.
+The projection contains kind/source counters and checkpoint values, never the
+full save, item IDs, acquisition annotations, activity log or player identity.
+The existing document path remains account scoped and private.
 
-Deploy the browser and bundled statistics function together. No new rules, indexes
-or Firebase credentials are needed. CSV changes and a new statistics frontend are
-outside the agreed collection scope. #433 will add floor context, availability
-and economy measurements, including store purchases/sales. Zero usage alone does
-not imply rejection: the player may never have obtained the item or learned the
-spell.
+Zero usage alone does not imply rejection: the player may never have obtained
+the item or learned the spell. Acquisitions and checkpoint supplies distinguish
+observed availability from usage. Metrics describe **finished, submitted runs**,
+not every adventure started: abandoned, never-submitted/offline and signed-out
+runs are missing. Future comparisons must account for that selection and floor
+reach/survivorship bias, separating game version, difficulty, standard/custom,
+outcome and dates. Do not treat an unreached floor as measured zero. Town counters
+are separate; a `null` final floor denotes termination in town.
 
-## Floor checkpoints (#433, first collection slice)
+### Combined payload and read budgets
+
+- Uncompressed save/request: **4 MiB**, enforced by `parseSave`.
+- Finished statistics JSON: **512 KiB**, enforced before the Admin write.
+- List summary JSON: **16 KiB** per run, enforced on new submissions.
+- API response JSON: **4 MiB**, enforced for both list and detail reads.
+- Developer pages: **200** existing metadata/usage summaries, excluding
+  `telemetry` through Firestore field projection. Cursor lookup fetches only
+  `finishedAt`. Inspect fetches one full private document on demand, with the same
+  current-developer authorization, no caching/polling and cancellation/retry.
+  Filters, breakdowns and CSV retain their existing fields and behavior.
+
+These budgets leave room below [Firestore's 1 MiB document limit](https://firebase.google.com/docs/firestore/quotas)
+(including its field-name/storage overhead) and [Vercel's 4.5 MB function payload limit](https://vercel.com/docs/functions/limitations).
+A valid standard 40×40×20 save with every catalog/source/store map populated,
+large counters and all floor checkpoints exercises the combined budgets and real
+Admin write in the emulators. Tests also bound the 200-row response including IDs
+and wrappers. Separate catalog-wide maximum-safe-integer tests enforce the usage,
+checkpoint, combat and economy ceilings described below. These are bounded maps,
+not an ever-growing event history. New catalog additions must keep these budgets
+passing or explicitly revise collection/storage design.
+
+Deploy browser and bundled functions together. Publish `firestore.indexes.json`
+(`firebase deploy --only firestore:indexes` from `frontend`) to exempt the
+`statistics.telemetry` map and its nested fields from indexing; no new query uses
+those fields. Existing developer-read-only rules remain unchanged. No new
+credentials are needed. There are no new CSV columns or analytics views.
+
+## Floor checkpoints (#433)
 
 New sessions also own optional `state.floorTelemetry`. It starts empty in town;
 looking at the dungeon map before descending does not count as reaching a floor.
@@ -106,12 +138,11 @@ inconsistent resources/slots, invalid exit destinations and final resource/equip
 facts that differ from the saved terminal state. Derived historical values are not
 recomputed against later balance rules or level curves when loading. Tests bound the checkpoint JSON to **128 KiB** across all 20 floors.
 
-Checkpoints currently save in browser/cloud adventures only. Projecting floor
-telemetry into finished-run statistics remains a separate review commit.
-No new request or Firestore statistics write is introduced by capturing
-checkpoints. No balance rules or RNG streams change.
+Checkpoints save in browser/cloud adventures and project into the existing
+finished-run statistics document. No new request or Firestore statistics write
+is introduced by capturing checkpoints. No balance rules or RNG streams change.
 
-## Combat, healing and encounter counters (#433, second collection slice)
+## Combat, healing and encounter counters (#433)
 
 New sessions also initialize optional `state.combatTelemetry`. Missing telemetry
 is unknown, including adventures created before this slice; loading never adds
@@ -171,10 +202,10 @@ Validation accepts only known keys and safe nonnegative integers, checks source
 subtotals, death state, floor limits, and local/global usage consistency. A
 catalog-wide, twenty-floor plus town counter fixture is below **128 KiB**; the
 counter field also has a 128 KiB validation ceiling. This is separate from the
-checkpoint budget. The final submission slice will test the combined save and
-Firestore document budgets before projecting these fields into statistics.
+checkpoint budget; the combined save, Firestore and response budgets are tested
+in the finished-run collection tests.
 
-## Acquisitions and economy (#433, third collection slice)
+## Acquisitions and economy (#433)
 
 New sessions initialize optional `state.economyTelemetry`. Starting gold, owned
 kit and known spells are recorded separately from subsequent acquisition and
@@ -232,5 +263,5 @@ preserve the same counters and annotations. A catalog-wide fixture with all 20
 floor maps, every applicable store/item pair and maximum safe values stays under
 **256 KiB**, also enforced as the economy field's validation ceiling. Only new
 sessions initialize this field; no save-version bump or historical backfill is
-needed. Finished-run statistics projection and combined payload/API response
-budgets remain the next review slice.
+needed. Finished runs project these groups into the private statistics document
+under the combined budgets above.
