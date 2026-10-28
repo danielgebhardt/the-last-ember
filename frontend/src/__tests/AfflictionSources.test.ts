@@ -160,3 +160,19 @@ describe.each(SOURCES)("%s", (kind) => {
 		expect(save({ kind: "goblin", health: 4 }).ok).toBe(false);
 	});
 });
+
+describe("Miniboss affliction traits", () => {
+	const text = (kind: Parameters<typeof monsterTraits>[0]) =>
+		monsterTraits(kind).join(" ");
+	it("promises a remedy drop only from spawned carriers", () => {
+		expect(text("spider")).toContain("always drops a Cleansing potion");
+		expect(text("broodmother")).toContain("Web:");
+		expect(text("broodmother")).not.toContain("always drops");
+	});
+	it("names the Bone Lich's second-phase slowing hex, not Curse", () => {
+		expect(text("hexweaver")).toContain("and Curse");
+		expect(text("bone-lich")).toContain("Hex, from its second phase");
+		expect(text("bone-lich")).toContain("and Slowed");
+		expect(text("bone-lich")).not.toContain("Curse");
+	});
+});

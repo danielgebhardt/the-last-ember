@@ -56,12 +56,14 @@ export const monsterTraits = (kind: MonsterKind): readonly string[] => {
 		);
 	if (definition.webAttack)
 		traits.push(
-			`Web: marks your tile within ${definition.webAttack.range} tiles instead of attacking, then resolves on its next action. Step off the marked tile to avoid it; staying applies Slowed (evasion −10 for 30 phases, refreshes without stacking). No damage; magic resistance does not protect. At least ${definition.webAttack.cooldown} phases between webs. Sleep or Fear cancels it. Cleansing potion or the sanctuary cures Slowed; the first spider of an adventure always drops a Cleansing potion.`,
+			`Web: marks your tile within ${definition.webAttack.range} tiles instead of attacking, then resolves on its next action. Step off the marked tile to avoid it; staying applies Slowed (evasion −10 for 30 phases, refreshes without stacking). No damage; magic resistance does not protect. At least ${definition.webAttack.cooldown} phases between webs. Sleep or Fear cancels it. Cleansing potion or the sanctuary cures Slowed${!definition.miniboss ? "; the first spider of an adventure always drops a Cleansing potion" : ""}.`,
 		);
-	if (definition.hexAttack)
+	if (definition.hexAttack) {
+		const slows = definition.hexAttack.affliction === "slowed";
 		traits.push(
-			`Hex: while it can see you within ${definition.hexAttack.range} tiles, it prepares a hex instead of attacking, then casts on its next action: ${definition.hexAttack.damage} arcane damage (magic resistance applies) and Curse (melee to-hit −10 and damage −1 until cured). Break its line of sight or leave range to make it fizzle; Sleep or Fear cancels it. At least ${definition.hexAttack.cooldown} phases between hexes. Remove Curse scroll or the sanctuary cures Curse.`,
+			`${definition.hexAttack.fromPhase === 2 ? "Hex, from its second phase" : "Hex"}: while it can see you within ${definition.hexAttack.range} tiles, it prepares a hex instead of attacking, then casts on its next action: ${definition.hexAttack.damage} arcane damage (magic resistance applies) and ${slows ? "Slowed (evasion −10 for 30 phases, refreshes without stacking)" : "Curse (melee to-hit −10 and damage −1 until cured)"}. Break its line of sight or leave range to make it fizzle; Sleep or Fear cancels it. At least ${definition.hexAttack.cooldown} phases between hexes. ${slows ? "Cleansing potion or the sanctuary cures Slowed." : "Remove Curse scroll or the sanctuary cures Curse."}`,
 		);
+	}
 	if (definition.blindingStrike)
 		traits.push(
 			`Blinding strike: when beside you, it marks your tile instead of attacking, then strikes on its next action with a normal melee roll. A landed hit deals normal damage and Blinded (sight 2 tiles and melee to-hit −20 for 30 phases). Step off the marked tile to avoid it; Sleep or Fear cancels it. At least ${definition.blindingStrike.cooldown} phases between strikes. Cleansing potion or the sanctuary cures Blinded.`,
