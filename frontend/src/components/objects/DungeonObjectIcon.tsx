@@ -1,10 +1,8 @@
 import {
-	Amphora,
 	Coins,
 	DoorClosed,
 	DoorClosedLocked,
 	DoorOpen,
-	Egg,
 	Flame,
 	Gem,
 	Hourglass,
@@ -22,10 +20,12 @@ import type {
 	DungeonObjectKind,
 } from "../../domain/objects/DungeonObject";
 import CrackedWallIcon from "./CrackedWallIcon";
+import EggSacIcon from "./EggSacIcon";
 import ForgeIcon from "./ForgeIcon";
 import FountainIcon from "./FountainIcon";
 import MerchantIcon from "./MerchantIcon";
 import MirrorIcon from "./MirrorIcon";
+import PhylacteryIcon from "./PhylacteryIcon";
 import RunicPortalIcon from "./RunicPortalIcon";
 import SarcophagusIcon from "./SarcophagusIcon";
 import ThroneIcon from "./ThroneIcon";
@@ -59,8 +59,15 @@ const icons: Record<
 	"arena-gate": Swords,
 	"arena-door": DoorClosedLocked,
 	"arena-reward": Trophy,
-	"egg-sac": Egg,
-	phylactery: Amphora,
+	"egg-sac": EggSacIcon,
+	phylactery: PhylacteryIcon,
+};
+// The arena features share their miniboss's color.
+const OBJECT_COLORS: Partial<Record<DungeonObjectKind, string>> = {
+	trap: "text-destructive",
+	gold: "text-item-gear",
+	"egg-sac": "text-[#89558b] dark:text-[#bf85bd]",
+	phylactery: "text-[#477c85] dark:text-[#b2d1d5]",
 };
 const DungeonObjectIcon = ({ object }: { object: DungeonObject }) => {
 	if (!objectAvailable(object)) return null;
@@ -132,7 +139,7 @@ const DungeonObjectIcon = ({ object }: { object: DungeonObject }) => {
 		<Icon
 			aria-hidden="true"
 			focusable="false"
-			className={`size-full ${object.activated && object.kind !== "door" ? "opacity-50" : ""} ${object.kind === "trap" ? "text-destructive" : object.kind === "gold" ? "text-item-gear" : "text-object-stone"}`}
+			className={`size-full ${object.activated && object.kind !== "door" ? "opacity-50" : ""} ${OBJECT_COLORS[object.kind] ?? "text-object-stone"}`}
 		/>
 	);
 };
