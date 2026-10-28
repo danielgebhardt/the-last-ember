@@ -10,7 +10,7 @@ import {
 	type Difficulty,
 	isDifficulty,
 } from "../src/domain/game/Difficulty.ts";
-import { GAME_VERSION } from "../src/domain/game/GameVersion.ts";
+import { GAME_VERSION, GAME_VERSIONS } from "../src/domain/game/GameVersion.ts";
 import { isTestSeed } from "../src/domain/game/TestSeed.ts";
 import { summarizeRun } from "../src/domain/saves/RunStatistics.ts";
 import { parseSave } from "../src/domain/saves/SaveFormat.ts";
@@ -20,9 +20,6 @@ import type {
 } from "../src/statistics/Rankings.ts";
 import { activeAccount, database } from "./AccountData.ts";
 
-// Retain released versions here as GAME_VERSION advances, so in-flight adventures
-// keep the board on which they started. No pre-Rankings adventure has this marker.
-const supportedVersions: readonly string[] = ["0.3.0-alpha", GAME_VERSION];
 const json = (status: number, body: unknown) =>
 	Response.json(body, { status, headers: { "cache-control": "no-store" } });
 export type RankingsWriter = (
@@ -198,10 +195,7 @@ export const handleRankings = async (
 			return json(400, {
 				error: "Adventures started in Settings are unranked.",
 			});
-		if (
-			!state.rankingVersion ||
-			!supportedVersions.includes(state.rankingVersion)
-		)
+		if (!state.rankingVersion || !GAME_VERSIONS.includes(state.rankingVersion))
 			return json(400, {
 				error:
 					"Only adventures newly started after Rankings was introduced qualify.",
