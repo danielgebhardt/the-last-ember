@@ -77,7 +77,9 @@ export const verifiedUser = async (
 			code === "auth/id-token-expired" ||
 			code === "auth/invalid-id-token" ||
 			code === "auth/argument-error" ||
-			code === "auth/id-token-revoked";
+			code === "auth/id-token-revoked" ||
+			code === "auth/user-not-found" ||
+			code === "auth/user-disabled";
 
 		console.error("[Firebase Admin] Token verification failed:", {
 			code: code ?? "unknown",
