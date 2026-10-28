@@ -10,7 +10,7 @@ import {
 import { createPlayerStats } from "../game/PlayerStats";
 import { createProgression } from "../game/Progression";
 import { createStartingEquipment, equipmentSlotFor } from "../items/Equipment";
-import { ITEM_DEFINITIONS } from "../items/Item";
+import { ITEM_DEFINITIONS, type ItemInstance } from "../items/Item";
 import { itemName } from "../items/ItemValues";
 import { EMPOWERED_MULTIPLIER } from "../monsters/MonsterStats";
 import { FOUNTAIN_RULES, fountainRestoration } from "./DungeonFountains";
@@ -48,6 +48,8 @@ export type InteractionChoice = Readonly<{
 	// The Seer's Circlet names the fixed result.
 	foreseen?: string;
 	itemId?: string;
+	// The equipment a choice gives, shown compared with what is worn.
+	equipment?: ItemInstance;
 }>;
 // A line of atmosphere above an encounter's choices.
 export const OBJECT_FLAVOR: Partial<Record<DungeonObjectKind, string>> = {
@@ -396,6 +398,7 @@ const baseObjectChoices = (
 			return {
 				value: `claim-${kind}` as const,
 				label: definition.name,
+				equipment: { id: kind, kind },
 				description: ARENA_REWARD_LINES[kind],
 				outcomes: [
 					{

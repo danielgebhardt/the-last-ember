@@ -207,4 +207,46 @@ const EquipmentComparisonView = ({
 	);
 };
 
+// The verdict and only what changes, on a line or two, for choices read side by side.
+export const CompactComparison = ({
+	comparison,
+	replaces,
+}: {
+	comparison: EquipmentComparison;
+	// The worn piece it would take the place of.
+	replaces?: string;
+}) => {
+	const changed = [
+		...comparisonRows(comparison),
+		...attributeRows(comparison),
+	].filter((row) => row.changed);
+	return (
+		<span className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs">
+			<span
+				className={`rounded-md border px-2 py-0.5 font-semibold ${
+					comparisonStyles[comparison.label].border
+				} ${comparisonStyles[comparison.label].text}`}
+			>
+				{comparison.label}
+			</span>
+			{changed.length ? (
+				changed.map((row) => (
+					<span key={row.label} className="tabular-nums">
+						<span className="text-muted-foreground">{row.label}</span>{" "}
+						{row.before} →{" "}
+						<span className={`font-semibold ${valueStyle(row.change)}`}>
+							{row.after}
+						</span>
+					</span>
+				))
+			) : (
+				<span className="text-muted-foreground">No stat changes</span>
+			)}
+			{replaces && (
+				<span className="text-muted-foreground">replaces {replaces}</span>
+			)}
+		</span>
+	);
+};
+
 export default EquipmentComparisonView;

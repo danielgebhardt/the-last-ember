@@ -3,6 +3,9 @@ import { Eye, TriangleAlert } from "lucide-react";
 import { type RefObject, useLayoutEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import type { GameState } from "../../domain/game/GameState";
+import { equipmentSlotsFor } from "../../domain/items/Equipment";
+import { compareEquipment } from "../../domain/items/EquipmentComparison";
+import { itemName } from "../../domain/items/ItemValues";
 import {
 	type DungeonObject,
 	OBJECT_DEFINITIONS,
@@ -17,6 +20,7 @@ import {
 } from "../../domain/objects/ObjectChoices";
 import { describeObject } from "../../domain/objects/ObjectDescriptions";
 import type { InteractAction } from "../../domain/objects/ObjectInteraction";
+import { CompactComparison } from "../game/EquipmentComparisonView";
 import DungeonObjectIcon from "./DungeonObjectIcon";
 
 const TONES: Readonly<Record<ChoiceOutcome["tone"], string>> = {
@@ -24,7 +28,34 @@ const TONES: Readonly<Record<ChoiceOutcome["tone"], string>> = {
 	bad: "border-rose-600/30 bg-rose-500/10 text-rose-800 dark:border-rose-400/30 dark:text-rose-300",
 	neutral: "border-border bg-muted/60 text-muted-foreground",
 };
-const ChoiceDetails = ({ choice }: { choice: InteractionChoice }) => (
+// Equipment on offer is compared with what is worn, in place of its bonus chips.
+const EquipmentChoice = ({
+	choice,
+	state,
+}: {
+	choice: InteractionChoice;
+	state: GameState;
+}) => {
+	const piece = choice.equipment;
+	const slot = piece && equipmentSlotsFor(piece)[0];
+	const comparison = piece && slot && compareEquipment(piece, state, slot);
+	if (!slot || !comparison) return null;
+	const worn = state.equipment[slot];
+	return (
+		<CompactComparison
+			comparison={comparison}
+			replaces={worn ? itemName(worn) : undefined}
+		/>
+	);
+};
+
+const ChoiceDetails = ({
+	choice,
+	state,
+}: {
+	choice: InteractionChoice;
+	state: GameState;
+}) => (
 	<span className="mt-1 grid gap-2">
 		<span className="block text-sm leading-snug font-normal text-muted-foreground">
 			{choice.description}
@@ -34,6 +65,8 @@ const ChoiceDetails = ({ choice }: { choice: InteractionChoice }) => (
 				<Eye aria-hidden="true" className="size-4 shrink-0" />
 				Seer's sight: {choice.foreseen}
 			</span>
+		) : choice.equipment ? (
+			<EquipmentChoice choice={choice} state={state} />
 		) : (
 			choice.outcomes && (
 				<span className="flex flex-wrap gap-1.5">
@@ -216,7 +249,7 @@ const ObjectChoiceDialog = ({
 							</kbd>
 							<span className="min-w-0">
 								<span className="block font-medium">{choice.label}</span>
-								<ChoiceDetails choice={choice} />
+								<ChoiceDetails choice={choice} state={state} />
 							</span>
 						</Button>
 					))}
