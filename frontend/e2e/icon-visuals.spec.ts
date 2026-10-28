@@ -69,7 +69,12 @@ for (const [theme, width] of [
 						if (!view || !card) return true;
 						const style = view.getComputedStyle(node);
 						const textColor = view.getComputedStyle(card).color;
-						return style.color === textColor || style.stroke !== style.color;
+						// Line art strokes in the themed color; filled art (the Pyre Lord)
+						// fills its shape with it instead.
+						const themed =
+							style.stroke === style.color ||
+							node.querySelector('[fill="currentColor"]') !== null;
+						return style.color === textColor || !themed;
 					})
 					.map(
 						(node) => node.closest("li")?.querySelector("code")?.textContent,

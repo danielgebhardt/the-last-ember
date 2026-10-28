@@ -1,7 +1,9 @@
-import { Bug, Flame, Rat, Shield, Skull } from "lucide-react";
+import { Rat } from "lucide-react";
 import type { ComponentType, SVGProps } from "react";
 import { MONSTER_DEFINITIONS } from "../../domain/monsters/Monster";
 import type { MonsterKind } from "../../domain/monsters/Monster.ts";
+import BoneLichIcon from "./BoneLichIcon";
+import BroodmotherIcon from "./BroodmotherIcon";
 import BruteIcon from "./BruteIcon";
 import ChampionIcon from "./ChampionIcon";
 import ChargerIcon from "./ChargerIcon";
@@ -12,12 +14,14 @@ import GoblinArcherIcon from "./GoblinArcherIcon";
 import GoblinIcon from "./GoblinIcon.tsx";
 import GolemIcon from "./GolemIcon";
 import HexweaverIcon from "./HexweaverIcon";
+import IronJuggernautIcon from "./IronJuggernautIcon";
 import KoboldSlingerIcon from "./KoboldSlingerIcon";
 import ManaLeechIcon from "./ManaLeechIcon";
 import NecromancerIcon from "./NecromancerIcon";
 import OgreIcon from "./OgreIcon";
 import OrcIcon from "./OrcIcon";
 import PlagueRatIcon from "./PlagueRatIcon";
+import PyreLordIcon from "./PyreLordIcon";
 import ReflectionIcon from "./ReflectionIcon";
 import SalamanderIcon from "./SalamanderIcon";
 import SentryIcon from "./SentryIcon";
@@ -48,25 +52,24 @@ export const MONSTER_VISUALS: Record<
 		color: "text-monster-rust",
 		label: MONSTER_DEFINITIONS["iron-champion"].name,
 	},
-	// Placeholders until drawn icons exist.
 	"pyre-lord": {
-		icon: Flame,
-		color: "text-[#c2410c] dark:text-[#fb923c]",
+		icon: PyreLordIcon,
+		color: "text-[#b84d16] dark:text-[#ef7b3d]",
 		label: MONSTER_DEFINITIONS["pyre-lord"].name,
 	},
 	"iron-juggernaut": {
-		icon: Shield,
-		color: "text-[#57534e] dark:text-[#d6d3d1]",
+		icon: IronJuggernautIcon,
+		color: "text-[#8f742e] dark:text-[#dbc27d]",
 		label: MONSTER_DEFINITIONS["iron-juggernaut"].name,
 	},
 	broodmother: {
-		icon: Bug,
-		color: "text-[#7e22ce] dark:text-[#d8b4fe]",
+		icon: BroodmotherIcon,
+		color: "text-[#89558b] dark:text-[#bf85bd]",
 		label: MONSTER_DEFINITIONS.broodmother.name,
 	},
 	"bone-lich": {
-		icon: Skull,
-		color: "text-[#4d7c0f] dark:text-[#bef264]",
+		icon: BoneLichIcon,
+		color: "text-[#477c85] dark:text-[#b2d1d5]",
 		label: MONSTER_DEFINITIONS["bone-lich"].name,
 	},
 	spiderling: {
