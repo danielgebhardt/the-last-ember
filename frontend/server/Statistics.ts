@@ -49,6 +49,11 @@ export const handleStatistics = async (
 			document,
 			process.env.VERCEL_GIT_COMMIT_SHA ?? null,
 		);
+		// The save's clock is the client's. Lists sort and filter on this string, so
+		// store it as UTC ISO and never later than its receipt.
+		summary.finishedAt = new Date(
+			Math.min(Date.parse(summary.finishedAt), Date.now()),
+		).toISOString();
 		if (
 			statisticsBytes(summary) > MAX_STATISTICS_BYTES ||
 			statisticsBytes(statisticsListSummary(summary)) >

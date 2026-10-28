@@ -161,6 +161,28 @@ describe("Trusted run statistics", () => {
 		);
 	});
 
+	it("records the save's finish time, never later than its receipt", async () => {
+		const finishedAt = async (savedAt: string) => {
+			const document = finished();
+			document.savedAt = savedAt;
+			const write = vi.fn();
+			expect(
+				(await handleStatistics(request(document), verify, write)).status,
+			).toBe(200);
+			return write.mock.calls[0][1].finishedAt as string;
+		};
+
+		expect(await finishedAt("2026-10-01T12:00:00.000Z")).toBe(
+			"2026-10-01T12:00:00.000Z",
+		);
+		expect(await finishedAt("2026-10-01T14:00:00+02:00")).toBe(
+			"2026-10-01T12:00:00.000Z",
+		);
+		const before = Date.now();
+		const future = Date.parse(await finishedAt("2999-01-01T00:00:00.000Z"));
+		expect(future).toBeGreaterThanOrEqual(before);
+		expect(future).toBeLessThanOrEqual(Date.now());
+	});
 	it("acknowledges an existing run, and makes other write failures retryable", async () => {
 		expect(
 			(
