@@ -37,8 +37,13 @@ export const AccountProfileProvider = ({
 	const uid = account.status === "signed-in" ? account.user?.uid : undefined;
 	const generation = useRef(0);
 	const [epoch, reload] = useState(0);
+	const loaded = useRef(false);
 	useEffect(() => {
-		const online = () => reload((value) => value + 1);
+		// Only a profile that failed to load retries: reloading a ready one would
+		// tear down cloud sync on every reconnect.
+		const online = () => {
+			if (!loaded.current) reload((value) => value + 1);
+		};
 		window.addEventListener("online", online);
 		return () => window.removeEventListener("online", online);
 	}, []);
@@ -49,6 +54,7 @@ export const AccountProfileProvider = ({
 		ready: boolean;
 		busy: boolean;
 	}>({ displayName: null, error: null, ready: false, busy: false });
+	loaded.current = !!uid && state.uid === uid && state.ready;
 	const request = async (
 		owner: string,
 		method: string,
