@@ -269,6 +269,9 @@ export type ActivityEvent = { turn: number } & (
 	| { type: "arena-reward-claimed"; item: ArenaRewardKind }
 	| { type: "egg-sac-broken" }
 	| { type: "egg-sacs-burned" | "brood-hatched"; count: number }
+	| { type: "dead-raised"; monster: "skeleton" | "zombie"; count: number }
+	| { type: "phylactery-struck"; blows: number }
+	| { type: "phylactery-blow-lost" | "phylactery-broken" | "lich-warded" }
 	| { type: "omen-foreseen"; omen?: OmenKind }
 	| { type: "experience-gained"; amount: number }
 	| { type: "level-gained"; level: number; healthGain: number }

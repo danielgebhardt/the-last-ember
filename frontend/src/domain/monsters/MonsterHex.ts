@@ -14,14 +14,16 @@ import {
 } from "./MonsterTelegraphs";
 
 // A hex replaces that phase's attack: prepare while it sees you, then resolve next action.
-// Breaking its sight or leaving range avoids it; landing deals arcane damage and Curse.
+// Breaking its sight or leaving range avoids it; landing deals arcane damage and its
+// affliction, Curse unless the hex names another.
 export const resolveMonsterHex = (
 	state: GameState,
 	monster: Monster,
 	detected: boolean,
 ): SpecialActionOutcome | undefined => {
 	const hex = MONSTER_DEFINITIONS[monster.kind].hexAttack;
-	if (!hex) return undefined;
+	if (!hex || (hex.fromPhase === 2 && monster.minibossPhase !== 2))
+		return undefined;
 	const turn = state.turn;
 	const inReach =
 		detected &&
@@ -45,7 +47,7 @@ export const resolveMonsterHex = (
 				{ type: "monster-hex-hit", monster: monster.kind, damage, turn },
 			],
 			damage,
-			affliction: "curse",
+			affliction: hex.affliction ?? "curse",
 		};
 	}
 	if (

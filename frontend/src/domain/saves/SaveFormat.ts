@@ -130,6 +130,7 @@ export const createSaveDocument = (
 				wellResult,
 				mirrorResult,
 				portalDestination,
+				blows,
 			}) => ({
 				id,
 				kind,
@@ -141,6 +142,7 @@ export const createSaveDocument = (
 				...(forgeResult ? { forgeResult: { ...forgeResult } } : {}),
 				...(wellResult ? { wellResult: { ...wellResult } } : {}),
 				...(mirrorResult ? { mirrorResult: { ...mirrorResult } } : {}),
+				...(blows ? { blows } : {}),
 				...(portalDestination
 					? {
 							portalDestination: {

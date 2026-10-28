@@ -4,6 +4,7 @@ import {
 	EXIT_REFUSAL,
 	enterArena,
 } from "../arena/ArenaRules";
+import { strikePhylactery } from "../arena/BoneLich";
 import { breakEggSac } from "../arena/Brood";
 import { appendActivityEvents } from "../game/ActivityHistory";
 import type { GameState } from "../game/GameState";
@@ -139,6 +140,7 @@ export const interactObject = (
 	if (object.kind === "arena-reward")
 		return claimArenaReward(state, object, action.choice);
 	if (object.kind === "egg-sac") return breakEggSac(state, object);
+	if (object.kind === "phylactery") return strikePhylactery(state, object);
 
 	if (
 		object.activated &&

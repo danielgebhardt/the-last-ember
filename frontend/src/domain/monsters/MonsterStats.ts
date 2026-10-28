@@ -28,6 +28,7 @@ const DEPTH_GROWTH: Partial<
 	"pyre-lord": { health: (depth) => 8 * depth, attack: (depth) => depth },
 	"iron-juggernaut": { health: (depth) => 9 * depth, attack: (depth) => depth },
 	broodmother: { health: (depth) => 7 * depth, attack: (depth) => depth },
+	"bone-lich": { health: (depth) => 8 * depth, attack: (depth) => depth },
 	// The brood grows with its mother's floor, so a deep hall's hatchlings still bite.
 	spiderling: {
 		health: (depth) => depth,

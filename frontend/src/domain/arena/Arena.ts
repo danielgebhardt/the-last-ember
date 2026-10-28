@@ -22,6 +22,7 @@ export const MINIBOSS_KINDS = [
 	"pyre-lord",
 	"iron-juggernaut",
 	"broodmother",
+	"bone-lich",
 ] as const;
 export type MinibossKind = (typeof MINIBOSS_KINDS)[number];
 export type Arena = Readonly<{ floorNumber: number; miniboss: MinibossKind }>;
@@ -58,6 +59,12 @@ export const EGG_SAC_TILES: readonly Coordinate[] = [
 ];
 export const eggSacId = (floorNumber: number, index: number) =>
 	`floor:${floorNumber}:object:egg-sac:${index + 1}`;
+// The Bone Lich raises the dead from bone piles on the same tiles beside the pillars,
+// and his phylactery stands at the far end of the hall, before the exit.
+export const BONE_PILE_TILES = EGG_SAC_TILES;
+export const PHYLACTERY_TILE: Coordinate = { row: 8, col: 31 };
+export const phylacteryId = (floorNumber: number) =>
+	`floor:${floorNumber}:object:phylactery:1`;
 
 // The arena's stairs: you arrive on the sealed up stair; the way on lies in the reward room.
 export const ARENA_UP_STAIR: Coordinate = { row: 8, col: 3 };
@@ -226,6 +233,17 @@ export const withArena = (
 					coordinate: { ...coordinate },
 					activated: false,
 				}))
+			: []),
+		...(miniboss === "bone-lich"
+			? [
+					{
+						id: phylacteryId(floorNumber),
+						kind: "phylactery" as const,
+						floorNumber,
+						coordinate: { ...PHYLACTERY_TILE },
+						activated: false,
+					},
+				]
 			: []),
 	];
 	const boss: Monster = {

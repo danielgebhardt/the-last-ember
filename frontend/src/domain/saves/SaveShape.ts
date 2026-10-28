@@ -4,6 +4,7 @@ import {
 	MINIBOSS_KINDS,
 } from "../arena/Arena";
 import { ARENA_COLS, ARENA_ROWS } from "../arena/ArenaLayout";
+import { PHYLACTERY_BLOWS } from "../arena/BoneLich";
 import {
 	CONFIGURATION_LIMITS,
 	FOG_RADIUS_LIMITS,
@@ -389,6 +390,14 @@ const eventFields = {
 	"egg-sac-broken": {},
 	"egg-sacs-burned": { count: integer(1, EGG_SAC_TILES.length) },
 	"brood-hatched": { count: integer(1, EGG_SAC_TILES.length) },
+	"dead-raised": {
+		monster: oneOf(["skeleton", "zombie"]),
+		count: integer(1, 2),
+	},
+	"phylactery-struck": { blows: integer(1, PHYLACTERY_BLOWS - 1) },
+	"phylactery-blow-lost": {},
+	"phylactery-broken": {},
+	"lich-warded": {},
 	"omen-foreseen": { omen: optional(oneOf(OMEN_KINDS)) },
 	"gold-collected": { amount: integer(1) },
 	"merchant-bought": { item: itemKind, gold: integer(1) },
@@ -755,6 +764,7 @@ const documentShape = object({
 					oneOf(["treasure", "guardian", "both", "empty"]),
 				),
 				portalDestination: optional(object({ floorNumber, coordinate })),
+				blows: optional(integer(1, PHYLACTERY_BLOWS - 1)),
 				// Which choices carry an outcome is a consistency rule.
 				mirrorResult: optional(
 					object({

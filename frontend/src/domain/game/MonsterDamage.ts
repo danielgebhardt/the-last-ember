@@ -1,3 +1,4 @@
+import { lichWarded } from "../arena/BoneLich";
 import { feedBlade } from "../items/HungeringBlade";
 import { createMonsterDrop } from "../items/MonsterDrops";
 import { isWarden, wardenDrop, wardenFlameDrop } from "../monsters/EmberWarden";
@@ -39,6 +40,14 @@ export const damageMonster = (
 	if (!current) return state;
 	monster = current;
 	const turn = state.turn;
+	// While his phylactery stands, the Lich shrugs off every hit.
+	if (lichWarded(state, monster))
+		return {
+			...state,
+			activityHistory: appendActivityEvents(state.activityHistory, [
+				{ type: "lich-warded", turn },
+			]),
+		};
 	const spell =
 		source.type === "spell-hit" ? SPELL_DEFINITIONS[source.spell] : undefined;
 	const element: DamageElement =

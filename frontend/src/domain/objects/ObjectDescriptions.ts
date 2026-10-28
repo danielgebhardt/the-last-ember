@@ -94,6 +94,11 @@ const hints: Record<DungeonObjectKind, { fresh: string; spent: string }> = {
 			"Something moves inside. Press E to break it before it hatches; fire burns it too.",
 		spent: "Broken. Nothing will hatch from it now.",
 	},
+	phylactery: {
+		fresh:
+			"While it stands, the Lich can't be harmed. Press E to strike it; three blows break it, and a blow is lost if you are hit that turn.",
+		spent: "Shattered. The Lich can be hurt now.",
+	},
 	"arena-door": {
 		fresh: "Sealed until nothing in the hall is left standing.",
 		spent: "Open. The way on lies beyond.",

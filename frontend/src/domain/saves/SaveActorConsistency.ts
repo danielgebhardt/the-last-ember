@@ -141,9 +141,11 @@ export const hasConsistentActors = (document: SaveDocument): boolean => {
 				(entry.kind === "treasure-thief") === isThiefId(entry.id) &&
 				(entry.theft === undefined ||
 					(isThief(entry) && entry.theft.turn <= state.turn)) &&
-				// Only a sounded sentry tracks reinforcements, and the Broodmother her brood.
+				// Only a sounded sentry tracks reinforcements, and the Broodmother and the Bone
+				// Lich what they call.
 				(entry.summons === undefined ||
 					((entry.kind === "broodmother" ||
+						entry.kind === "bone-lich" ||
 						(MONSTER_DEFINITIONS[entry.kind].alarmRadius !== undefined &&
 							entry.alarmUsed === true)) &&
 						entry.summons.turn <= state.turn)) &&

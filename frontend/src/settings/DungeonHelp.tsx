@@ -20,6 +20,11 @@ import DungeonLegend from "../components/dungeon/DungeonLegend.tsx";
 import MonsterIcon from "../components/monsters/MonsterIcon";
 import ObservedCreatures from "../components/monsters/ObservedCreatures";
 import { ARENA_DEPTH_SHARE, ARENA_MIN_DEPTH } from "../domain/arena/Arena";
+import {
+	LICH_RAISE_INTERVAL,
+	LICH_RAISED_CAP,
+	PHYLACTERY_BLOWS,
+} from "../domain/arena/BoneLich";
 import { BROOD_HATCH_INTERVAL } from "../domain/arena/Brood";
 import type { VisibilityGrid } from "../domain/dungeon/Visibility";
 import type { Difficulty } from "../domain/game/Difficulty";
@@ -745,6 +750,18 @@ const DungeonHelp = ({
 							sac to break it, or burn it with a Fireball. Her webs Slow you if
 							you stay put. At half health every sac left bursts at once and she
 							webs without pause. Unbroken sacs don't keep the exit shut.
+						</dd>
+					</div>
+					<div>
+						<dt className="font-medium">Bone Lich</dt>
+						<dd className="text-muted-foreground">
+							Nothing harms him while his phylactery stands at the far end of
+							the hall. Press E beside it to strike: {PHYLACTERY_BLOWS} blows
+							break it, but a blow is lost if you are hit that turn. Every{" "}
+							{LICH_RAISE_INTERVAL} turns he raises a skeleton from the bones,
+							at most {LICH_RAISED_CAP} at a time, and the raised give no
+							experience or loot. At half health he raises two zombies and
+							starts a slowing hex.
 						</dd>
 					</div>
 				</dl>

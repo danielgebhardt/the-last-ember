@@ -1,4 +1,5 @@
 import {
+	Amphora,
 	Coins,
 	DoorClosed,
 	DoorClosedLocked,
@@ -59,6 +60,7 @@ const icons: Record<
 	"arena-door": DoorClosedLocked,
 	"arena-reward": Trophy,
 	"egg-sac": Egg,
+	phylactery: Amphora,
 };
 const DungeonObjectIcon = ({ object }: { object: DungeonObject }) => {
 	if (!objectAvailable(object)) return null;

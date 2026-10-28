@@ -220,6 +220,17 @@ export const OBJECT_DEFINITIONS = {
 		chance: 1,
 		placement: "arena",
 	},
+	// The Bone Lich's: while it stands he can't be harmed; three blows break it.
+	phylactery: {
+		name: "Phylactery",
+		freshLabel: "phylactery",
+		usedLabel: "shattered phylactery",
+		minFloor: 6,
+		maxFloor: 12,
+		maxPerFloor: 1,
+		chance: 1,
+		placement: "arena",
+	},
 	// At most one per adventure, in the middle third; see DarkAltar.
 	"dark-altar": {
 		name: "Dark altar",
@@ -256,6 +267,10 @@ export type DungeonObject = Readonly<{
 	wellResult?: import("./WishingWell").WellResult;
 	mirrorResult?: import("./MirrorOfShadows").MirrorResult;
 	portalDestination?: import("./RunicPortal").PortalDestination;
+	// Blows that have landed on a phylactery still standing.
+	blows?: number;
+	// A blow struck this turn, settled once the monsters have acted; never saved.
+	struckTurn?: number;
 }>;
 export const objectLabel = (
 	object: Pick<DungeonObject, "kind" | "activated">,

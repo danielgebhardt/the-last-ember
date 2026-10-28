@@ -10,11 +10,13 @@ import {
 	arenaRackId,
 	arenaRewardId,
 	arenaSpawnId,
+	BONE_PILE_TILES,
 	eggSacId,
 	isArenaTerrain,
 	MINIBOSS_KINDS,
 	type MinibossKind,
 	minibossId,
+	phylacteryId,
 	selectMiniboss,
 } from "../domain/arena/Arena";
 import { ARENA_ROOMS } from "../domain/arena/ArenaLayout";
@@ -25,6 +27,7 @@ import {
 	resolveArenas,
 	SEALED_STAIR_REFUSAL,
 } from "../domain/arena/ArenaRules";
+import { LICH_RAISE_INTERVAL } from "../domain/arena/BoneLich";
 import { BROOD_HATCH_INTERVAL } from "../domain/arena/Brood";
 import {
 	connectDungeonFloors,
@@ -173,10 +176,13 @@ describe("Arenas", () => {
 					"arena-reward",
 					"door",
 					"gold",
-					// The Broodmother's hall also holds her four egg sacs.
+					// The Broodmother's hall also holds her four egg sacs, the Lich's his
+					// phylactery.
 					...(selectMiniboss(seed) === "broodmother"
 						? Array(4).fill("egg-sac")
-						: []),
+						: selectMiniboss(seed) === "bone-lich"
+							? ["phylactery"]
+							: []),
 				].sort(),
 			);
 			expect(state.floorItems.filter((i) => i.floorNumber === 6)).toEqual([]);
@@ -672,5 +678,116 @@ describe("Broodmother", () => {
 		expect(save(burst).ok).toBe(true);
 		// Once only.
 		expect(brood(act(burst).state)).toHaveLength(3);
+	});
+});
+
+describe("Bone Lich", () => {
+	const withLich = (state: GameState, change: Partial<Monster>) => ({
+		...state,
+		monsters: state.monsters.map((m) =>
+			m.id === minibossId(6) ? { ...m, ...change } : m,
+		),
+	});
+	const hunting = (state: GameState) =>
+		withLich(state, {
+			awareness: {
+				type: "pursuing",
+				target: state.run.playerCoordinate,
+				remaining: 10,
+				blocked: 0,
+			},
+		});
+	const phylactery = (state: GameState) =>
+		state.objects.find((o) => o.id === phylacteryId(6));
+	const raised = (state: GameState) =>
+		state.monsters.filter((m) => m.summonedBy === minibossId(6));
+	// Beside the phylactery, with the Lich far off in the hall's other corner.
+	const atPhylactery = () =>
+		inHall("bone-lich", { row: 8, col: 30 }, { row: 2, col: 11 });
+	const strike = (state: GameState) =>
+		act(state, { type: "interact", objectId: phylacteryId(6) }).state;
+
+	it("shrugs off every hit while his phylactery stands", () => {
+		const hall = atPhylactery();
+		const lich = boss(hall);
+		if (!lich) throw new Error("Expected the Bone Lich");
+		const warded = damageMonster(hall, lich, 10, { type: "player-hit" });
+		expect(boss(warded)?.health).toBe(lich.health);
+		expect(warded.activityHistory.entries.at(-1)?.event.type).toBe(
+			"lich-warded",
+		);
+		const exposed = {
+			...hall,
+			objects: hall.objects.map((o) =>
+				o.id === phylacteryId(6) ? { ...o, activated: true } : o,
+			),
+		};
+		expect(
+			boss(damageMonster(exposed, lich, 10, { type: "player-hit" }))?.health,
+		).toBe(lich.health - 10);
+	});
+
+	it("three blows break the phylactery; a blow struck while you are hit is lost", () => {
+		const once = strike(atPhylactery());
+		expect(phylactery(once)).toMatchObject({ activated: false, blows: 1 });
+		expect(phylactery(once)?.struckTurn).toBeUndefined();
+		expect(save(once).ok).toBe(true);
+		const broken = strike(strike(once));
+		expect(phylactery(broken)?.activated).toBe(true);
+		expect(phylactery(broken)?.blows).toBeUndefined();
+		expect(broken.activityHistory.entries.at(-1)?.event.type).toBe(
+			"phylactery-broken",
+		);
+		expect(save(broken).ok).toBe(true);
+		// The Lich beside you lands his blow first: yours glances off.
+		const pressed = withLich(once, { coordinate: { row: 8, col: 29 } });
+		const lost = strike(pressed);
+		expect(lost.player.health).toBeLessThan(pressed.player.health);
+		expect(phylactery(lost)?.blows).toBe(1);
+		expect(
+			lost.activityHistory.entries.some(
+				({ event }) => event.type === "phylactery-blow-lost",
+			),
+		).toBe(true);
+	});
+
+	it("raises a skeleton every five turns once he hunts you, at most three, worth nothing", () => {
+		const clock = resolveArenas(hunting(atPhylactery()));
+		expect(boss(clock)?.summons).toEqual({ count: 0, turn: clock.turn });
+		const rise = (state: GameState) =>
+			resolveArenas({ ...state, turn: state.turn + LICH_RAISE_INTERVAL });
+		const first = rise(clock);
+		expect(raised(first).map((m) => [m.id, m.kind])).toEqual([
+			[arenaSpawnId(6, 1), "skeleton"],
+		]);
+		expect(raised(first)[0].coordinate).toEqual(BONE_PILE_TILES[0]);
+		expect(save(first).ok).toBe(true);
+		const capped = rise(rise(rise(first)));
+		expect(raised(capped)).toHaveLength(3);
+		// Raised dead give no experience.
+		const skeleton = raised(capped)[0];
+		const killed = damageMonster(capped, skeleton, 999, { type: "player-hit" });
+		expect(killed.progression.experience).toBe(capped.progression.experience);
+		expect(raised(rise(killed))).toHaveLength(3);
+	});
+
+	it("at half health raises two zombies and starts his slowing hex, once", () => {
+		// In sight and in hex range, but not beside you.
+		const near = inHall("bone-lich", { row: 2, col: 20 }, { row: 2, col: 24 });
+		const lich = boss(near);
+		if (!lich) throw new Error("Expected the Bone Lich");
+		expect(boss(act(near).state)?.intent.type).not.toBe("preparing-hex");
+		const halved = withLich(near, { health: Math.floor(lich.health / 2) });
+		const enraged = act(halved).state;
+		expect(boss(enraged)?.minibossPhase).toBe(2);
+		expect(raised(enraged).map((m) => m.kind)).toEqual(["zombie", "zombie"]);
+		expect(save(enraged).ok).toBe(true);
+		const hexing = act(enraged).state;
+		expect(boss(hexing)?.intent.type).toBe("preparing-hex");
+		const slowed = act(hexing).state;
+		expect(slowed.afflictions.map((a) => a.kind)).toContain("slowed");
+		expect(
+			raised(act(slowed).state).filter((m) => m.kind === "zombie"),
+		).toHaveLength(2);
 	});
 });

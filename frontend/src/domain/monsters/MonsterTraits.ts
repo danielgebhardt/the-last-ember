@@ -1,3 +1,8 @@
+import {
+	LICH_RAISE_INTERVAL,
+	LICH_RAISED_CAP,
+	PHYLACTERY_BLOWS,
+} from "../arena/BoneLich";
 import { BROOD_HATCH_INTERVAL } from "../arena/Brood";
 import { AFFLICTION_DEFINITIONS } from "../game/AfflictionDefinitions";
 import { afflictionTrait } from "../game/AfflictionText";
@@ -76,6 +81,10 @@ export const monsterTraits = (kind: MonsterKind): readonly string[] => {
 	if (kind === "broodmother")
 		traits.push(
 			`Arena miniboss. Four egg sacs stand beside the hall's pillars; while she hunts you, each unbroken sac hatches a spiderling every ${BROOD_HATCH_INTERVAL} turns. Press E beside a sac to break it, or burn it with a Fireball. At half health every sac left bursts at once and her webs come without pause. Her health and attack grow with depth.`,
+		);
+	if (kind === "bone-lich")
+		traits.push(
+			`Arena miniboss. While his phylactery stands at the far end of the hall, nothing harms him. Press E beside it to strike: ${PHYLACTERY_BLOWS} blows break it, and a blow is lost if you are hit that turn. While he hunts you he raises a skeleton from a bone pile every ${LICH_RAISE_INTERVAL} turns, keeping at most ${LICH_RAISED_CAP} standing. At half health he raises two zombies and starts a slowing hex. The raised give no experience or loot. His health and attack grow with depth.`,
 		);
 	if (kind === "spiderling")
 		traits.push(

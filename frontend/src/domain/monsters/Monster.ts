@@ -107,7 +107,14 @@ export type MonsterDefinition = {
 	webAttack?: { range: number; cooldown: number };
 	// Telegraphed ranged hex: prepared in sight, resolved next action if still in sight and
 	// range. Base arcane damage (magic resistance applies) plus Curse.
-	hexAttack?: { range: number; cooldown: number; damage: number };
+	// Curse unless it names another affliction; a miniboss's may wait for its second phase.
+	hexAttack?: {
+		range: number;
+		cooldown: number;
+		damage: number;
+		affliction?: "curse" | "slowed";
+		fromPhase?: 2;
+	};
 	// Telegraphed adjacent strike: marks your tile, then makes a normal melee roll
 	// next action if you stayed. A landed hit deals normal damage and Blinded.
 	blindingStrike?: { cooldown: number };
@@ -407,6 +414,30 @@ const monsterCatalog = {
 		weaknesses: ["fire"],
 		miniboss: true,
 		webAttack: { range: 6, cooldown: 3 },
+	},
+	// Can't be harmed while his phylactery stands, and raises the dead; see BoneLich.
+	"bone-lich": {
+		name: "Bone Lich",
+		minFloor: 6,
+		maxFloor: 12,
+		maxHealth: 75,
+		attackDamage: 8,
+		experienceReward: 120,
+		detectionRadius: 12,
+		spawnWeight: 1,
+		spawnEnabled: false,
+		dropChance: 0,
+		lootPreferences: {},
+		resists: ["poison", "cold"],
+		weaknesses: ["fire"],
+		miniboss: true,
+		hexAttack: {
+			range: 6,
+			cooldown: 3,
+			damage: 3,
+			affliction: "slowed",
+			fromPhase: 2,
+		},
 	},
 	// Hatched from the Broodmother's sacs; called creatures give no XP or loot.
 	spiderling: {
@@ -918,7 +949,7 @@ export const monsterAffliction = (
 	(MONSTER_DEFINITIONS[kind].webAttack
 		? "slowed"
 		: MONSTER_DEFINITIONS[kind].hexAttack
-			? "curse"
+			? (MONSTER_DEFINITIONS[kind].hexAttack.affliction ?? "curse")
 			: MONSTER_DEFINITIONS[kind].blindingStrike
 				? "blinded"
 				: MONSTER_DEFINITIONS[kind].soulBolt

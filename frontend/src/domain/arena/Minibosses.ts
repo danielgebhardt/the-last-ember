@@ -9,6 +9,7 @@ import {
 import type { SpecialActionOutcome } from "../monsters/MonsterTelegraphs";
 import { navigationRun } from "../objects/NavigationTerrain";
 import { MINIBOSS_SUMMON_IDS, type MinibossKind } from "./Arena";
+import { raiseZombies } from "./BoneLich";
 import { burstSacs } from "./Brood";
 
 const SIDES: readonly Coordinate[] = [
@@ -24,7 +25,8 @@ const SIDES: readonly Coordinate[] = [
 
 // At half health a miniboss spends one action changing phase. The Pyre Lord calls two
 // salamanders and breathes without pause; the Juggernaut charges again without recovering;
-// every unbroken sac of the Broodmother's bursts and she webs without pause.
+// every unbroken sac of the Broodmother's bursts and she webs without pause; the Bone
+// Lich raises two zombies and starts his slowing hex.
 export const resolveMinibossPhase = (
 	state: GameState,
 	monster: Monster,
@@ -51,6 +53,25 @@ export const resolveMinibossPhase = (
 	if (monster.kind === "broodmother") {
 		const burst = burstSacs(state, enraged);
 		return { ...burst, events };
+	}
+	if (monster.kind === "bone-lich") {
+		const raised = raiseZombies(state, enraged);
+		return {
+			...raised,
+			events: [
+				...events,
+				...(raised.summons.length
+					? [
+							{
+								type: "dead-raised" as const,
+								monster: "zombie" as const,
+								count: raised.summons.length,
+								turn: state.turn,
+							},
+						]
+					: []),
+			],
+		};
 	}
 	if (monster.kind !== "pyre-lord") return { monster: enraged, events };
 	const terrain = navigationRun(state).floors[monster.floorNumber - 1].terrain;

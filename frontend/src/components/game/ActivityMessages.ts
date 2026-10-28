@@ -1,4 +1,5 @@
 import type { MinibossKind } from "../../domain/arena/Arena";
+import { PHYLACTERY_BLOWS } from "../../domain/arena/BoneLich";
 import type { ActivityEvent } from "../../domain/game/ActivityHistory.ts";
 import { ADVENTURE_STORY } from "../../domain/game/AdventureStory";
 import { AFFLICTION_DEFINITIONS } from "../../domain/game/AfflictionDefinitions";
@@ -23,6 +24,8 @@ const MINIBOSS_ENRAGED: Readonly<Record<MinibossKind, string>> = {
 		"The Iron Juggernaut stamps and lowers its head. It will charge again and again!",
 	broodmother:
 		"The Broodmother shrieks. Every egg sac bursts at once, and her webs come without pause!",
+	"bone-lich":
+		"The Bone Lich howls. The dead claw up from the bones, and he begins to weave a slowing hex!",
 };
 
 export const formatActivityEvent = (event: ActivityEvent): string => {
@@ -174,6 +177,16 @@ export const formatActivityEvent = (event: ActivityEvent): string => {
 			return `${prefix}You tear the egg sac open. Nothing will hatch from it now.`;
 		case "egg-sacs-burned":
 			return `${prefix}${event.count === 1 ? "The flames burn an egg sac." : `The flames burn ${event.count} egg sacs.`} Nothing will hatch from ${event.count === 1 ? "it" : "them"} now.`;
+		case "dead-raised":
+			return `${prefix}${event.count === 1 ? `A ${event.monster} claws its way up from the bones.` : `${event.count} ${event.monster}s claw their way up from the bones.`}`;
+		case "phylactery-struck":
+			return `${prefix}You strike the phylactery. It cracks (${event.blows} of ${PHYLACTERY_BLOWS}).`;
+		case "phylactery-blow-lost":
+			return `${prefix}You are struck mid-swing, and your blow glances off the phylactery.`;
+		case "phylactery-broken":
+			return `${prefix}The phylactery shatters. The Bone Lich can be harmed now!`;
+		case "lich-warded":
+			return `${prefix}The blow passes through the Bone Lich. While his phylactery stands, nothing can harm him.`;
 		case "brood-hatched":
 			return `${prefix}${event.count === 1 ? "An egg sac splits, and a spiderling scuttles out!" : `${event.count} egg sacs split, and spiderlings scuttle out!`}`;
 		case "pact-struck":

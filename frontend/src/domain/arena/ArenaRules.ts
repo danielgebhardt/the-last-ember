@@ -21,6 +21,7 @@ import {
 	minibossId,
 	standingArena,
 } from "./Arena";
+import { raiseDead } from "./BoneLich";
 import { hatchBrood } from "./Brood";
 
 export const SEALED_STAIR_REFUSAL =
@@ -121,7 +122,7 @@ export const enterArena = (
 // restored.
 export const resolveArenas = (state: GameState): GameState => {
 	if (state.player.health <= 0) return state;
-	let next = hatchBrood(state);
+	let next = raiseDead(hatchBrood(state));
 	for (const arena of state.arenas ?? []) {
 		// Won only while you stand in it.
 		if (arenaCleared(next, arena) || next.run.activeFloor !== arena.floorNumber)

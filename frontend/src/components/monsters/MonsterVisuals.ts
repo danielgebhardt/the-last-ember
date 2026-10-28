@@ -1,4 +1,4 @@
-import { Bug, Flame, Rat, Shield } from "lucide-react";
+import { Bug, Flame, Rat, Shield, Skull } from "lucide-react";
 import type { ComponentType, SVGProps } from "react";
 import { MONSTER_DEFINITIONS } from "../../domain/monsters/Monster";
 import type { MonsterKind } from "../../domain/monsters/Monster.ts";
@@ -63,6 +63,11 @@ export const MONSTER_VISUALS: Record<
 		icon: Bug,
 		color: "text-[#7e22ce] dark:text-[#d8b4fe]",
 		label: MONSTER_DEFINITIONS.broodmother.name,
+	},
+	"bone-lich": {
+		icon: Skull,
+		color: "text-[#4d7c0f] dark:text-[#bef264]",
+		label: MONSTER_DEFINITIONS["bone-lich"].name,
 	},
 	spiderling: {
 		icon: SpiderlingIcon,

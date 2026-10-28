@@ -15,7 +15,10 @@ import {
 	isArenaTerrain,
 	isMinibossKind,
 	MINIBOSS_SUMMON_IDS,
+	type MinibossKind,
 	minibossId,
+	PHYLACTERY_TILE,
+	phylacteryId,
 	selectMiniboss,
 } from "../arena/Arena";
 import { ARENA_POINTS } from "../arena/ArenaLayout";
@@ -30,22 +33,29 @@ const ARENA_OBJECTS = {
 	gold: ARENA_REWARD_TILES.gold,
 } as const;
 
-const isEggSac = (
-	object: {
-		id: string;
-		kind: string;
-		coordinate: { row: number; col: number };
-	},
-	floorNumber: number,
-	miniboss: string,
-) =>
-	miniboss === "broodmother" &&
-	object.kind === "egg-sac" &&
-	EGG_SAC_TILES.some(
-		(tile, index) =>
-			object.id === eggSacId(floorNumber, index) &&
-			sameCoordinate(object.coordinate, tile),
-	);
+// What a miniboss's hall holds besides the arena itself, each on its fixed tile.
+const hallFeatures = (floorNumber: number, miniboss: MinibossKind) =>
+	miniboss === "broodmother"
+		? EGG_SAC_TILES.map((tile, index) => ({
+				id: eggSacId(floorNumber, index),
+				kind: "egg-sac",
+				tile,
+			}))
+		: miniboss === "bone-lich"
+			? [
+					{
+						id: phylacteryId(floorNumber),
+						kind: "phylactery",
+						tile: PHYLACTERY_TILE,
+					},
+				]
+			: [];
+// The creatures a miniboss calls over the fight, numbered by its summons count.
+const ARENA_SPAWN_KINDS: Partial<Record<MinibossKind, readonly string[]>> = {
+	broodmother: ["spiderling"],
+	"bone-lich": ["skeleton", "zombie"],
+};
+const HALL_FEATURE_KINDS = ["egg-sac", "phylactery"];
 
 // An arena stands where this seed and depth put it, with its fixed floor, objects and
 // miniboss; nothing on it but what the arena brought, and its exit open only once the
@@ -59,7 +69,7 @@ export const hasConsistentArenas = ({ state }: SaveDocument): boolean => {
 	if (!arenas.length)
 		return (
 			!arenaObjects.length &&
-			!state.objects.some((o) => o.kind === "egg-sac") &&
+			!state.objects.some((o) => HALL_FEATURE_KINDS.includes(o.kind)) &&
 			!state.monsters.some(
 				(m) => isMinibossKind(m.kind) || m.kind === "spiderling",
 			) &&
@@ -77,6 +87,7 @@ export const hasConsistentArenas = ({ state }: SaveDocument): boolean => {
 	)
 		return false;
 	// The gate, both doors and the gold, each where the arena put it.
+	const features = hallFeatures(floorNumber, arena.miniboss);
 	const gate = state.objects.find((o) => o.id === arenaGateId(floorNumber));
 	const exit = state.objects.find((o) => o.id === arenaDoorId(floorNumber));
 	if (
@@ -97,15 +108,24 @@ export const hasConsistentArenas = ({ state }: SaveDocument): boolean => {
 						ARENA_OBJECTS[o.kind as keyof typeof ARENA_OBJECTS],
 					)
 				) &&
-				!isEggSac(o, floorNumber, arena.miniboss),
+				!features.some((f) => f.id === o.id),
 		) ||
-		// The Broodmother's hall keeps all four of its sacs, broken or not.
-		(arena.miniboss === "broodmother" &&
-			!EGG_SAC_TILES.every((_, index) =>
-				state.objects.some((o) => o.id === eggSacId(floorNumber, index)),
-			)) ||
+		// Like the arena's own objects, each hall feature stands as its kind on its tile;
+		// a phylactery's landed blows stay only while it stands.
+		state.objects.some((o) =>
+			features.some(
+				(f) =>
+					f.id === o.id &&
+					(o.kind !== f.kind ||
+						o.floorNumber !== floorNumber ||
+						!sameCoordinate(o.coordinate, f.tile)),
+			),
+		) ||
 		state.objects.some(
-			(o) => o.kind === "egg-sac" && !isEggSac(o, floorNumber, arena.miniboss),
+			(o) =>
+				(HALL_FEATURE_KINDS.includes(o.kind) &&
+					!features.some((f) => f.id === o.id)) ||
+				(o.blows !== undefined && (o.kind !== "phylactery" || o.activated)),
 		) ||
 		(exit?.activated && gate && !gate.activated) ||
 		(exit?.activated &&
@@ -113,12 +133,12 @@ export const hasConsistentArenas = ({ state }: SaveDocument): boolean => {
 	)
 		return false;
 	// The miniboss owns its reserved identity; only its second phase calls salamanders,
-	// and only the Broodmother's sacs hatch spiderlings, each numbered by her count.
+	// and only the Broodmother and the Bone Lich call more, each numbered by their count.
 	const boss = state.monsters.find((m) => m.id === minibossId(floorNumber));
-	const hatchling = (m: (typeof state.monsters)[number]) =>
+	const spawnKinds = ARENA_SPAWN_KINDS[arena.miniboss];
+	const called = (m: (typeof state.monsters)[number]) =>
 		m.floorNumber === floorNumber &&
-		arena.miniboss === "broodmother" &&
-		isArenaSpawnId(m.id) &&
+		!!spawnKinds?.includes(m.kind) &&
 		m.summonedBy === minibossId(floorNumber) &&
 		(!boss ||
 			Number(m.id.split(":")[1]) - ARENA_SPAWN_ID_BASE <=
@@ -126,10 +146,10 @@ export const hasConsistentArenas = ({ state }: SaveDocument): boolean => {
 	if (
 		state.monsters.some(
 			(m) =>
-				(m.kind === "spiderling") !== isArenaSpawnId(m.id) ||
-				(m.kind === "spiderling" && !hatchling(m)),
+				(m.kind === "spiderling" && !isArenaSpawnId(m.id)) ||
+				(isArenaSpawnId(m.id) && !called(m)),
 		) ||
-		(boss?.summons && arena.miniboss !== "broodmother")
+		(boss?.summons && !spawnKinds)
 	)
 		return false;
 	if (

@@ -1,4 +1,5 @@
 import { arenaMoveRefusal, resolveArenas } from "../arena/ArenaRules";
+import { settlePhylactery } from "../arena/BoneLich";
 import {
 	MOVEMENT_OFFSETS,
 	type MovementDirection,
@@ -438,16 +439,16 @@ const resolveAction = (
 		),
 		exitReason(state, action),
 	);
-	const monsterPhase =
+	const phased =
 		responseState.quest.victory || responseState.player.health <= 0
 			? undefined
-			: hungerAfterTurn(
-					advanceTimedEffects(
-						tickAfflictionDamage(
-							resolveMonsterPhase(responseState, rollSource, scope),
-						),
-					),
-				);
+			: resolveMonsterPhase(responseState, rollSource, scope);
+	// A phylactery blow lands only if the monsters didn't hurt you; conditions ticking
+	// afterwards don't count.
+	const settled = settlePhylactery(responseState, phased ?? responseState);
+	const monsterPhase = phased
+		? hungerAfterTurn(advanceTimedEffects(tickAfflictionDamage(settled)))
+		: undefined;
 	// Passing close to a hidden cracked wall notices it, wherever the turn left you; a
 	// new floor's omen, or the next one's through the Seer's Circlet, is announced.
 	const resolved = announceOmens(
@@ -459,7 +460,7 @@ const resolveAction = (
 							advancePlayerAfflictions(monsterPhase),
 							suppressesManaRecovery(monsterPhase.afflictions),
 						)
-					: responseState,
+					: settled,
 			),
 		),
 	);
