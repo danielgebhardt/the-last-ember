@@ -14,8 +14,16 @@ export const verifiedDeveloper = async (
 	if (user.developer === true) {
 		try {
 			if (await currentRole(user.uid)) return user;
-		} catch {
-			/* Deleted/revoked accounts cannot retain developer access. */
+		} catch (error) {
+			// Deleted accounts cannot retain developer access; any other failure is
+			// an outage, not a verdict on the role.
+			if ((error as { code?: string }).code !== "auth/user-not-found")
+				return Response.json(
+					{
+						error: "Developer access could not be checked. Try again shortly.",
+					},
+					{ status: 503, headers: { "cache-control": "no-store" } },
+				);
 		}
 	}
 	return Response.json(

@@ -105,3 +105,32 @@ it("requires a verified developer claim and a currently authorized account", asy
 		).status,
 	).toBe(403);
 });
+
+it("refuses deleted developers, and reports a role-check outage as retryable", async () => {
+	const developer = async () => ({
+		uid: "dev",
+		email: null,
+		developer: true as const,
+	});
+	const failing = (error: unknown) => async () => {
+		throw error;
+	};
+
+	const deleted = (await verifiedDeveloper(
+		request(),
+		developer,
+		failing(Object.assign(Error("gone"), { code: "auth/user-not-found" })),
+	)) as Response;
+	expect(deleted.status).toBe(403);
+
+	const outage = (await verifiedDeveloper(
+		request(),
+		developer,
+		failing(Object.assign(Error("quota"), { code: "auth/quota-exceeded" })),
+	)) as Response;
+	expect(outage.status).toBe(503);
+	expect(outage.headers.get("cache-control")).toBe("no-store");
+	expect(await outage.json()).toEqual({
+		error: "Developer access could not be checked. Try again shortly.",
+	});
+});
