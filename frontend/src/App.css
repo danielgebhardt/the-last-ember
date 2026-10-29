@@ -282,8 +282,15 @@
 	opacity: var(--remembered-icon-opacity);
 }
 
+/* The panel's surface colour, which rail caps paint to blend into it; low health
+   tints both red. */
+:root {
+	--panel-surface: var(--card);
+}
+
 [data-low-health="true"] {
-	background-color: color-mix(in oklab, var(--destructive) 20%, var(--card));
+	--panel-surface: color-mix(in oklab, var(--destructive) 20%, var(--card));
+	background-color: var(--panel-surface);
 }
 
 /* Decorative trim overlays the existing boxes without changing layout or hit areas. */

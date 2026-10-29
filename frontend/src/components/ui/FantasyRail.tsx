@@ -17,7 +17,7 @@ const RailEnd = ({ right = false }: { right?: boolean }) => (
 		{/* Outer engraved border */}
 		<path
 			d="M28 0 H15 L7 9 V25 L2 34 V46 L7 55 V71 L15 80 H28"
-			fill="var(--card)"
+			fill="var(--panel-surface)"
 			stroke="currentColor"
 			strokeWidth="1.4"
 			vectorEffect="non-scaling-stroke"
@@ -36,7 +36,7 @@ const RailEnd = ({ right = false }: { right?: boolean }) => (
 		{/* Central diamond */}
 		<path
 			d="M3 40 L12 31 L21 40 L12 49 Z"
-			fill="var(--card)"
+			fill="var(--panel-surface)"
 			stroke="currentColor"
 			strokeWidth="1.1"
 			vectorEffect="non-scaling-stroke"
