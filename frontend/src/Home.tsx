@@ -784,8 +784,8 @@ const Home = ({
 							</div>
 						</div>
 					</FantasyRail>
-					<div className="grid min-h-0 flex-1 grid-cols-1 gap-2 lg:grid-cols-[minmax(0,1fr)_18rem] lg:grid-rows-[minmax(0,1fr)_auto] xl:grid-cols-[minmax(0,1fr)_20rem] 2xl:grid-cols-[minmax(0,1fr)_22rem] min-[112.5rem]:grid-cols-[minmax(0,1fr)_26rem]">
-						<div className="flex h-[50dvh] min-h-[23rem] min-w-0 flex-col lg:col-start-1 lg:row-start-1 lg:h-auto lg:min-h-0">
+					<div className="grid min-h-0 flex-1 grid-cols-1 gap-2 lg:grid-cols-[minmax(0,1fr)_18rem] lg:grid-rows-[auto_minmax(0,1fr)_auto] xl:grid-cols-[minmax(0,1fr)_20rem] 2xl:grid-cols-[minmax(0,1fr)_22rem] min-[112.5rem]:grid-cols-[minmax(0,1fr)_26rem]">
+						<div className="order-1 flex h-[50dvh] min-h-[23rem] min-w-0 flex-col lg:col-start-1 lg:row-span-2 lg:row-start-1 lg:h-auto lg:min-h-0">
 							<DungeonFrame>
 								{town ? (
 									<TownMap
@@ -913,7 +913,19 @@ const Home = ({
 										movementEnabled={gameplayEnabled && !town}
 									/>
 								)}
+								{spells.description && (
+									// Read while aiming, so it sits on the map rather than beside it.
+									<p
+										role="status"
+										aria-label="Spell targeting"
+										className="pointer-events-none absolute inset-x-2 top-1 z-20 mx-auto w-fit max-w-[calc(100%-1rem)] rounded-md border border-violet-500/60 bg-card/85 px-3 py-1 text-center text-xs leading-snug shadow-sm backdrop-blur-sm"
+									>
+										{spells.description}
+									</p>
+								)}
 							</DungeonFrame>
+						</div>
+						<div className="order-2 flex min-w-0 flex-col lg:col-start-2 lg:row-start-1">
 							<DungeonNotices
 								state={game.state}
 								visible={
@@ -922,7 +934,6 @@ const Home = ({
 								monsters={activeMonsters}
 								actionError={game.actionError}
 								showActionFeedback={!!town || merchantId === null}
-								spellDescription={spells.description}
 								corridorDescription={corridor.description}
 								targeting={!!spells.targeting}
 								onVictorySummary={() => setDismissedVictory(null)}
@@ -945,14 +956,14 @@ const Home = ({
 								}
 							/>
 						</div>
-						<div className="order-3 flex min-h-0 min-w-0 flex-col lg:col-start-2 lg:row-span-2 lg:row-start-1 [&>*]:flex-1 [&>*]:min-h-0">
+						<div className="order-4 flex min-h-0 min-w-0 flex-col lg:col-start-2 lg:row-span-2 lg:row-start-2 [&>*]:flex-1 [&>*]:min-h-0">
 							<ActivityLog
 								history={game.state.activityHistory}
 								resetKey={run.floors}
 							/>
 						</div>
 
-						<div className="order-2 flex min-w-0 justify-center lg:col-start-1 lg:row-start-2">
+						<div className="order-3 flex min-w-0 justify-center lg:col-start-1 lg:row-start-3">
 							<FantasyRail className="w-fit max-w-full">
 								<fieldset
 									aria-label="Quick slots"

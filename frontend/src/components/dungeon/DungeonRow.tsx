@@ -24,7 +24,7 @@ import TileIcon from "./TileIcon.tsx";
 import {
 	TILE_BACKGROUNDS,
 	TILE_LABELS,
-	TILE_TERRAIN_CLASSES,
+	terrainTexture,
 } from "./TileVisuals.ts";
 
 type TileVisibility = "visible" | "remembered" | "unknown";
@@ -85,7 +85,10 @@ const DungeonCell = memo(function DungeonCell({
 					: TILE_LABELS[tile];
 	const label =
 		visibility === "remembered" ? `remembered ${description}` : description;
-	const texture = tile === undefined ? undefined : TILE_TERRAIN_CLASSES[tile];
+	const texture =
+		tile === undefined
+			? undefined
+			: terrainTexture(tile, rowIndex, columnIndex);
 	// Remembered terrain keeps its texture under fog; undiscovered stays transparent.
 	const background =
 		visibility === "unknown"

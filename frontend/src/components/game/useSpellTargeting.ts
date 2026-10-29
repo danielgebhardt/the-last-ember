@@ -4,7 +4,6 @@ import { spellArea } from "../../domain/game/AreaSpells";
 import type { GameState } from "../../domain/game/GameState";
 import type { PlayerAction } from "../../domain/game/PlayerActions";
 import { isSpellTarget } from "../../domain/game/SpellCasting";
-import { spellTargetDetails } from "../../domain/game/SpellDetails";
 import {
 	playerSpell,
 	SPELL_DEFINITIONS,
@@ -156,9 +155,19 @@ export const useSpellTargeting = (
 		handleKey,
 		targeting,
 		targetIds: targeting ? targets.map((target) => target.id) : undefined,
+		// Only how to aim, and whether this target's blast reaches you; the catalog
+		// has each spell's numbers.
 		description:
 			selected && targeting
-				? `${SPELL_DEFINITIONS[targeting.spell].name}: ${MONSTER_DEFINITIONS[selected.kind].name} at row ${selected.coordinate.row}, column ${selected.coordinate.col}. ${spellTargetDetails(state, targeting.spell, selected, visible) ?? ""}. Arrows or WASD cast straight in a direction; Enter or click casts at the highlighted target. Escape or Z cancels.`
+				? `${SPELL_DEFINITIONS[targeting.spell].name} at ${MONSTER_DEFINITIONS[selected.kind].name}.${
+						preview?.some(
+							({ row, col }) =>
+								row === state.run.playerCoordinate.row &&
+								col === state.run.playerCoordinate.col,
+						)
+							? " Warning: you are inside the blast."
+							: ""
+					} Enter or click casts; arrows or WASD cast in a direction. Escape or Z cancels.`
 				: null,
 	};
 };

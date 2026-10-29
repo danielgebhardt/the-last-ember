@@ -1,5 +1,5 @@
 /* ==========================================
-   The Warden's Flame — Ancient Slate Dungeon
+   The Warden's Flame — Ancient Ruins Dungeon
    Consistent 24px terrain tiles
    ========================================== */
 
@@ -10,118 +10,65 @@
    the backdrop art shows through.
 */
 
-/* Light-mode palette */
+/* Each tile is drawn art, with its own drawing for each theme. */
+.dungeon-stone-wall,
+.dungeon-flagstone {
+	background-size: 100% 100%;
+	background-repeat: no-repeat;
+}
+
+/* Light mode keeps its remembered tiles desaturated under a pale veil. */
 :root {
-	--dungeon-wall-face: #7a8592;
-	--dungeon-wall-light: #b9c0c7;
-	--dungeon-wall-dark: #4d5866;
-
-	--dungeon-floor-face: #bcb5a8;
-	--dungeon-floor-light: #e4ded3;
-	--dungeon-floor-dark: #898276;
-
-	/* Remembered fog: solid, desaturated terrain under a pale veil */
 	--remembered-tile-filter: saturate(0.3) contrast(0.85);
 	--remembered-fog: rgb(236 231 222 / 55%);
 }
 
-/* Dark-mode palette */
 .dark {
-	--dungeon-wall-face: #415064;
-	--dungeon-wall-light: #77899d;
-	--dungeon-wall-dark: #202c3a;
-
-	--dungeon-floor-face: #4a545b;
-	--dungeon-floor-light: #677075;
-	--dungeon-floor-dark: #2f3941;
-
 	--remembered-tile-filter: saturate(0.4) contrast(0.9);
 	--remembered-fog: rgb(12 16 23 / 55%);
 }
 
-/* ==========================================
-   CARVED SLATE WALL
-   ========================================== */
-
 .dungeon-stone-wall {
-	background-color: var(--dungeon-wall-face);
-
-	background-image:
-		/* A faint carved mark on the stone face */
-		linear-gradient(
-			99deg,
-			transparent 0 19%,
-			rgb(255 255 255 / 17%) 20%,
-			transparent 22%
-		),
-		linear-gradient(
-			180deg,
-			transparent 0 24%,
-			rgb(255 255 255 / 13%) 25%,
-			transparent 27%
-		),
-		/* Small chipped diagonal corner */
-		linear-gradient(
-			140deg,
-			transparent 0 74%,
-			rgb(0 0 0 / 20%) 76%,
-			transparent 79%
-		),
-		/* Base stone face */
-		linear-gradient(
-			135deg,
-			var(--dungeon-wall-light) 0%,
-			var(--dungeon-wall-face) 28%,
-			var(--dungeon-wall-face) 75%,
-			var(--dungeon-wall-dark) 100%
-		);
-
-	box-shadow:
-		inset 0 0 0 2px var(--dungeon-wall-dark),
-		inset 3px 3px 0 rgb(255 255 255 / 17%),
-		inset -3px -3px 0 rgb(0 0 0 / 30%);
-
-	background-clip: border-box;
+	background-image: url("../assets/terrain/wall-light.svg");
 }
 
-/* ==========================================
-   WEATHERED FLAGSTONE FLOOR
-   ========================================== */
-
+/* The light floor is lifted from the drawing's grey so single-colour monster
+   tints keep their contrast against it. */
 .dungeon-flagstone {
-	background-color: var(--dungeon-floor-face);
+	background-image: url("../assets/terrain/floor-light.svg");
+}
 
-	background-image:
-		/* Worn diagonal fissure */
-		linear-gradient(
-			127deg,
-			transparent 0 31%,
-			rgb(0 0 0 / 15%) 32%,
-			transparent 34%
-		),
-		/* Sparse, consistent surface imperfections */
-		radial-gradient(
-			circle at 75% 29%,
-			rgb(0 0 0 / 23%) 0 0.7px,
-			transparent 1.2px
-		),
-		radial-gradient(
-			circle at 25% 71%,
-			rgb(255 255 255 / 17%) 0 0.8px,
-			transparent 1.4px
-		),
-		/* Weathered stone shading */
-		linear-gradient(
-			130deg,
-			var(--dungeon-floor-light) 0%,
-			var(--dungeon-floor-face) 40%,
-			var(--dungeon-floor-face) 75%,
-			var(--dungeon-floor-dark) 100%
-		);
+.dark .dungeon-stone-wall {
+	background-image: url("../assets/terrain/wall-dark.svg");
+}
 
-	box-shadow:
-		inset 0 0 0 1px rgb(0 0 0 / 19%),
-		inset 1px 1px 0 rgb(255 255 255 / 12%);
+.dark .dungeon-flagstone {
+	background-image: url("../assets/terrain/floor-dark.svg");
+}
+
+/* Wall variations, chosen per tile (see terrainTexture), break up the repeat. */
+.dungeon-wall-2 {
+	background-image: url("../assets/terrain/wall-light-2.svg");
+}
+
+.dark .dungeon-wall-2 {
+	background-image: url("../assets/terrain/wall-dark-2.svg");
+}
+
+.dungeon-wall-3 {
+	background-image: url("../assets/terrain/wall-light-3.svg");
+}
+
+.dark .dungeon-wall-3 {
+	background-image: url("../assets/terrain/wall-dark-3.svg");
+}
+
+.dungeon-wall-4 {
+	background-image: url("../assets/terrain/wall-light-4.svg");
+}
+
+.dark .dungeon-wall-4 {
+	background-image: url("../assets/terrain/wall-dark-4.svg");
 }
 
 /* Keep targeting controls above the terrain */
@@ -134,7 +81,15 @@
 /* High-contrast system settings */
 @media (forced-colors: active) {
 	.dungeon-stone-wall,
-	.dungeon-flagstone {
+	.dungeon-flagstone,
+	.dark .dungeon-stone-wall,
+	.dark .dungeon-flagstone,
+	.dungeon-wall-2,
+	.dungeon-wall-3,
+	.dungeon-wall-4,
+	.dark .dungeon-wall-2,
+	.dark .dungeon-wall-3,
+	.dark .dungeon-wall-4 {
 		background-image: none;
 		box-shadow: inset 0 0 0 1px CanvasText;
 	}

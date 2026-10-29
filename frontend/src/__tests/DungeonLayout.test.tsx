@@ -173,10 +173,11 @@ describe("Dungeon layout and controlled rendering", () => {
 			expect(map).toHaveFocus();
 		});
 		it.each([
+			// Drawn tiles carry a light and a dark drawing.
 			{ tile: FLOOR, description: "floor", icons: 0 },
-			{ tile: PLAYER, description: "player", icons: 1 },
-			{ tile: STAIRS_UP, description: "stairs up", icons: 1 },
-			{ tile: STAIRS_DOWN, description: "stairs down", icons: 1 },
+			{ tile: PLAYER, description: "player", icons: 2 },
+			{ tile: STAIRS_UP, description: "stairs up", icons: 2 },
+			{ tile: STAIRS_DOWN, description: "stairs down", icons: 2 },
 		])(
 			"renders $description decoratively instead of a glyph",
 			({ tile, description, icons }) => {

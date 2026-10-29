@@ -1,11 +1,11 @@
 // @vitest-environment node
 import { expect, it } from "vitest";
 import { tickAfflictionDamage } from "../domain/game/Afflictions";
+import { areaDamageRange, spellArea } from "../domain/game/AreaSpells";
 import { createGameState } from "../domain/game/GameState";
 import { resolvePlayerAction } from "../domain/game/PlayerActions";
 import { experienceThreshold } from "../domain/game/Progression";
 import { castSpell } from "../domain/game/SpellCasting";
-import { spellTargetDetails } from "../domain/game/SpellDetails";
 import { SPELL_DEFINITIONS, spellPotency } from "../domain/game/Spells";
 import { advanceTimedEffects } from "../domain/game/TimedEffects";
 import { createTestDungeonFloor } from "./testhelpers";
@@ -192,17 +192,31 @@ it("Blink prefers a useful jump of four to ten tiles", () => {
 
 it("Fireball preview shares the actual splash range and wall-aware danger area", () => {
 	const state = arena();
-	const details = spellTargetDetails(state, "fireball", state.monsters[0]);
-	expect(details).toContain("Damage 16–24");
-	expect(details).toContain("Splash 8–12");
-	expect(details).toContain("you are inside the blast and take 8–12");
+	const fireball = SPELL_DEFINITIONS.fireball;
+	const potency = spellPotency(state.progression, fireball);
+	if (potency.effect !== "damage") throw new Error("Expected a damage spell");
+	expect([potency.minimumDamage, potency.maximumDamage]).toEqual([16, 24]);
+	expect(
+		areaDamageRange(
+			potency.minimumDamage,
+			potency.maximumDamage,
+			fireball.splashMultiplier,
+		),
+	).toEqual({ minimumDamage: 8, maximumDamage: 12 });
+	// The targeting banner warns when this area holds the player.
+	const area = spellArea(
+		state.run.floors[0].terrain,
+		state.monsters[0].coordinate,
+		fireball.radius ?? 0,
+	);
+	const inBlast = ({ row, col }: { row: number; col: number }) =>
+		area.some((point) => point.row === row && point.col === col);
+	expect(inBlast(state.run.playerCoordinate)).toBe(true);
 	const safe = {
 		...state,
 		run: { ...state.run, playerCoordinate: { row: 7, col: 1 } },
 	};
-	expect(spellTargetDetails(safe, "fireball", safe.monsters[0])).not.toContain(
-		"Warning:",
-	);
+	expect(inBlast(safe.run.playerCoordinate)).toBe(false);
 	const result = castSpell(
 		safe,
 		{ type: "cast", spell: "fireball", targetId: "1:1" },

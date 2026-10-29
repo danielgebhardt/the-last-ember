@@ -15,7 +15,6 @@ type Props = {
 	monsters: readonly Monster[];
 	actionError: string;
 	showActionFeedback: boolean;
-	spellDescription?: string | null;
 	corridorDescription?: string | null;
 	targeting: boolean;
 	onVictorySummary: () => void;
@@ -28,7 +27,6 @@ const DungeonNotices = ({
 	monsters,
 	actionError,
 	showActionFeedback,
-	spellDescription,
 	corridorDescription,
 	targeting,
 	onVictorySummary,
@@ -39,16 +37,14 @@ const DungeonNotices = ({
 	const victory = state.quest.victory;
 	const canPlay = state.player.health > 0 && victory === null;
 	return (
-		<div
-			className={
-				town ? "relative h-14 shrink-0" : "relative h-32 shrink-0 lg:h-24"
-			}
-		>
+		// Grows with what there is to say, from one line up to a scrolling cap, so the
+		// map keeps its full height and the activity log below takes what's left.
+		<div className="ember-panel flex min-h-11 max-h-[40dvh] min-w-0 shrink-0 flex-col overflow-hidden rounded-lg border border-border bg-card shadow-sm dark:border-amber-900/25">
 			<section
 				aria-label="Dungeon notices"
 				// biome-ignore lint/a11y/noNoninteractiveTabindex: Keyboard users need to scroll longer notices.
 				tabIndex={0}
-				className="h-full overflow-y-auto px-1 py-1 focus-visible:outline-1 focus-visible:-outline-offset-1 focus-visible:outline-ring"
+				className="min-h-0 overflow-y-auto px-3 py-1 empty:py-2.5 empty:text-xs empty:text-muted-foreground empty:before:content-['Nothing_of_note_nearby.'] focus-visible:outline-1 focus-visible:-outline-offset-1 focus-visible:outline-ring"
 			>
 				{hint && (
 					<HintNotice
@@ -78,15 +74,6 @@ const DungeonNotices = ({
 					>
 						Victory summary
 					</Button>
-				)}
-				{spellDescription && (
-					<p
-						role="status"
-						aria-label="Spell targeting"
-						className="mb-2 rounded-md border border-violet-500/50 bg-violet-500/10 px-3 py-2 text-center text-sm"
-					>
-						{spellDescription}
-					</p>
 				)}
 				{corridorDescription && (
 					<p

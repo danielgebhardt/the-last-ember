@@ -67,7 +67,7 @@ const createOpenEncounter = (): DungeonRun => ({
 });
 afterEach(resetHomeTestState);
 describe("Spell targeting controls", () => {
-	it("uses the selected spell's catalog name in its targeting description", async () => {
+	it("names the spell and target, and says only how to aim", async () => {
 		const definition = SPELL_DEFINITIONS["magic-missile"];
 		const originalName = definition.name;
 		Reflect.set(definition, "name", "Renamed bolt");
@@ -75,7 +75,7 @@ describe("Spell targeting controls", () => {
 			const { user } = setup();
 			await user.keyboard("z");
 			expect(screen.getByLabelText("Spell targeting")).toHaveTextContent(
-				"Renamed bolt:",
+				"Renamed bolt at goblin. Enter or click casts; arrows or WASD cast in a direction. Escape or Z cancels.",
 			);
 		} finally {
 			Reflect.set(definition, "name", originalName);

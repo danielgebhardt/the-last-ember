@@ -54,7 +54,6 @@
 	--color-item-ember: var(--item-ember);
 	--color-item-gear: var(--item-gear);
 	--color-item-mana: var(--item-mana);
-	--color-stairs: var(--stairs);
 	--font-sans: "Geist Variable", sans-serif;
 	--color-sidebar-ring: var(--sidebar-ring);
 	--color-sidebar-border: var(--sidebar-border);
@@ -180,7 +179,6 @@
 	--item-cure: #1d4ed8;
 	--item-ember: #b45309;
 	--item-mana: #2563eb;
-	--stairs: #a16207;
 }
 
 .dark {
@@ -263,7 +261,6 @@
 	--item-cure: #93c5fd;
 	--item-ember: #fbbf24;
 	--item-mana: #60a5fa;
-	--stairs: #fbbf24;
 }
 
 @layer base {
