@@ -1,4 +1,4 @@
-import { render, screen, within } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import { afterEach, expect, it, vi } from "vitest";
 import * as GameState from "../domain/game/GameState";
 import { ThemeProvider } from "../settings/ThemeProvider";
@@ -16,7 +16,7 @@ afterEach(() => {
 	flags.wanderingMerchant = true;
 });
 it.each([true, false])(
-	"shows the labeled shop icon only when availability is %s",
+	"shows the merchant's stall only when availability is %s",
 	(enabled) => {
 		flags.wanderingMerchant = enabled;
 		stubDungeonRun(createCorridorEncounter());
@@ -43,12 +43,11 @@ it.each([true, false])(
 				}),
 			).toBeVisible();
 			expect(screen.getByText(/Press E within reach to trade/)).toBeVisible();
+			// The cell's label names the stall; its drawing is decorative.
 			expect(
-				within(
-					screen.getByRole("cell", {
-						name: "row1col2 - potion merchant",
-					}),
-				).getByTitle("Potion merchant shop"),
+				screen
+					.getByRole("cell", { name: "row1col2 - potion merchant" })
+					.querySelector("svg[data-full-color]"),
 			).toBeInTheDocument();
 		} else {
 			expect(

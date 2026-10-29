@@ -33,8 +33,9 @@ import {
 	comparisonStyles,
 } from "../game/EquipmentComparisonView";
 import EquipmentPreviews from "../game/EquipmentPreviews";
+import { FullColor } from "../icons/FullColorIcon";
 import ItemIcon from "../items/ItemIcon";
-import MerchantIcon from "../objects/MerchantIcon";
+import { OBJECT_ICONS } from "../objects/DungeonObjectIcon";
 import TownTalk from "../town/TownTalk";
 
 const SALE_DROP_ID = "sale";
@@ -221,7 +222,7 @@ const MerchantDialog = ({
 								className="flex items-center gap-2 text-lg font-semibold outline-none"
 							>
 								<span className="size-7">
-									<MerchantIcon />
+									<FullColor icon={OBJECT_ICONS.merchant} />
 								</span>
 								{inTown ? "The Rag & Bone" : "Wandering potion merchant"}
 							</Dialog.Title>

@@ -54,7 +54,7 @@ for (const [theme, width] of [
 			name: "Developer Catalog",
 			exact: true,
 		});
-		for (const section of ["Monsters", "Items", "Spells"]) {
+		for (const section of ["Monsters", "Items", "Dungeon objects", "Spells"]) {
 			await catalog.getByRole("tab", { name: section, exact: true }).click();
 			const panel = catalog.getByRole("tabpanel", {
 				name: section,

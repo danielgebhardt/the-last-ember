@@ -11,7 +11,6 @@
 	--color-fog-unseen: var(--fog-unseen);
 	--color-fog-remembered: var(--fog-remembered);
 	--color-wall-icon: var(--wall-icon);
-	--color-object-stone: var(--object-stone);
 	--color-wall-tile: var(--wall-tile);
 	--color-floor-dot: var(--floor-dot);
 	--color-player: var(--player);
@@ -164,7 +163,6 @@
 	--sidebar-border: oklch(0.922 0 0);
 	--sidebar-ring: oklch(0.708 0 0);
 	--wall-icon: #475569;
-	--object-stone: #57534e;
 	--wall-tile: rgba(203, 195, 182, 0.78);
 	--floor-dot: #77818f;
 	--player: #dc2626;
@@ -247,7 +245,6 @@
 	--sidebar-border: oklch(1 0 0 / 10%);
 	--sidebar-ring: oklch(0.556 0 0);
 	--wall-icon: #9ca6b8;
-	--object-stone: #d6d3d1;
 	--wall-tile: #292f3b;
 	--floor-dot: #596273;
 	--player: #f87171;
