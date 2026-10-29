@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" role="img" aria-label="RunicHelmet light">
+  <!-- Approved design A: Rune Crown; scalable at 24px and 48px. -->
+  <path d="M7 37 5 13 15 21 24 7 33 21 43 13 41 37Z" fill="#69519e" stroke="#2e224c" stroke-width="2.1" stroke-linejoin="round"/>
+  <path d="M7 32H41V40H7ZM17 24 24 17 31 24 24 30Z" fill="#dfab3d" stroke="#49316b" stroke-width="1.7" stroke-linejoin="round"/>
+  <path d="M15 31 19 27M33 31 29 27" fill="none" stroke="#49316b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
