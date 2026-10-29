@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" role="img" aria-label="IronHelmet dark">
+  <!-- Approved design B: Iron Guard; scalable at 24px and 48px. -->
+  <path d="M9 34V20Q11 7 24 7Q37 7 39 20V34L33 39 30 32H18L15 39Z" fill="#94a9bb" stroke="#f0f7ff" stroke-width="2.1" stroke-linejoin="round"/>
+  <path d="M18 11 24 8 30 11 29 30H19ZM10 30H38" fill="#cbdcea" stroke="#3f566b" stroke-width="1.7" stroke-linejoin="round"/>
+  <path d="M12 21 17 25M36 21 31 25" fill="none" stroke="#3f566b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
