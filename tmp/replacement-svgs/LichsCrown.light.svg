@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" role="img" aria-label="LichsCrown light mode">
+  <!-- Approved Grave King's Crown; exact comparison paths, ordering, circles and colors. -->
+  <path d="M6 11 14 21 16 5 24 17 32 5 34 21 42 11 38 35H10Z" fill="#655077" stroke="#342540" stroke-width="1.8" stroke-linejoin="round"/>
+  <path d="M10 32H38V40H10Z" fill="#9275a5" stroke="#44314f" stroke-width="1.5" stroke-linejoin="round"/>
+  <path d="M13 26 19 30M35 26 29 30M24 18V35" fill="none" stroke="#44314f" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M24 23 29 30 24 36 19 30Z" fill="#168e83" stroke="#342540" stroke-width="1.1" stroke-linejoin="round"/>
+  <circle cx="15" cy="36" r="1.5" fill="#37bea7" stroke="#44314f" stroke-width=".7"/>
+  <circle cx="33" cy="36" r="1.5" fill="#37bea7" stroke="#44314f" stroke-width=".7"/>
+</svg>
