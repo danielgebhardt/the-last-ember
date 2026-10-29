@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" role="img" aria-label="RingOfVitality light mode">
+  <ellipse cx="24" cy="30" rx="14" ry="12" fill="none" stroke="#796b75" stroke-width="9"/>
+  <ellipse cx="24" cy="30" rx="14" ry="12" fill="none" stroke="#ac9b9a" stroke-width="5"/>
+  <path d="M10 26Q24 18 38 26" fill="none" stroke="#4d404c" stroke-width="1.8" stroke-linecap="round"/>
+  <path d="M24 25 14 16Q13 9 19 10Q23 10 24 14Q25 10 29 10Q35 9 34 16Z" fill="#5cab59" stroke="#4d404c" stroke-width="1.5"/>
+</svg>
