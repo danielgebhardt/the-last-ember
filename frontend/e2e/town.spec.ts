@@ -28,6 +28,14 @@ test("fixed town preview works in both themes on phone, laptop and desktop witho
 			const sheet = page.getByRole("dialog", { name: "Developer Catalog" });
 			await sheet.getByRole("tab", { name: "Town", exact: true }).click();
 			const preview = sheet.getByRole("region", { name: "Town map preview" });
+			// The whole town fits; only the catalog panel scrolls.
+			expect(
+				await preview.evaluate(
+					(element) =>
+						element.scrollHeight <= element.clientHeight + 1 &&
+						element.scrollWidth <= element.clientWidth + 1,
+				),
+			).toBe(true);
 			await preview.focus();
 			await page.keyboard.type("sse");
 			await expect(sheet.getByRole("status")).toContainText("not connected");

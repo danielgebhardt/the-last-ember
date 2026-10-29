@@ -241,7 +241,7 @@ const TownMap = ({
 					aria-describedby={instructionsId}
 					// biome-ignore lint/a11y/noNoninteractiveTabindex: The map is the keyboard movement and scrolling surface.
 					tabIndex={0}
-					className={`w-fit min-h-0 min-w-0 max-w-full overflow-auto rounded-md bg-transparent outline-offset-2 focus-visible:outline-2 focus-visible:outline-primary ${preview ? "max-h-[22rem]" : "max-h-[26.25rem]"}`}
+					className="w-fit min-h-0 min-w-0 max-w-full overflow-auto rounded-md bg-transparent outline-offset-2 focus-visible:outline-2 focus-visible:outline-primary max-h-[26.25rem]"
 					onFocus={(event) => {
 						if (event.target === event.currentTarget) followPlayer();
 					}}
