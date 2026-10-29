@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" role="img" aria-label="Steel Helmet - Visored Bascinet (light)">
+  <!-- Approved E: Visored Bascinet. Scalable 24px / 48px; transparent background. -->
+  <path d="M24 3 14 10 9 21 10 37 16 42H32L38 37 39 21 34 10Z" fill="#647d91" stroke="#203446" stroke-width="2" stroke-linejoin="round"/>
+  <path d="M12 25H36V32H12ZM21 32H27V40H21Z" fill="#99b0c0" stroke="#354b5d" stroke-width="1.8" stroke-linejoin="round"/>
+  <path d="M16 29H32M14 19 24 8 34 19" fill="none" stroke="#354b5d" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M21 12H27" stroke="#d69c4d" stroke-width="1.8" stroke-linecap="round"/>
+</svg>
