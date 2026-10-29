@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" role="img" aria-label="ShortSword dark mode">
+  <!-- Approved D — Roman Gladius; exact comparison geometry and theme palette. -->
+  <g transform="rotate(-38 24 24)">
+    <path d="M24 3 30 12 30 26 24 34 18 26 18 12Z" fill="#c0d8e9" stroke="#f4faff" stroke-width="1.7" stroke-linejoin="round"/>
+    <path d="M24 8V29" fill="none" stroke="#40586f" stroke-width="1.5" stroke-linecap="round"/>
+    <path d="M14 31H34L31 35H17Z" fill="#f1c56c" stroke="#40586f" stroke-width="1.4" stroke-linejoin="round"/>
+    <path d="M22 34H26V43H22Z" fill="#87512c" stroke="#f4faff" stroke-width="1.4" stroke-linejoin="round"/>
+    <circle cx="24" cy="46" r="1.8" fill="#f1c56c" stroke="#40586f" stroke-width=".8"/>
+  </g>
+</svg>
