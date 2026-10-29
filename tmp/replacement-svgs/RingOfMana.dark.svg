@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" role="img" aria-label="RingOfMana dark mode">
+  <ellipse cx="24" cy="30" rx="14" ry="12" fill="none" stroke="#5b5168" stroke-width="9"/>
+  <ellipse cx="24" cy="30" rx="14" ry="12" fill="none" stroke="#b6a5ac" stroke-width="5"/>
+  <path d="M10 26Q24 18 38 26" fill="none" stroke="#f8e5ed" stroke-width="1.8" stroke-linecap="round"/>
+  <path d="M24 6 28 13 36 16 28 19 24 27 20 19 12 16 20 13Z" fill="#c5a0ff" stroke="#f8e5ed" stroke-width="1.5"/>
+</svg>
