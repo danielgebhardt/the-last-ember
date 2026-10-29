@@ -71,6 +71,31 @@
 	background-image: url("../assets/terrain/wall-dark-4.svg");
 }
 
+/* Floor variations work the same way: same stone, different joints and cracks. */
+.dungeon-floor-2 {
+	background-image: url("../assets/terrain/floor-light-2.svg");
+}
+
+.dark .dungeon-floor-2 {
+	background-image: url("../assets/terrain/floor-dark-2.svg");
+}
+
+.dungeon-floor-3 {
+	background-image: url("../assets/terrain/floor-light-3.svg");
+}
+
+.dark .dungeon-floor-3 {
+	background-image: url("../assets/terrain/floor-dark-3.svg");
+}
+
+.dungeon-floor-4 {
+	background-image: url("../assets/terrain/floor-light-4.svg");
+}
+
+.dark .dungeon-floor-4 {
+	background-image: url("../assets/terrain/floor-dark-4.svg");
+}
+
 /* Keep targeting controls above the terrain */
 .dungeon-stone-wall > button,
 .dungeon-flagstone > button {
@@ -89,7 +114,13 @@
 	.dungeon-wall-4,
 	.dark .dungeon-wall-2,
 	.dark .dungeon-wall-3,
-	.dark .dungeon-wall-4 {
+	.dark .dungeon-wall-4,
+	.dungeon-floor-2,
+	.dungeon-floor-3,
+	.dungeon-floor-4,
+	.dark .dungeon-floor-2,
+	.dark .dungeon-floor-3,
+	.dark .dungeon-floor-4 {
 		background-image: none;
 		box-shadow: inset 0 0 0 1px CanvasText;
 	}

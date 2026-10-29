@@ -1,6 +1,6 @@
 import { FLOOR, PLAYER, WALL } from "../../domain/dungeon/Tiles.ts";
-import { FullColor } from "../icons/FullColorIcon";
-import { TILE_ICONS } from "./TileVisuals.ts";
+import { FullColor, isFullColor } from "../icons/FullColorIcon";
+import { TILE_ICON_COLORS, TILE_ICONS } from "./TileVisuals.ts";
 
 const TileIcon = ({ tile }: { tile: string }) => {
 	// Terrain is painted by CSS on the parent cell.
@@ -11,6 +11,21 @@ const TileIcon = ({ tile }: { tile: string }) => {
 	const icon = TILE_ICONS[tile];
 
 	if (!icon) return tile;
+
+	if (!isFullColor(icon)) {
+		const Icon = icon;
+		return (
+			<span
+				className={`relative z-10 block size-full ${TILE_ICON_COLORS[tile] ?? ""}`}
+			>
+				<Icon
+					aria-hidden="true"
+					focusable="false"
+					className="block size-full"
+				/>
+			</span>
+		);
+	}
 
 	return (
 		<span className="relative z-10 block size-full">

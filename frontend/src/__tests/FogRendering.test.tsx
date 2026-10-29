@@ -53,8 +53,7 @@ describe("Fog display states", () => {
 			name: "row1col4 - remembered stairs down",
 		});
 		expect(stair).toHaveAttribute("data-visibility", "remembered");
-		// Its light and dark drawings.
-		expect(stair.querySelectorAll("svg")).toHaveLength(2);
+		expect(stair.querySelectorAll("svg")).toHaveLength(1);
 		expect(
 			screen.getByRole("cell", { name: "row0col2 - remembered wall" }),
 		).toHaveAttribute("data-visibility", "remembered");
