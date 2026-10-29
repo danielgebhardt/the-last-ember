@@ -226,6 +226,9 @@ const DungeonLayout = ({
 		}
 		const observer = new ResizeObserver(followPlayer);
 		observer.observe(viewport);
+		// The map itself resizes when the tile size setting changes.
+		if (viewport.firstElementChild)
+			observer.observe(viewport.firstElementChild);
 		return () => observer.disconnect();
 	}, [followPlayer, viewportRef]);
 

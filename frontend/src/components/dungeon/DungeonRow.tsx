@@ -163,7 +163,7 @@ const DungeonCell = memo(function DungeonCell({
 					className="pointer-events-none absolute inset-0 rounded-xs border-2 border-map-threat bg-map-threat/15"
 				>
 					<TriangleAlert
-						className="absolute -right-0.5 -top-0.5 size-2.5 fill-background text-map-threat"
+						className="absolute -right-0.5 -top-0.5 size-[var(--tile-threat-marker)] fill-background text-map-threat"
 						strokeWidth={2.5}
 					/>
 				</span>

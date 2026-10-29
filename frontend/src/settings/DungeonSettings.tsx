@@ -37,6 +37,7 @@ import type {
 	ConfigurationField,
 } from "./RunConfigurationDraft.ts";
 import { useTheme } from "./ThemeProvider.tsx";
+import { setTileSize, TILE_SIZES, useTileSize } from "./TileSizes";
 
 type DungeonSettingsProps = {
 	finalFocus?: RefObject<HTMLElement | null> | false;
@@ -86,6 +87,11 @@ const DungeonSettings = ({
 	const selectedDifficulty = Number(configDraft.difficulty ?? 1);
 	const inputRef = useRef<HTMLInputElement>(null);
 	const { theme, setTheme } = useTheme();
+	const tileSize = useTileSize();
+	const tileStep = Math.max(
+		0,
+		TILE_SIZES.findIndex((size) => size.tile === tileSize),
+	);
 	return (
 		<SheetContent
 			initialFocus={inputRef}
@@ -279,6 +285,44 @@ const DungeonSettings = ({
 						</ToggleGroup>
 						<p className="text-xs text-muted-foreground">
 							Saved on this device. System follows your device’s appearance.
+						</p>
+					</div>
+					<div className="grid gap-2 border-t pt-4">
+						<Label htmlFor="tile-size" className="text-sm font-medium">
+							Map tile size
+						</Label>
+						<input
+							id="tile-size"
+							type="range"
+							min={0}
+							max={TILE_SIZES.length - 1}
+							step={1}
+							value={tileStep}
+							aria-valuetext={`${tileSize} pixels`}
+							aria-describedby="tile-size-help"
+							onChange={(event) =>
+								setTileSize(TILE_SIZES[Number(event.target.value)].tile)
+							}
+							className="w-full accent-primary"
+						/>
+						<div
+							aria-hidden="true"
+							className="flex justify-between text-xs text-muted-foreground"
+						>
+							{TILE_SIZES.map(({ tile }) => (
+								<span
+									key={tile}
+									className={
+										tile === tileSize ? "font-semibold text-foreground" : ""
+									}
+								>
+									{tile}px
+								</span>
+							))}
+						</div>
+						<p id="tile-size-help" className="text-xs text-muted-foreground">
+							Larger tiles show more detail and less of the floor. Saved on this
+							device.
 						</p>
 					</div>
 					{hints && (

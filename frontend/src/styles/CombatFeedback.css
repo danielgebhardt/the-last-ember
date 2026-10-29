@@ -50,7 +50,7 @@
 	left: 50%;
 	bottom: 72%;
 	white-space: nowrap;
-	font-size: 14px;
+	font-size: var(--tile-feedback-text);
 	font-weight: 800;
 	line-height: 1;
 	color: var(--feedback-tone);
@@ -59,14 +59,17 @@
 		1px -1px 0 var(--feedback-outline),
 		-1px 1px 0 var(--feedback-outline),
 		1px 1px 0 var(--feedback-outline);
-	transform: translate(-50%, calc(var(--feedback-stack, 0) * -14px));
+	transform: translate(
+		-50%,
+		calc(var(--feedback-stack, 0) * -1 * var(--tile-feedback-rise))
+	);
 	animation: combat-feedback-rise var(--feedback-duration) ease-out forwards;
 }
 
 .combat-feedback-mark[data-tone="miss"],
 .combat-feedback-mark[data-tone="loot"],
 .combat-feedback-mark[data-tone="death"] {
-	font-size: 11px;
+	font-size: var(--tile-feedback-label);
 	font-weight: 700;
 	text-transform: uppercase;
 	letter-spacing: 0.04em;
@@ -86,7 +89,7 @@
 	}
 	100% {
 		opacity: 0;
-		translate: 0 -14px;
+		translate: 0 calc(-1 * var(--tile-feedback-rise));
 	}
 }
 
