@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" role="img" aria-label="PlateArmor (light theme)">
+  <!-- Approved high-contrast vector design; transparent background; scales to 24px or 48px. -->
+  <path d="M15 4 8 8 3 16 10 23 12 39 24 44 36 39 38 23 45 16 40 8 33 4 28 12H20Z" fill="#536d80" stroke="#1d3347" stroke-width="1.75" stroke-linejoin="round"/>
+  <path d="M17 14 24 19 31 14 34 22 32 37 24 41 16 37 14 22Z" fill="#91a7ba" stroke="#304c65" stroke-width="1.9" stroke-linejoin="round"/>
+  <path d="M19 7 24 13 29 7 31 13 24 18 17 13Z" fill="#d99833" stroke="#304c65" stroke-width="1.3" stroke-linejoin="round"/>
+  <path d="M24 19V40M16 30 24 36 32 30M9 17 16 21M39 17 32 21" fill="none" stroke="#304c65" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
