@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" role="img" aria-label="JuggernautsBulwark light mode">
+  <!-- Approved Citadel Wall; exact comparison paths, ordering, circles and colors. -->
+  <path d="M7 4H41V30L35 40 24 46 13 40 7 30Z" fill="#8291a3" stroke="#293849" stroke-width="1.8" stroke-linejoin="round"/>
+  <path d="M12 10H36V29L30 37 24 41 18 37 12 29Z" fill="#c0c8d1" stroke="#46556b" stroke-width="1.5" stroke-linejoin="round"/>
+  <path d="M13 19H35M14 30H34M24 10V40" fill="none" stroke="#46556b" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M19 15H29V32H19ZM16 21H32V27H16Z" fill="#a77d33" stroke="#293849" stroke-width="1.1" stroke-linejoin="round"/>
+  <circle cx="11" cy="8" r="1.5" fill="#e8bc5d" stroke="#46556b" stroke-width=".7"/>
+  <circle cx="37" cy="8" r="1.5" fill="#e8bc5d" stroke="#46556b" stroke-width=".7"/>
+  <circle cx="11" cy="33" r="1.5" fill="#e8bc5d" stroke="#46556b" stroke-width=".7"/>
+  <circle cx="37" cy="33" r="1.5" fill="#e8bc5d" stroke="#46556b" stroke-width=".7"/>
+</svg>
