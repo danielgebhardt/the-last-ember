@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" role="img" aria-label="CopperRing dark mode">
+  <ellipse cx="24" cy="30" rx="14" ry="12" fill="none" stroke="#a56844" stroke-width="9"/>
+  <ellipse cx="24" cy="30" rx="14" ry="12" fill="none" stroke="#d39b6c" stroke-width="5"/>
+  <path d="M10 26Q24 18 38 26" fill="none" stroke="#f8e5ed" stroke-width="1.8" stroke-linecap="round"/>
+  <path d="M14 20Q24 15 34 20" fill="none" stroke="#f1bb8a" stroke-width="2"/>
+</svg>
