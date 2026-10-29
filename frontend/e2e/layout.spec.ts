@@ -116,6 +116,65 @@ test("adventure layout keeps the dungeon usable beside a responsive Activity pan
 	}
 });
 
+test("the quick-slot hotbar keeps one row, naming compact slots on hover and focus", async ({
+	page,
+}, testInfo) => {
+	await importAdventure(page, "spell-balance");
+	const rail = page.getByRole("group", { name: "Quick slots", exact: true });
+	const slots = rail.locator("button, [role=img]");
+	const fireball = rail.getByRole("button", { name: /^Fireball/ });
+	for (const { width, height, compact } of [
+		{ width: 1024, height: 768, compact: true },
+		{ width: 1180, height: 820, compact: true },
+		{ width: 1280, height: 800, compact: false },
+		{ width: 1470, height: 830, compact: false },
+	]) {
+		await page.setViewportSize({ width, height });
+		await expect(slots).toHaveCount(11);
+		const rows = await slots.evaluateAll(
+			(nodes) =>
+				new Set(
+					nodes.map((node) => Math.round(node.getBoundingClientRect().top)),
+				).size,
+		);
+		expect(rows, `${width}px`).toBe(1);
+		// Each slot clears the rail's 28px ends, drawn over the outer frame around
+		// the slots. Slots animate their size, so wait for them to settle.
+		const frame = rail.locator("xpath=../..");
+		await expect
+			.poll(async () => {
+				const railBox = await frame.boundingBox();
+				const first = await slots.first().boundingBox();
+				const last = await slots.last().boundingBox();
+				if (!railBox || !first || !last) return null;
+				return Math.min(
+					first.x - railBox.x,
+					railBox.x + railBox.width - (last.x + last.width),
+				);
+			})
+			.toBeGreaterThanOrEqual(28);
+		const first = await slots.first().boundingBox();
+		if (!first) throw new Error("Missing hotbar geometry");
+		const label = rail.getByText("Fireball", { exact: true });
+		if (compact) {
+			expect(first.width).toBeGreaterThanOrEqual(44);
+			await page.mouse.move(0, 0);
+			await expect(label).toBeHidden();
+			await fireball.hover();
+			await expect(label).toBeVisible();
+			const tag = await label.boundingBox();
+			expect(tag && tag.y + tag.height).toBeLessThanOrEqual(first.y);
+			await page.mouse.move(0, 0);
+			await expect(label).toBeHidden();
+			await fireball.focus();
+			await expect(label).toBeVisible();
+			await page.screenshot({
+				path: testInfo.outputPath(`hotbar-${width}.png`),
+			});
+			await map(page).focus();
+		} else await expect(label).toBeVisible();
+	}
+});
 test("interaction hints reserve their space without resizing the dungeon", async ({
 	page,
 }) => {

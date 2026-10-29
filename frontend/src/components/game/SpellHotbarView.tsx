@@ -8,6 +8,7 @@ import {
 import { playerSpell, type SpellKind } from "../../domain/game/Spells";
 import {
 	HOTBAR_CARD_CLASS_NAME,
+	HOTBAR_LABEL_CLASS_NAME,
 	HOTBAR_SLOT_CLASS_NAME,
 	HotbarShortcut,
 } from "./HotbarSlot";
@@ -50,10 +51,7 @@ const SpellHotbarView = ({
 							</span>
 						</span>
 
-						<span
-							aria-hidden="true"
-							className="whitespace-nowrap text-[11px] leading-4 text-muted-foreground"
-						>
+						<span aria-hidden="true" className={HOTBAR_LABEL_CLASS_NAME}>
 							Empty
 						</span>
 					</div>
@@ -97,10 +95,7 @@ const SpellHotbarView = ({
 						</span>
 					</Button>
 
-					<span
-						aria-hidden="true"
-						className="w-full whitespace-nowrap text-center text-[11px] leading-4 text-muted-foreground"
-					>
+					<span aria-hidden="true" className={HOTBAR_LABEL_CLASS_NAME}>
 						{definition.name}
 					</span>
 				</div>

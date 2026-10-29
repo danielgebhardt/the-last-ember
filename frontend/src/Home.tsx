@@ -963,14 +963,15 @@ const Home = ({
 							/>
 						</div>
 
-						<div className="order-3 flex min-w-0 justify-center lg:col-start-1 lg:row-start-3">
+						<div className="@container/hotbar order-3 flex min-w-0 justify-center lg:col-start-1 lg:row-start-3">
 							<FantasyRail className="w-fit max-w-full">
 								<fieldset
 									aria-label="Quick slots"
 									className="
             flex min-w-0 max-w-full flex-wrap
             items-start justify-center gap-x-3 gap-y-3
-            bg-muted/20 px-2 py-2 sm:px-5
+            bg-muted/20 px-8 py-2 @min-[57rem]/hotbar:px-5
+            @max-[57rem]/hotbar:gap-x-2
          "
 								>
 									<RemediesButton

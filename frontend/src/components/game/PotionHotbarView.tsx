@@ -11,6 +11,7 @@ import {
 import ItemIcon from "../items/ItemIcon";
 import {
 	HOTBAR_CARD_CLASS_NAME,
+	HOTBAR_LABEL_CLASS_NAME,
 	HOTBAR_SLOT_CLASS_NAME,
 	HotbarShortcut,
 } from "./HotbarSlot";
@@ -89,10 +90,7 @@ const PotionHotbarView = ({
 						)}
 					</Button>
 
-					<span
-						aria-hidden="true"
-						className="w-full whitespace-nowrap text-center text-[11px] leading-4 text-muted-foreground"
-					>
+					<span aria-hidden="true" className={HOTBAR_LABEL_CLASS_NAME}>
 						{kind ? POTION_LABELS[kind] : "Empty"}
 					</span>
 				</div>
