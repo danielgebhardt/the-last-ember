@@ -53,10 +53,7 @@
 	--color-item-cure: var(--item-cure);
 	--color-item-ember: var(--item-ember);
 	--color-item-gear: var(--item-gear);
-	--color-item-potion: var(--item-potion);
 	--color-item-mana: var(--item-mana);
-	--color-item-antidote: var(--item-antidote);
-	--color-item-cleansing: var(--item-cleansing);
 	--color-stairs: var(--stairs);
 	--font-sans: "Geist Variable", sans-serif;
 	--color-sidebar-ring: var(--sidebar-ring);
@@ -182,9 +179,6 @@
 	--item-gear: #a16207;
 	--item-cure: #1d4ed8;
 	--item-ember: #b45309;
-	--item-potion: #b91c1c;
-	--item-antidote: #15803d;
-	--item-cleansing: #0f766e;
 	--item-mana: #2563eb;
 	--stairs: #a16207;
 }
@@ -268,9 +262,6 @@
 	--item-gear: #fbbf24;
 	--item-cure: #93c5fd;
 	--item-ember: #fbbf24;
-	--item-potion: #f87171;
-	--item-antidote: #4ade80;
-	--item-cleansing: #5eead4;
 	--item-mana: #60a5fa;
 	--stairs: #fbbf24;
 }

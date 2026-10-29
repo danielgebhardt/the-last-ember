@@ -1,0 +1,75 @@
+import type { FullColorArtProps } from "../../icons/FullColorIcon";
+
+export const SpellbookLight = (props: FullColorArtProps) => (
+	<svg
+		viewBox="0 0 48 48"
+		strokeLinecap="round"
+		strokeLinejoin="round"
+		aria-hidden="true"
+		{...props}
+	>
+		<path
+			d="M4 13 7 11 6 40Q17 36 24 44Q31 36 42 40L41 11 44 13"
+			fill="none"
+			stroke="#69518f"
+			strokeWidth="3.8"
+		/>
+		<path
+			d="M24 13Q14 4 6 11L7 37Q17 33 24 41Z"
+			fill="#f5dfba"
+			stroke="#684f3c"
+			strokeWidth="1.5"
+		/>
+		<path
+			d="M24 13Q34 4 42 11L41 37Q31 33 24 41Z"
+			fill="#f5dfba"
+			stroke="#684f3c"
+			strokeWidth="1.5"
+		/>
+		<path d="M24 14V40" fill="none" stroke="#76573b" strokeWidth="1.8" />
+		<path
+			d="M10 17Q17 14 21 18M10 22Q17 19 21 23M11 27 19 26M27 18Q34 14 38 17M27 23Q34 19 38 22M29 27 37 26"
+			fill="none"
+			stroke="#886548"
+			strokeWidth="1.1"
+			opacity=".65"
+		/>
+	</svg>
+);
+
+export const SpellbookDark = (props: FullColorArtProps) => (
+	<svg
+		viewBox="0 0 48 48"
+		strokeLinecap="round"
+		strokeLinejoin="round"
+		aria-hidden="true"
+		{...props}
+	>
+		<path
+			d="M4 13 7 11 6 40Q17 36 24 44Q31 36 42 40L41 11 44 13"
+			fill="none"
+			stroke="#ab8de9"
+			strokeWidth="3.8"
+		/>
+		<path
+			d="M24 13Q14 4 6 11L7 37Q17 33 24 41Z"
+			fill="#fff0ce"
+			stroke="#ffffff"
+			strokeWidth="1.5"
+		/>
+		<path
+			d="M24 13Q34 4 42 11L41 37Q31 33 24 41Z"
+			fill="#fff0ce"
+			stroke="#ffffff"
+			strokeWidth="1.5"
+		/>
+		<path d="M24 14V40" fill="none" stroke="#5c3b8c" strokeWidth="2.3" />
+		<path
+			d="M10 17Q17 14 21 18M10 22Q17 19 21 23M11 27 19 26M27 18Q34 14 38 17M27 23Q34 19 38 22M29 27 37 26"
+			fill="none"
+			stroke="#62472d"
+			strokeWidth="1.45"
+			opacity=".95"
+		/>
+	</svg>
+);

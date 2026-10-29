@@ -1,0 +1,83 @@
+import type { FullColorArtProps } from "../../icons/FullColorIcon";
+
+export const ShadowweaveCloakLight = (props: FullColorArtProps) => (
+	<svg viewBox="0 0 48 48" aria-hidden="true" {...props}>
+		<path
+			d="M24 4 14 9 5 18 11 24 3 40 15 36 21 44 24 37 27 44 33 36 45 40 37 24 43 18 34 9Z"
+			fill="#4d326b"
+			stroke="#29203e"
+			strokeWidth="1.8"
+			strokeLinejoin="round"
+		/>
+		<path
+			d="M24 11 18 19 13 34 21 31 24 40 27 31 35 34 30 19Z"
+			fill="#71519d"
+			stroke="#34214b"
+			strokeWidth="1.8"
+			strokeLinejoin="round"
+		/>
+		<path
+			d="M24 7 17 14 20 21 24 25 28 21 31 14Z"
+			fill="#b99ae6"
+			stroke="#34214b"
+			strokeWidth="1.3"
+			strokeLinejoin="round"
+		/>
+		<path
+			d="M9 20 18 26 13 33M39 20 30 26 35 33M20 29 24 34 28 29"
+			fill="none"
+			stroke="#a47edb"
+			strokeWidth="2"
+			strokeLinecap="round"
+			strokeLinejoin="round"
+		/>
+		<path
+			d="M22 21 24 24 26 21"
+			fill="none"
+			stroke="#34214b"
+			strokeWidth="1.5"
+			strokeLinecap="round"
+		/>
+	</svg>
+);
+
+export const ShadowweaveCloakDark = (props: FullColorArtProps) => (
+	<svg viewBox="0 0 48 48" aria-hidden="true" {...props}>
+		<path
+			d="M24 4 14 9 5 18 11 24 3 40 15 36 21 44 24 37 27 44 33 36 45 40 37 24 43 18 34 9Z"
+			fill="#40266c"
+			stroke="#d2b5ff"
+			strokeWidth="1.8"
+			strokeLinejoin="round"
+		/>
+		<path
+			d="M24 11 18 19 13 34 21 31 24 40 27 31 35 34 30 19Z"
+			fill="#8663c6"
+			stroke="#261841"
+			strokeWidth="1.8"
+			strokeLinejoin="round"
+		/>
+		<path
+			d="M24 7 17 14 20 21 24 25 28 21 31 14Z"
+			fill="#c6a4ff"
+			stroke="#261841"
+			strokeWidth="1.3"
+			strokeLinejoin="round"
+		/>
+		<path
+			d="M9 20 18 26 13 33M39 20 30 26 35 33M20 29 24 34 28 29"
+			fill="none"
+			stroke="#a97bff"
+			strokeWidth="2"
+			strokeLinecap="round"
+			strokeLinejoin="round"
+		/>
+		<path
+			d="M22 21 24 24 26 21"
+			fill="none"
+			stroke="#261841"
+			strokeWidth="1.5"
+			strokeLinecap="round"
+		/>
+	</svg>
+);

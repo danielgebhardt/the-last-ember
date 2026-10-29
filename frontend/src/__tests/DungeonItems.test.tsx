@@ -29,8 +29,8 @@ describe("Floor item symbols", () => {
 			/>,
 		);
 		const cell = screen.getByLabelText("row1col2 - Warden's Flame");
-		expect(cell.querySelector("svg")).toHaveClass("text-item-ember");
-		expect(cell.querySelector("svg")).toHaveAttribute("viewBox", "0 0 24 24");
+		expect(cell.querySelector("svg")).toHaveAttribute("data-full-color");
+		expect(cell.querySelector("svg")).toHaveAttribute("viewBox", "0 0 48 48");
 	});
 	it("shows visible items and describes multiple items on the same tile", () => {
 		render(<DungeonLayout {...props} floorItems={pile} />);
@@ -66,7 +66,7 @@ describe("Floor item symbols", () => {
 		const cell = screen.getByLabelText("row1col2 - Iron sword");
 		expect(within(cell).queryByText("2")).not.toBeInTheDocument();
 		expect(cell).not.toHaveAttribute("title");
-		expect(cell.querySelector("svg")).toHaveClass("lucide-sword");
+		expect(cell.querySelector("svg")).toHaveAttribute("data-full-color");
 	});
 	it("hides items on remembered and undiscovered tiles", () => {
 		const visible = props.dungeon.map((row) => row.map(() => false));

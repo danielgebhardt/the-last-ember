@@ -42,6 +42,7 @@ it("gives every rendered copy its own ids, referenced only inside its own drawin
 	const ids = [...container.querySelectorAll("[id]")].map((node) => node.id);
 	expect(ids.length).toBeGreaterThan(5);
 	expect(new Set(ids).size).toBe(ids.length);
+	let referenced = 0;
 	for (const svg of container.querySelectorAll("svg")) {
 		const local = new Set(
 			[...svg.querySelectorAll("[id]")].map((node) => node.id),
@@ -53,9 +54,10 @@ it("gives every rendered copy its own ids, referenced only inside its own drawin
 				),
 			),
 		);
-		expect(references.length).toBeGreaterThan(0);
+		referenced += references.length;
 		for (const reference of references) expect(local).toContain(reference);
 	}
+	expect(referenced).toBeGreaterThan(0);
 });
 
 it("keeps full-colour art untinted, and marks it", () => {
@@ -64,11 +66,6 @@ it("keeps full-colour art untinted, and marks it", () => {
 	expect(svg).toHaveAttribute("data-full-color");
 	expect(svg).toHaveAttribute("viewBox", "0 0 48 48");
 	expect(svg?.getAttribute("class")).not.toMatch(/text-/);
-	// A single-colour neighbour keeps its category tint.
-	const { container: plain } = render(<ItemIcon kind="dragon-mail" />);
-	expect(plain.querySelector("svg")?.getAttribute("class")).toMatch(
-		/text-item-gear/,
-	);
 });
 
 it("shows a theme pair's light drawing in light and its dark one in dark", () => {

@@ -51,7 +51,7 @@ test("The Warden's Flame introduces its quest and presents the historical quest 
 	await page.keyboard.press("c");
 	const pouch = page.getByLabel("Quest pouch", { exact: true });
 	await expect(pouch).toContainText("Flame secured");
-	await expect(pouch.locator("svg")).toHaveClass(/text-item-ember/);
+	await expect(pouch.locator("svg[data-full-color]:visible")).toHaveCount(1);
 	await pouch.screenshot({ path: testInfo.outputPath("ember.png") });
 	await page.keyboard.press("Escape");
 	await expect(map(page)).toBeFocused();

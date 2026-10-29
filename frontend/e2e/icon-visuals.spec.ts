@@ -5,7 +5,7 @@ for (const [theme, width] of [
 	["Light", 1440],
 	["Dark", 1280],
 ] as const) {
-	test(`spell and monster icons retain themed colors and shortcut labels at ${width}px ${theme}`, async ({
+	test(`spell, monster and item icons retain themed colors and shortcut labels at ${width}px ${theme}`, async ({
 		page,
 	}, testInfo) => {
 		await page.setViewportSize({ width, height: 900 });
@@ -54,7 +54,7 @@ for (const [theme, width] of [
 			name: "Developer Catalog",
 			exact: true,
 		});
-		for (const section of ["Monsters", "Spells"]) {
+		for (const section of ["Monsters", "Items", "Spells"]) {
 			await catalog.getByRole("tab", { name: section, exact: true }).click();
 			const panel = catalog.getByRole("tabpanel", {
 				name: section,
@@ -95,22 +95,89 @@ for (const [theme, width] of [
 							viewBox: { baseVal: { width: number; height: number } };
 						}
 					).viewBox.baseVal;
-					const box = (
-						node as typeof node & {
-							getBBox(): {
-								x: number;
-								y: number;
-								width: number;
-								height: number;
-							};
-						}
-					).getBBox();
-					const halfStroke =
-						Number.parseFloat(view.getComputedStyle(node).strokeWidth) / 2;
-					return box.x - halfStroke < 0 ||
-						box.y - halfStroke < 0 ||
-						box.x + box.width + halfStroke > viewWidth ||
-						box.y + box.height + halfStroke > viewHeight
+					// The e2e config has no DOM types; describe what this check uses.
+					type Matrix = {
+						inverse(): Matrix;
+						multiply(other: Matrix): Matrix;
+					};
+					type Point = { x: number; y: number };
+					type Graphic = {
+						getBBox(): { x: number; y: number; width: number; height: number };
+						getScreenCTM(): Matrix | null;
+						getTotalLength(): number;
+						getPointAtLength(length: number): {
+							matrixTransform(matrix: Matrix): Point;
+						};
+					};
+					const svg = node as unknown as Graphic;
+					// Line art shares the root's stroke; full-colour shapes each carry their
+					// own, so measure every shape with its stroke in the drawing's units.
+					const toView = svg.getScreenCTM()?.inverse();
+					const shapes = node.hasAttribute("data-full-color")
+						? [
+								...node.querySelectorAll(
+									"path, circle, ellipse, rect, line, polygon, polyline",
+								),
+							].map((shape) => {
+								const style = view.getComputedStyle(shape);
+								const pad =
+									style.stroke === "none"
+										? 0
+										: Number.parseFloat(style.strokeWidth) / 2;
+								const outline = shape as unknown as Graphic;
+								const own = outline.getScreenCTM();
+								if (!toView || !own)
+									throw new Error("Missing drawing transform");
+								const matrix = toView.multiply(own);
+								// Points along the outline, so rotated shapes aren't boxed loosely.
+								const length = outline.getTotalLength();
+								const points = Array.from({ length: 241 }, (_, step) =>
+									outline
+										.getPointAtLength((length * step) / 240)
+										.matrixTransform(matrix),
+								).flatMap(({ x, y }) => [
+									{ x: x - pad, y: y - pad },
+									{ x: x + pad, y: y + pad },
+								]);
+								const xs = points.map((point) => point.x);
+								const ys = points.map((point) => point.y);
+								return {
+									x: Math.min(...xs),
+									y: Math.min(...ys),
+									right: Math.max(...xs),
+									bottom: Math.max(...ys),
+								};
+							})
+						: (() => {
+								const whole = svg.getBBox();
+								const half =
+									Number.parseFloat(view.getComputedStyle(node).strokeWidth) /
+									2;
+								return [
+									{
+										x: whole.x - half,
+										y: whole.y - half,
+										right: whole.x + whole.width + half,
+										bottom: whole.y + whole.height + half,
+									},
+								];
+							})();
+					// Rounding slack for transformed boxes.
+					const slack = 0.05;
+					const box = {
+						x: Math.min(...shapes.map((shape) => shape.x)),
+						y: Math.min(...shapes.map((shape) => shape.y)),
+						width:
+							Math.max(...shapes.map((shape) => shape.right)) -
+							Math.min(...shapes.map((shape) => shape.x)),
+						height:
+							Math.max(...shapes.map((shape) => shape.bottom)) -
+							Math.min(...shapes.map((shape) => shape.y)),
+					};
+					return box.x < -slack ||
+						box.y < -slack ||
+						box.x + box.width > viewWidth + slack ||
+						box.y + box.height > viewHeight + slack
 						? [
 								{
 									kind: node.closest("li")?.querySelector("code")?.textContent,
