@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" role="img" aria-label="Dagger dark mode">
+  <!-- Approved E — Curved Fang; exact comparison geometry and theme palette. -->
+  <g transform="rotate(35 24 24)">
+    <path d="M27 5Q37 14 29 25L23 30 21 24Q29 17 27 5Z" fill="#c0d8e9" stroke="#f4faff" stroke-width="1.7" stroke-linejoin="round"/>
+    <path d="M28 12Q30 19 24 26" fill="none" stroke="#40586f" stroke-width="1.5" stroke-linecap="round"/>
+    <path d="M17 29 25 26 31 30 28 33 19 33Z" fill="#f1c56c" stroke="#40586f" stroke-width="1.4" stroke-linejoin="round"/>
+    <path d="M21 32 26 32 27 43 22 43Z" fill="#87512c" stroke="#f4faff" stroke-width="1.4" stroke-linejoin="round"/>
+    <circle cx="24" cy="43" r="1.8" fill="#f1c56c" stroke="#40586f" stroke-width=".8"/>
+  </g>
+</svg>
