@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" role="img" aria-label="BattleAxe light theme">
+  <!-- Approved F Warlord's Double Axe; exact vector geometry and palette from comparison. -->
+  
+    <path d="M22 15H26V45H22Z" fill="#784a2c" stroke="#243a4c" stroke-width="1.6" stroke-linejoin="round"/>
+    <path d="M16 4 7 11 5 25 15 32 24 20 33 32 43 25 41 11 32 4 24 13Z" fill="#839aac" stroke="#243a4c" stroke-width="1.8" stroke-linejoin="round"/>
+    <path d="M17 9 24 16 31 9 29 19 24 22 19 19Z" fill="#c18b44" stroke="#42586b" stroke-width="1.25" stroke-linejoin="round"/>
+    <path d="M10 14 16 20M38 14 32 20M12 28 18 27M36 28 30 27" fill="none" stroke="#42586b" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+  
+</svg>
