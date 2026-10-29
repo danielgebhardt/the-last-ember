@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" role="img" aria-label="LeatherCap dark">
+  <!-- Approved design B: Ranger Cap; scalable at 24px and 48px. -->
+  <path d="M6 30 10 17 19 10 29 10 38 17 42 30 37 35H11Z" fill="#c7803a" stroke="#ffe0a1" stroke-width="2.1" stroke-linejoin="round"/>
+  <path d="M7 29H41L39 36H9ZM14 20 18 13M34 20 30 13" fill="#f8b85d" stroke="#653215" stroke-width="1.7" stroke-linejoin="round"/>
+  <path d="M14 25H34" fill="none" stroke="#653215" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
