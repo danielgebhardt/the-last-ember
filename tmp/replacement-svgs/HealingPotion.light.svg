@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" stroke-linejoin="round" stroke-linecap="round" role="img" aria-label="HealingPotion light mode">
+  <path d="M19 5H29V14L33 19V39Q33 44 28 44H20Q15 44 15 39V19L19 14Z" fill="#a9c3d1" fill-opacity=".5" stroke="#354b5d" stroke-width="1.8"/>
+  <path d="M17 24H31V40Q31 42 28 42H20Q17 42 17 40Z" fill="#cd3445"/>
+  <path d="M19 18 17 22V34" stroke="white" stroke-opacity=".7" stroke-width="2" fill="none"/>
+  <path d="M18 5H30V11H18Z" fill="#a87649" stroke="#354b5d" stroke-width="1.3"/>
+</svg>
