@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" stroke-linecap="round" stroke-linejoin="round" role="img" aria-label="Ancient Ruins Entrance dark mode">
+  <path d="M5 46V18Q7 5 24 4Q41 5 43 18V46H34V20Q33 13 24 13Q15 13 14 20V46Z" fill="#74818e" stroke="#b1beca" stroke-width="2.2"/>
+  <path d="M14 45V20Q15 13 24 13Q33 13 34 20V45Z" fill="#182431" stroke="#202a34" stroke-width="1.6"/>
+  <path d="M7 22H14M34 22H41M10 12 16 16M32 16 38 12M7 34H14M34 34H41" fill="none" stroke="#202a34" stroke-width="2"/>
+  <path d="M9 20 11 17 13 20 11 24ZM35 20 37 17 39 20 37 24Z" fill="#e1ac57"/>
+  <path d="M11 17V24M37 17V24" stroke="#ffe3a0" stroke-width="1.1"/>
+  <path d="M17 43H31" stroke="#e1ac57" stroke-width="3.5"/>
+</svg>
