@@ -1,5 +1,5 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" stroke-linejoin="bevel" stroke-linecap="butt" role="img" aria-label="S19 Stone Rampart stairs down dark mode">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" stroke-linecap="round" stroke-linejoin="round" role="img" aria-label="Ancient Ruins StairsDown dark mode">
   <path d="M5 5H13V16H21V24H29V32H37V40H44V45H5Z" fill="#566575" stroke="#101923" stroke-width="2"/>
-  <path d="M5 5H13V16H21V24H29V32H37V40" fill="none" stroke="#efbd58" stroke-width="3.4" stroke-linecap="butt" stroke-linejoin="bevel"/>
   <path d="M5 8H10V19H18V27H26V35H34V43H44" fill="none" stroke="#d2d9de" stroke-width="1.1" opacity=".6"/>
+  <path d="M5 5H13V16H21V24H29V32H37V40H44" fill="none" stroke="#efbd58" stroke-width="3.4" stroke-linecap="butt" stroke-linejoin="bevel"/>
 </svg>
