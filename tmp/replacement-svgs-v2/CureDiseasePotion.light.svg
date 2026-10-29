@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" stroke-linejoin="round" stroke-linecap="round" role="img" aria-label="CureDiseasePotion light mode">
+  <path d="M20 5H28V17L41 37Q44 43 37 44H11Q4 43 7 37L20 17Z" fill="#aecbd7" fill-opacity=".45" stroke="#354d5f" stroke-width="1.8"/>
+  <path d="M14 29H34L39 38Q41 42 36 42H12Q7 42 9 38Z" fill="#5c9bc3"/>
+  <path d="M19 4H29V11H19Z" fill="#a77b50" stroke="#354d5f" stroke-width="1.3"/>
+  <path d="M22 29H26V32H29V36H26V39H22V36H19V32H22Z" fill="#ffffff" stroke="#394954" stroke-width=".8"/>
+  <path d="M17 19Q14 23 15 27" fill="none" stroke="#fff" stroke-opacity=".65" stroke-width="1.7"/>
+</svg>
