@@ -13,12 +13,16 @@ import {
 	TriangleAlert,
 	Trophy,
 } from "lucide-react";
-import type { ComponentType, SVGProps } from "react";
 import { objectAvailable } from "../../domain/merchant/MerchantAvailability";
 import type {
 	DungeonObject,
 	DungeonObjectKind,
 } from "../../domain/objects/DungeonObject";
+import {
+	FullColor,
+	isFullColor,
+	type RegisteredIcon,
+} from "../icons/FullColorIcon";
 import CrackedWallIcon from "./CrackedWallIcon";
 import EggSacIcon from "./EggSacIcon";
 import ForgeIcon from "./ForgeIcon";
@@ -36,7 +40,7 @@ import WellIcon from "./WellIcon";
 
 const icons: Record<
 	Exclude<DungeonObjectKind, "elite-door" | "merchant">,
-	ComponentType<SVGProps<SVGSVGElement>>
+	RegisteredIcon
 > = {
 	sarcophagus: SarcophagusIcon,
 	forge: ForgeIcon,
@@ -61,6 +65,11 @@ const icons: Record<
 	"arena-reward": Trophy,
 	"egg-sac": EggSacIcon,
 	phylactery: PhylacteryIcon,
+};
+// A separate drawing for a used object, single- or full-colour; others just dim.
+const SPENT_ICONS: Partial<Record<DungeonObjectKind, RegisteredIcon>> = {
+	door: DoorOpen,
+	chest: OpenedTreasureChestIcon,
 };
 // The arena features share their miniboss's color.
 const OBJECT_COLORS: Partial<Record<DungeonObjectKind, string>> = {
@@ -130,16 +139,15 @@ const DungeonObjectIcon = ({ object }: { object: DungeonObject }) => {
 		);
 	}
 	const Icon =
-		object.kind === "door" && object.activated
-			? DoorOpen
-			: object.kind === "chest" && object.activated
-				? OpenedTreasureChestIcon
-				: icons[object.kind];
+		(object.activated ? SPENT_ICONS[object.kind] : undefined) ??
+		icons[object.kind];
+	const dimmed = object.activated && object.kind !== "door" ? "opacity-50" : "";
+	if (isFullColor(Icon)) return <FullColor icon={Icon} className={dimmed} />;
 	return (
 		<Icon
 			aria-hidden="true"
 			focusable="false"
-			className={`size-full ${object.activated && object.kind !== "door" ? "opacity-50" : ""} ${OBJECT_COLORS[object.kind] ?? "text-object-stone"}`}
+			className={`size-full ${dimmed} ${OBJECT_COLORS[object.kind] ?? "text-object-stone"}`}
 		/>
 	);
 };

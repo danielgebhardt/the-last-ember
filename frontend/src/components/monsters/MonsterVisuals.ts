@@ -1,7 +1,7 @@
 import { Rat } from "lucide-react";
-import type { ComponentType, SVGProps } from "react";
 import { MONSTER_DEFINITIONS } from "../../domain/monsters/Monster";
 import type { MonsterKind } from "../../domain/monsters/Monster.ts";
+import type { RegisteredIcon } from "../icons/FullColorIcon";
 import BoneLichIcon from "./BoneLichIcon";
 import BroodmotherIcon from "./BroodmotherIcon";
 import BruteIcon from "./BruteIcon";
@@ -42,7 +42,8 @@ import ZombieIcon from "./ZombieIcon";
 export const MONSTER_VISUALS: Record<
 	MonsterKind,
 	{
-		icon: ComponentType<SVGProps<SVGSVGElement>>;
+		// Single-colour art tinted by `color`, or full-colour art that ignores it.
+		icon: RegisteredIcon;
 		color: string;
 		label: string;
 	}

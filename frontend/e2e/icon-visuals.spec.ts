@@ -60,7 +60,7 @@ for (const [theme, width] of [
 				name: section,
 				exact: true,
 			});
-			// Inspect real browser geometry: artwork must fit its 24-unit viewBox, including stroke.
+			// Inspect real browser geometry: artwork must fit its own viewBox, including stroke.
 			const unstyled = await panel.locator("svg").evaluateAll((nodes) =>
 				nodes
 					.filter((node) => {
@@ -69,6 +69,8 @@ for (const [theme, width] of [
 						if (!view || !card) return true;
 						const style = view.getComputedStyle(node);
 						const textColor = view.getComputedStyle(card).color;
+						// Full-colour art keeps its own palette by design.
+						if (node.hasAttribute("data-full-color")) return false;
 						// Line art strokes in the themed color; filled art (the Pyre Lord)
 						// fills its shape with it instead.
 						const themed =
@@ -83,6 +85,16 @@ for (const [theme, width] of [
 			expect(unstyled).toEqual([]);
 			const clipped = await panel.locator("svg").evaluateAll((nodes) =>
 				nodes.flatMap((node) => {
+					const view = node.ownerDocument.defaultView;
+					if (!view) throw new Error("Missing browser window");
+					// A theme pair's other drawing isn't shown, so it has no box.
+					if (view.getComputedStyle(node).display === "none") return [];
+					// Each drawing fits its own viewBox, whatever its size.
+					const { width: viewWidth, height: viewHeight } = (
+						node as typeof node & {
+							viewBox: { baseVal: { width: number; height: number } };
+						}
+					).viewBox.baseVal;
 					const box = (
 						node as typeof node & {
 							getBBox(): {
@@ -93,14 +105,12 @@ for (const [theme, width] of [
 							};
 						}
 					).getBBox();
-					const view = node.ownerDocument.defaultView;
-					if (!view) throw new Error("Missing browser window");
 					const halfStroke =
 						Number.parseFloat(view.getComputedStyle(node).strokeWidth) / 2;
 					return box.x - halfStroke < 0 ||
 						box.y - halfStroke < 0 ||
-						box.x + box.width + halfStroke > 24 ||
-						box.y + box.height + halfStroke > 24
+						box.x + box.width + halfStroke > viewWidth ||
+						box.y + box.height + halfStroke > viewHeight
 						? [
 								{
 									kind: node.closest("li")?.querySelector("code")?.textContent,

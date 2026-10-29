@@ -15,9 +15,16 @@ import {
 import type { ComponentType, SVGProps } from "react";
 import { ITEM_DEFINITIONS, type ItemKind } from "../../domain/items/Item";
 import type { PotionKind } from "../../domain/items/PotionHotbar";
+import {
+	FullColor,
+	fullColor,
+	isFullColor,
+	type RegisteredIcon,
+} from "../icons/FullColorIcon";
 import BloodrageAxeIcon from "./BloodrageAxeIcon";
 import DragonMailIcon from "./DragonMailIcon";
 import EmberIcon from "./EmberIcon";
+import EmberscaleMailIcon from "./EmberscaleMailIcon";
 import ExitScrollIcon from "./ExitScrollIcon";
 import GoldboundBladeIcon from "./GoldboundBladeIcon";
 import HungeringBladeIcon from "./HungeringBladeIcon";
@@ -41,7 +48,7 @@ type RingKind = Extract<
 >;
 const icons: Record<
 	Exclude<ItemKind, BookKind | PotionKind | RingKind>,
-	ComponentType<SVGProps<SVGSVGElement>>
+	RegisteredIcon
 > = {
 	"warding-cloak": WardingCloakIcon,
 	"spellguard-shield": SpellguardShieldIcon,
@@ -50,8 +57,8 @@ const icons: Record<
 	"hungering-blade": HungeringBladeIcon,
 	"shadowweave-cloak": ShadowweaveCloakIcon,
 	"seers-circlet": SeersCircletIcon,
+	"emberscale-mail": fullColor(EmberscaleMailIcon),
 	// Placeholders until drawn icons exist.
-	"emberscale-mail": Shirt,
 	"juggernaut-bulwark": ShieldCheck,
 	broodfang: Sword,
 	"lich-crown": Crown,
@@ -103,6 +110,7 @@ const ItemIcon = ({ kind }: { kind: ItemKind }) => {
 			? BookOpen
 			: icons[kind];
 	if (!Icon) return <RingIcon kind={kind} />;
+	if (isFullColor(Icon)) return <FullColor icon={Icon} />;
 	return (
 		<Icon
 			aria-hidden="true"
