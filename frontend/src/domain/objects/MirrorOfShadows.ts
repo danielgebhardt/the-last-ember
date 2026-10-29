@@ -7,7 +7,7 @@ import { deriveCombatStats } from "../game/CombatStats";
 import type { GameState } from "../game/GameState";
 import { attackProfile, deriveAccuracy } from "../game/MeleeRules";
 import type { FloorItem } from "../items/FloorItems";
-import { type ItemKind, isRareEquipmentKind } from "../items/Item";
+import { type ItemKind, isUniqueEquipmentKind } from "../items/Item";
 import { isEnchantableKind } from "../items/ItemValues";
 import { lootWeights } from "../items/LootWeights";
 import {
@@ -66,7 +66,7 @@ export const mirrorRewardKind = (
 ): ItemKind | undefined =>
 	selectWeighted(
 		lootWeights(object.floorNumber, "found").filter(
-			({ value }) => isEnchantableKind(value) && !isRareEquipmentKind(value),
+			({ value }) => isEnchantableKind(value) && !isUniqueEquipmentKind(value),
 		),
 		stream(seed, object, "reward"),
 	);

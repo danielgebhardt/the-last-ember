@@ -13,11 +13,11 @@ import type { DungeonObject } from "../objects/DungeonObject";
 import { navigationRun } from "../objects/NavigationTerrain";
 import type { ObjectChoice } from "../objects/ObjectInteraction";
 import {
-	ARENA_REWARD_KINDS,
 	arenaCleared,
 	arenaDoorId,
 	arenaOn,
 	arenaRewardId,
+	arenaRewardKinds,
 	minibossId,
 	standingArena,
 } from "./Arena";
@@ -176,9 +176,9 @@ export const claimArenaReward = (
 	rack: DungeonObject,
 	choice: ObjectChoice | undefined,
 ): GameState | { error: string } => {
-	const kind = ARENA_REWARD_KINDS.find(
-		(reward) => choice === `claim-${reward}`,
-	);
+	const kind = arenaRewardKinds(
+		arenaOn(state, rack.floorNumber)?.miniboss,
+	).find((reward) => choice === `claim-${reward}`);
 	if (!kind) return { error: "Choose one piece from the rack." };
 	return {
 		...state,

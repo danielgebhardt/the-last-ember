@@ -8,6 +8,7 @@ import {
 } from "../game/CombatStats";
 import { scaleEnemyValue } from "../game/Difficulty";
 import type { GameState } from "../game/GameState";
+import { fireWardedDamage } from "../items/ArenaGear";
 import { MONSTER_DEFINITIONS, type Monster } from "./Monster";
 import { orthogonalDistance } from "./MonsterLocations";
 import { detectsPlayer } from "./MonsterPursuit";
@@ -95,11 +96,15 @@ export const resolveMonsterArea = (
 			attackerId: `${monster.id}:area:${intent.element}`,
 			targetId: "player",
 		}).damage(...breathDamage(monster, profile));
-		const damage = resolveIncomingMagicDamage(
+		const resisted = resolveIncomingMagicDamage(
 			scaleEnemyValue(rawDamage, state.difficulty),
 			deriveCombatStats(state.equipment, state.progression, state.effects)
 				.magicResistance,
 		);
+		const damage =
+			intent.element === "fire"
+				? fireWardedDamage(state.equipment, resisted)
+				: resisted;
 		return {
 			monster: finished,
 			damage,

@@ -50,6 +50,11 @@ const icons: Record<
 	"hungering-blade": HungeringBladeIcon,
 	"shadowweave-cloak": ShadowweaveCloakIcon,
 	"seers-circlet": SeersCircletIcon,
+	// Placeholders until drawn icons exist.
+	"emberscale-mail": Shirt,
+	"juggernaut-bulwark": ShieldCheck,
+	broodfang: Sword,
+	"lich-crown": Crown,
 	"enchantment-scroll": ScrollText,
 	"remove-curse-scroll": Scroll,
 	"exit-scroll": ExitScrollIcon,

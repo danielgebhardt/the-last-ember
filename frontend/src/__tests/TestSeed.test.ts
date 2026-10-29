@@ -18,7 +18,11 @@ import {
 	TEST_SEED,
 	TEST_SEED_FLOORS,
 } from "../domain/game/TestSeed";
-import { ITEM_DEFINITIONS, type ItemKind } from "../domain/items/Item";
+import {
+	ITEM_DEFINITIONS,
+	type ItemKind,
+	isArenaGearKind,
+} from "../domain/items/Item";
 import {
 	MONSTER_DEFINITIONS,
 	type MonsterKind,
@@ -66,6 +70,7 @@ describe("reserved test seed", () => {
 		])
 			expect(count(kind), kind).toBe(20);
 		// Special finds that are gear come singly; stackable ones come as 20 above.
+		// Arena gear waits on each test arena's rack instead.
 		for (const kind of Object.keys(ITEM_DEFINITIONS) as ItemKind[])
 			if (
 				"specialFindOnly" in ITEM_DEFINITIONS[kind] &&
@@ -73,7 +78,7 @@ describe("reserved test seed", () => {
 					ITEM_DEFINITIONS[kind].type,
 				)
 			)
-				expect(count(kind), kind).toBe(1);
+				expect(count(kind), kind).toBe(isArenaGearKind(kind) ? 0 : 1);
 	});
 
 	// Coverage is derived from the content definitions, so new content joins the

@@ -53,13 +53,14 @@ export const hasConsistentInventory = (document: SaveDocument): boolean => {
 			state.hunger.fedTurn > state.turn)
 	)
 		return false;
-	// A Ring of Displacement fires at most once per floor of this dungeon.
-	const displaced = state.displacedFloors ?? [];
-	if (
-		!unique(displaced) ||
-		displaced.some((floor) => floor > state.run.floors.length)
-	)
-		return false;
+	// A Ring of Displacement fires, and a Lich's Crown spares you, at most once per floor
+	// of this dungeon.
+	for (const floors of [state.displacedFloors ?? [], state.sparedFloors ?? []])
+		if (
+			!unique(floors) ||
+			floors.some((floor) => floor > state.run.floors.length)
+		)
+			return false;
 	if (!hasConsistentRareEquipment(document)) return false;
 	const purchased = state.townEquipmentPurchases;
 	if (

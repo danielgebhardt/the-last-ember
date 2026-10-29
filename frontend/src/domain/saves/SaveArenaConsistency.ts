@@ -1,5 +1,4 @@
 import {
-	ARENA_REWARD_KINDS,
 	ARENA_REWARD_TILES,
 	ARENA_SPAWN_ID_BASE,
 	arenaDoorId,
@@ -9,6 +8,7 @@ import {
 	arenaGoldId,
 	arenaRackId,
 	arenaRewardId,
+	arenaRewardKinds,
 	EGG_SAC_TILES,
 	eggSacId,
 	isArenaSpawnId,
@@ -22,6 +22,7 @@ import {
 	selectMiniboss,
 } from "../arena/Arena";
 import { ARENA_POINTS } from "../arena/ArenaLayout";
+import { isArenaGearKind } from "../items/Item";
 import { ownedItems } from "../items/OwnedItems";
 import { sameCoordinate } from "./SaveConsistencyHelpers";
 import type { SaveDocument } from "./SaveDocument";
@@ -73,7 +74,9 @@ export const hasConsistentArenas = ({ state }: SaveDocument): boolean => {
 			!state.monsters.some(
 				(m) => isMinibossKind(m.kind) || m.kind === "spiderling",
 			) &&
-			!ownedItems(state).some((i) => i.id.startsWith("arena-reward:"))
+			!ownedItems(state).some(
+				(i) => i.id.startsWith("arena-reward:") || isArenaGearKind(i.kind),
+			)
 		);
 	const [arena] = arenas;
 	const { floorNumber } = arena;
@@ -169,15 +172,17 @@ export const hasConsistentArenas = ({ state }: SaveDocument): boolean => {
 		return false;
 	// At most the one piece taken from the rack, and only once the hall was won.
 	const rack = state.objects.find((o) => o.id === arenaRackId(floorNumber));
-	const rewards = ownedItems(state).filter((i) =>
-		i.id.startsWith("arena-reward:"),
+	const rewards = ownedItems(state).filter(
+		(i) => i.id.startsWith("arena-reward:") || isArenaGearKind(i.kind),
 	);
 	return (
 		rewards.length <= 1 &&
 		rewards.every(
 			(i) =>
 				i.id === arenaRewardId(floorNumber) &&
-				(ARENA_REWARD_KINDS as readonly string[]).includes(i.kind) &&
+				(arenaRewardKinds(arena.miniboss) as readonly string[]).includes(
+					i.kind,
+				) &&
 				rack?.activated === true,
 		) &&
 		(!rack?.activated || exit?.activated === true)

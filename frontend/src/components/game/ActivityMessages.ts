@@ -177,6 +177,10 @@ export const formatActivityEvent = (event: ActivityEvent): string => {
 			return `${prefix}You tear the egg sac open. Nothing will hatch from it now.`;
 		case "egg-sacs-burned":
 			return `${prefix}${event.count === 1 ? "The flames burn an egg sac." : `The flames burn ${event.count} egg sacs.`} Nothing will hatch from ${event.count === 1 ? "it" : "them"} now.`;
+		case "blow-braced":
+			return `${prefix}Your Bulwark takes the blow, and the ${MONSTER_DEFINITIONS[event.monster].name} reels, stunned!`;
+		case "death-warded":
+			return `${prefix}The Lich's Crown turns aside a killing blow. You cling to life with 1 health. It won't save you again on this floor.`;
 		case "dead-raised":
 			return `${prefix}${event.count === 1 ? `A ${event.monster} claws its way up from the bones.` : `${event.count} ${event.monster}s claw their way up from the bones.`}`;
 		case "phylactery-struck":

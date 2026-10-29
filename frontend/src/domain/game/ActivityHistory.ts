@@ -56,6 +56,8 @@ export type ActivityEvent = { turn: number } & (
 			target: Coordinate;
 	  }
 	| { type: "monster-charge-hit"; monster: MonsterKind; damage: number }
+	| { type: "blow-braced"; monster: MonsterKind }
+	| { type: "death-warded" }
 	| {
 			type: "monster-charge-ended";
 			actorId: string;

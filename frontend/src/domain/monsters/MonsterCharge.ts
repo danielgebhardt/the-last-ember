@@ -10,6 +10,7 @@ import {
 	resolveMeleeAttack,
 } from "../game/MeleeRules";
 import { hasMonsterEffect } from "../game/TimedEffects";
+import { bracesAgainstBlows } from "../items/ArenaGear";
 import { navigationRun } from "../objects/NavigationTerrain";
 import { MONSTER_DEFINITIONS, type Monster } from "./Monster";
 import {
@@ -103,7 +104,12 @@ export const resolveMonsterCharge = (
 	rolls: AttackRollSource,
 	detected: boolean,
 ):
-	| { monster: Monster; events: ActivityEvent[]; damage?: number }
+	| {
+			monster: Monster;
+			events: ActivityEvent[];
+			damage?: number;
+			stunned?: true;
+	  }
 	| undefined => {
 	const range = MONSTER_DEFINITIONS[monster.kind].chargeRange;
 	if (!range) return undefined;
@@ -240,6 +246,10 @@ export const resolveMonsterCharge = (
 					intent: { type: "recovering-charge" },
 				},
 				damage: outcome.damage,
+				// A Juggernaut's Bulwark stops the charge dead: the charger is stunned.
+				...(bracesAgainstBlows(state.equipment)
+					? { stunned: true as const }
+					: {}),
 				events: [
 					{
 						type: "monster-charge-hit",
@@ -247,6 +257,9 @@ export const resolveMonsterCharge = (
 						damage: outcome.damage,
 						turn,
 					},
+					...(bracesAgainstBlows(state.equipment)
+						? [{ type: "blow-braced" as const, monster: monster.kind, turn }]
+						: []),
 				],
 			};
 		}

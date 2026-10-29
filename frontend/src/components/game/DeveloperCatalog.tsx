@@ -22,6 +22,7 @@ import {
 	ARENA_DEPTH_SHARE,
 	ARENA_MIN_DEPTH,
 	ARENA_REWARD_KINDS,
+	MINIBOSS_GEAR,
 	MINIBOSS_KINDS,
 } from "../../domain/arena/Arena";
 import {
@@ -504,7 +505,13 @@ const DeveloperCatalog = ({
 											{ARENA_REWARD_KINDS.map(
 												(k) => ITEM_DEFINITIONS[k].name,
 											).join(", ")}
-											; it is laid at your feet and the rack empties.
+											, except that the beaten miniboss's own piece takes its
+											slot's place (
+											{MINIBOSS_KINDS.map(
+												(boss) =>
+													`${MONSTER_DEFINITIONS[boss].name}: ${ITEM_DEFINITIONS[MINIBOSS_GEAR[boss].kind].name}`,
+											).join("; ")}
+											); it is laid at your feet and the rack empties.
 										</p>
 									)}
 									{kind === "arena-door" && (

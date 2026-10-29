@@ -1,4 +1,4 @@
-import { ARENA_REWARD_KINDS, type ArenaRewardKind } from "../arena/Arena";
+import { type ArenaRewardKind, arenaRewardKinds } from "../arena/Arena";
 import type { GameState } from "../game/GameState";
 import { omenFavorsWell, WELL_FAVOR } from "../game/Omens";
 import {
@@ -80,6 +80,14 @@ const ARENA_REWARD_LINES: Readonly<Record<ArenaRewardKind, string>> = {
 	"tower-shield": "A wall of iron you can carry.",
 	"dragon-mail": "Scales no blade has ever cut through.",
 	"runic-helmet": "Carved with wards against every blow.",
+	"emberscale-mail":
+		"The Pyre Lord's scales, still warm: fire burns you half as much.",
+	"juggernaut-bulwark":
+		"The Juggernaut's shield: charges and heavy blows that land on it stun their attacker.",
+	broodfang:
+		"The Broodmother's fang: a landed hit may web its target in place.",
+	"lich-crown":
+		"The Lich's crown: once per floor, a killing blow leaves you at 1 health.",
 };
 // Replaces the usual "each choice takes a turn" line where the stakes differ.
 export const OBJECT_NOTE: Partial<Record<DungeonObjectKind, string>> = {
@@ -153,7 +161,10 @@ const baseObjectChoices = (
 		| "difficulty"
 	> &
 		Partial<
-			Pick<GameState, "bag" | "gold" | "mana" | "monsters" | "run" | "omens">
+			Pick<
+				GameState,
+				"bag" | "gold" | "mana" | "monsters" | "run" | "omens" | "arenas"
+			>
 		>,
 ): readonly InteractionChoice[] => {
 	if (object.kind === "hourglass") {
@@ -391,7 +402,10 @@ const baseObjectChoices = (
 		];
 	}
 	if (object.kind === "arena-reward")
-		return ARENA_REWARD_KINDS.map((kind) => {
+		return arenaRewardKinds(
+			state?.arenas?.find((arena) => arena.floorNumber === object.floorNumber)
+				?.miniboss,
+		).map((kind) => {
 			const definition = ITEM_DEFINITIONS[kind];
 			const worn =
 				state?.equipment[equipmentSlotFor({ id: kind, kind }) ?? "mainHand"];

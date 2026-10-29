@@ -2,6 +2,7 @@ import { burnEggSacs } from "../arena/Brood";
 import type { Coordinate, Dungeon } from "../dungeon/DungeonTypes";
 import { FLOOR } from "../dungeon/Tiles";
 import { hasLineOfSight } from "../dungeon/Visibility";
+import { fireWardedDamage } from "../items/ArenaGear";
 import {
 	coordinateKey,
 	orthogonalDistance,
@@ -132,7 +133,13 @@ export const castAreaSpell = (
 			attackerId: `player:spell:${spell}`,
 			targetId: "player",
 		}).damage(range.minimumDamage, range.maximumDamage);
-		const damage = Math.min(next.player.health, omenSpellDamage(state, rolled));
+		const splash = omenSpellDamage(state, rolled);
+		const damage = Math.min(
+			next.player.health,
+			definition.element === "fire"
+				? fireWardedDamage(next.equipment, splash)
+				: splash,
+		);
 		const health = next.player.health - damage;
 		next = {
 			...recordDamageTaken(next, damage, { source: "self-spell", spell }),

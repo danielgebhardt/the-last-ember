@@ -46,6 +46,14 @@ export type ItemDefinition = {
 		armorPenalty: number;
 		healingShare: number;
 	}>;
+	// Worn: fire damage you take, after magic resistance, is halved.
+	fireWard?: true;
+	// Worn: a charge or prepared heavy strike that lands on you stuns its attacker.
+	brace?: true;
+	// Main hand: a landed hit webs a surviving target with this seeded chance.
+	webbing?: Readonly<{ chance: number }>;
+	// Worn: once per floor, a monster blow that would kill you leaves you at 1 health.
+	deathWard?: true;
 };
 export const ITEM_DEFINITIONS = {
 	"cure-disease-potion": {
@@ -115,6 +123,63 @@ export const ITEM_DEFINITIONS = {
 		dropWeight: 0,
 		description:
 			"A light cloak sewn with warding stars. Chest: 1 armor and +10 percentage points MR against enemy spells/breath, capped at 50% total. Trades physical protection for wards. Does not resist poison, traps, afflictions or your own Fireball. Enchantment adds armor only.",
+	},
+	// The arena's unique gear: each miniboss's piece takes its slot's place on the rack.
+	"emberscale-mail": {
+		specialFindOnly: true,
+		name: "Emberscale Mail",
+		type: "chest-armor",
+		attackBonus: 0,
+		armor: 5,
+		fireWard: true,
+		minFloor: 6,
+		maxFloor: 20,
+		foundWeight: 0,
+		dropWeight: 0,
+		description:
+			"Scales shed by the Pyre Lord, still warm. Chest: 5 armor, and fire damage you take is halved after magic resistance: breath, fire bursts, salamanders and your own Fireball's splash.",
+	},
+	"juggernaut-bulwark": {
+		specialFindOnly: true,
+		name: "Juggernaut's Bulwark",
+		type: "shield",
+		attackBonus: 0,
+		armor: 5,
+		brace: true,
+		minFloor: 6,
+		maxFloor: 20,
+		foundWeight: 0,
+		dropWeight: 0,
+		description:
+			"The Iron Juggernaut's own shield. Off hand: 5 armor. Brace: when a charge or a prepared heavy strike lands on you, the attacker is stunned for 2 phases and takes double damage while stunned.",
+	},
+	broodfang: {
+		specialFindOnly: true,
+		name: "Broodfang",
+		type: "weapon",
+		attackBonus: 6,
+		armor: 0,
+		webbing: { chance: 0.3 },
+		minFloor: 6,
+		maxFloor: 20,
+		foundWeight: 0,
+		dropWeight: 0,
+		description:
+			"A blade carved from the Broodmother's fang, sticky with silk. Main hand: +6 attack, and a landed hit has a 30% chance to web a surviving target in place for 3 phases, as the Web spell does.",
+	},
+	"lich-crown": {
+		specialFindOnly: true,
+		name: "Lich's Crown",
+		type: "helmet",
+		attackBonus: 0,
+		armor: 4,
+		deathWard: true,
+		minFloor: 6,
+		maxFloor: 20,
+		foundWeight: 0,
+		dropWeight: 0,
+		description:
+			"The Bone Lich's crown, cold as the grave. Head: 4 armor. Once per floor, a monster's blow that would kill you leaves you at 1 health instead.",
 	},
 	"goldbound-blade": {
 		specialFindOnly: true,
@@ -927,6 +992,19 @@ export const RARE_EQUIPMENT_KINDS = [
 export type RareEquipmentKind = (typeof RARE_EQUIPMENT_KINDS)[number];
 export const isRareEquipmentKind = (kind: string): kind is RareEquipmentKind =>
 	RARE_EQUIPMENT_KINDS.some((k) => k === kind);
+// Won only from an arena's rack, never placed or dropped.
+export const ARENA_GEAR_KINDS = [
+	"emberscale-mail",
+	"juggernaut-bulwark",
+	"broodfang",
+	"lich-crown",
+] as const;
+export type ArenaGearKind = (typeof ARENA_GEAR_KINDS)[number];
+export const isArenaGearKind = (kind: string): kind is ArenaGearKind =>
+	ARENA_GEAR_KINDS.some((k) => k === kind);
+// Unique gear, rare finds and arena gear alike: forges and reward pools leave it be.
+export const isUniqueEquipmentKind = (kind: string) =>
+	isRareEquipmentKind(kind) || isArenaGearKind(kind);
 
 // Kind identifies the shared definition; id identifies this particular copy.
 export type ItemInstance = Readonly<{

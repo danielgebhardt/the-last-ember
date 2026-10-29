@@ -2,13 +2,13 @@
 import { describe, expect, it } from "vitest";
 import {
 	ARENA_DOWN_STAIR,
-	ARENA_REWARD_KINDS,
 	ARENA_UP_STAIR,
 	arenaDoorId,
 	arenaFloorFor,
 	arenaGateId,
 	arenaRackId,
 	arenaRewardId,
+	arenaRewardKinds,
 	arenaSpawnId,
 	BONE_PILE_TILES,
 	eggSacId,
@@ -42,7 +42,9 @@ import { createGameState, type GameState } from "../domain/game/GameState";
 import { damageMonster } from "../domain/game/MonsterDamage";
 import { resolvePlayerAction } from "../domain/game/PlayerActions";
 import { createTestSeedState } from "../domain/game/TestSeed";
+import { equipmentSlotFor } from "../domain/items/Equipment";
 import { exitScrollRestriction } from "../domain/items/ExitDungeonScroll";
+import type { ItemKind } from "../domain/items/Item";
 import type { Monster } from "../domain/monsters/Monster";
 import { coordinateKey } from "../domain/monsters/MonsterLocations";
 import {
@@ -321,8 +323,11 @@ describe("Arenas", () => {
 			...won,
 			run: { ...won.run, playerCoordinate: { row: 7, col: 36 } },
 		};
+		// The standard pieces, with this arena's miniboss's own piece in its slot.
 		expect(objectChoices(rack, beside).map((c) => c.value)).toEqual(
-			ARENA_REWARD_KINDS.map((kind) => `claim-${kind}`),
+			arenaRewardKinds(won.arenas?.[0]?.miniboss).map(
+				(kind) => `claim-${kind}`,
+			),
 		);
 		const claimed = act(beside, {
 			type: "interact",
@@ -789,5 +794,213 @@ describe("Bone Lich", () => {
 		expect(
 			raised(act(slowed).state).filter((m) => m.kind === "zombie"),
 		).toHaveLength(2);
+	});
+});
+
+describe("Arena gear", () => {
+	const seedFor = (miniboss: MinibossKind) => {
+		let seed = 1;
+		while (selectMiniboss(seed) !== miniboss) seed++;
+		return seed;
+	};
+	const wear = (state: GameState, kind: ItemKind): GameState => {
+		const item = { id: arenaRewardId(6), kind };
+		const slot = equipmentSlotFor(item);
+		if (!slot) throw new Error(`Expected ${kind} to be wearable`);
+		return { ...state, equipment: { ...state.equipment, [slot]: item } };
+	};
+	const stunned = (state: GameState, id: string) =>
+		state.effects.some((e) => e.actorId === id && e.kind === "stunned");
+
+	it("puts each miniboss's own piece in its slot on the rack", () => {
+		expect(arenaRewardKinds("pyre-lord")).toEqual([
+			"runeblade",
+			"tower-shield",
+			"emberscale-mail",
+			"runic-helmet",
+		]);
+		expect(arenaRewardKinds("iron-juggernaut")).toEqual([
+			"runeblade",
+			"juggernaut-bulwark",
+			"dragon-mail",
+			"runic-helmet",
+		]);
+		expect(arenaRewardKinds("broodmother")).toEqual([
+			"broodfang",
+			"tower-shield",
+			"dragon-mail",
+			"runic-helmet",
+		]);
+		expect(arenaRewardKinds("bone-lich")).toEqual([
+			"runeblade",
+			"tower-shield",
+			"dragon-mail",
+			"lich-crown",
+		]);
+	});
+
+	it("Emberscale Mail halves the fire that reaches you", () => {
+		// Fireball the Pyre Lord beside you: its splash also burns you.
+		const hall = inHall("pyre-lord", { row: 3, col: 20 }, { row: 3, col: 21 });
+		const target = boss(hall);
+		if (!target) throw new Error("Expected the Pyre Lord");
+		const burn = (state: GameState) => {
+			const cast = castAreaSpell(
+				{ ...state, mana: 50 },
+				"fireball",
+				target.coordinate,
+				hit,
+			);
+			if ("error" in cast) throw new Error(cast.error);
+			return state.player.health - cast.state.player.health;
+		};
+		const bare = burn(hall);
+		expect(bare).toBeGreaterThan(1);
+		expect(burn(wear(hall, "emberscale-mail"))).toBe(Math.floor(bare / 2));
+	});
+
+	it("Juggernaut's Bulwark stuns a charge or a heavy strike that lands", () => {
+		const start = inHall(
+			"iron-juggernaut",
+			{ row: 3, col: 20 },
+			{ row: 3, col: 26 },
+		);
+		const braced = wear(start, "juggernaut-bulwark");
+		const prepared = act(braced).state;
+		expect(boss(prepared)?.intent.type).toBe("preparing-charge");
+		// Standing in its path, you take the charge on the shield.
+		const struck = act(prepared).state;
+		expect(
+			struck.activityHistory.entries.some(
+				({ event }) => event.type === "monster-charge-hit",
+			),
+		).toBe(true);
+		expect(stunned(struck, minibossId(6))).toBe(true);
+		expect(
+			struck.activityHistory.entries.some(
+				({ event }) => event.type === "blow-braced",
+			),
+		).toBe(true);
+		// Without it, a charge that lands stuns nothing.
+		const bare = act(act(start).state).state;
+		expect(stunned(bare, minibossId(6))).toBe(false);
+		// A brute's prepared heavy strike is braced against too.
+		const brute: Monster = {
+			id: "6:1",
+			kind: "dungeon-brute",
+			floorNumber: 6,
+			coordinate: { row: 3, col: 21 },
+			health: 50,
+			intent: { type: "preparing-attack", target: { row: 3, col: 20 } },
+			lastDamagedTurn: null,
+		};
+		const heavy = act({
+			...braced,
+			monsters: [...braced.monsters.filter((m) => m.floorNumber !== 6), brute],
+		}).state;
+		expect(
+			heavy.activityHistory.entries.some(
+				({ event }) => event.type === "monster-heavy-hit",
+			),
+		).toBe(true);
+		expect(stunned(heavy, "6:1")).toBe(true);
+	});
+
+	it("Broodfang sometimes webs a surviving target in place, on a fixed seed", () => {
+		const hall = inHall(
+			"iron-juggernaut",
+			{ row: 3, col: 20 },
+			{ row: 3, col: 21 },
+		);
+		const rooted = (state: GameState) =>
+			state.effects.some(
+				(e) => e.actorId === minibossId(6) && e.kind === "rooted",
+			);
+		const swings = (state: GameState) => {
+			const webbedTurns: number[] = [];
+			let next = state;
+			for (let swing = 0; swing < 12; swing++) {
+				const mother = boss(next);
+				if (!mother) break;
+				// Keep it beside you and unhurt enough to survive the swings.
+				next = act(
+					{
+						...next,
+						effects: next.effects.filter((e) => e.actorId !== mother.id),
+						monsters: next.monsters.map((m) =>
+							m.id === mother.id
+								? {
+										...m,
+										health: 999,
+										coordinate: { row: 3, col: 21 },
+										intent: { type: "idle" },
+									}
+								: m,
+						),
+						player: { ...next.player, health: next.player.maxHealth },
+						run: { ...next.run, playerCoordinate: { row: 3, col: 20 } },
+					},
+					{ type: "move", direction: "right" },
+				).state;
+				if (rooted(next)) webbedTurns.push(next.turn);
+			}
+			return webbedTurns;
+		};
+		const webbed = swings(wear(hall, "broodfang"));
+		expect(webbed.length).toBeGreaterThan(0);
+		expect(webbed.length).toBeLessThan(12);
+		expect(swings(wear(hall, "broodfang"))).toEqual(webbed);
+		expect(swings(wear(hall, "runeblade"))).toEqual([]);
+	});
+
+	it("Lich's Crown turns aside one killing blow per floor, and remembers it", () => {
+		const hall = inHall("bone-lich", { row: 2, col: 20 }, { row: 2, col: 21 });
+		const brink = (state: GameState) => ({
+			...state,
+			player: { ...state.player, health: 1 },
+		});
+		const spared = act(brink(wear(hall, "lich-crown"))).state;
+		expect(spared.player.health).toBe(1);
+		expect(spared.sparedFloors).toEqual([6]);
+		expect(
+			spared.activityHistory.entries.some(
+				({ event }) => event.type === "death-warded",
+			),
+		).toBe(true);
+		// Not twice on one floor.
+		expect(act(spared).state.player.health).toBe(0);
+		// Without it, the blow kills.
+		expect(act(brink(hall)).state.player.health).toBe(0);
+		// Saved with the won arena, the floor stays spent.
+		const entered = enter(atGate(seedFor("bone-lich")));
+		const lich = boss(entered);
+		if (!lich) throw new Error("Expected the Bone Lich");
+		const won = act(
+			damageMonster(
+				{
+					...entered,
+					objects: entered.objects.map((o) =>
+						o.kind === "phylactery" ? { ...o, activated: true } : o,
+					),
+				},
+				lich,
+				9999,
+				{ type: "player-hit" },
+			),
+		).state;
+		const crowned = wear(
+			{
+				...won,
+				objects: won.objects.map((o) =>
+					o.id === arenaRackId(6) ? { ...o, activated: true } : o,
+				),
+				sparedFloors: [6],
+			},
+			"lich-crown",
+		);
+		const parsed = save(crowned);
+		if (!parsed.ok) throw new Error(parsed.error);
+		expect(restoreSave(parsed.value).state.sparedFloors).toEqual([6]);
+		expect(save({ ...crowned, sparedFloors: [6, 6] }).ok).toBe(false);
 	});
 });

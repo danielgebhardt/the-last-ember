@@ -28,6 +28,7 @@ import {
 	hasMonsterEffect,
 	monsterSkipsAction,
 } from "../game/TimedEffects";
+import { bracesAgainstBlows, deathWardReady } from "../items/ArenaGear";
 import { displaceAfterHits } from "../items/RingOfDisplacement";
 import { navigationRun } from "../objects/NavigationTerrain";
 import { alertNearbyMonsters } from "./AlarmAlerts";
@@ -181,6 +182,19 @@ export const resolveMonsterPhase = (
 	let effects = state.effects;
 	const events: ActivityEvent[] = [];
 	const infections: { kind: AfflictionKind; source: string }[] = [];
+	// A Lich's Crown turns aside one killing blow per floor; the floors are saved.
+	let wardReady = deathWardReady(state);
+	let sparedFloors = state.sparedFloors;
+	const fallen = () => {
+		if (!wardReady) {
+			events.push({ type: "player-died", turn: state.turn });
+			return;
+		}
+		wardReady = false;
+		player = { ...player, health: 1 };
+		sparedFloors = [...(sparedFloors ?? []), state.run.activeFloor];
+		events.push({ type: "death-warded", turn: state.turn });
+	};
 	const { armor } = deriveCombatStats(
 		state.equipment,
 		state.progression,
@@ -440,8 +454,7 @@ export const resolveMonsterPhase = (
 					...player,
 					health: Math.max(0, player.health - special.damage),
 				};
-				if (player.health === 0)
-					events.push({ type: "player-died", turn: state.turn });
+				if (player.health === 0) fallen();
 			}
 			if (special.affliction && player.health > 0)
 				infections.push({ kind: special.affliction, source: profile.name });
@@ -540,8 +553,7 @@ export const resolveMonsterPhase = (
 					damage: cast.damage,
 					turn: state.turn,
 				});
-				if (player.health === 0)
-					events.push({ type: "player-died", turn: state.turn });
+				if (player.health === 0) fallen();
 			}
 			continue;
 		}
@@ -613,6 +625,26 @@ export const resolveMonsterPhase = (
 			monster: monster.kind,
 			damage,
 		});
+		// A Juggernaut's Bulwark braces against a prepared heavy strike: it stuns.
+		if (preparing && bracesAgainstBlows(state.equipment)) {
+			effects = [
+				...effects.filter(
+					(effect) =>
+						effect.actorId !== monster.id || effect.kind !== "stunned",
+				),
+				{
+					actorId: monster.id,
+					floorNumber: monster.floorNumber,
+					kind: "stunned",
+					remaining: EFFECT_DEFINITIONS.stunned.duration,
+				},
+			];
+			events.push({
+				type: "blow-braced",
+				monster: monster.kind,
+				turn: state.turn,
+			});
+		}
 		// Every landed melee hit burns mana on its own stream; it never goes below zero.
 		if (
 			player.health > 0 &&
@@ -661,8 +693,7 @@ export const resolveMonsterPhase = (
 				kind: definition.onHitCondition,
 				source: definition.name,
 			});
-		if (player.health === 0)
-			events.push({ type: "player-died", turn: state.turn });
+		if (player.health === 0) fallen();
 	}
 	if (
 		events.length === 0 &&
@@ -687,6 +718,7 @@ export const resolveMonsterPhase = (
 			objects,
 			monsters,
 			effects,
+			...(sparedFloors !== state.sparedFloors ? { sparedFloors } : {}),
 			activityHistory: appendActivityEvents(state.activityHistory, events),
 		},
 	);

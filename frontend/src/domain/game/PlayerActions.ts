@@ -5,6 +5,7 @@ import {
 	type MovementDirection,
 	moveDungeonRun,
 } from "../dungeon/DungeonRun.ts";
+import { webbedByHit } from "../items/ArenaGear";
 import { type ConsumeAction, consumeItem } from "../items/Consumables";
 import {
 	changeEquipment,
@@ -128,7 +129,7 @@ import {
 	fillNewSpellSlots,
 	type SpellAssignmentAction,
 } from "./SpellHotbar";
-import { advanceTimedEffects } from "./TimedEffects";
+import { advanceTimedEffects, applyTimedEffect } from "./TimedEffects";
 
 export type PlayerAction =
 	| SanctuaryAction
@@ -762,5 +763,14 @@ const resolveAttack = (
 				{ type: "player-missed", turn, monster: monster.kind },
 			]),
 		};
-	return damageMonster(state, monster, outcome.damage, { type: "player-hit" });
+	const struck = damageMonster(state, monster, outcome.damage, {
+		type: "player-hit",
+	});
+	// Broodfang may web a surviving target in place, as the Web spell does.
+	const survivor = struck.monsters.find(
+		(actor) => actor.id === monster.id && actor.health > 0,
+	);
+	return survivor && webbedByHit(state, survivor)
+		? applyTimedEffect(struck, survivor, "rooted")
+		: struck;
 };

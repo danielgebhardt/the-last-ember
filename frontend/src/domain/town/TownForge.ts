@@ -8,7 +8,7 @@ import {
 	ITEM_DEFINITIONS,
 	type ItemInstance,
 	type ItemKind,
-	isRareEquipmentKind,
+	isUniqueEquipmentKind,
 } from "../items/Item";
 import { isEnchantableKind, MAX_ENCHANTMENT } from "../items/ItemValues";
 import { canReachOpenBuilding } from "./TownServices";
@@ -51,7 +51,7 @@ export const townForgeRefusal = (
 	state: GameState,
 	item: ItemInstance,
 ): string | null =>
-	isRareEquipmentKind(item.kind)
+	isUniqueEquipmentKind(item.kind)
 		? "Rare item: can't be reforged"
 		: (item.enchantment ?? 0) >= MAX_ENCHANTMENT
 			? `Already +${MAX_ENCHANTMENT}`

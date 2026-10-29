@@ -103,6 +103,8 @@ export type GameState = {
 	hunger?: Readonly<{ fedTurn: number }>;
 	// Floors where a Ring of Displacement has already fired this adventure.
 	displacedFloors?: readonly number[];
+	// Floors where a Lich's Crown has already spared you this adventure.
+	sparedFloors?: readonly number[];
 	townEquipmentStock: readonly ItemInstance[];
 	townPotionStock: TownPotionStock;
 	townScrollStock: TownScrollStock;

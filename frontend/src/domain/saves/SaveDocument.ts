@@ -28,6 +28,7 @@ export type SaveDocument = {
 		| "afflictions"
 		| "townPortal"
 		| "displacedFloors"
+		| "sparedFloors"
 		| "hunger"
 		| "omens"
 		| "arenas"

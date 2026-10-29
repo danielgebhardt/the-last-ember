@@ -16,6 +16,7 @@ import {
 	ITEM_DEFINITIONS,
 	type ItemInstance,
 	type ItemKind,
+	isArenaGearKind,
 } from "../items/Item";
 import { createStartingPotionHotbar } from "../items/PotionHotbar";
 import {
@@ -301,7 +302,8 @@ const testBag = () => {
 		if (STACKED.includes(definition.type))
 			for (let copy = 1; copy <= 20; copy++)
 				items.push({ id: `test-seed:${kind}:${copy}`, kind });
-		else if ("specialFindOnly" in definition)
+		// Arena gear waits on each test arena's rack instead.
+		else if ("specialFindOnly" in definition && !isArenaGearKind(kind))
 			items.push({ id: `test-seed:${kind}`, kind });
 	}
 	return createBag(items);

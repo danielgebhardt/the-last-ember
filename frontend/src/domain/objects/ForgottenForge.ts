@@ -7,7 +7,7 @@ import { createBag } from "../items/Bag";
 import type { Equipment, EquipmentSlot } from "../items/Equipment";
 import { enchantmentTargets } from "../items/EquipmentEnchantment";
 import { resourcesAfterEquipmentChange } from "../items/EquipmentResources";
-import { type ItemKind, isRareEquipmentKind } from "../items/Item";
+import { type ItemKind, isUniqueEquipmentKind } from "../items/Item";
 import type { DungeonObject } from "./DungeonObject";
 import { spendObject } from "./ObjectEffects";
 import type { ObjectChoice } from "./ObjectInteraction";
@@ -35,7 +35,7 @@ export const forgeRiskyOutcome = (
 // Ordinary enchantable weapons and armor below the cap; rare finds stay untouched.
 export const forgeTargets = (state: Pick<GameState, "equipment" | "bag">) =>
 	enchantmentTargets(state).filter(
-		({ item }) => !isRareEquipmentKind(item.kind),
+		({ item }) => !isUniqueEquipmentKind(item.kind),
 	);
 
 export const operateForge = (

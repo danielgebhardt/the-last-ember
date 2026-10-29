@@ -7,6 +7,7 @@ import { scaleEnemyValue } from "../game/Difficulty";
 import type { GameState } from "../game/GameState";
 import { omenSpellDamage } from "../game/Omens";
 import { SPELL_DEFINITIONS } from "../game/Spells";
+import { fireWardedDamage } from "../items/ArenaGear";
 import {
 	type EnemySpellKind,
 	MONSTER_DEFINITIONS,
@@ -61,13 +62,17 @@ export const chooseEnemySpell = (
 		attackerId: `${monster.id}:spell:${spell}`,
 		targetId: "player",
 	}).damage(profile.minimumDamage, profile.maximumDamage);
+	const resisted = resolveIncomingMagicDamage(
+		omenSpellDamage(state, scaleEnemyValue(rawDamage, state.difficulty)),
+		deriveCombatStats(state.equipment, state.progression, state.effects)
+			.magicResistance,
+	);
 	return {
 		type: "damage",
 		spell,
-		damage: resolveIncomingMagicDamage(
-			omenSpellDamage(state, scaleEnemyValue(rawDamage, state.difficulty)),
-			deriveCombatStats(state.equipment, state.progression, state.effects)
-				.magicResistance,
-		),
+		damage:
+			spell === "ember-bolt"
+				? fireWardedDamage(state.equipment, resisted)
+				: resisted,
 	};
 };

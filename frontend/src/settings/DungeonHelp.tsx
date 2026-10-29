@@ -722,8 +722,13 @@ const DungeonHelp = ({
 					exit that opens only when nothing in the hall is left standing.
 					Winning restores your health and mana. The reward room holds gold, the
 					stair down and a rack with a Runeblade, a Tower shield, Dragon mail
-					and a Runic helmet: take one, and the rest stay behind. After that the
-					stairs work normally.
+					and a Runic helmet, except that the miniboss you beat leaves its own
+					piece in that slot's place: the Pyre Lord's Emberscale Mail (fire
+					burns you half as much), the Iron Juggernaut's Bulwark (charges and
+					heavy blows that land stun their attacker), the Broodmother's
+					Broodfang (a hit may web its target) or the Bone Lich's Crown (once
+					per floor, a killing blow leaves you at 1 health). Take one, and the
+					rest stay behind. After that the stairs work normally.
 				</p>
 				<dl className="grid gap-1 sm:grid-cols-2">
 					<div>

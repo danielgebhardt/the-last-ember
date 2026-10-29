@@ -12,7 +12,7 @@ import {
 	permanentAttributeGains,
 } from "../game/PermanentAttributes";
 import type { FloorItem } from "../items/FloorItems";
-import { type ItemKind, isRareEquipmentKind } from "../items/Item";
+import { type ItemKind, isUniqueEquipmentKind } from "../items/Item";
 import { isEnchantableKind, MAX_ENCHANTMENT } from "../items/ItemValues";
 import { lootWeights } from "../items/LootWeights";
 import { eligibleMonsterKinds, type MonsterKind } from "../monsters/Monster";
@@ -87,7 +87,7 @@ export const wellReward = (
 		};
 	const kind = selectWeighted(
 		lootWeights(object.floorNumber, "found").filter(
-			({ value }) => isEnchantableKind(value) && !isRareEquipmentKind(value),
+			({ value }) => isEnchantableKind(value) && !isUniqueEquipmentKind(value),
 		),
 		random,
 	);

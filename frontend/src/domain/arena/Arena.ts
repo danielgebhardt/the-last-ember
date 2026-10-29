@@ -7,6 +7,7 @@ import type { Coordinate } from "../dungeon/DungeonTypes";
 import { createSeededRandom } from "../dungeon/Seed";
 import type { Difficulty } from "../game/Difficulty";
 import type { GameState } from "../game/GameState";
+import type { ArenaGearKind } from "../items/Item";
 import type { Monster } from "../monsters/Monster";
 import { maximumMonsterHealth } from "../monsters/MonsterStats";
 import type { DungeonObject } from "../objects/DungeonObject";
@@ -73,14 +74,39 @@ export const ARENA_REWARD_TILES = {
 	rack: { row: 7, col: 37 },
 	gold: { row: 9, col: 37 },
 } as const satisfies Record<string, Coordinate>;
-// The victor takes one piece of the finest gear from the rack.
+// The victor takes one piece of the finest gear from the rack: these four, except that
+// the beaten miniboss's own piece takes its slot's place.
 export const ARENA_REWARD_KINDS = [
 	"runeblade",
 	"tower-shield",
 	"dragon-mail",
 	"runic-helmet",
 ] as const;
-export type ArenaRewardKind = (typeof ARENA_REWARD_KINDS)[number];
+export const MINIBOSS_GEAR = {
+	"pyre-lord": { kind: "emberscale-mail", replaces: "dragon-mail" },
+	"iron-juggernaut": { kind: "juggernaut-bulwark", replaces: "tower-shield" },
+	broodmother: { kind: "broodfang", replaces: "runeblade" },
+	"bone-lich": { kind: "lich-crown", replaces: "runic-helmet" },
+} as const satisfies Record<
+	MinibossKind,
+	{ kind: ArenaGearKind; replaces: (typeof ARENA_REWARD_KINDS)[number] }
+>;
+export type ArenaRewardKind =
+	| (typeof ARENA_REWARD_KINDS)[number]
+	| (typeof MINIBOSS_GEAR)[MinibossKind]["kind"];
+// Every piece any rack can hold, for save shapes.
+export const ARENA_REWARD_ITEM_KINDS: readonly ArenaRewardKind[] = [
+	...ARENA_REWARD_KINDS,
+	...Object.values(MINIBOSS_GEAR).map((gear) => gear.kind),
+];
+export const arenaRewardKinds = (
+	miniboss: MinibossKind | undefined,
+): readonly ArenaRewardKind[] =>
+	ARENA_REWARD_KINDS.map((kind) =>
+		miniboss && MINIBOSS_GEAR[miniboss].replaces === kind
+			? MINIBOSS_GEAR[miniboss].kind
+			: kind,
+	);
 export const arenaRackId = (floorNumber: number) =>
 	`floor:${floorNumber}:object:arena-reward:1`;
 export const arenaGateId = (floorNumber: number) =>

@@ -6,7 +6,7 @@ import type { ActivityEvent } from "../game/ActivityHistory";
 import type { Difficulty } from "../game/Difficulty";
 import type { GameState } from "../game/GameState";
 import type { FloorItem } from "../items/FloorItems";
-import { isRareEquipmentKind } from "../items/Item";
+import { isUniqueEquipmentKind } from "../items/Item";
 import { isEnchantableKind } from "../items/ItemValues";
 import { lootWeights } from "../items/LootWeights";
 import type { DungeonObject } from "../objects/DungeonObject";
@@ -120,7 +120,7 @@ export const wardenDrop = (
 	if (!monster.warden) return undefined;
 	const kind = selectWeighted(
 		lootWeights(monster.warden.depth, "found").filter(
-			({ value }) => isEnchantableKind(value) && !isRareEquipmentKind(value),
+			({ value }) => isEnchantableKind(value) && !isUniqueEquipmentKind(value),
 		),
 		createSeededRandom(hashStringToUint32(`${seed}:ember-warden:reward`)),
 	);

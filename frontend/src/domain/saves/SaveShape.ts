@@ -1,5 +1,5 @@
 import {
-	ARENA_REWARD_KINDS,
+	ARENA_REWARD_ITEM_KINDS,
 	EGG_SAC_TILES,
 	MINIBOSS_KINDS,
 } from "../arena/Arena";
@@ -386,7 +386,7 @@ const eventFields = {
 	"arena-entered": { miniboss: oneOf(MINIBOSS_KINDS) },
 	"arena-cleared": { miniboss: oneOf(MINIBOSS_KINDS) },
 	"miniboss-enraged": { miniboss: oneOf(MINIBOSS_KINDS) },
-	"arena-reward-claimed": { item: oneOf(ARENA_REWARD_KINDS) },
+	"arena-reward-claimed": { item: oneOf(ARENA_REWARD_ITEM_KINDS) },
 	"egg-sac-broken": {},
 	"egg-sacs-burned": { count: integer(1, EGG_SAC_TILES.length) },
 	"brood-hatched": { count: integer(1, EGG_SAC_TILES.length) },
@@ -531,6 +531,8 @@ const eventFields = {
 		monster: monsterKind,
 		target: coordinate,
 	},
+	"blow-braced": { monster: monsterKind },
+	"death-warded": {},
 	"monster-summoned": {
 		actorId: text,
 		monster: monsterKind,
@@ -659,6 +661,7 @@ const documentShape = object({
 		),
 		townPortal: nullable(object({ floorNumber, coordinate })),
 		displacedFloors: optional(array(floorNumber, 0, 20)),
+		sparedFloors: optional(array(floorNumber, 0, 20)),
 		hunger: optional(object({ fedTurn: natural })),
 		omens: array(object({ floorNumber, kind: oneOf(OMEN_KINDS) }), 0, 20),
 		encounters: optional(
