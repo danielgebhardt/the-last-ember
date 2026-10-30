@@ -35,9 +35,27 @@ test("live town is centered over transparent space, preserves the dungeon, and r
 			]);
 			if (!bounds || !grid || !panel)
 				throw new Error("Expected town presentation");
-			if (size.width >= 1440)
+			// Wide enough: the panel sits beside the town. On an iPad it is a banner
+			// above it, and the tiles shrink a little so nothing scrolls.
+			if (size.width >= 1280)
 				expect(panel.x).toBeGreaterThanOrEqual(bounds.x + bounds.width);
-			else expect(panel.y).toBeGreaterThanOrEqual(bounds.y + bounds.height);
+			else expect(panel.y + panel.height).toBeLessThanOrEqual(bounds.y);
+			const scene = town.locator(
+				"xpath=ancestor::*[contains(@class,'town-scene')]",
+			);
+			expect(
+				await scene.evaluate(
+					(node) =>
+						node.scrollHeight <= node.clientHeight + 1 &&
+						node.scrollWidth <= node.clientWidth + 1,
+				),
+			).toBe(true);
+			// Tiles fill the room, never above the 32px map tile size; at least 20px
+			// beside the panel, at least 16px under the banner.
+			const tile = (await town.locator("td").first().boundingBox())?.width ?? 0;
+			expect(tile).toBeLessThanOrEqual(32.05);
+			expect(tile).toBeGreaterThanOrEqual(size.width >= 1280 ? 19.95 : 15.95);
+			if (size.width === 1920) expect(tile).toBeCloseTo(32, 1);
 			expect(
 				await page
 					.locator("html")

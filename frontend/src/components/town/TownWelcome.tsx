@@ -15,6 +15,10 @@ type TownWelcomeProps = {
 	portalNotice?: string;
 };
 
+// Beside a wide town it is a panel; above a narrow one (below 52.5rem, the
+// @max-[52.5rem]/town classes) it is a banner, so the town keeps its room and
+// nothing scrolls.
+
 const TownWelcome = ({
 	onDirectoryRequested,
 	enabled,
@@ -25,24 +29,27 @@ const TownWelcome = ({
 	return (
 		<aside
 			aria-labelledby={titleId}
-			className="
+			className={`
          flex w-full min-w-0 flex-col
          rounded-lg border border-amber-800/35
          bg-gradient-to-b from-card via-card to-muted
          p-4 shadow-lg
          dark:border-amber-600/35
          dark:from-[#121a24] dark:via-card dark:to-[#11151d]
-      "
+         @max-[52.5rem]/town:flex-row @max-[52.5rem]/town:flex-wrap @max-[52.5rem]/town:items-center
+         @max-[52.5rem]/town:gap-x-4 @max-[52.5rem]/town:gap-y-1 @max-[52.5rem]/town:px-3 @max-[52.5rem]/town:py-2
+      `}
 		>
 			{/* Heading */}
-			<div className="flex items-center gap-2.5">
+			<div className="flex shrink-0 items-center gap-2.5">
 				<div
-					className="
+					className={`
                flex size-9 shrink-0 items-center justify-center
                rounded-md border border-amber-700/40
                bg-amber-500/10
                dark:border-amber-500/40
-            "
+               @max-[52.5rem]/town:size-7
+            `}
 				>
 					<Flame
 						aria-hidden="true"
@@ -53,90 +60,92 @@ const TownWelcome = ({
 				<div className="min-w-0">
 					<h2
 						id={titleId}
-						className="
+						className={`
                   font-serif text-xl font-bold
                   leading-tight tracking-wide
-               "
+                  @max-[52.5rem]/town:text-base
+               `}
 					>
 						Welcome to Beacon
 					</h2>
 
-					<p className="mt-0.5 text-[11px] italic text-amber-800 dark:text-amber-300">
+					<p
+						className={`mt-0.5 text-[11px] italic text-amber-800 dark:text-amber-300 @max-[52.5rem]/town:hidden`}
+					>
 						The last light before the ruins
 					</p>
 				</div>
 			</div>
 
 			{/* Decorative divider */}
-			<div aria-hidden="true" className="my-2.5 flex items-center gap-2">
+			<div
+				aria-hidden="true"
+				className={`my-2.5 flex items-center gap-2 @max-[52.5rem]/town:hidden`}
+			>
 				<span className="h-px flex-1 bg-amber-800/30 dark:bg-amber-500/30" />
 				<span className="size-1.5 rotate-45 border border-amber-700/60 dark:border-amber-400/60" />
 				<span className="h-px flex-1 bg-amber-800/30 dark:bg-amber-500/30" />
 			</div>
 
 			{/* Introduction */}
-			<p className="text-sm leading-relaxed text-foreground/90">
-				The beacon is fading. Prepare at the town shops, then travel south to
-				the gate and descend into the ruins.
+			<p
+				className={`text-sm leading-relaxed text-foreground/90 @max-[52.5rem]/town:hidden`}
+			>
+				The beacon is fading. Prepare at the shops, then descend at the southern
+				gate. Town actions don't pass time.
 			</p>
 
-			{/* Keyboard controls */}
-			<div className="mt-3 grid gap-2">
-				<div className="flex items-start gap-2">
+			{/* Keyboard controls: a list in the panel, one line in the banner */}
+			<div className={`mt-3 grid gap-1.5 @max-[52.5rem]/town:hidden`}>
+				<p className="flex items-start gap-2 text-[13px] leading-5 text-muted-foreground">
 					<Footprints
 						aria-hidden="true"
 						className="mt-0.5 size-4 shrink-0 text-amber-700 dark:text-amber-400"
 					/>
-
-					<p className="text-[13px] leading-5 text-muted-foreground">
+					<span>
 						<strong className="text-foreground">WASD / Arrows</strong>
-						{" — "}Move through town, or tap neighboring tiles
-					</p>
-				</div>
-
-				<div className="flex items-start gap-2">
+						{" — "}Move, or tap a neighboring tile
+					</span>
+				</p>
+				<p className="flex items-start gap-2 text-[13px] leading-5 text-muted-foreground">
 					<Search
 						aria-hidden="true"
 						className="mt-0.5 size-4 shrink-0 text-amber-700 dark:text-amber-400"
 					/>
-
-					<p className="text-[13px] leading-5 text-muted-foreground">
+					<span>
 						<strong className="text-foreground">E</strong>
-						{" — "}Inspect signs or enter open shops; tap your character or a
-						nearby doorway
-					</p>
-				</div>
-
-				<div className="flex items-start gap-2">
+						{" — "}Inspect signs or enter open shops
+					</span>
+				</p>
+				<p className="flex items-start gap-2 text-[13px] leading-5 text-muted-foreground">
 					<DoorOpen
 						aria-hidden="true"
 						className="mt-0.5 size-4 shrink-0 text-amber-700 dark:text-amber-400"
 					/>
-
-					<p className="text-[13px] leading-5 text-muted-foreground">
+					<span>
 						<strong className="text-foreground">Enter</strong>
 						{" — "}Descend at the southern gate
-					</p>
-				</div>
+					</span>
+				</p>
 			</div>
-
-			{/* Town information */}
 			<p
-				className="
-            mt-3 rounded border border-border/50
-            bg-muted/25 px-2.5 py-2
-            text-xs leading-4 text-muted-foreground
-         "
+				className={`hidden min-w-0 flex-1 text-xs leading-5 text-muted-foreground @max-[52.5rem]/town:block`}
 			>
-				Potion, scroll, armor, and weapon shops are open. Sell spare gear at The
-				Rag &amp; Bone. Town actions don't advance time or restore resources.
+				<strong className="text-foreground">WASD</strong> move ·{" "}
+				<strong className="text-foreground">E</strong> inspect or shop ·{" "}
+				<strong className="text-foreground">Enter</strong> descend at the gate
 			</p>
 
+			{/* In the banner, the portal notice and nearby feedback share a second row */}
+			<div
+				aria-hidden="true"
+				className="hidden h-0 basis-full @max-[52.5rem]/town:order-last @max-[52.5rem]/town:block"
+			/>
 			{portalNotice && (
 				<p
 					role="status"
 					aria-label="Town portal status"
-					className="mt-2 text-xs leading-relaxed text-muted-foreground"
+					className="mt-2 text-xs leading-relaxed text-muted-foreground @max-[52.5rem]/town:order-last @max-[52.5rem]/town:mt-0 @max-[52.5rem]/town:min-w-0 @max-[52.5rem]/town:flex-1 @max-[52.5rem]/town:truncate"
 				>
 					{portalNotice}
 				</p>
@@ -148,7 +157,7 @@ const TownWelcome = ({
 				aria-label="Town directory"
 				disabled={!enabled}
 				onClick={onDirectoryRequested}
-				className="
+				className={`
             mt-3 h-11 w-full scroll-mb-4
             border-amber-800/50
             bg-gradient-to-b from-amber-100/60 to-muted/50
@@ -159,7 +168,8 @@ const TownWelcome = ({
             dark:from-[#302418] dark:to-[#211c19]
             dark:hover:border-amber-400/75
             dark:hover:from-[#45301d] dark:hover:to-[#302318]
-         "
+            @max-[52.5rem]/town:mt-0 @max-[52.5rem]/town:h-9 @max-[52.5rem]/town:w-auto @max-[52.5rem]/town:shrink-0
+         `}
 			>
 				<MapIcon
 					aria-hidden="true"
@@ -168,14 +178,16 @@ const TownWelcome = ({
 
 				<span className="flex flex-col items-start gap-0.5">
 					<span className="font-serif font-semibold">Town Directory</span>
-					<span className="text-[11px] font-normal text-muted-foreground">
+					<span
+						className={`text-[11px] font-normal text-muted-foreground @max-[52.5rem]/town:hidden`}
+					>
 						Shops and landmarks · ?
 					</span>
 				</span>
 			</Button>
 
 			{/* Fixed-height nearby feedback prevents panel resizing */}
-			<div className="mt-2 flex min-h-5 min-w-0 items-center justify-center">
+			<div className="mt-2 flex min-h-5 min-w-0 items-center justify-center @max-[52.5rem]/town:order-last @max-[52.5rem]/town:mt-0 @max-[52.5rem]/town:shrink-0">
 				<p
 					role="status"
 					aria-live="polite"
@@ -188,7 +200,7 @@ const TownWelcome = ({
 				>
 					{interactionLabel !== "Inspect nearby"
 						? `Nearby: ${interactionLabel}`
-						: "\u00A0"}
+						: " "}
 				</p>
 			</div>
 		</aside>

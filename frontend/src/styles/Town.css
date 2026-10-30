@@ -6,9 +6,9 @@
 
 .town-map-grid td {
 	box-sizing: border-box;
-	width: 20px;
-	min-width: 20px;
-	height: 20px;
+	width: var(--town-tile, 20px);
+	min-width: var(--town-tile, 20px);
+	height: var(--town-tile, 20px);
 	padding: 0;
 	border: 0;
 	background-clip: padding-box;
@@ -268,5 +268,33 @@
 @media (prefers-reduced-motion: reduce) {
 	.town-gate-center {
 		transition: none;
+	}
+}
+
+/* The live town sizes its tiles to fill the space it has, never above the map tile
+   size the player chose. Container units measure inside the scene's padding. Beside
+   a wide enough space (52.5rem: a 20px-tile town, the gap and the 20rem panel) the
+   welcome panel sits to the right and tiles stay at least 20px; otherwise it is a
+   banner above (about 6.25rem with its gap) and tiles may shrink to 16px so the
+   town still fits without scrolling. The town is 25 × 21 tiles. */
+.town-scene {
+	container-type: size;
+}
+
+.town-layout {
+	--town-tile: clamp(
+		16px,
+		min((100cqh - 6.25rem) / 21, 100cqw / 25),
+		var(--dungeon-tile-size)
+	);
+}
+
+@container town (min-width: 52.5rem) {
+	.town-layout {
+		--town-tile: clamp(
+			20px,
+			min(100cqh / 21, (100cqw - 1.25rem - 20rem) / 25),
+			var(--dungeon-tile-size)
+		);
 	}
 }

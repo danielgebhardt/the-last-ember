@@ -147,14 +147,14 @@ const TownTileContent = ({
 		return (
 			<CircleDot
 				aria-hidden="true"
-				className={`mx-auto size-4 ${portalFloor ? "text-cyan-700 dark:text-cyan-300" : "text-muted-foreground"}`}
+				className={`mx-auto size-[80%] ${portalFloor ? "text-cyan-700 dark:text-cyan-300" : "text-muted-foreground"}`}
 			/>
 		);
 	if (gate === "center")
 		return (
 			<ChevronsDown
 				aria-hidden="true"
-				className="relative z-10 mx-auto size-4 text-amber-200 drop-shadow-[0_0_6px_rgba(251,191,36,0.55)] dark:text-amber-300"
+				className="relative z-10 mx-auto size-[80%] text-amber-200 drop-shadow-[0_0_6px_rgba(251,191,36,0.55)] dark:text-amber-300"
 				strokeWidth={2.5}
 			/>
 		);
@@ -165,7 +165,7 @@ const TownTileContent = ({
 				aria-hidden="true"
 				className="relative mx-auto flex size-full items-center justify-center rounded-full border border-amber-700/60 bg-amber-500/15 shadow-[0_0_8px_rgba(245,158,11,0.25)] dark:border-amber-400/60 dark:bg-amber-500/20"
 			>
-				<Flame className="size-4 fill-orange-400/35 text-amber-700 drop-shadow-[0_0_5px_rgba(245,158,11,0.65)] dark:fill-orange-500/45 dark:text-amber-300" />
+				<Flame className="size-[80%] fill-orange-400/35 text-amber-700 drop-shadow-[0_0_5px_rgba(245,158,11,0.65)] dark:fill-orange-500/45 dark:text-amber-300" />
 			</span>
 		);
 	if (tile === "D") return building?.mark;
@@ -178,7 +178,7 @@ const TownTileContent = ({
 		return (
 			<TownBuildingIcon
 				id={building.id}
-				className="mx-auto size-4 text-foreground"
+				className="mx-auto size-[80%] text-foreground"
 			/>
 		);
 	return null;
@@ -239,7 +239,7 @@ const TownMap = ({
 	return (
 		<div
 			ref={scene}
-			className={`@container/town grid min-h-0 min-w-0 flex-1 overflow-auto ${preview ? "" : "px-2 py-3 sm:px-4"}`}
+			className={`@container/town grid min-h-0 min-w-0 flex-1 overflow-auto ${preview ? "" : "town-scene px-2 py-3 sm:px-4"}`}
 		>
 			<p id={instructionsId} className="sr-only">
 				Use arrows or WASD to walk, or tap neighboring tiles. E or tapping your
@@ -250,7 +250,7 @@ const TownMap = ({
 				dungeon when active; stand on it and press Enter.
 			</p>
 			<div
-				className={`m-auto grid min-w-0 max-w-full items-center justify-items-center gap-5 ${preview ? "w-fit" : "w-full @min-[63rem]/town:w-fit @min-[63rem]/town:grid-cols-[500px_480px]"}`}
+				className={`m-auto grid min-w-0 max-w-full items-center justify-items-center ${preview ? "w-fit gap-5" : "town-layout w-full gap-3 @min-[52.5rem]/town:w-fit @min-[52.5rem]/town:grid-cols-[auto_20rem] @min-[52.5rem]/town:gap-5"}`}
 			>
 				<section
 					ref={viewport}
@@ -258,7 +258,7 @@ const TownMap = ({
 					aria-describedby={instructionsId}
 					// biome-ignore lint/a11y/noNoninteractiveTabindex: The map is the keyboard movement and scrolling surface.
 					tabIndex={0}
-					className="w-fit min-h-0 min-w-0 max-w-full overflow-auto rounded-md bg-transparent outline-offset-2 focus-visible:outline-2 focus-visible:outline-primary max-h-[26.25rem]"
+					className={`w-fit min-h-0 min-w-0 max-w-full overflow-auto rounded-md bg-transparent outline-offset-2 focus-visible:outline-2 focus-visible:outline-primary ${preview ? "max-h-[26.25rem]" : ""}`}
 					onFocus={(event) => {
 						if (event.target === event.currentTarget) followPlayer();
 					}}
@@ -308,7 +308,7 @@ const TownMap = ({
 				>
 					<table
 						aria-label="Fixed town layout"
-						className="town-map-grid m-auto text-center font-sans text-xs"
+						className="town-map-grid m-auto text-center font-sans text-[length:calc(var(--town-tile,20px)*0.6)]"
 					>
 						<tbody>
 							{TOWN.terrain.map((tiles, row) => (
@@ -415,7 +415,7 @@ const TownMap = ({
 					</table>
 				</section>
 				{!preview && (
-					<div className="w-full min-w-0 max-w-[480px]">
+					<div className="w-full min-w-0 @max-[52.5rem]/town:order-first">
 						<TownWelcome
 							portalNotice={townPortalMessage(
 								portalFloor
