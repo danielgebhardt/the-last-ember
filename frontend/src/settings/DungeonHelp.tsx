@@ -719,16 +719,19 @@ const DungeonHelp = ({
 					stair back up stays sealed, no Town Portal scroll can be read, and no
 					Runic Portal carries you past an arena. The arena is the same in every
 					run: an antechamber, a hall with pillars, and a reward room behind an
-					exit that opens only when nothing in the hall is left standing.
-					Winning restores your health and mana. The reward room holds gold, the
-					stair down and a rack with a Runeblade, a Tower shield, Dragon mail
-					and a Runic helmet, except that the miniboss you beat leaves its own
-					piece in that slot's place: the Pyre Lord's Emberscale Mail (fire
-					burns you half as much), the Iron Juggernaut's Bulwark (charges and
-					heavy blows that land stun their attacker), the Broodmother's
-					Broodfang (a hit may web its target) or the Bone Lich's Crown (once
-					per floor, a killing blow leaves you at 1 health). Take one, and the
-					rest stay behind. After that the stairs work normally.
+					exit that opens only when nothing in the hall is left standing. Its
+					minibosses fill a 2×2 block of tiles: strike them from any tile along
+					an edge (not a diagonal corner). They move only where their whole body
+					fits and follow you through the two-tile doorways. Winning restores
+					your health and mana. The reward room holds gold, the stair down and a
+					rack with a Runeblade, a Tower shield, Dragon mail and a Runic helmet,
+					except that the miniboss you beat leaves its own piece in that slot's
+					place: the Pyre Lord's Emberscale Mail (fire burns you half as much),
+					the Iron Juggernaut's Bulwark (charges and heavy blows that land stun
+					their attacker), the Broodmother's Broodfang (a hit may web its
+					target) or the Bone Lich's Crown (once per floor, a killing blow
+					leaves you at 1 health). Take one, and the rest stay behind. After
+					that the stairs work normally.
 				</p>
 				<dl className="grid gap-1 sm:grid-cols-2">
 					<div>
@@ -742,9 +745,10 @@ const DungeonHelp = ({
 					<div>
 						<dt className="font-medium">Iron Juggernaut</dt>
 						<dd className="text-muted-foreground">
-							Charges run past you until something stops them. Slamming into
-							stone stuns it, and a stunned juggernaut takes double damage. At
-							half health it charges again without recovering.
+							Charges run past you in a lane as wide as its body until something
+							stops them; step out of the lane to dodge. Slamming into stone
+							stuns it, and a stunned juggernaut takes double damage. At half
+							health it charges again without recovering.
 						</dd>
 					</div>
 					<div>

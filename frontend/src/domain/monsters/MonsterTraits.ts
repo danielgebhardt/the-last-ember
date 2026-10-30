@@ -72,13 +72,17 @@ export const monsterTraits = (kind: MonsterKind): readonly string[] => {
 		traits.push(
 			`A treasure chest that bites. Some chests from floor ${MONSTER_DEFINITIONS["treasure-mimic"].minFloor} are mimics; the nearby notice gives a tell: "${MIMIC_TELL}" Opening one wakes it beside you. Its health and attack grow with depth. When it falls it drops the chest's loot plus its own.`,
 		);
+	if (definition.miniboss)
+		traits.push(
+			"Fills a 2×2 block of tiles. Strike it from any tile along its edges, though not from a diagonal corner; it moves only where its whole body fits and follows you through the arena's doorways.",
+		);
 	if (kind === "pyre-lord")
 		traits.push(
 			"Arena miniboss. Its fire bursts mark an area around you first; leave it before they land. It must see you to aim, so a pillar between you keeps it from starting one. At half health it calls two salamanders and breathes without pause. Its health and attack grow with depth.",
 		);
 	if (kind === "iron-juggernaut")
 		traits.push(
-			`Arena miniboss. Its charge runs on past your tile until something stops it. If it slams into stone it is stunned for ${EFFECT_DEFINITIONS.stunned.duration} phases and takes double damage, so stand in front of a wall or pillar and step aside. At half health it no longer recovers after a charge that misses. Its health and attack grow with depth.`,
+			`Arena miniboss. Its charge runs on past your tile in a lane as wide as its body, until something stops it; step out of the lane to dodge. If it slams into stone it is stunned for ${EFFECT_DEFINITIONS.stunned.duration} phases and takes double damage, so stand in front of a wall or pillar and step aside. At half health it no longer recovers after a charge that misses. Its health and attack grow with depth.`,
 		);
 	if (kind === "broodmother")
 		traits.push(

@@ -45,10 +45,12 @@ import { createGameState, type GameState } from "../domain/game/GameState";
 import { damageMonster } from "../domain/game/MonsterDamage";
 import { resolvePlayerAction } from "../domain/game/PlayerActions";
 import { createTestSeedState } from "../domain/game/TestSeed";
+import { applyTimedEffect } from "../domain/game/TimedEffects";
 import { equipmentSlotFor } from "../domain/items/Equipment";
 import { exitScrollRestriction } from "../domain/items/ExitDungeonScroll";
 import type { ItemKind } from "../domain/items/Item";
 import type { Monster } from "../domain/monsters/Monster";
+import { chargeLine } from "../domain/monsters/MonsterCharge";
 import {
 	bodyDistance,
 	bodyFitsAt,
@@ -1224,4 +1226,139 @@ describe("2×2 miniboss bodies", () => {
 			expect(exit?.coordinate).toEqual({ row: 9, col: 33 });
 		});
 	});
+});
+
+describe("2×2 miniboss abilities", () => {
+	const terrainOf = (state: GameState) =>
+		state.run.floors[state.run.activeFloor - 1].terrain;
+	const withBoss = (state: GameState, change: Partial<Monster>) => ({
+		...state,
+		monsters: state.monsters.map((m) =>
+			m.id === minibossId(6) ? { ...m, ...change } : m,
+		),
+	});
+
+	it("Iron Juggernaut: charges in a lane as wide as its body, so stepping within it doesn't dodge", () => {
+		// Level with the lower row of its body, eight tiles off.
+		const start = inHall(
+			"iron-juggernaut",
+			{ row: 3, col: 20 },
+			{ row: 2, col: 28 },
+		);
+		const prepared = act(start).state;
+		const juggernaut = boss(prepared);
+		if (juggernaut?.intent.type !== "preparing-charge")
+			throw new Error("Expected a prepared charge");
+		// The telegraph marks both rows of the lane.
+		const lane = chargeLine(
+			terrainOf(prepared),
+			juggernaut,
+			juggernaut.intent.target,
+			8,
+		);
+		expect(new Set(lane.map((tile) => tile.row))).toEqual(new Set([2, 3]));
+		// Up into the lane's other row: still in its path.
+		const caught = act(prepared, { type: "move", direction: "up" }).state;
+		expect(caught.player.health).toBeLessThan(prepared.player.health);
+		expect(
+			caught.activityHistory.entries.some(
+				({ event }) => event.type === "monster-charge-hit",
+			),
+		).toBe(true);
+	});
+
+	it("Broodmother: webs from the nearest tile of her body", () => {
+		// Her nearest tile is 6 away, the web's range; her top-left tile is 7.
+		const hall = inHall(
+			"broodmother",
+			{ row: 3, col: 18 },
+			{ row: 2, col: 24 },
+		);
+		const mother = boss(hall);
+		if (!mother) throw new Error("Expected the Broodmother");
+		expect(bodyDistance(mother, hall.run.playerCoordinate)).toBe(6);
+		expect(
+			Math.abs(mother.coordinate.row - 3) +
+				Math.abs(mother.coordinate.col - 18),
+		).toBe(7);
+		expect(boss(act(hall).state)?.intent.type).toBe("preparing-web");
+	});
+
+	it("Bone Lich: hexes from the nearest tile of his body once enraged", () => {
+		const hall = inHall("bone-lich", { row: 3, col: 18 }, { row: 2, col: 24 });
+		const enraged = withBoss(hall, { minibossPhase: 2 });
+		const lich = boss(enraged);
+		if (!lich) throw new Error("Expected the Bone Lich");
+		expect(bodyDistance(lich, enraged.run.playerCoordinate)).toBe(6);
+		expect(boss(act(enraged).state)?.intent.type).toBe("preparing-hex");
+	});
+
+	it("Fear: an afraid miniboss flees as a whole, only where its body fits", () => {
+		const hall = inHall("pyre-lord", { row: 8, col: 24 }, { row: 7, col: 26 });
+		const lord = boss(hall);
+		if (!lord) throw new Error("Expected the Pyre Lord");
+		const afraid = applyTimedEffect(hall, lord, "afraid");
+		const fled = boss(act(afraid).state);
+		if (!fled) throw new Error("Expected the Pyre Lord");
+		expect(fled.coordinate).not.toEqual(lord.coordinate);
+		expect(bodyFitsAt(terrainOf(afraid), fled, fled.coordinate)).toBe(true);
+		expect(bodyDistance(fled, afraid.run.playerCoordinate)).toBeGreaterThan(
+			bodyDistance(lord, afraid.run.playerCoordinate),
+		);
+	});
+
+	it.each(MINIBOSS_KINDS)(
+		"%s: a fight plays out the same way every time, and saves at every turn",
+		(miniboss) => {
+			// Walk at the boss and strike it whenever beside it.
+			const fight = () => {
+				let state: GameState = inHall(
+					miniboss,
+					{ row: 8, col: 12 },
+					{ row: 7, col: 26 },
+				);
+				const turns: GameState[] = [];
+				for (let turn = 0; turn < 40 && state.player.health > 0; turn++) {
+					const foe = boss(state);
+					if (!foe || foe.health <= 0) break;
+					const player = state.run.playerCoordinate;
+					const step = (["up", "right", "down", "left"] as const)
+						.map((direction) => {
+							const offset = {
+								up: { row: -1, col: 0 },
+								right: { row: 0, col: 1 },
+								down: { row: 1, col: 0 },
+								left: { row: 0, col: -1 },
+							}[direction];
+							const to = {
+								row: player.row + offset.row,
+								col: player.col + offset.col,
+							};
+							return { direction, to };
+						})
+						.filter(({ to }) => terrainOf(state)[to.row]?.[to.col] === ".")
+						.sort(
+							(a, b) => bodyDistance(foe, a.to) - bodyDistance(foe, b.to),
+						)[0];
+					state = act(
+						state,
+						step
+							? { type: "move", direction: step.direction }
+							: { type: "wait" },
+					).state;
+					turns.push(state);
+				}
+				return turns;
+			};
+			const first = fight();
+			expect(fight()).toEqual(first);
+			for (const state of first) {
+				for (const monster of state.monsters.filter((m) => m.floorNumber === 6))
+					expect(
+						bodyFitsAt(terrainOf(state), monster, monster.coordinate),
+					).toBe(true);
+				expect(save(state).ok).toBe(true);
+			}
+		},
+	);
 });
