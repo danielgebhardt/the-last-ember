@@ -55,8 +55,13 @@ export const terrainTexture = (tile: string, row: number, col: number) => {
 	const texture = TILE_TERRAIN_CLASSES[tile];
 	const variants = texture && TERRAIN_VARIANTS[texture];
 	if (!variants) return texture;
-	const variant =
-		(Math.imul(row + 1, 73856093) ^ Math.imul(col + 1, 19349663)) >>> 0;
+	let hash = Math.imul(row + 1, 73856093) ^ Math.imul(col + 1, 19349663);
+	// Fold the high bits down before keeping the low two: on their own, the low
+	// bits of the products repeat every 4 rows and columns.
+	hash ^= hash >>> 16;
+	hash = Math.imul(hash, 0x45d9f3b);
+	hash ^= hash >>> 16;
+	const variant = hash >>> 0;
 	return variant % 4 === 0
 		? texture
 		: `${texture} ${variants}-${(variant % 4) + 1}`;

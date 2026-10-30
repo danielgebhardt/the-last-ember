@@ -84,11 +84,11 @@ export const setTileSize = (tile: TileSize) => {
 	for (const listener of listeners) listener();
 };
 
-export const useTileSize = () =>
-	useSyncExternalStore(
-		(listener) => {
-			listeners.add(listener);
-			return () => listeners.delete(listener);
-		},
-		() => current,
-	);
+const subscribe = (listener: () => void) => {
+	listeners.add(listener);
+	return () => {
+		listeners.delete(listener);
+	};
+};
+
+export const useTileSize = () => useSyncExternalStore(subscribe, () => current);

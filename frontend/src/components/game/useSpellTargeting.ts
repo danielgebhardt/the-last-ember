@@ -156,18 +156,23 @@ export const useSpellTargeting = (
 		targeting,
 		targetIds: targeting ? targets.map((target) => target.id) : undefined,
 		// Only how to aim, and whether this target's blast reaches you; the catalog
-		// has each spell's numbers.
+		// has each spell's numbers. The target's position is for screen readers,
+		// which can't see which of two like monsters is highlighted.
 		description:
 			selected && targeting
-				? `${SPELL_DEFINITIONS[targeting.spell].name} at ${MONSTER_DEFINITIONS[selected.kind].name}.${
-						preview?.some(
-							({ row, col }) =>
-								row === state.run.playerCoordinate.row &&
-								col === state.run.playerCoordinate.col,
-						)
-							? " Warning: you are inside the blast."
-							: ""
-					} Enter or click casts; arrows or WASD cast in a direction. Escape or Z cancels.`
+				? {
+						target: `${SPELL_DEFINITIONS[targeting.spell].name} at ${MONSTER_DEFINITIONS[selected.kind].name}`,
+						position: `, row ${selected.coordinate.row}, column ${selected.coordinate.col}`,
+						guidance: `.${
+							preview?.some(
+								({ row, col }) =>
+									row === state.run.playerCoordinate.row &&
+									col === state.run.playerCoordinate.col,
+							)
+								? " Warning: you are inside the blast."
+								: ""
+						} Enter or click casts; arrows or WASD cast in a direction. Escape or Z cancels.`,
+					}
 				: null,
 	};
 };

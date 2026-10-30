@@ -74,8 +74,13 @@ describe("Spell targeting controls", () => {
 		try {
 			const { user } = setup();
 			await user.keyboard("z");
-			expect(screen.getByLabelText("Spell targeting")).toHaveTextContent(
-				"Renamed bolt at goblin. Enter or click casts; arrows or WASD cast in a direction. Escape or Z cancels.",
+			const banner = screen.getByLabelText("Spell targeting");
+			// Screen readers also hear which goblin is highlighted.
+			expect(banner).toHaveTextContent(
+				"Renamed bolt at goblin, row 1, column 3. Enter or click casts; arrows or WASD cast in a direction. Escape or Z cancels.",
+			);
+			expect(banner.querySelector(".sr-only")).toHaveTextContent(
+				", row 1, column 3",
 			);
 		} finally {
 			Reflect.set(definition, "name", originalName);

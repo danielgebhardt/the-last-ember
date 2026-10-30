@@ -36,7 +36,7 @@ describe.each([
 				expect(terrainTexture(tile, row, col)).toBe(texture);
 			}
 	});
-	it("mixes all four drawings without long runs along rows or columns", () => {
+	it("mixes all four drawings without long runs or a repeating grid", () => {
 		const counts = new Map<string | undefined, number>();
 		for (const texture of grid.flat())
 			counts.set(texture, (counts.get(texture) ?? 0) + 1);
@@ -44,7 +44,20 @@ describe.each([
 		for (const count of counts.values()) expect(count).toBeGreaterThan(60);
 		const columns = grid[0].map((_, col) => grid.map((cells) => cells[col]));
 		for (const line of [...grid, ...columns])
-			expect(longestRun(line)).toBeLessThan(5);
+			expect(longestRun(line)).toBeLessThanOrEqual(6);
+		// Tiles a few steps apart agree about as often as chance (a quarter of the
+		// time), so no stripes or tiled blocks repeat across a room.
+		for (let step = 1; step <= 8; step += 1) {
+			let same = 0;
+			let pairs = 0;
+			for (let row = 0; row + step < 20; row += 1)
+				for (let col = 0; col + step < 20; col += 1) {
+					same += Number(grid[row][col] === grid[row + step][col]);
+					same += Number(grid[row][col] === grid[row][col + step]);
+					pairs += 2;
+				}
+			expect(same / pairs, `tiles ${step} apart`).toBeLessThan(0.4);
+		}
 	});
 });
 

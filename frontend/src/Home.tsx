@@ -920,7 +920,11 @@ const Home = ({
 										aria-label="Spell targeting"
 										className="pointer-events-none absolute inset-x-2 top-1 z-20 mx-auto w-fit max-w-[calc(100%-1rem)] rounded-md border border-violet-500/60 bg-card/85 px-3 py-1 text-center text-xs leading-snug shadow-sm backdrop-blur-sm"
 									>
-										{spells.description}
+										{spells.description.target}
+										<span className="sr-only">
+											{spells.description.position}
+										</span>
+										{spells.description.guidance}
 									</p>
 								)}
 							</DungeonFrame>
