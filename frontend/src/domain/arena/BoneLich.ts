@@ -2,6 +2,7 @@ import type { Coordinate } from "../dungeon/DungeonTypes";
 import { appendActivityEvents } from "../game/ActivityHistory";
 import type { GameState } from "../game/GameState";
 import type { Monster, MonsterKind } from "../monsters/Monster";
+import { bodyTiles } from "../monsters/MonsterFootprint";
 import {
 	coordinateKey,
 	orthogonalDistance,
@@ -49,9 +50,10 @@ const raise = (
 ): { monsters: Monster[]; count: number } => {
 	const taken = new Set([
 		coordinateKey(state.run.playerCoordinate),
+		// Every tile of a large body, so none rises inside him.
 		...state.monsters
 			.filter((m) => m.floorNumber === lich.floorNumber && m.health > 0)
-			.map((m) => coordinateKey(m.coordinate)),
+			.flatMap((m) => bodyTiles(m).map(coordinateKey)),
 	]);
 	const raised: Monster[] = [];
 	let count = lich.summons?.count ?? 0;

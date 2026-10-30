@@ -3,7 +3,7 @@ import type { VisibilityGrid } from "../../domain/dungeon/Visibility";
 import { spellArea } from "../../domain/game/AreaSpells";
 import type { GameState } from "../../domain/game/GameState";
 import type { PlayerAction } from "../../domain/game/PlayerActions";
-import { isSpellTarget } from "../../domain/game/SpellCasting";
+import { isSpellTarget, spellCenter } from "../../domain/game/SpellCasting";
 import {
 	playerSpell,
 	SPELL_DEFINITIONS,
@@ -11,7 +11,11 @@ import {
 	spellKnowledgeError,
 } from "../../domain/game/Spells";
 import { MONSTER_DEFINITIONS } from "../../domain/monsters/Monster";
-import { orthogonalDistance } from "../../domain/monsters/MonsterLocations";
+import {
+	bodyDistance,
+	bodyTiles,
+	nearestBodyTile,
+} from "../../domain/monsters/MonsterFootprint";
 import { navigationRun } from "../../domain/objects/NavigationTerrain";
 
 const eligibleTargets = (
@@ -23,12 +27,13 @@ const eligibleTargets = (
 		.filter(
 			(monster) =>
 				isSpellTarget(state, monster, playerSpell(spell, state.progression)) &&
-				(!visible || visible[monster.coordinate.row]?.[monster.coordinate.col]),
+				(!visible ||
+					bodyTiles(monster).some((tile) => visible[tile.row]?.[tile.col])),
 		)
 		.sort(
 			(a, b) =>
-				orthogonalDistance(a.coordinate, state.run.playerCoordinate) -
-					orthogonalDistance(b.coordinate, state.run.playerCoordinate) ||
+				bodyDistance(a, state.run.playerCoordinate) -
+					bodyDistance(b, state.run.playerCoordinate) ||
 				a.id.localeCompare(b.id),
 		);
 
@@ -127,9 +132,11 @@ export const useSpellTargeting = (
 		const [rowDirection, colDirection] = direction;
 		const player = state.run.playerCoordinate;
 		// Targets are already visible, in range, in clear sight and nearest first.
-		const target = targets.find(({ coordinate }) => {
-			const rowOffset = coordinate.row - player.row;
-			const colOffset = coordinate.col - player.col;
+		const target = targets.find((monster) => {
+			// A large body is in line when any of its rows or columns is yours.
+			const nearest = nearestBodyTile(monster, player);
+			const rowOffset = nearest.row - player.row;
+			const colOffset = nearest.col - player.col;
 			return rowDirection === 0
 				? rowOffset === 0 && colOffset * colDirection > 0
 				: colOffset === 0 && rowOffset * rowDirection > 0;
@@ -145,9 +152,9 @@ export const useSpellTargeting = (
 		if (!selected || !selectedSpell) return undefined;
 		const definition = SPELL_DEFINITIONS[selectedSpell];
 		return "radius" in definition && definition.radius !== undefined
-			? spellArea(terrain, selected.coordinate, definition.radius)
+			? spellArea(terrain, spellCenter(state, selected), definition.radius)
 			: undefined;
-	}, [selected, selectedSpell, terrain]);
+	}, [selected, selectedSpell, terrain, state]);
 	return {
 		spellArea: preview,
 		activate,

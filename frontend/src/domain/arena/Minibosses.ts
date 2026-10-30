@@ -1,7 +1,7 @@
 import type { Coordinate } from "../dungeon/DungeonTypes";
 import type { GameState } from "../game/GameState";
 import { MONSTER_DEFINITIONS, type Monster } from "../monsters/Monster";
-import { orthogonalDistance } from "../monsters/MonsterLocations";
+import { bodyRing, occupies } from "../monsters/MonsterFootprint";
 import {
 	actorMaximumHealth,
 	maximumMonsterHealth,
@@ -11,17 +11,6 @@ import { navigationRun } from "../objects/NavigationTerrain";
 import { MINIBOSS_SUMMON_IDS, type MinibossKind } from "./Arena";
 import { raiseZombies } from "./BoneLich";
 import { burstSacs } from "./Brood";
-
-const SIDES: readonly Coordinate[] = [
-	{ row: -1, col: 0 },
-	{ row: 0, col: 1 },
-	{ row: 1, col: 0 },
-	{ row: 0, col: -1 },
-	{ row: -1, col: -1 },
-	{ row: -1, col: 1 },
-	{ row: 1, col: 1 },
-	{ row: 1, col: -1 },
-];
 
 // At half health a miniboss spends one action changing phase. The Pyre Lord calls two
 // salamanders and breathes without pause; the Juggernaut charges again without recovering;
@@ -76,17 +65,16 @@ export const resolveMinibossPhase = (
 	if (monster.kind !== "pyre-lord") return { monster: enraged, events };
 	const terrain = navigationRun(state).floors[monster.floorNumber - 1].terrain;
 	const taken = (point: Coordinate) =>
-		orthogonalDistance(point, state.run.playerCoordinate) === 0 ||
+		(point.row === state.run.playerCoordinate.row &&
+			point.col === state.run.playerCoordinate.col) ||
 		monsters.some(
 			(m) =>
 				m.floorNumber === monster.floorNumber &&
 				m.health > 0 &&
-				orthogonalDistance(m.coordinate, point) === 0,
+				occupies(m, point),
 		);
-	const free = SIDES.map((side) => ({
-		row: monster.coordinate.row + side.row,
-		col: monster.coordinate.col + side.col,
-	})).filter(
+	// The salamanders appear in the ring around his body, never on it.
+	const free = bodyRing(monster).filter(
 		(point) => terrain[point.row]?.[point.col] === "." && !taken(point),
 	);
 	const summons: Monster[] = MINIBOSS_SUMMON_IDS.slice(0, free.length).map(

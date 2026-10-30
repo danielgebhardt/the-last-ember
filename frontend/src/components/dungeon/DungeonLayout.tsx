@@ -14,10 +14,12 @@ import type { FloorItem } from "../../domain/items/FloorItems";
 import { MONSTER_DEFINITIONS } from "../../domain/monsters/Monster";
 import type { Monster } from "../../domain/monsters/Monster.ts";
 import { chargeLine } from "../../domain/monsters/MonsterCharge";
+import { bodySpan, bodyTiles } from "../../domain/monsters/MonsterFootprint";
 import type { DungeonObject } from "../../domain/objects/DungeonObject";
 import { PLAYER_FOLLOW_MARGINS_TILES } from "../../settings/UIConfiguration";
 import CombatFeedbackLayer, { type FeedbackMark } from "./CombatFeedbackLayer";
 import DungeonRow from "./DungeonRow.tsx";
+import LargeMonsterLayer from "./LargeMonsterLayer";
 import { getScrollOffset } from "./MapScroll.ts";
 import {
 	type DungeonKeyboardOptions,
@@ -106,14 +108,14 @@ const DungeonLayout = ({
 				continue;
 			const sourceVisible =
 				visible === undefined ||
-				visible[monster.coordinate.row]?.[monster.coordinate.col];
+				bodyTiles(monster).some((tile) => visible[tile.row]?.[tile.col]);
 			if (!sourceVisible) continue;
 			const intent = monster.intent;
 			const targets =
 				intent.type === "preparing-charge"
 					? chargeLine(
 							dungeon,
-							monster.coordinate,
+							monster,
 							intent.target,
 							MONSTER_DEFINITIONS[monster.kind].chargeRange ?? 0,
 						)
@@ -168,11 +170,15 @@ const DungeonLayout = ({
 	}, [floorItems]);
 	const monsterRows = useMemo(() => {
 		const rows = new Map<number, Monster[]>();
+		// A large body belongs to every row it covers.
 		for (const monster of monsters) {
 			if (monster.health <= 0) continue;
-			const row = rows.get(monster.coordinate.row) ?? [];
-			row.push(monster);
-			rows.set(monster.coordinate.row, row);
+			for (let offset = 0; offset < bodySpan(monster); offset++) {
+				const index = monster.coordinate.row + offset;
+				const row = rows.get(index) ?? [];
+				row.push(monster);
+				rows.set(index, row);
+			}
 		}
 		return rows;
 	}, [monsters]);
@@ -297,6 +303,7 @@ const DungeonLayout = ({
 						))}
 					</tbody>
 				</table>
+				<LargeMonsterLayer monsters={monsters} visible={visible} />
 				{feedback && feedback.length > 0 && (
 					<CombatFeedbackLayer marks={feedback} />
 				)}

@@ -4,6 +4,9 @@ import {
 	ARENA_DOWN_STAIR,
 	ARENA_UP_STAIR,
 	arenaDoorId,
+	arenaDoorLowerId,
+	arenaEntryId,
+	arenaEntryLowerId,
 	arenaFloorFor,
 	arenaGateId,
 	arenaRackId,
@@ -19,7 +22,7 @@ import {
 	phylacteryId,
 	selectMiniboss,
 } from "../domain/arena/Arena";
-import { ARENA_ROOMS } from "../domain/arena/ArenaLayout";
+import { ARENA_LAYOUT, ARENA_ROOMS } from "../domain/arena/ArenaLayout";
 import {
 	ARENA_SCROLL_REFUSAL,
 	EXIT_REFUSAL,
@@ -46,9 +49,16 @@ import { equipmentSlotFor } from "../domain/items/Equipment";
 import { exitScrollRestriction } from "../domain/items/ExitDungeonScroll";
 import type { ItemKind } from "../domain/items/Item";
 import type { Monster } from "../domain/monsters/Monster";
+import {
+	bodyDistance,
+	bodyFitsAt,
+	bodyTiles,
+	occupies,
+} from "../domain/monsters/MonsterFootprint";
 import { coordinateKey } from "../domain/monsters/MonsterLocations";
 import {
 	actorAttackDamage,
+	actorMaximumHealth,
 	maximumMonsterHealth,
 	monsterAttackDamage,
 } from "../domain/monsters/MonsterStats";
@@ -174,8 +184,11 @@ describe("Arenas", () => {
 					.sort(),
 			).toEqual(
 				[
+					// Both leaves of each two-tile doorway.
+					"arena-door",
 					"arena-door",
 					"arena-reward",
+					"door",
 					"door",
 					"gold",
 					// The Broodmother's hall also holds her four egg sacs, the Lich's his
@@ -365,17 +378,19 @@ describe("Arenas", () => {
 	});
 
 	it("Iron Juggernaut: charges past you into stone, is stunned and takes double damage", () => {
-		// Same row of the open upper hall: it prepares from eight tiles.
+		// Level with its body's lower row in the open upper hall, clear of the
+		// pillars: it prepares from eight tiles.
 		const start = inHall(
 			"iron-juggernaut",
 			{ row: 3, col: 20 },
-			{ row: 3, col: 28 },
+			{ row: 2, col: 28 },
 		);
 		const prepared = act(start).state;
 		expect(boss(prepared)?.intent.type).toBe("preparing-charge");
 		const dodged = act(prepared, { type: "move", direction: "down" }).state;
 		const juggernaut = boss(dodged);
-		expect(juggernaut?.coordinate).toEqual({ row: 3, col: 10 });
+		// Its 2×2 body slams into the west wall.
+		expect(juggernaut?.coordinate).toEqual({ row: 2, col: 10 });
 		expect(
 			dodged.effects.some(
 				(e) => e.actorId === minibossId(6) && e.kind === "stunned",
@@ -744,8 +759,9 @@ describe("Bone Lich", () => {
 			"phylactery-broken",
 		);
 		expect(save(broken).ok).toBe(true);
-		// The Lich beside you lands his blow first: yours glances off.
-		const pressed = withLich(once, { coordinate: { row: 8, col: 29 } });
+		// The Lich beside you lands his blow first: yours glances off. His 2×2 body
+		// stands just to your left.
+		const pressed = withLich(once, { coordinate: { row: 8, col: 28 } });
 		const lost = strike(pressed);
 		expect(lost.player.health).toBeLessThan(pressed.player.health);
 		expect(phylactery(lost)?.blows).toBe(1);
@@ -1002,5 +1018,210 @@ describe("Arena gear", () => {
 		if (!parsed.ok) throw new Error(parsed.error);
 		expect(restoreSave(parsed.value).state.sparedFloors).toEqual([6]);
 		expect(save({ ...crowned, sparedFloors: [6, 6] }).ok).toBe(false);
+	});
+});
+
+describe("2×2 miniboss bodies", () => {
+	// The hall's open upper rows, clear of its pillars.
+	const juggernaut = (player: { row: number; col: number }) =>
+		inHall("iron-juggernaut", player, { row: 2, col: 20 });
+	const terrainOf = (state: GameState) =>
+		state.run.floors[state.run.activeFloor - 1].terrain;
+
+	it("is struck by stepping into any of its four tiles", () => {
+		// Beside its lower-right tile; stepping left strikes that tile.
+		const start = juggernaut({ row: 3, col: 22 });
+		const before = boss(start);
+		if (!before) throw new Error("Expected the juggernaut");
+		const struck = act(start, { type: "move", direction: "left" }).state;
+		expect(boss(struck)?.health).toBeLessThan(before.health);
+		expect(struck.run.playerCoordinate).toEqual({ row: 3, col: 22 });
+	});
+
+	it("strikes from along its edges, but not from a diagonal corner", () => {
+		const beside = juggernaut({ row: 3, col: 22 });
+		expect(act(beside).state.player.health).toBeLessThan(beside.player.health);
+		const corner = juggernaut({ row: 4, col: 22 });
+		expect(
+			bodyDistance(
+				{ kind: "iron-juggernaut", coordinate: { row: 2, col: 20 } },
+				{ row: 4, col: 22 },
+			),
+		).toBe(2);
+		expect(act(corner).state.player.health).toBe(corner.player.health);
+	});
+
+	it("moves only where its whole body fits, around the hall's pillars", () => {
+		let state: GameState = juggernaut({ row: 8, col: 12 });
+		const start = boss(state);
+		if (!start) throw new Error("Expected the juggernaut");
+		for (let turn = 0; turn < 12 && state.player.health > 0; turn++) {
+			state = act(state).state;
+			const body = boss(state);
+			if (!body) throw new Error("Expected the juggernaut");
+			expect(bodyFitsAt(terrainOf(state), body, body.coordinate)).toBe(true);
+			expect(occupies(body, state.run.playerCoordinate)).toBe(false);
+			expect(save(state).ok).toBe(true);
+		}
+		expect(
+			bodyDistance(boss(state) ?? start, state.run.playerCoordinate),
+		).toBeLessThan(bodyDistance(start, state.run.playerCoordinate));
+	});
+
+	it("calls its summons into the ring around its body, never onto it", () => {
+		const hall = inHall("pyre-lord", { row: 13, col: 12 }, { row: 2, col: 20 });
+		const pyre = boss(hall);
+		if (!pyre) throw new Error("Expected the Pyre Lord");
+		const wounded = {
+			...hall,
+			monsters: hall.monsters.map((m) =>
+				m.id === pyre.id
+					? {
+							...m,
+							health: Math.floor(actorMaximumHealth(m, hall.difficulty) / 2),
+						}
+					: m,
+			),
+		};
+		const enraged = act(wounded).state;
+		const lord = boss(enraged);
+		if (!lord) throw new Error("Expected the Pyre Lord");
+		const salamanders = enraged.monsters.filter((m) => m.kind === "salamander");
+		expect(salamanders.length).toBeGreaterThan(0);
+		for (const salamander of salamanders) {
+			expect(occupies(lord, salamander.coordinate)).toBe(false);
+			expect(
+				terrainOf(enraged)[salamander.coordinate.row][
+					salamander.coordinate.col
+				],
+			).toBe(".");
+		}
+		expect(save(enraged).ok).toBe(true);
+	});
+
+	it("is caught by a blast that covers any of its tiles", () => {
+		// Only its lower-right tile lies within three steps of the burst.
+		const hall = { ...juggernaut({ row: 13, col: 12 }), mana: 50 };
+		const before = boss(hall);
+		if (!before) throw new Error("Expected the juggernaut");
+		const center = { row: 3, col: 24 };
+		expect(
+			bodyTiles(before).filter(
+				(tile) =>
+					Math.abs(tile.row - center.row) + Math.abs(tile.col - center.col) <=
+					3,
+			),
+		).toEqual([{ row: 3, col: 21 }]);
+		const blasted = castAreaSpell(hall, "fireball", center, hit);
+		if (!("state" in blasted)) throw new Error(blasted.error);
+		expect(boss(blasted.state)?.health).toBeLessThan(before.health);
+	});
+
+	it("is sent away by Teleport Away only to where its whole body fits", () => {
+		const start = juggernaut({ row: 3, col: 24 });
+		const prepared = {
+			...start,
+			knownSpells: [...start.knownSpells, "teleport-away" as const],
+		};
+		const before = boss(prepared);
+		if (!before) throw new Error("Expected the juggernaut");
+		const sent = act(prepared, {
+			type: "cast",
+			spell: "teleport-away",
+			targetId: before.id,
+		}).state;
+		const after = boss(sent);
+		if (!after) throw new Error("Expected the juggernaut");
+		expect(after.coordinate).not.toEqual(before.coordinate);
+		expect(bodyFitsAt(terrainOf(sent), after, after.coordinate)).toBe(true);
+		expect(bodyDistance(after, sent.run.playerCoordinate)).toBeGreaterThan(
+			bodyDistance(before, prepared.run.playerCoordinate),
+		);
+		expect(save(sent).ok).toBe(true);
+	});
+
+	it("can't be saved overlapping a pillar or the player", () => {
+		expect(save(juggernaut({ row: 13, col: 12 })).ok).toBe(true);
+		// Its body would cover the pillar at row 4, column 14.
+		expect(
+			save(inHall("iron-juggernaut", { row: 13, col: 12 }, { row: 3, col: 13 }))
+				.ok,
+		).toBe(false);
+		// Its lower-right tile would be the player's.
+		expect(save(juggernaut({ row: 3, col: 21 })).ok).toBe(false);
+	});
+
+	describe("two-tile doorways", () => {
+		const leaf = (state: GameState, id: string) =>
+			state.objects.find((o) => o.id === id);
+		it("are two tiles tall, at both ends of the hall", () => {
+			for (const col of [9, 33])
+				expect([ARENA_LAYOUT[8][col], ARENA_LAYOUT[9][col]]).toEqual([
+					".",
+					".",
+				]);
+		});
+		it("open and close as one door", () => {
+			// In the antechamber, beside the doorway's upper leaf.
+			const start = inHall(
+				"bone-lich",
+				{ row: 8, col: 8 },
+				{ row: 2, col: 28 },
+			);
+			const opened = act(start, { type: "move", direction: "right" }).state;
+			expect(leaf(opened, arenaEntryId(6))?.activated).toBe(true);
+			expect(leaf(opened, arenaEntryLowerId(6))?.activated).toBe(true);
+			// Closing the leaf beside you shuts both.
+			const closed = act(opened, {
+				type: "interact",
+				objectId: arenaEntryId(6),
+			}).state;
+			expect(leaf(closed, arenaEntryId(6))?.activated).toBe(false);
+			expect(leaf(closed, arenaEntryLowerId(6))?.activated).toBe(false);
+			expect(save(closed).ok).toBe(true);
+		});
+		it("let a 2×2 miniboss follow you out of the hall", () => {
+			const hall = inHall("bone-lich", { row: 8, col: 4 }, { row: 8, col: 12 });
+			let state: GameState = {
+				...hall,
+				objects: hall.objects.map((o) =>
+					[arenaEntryId(6), arenaEntryLowerId(6)].includes(o.id)
+						? { ...o, activated: true }
+						: o,
+				),
+				monsters: hall.monsters.map((m) =>
+					m.id === minibossId(6)
+						? {
+								...m,
+								awareness: {
+									type: "pursuing",
+									target: hall.run.playerCoordinate,
+									remaining: 20,
+									blocked: 0,
+								},
+							}
+						: m,
+				),
+			};
+			for (let turn = 0; turn < 8 && state.player.health > 0; turn++)
+				state = act(state).state;
+			const lich = boss(state);
+			if (!lich) throw new Error("Expected the Bone Lich");
+			// Its whole body has passed the doorway into the antechamber.
+			expect(lich.coordinate.col + 1).toBeLessThan(9);
+			expect(save(state).ok).toBe(true);
+		});
+		it("can't be saved with one leaf open and the other shut", () => {
+			const hall = inHall("bone-lich", { row: 8, col: 4 }, { row: 2, col: 28 });
+			const ajar = {
+				...hall,
+				objects: hall.objects.map((o) =>
+					o.id === arenaEntryId(6) ? { ...o, activated: true } : o,
+				),
+			};
+			expect(save(ajar).ok).toBe(false);
+			const exit = hall.objects.find((o) => o.id === arenaDoorLowerId(6));
+			expect(exit?.coordinate).toEqual({ row: 9, col: 33 });
+		});
 	});
 });

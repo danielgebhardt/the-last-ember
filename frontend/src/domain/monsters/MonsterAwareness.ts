@@ -1,6 +1,6 @@
 import type { DungeonRun } from "../dungeon/DungeonRun";
 import type { Monster } from "./Monster";
-import { orthogonalDistance } from "./MonsterLocations";
+import { bodyDistance } from "./MonsterFootprint";
 import { selectPursuitStep } from "./MonsterPursuit";
 import { PURSUIT_RULES, type PursuitRules } from "./PursuitRules";
 
@@ -22,7 +22,8 @@ export const advanceUnseenPursuit = (
 					awareness: { ...memory, remaining: memory.remaining - 1 },
 				};
 	if (memory.remaining <= 0) return idle;
-	if (orthogonalDistance(monster.coordinate, memory.target) === 0)
+	// A large body has arrived once any of it covers the remembered tile.
+	if (bodyDistance(monster, memory.target) === 0)
 		return {
 			...monster,
 			awareness: {
@@ -42,7 +43,8 @@ export const advanceUnseenPursuit = (
 		...monster,
 		coordinate: coordinate ?? monster.coordinate,
 		awareness:
-			coordinate && orthogonalDistance(coordinate, memory.target) === 0
+			coordinate &&
+			bodyDistance({ kind: monster.kind, coordinate }, memory.target) === 0
 				? {
 						type: "searching",
 						target: memory.target,

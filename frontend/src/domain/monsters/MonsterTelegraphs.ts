@@ -8,7 +8,7 @@ import {
 	type MonsterDefinition,
 	type MonsterIntent,
 } from "./Monster";
-import { orthogonalDistance } from "./MonsterLocations";
+import { bodyDistance, occupies } from "./MonsterFootprint";
 
 // Prepare-then-act behaviors whose saved intent is a single target tile. The
 // area attack carries extra state and keeps its own shape and checks.
@@ -50,8 +50,9 @@ type TelegraphRule = Readonly<{
 	advice: string;
 }>;
 
+// Measured from the nearest tile of a large body.
 const reach = (monster: Monster, target: Coordinate) =>
-	orthogonalDistance(monster.coordinate, target);
+	bodyDistance(monster, target);
 
 export const TARGET_TELEGRAPHS: Readonly<
 	Record<TargetTelegraph, TelegraphRule>
@@ -65,8 +66,11 @@ export const TARGET_TELEGRAPHS: Readonly<
 	"preparing-charge": {
 		owns: (definition) => definition.chargeRange !== undefined,
 		reaches: (monster, target) =>
-			(monster.coordinate.row === target.row ||
-				monster.coordinate.col === target.col) &&
+			// Level with one of the body's rows or columns, not off to a diagonal.
+			[
+				{ row: target.row, col: monster.coordinate.col },
+				{ row: monster.coordinate.row, col: target.col },
+			].some((point) => occupies(monster, point)) &&
 			reach(monster, target) >= 2 &&
 			reach(monster, target) <=
 				(MONSTER_DEFINITIONS[monster.kind].chargeRange ?? 0),

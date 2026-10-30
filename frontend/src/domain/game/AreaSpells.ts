@@ -3,6 +3,7 @@ import type { Coordinate, Dungeon } from "../dungeon/DungeonTypes";
 import { FLOOR } from "../dungeon/Tiles";
 import { hasLineOfSight } from "../dungeon/Visibility";
 import { fireWardedDamage } from "../items/ArenaGear";
+import { bodyTiles, occupies } from "../monsters/MonsterFootprint";
 import {
 	coordinateKey,
 	orthogonalDistance,
@@ -84,7 +85,8 @@ export const castAreaSpell = (
 			(monster) =>
 				monster.health > 0 &&
 				monster.floorNumber === state.run.activeFloor &&
-				area.has(coordinateKey(monster.coordinate)),
+				// A large body is caught when the blast covers any of it.
+				bodyTiles(monster).some((tile) => area.has(coordinateKey(tile))),
 		)
 		.sort((a, b) => a.id.localeCompare(b.id, undefined, { numeric: true }));
 	if (!targets.length) return { error: "No monsters within the spell area." };
@@ -93,8 +95,7 @@ export const castAreaSpell = (
 	// Potency is fixed before any kills can increase the caster's level.
 	for (const target of targets) {
 		const multiplier =
-			"splashMultiplier" in definition &&
-			coordinateKey(target.coordinate) !== coordinateKey(center)
+			"splashMultiplier" in definition && !occupies(target, center)
 				? definition.splashMultiplier
 				: 1;
 		const range = areaDamageRange(

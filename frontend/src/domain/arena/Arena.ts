@@ -115,6 +115,24 @@ export const arenaDoorId = (floorNumber: number) =>
 	`floor:${floorNumber}:object:arena-door:1`;
 export const arenaEntryId = (floorNumber: number) =>
 	`floor:${floorNumber}:object:door:arena`;
+// The lower leaves of the two-tile doorways.
+export const arenaEntryLowerId = (floorNumber: number) =>
+	`floor:${floorNumber}:object:door:arena-2`;
+export const arenaDoorLowerId = (floorNumber: number) =>
+	`floor:${floorNumber}:object:arena-door:2`;
+// Both leaves of an arena doorway open, seal and close together; any other door is
+// a single leaf.
+export const doorwayLeaves = (id: string): readonly string[] => {
+	const floor = /^floor:(\d+):object:/.exec(id)?.[1];
+	if (floor === undefined) return [id];
+	const floorNumber = Number(floor);
+	for (const pair of [
+		[arenaEntryId(floorNumber), arenaEntryLowerId(floorNumber)],
+		[arenaDoorId(floorNumber), arenaDoorLowerId(floorNumber)],
+	])
+		if (pair.includes(id)) return pair;
+	return [id];
+};
 export const arenaGoldId = (floorNumber: number) =>
 	`floor:${floorNumber}:object:gold:arena`;
 export const arenaRewardId = (floorNumber: number) =>
@@ -231,10 +249,24 @@ export const withArena = (
 			activated: false,
 		},
 		{
+			id: arenaEntryLowerId(floorNumber),
+			kind: "door",
+			floorNumber,
+			coordinate: { ...ARENA_POINTS.entryDoorLower },
+			activated: false,
+		},
+		{
 			id: arenaDoorId(floorNumber),
 			kind: "arena-door",
 			floorNumber,
 			coordinate: { ...ARENA_POINTS.exitDoor },
+			activated: false,
+		},
+		{
+			id: arenaDoorLowerId(floorNumber),
+			kind: "arena-door",
+			floorNumber,
+			coordinate: { ...ARENA_POINTS.exitDoorLower },
 			activated: false,
 		},
 		{

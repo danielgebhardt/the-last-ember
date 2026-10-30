@@ -638,7 +638,7 @@ const monsterAwareness: Schema = (value) =>
 			(value.type !== "pursuing" || integer(0, 100)(value.blocked))));
 
 const documentShape = object({
-	version: oneOf([33]),
+	version: oneOf([34]),
 	savedAt: (value) =>
 		text(value) &&
 		typeof value === "string" &&

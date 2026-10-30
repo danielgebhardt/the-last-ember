@@ -1,4 +1,4 @@
-import type { ArenaRewardKind } from "../arena/Arena";
+import { type ArenaRewardKind, doorwayLeaves } from "../arena/Arena";
 import {
 	claimArenaReward,
 	EXIT_REFUSAL,
@@ -10,6 +10,7 @@ import { appendActivityEvents } from "../game/ActivityHistory";
 import type { GameState } from "../game/GameState";
 import type { PactKind } from "../game/Pacts";
 import { objectAvailable } from "../merchant/MerchantAvailability";
+import { occupies } from "../monsters/MonsterFootprint";
 import { orthogonalDistance } from "../monsters/MonsterLocations";
 import { openSarcophagus } from "./AncientSarcophagi";
 import { strikePact } from "./DarkAltar";
@@ -142,22 +143,29 @@ export const interactObject = (
 	if (object.kind === "egg-sac") return breakEggSac(state, object);
 	if (object.kind === "phylactery") return strikePhylactery(state, object);
 
+	// A two-tile doorway opens and closes as one door, and is occupied if either
+	// of its leaves is.
+	const leaves = doorwayLeaves(object.id);
+	const doorway = state.objects.filter((entry) => leaves.includes(entry.id));
 	if (
 		object.activated &&
-		(orthogonalDistance(object.coordinate, player) === 0 ||
-			state.monsters.some(
-				(actor) =>
-					actor.health > 0 &&
-					actor.floorNumber === object.floorNumber &&
-					orthogonalDistance(actor.coordinate, object.coordinate) === 0,
-			))
+		doorway.some(
+			(leaf) =>
+				orthogonalDistance(leaf.coordinate, player) === 0 ||
+				state.monsters.some(
+					(actor) =>
+						actor.health > 0 &&
+						actor.floorNumber === leaf.floorNumber &&
+						occupies(actor, leaf.coordinate),
+				),
+		)
 	)
 		return { error: "An occupied door cannot be closed." };
 	return {
 		...state,
 		objects: state.objects.map((entry) =>
-			entry.id === object.id
-				? { ...entry, activated: !entry.activated }
+			leaves.includes(entry.id)
+				? { ...entry, activated: !object.activated }
 				: entry,
 		),
 		activityHistory: appendActivityEvents(state.activityHistory, [

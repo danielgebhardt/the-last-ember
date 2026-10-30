@@ -370,6 +370,8 @@ const monsterCatalog = {
 		resists: ["fire"],
 		weaknesses: ["cold"],
 		miniboss: true,
+		// Follows you through the arena's doorways.
+		opensDoors: true,
 		// Pillars block his line of fire.
 		areaAttack: {
 			element: "fire",
@@ -394,6 +396,8 @@ const monsterCatalog = {
 		lootPreferences: {},
 		resists: ["arcane"],
 		miniboss: true,
+		// Follows you through the arena's doorways.
+		opensDoors: true,
 		chargeRange: 8,
 		overrun: true,
 	},
@@ -413,6 +417,8 @@ const monsterCatalog = {
 		resists: ["poison"],
 		weaknesses: ["fire"],
 		miniboss: true,
+		// Follows you through the arena's doorways.
+		opensDoors: true,
 		webAttack: { range: 6, cooldown: 3 },
 	},
 	// Can't be harmed while his phylactery stands, and raises the dead; see BoneLich.
@@ -431,6 +437,8 @@ const monsterCatalog = {
 		resists: ["poison", "cold"],
 		weaknesses: ["fire"],
 		miniboss: true,
+		// Follows you through the arena's doorways.
+		opensDoors: true,
 		hexAttack: {
 			range: 6,
 			cooldown: 3,

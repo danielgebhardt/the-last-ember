@@ -6,7 +6,7 @@ import { scaleEnemyValue } from "../game/Difficulty";
 import type { GameState } from "../game/GameState";
 import { omenSpellDamage } from "../game/Omens";
 import { MONSTER_DEFINITIONS, type Monster } from "./Monster";
-import { orthogonalDistance } from "./MonsterLocations";
+import { bodyDistance } from "./MonsterFootprint";
 import {
 	resolvedTelegraph,
 	type SpecialActionOutcome,
@@ -26,9 +26,7 @@ export const resolveMonsterHex = (
 		return undefined;
 	const turn = state.turn;
 	const inReach =
-		detected &&
-		orthogonalDistance(monster.coordinate, state.run.playerCoordinate) <=
-			hex.range;
+		detected && bodyDistance(monster, state.run.playerCoordinate) <= hex.range;
 	if (monster.intent.type === "preparing-hex") {
 		const resolved = resolvedTelegraph(monster, "hex", turn);
 		if (!inReach)

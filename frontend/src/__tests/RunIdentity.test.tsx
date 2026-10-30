@@ -30,7 +30,7 @@ it("gives separate starts separate identities without changing seeded gameplay",
 		runId: undefined,
 	});
 });
-it("assigns an old v33 save an ID when loaded and retains it in subsequent saves and loads", () => {
+it("assigns an older save an ID when loaded and retains it in subsequent saves and loads", () => {
 	const old = savedAdventure();
 	delete old.state.runId;
 	const { result } = renderHook(() =>
@@ -49,7 +49,7 @@ it("assigns an old v33 save an ID when loaded and retains it in subsequent saves
 		result.current.fogConfiguration,
 	);
 	expect(parseSave(JSON.stringify(saved)).ok).toBe(true);
-	expect(saved.version).toBe(33);
+	expect(saved.version).toBe(34);
 	expect(saved.state.runId).toBe(id);
 	act(() => {
 		result.current.restore(saved);

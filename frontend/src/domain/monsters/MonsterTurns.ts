@@ -1,3 +1,4 @@
+import { doorwayLeaves } from "../arena/Arena";
 import { resolveMinibossPhase } from "../arena/Minibosses";
 import { hashStringToUint32 } from "../dungeon/DungeonRun";
 import { createSeededRandom } from "../dungeon/Seed";
@@ -41,6 +42,7 @@ import { advanceUnseenPursuit } from "./MonsterAwareness";
 import { resolveMonsterBlindingStrike } from "./MonsterBlindingStrike";
 import { resolveMonsterCharge, selectChargeApproach } from "./MonsterCharge";
 import { doorPlanningRun, monsterDoorToOpen } from "./MonsterDoors";
+import { bodyDistance } from "./MonsterFootprint";
 import { resolveMonsterHex } from "./MonsterHex";
 import { orthogonalDistance } from "./MonsterLocations";
 import { detectsPlayer, selectPursuitStep, sensesCure } from "./MonsterPursuit";
@@ -123,7 +125,7 @@ const strikesBeforeStep = (
 		monster.health <= 0 ||
 		monster.floorNumber !== state.run.activeFloor ||
 		monster.intent.type !== "idle" ||
-		orthogonalDistance(monster.coordinate, state.run.playerCoordinate) !== 1 ||
+		bodyDistance(monster, state.run.playerCoordinate) !== 1 ||
 		monsterSkipsAction(state, monster) ||
 		state.turn % (definition.actionInterval ?? 1) !== 0 ||
 		hasMonsterEffect(state, monster, "afraid") ||
@@ -328,8 +330,10 @@ export const resolveMonsterPhase = (
 		) {
 			const door = monsterDoorToOpen({ ...state, objects }, monster, monsters);
 			if (door) {
+				// Both leaves of a two-tile doorway open together.
+				const leaves = doorwayLeaves(door.id);
 				objects = objects.map((object) =>
-					object.id === door.id ? { ...object, activated: true } : object,
+					leaves.includes(object.id) ? { ...object, activated: true } : object,
 				);
 				navigation = navigationRun({ run: state.run, objects });
 				const memory = monster.awareness;
@@ -460,11 +464,9 @@ export const resolveMonsterPhase = (
 				infections.push({ kind: special.affliction, source: profile.name });
 			continue;
 		}
-		// Both attack range and prepared-target adjacency use Manhattan distance.
-		const distance = orthogonalDistance(
-			monster.coordinate,
-			state.run.playerCoordinate,
-		);
+		// Both attack range and prepared-target adjacency use Manhattan distance,
+		// measured from the nearest tile of a large body.
+		const distance = bodyDistance(monster, state.run.playerCoordinate);
 		const definition = MONSTER_DEFINITIONS[monster.kind];
 		// A thief never attacks: it closes in while you carry gold to take.
 		if (definition.thief) {

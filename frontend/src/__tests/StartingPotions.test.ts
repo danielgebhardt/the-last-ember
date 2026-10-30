@@ -136,7 +136,7 @@ it("loads a v%i empty bag and custom shortcuts without granting or assigning sta
 	const document = savedAdventure();
 	const old = {
 		...document,
-		version: 33,
+		version: 34,
 		state: {
 			...document.state,
 			bag: { items: [] },

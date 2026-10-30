@@ -4,6 +4,7 @@ import type { Coordinate } from "../dungeon/DungeonTypes";
 import { createSeededRandom } from "../dungeon/Seed";
 import { FLOOR } from "../dungeon/Tiles";
 import type { Monster } from "../monsters/Monster";
+import { occupies } from "../monsters/MonsterFootprint";
 import { protectedSpawnLocations } from "../monsters/MonsterLocations";
 import type { FloorItem } from "./FloorItems";
 import { selectLootKind } from "./Loot";
@@ -72,8 +73,7 @@ export const availableItemLocations = (
 					monsters.some(
 						(monster) =>
 							monster.floorNumber === floor.floorNumber &&
-							monster.coordinate.row === row &&
-							monster.coordinate.col === col,
+							occupies(monster, { row, col }),
 					)
 				)
 					continue;

@@ -9,6 +9,7 @@ import {
 import type { FloorItem } from "../../domain/items/FloorItems";
 import { ITEM_DEFINITIONS, type ItemKind } from "../../domain/items/Item";
 import type { Monster, MonsterKind } from "../../domain/monsters/Monster.ts";
+import { bodySpan, occupies } from "../../domain/monsters/MonsterFootprint";
 import {
 	type DungeonObject,
 	isDoor,
@@ -51,6 +52,7 @@ const DungeonCell = memo(function DungeonCell({
 	areaThreatened = false,
 	chargeThreatened = false,
 	inSpellArea = false,
+	bodyPart,
 }: {
 	rowIndex: number;
 	columnIndex: number;
@@ -71,6 +73,9 @@ const DungeonCell = memo(function DungeonCell({
 	areaThreatened?: boolean;
 	chargeThreatened?: boolean;
 	inSpellArea?: boolean;
+	// A tile of a 2×2 body, drawn by the large-monster layer: its top-left tile is
+	// the keyboard stop, the others still click to target it.
+	bodyPart?: "anchor" | "rest";
 }) {
 	const showsPile = itemKind !== undefined && itemCount > 1 && !monsterKind;
 	// Treasure shows over anything it lies on, so a drop in a doorway isn't hidden.
@@ -132,13 +137,14 @@ const DungeonCell = memo(function DungeonCell({
 						type="button"
 						aria-label={`Target ${heroic ? "Heroic " : ""}${MONSTER_VISUALS[monsterKind].label} at row ${rowIndex}, column ${columnIndex}`}
 						aria-pressed={selectedTarget}
+						tabIndex={bodyPart === "rest" ? -1 : undefined}
 						onClick={() => onTargetRequested?.(monsterId)}
 						className={`flex size-full items-center justify-center rounded-sm ring-inset focus-visible:outline-2 focus-visible:outline-amber-500 ${selectedTarget ? "ring-2 ring-violet-600 dark:ring-violet-300 bg-violet-500/25" : "ring-1 ring-violet-500/60"}`}
 					>
-						<MonsterIcon kind={monsterKind} />
+						{!bodyPart && <MonsterIcon kind={monsterKind} />}
 					</button>
 				) : (
-					<MonsterIcon kind={monsterKind} />
+					!bodyPart && <MonsterIcon kind={monsterKind} />
 				)
 			) : itemKind ? (
 				showsPile ? (
@@ -154,13 +160,13 @@ const DungeonCell = memo(function DungeonCell({
 			{inSpellArea && (
 				<span
 					aria-hidden="true"
-					className="pointer-events-none absolute inset-0 rounded-xs border-2 border-violet-500 bg-violet-500/20 dark:border-violet-300"
+					className="pointer-events-none absolute inset-0 z-[3] rounded-xs border-2 border-violet-500 bg-violet-500/20 dark:border-violet-300"
 				/>
 			)}
 			{(threatened || areaThreatened || chargeThreatened) && (
 				<span
 					aria-hidden="true"
-					className="pointer-events-none absolute inset-0 rounded-xs border-2 border-map-threat bg-map-threat/15"
+					className="pointer-events-none absolute inset-0 z-[3] rounded-xs border-2 border-map-threat bg-map-threat/15"
 				>
 					<TriangleAlert
 						className="absolute -right-0.5 -top-0.5 size-[var(--tile-threat-marker)] fill-background text-map-threat"
@@ -242,8 +248,8 @@ const DungeonRow = memo(
 								(downStairMarked && columnIndex === downStairColumn)
 							? "remembered"
 							: "unknown";
-					const monster = monsters?.find(
-						(actor) => actor.coordinate.col === columnIndex,
+					const monster = monsters?.find((actor) =>
+						occupies(actor, { row: rowIndex, col: columnIndex }),
 					);
 					let tile = terrain;
 					if (columnIndex === playerColumn) tile = PLAYER;
@@ -310,9 +316,17 @@ const DungeonRow = memo(
 							monsterKind={
 								visibility === "visible" &&
 								tile !== PLAYER &&
-								monster?.coordinate.col === columnIndex &&
+								monster &&
 								monster.health > 0
 									? monster.kind
+									: undefined
+							}
+							bodyPart={
+								monster && bodySpan(monster) > 1
+									? monster.coordinate.row === rowIndex &&
+										monster.coordinate.col === columnIndex
+										? "anchor"
+										: "rest"
 									: undefined
 							}
 							playerRef={tile === PLAYER ? playerRef : undefined}

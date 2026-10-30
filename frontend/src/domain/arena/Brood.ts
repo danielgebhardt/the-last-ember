@@ -2,6 +2,7 @@ import type { Coordinate } from "../dungeon/DungeonTypes";
 import { appendActivityEvents } from "../game/ActivityHistory";
 import type { GameState } from "../game/GameState";
 import type { Monster } from "../monsters/Monster";
+import { bodyTiles } from "../monsters/MonsterFootprint";
 import {
 	coordinateKey,
 	orthogonalDistance,
@@ -45,9 +46,10 @@ const hatch = (
 		...state.objects
 			.filter((o) => o.floorNumber === mother.floorNumber)
 			.map((o) => coordinateKey(o.coordinate)),
+		// Every tile of a large body, so none hatches inside her.
 		...state.monsters
 			.filter((m) => m.floorNumber === mother.floorNumber && m.health > 0)
-			.map((m) => coordinateKey(m.coordinate)),
+			.flatMap((m) => bodyTiles(m).map(coordinateKey)),
 	]);
 	const hatched: Monster[] = [];
 	let count = mother.summons?.count ?? 0;

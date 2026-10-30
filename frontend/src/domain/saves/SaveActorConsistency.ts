@@ -1,5 +1,4 @@
 import { isArenaSpawnId } from "../arena/Arena";
-import { hasLineOfSight } from "../dungeon/Visibility";
 import { WARDEN_SPAWN_ID, wardenStats } from "../monsters/EmberWarden";
 import {
 	MONSTER_DEFINITIONS,
@@ -12,9 +11,12 @@ import {
 	sentrySummonKinds,
 } from "../monsters/MonsterAlarm";
 import {
-	orthogonalDistance,
-	protectedFloorLocations,
-} from "../monsters/MonsterLocations";
+	bodyDistance,
+	bodyHasLineOfSight,
+	bodyTiles,
+	occupies,
+} from "../monsters/MonsterFootprint";
+import { protectedFloorLocations } from "../monsters/MonsterLocations";
 import { actorMaximumHealth } from "../monsters/MonsterStats";
 import {
 	TARGET_TELEGRAPHS,
@@ -34,7 +36,6 @@ import {
 } from "../objects/MirrorOfShadows";
 import { WELL_SPAWN_ID, wellHostileKind } from "../objects/WishingWell";
 import {
-	sameCoordinate,
 	savedDifficulty,
 	savedLocations,
 	unique,
@@ -106,10 +107,12 @@ export const hasConsistentActors = (document: SaveDocument): boolean => {
 				entry.remedyDrop ? [monsterAffliction(entry.kind) ?? entry.id] : [],
 			),
 		) ||
+		// No two creatures overlap, counting every tile of a large body.
 		!unique(
-			state.monsters.map(
-				(entry) =>
-					`${entry.floorNumber}:${entry.coordinate.row}:${entry.coordinate.col}`,
+			state.monsters.flatMap((entry) =>
+				bodyTiles(entry).map(
+					(tile) => `${entry.floorNumber}:${tile.row}:${tile.col}`,
+				),
 			),
 		) ||
 		!state.monsters.every(
@@ -202,10 +205,10 @@ export const hasConsistentActors = (document: SaveDocument): boolean => {
 							MONSTER_DEFINITIONS[entry.kind],
 						) !== undefined && turn <= state.turn,
 				) &&
-				walkable(entry.floorNumber, entry.coordinate) &&
+				bodyTiles(entry).every((tile) => walkable(entry.floorNumber, tile)) &&
 				!protectedLocations
 					.get(entry.floorNumber)
-					?.some((location) => sameCoordinate(location, entry.coordinate)) &&
+					?.some((location) => occupies(entry, location)) &&
 				(entry.lastDamagedTurn == null ||
 					entry.lastDamagedTurn <= state.turn) &&
 				(entry.awareness === undefined ||
@@ -219,7 +222,7 @@ export const hasConsistentActors = (document: SaveDocument): boolean => {
 				) &&
 				!(
 					entry.floorNumber === run.activeFloor &&
-					sameCoordinate(entry.coordinate, run.playerCoordinate)
+					occupies(entry, run.playerCoordinate)
 				),
 		)
 	)
@@ -240,11 +243,10 @@ export const hasConsistentActors = (document: SaveDocument): boolean => {
 									intent.element === profile.element &&
 									intent.remaining <= profile.radius + 1 &&
 									walkable(monster.floorNumber, intent.target) &&
-									orthogonalDistance(monster.coordinate, intent.target) <=
-										profile.range &&
-									hasLineOfSight(
+									bodyDistance(monster, intent.target) <= profile.range &&
+									bodyHasLineOfSight(
 										floorAt(monster.floorNumber).terrain.map((row) => [...row]),
-										monster.coordinate,
+										monster,
 										intent.target,
 									)
 								);

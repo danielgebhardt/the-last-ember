@@ -1,4 +1,3 @@
-import { hasLineOfSight } from "../dungeon/Visibility";
 import type { ActivityEvent } from "../game/ActivityHistory";
 import { spellArea } from "../game/AreaSpells";
 import type { AttackRollSource } from "../game/CombatRandomness";
@@ -10,6 +9,7 @@ import { scaleEnemyValue } from "../game/Difficulty";
 import type { GameState } from "../game/GameState";
 import { fireWardedDamage } from "../items/ArenaGear";
 import { MONSTER_DEFINITIONS, type Monster } from "./Monster";
+import { bodyDistance, bodyHasLineOfSight } from "./MonsterFootprint";
 import { orthogonalDistance } from "./MonsterLocations";
 import { detectsPlayer } from "./MonsterPursuit";
 import { resolvedTelegraph, telegraphReady } from "./MonsterTelegraphs";
@@ -50,10 +50,11 @@ export const resolveMonsterArea = (
 		const finished = profile.cooldown
 			? resolvedTelegraph(monster, "breath", state.turn)
 			: { ...monster, intent: { type: "idle" as const } };
+		// Fire leaves from any tile of a large body with a clear line.
 		if (
-			!hasLineOfSight(
+			!bodyHasLineOfSight(
 				state.run.floors[state.run.activeFloor - 1].terrain,
-				monster.coordinate,
+				monster,
 				intent.target,
 			)
 		)
@@ -127,8 +128,7 @@ export const resolveMonsterArea = (
 			telegraphReady(monster, "breath", state.turn)
 		) ||
 		!detectsPlayer(state.run, monster, rules) ||
-		orthogonalDistance(monster.coordinate, state.run.playerCoordinate) >
-			profile.range
+		bodyDistance(monster, state.run.playerCoordinate) > profile.range
 	)
 		return undefined;
 	const target = { ...state.run.playerCoordinate };

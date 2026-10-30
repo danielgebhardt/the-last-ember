@@ -6,7 +6,7 @@ import {
 	readLocalSave,
 	writeLocalSave,
 } from "../persistence/LocalAdventureSave";
-import capturedSaveFile from "./fixtures/adventure-v33.json?raw";
+import capturedSaveFile from "./fixtures/adventure-v34.json?raw";
 import { savedAdventure } from "./SaveTestHelpers";
 
 const memoryStorage = () => {
@@ -27,7 +27,7 @@ describe("One local adventure save slot", () => {
 		expect(loaded).toEqual(parseSave(capturedSaveFile));
 		if (!loaded.ok || !loaded.value)
 			throw new Error("Captured current slot must load");
-		expect(loaded.value.version).toBe(33);
+		expect(loaded.value.version).toBe(34);
 		expect(set).not.toHaveBeenCalled();
 		expect(storage.getItem(LOCAL_SAVE_KEY)).toBe(capturedSaveFile);
 
@@ -82,7 +82,7 @@ describe("One local adventure save slot", () => {
 		writeLocalSave(previous, () => storage);
 		const set = vi.spyOn(storage, "setItem");
 		expect(
-			writeLocalSave({ ...previous, version: 99 as 33 }, () => storage).ok,
+			writeLocalSave({ ...previous, version: 99 as 34 }, () => storage).ok,
 		).toBe(false);
 		expect(set).not.toHaveBeenCalled();
 		expect(readLocalSave(() => storage)).toEqual({ ok: true, value: previous });

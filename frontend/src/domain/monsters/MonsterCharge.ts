@@ -14,36 +14,87 @@ import { bracesAgainstBlows } from "../items/ArenaGear";
 import { navigationRun } from "../objects/NavigationTerrain";
 import { MONSTER_DEFINITIONS, type Monster } from "./Monster";
 import {
-	coordinateKey,
-	orthogonalDistance,
-	protectedFloorLocations,
-} from "./MonsterLocations";
+	bodyDistance,
+	bodyFitsAt,
+	bodySpan,
+	bodyTiles,
+	bodyTilesAt,
+	occupies,
+} from "./MonsterFootprint";
+import { coordinateKey, protectedFloorLocations } from "./MonsterLocations";
 import { actorAttackDamage } from "./MonsterStats";
 
-// Far enough to cross any hall; the line itself stops at the first wall.
+// Far enough to cross any hall; the charge itself stops at the first wall.
 const OVERRUN_LIMIT = 64;
-const beyond = (start: Coordinate, target: Coordinate): Coordinate => ({
-	row: start.row + Math.sign(target.row - start.row) * OVERRUN_LIMIT,
-	col: start.col + Math.sign(target.col - start.col) * OVERRUN_LIMIT,
-});
-export const chargeLine = (
+type Body = Pick<Monster, "kind" | "coordinate">;
+// The straight direction from a body toward `target`, when the target lies in
+// the body's lane (level with one of its rows or columns); otherwise none.
+const chargeDirection = (
+	body: Body,
+	target: Coordinate,
+): Coordinate | undefined => {
+	const span = bodySpan(body);
+	const { row, col } = body.coordinate;
+	const inRows = target.row >= row && target.row < row + span;
+	const inCols = target.col >= col && target.col < col + span;
+	if (inRows === inCols) return undefined;
+	return inRows
+		? { row: 0, col: Math.sign(target.col - col) }
+		: { row: Math.sign(target.row - row), col: 0 };
+};
+// A point far past `target` in the same lane, for a charge that overruns its mark.
+const beyond = (body: Body, target: Coordinate): Coordinate => {
+	const direction = chargeDirection(body, target);
+	if (!direction) return target;
+	return {
+		row:
+			direction.row === 0
+				? target.row
+				: body.coordinate.row + direction.row * OVERRUN_LIMIT,
+		col:
+			direction.col === 0
+				? target.col
+				: body.coordinate.col + direction.col * OVERRUN_LIMIT,
+	};
+};
+// Each step of a charge: where the body moves, and the tiles its leading edge
+// enters. A one-tile charger's steps are the tiles of its line. The charge
+// stops before stone.
+export const chargeSteps = (
 	terrain: readonly (readonly string[])[],
-	start: Coordinate,
+	body: Body,
 	target: Coordinate,
 	range: number,
-): Coordinate[] => {
-	if (start.row !== target.row && start.col !== target.col) return [];
-	const dr = Math.sign(target.row - start.row),
-		dc = Math.sign(target.col - start.col);
-	const length = Math.min(range, orthogonalDistance(start, target));
-	const points: Coordinate[] = [];
+): { anchor: Coordinate; leading: Coordinate[] }[] => {
+	const direction = chargeDirection(body, target);
+	if (!direction) return [];
+	const length = Math.min(range, bodyDistance(body, target));
+	const steps: { anchor: Coordinate; leading: Coordinate[] }[] = [];
 	for (let step = 1; step <= length; step++) {
-		const point = { row: start.row + dr * step, col: start.col + dc * step };
-		if (terrain[point.row]?.[point.col] !== ".") break;
-		points.push(point);
+		const anchor = {
+			row: body.coordinate.row + direction.row * step,
+			col: body.coordinate.col + direction.col * step,
+		};
+		const behind = {
+			kind: body.kind,
+			coordinate: steps.at(-1)?.anchor ?? body.coordinate,
+		};
+		const leading = bodyTilesAt(body, anchor).filter(
+			(tile) => !occupies(behind, tile),
+		);
+		if (leading.some((tile) => terrain[tile.row]?.[tile.col] !== ".")) break;
+		steps.push({ anchor, leading });
 	}
-	return points;
+	return steps;
 };
+// The tiles a charge sweeps, for telegraphs: the whole lane up to its target.
+export const chargeLine = (
+	terrain: readonly (readonly string[])[],
+	body: Body,
+	target: Coordinate,
+	range: number,
+): Coordinate[] =>
+	chargeSteps(terrain, body, target, range).flatMap((step) => step.leading);
 // Only the Iron Juggernaut hunts for a charging line: its arena fight is built on the
 // charge, while ordinary chargers simply close in. When it can't charge or strike, it
 // takes a step that leaves it in line with the player, a clear 2 to range tiles away,
@@ -66,7 +117,7 @@ export const selectChargeApproach = (
 			actor.floorNumber === run.activeFloor &&
 			actor.id !== monster.id
 		)
-			blocked.add(coordinateKey(actor.coordinate));
+			for (const tile of bodyTiles(actor)) blocked.add(coordinateKey(tile));
 	// The same neighbor order as pursuit breaks ties.
 	const steps = [
 		{ row: -1, col: 0 },
@@ -79,21 +130,21 @@ export const selectChargeApproach = (
 			col: monster.coordinate.col + offset.col,
 		}))
 		.filter((step) => {
-			const distance = orthogonalDistance(step, target);
+			const body = { kind: monster.kind, coordinate: step };
+			const distance = bodyDistance(body, target);
 			return (
-				terrain[step.row]?.[step.col] === "." &&
-				!blocked.has(coordinateKey(step)) &&
+				bodyFitsAt(terrain, monster, step, (tile) =>
+					blocked.has(coordinateKey(tile)),
+				) &&
 				distance >= 2 &&
 				distance <= range &&
-				chargeLine(terrain, step, target, range).length === distance
+				chargeSteps(terrain, body, target, range).length === distance
 			);
 		});
+	const away = (step: Coordinate) =>
+		bodyDistance({ kind: monster.kind, coordinate: step }, target);
 	return steps.reduce<Coordinate | undefined>(
-		(best, step) =>
-			!best ||
-			orthogonalDistance(step, target) < orthogonalDistance(best, target)
-				? step
-				: best,
+		(best, step) => (!best || away(step) < away(best) ? step : best),
 		undefined,
 	);
 };
@@ -118,13 +169,10 @@ export const resolveMonsterCharge = (
 	if (intent.type === "recovering-charge")
 		return { monster: { ...monster, intent: { type: "idle" } }, events: [] };
 	if (intent.type === "idle") {
-		const distance = orthogonalDistance(
-			monster.coordinate,
-			state.run.playerCoordinate,
-		);
-		const line = chargeLine(
+		const distance = bodyDistance(monster, state.run.playerCoordinate);
+		const line = chargeSteps(
 			state.run.floors[state.run.activeFloor - 1].terrain,
-			monster.coordinate,
+			monster,
 			state.run.playerCoordinate,
 			range,
 		);
@@ -190,32 +238,37 @@ export const resolveMonsterCharge = (
 	);
 	// An overrunning charge keeps going past its mark, through open doors, until stone
 	// or someone stops it.
+	const same = (a: Coordinate, b: Coordinate) =>
+		a.row === b.row && a.col === b.col;
 	const line = overrun
-		? chargeLine(
+		? chargeSteps(
 				navigationRun(state).floors[state.run.activeFloor - 1].terrain,
-				monster.coordinate,
-				beyond(monster.coordinate, intent.target),
+				monster,
+				beyond(monster, intent.target),
 				OVERRUN_LIMIT,
 			)
-		: chargeLine(
+		: chargeSteps(
 				state.run.floors[state.run.activeFloor - 1].terrain,
-				monster.coordinate,
+				monster,
 				intent.target,
 				range,
 			);
-	for (const point of line) {
+	for (const { anchor, leading } of line) {
 		if (
-			protectedTiles.some((tile) => orthogonalDistance(tile, point) === 0) ||
-			actors.some(
-				(actor) =>
-					actor.id !== monster.id &&
-					actor.floorNumber === monster.floorNumber &&
-					actor.health > 0 &&
-					orthogonalDistance(actor.coordinate, point) === 0,
+			leading.some(
+				(point) =>
+					protectedTiles.some((tile) => same(tile, point)) ||
+					actors.some(
+						(actor) =>
+							actor.id !== monster.id &&
+							actor.floorNumber === monster.floorNumber &&
+							actor.health > 0 &&
+							occupies(actor, point),
+					),
 			)
 		)
 			return finished("blocked");
-		if (orthogonalDistance(point, state.run.playerCoordinate) === 0) {
+		if (leading.some((point) => same(point, state.run.playerCoordinate))) {
 			const outcome = resolveMeleeAttack(
 				attackProfile(
 					actorAttackDamage(monster),
@@ -263,12 +316,12 @@ export const resolveMonsterCharge = (
 				],
 			};
 		}
-		coordinate = point;
+		coordinate = anchor;
 	}
 	if (overrun)
 		return finished(line.length < OVERRUN_LIMIT ? "slammed" : "avoided");
 	return finished(
-		line.length === orthogonalDistance(monster.coordinate, intent.target)
+		line.length === bodyDistance(monster, intent.target)
 			? "avoided"
 			: "blocked",
 	);

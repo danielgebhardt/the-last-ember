@@ -2,7 +2,9 @@ import {
 	ARENA_REWARD_TILES,
 	ARENA_SPAWN_ID_BASE,
 	arenaDoorId,
+	arenaDoorLowerId,
 	arenaEntryId,
+	arenaEntryLowerId,
 	arenaFloorFor,
 	arenaGateId,
 	arenaGoldId,
@@ -27,12 +29,29 @@ import { ownedItems } from "../items/OwnedItems";
 import { sameCoordinate } from "./SaveConsistencyHelpers";
 import type { SaveDocument } from "./SaveDocument";
 
-const ARENA_OBJECTS = {
-	door: ARENA_POINTS.entryDoor,
-	"arena-door": ARENA_POINTS.exitDoor,
-	"arena-reward": ARENA_REWARD_TILES.rack,
-	gold: ARENA_REWARD_TILES.gold,
-} as const;
+// The arena's own objects on its floor: both leaves of each doorway, the rack and
+// the gold, each by identity, kind and tile.
+const arenaObjects = (floorNumber: number) =>
+	new Map([
+		[arenaEntryId(floorNumber), { kind: "door", tile: ARENA_POINTS.entryDoor }],
+		[
+			arenaEntryLowerId(floorNumber),
+			{ kind: "door", tile: ARENA_POINTS.entryDoorLower },
+		],
+		[
+			arenaDoorId(floorNumber),
+			{ kind: "arena-door", tile: ARENA_POINTS.exitDoor },
+		],
+		[
+			arenaDoorLowerId(floorNumber),
+			{ kind: "arena-door", tile: ARENA_POINTS.exitDoorLower },
+		],
+		[
+			arenaRackId(floorNumber),
+			{ kind: "arena-reward", tile: ARENA_REWARD_TILES.rack },
+		],
+		[arenaGoldId(floorNumber), { kind: "gold", tile: ARENA_REWARD_TILES.gold }],
+	]);
 
 // What a miniboss's hall holds besides the arena itself, each on its fixed tile.
 const hallFeatures = (floorNumber: number, miniboss: MinibossKind) =>
@@ -64,12 +83,12 @@ const HALL_FEATURE_KINDS = ["egg-sac", "phylactery"];
 export const hasConsistentArenas = ({ state }: SaveDocument): boolean => {
 	const { run } = state;
 	const arenas = state.arenas ?? [];
-	const arenaObjects = state.objects.filter(
+	const barriers = state.objects.filter(
 		(o) => o.kind === "arena-gate" || o.kind === "arena-door",
 	);
 	if (!arenas.length)
 		return (
-			!arenaObjects.length &&
+			!barriers.length &&
 			!state.objects.some((o) => HALL_FEATURE_KINDS.includes(o.kind)) &&
 			!state.monsters.some(
 				(m) => isMinibossKind(m.kind) || m.kind === "spiderling",
@@ -89,30 +108,37 @@ export const hasConsistentArenas = ({ state }: SaveDocument): boolean => {
 		!isArenaTerrain(floor.terrain)
 	)
 		return false;
-	// The gate, both doors and the gold, each where the arena put it.
+	// The gate, both doorways and the gold, each where the arena put it.
 	const features = hallFeatures(floorNumber, arena.miniboss);
+	const own = arenaObjects(floorNumber);
 	const gate = state.objects.find((o) => o.id === arenaGateId(floorNumber));
 	const exit = state.objects.find((o) => o.id === arenaDoorId(floorNumber));
+	const leafState = (id: string) =>
+		state.objects.find((o) => o.id === id)?.activated;
 	if (
-		arenaObjects.some(
+		barriers.some(
 			(o) =>
-				o.id !== arenaGateId(floorNumber) && o.id !== arenaDoorId(floorNumber),
+				o.id !== arenaGateId(floorNumber) &&
+				o.id !== arenaDoorId(floorNumber) &&
+				o.id !== arenaDoorLowerId(floorNumber),
 		) ||
-		state.objects.some(
-			(o) =>
+		state.objects.some((o) => {
+			const placed = own.get(o.id);
+			return (
 				o.floorNumber === floorNumber &&
 				!(
-					(o.id === arenaEntryId(floorNumber) ||
-						o.id === arenaDoorId(floorNumber) ||
-						o.id === arenaRackId(floorNumber) ||
-						o.id === arenaGoldId(floorNumber)) &&
-					sameCoordinate(
-						o.coordinate,
-						ARENA_OBJECTS[o.kind as keyof typeof ARENA_OBJECTS],
-					)
+					placed &&
+					o.kind === placed.kind &&
+					sameCoordinate(o.coordinate, placed.tile)
 				) &&
-				!features.some((f) => f.id === o.id),
-		) ||
+				!features.some((f) => f.id === o.id)
+			);
+		}) ||
+		// Each doorway's two leaves are always open or shut together.
+		leafState(arenaEntryId(floorNumber)) !==
+			leafState(arenaEntryLowerId(floorNumber)) ||
+		leafState(arenaDoorId(floorNumber)) !==
+			leafState(arenaDoorLowerId(floorNumber)) ||
 		// Like the arena's own objects, each hall feature stands as its kind on its tile;
 		// a phylactery's landed blows stay only while it stands.
 		state.objects.some((o) =>

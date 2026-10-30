@@ -43,7 +43,7 @@ const preparedSave = (difficulty: Difficulty) => {
 				(offset) =>
 					chargeLine(
 						terrain,
-						m.coordinate,
+						m,
 						{
 							row: m.coordinate.row + offset.row,
 							col: m.coordinate.col + offset.col,
@@ -58,9 +58,7 @@ const preparedSave = (difficulty: Difficulty) => {
 			row: actor.coordinate.row + offset.row,
 			col: actor.coordinate.col + offset.col,
 		}))
-		.find(
-			(point) => chargeLine(terrain, actor.coordinate, point, 4).length === 2,
-		);
+		.find((point) => chargeLine(terrain, actor, point, 4).length === 2);
 	if (!target) throw new Error("Expected a fixed charge target");
 	const state = {
 		...fresh,

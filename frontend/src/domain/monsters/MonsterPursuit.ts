@@ -1,8 +1,15 @@
 import type { DungeonRun } from "../dungeon/DungeonRun";
 import type { Coordinate } from "../dungeon/DungeonTypes";
 import { FLOOR } from "../dungeon/Tiles";
-import { hasLineOfSight } from "../dungeon/Visibility";
 import { MONSTER_DEFINITIONS, type Monster } from "./Monster";
+import {
+	bodyDistance,
+	bodyFitsAt,
+	bodyHasLineOfSight,
+	bodySpan,
+	bodyTiles,
+	nearestBodyTile,
+} from "./MonsterFootprint";
 import {
 	coordinateKey,
 	orthogonalDistance,
@@ -18,8 +25,7 @@ export const sensesCure = (
 	rules: Readonly<PursuitRules>,
 ): boolean =>
 	monster.floorNumber === run.activeFloor &&
-	orthogonalDistance(monster.coordinate, run.playerCoordinate) <=
-		(rules.cureSenseRadius ?? -1);
+	bodyDistance(monster, run.playerCoordinate) <= (rules.cureSenseRadius ?? -1);
 
 export const detectsPlayer = (
 	run: DungeonRun,
@@ -27,8 +33,10 @@ export const detectsPlayer = (
 	rules: Readonly<PursuitRules> = PURSUIT_RULES,
 ): boolean => {
 	if (monster.floorNumber !== run.activeFloor) return false;
-	const row = run.playerCoordinate.row - monster.coordinate.row;
-	const col = run.playerCoordinate.col - monster.coordinate.col;
+	// A large body senses from its tile nearest you.
+	const nearest = nearestBodyTile(monster, run.playerCoordinate);
+	const row = run.playerCoordinate.row - nearest.row;
+	const col = run.playerCoordinate.col - nearest.col;
 	// Stealth never hides you from a monster right beside you.
 	const radius = Math.max(
 		1,
@@ -36,9 +44,9 @@ export const detectsPlayer = (
 	);
 	return (
 		row * row + col * col <= radius * radius &&
-		hasLineOfSight(
+		bodyHasLineOfSight(
 			run.floors[run.activeFloor - 1].terrain,
-			monster.coordinate,
+			monster,
 			run.playerCoordinate,
 		)
 	);
@@ -69,8 +77,10 @@ export const selectPursuitStep = (
 			actor.floorNumber === run.activeFloor &&
 			actor.id !== monster.id
 		)
-			blocked.add(coordinateKey(actor.coordinate));
+			for (const tile of bodyTiles(actor)) blocked.add(coordinateKey(tile));
 	}
+	if (bodySpan(monster) > 1)
+		return selectBodyStep(run, monster, blocked, target, exactTarget);
 	// Every pursuit path must end beside the player. If those tiles are all
 	// blocked, avoid searching the entire floor for a destination that cannot exist.
 	if (
@@ -108,6 +118,45 @@ export const selectPursuitStep = (
 				terrain[next.row]?.[next.col] !== FLOOR
 			)
 				continue;
+			visited.add(key);
+			queue.push({ coordinate: next, firstStep: firstStep ?? next });
+		}
+	}
+	return undefined;
+};
+
+// A large body searches for spots where all of it fits, and arrives once any
+// tile of it is beside the target (or on it, for an exact target).
+const selectBodyStep = (
+	run: DungeonRun,
+	monster: Monster,
+	blocked: ReadonlySet<string>,
+	target: Coordinate,
+	exactTarget: boolean,
+): Coordinate | undefined => {
+	const terrain = run.floors[run.activeFloor - 1].terrain;
+	const fits = (anchor: Coordinate) =>
+		bodyFitsAt(terrain, monster, anchor, (tile) =>
+			blocked.has(coordinateKey(tile)),
+		);
+	const visited = new Set([coordinateKey(monster.coordinate)]);
+	const queue: { coordinate: Coordinate; firstStep?: Coordinate }[] = [
+		{ coordinate: monster.coordinate },
+	];
+	for (let cursor = 0; cursor < queue.length; cursor++) {
+		const { coordinate, firstStep } = queue[cursor];
+		if (
+			bodyDistance({ kind: monster.kind, coordinate }, target) ===
+			(exactTarget ? 0 : 1)
+		)
+			return firstStep;
+		for (const offset of offsets) {
+			const next = {
+				row: coordinate.row + offset.row,
+				col: coordinate.col + offset.col,
+			};
+			const key = coordinateKey(next);
+			if (visited.has(key) || !fits(next)) continue;
 			visited.add(key);
 			queue.push({ coordinate: next, firstStep: firstStep ?? next });
 		}

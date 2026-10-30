@@ -47,6 +47,7 @@ import {
 	sellLowerEquipment,
 } from "../merchant/MerchantTrades";
 import type { Monster } from "../monsters/Monster.ts";
+import { occupies } from "../monsters/MonsterFootprint";
 import { actorMaximumHealth } from "../monsters/MonsterStats";
 import {
 	type MonsterPhaseScope,
@@ -653,8 +654,8 @@ const resolveCommittedEffect = (
 			monster.floorNumber === state.run.activeFloor &&
 			monster.floorNumber === run.activeFloor &&
 			monster.health > 0 &&
-			monster.coordinate.row === run.playerCoordinate.row &&
-			monster.coordinate.col === run.playerCoordinate.col,
+			// Stepping into any tile of a large body attacks it.
+			occupies(monster, run.playerCoordinate),
 	);
 	return monster
 		? resolveAttack(state, monster, rollSource)

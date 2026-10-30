@@ -1,7 +1,12 @@
+import type { Coordinate } from "../dungeon/DungeonTypes";
 import { FLOOR } from "../dungeon/Tiles";
 import { hasLineOfSight } from "../dungeon/Visibility";
 import type { Monster } from "../monsters/Monster";
-import { orthogonalDistance } from "../monsters/MonsterLocations";
+import {
+	bodyDistance,
+	bodyTiles,
+	nearestBodyTile,
+} from "../monsters/MonsterFootprint";
 import { navigationRun } from "../objects/NavigationTerrain";
 import { appendActivityEvents } from "./ActivityHistory";
 import { castAreaSpell } from "./AreaSpells";
@@ -33,11 +38,17 @@ export const isSpellTarget = (
 		monster.health > 0 &&
 		monster.floorNumber === state.run.activeFloor &&
 		terrain[monster.coordinate.row]?.[monster.coordinate.col] === FLOOR &&
-		orthogonalDistance(state.run.playerCoordinate, monster.coordinate) <=
-			definition.range &&
-		hasLineOfSight(terrain, state.run.playerCoordinate, monster.coordinate)
+		// A large body is in reach when any of it is in range and in sight.
+		bodyDistance(monster, state.run.playerCoordinate) <= definition.range &&
+		bodyTiles(monster).some((tile) =>
+			hasLineOfSight(terrain, state.run.playerCoordinate, tile),
+		)
 	);
 };
+// Where a blast aimed at a monster bursts: on it, or on the tile of a large body
+// nearest you.
+export const spellCenter = (state: GameState, target: Monster): Coordinate =>
+	nearestBodyTile(target, state.run.playerCoordinate);
 // Apply spell effects on the turn already committed by action resolution.
 export const castSpell = (
 	state: GameState,
@@ -109,7 +120,12 @@ export const castSpell = (
 				"Choose a living monster within range and clear line of sight on this floor.",
 		};
 	if ("radius" in definition && definition.radius !== undefined)
-		return castAreaSpell(state, action.spell, target.coordinate, rolls);
+		return castAreaSpell(
+			state,
+			action.spell,
+			spellCenter(state, target),
+			rolls,
+		);
 	if (definition.effect === "reposition")
 		return repositionSpell(
 			state,

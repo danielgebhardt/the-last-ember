@@ -5,6 +5,12 @@ import { FLOOR } from "../dungeon/Tiles";
 import { itemsAtPlayer } from "../items/FloorItems";
 import type { Monster } from "../monsters/Monster";
 import {
+	bodyDistance,
+	bodyFitsAt,
+	bodyTiles,
+	occupies,
+} from "../monsters/MonsterFootprint";
+import {
 	coordinateKey,
 	orthogonalDistance,
 	protectedFloorLocations,
@@ -32,7 +38,8 @@ export const repositionSpell = (
 		protectedTiles.add(coordinateKey(state.quest.entrance));
 	for (const monster of state.monsters)
 		if (monster.floorNumber === state.run.activeFloor && monster.health > 0)
-			protectedTiles.add(coordinateKey(monster.coordinate));
+			for (const tile of bodyTiles(monster))
+				protectedTiles.add(coordinateKey(tile));
 	const terrain =
 		navigationRun(state).floors[state.run.activeFloor - 1].terrain;
 	for (const key of sealedTiles(
@@ -44,20 +51,28 @@ export const repositionSpell = (
 	for (let row = 0; row < terrain.length; row++)
 		for (let col = 0; col < terrain[row].length; col++) {
 			const coordinate = { row, col };
-			if (
-				terrain[row][col] !== FLOOR ||
-				protectedTiles.has(coordinateKey(coordinate))
-			)
-				continue;
-			const distance = orthogonalDistance(
-				state.run.playerCoordinate,
-				coordinate,
-			);
+			// A large body lands only where all of it fits; it may overlap where it stood.
 			if (
 				target
-					? distance >
-						orthogonalDistance(state.run.playerCoordinate, target.coordinate)
-					: distance <= range
+					? !bodyFitsAt(
+							terrain,
+							target,
+							coordinate,
+							(tile) =>
+								protectedTiles.has(coordinateKey(tile)) &&
+								!occupies(target, tile),
+						)
+					: terrain[row][col] !== FLOOR ||
+						protectedTiles.has(coordinateKey(coordinate))
+			)
+				continue;
+			if (
+				target
+					? bodyDistance(
+							{ kind: target.kind, coordinate },
+							state.run.playerCoordinate,
+						) > bodyDistance(target, state.run.playerCoordinate)
+					: orthogonalDistance(state.run.playerCoordinate, coordinate) <= range
 			)
 				candidates.push(coordinate);
 		}

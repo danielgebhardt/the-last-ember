@@ -18,6 +18,7 @@ import {
 	arenaOn,
 	arenaRewardId,
 	arenaRewardKinds,
+	doorwayLeaves,
 	minibossId,
 	standingArena,
 } from "./Arena";
@@ -147,7 +148,9 @@ export const resolveArenas = (state: GameState): GameState => {
 				"arena-cleared",
 			),
 			objects: next.objects.map((o) =>
-				o.id === arenaDoorId(arena.floorNumber) ? { ...o, activated: true } : o,
+				doorwayLeaves(arenaDoorId(arena.floorNumber)).includes(o.id)
+					? { ...o, activated: true }
+					: o,
 			),
 			player: { ...next.player, health: next.player.maxHealth },
 			mana: maxMana,

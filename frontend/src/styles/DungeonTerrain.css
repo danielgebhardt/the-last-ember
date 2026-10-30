@@ -96,11 +96,24 @@
 	background-image: url("../assets/terrain/floor-dark-4.svg");
 }
 
-/* Keep targeting controls above the terrain */
+/* Keep targeting controls above the terrain and over a 2×2 monster's drawing */
 .dungeon-stone-wall > button,
 .dungeon-flagstone > button {
 	position: relative;
-	z-index: 1;
+	z-index: 3;
+}
+
+/* 2×2 monsters, drawn once across their tiles (see LargeMonsterLayer): over the
+   terrain, under the targeting rings, threat markers and combat feedback. */
+.large-monster-layer {
+	pointer-events: none;
+	position: absolute;
+	inset: 0;
+	z-index: 2;
+}
+
+.large-monster {
+	position: absolute;
 }
 
 /* High-contrast system settings */

@@ -213,7 +213,7 @@ it("retains completed bulk sales in a save and preserves the next ordinary turn"
 	);
 	const parsed = parseSave(serializeSave(document));
 	if (!parsed.ok) throw new Error(parsed.error);
-	expect(parsed.value.version).toBe(33);
+	expect(parsed.value.version).toBe(34);
 	const loaded = restoreSave(parsed.value).state;
 	expect(loaded).toEqual(state);
 	expect(resolvePlayerAction(loaded, { type: "wait" })).toEqual(

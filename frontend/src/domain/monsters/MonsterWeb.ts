@@ -1,5 +1,6 @@
 import type { GameState } from "../game/GameState";
 import { MONSTER_DEFINITIONS, type Monster } from "./Monster";
+import { bodyDistance } from "./MonsterFootprint";
 import { orthogonalDistance } from "./MonsterLocations";
 import {
 	resolvedTelegraph,
@@ -36,7 +37,7 @@ export const resolveMonsterWeb = (
 		monster.intent.type !== "idle" ||
 		!detected ||
 		!telegraphReady(monster, "web", turn) ||
-		orthogonalDistance(monster.coordinate, player) > web.range
+		bodyDistance(monster, player) > web.range
 	)
 		return undefined;
 	const target = { ...player };
