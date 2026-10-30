@@ -13,6 +13,7 @@ import {
 import {
 	bodyDistance,
 	bodyHasLineOfSight,
+	bodySpan,
 	bodyTiles,
 	occupies,
 } from "../monsters/MonsterFootprint";
@@ -34,6 +35,7 @@ import {
 	MIRROR_REFLECTION_ID,
 	mirrorHostileKind,
 } from "../objects/MirrorOfShadows";
+import { bodyObstacles } from "../objects/NavigationTerrain";
 import { WELL_SPAWN_ID, wellHostileKind } from "../objects/WishingWell";
 import {
 	savedDifficulty,
@@ -206,6 +208,13 @@ export const hasConsistentActors = (document: SaveDocument): boolean => {
 						) !== undefined && turn <= state.turn,
 				) &&
 				bodyTiles(entry).every((tile) => walkable(entry.floorNumber, tile)) &&
+				// A 2×2 body never stands on the hall features it walks around.
+				(bodySpan(entry) === 1 ||
+					!bodyTiles(entry).some((tile) =>
+						bodyObstacles(state.objects, entry.floorNumber).includes(
+							`${tile.row}:${tile.col}`,
+						),
+					)) &&
 				!protectedLocations
 					.get(entry.floorNumber)
 					?.some((location) => occupies(entry, location)) &&

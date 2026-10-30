@@ -1,6 +1,6 @@
 import type { DungeonRun } from "../dungeon/DungeonRun";
 import type { Monster } from "./Monster";
-import { bodyDistance, bodyFitsAt, bodyTiles } from "./MonsterFootprint";
+import { bodyDistance, bodyFitsOn, bodyTiles } from "./MonsterFootprint";
 import { protectedFloorLocations } from "./MonsterLocations";
 
 // Cardinal tie order matches pursuit. Fear cannot cross stairs, allies or the player.
@@ -21,7 +21,7 @@ export const selectRetreatStep = (
 			)
 			.flatMap((actor) => bodyTiles(actor)),
 	];
-	const terrain = run.floors[monster.floorNumber - 1].terrain;
+	const floor = run.floors[monster.floorNumber - 1];
 	// A large body flees as a whole: all of it must fit, and its nearest tile
 	// must end farther from you.
 	const distance = bodyDistance(monster, run.playerCoordinate);
@@ -37,7 +37,7 @@ export const selectRetreatStep = (
 		}))
 		.find(
 			(point) =>
-				bodyFitsAt(terrain, monster, point, (tile) =>
+				bodyFitsOn(floor, monster, point, (tile) =>
 					blocked.some(
 						(other) => other.row === tile.row && other.col === tile.col,
 					),

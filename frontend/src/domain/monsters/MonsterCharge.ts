@@ -15,7 +15,7 @@ import { navigationRun } from "../objects/NavigationTerrain";
 import { MONSTER_DEFINITIONS, type Monster } from "./Monster";
 import {
 	bodyDistance,
-	bodyFitsAt,
+	bodyFitsOn,
 	bodySpan,
 	bodyTiles,
 	bodyTilesAt,
@@ -133,7 +133,7 @@ export const selectChargeApproach = (
 			const body = { kind: monster.kind, coordinate: step };
 			const distance = bodyDistance(body, target);
 			return (
-				bodyFitsAt(terrain, monster, step, (tile) =>
+				bodyFitsOn(run.floors[run.activeFloor - 1], monster, step, (tile) =>
 					blocked.has(coordinateKey(tile)),
 				) &&
 				distance >= 2 &&

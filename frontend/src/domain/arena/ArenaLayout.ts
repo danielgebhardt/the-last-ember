@@ -2,7 +2,8 @@ import type { Coordinate } from "../dungeon/DungeonTypes";
 
 // The arena is drawn by hand and identical in every run: an antechamber, the hall
 // with its pillars, and the reward room, joined by two doorways. Each doorway is two
-// tiles tall, so a 2×2 miniboss can pass through it.
+// tiles tall, so a 2×2 miniboss can pass through it, and the hall's central
+// column is two tiles wide, so it shields you from a 2×2 body as the pillars do.
 export const ARENA_LAYOUT = [
 	"###########################################",
 	"##########.......................##########",
@@ -11,9 +12,9 @@ export const ARENA_LAYOUT = [
 	"##########....##...........##....##########",
 	"##########....##...........##....##########",
 	"##.......#.......................#.......##",
-	"##.......#...........#...........#.......##",
-	"##...................#...................##",
-	"##...................#...................##",
+	"##.......#...........##..........#.......##",
+	"##...................##..................##",
+	"##...................##..................##",
 	"##.......#.......................#.......##",
 	"##########....##...........##....##########",
 	"##########....##...........##....##########",

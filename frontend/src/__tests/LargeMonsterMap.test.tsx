@@ -73,18 +73,41 @@ describe("2×2 monsters on the map", () => {
 		expect(cast).toHaveBeenCalledExactlyOnceWith(lich.id);
 	});
 
-	it("stays drawn while any of its tiles is in view, and hides once none is", () => {
+	it("shows only the parts of it over tiles in view, and hides once none is", () => {
 		const seen = (tiles: readonly string[]) =>
 			terrain.map((row, r) => row.map((_, c) => tiles.includes(`${r}:${c}`)));
+		const drawings = (container: HTMLElement) => [
+			...container.querySelectorAll<HTMLElement>(
+				'[data-testid="large-monster"]',
+			),
+		];
 		const { container, rerender } = render(
-			<DungeonLayout {...props} visible={seen(["2:3", "4:1"])} />,
+			<DungeonLayout
+				{...props}
+				visible={seen(["1:2", "1:3", "2:2", "2:3", "4:1"])}
+			/>,
 		);
-		expect(
-			container.querySelectorAll('[data-testid="large-monster"]'),
-		).toHaveLength(1);
+		// In full view: one drawing across its four tiles.
+		expect(drawings(container)).toHaveLength(1);
+		// Only its lower-right tile in view: a one-tile window onto that part.
+		rerender(<DungeonLayout {...props} visible={seen(["2:3", "4:1"])} />);
+		const [window] = drawings(container);
+		expect(drawings(container)).toHaveLength(1);
+		expect(window).toHaveStyle({
+			top: "calc(var(--dungeon-tile-size) * 2)",
+			left: "calc(var(--dungeon-tile-size) * 3)",
+			width: "calc(var(--dungeon-tile-size) * 1)",
+		});
+		expect(window.firstElementChild).toHaveStyle({
+			top: "calc(var(--dungeon-tile-size) * -1)",
+			left: "calc(var(--dungeon-tile-size) * -1)",
+		});
+		// Two tiles in view: two windows.
+		rerender(
+			<DungeonLayout {...props} visible={seen(["1:2", "2:2", "4:1"])} />,
+		);
+		expect(drawings(container)).toHaveLength(2);
 		rerender(<DungeonLayout {...props} visible={seen(["4:1"])} />);
-		expect(
-			container.querySelectorAll('[data-testid="large-monster"]'),
-		).toHaveLength(0);
+		expect(drawings(container)).toHaveLength(0);
 	});
 });

@@ -9,6 +9,9 @@ export type DungeonFloor = GeneratedDungeon & {
 	floorNumber: number;
 	upStair?: StairLink;
 	downStair?: StairLink;
+	// Derived for movement only, never saved: tiles ("row:col") a 2×2 body may not
+	// stand on, so it never hides an object you need to see.
+	bodyObstacles?: readonly string[];
 };
 
 export type DungeonRun = {

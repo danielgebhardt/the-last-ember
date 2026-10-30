@@ -114,6 +114,12 @@
 
 .large-monster {
 	position: absolute;
+	overflow: hidden;
+}
+
+/* A window onto part of the drawing shifts it so that part lines up. */
+.large-monster-offset {
+	position: absolute;
 }
 
 /* High-contrast system settings */

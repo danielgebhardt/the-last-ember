@@ -7,6 +7,7 @@ import type { Monster } from "../monsters/Monster";
 import {
 	bodyDistance,
 	bodyFitsAt,
+	bodySpan,
 	bodyTiles,
 	occupies,
 } from "../monsters/MonsterFootprint";
@@ -15,7 +16,7 @@ import {
 	orthogonalDistance,
 	protectedFloorLocations,
 } from "../monsters/MonsterLocations";
-import { navigationRun } from "../objects/NavigationTerrain";
+import { bodyObstacles, navigationRun } from "../objects/NavigationTerrain";
 import { sealedTiles } from "../objects/OptionalEliteRooms";
 import { appendActivityEvents } from "./ActivityHistory";
 import type { GameState } from "./GameState";
@@ -47,6 +48,10 @@ export const repositionSpell = (
 		state.objects,
 	))
 		protectedTiles.add(key);
+	// A 2×2 body never lands on the hall features it walks around.
+	const obstacles = new Set(
+		bodyObstacles(state.objects, state.run.activeFloor),
+	);
 	const candidates: Coordinate[] = [];
 	for (let row = 0; row < terrain.length; row++)
 		for (let col = 0; col < terrain[row].length; col++) {
@@ -59,8 +64,9 @@ export const repositionSpell = (
 							target,
 							coordinate,
 							(tile) =>
-								protectedTiles.has(coordinateKey(tile)) &&
-								!occupies(target, tile),
+								(protectedTiles.has(coordinateKey(tile)) &&
+									!occupies(target, tile)) ||
+								(bodySpan(target) > 1 && obstacles.has(coordinateKey(tile))),
 						)
 					: terrain[row][col] !== FLOOR ||
 						protectedTiles.has(coordinateKey(coordinate))

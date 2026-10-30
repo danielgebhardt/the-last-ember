@@ -14,11 +14,13 @@ import {
 	arenaRewardKinds,
 	arenaSpawnId,
 	BONE_PILE_TILES,
+	EGG_SAC_TILES,
 	eggSacId,
 	isArenaTerrain,
 	MINIBOSS_KINDS,
 	type MinibossKind,
 	minibossId,
+	PHYLACTERY_TILE,
 	phylacteryId,
 	selectMiniboss,
 } from "../domain/arena/Arena";
@@ -1361,4 +1363,66 @@ describe("2×2 miniboss abilities", () => {
 			}
 		},
 	);
+});
+
+describe("the arena hall around a 2×2 miniboss", () => {
+	const covers = (state: GameState, point: { row: number; col: number }) =>
+		state.monsters.some(
+			(m) => m.id === minibossId(6) && m.health > 0 && occupies(m, point),
+		);
+	const hunting = (state: GameState) => ({
+		...state,
+		monsters: state.monsters.map((m) =>
+			m.id === minibossId(6)
+				? {
+						...m,
+						awareness: {
+							type: "pursuing" as const,
+							target: state.run.playerCoordinate,
+							remaining: 20,
+							blocked: 0,
+						},
+					}
+				: m,
+		),
+	});
+
+	it("has a central column two tiles wide, like cover from the pillars", () => {
+		for (const row of [7, 8, 9])
+			expect(ARENA_LAYOUT[row].slice(21, 23)).toBe("##");
+		expect(ARENA_LAYOUT[6].slice(21, 23)).toBe("..");
+		expect(ARENA_LAYOUT[10].slice(21, 23)).toBe("..");
+	});
+
+	it("keeps the Bone Lich off his phylactery, so it stays in sight", () => {
+		// The phylactery stands between him and you; he must go around it.
+		let state: GameState = hunting(
+			inHall("bone-lich", { row: 8, col: 32 }, { row: 7, col: 28 }),
+		);
+		for (let turn = 0; turn < 10 && state.player.health > 0; turn++) {
+			state = act(state).state;
+			expect(covers(state, PHYLACTERY_TILE)).toBe(false);
+			expect(save(state).ok).toBe(true);
+		}
+	});
+
+	it("keeps the Broodmother off her egg sacs", () => {
+		let state: GameState = hunting(
+			inHall("broodmother", { row: 4, col: 12 }, { row: 3, col: 18 }),
+		);
+		for (let turn = 0; turn < 10 && state.player.health > 0; turn++) {
+			state = act(state).state;
+			for (const tile of EGG_SAC_TILES) expect(covers(state, tile)).toBe(false);
+		}
+	});
+
+	it("can't be saved with a miniboss over a hall feature", () => {
+		// His body would cover the phylactery at row 8, column 31.
+		expect(
+			save(inHall("bone-lich", { row: 2, col: 12 }, { row: 8, col: 30 })).ok,
+		).toBe(false);
+		expect(
+			save(inHall("bone-lich", { row: 2, col: 12 }, { row: 8, col: 28 })).ok,
+		).toBe(true);
+	});
 });

@@ -1,3 +1,4 @@
+import type { DungeonFloor } from "../dungeon/DungeonRun";
 import type { Coordinate, Dungeon } from "../dungeon/DungeonTypes";
 import { FLOOR } from "../dungeon/Tiles";
 import { hasLineOfSight } from "../dungeon/Visibility";
@@ -99,4 +100,24 @@ export const bodyRing = (
 		{ row: row + span, col: col + span },
 		{ row: row + span, col: col - 1 },
 	];
+};
+
+// Whether a body fits on a navigation floor: open, unblocked, and for a 2×2 body
+// clear of the objects it walks around.
+export const bodyFitsOn = (
+	floor: Pick<DungeonFloor, "terrain" | "bodyObstacles">,
+	monster: Pick<Monster, "kind">,
+	anchor: Coordinate,
+	blocked: (point: Coordinate) => boolean = () => false,
+): boolean => {
+	const obstacles =
+		bodySpan(monster) > 1 && floor.bodyObstacles?.length
+			? new Set(floor.bodyObstacles)
+			: undefined;
+	return bodyFitsAt(
+		floor.terrain,
+		monster,
+		anchor,
+		(point) => blocked(point) || !!obstacles?.has(`${point.row}:${point.col}`),
+	);
 };

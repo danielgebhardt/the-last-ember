@@ -4,7 +4,7 @@ import { FLOOR } from "../dungeon/Tiles";
 import { MONSTER_DEFINITIONS, type Monster } from "./Monster";
 import {
 	bodyDistance,
-	bodyFitsAt,
+	bodyFitsOn,
 	bodyHasLineOfSight,
 	bodySpan,
 	bodyTiles,
@@ -134,9 +134,9 @@ const selectBodyStep = (
 	target: Coordinate,
 	exactTarget: boolean,
 ): Coordinate | undefined => {
-	const terrain = run.floors[run.activeFloor - 1].terrain;
+	const floor = run.floors[run.activeFloor - 1];
 	const fits = (anchor: Coordinate) =>
-		bodyFitsAt(terrain, monster, anchor, (tile) =>
+		bodyFitsOn(floor, monster, anchor, (tile) =>
 			blocked.has(coordinateKey(tile)),
 		);
 	const visited = new Set([coordinateKey(monster.coordinate)]);
