@@ -1,236 +1,200 @@
-import { Rat } from "lucide-react";
 import { MONSTER_DEFINITIONS } from "../../domain/monsters/Monster";
 import type { MonsterKind } from "../../domain/monsters/Monster.ts";
-import type { RegisteredIcon } from "../icons/FullColorIcon";
-import BoneLichIcon from "./BoneLichIcon";
-import BroodmotherIcon from "./BroodmotherIcon";
-import BruteIcon from "./BruteIcon";
-import ChampionIcon from "./ChampionIcon";
-import ChargerIcon from "./ChargerIcon";
-import CultistIcon from "./CultistIcon";
-import EmberWardenIcon from "./EmberWardenIcon";
-import FrostGiantIcon from "./FrostGiantIcon";
-import GoblinArcherIcon from "./GoblinArcherIcon";
-import GoblinIcon from "./GoblinIcon.tsx";
-import GolemIcon from "./GolemIcon";
-import HexweaverIcon from "./HexweaverIcon";
-import IronJuggernautIcon from "./IronJuggernautIcon";
-import KoboldSlingerIcon from "./KoboldSlingerIcon";
-import ManaLeechIcon from "./ManaLeechIcon";
-import NecromancerIcon from "./NecromancerIcon";
-import OgreIcon from "./OgreIcon";
-import OrcIcon from "./OrcIcon";
-import PlagueRatIcon from "./PlagueRatIcon";
-import PyreLordIcon from "./PyreLordIcon";
-import ReflectionIcon from "./ReflectionIcon";
-import SalamanderIcon from "./SalamanderIcon";
-import SentryIcon from "./SentryIcon";
-import ShadowStalkerIcon from "./ShadowStalkerIcon";
-import SkeletonIcon from "./SkeletonIcon";
-import SoulWraithIcon from "./SoulWraithIcon";
-import SpiderIcon from "./SpiderIcon";
-import SpiderlingIcon from "./SpiderlingIcon";
-import TreasureMimicIcon from "./TreasureMimicIcon";
-import TreasureThiefIcon from "./TreasureThiefIcon";
-import TrollIcon from "./TrollIcon";
-import WardenIcon from "./WardenIcon";
-import WolfIcon from "./WolfIcon";
-import WraithIcon from "./WraithIcon";
-import WyvernIcon from "./WyvernIcon";
-import ZombieIcon from "./ZombieIcon";
+import { type FullColorIcon, fullColor } from "../icons/FullColorIcon";
+import { AlarmSentryDark, AlarmSentryLight } from "./art/AlarmSentryArt";
+import { BoneLichDark, BoneLichLight } from "./art/BoneLichArt";
+import { BroodmotherDark, BroodmotherLight } from "./art/BroodmotherArt";
+import { CultistDark, CultistLight } from "./art/CultistArt";
+import { DemonWardenDark, DemonWardenLight } from "./art/DemonWardenArt";
+import { DungeonBruteDark, DungeonBruteLight } from "./art/DungeonBruteArt";
+import { EmberWardenDark, EmberWardenLight } from "./art/EmberWardenArt";
+import { FrostGiantDark, FrostGiantLight } from "./art/FrostGiantArt";
+import { GiantRatDark, GiantRatLight } from "./art/GiantRatArt";
+import { GiantSpiderDark, GiantSpiderLight } from "./art/GiantSpiderArt";
+import { GoblinArcherDark, GoblinArcherLight } from "./art/GoblinArcherArt";
+import { GoblinDark, GoblinLight } from "./art/GoblinArt";
+import { HexweaverDark, HexweaverLight } from "./art/HexweaverArt";
+import { HornedChargerDark, HornedChargerLight } from "./art/HornedChargerArt";
+import { IronChampionDark, IronChampionLight } from "./art/IronChampionArt";
+import {
+	IronJuggernautDark,
+	IronJuggernautLight,
+} from "./art/IronJuggernautArt";
+import { KoboldSlingerDark, KoboldSlingerLight } from "./art/KoboldSlingerArt";
+import { ManaLeechDark, ManaLeechLight } from "./art/ManaLeechArt";
+import { NecromancerDark, NecromancerLight } from "./art/NecromancerArt";
+import { OgreDark, OgreLight } from "./art/OgreArt";
+import { OrcDark, OrcLight } from "./art/OrcArt";
+import { PlagueRatDark, PlagueRatLight } from "./art/PlagueRatArt";
+import { PyreLordDark, PyreLordLight } from "./art/PyreLordArt";
+import { ReflectionDark, ReflectionLight } from "./art/ReflectionArt";
+import { SalamanderDark, SalamanderLight } from "./art/SalamanderArt";
+import { ShadowStalkerDark, ShadowStalkerLight } from "./art/ShadowStalkerArt";
+import { SkeletonDark, SkeletonLight } from "./art/SkeletonArt";
+import { SoulWraithDark, SoulWraithLight } from "./art/SoulWraithArt";
+import { SpiderlingDark, SpiderlingLight } from "./art/SpiderlingArt";
+import { StoneGolemDark, StoneGolemLight } from "./art/StoneGolemArt";
+import { TreasureMimicDark, TreasureMimicLight } from "./art/TreasureMimicArt";
+import { TreasureThiefDark, TreasureThiefLight } from "./art/TreasureThiefArt";
+import { TrollDark, TrollLight } from "./art/TrollArt";
+import { WolfDark, WolfLight } from "./art/WolfArt";
+import { WraithDark, WraithLight } from "./art/WraithArt";
+import { WyvernDark, WyvernLight } from "./art/WyvernArt";
+import { ZombieDark, ZombieLight } from "./art/ZombieArt";
 
 export const MONSTER_VISUALS: Record<
 	MonsterKind,
 	{
-		// Single-colour art tinted by `color`, or full-colour art that ignores it.
-		icon: RegisteredIcon;
-		color: string;
+		icon: FullColorIcon;
 		label: string;
 	}
 > = {
 	"iron-champion": {
-		icon: ChampionIcon,
-		color: "text-monster-rust",
+		icon: fullColor(IronChampionLight, IronChampionDark),
 		label: MONSTER_DEFINITIONS["iron-champion"].name,
 	},
 	"pyre-lord": {
-		icon: PyreLordIcon,
-		color: "text-[#b84d16] dark:text-[#ef7b3d]",
+		icon: fullColor(PyreLordLight, PyreLordDark),
 		label: MONSTER_DEFINITIONS["pyre-lord"].name,
 	},
 	"iron-juggernaut": {
-		icon: IronJuggernautIcon,
-		color: "text-[#8f742e] dark:text-[#dbc27d]",
+		icon: fullColor(IronJuggernautLight, IronJuggernautDark),
 		label: MONSTER_DEFINITIONS["iron-juggernaut"].name,
 	},
 	broodmother: {
-		icon: BroodmotherIcon,
-		color: "text-[#89558b] dark:text-[#bf85bd]",
+		icon: fullColor(BroodmotherLight, BroodmotherDark),
 		label: MONSTER_DEFINITIONS.broodmother.name,
 	},
 	"bone-lich": {
-		icon: BoneLichIcon,
-		color: "text-[#477c85] dark:text-[#b2d1d5]",
+		icon: fullColor(BoneLichLight, BoneLichDark),
 		label: MONSTER_DEFINITIONS["bone-lich"].name,
 	},
 	spiderling: {
-		icon: SpiderlingIcon,
-		color: "text-[#a78bfa] dark:text-[#c4b5fd]",
+		icon: fullColor(SpiderlingLight, SpiderlingDark),
 		label: MONSTER_DEFINITIONS.spiderling.name,
 	},
 	"treasure-mimic": {
-		icon: TreasureMimicIcon,
-		color: "text-[#99622e] dark:text-[#d9a472]",
+		icon: fullColor(TreasureMimicLight, TreasureMimicDark),
 		label: MONSTER_DEFINITIONS["treasure-mimic"].name,
 	},
 	"treasure-thief": {
-		icon: TreasureThiefIcon,
-		color: "text-[#4f7d2e] dark:text-[#8fc86a]",
+		icon: fullColor(TreasureThiefLight, TreasureThiefDark),
 		label: MONSTER_DEFINITIONS["treasure-thief"].name,
 	},
 	"alarm-sentry": {
-		icon: SentryIcon,
-		color: "text-monster-cyan",
+		icon: fullColor(AlarmSentryLight, AlarmSentryDark),
 		label: MONSTER_DEFINITIONS["alarm-sentry"].name,
 	},
 	"horned-charger": {
-		icon: ChargerIcon,
-		color: "text-monster-ember",
+		icon: fullColor(HornedChargerLight, HornedChargerDark),
 		label: MONSTER_DEFINITIONS["horned-charger"].name,
 	},
 	goblin: {
-		icon: GoblinIcon,
-		color: "text-monster-moss",
+		icon: fullColor(GoblinLight, GoblinDark),
 		label: MONSTER_DEFINITIONS.goblin.name,
 	},
 	"goblin-archer": {
-		icon: GoblinArcherIcon,
-		color: "text-monster-moss",
+		icon: fullColor(GoblinArcherLight, GoblinArcherDark),
 		label: MONSTER_DEFINITIONS["goblin-archer"].name,
 	},
 	"dungeon-brute": {
-		icon: BruteIcon,
-		color: "text-monster-rust",
+		icon: fullColor(DungeonBruteLight, DungeonBruteDark),
 		label: MONSTER_DEFINITIONS["dungeon-brute"].name,
 	},
 	"giant-rat": {
-		icon: Rat,
-		color: "text-monster-ember",
+		icon: fullColor(GiantRatLight, GiantRatDark),
 		label: MONSTER_DEFINITIONS["giant-rat"].name,
 	},
 	hexweaver: {
-		icon: HexweaverIcon,
-		color: "text-monster-hex",
+		icon: fullColor(HexweaverLight, HexweaverDark),
 		label: MONSTER_DEFINITIONS.hexweaver.name,
 	},
 	"shadow-stalker": {
-		icon: ShadowStalkerIcon,
-		color: "text-monster-shadow",
+		icon: fullColor(ShadowStalkerLight, ShadowStalkerDark),
 		label: MONSTER_DEFINITIONS["shadow-stalker"].name,
 	},
 	"mana-leech": {
-		icon: ManaLeechIcon,
-		color: "text-monster-azure",
+		icon: fullColor(ManaLeechLight, ManaLeechDark),
 		label: MONSTER_DEFINITIONS["mana-leech"].name,
 	},
 	"plague-rat": {
-		icon: PlagueRatIcon,
-		color: "text-monster-blight",
+		icon: fullColor(PlagueRatLight, PlagueRatDark),
 		label: MONSTER_DEFINITIONS["plague-rat"].name,
 	},
 	orc: {
-		icon: OrcIcon,
-		color: "text-monster-ochre",
+		icon: fullColor(OrcLight, OrcDark),
 		label: MONSTER_DEFINITIONS.orc.name,
 	},
 	skeleton: {
-		icon: SkeletonIcon,
-		color: "text-monster-bone",
+		icon: fullColor(SkeletonLight, SkeletonDark),
 		label: MONSTER_DEFINITIONS.skeleton.name,
 	},
 	zombie: {
-		icon: ZombieIcon,
-		color: "text-monster-teal",
+		icon: fullColor(ZombieLight, ZombieDark),
 		label: MONSTER_DEFINITIONS.zombie.name,
 	},
 	wolf: {
-		icon: WolfIcon,
-		color: "text-monster-bone",
+		icon: fullColor(WolfLight, WolfDark),
 		label: MONSTER_DEFINITIONS.wolf.name,
 	},
 	"kobold-slinger": {
-		icon: KoboldSlingerIcon,
-		color: "text-monster-cyan",
+		icon: fullColor(KoboldSlingerLight, KoboldSlingerDark),
 		label: MONSTER_DEFINITIONS["kobold-slinger"].name,
 	},
 	spider: {
-		icon: SpiderIcon,
-		color: "text-monster-rose",
+		icon: fullColor(GiantSpiderLight, GiantSpiderDark),
 		label: MONSTER_DEFINITIONS.spider.name,
 	},
 	ogre: {
-		icon: OgreIcon,
-		color: "text-monster-rust",
+		icon: fullColor(OgreLight, OgreDark),
 		label: MONSTER_DEFINITIONS.ogre.name,
 	},
 	troll: {
-		icon: TrollIcon,
-		color: "text-monster-moss",
+		icon: fullColor(TrollLight, TrollDark),
 		label: MONSTER_DEFINITIONS.troll.name,
 	},
 	cultist: {
-		icon: CultistIcon,
-		color: "text-monster-violet",
+		icon: fullColor(CultistLight, CultistDark),
 		label: MONSTER_DEFINITIONS.cultist.name,
 	},
 	"stone-golem": {
-		icon: GolemIcon,
-		color: "text-monster-rust",
+		icon: fullColor(StoneGolemLight, StoneGolemDark),
 		label: MONSTER_DEFINITIONS["stone-golem"].name,
 	},
 	wraith: {
-		icon: WraithIcon,
-		color: "text-monster-spectral",
+		icon: fullColor(WraithLight, WraithDark),
 		label: MONSTER_DEFINITIONS.wraith.name,
 	},
 	wyvern: {
-		icon: WyvernIcon,
-		color: "text-monster-violet",
+		icon: fullColor(WyvernLight, WyvernDark),
 		label: MONSTER_DEFINITIONS.wyvern.name,
 	},
 	salamander: {
-		icon: SalamanderIcon,
-		color: "text-monster-ember",
+		icon: fullColor(SalamanderLight, SalamanderDark),
 		label: MONSTER_DEFINITIONS.salamander.name,
 	},
 	"frost-giant": {
-		icon: FrostGiantIcon,
-		color: "text-monster-cyan",
+		icon: fullColor(FrostGiantLight, FrostGiantDark),
 		label: MONSTER_DEFINITIONS["frost-giant"].name,
 	},
 	"ember-warden": {
-		icon: EmberWardenIcon,
-		color: "text-item-gear",
+		icon: fullColor(EmberWardenLight, EmberWardenDark),
 		label: MONSTER_DEFINITIONS["ember-warden"].name,
 	},
 	reflection: {
-		icon: ReflectionIcon,
-		color: "text-monster-shadow",
+		icon: fullColor(ReflectionLight, ReflectionDark),
 		label: MONSTER_DEFINITIONS.reflection.name,
 	},
 	"soul-wraith": {
-		icon: SoulWraithIcon,
-		color: "text-monster-soul",
+		icon: fullColor(SoulWraithLight, SoulWraithDark),
 		label: MONSTER_DEFINITIONS["soul-wraith"].name,
 	},
 	necromancer: {
-		icon: NecromancerIcon,
-		color: "text-monster-violet",
+		icon: fullColor(NecromancerLight, NecromancerDark),
 		label: MONSTER_DEFINITIONS.necromancer.name,
 	},
 	"demon-warden": {
-		icon: WardenIcon,
-		color: "text-monster-rose",
+		icon: fullColor(DemonWardenLight, DemonWardenDark),
 		label: MONSTER_DEFINITIONS["demon-warden"].name,
 	},
 };

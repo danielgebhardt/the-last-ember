@@ -1,0 +1,147 @@
+import type { FullColorArtProps } from "../../icons/FullColorIcon";
+
+export const BroodmotherLight = (props: FullColorArtProps) => (
+	<svg
+		viewBox="0 0 48 48"
+		strokeLinecap="round"
+		strokeLinejoin="round"
+		aria-hidden="true"
+		{...props}
+	>
+		<path
+			d="M18 18 10 10 3 17M17 25 7 24 2 36M19 32 10 38 8 44M30 18 38 10 45 17M31 25 41 24 46 36M29 32 38 38 40 44"
+			fill="none"
+			stroke="#a83e91"
+			strokeWidth="3.4"
+		/>
+		<path
+			d="M16 15 17 8 23 13 27 6 32 15"
+			fill="#a83e91"
+			stroke="#a83e91"
+			strokeWidth="1.6"
+		/>
+		<ellipse
+			cx="24"
+			cy="31"
+			rx="10"
+			ry="13"
+			fill="#e2a4d6"
+			stroke="#a83e91"
+			strokeWidth="2"
+		/>
+		<circle cx="24" cy="18" r="7" fill="#a83e91" />
+		<circle
+			cx="20"
+			cy="27"
+			r="2.8"
+			fill="#a83e91"
+			stroke="#f5f5ef"
+			strokeWidth=".8"
+		/>
+		<circle
+			cx="27"
+			cy="27"
+			r="2.8"
+			fill="#a83e91"
+			stroke="#f5f5ef"
+			strokeWidth=".8"
+		/>
+		<circle
+			cx="18"
+			cy="34"
+			r="2.8"
+			fill="#a83e91"
+			stroke="#f5f5ef"
+			strokeWidth=".8"
+		/>
+		<circle
+			cx="25"
+			cy="35"
+			r="2.8"
+			fill="#a83e91"
+			stroke="#f5f5ef"
+			strokeWidth=".8"
+		/>
+		<circle
+			cx="31"
+			cy="34"
+			r="2.8"
+			fill="#a83e91"
+			stroke="#f5f5ef"
+			strokeWidth=".8"
+		/>
+	</svg>
+);
+
+export const BroodmotherDark = (props: FullColorArtProps) => (
+	<svg
+		viewBox="0 0 48 48"
+		strokeLinecap="round"
+		strokeLinejoin="round"
+		aria-hidden="true"
+		{...props}
+	>
+		<path
+			d="M18 18 10 10 3 17M17 25 7 24 2 36M19 32 10 38 8 44M30 18 38 10 45 17M31 25 41 24 46 36M29 32 38 38 40 44"
+			fill="none"
+			stroke="#e88ad8"
+			strokeWidth="3.4"
+		/>
+		<path
+			d="M16 15 17 8 23 13 27 6 32 15"
+			fill="#e88ad8"
+			stroke="#e88ad8"
+			strokeWidth="1.6"
+		/>
+		<ellipse
+			cx="24"
+			cy="31"
+			rx="10"
+			ry="13"
+			fill="#923f99"
+			stroke="#e88ad8"
+			strokeWidth="2"
+		/>
+		<circle cx="24" cy="18" r="7" fill="#e88ad8" />
+		<circle
+			cx="20"
+			cy="27"
+			r="2.8"
+			fill="#e88ad8"
+			stroke="#101923"
+			strokeWidth=".8"
+		/>
+		<circle
+			cx="27"
+			cy="27"
+			r="2.8"
+			fill="#e88ad8"
+			stroke="#101923"
+			strokeWidth=".8"
+		/>
+		<circle
+			cx="18"
+			cy="34"
+			r="2.8"
+			fill="#e88ad8"
+			stroke="#101923"
+			strokeWidth=".8"
+		/>
+		<circle
+			cx="25"
+			cy="35"
+			r="2.8"
+			fill="#e88ad8"
+			stroke="#101923"
+			strokeWidth=".8"
+		/>
+		<circle
+			cx="31"
+			cy="34"
+			r="2.8"
+			fill="#e88ad8"
+			stroke="#101923"
+			strokeWidth=".8"
+		/>
+	</svg>
+);

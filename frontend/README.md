@@ -5,7 +5,8 @@ The React and TypeScript application uses Vite, Tailwind CSS, shadcn/ui, and Luc
 Install dependencies from the repository root with `pnpm install`. From this directory:
 
 ```bash
-pnpm dev          # Start the development server
+pnpm dev          # Start the development server (browser app only)
+pnpm dev:api      # Also run the /api functions (sign-in, cloud saves, Rankings) with vercel dev
 pnpm test        # Run Vitest in watch mode
 pnpm test:run    # Run the full test suite once
 pnpm check       # Check formatting and lint with Biome

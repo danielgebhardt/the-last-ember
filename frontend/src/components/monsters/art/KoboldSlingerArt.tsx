@@ -1,0 +1,55 @@
+import type { FullColorArtProps } from "../../icons/FullColorIcon";
+
+export const KoboldSlingerLight = (props: FullColorArtProps) => (
+	<svg
+		viewBox="0 0 48 48"
+		fill="none"
+		strokeLinecap="round"
+		strokeLinejoin="round"
+		aria-hidden="true"
+		{...props}
+	>
+		<path
+			d="M11 18 4 7 20 11 28 10 43 6 37 21 34 40 17 43 10 32Z"
+			fill="#9b6332"
+			stroke="#374453"
+			strokeWidth="2.5"
+		/>
+		<path
+			d="M13 21 36 20 34 32 16 32Z"
+			fill="#8491a0"
+			stroke="#374453"
+			strokeWidth="1.5"
+		/>
+		<path d="M17 25 22 27M27 27 32 25" stroke="#ad7721" strokeWidth="2.7" />
+		<path d="M35 39 43 30 46 34" stroke="#ad7721" strokeWidth="3" />
+		<path d="M14 36 9 43M29 40 34 45" stroke="#9b6332" strokeWidth="3" />
+	</svg>
+);
+
+export const KoboldSlingerDark = (props: FullColorArtProps) => (
+	<svg
+		viewBox="0 0 48 48"
+		fill="none"
+		strokeLinecap="round"
+		strokeLinejoin="round"
+		aria-hidden="true"
+		{...props}
+	>
+		<path
+			d="M11 18 4 7 20 11 28 10 43 6 37 21 34 40 17 43 10 32Z"
+			fill="#d19a59"
+			stroke="#39495c"
+			strokeWidth="2.5"
+		/>
+		<path
+			d="M13 21 36 20 34 32 16 32Z"
+			fill="#647387"
+			stroke="#39495c"
+			strokeWidth="1.5"
+		/>
+		<path d="M17 25 22 27M27 27 32 25" stroke="#f6d076" strokeWidth="2.7" />
+		<path d="M35 39 43 30 46 34" stroke="#f6d076" strokeWidth="3" />
+		<path d="M14 36 9 43M29 40 34 45" stroke="#d19a59" strokeWidth="3" />
+	</svg>
+);

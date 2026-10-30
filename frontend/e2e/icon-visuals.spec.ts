@@ -71,8 +71,8 @@ for (const [theme, width] of [
 						const textColor = view.getComputedStyle(card).color;
 						// Full-colour art keeps its own palette by design.
 						if (node.hasAttribute("data-full-color")) return false;
-						// Line art strokes in the themed color; filled art (the Pyre Lord)
-						// fills its shape with it instead.
+						// Line art strokes in the themed color; filled art fills its shape
+						// with it instead.
 						const themed =
 							style.stroke === style.color ||
 							node.querySelector('[fill="currentColor"]') !== null;

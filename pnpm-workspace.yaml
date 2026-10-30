@@ -3,6 +3,8 @@ packages:
 overrides:
   'jwks-rsa>jose': 4.15.9
 allowBuilds:
+  # The Vercel CLI's function bundler, for `pnpm dev:api`.
+  esbuild: true
   # Vitest's mock server.
   msw: true
   # Not needed: the Firebase SDK reads its config from the app, protobufjs only checks
