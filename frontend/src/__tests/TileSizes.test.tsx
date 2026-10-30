@@ -21,9 +21,9 @@ describe("map tile sizes", () => {
 	});
 	afterEach(() => act(() => setTileSize(DEFAULT_TILE_SIZE)));
 
-	it("offers growing sizes, and grows everything drawn with the tiles", () => {
+	it("offers growing sizes, 32px by default, and grows everything drawn with the tiles", () => {
 		expect(TILE_SIZES.map((size) => size.tile)).toEqual([24, 32, 36]);
-		expect(TILE_SIZES.map((size) => size.tile)).toContain(DEFAULT_TILE_SIZE);
+		expect(DEFAULT_TILE_SIZE).toBe(32);
 		for (const [smaller, larger] of TILE_SIZES.slice(1).map(
 			(size, index) => [TILE_SIZES[index], size] as const,
 		))
@@ -38,8 +38,9 @@ describe("map tile sizes", () => {
 	it("restores a saved size at startup, and ignores one it doesn't offer", async () => {
 		for (const [saved, expected] of [
 			["36", "36px"],
-			["40", "24px"],
-			["huge", "24px"],
+			// Unknown sizes fall back to the 32px default.
+			["40", "32px"],
+			["huge", "32px"],
 		] as const) {
 			localStorage.setItem("larn-tile-size", saved);
 			vi.resetModules();
@@ -53,13 +54,14 @@ describe("map tile sizes", () => {
 		render(<Home />, { wrapper: ThemeProvider });
 		await user.click(screen.getByRole("button", { name: "Settings" }));
 		const slider = screen.getByRole("slider", { name: "Map tile size" });
-		expect(slider).toHaveAttribute("aria-valuetext", "24 pixels");
-		fireEvent.change(slider, { target: { value: "1" } });
+		// 32px by default.
 		expect(slider).toHaveAttribute("aria-valuetext", "32 pixels");
-		expect(tileVariable()).toBe("32px");
+		fireEvent.change(slider, { target: { value: "2" } });
+		expect(slider).toHaveAttribute("aria-valuetext", "36 pixels");
+		expect(tileVariable()).toBe("36px");
 		expect(
 			document.documentElement.style.getPropertyValue("--tile-pile-count"),
-		).toBe("11px");
-		expect(localStorage.getItem("larn-tile-size")).toBe("32");
+		).toBe("12px");
+		expect(localStorage.getItem("larn-tile-size")).toBe("36");
 	});
 });

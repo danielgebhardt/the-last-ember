@@ -155,6 +155,9 @@ test("a loaded late-game character shows the applied evasion curve and returns m
 test("map following keeps five-tile margins, preserves manual scrolling and centers in a tiny viewport", async ({
 	page,
 }) => {
+	// The viewport sizes below are measured in 24px tiles.
+	await page.evaluate(() => localStorage.setItem("larn-tile-size", "24"));
+	await page.reload();
 	await importAdventure(page, "scrolling");
 	const viewport = map(page);
 	const player = page.getByRole("cell", {

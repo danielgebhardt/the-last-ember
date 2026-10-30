@@ -15,6 +15,7 @@ import type { DeveloperFeature } from "../../domain/game/DeveloperFeatures";
 import { type SaveDocument, saveSummary } from "../../domain/saves/SaveFormat";
 import { useSaves } from "../../saves/SavesProvider";
 import RankingsButton from "../../statistics/RankingsButton";
+import AdventurerChoice from "./AdventurerChoice";
 import AdventureSaveSheet from "./AdventureSaveSheet";
 import AppearanceChoice from "./AppearanceChoice";
 import DifficultyChoice from "./DifficultyChoice";
@@ -404,6 +405,8 @@ const AdventureOpening = ({
 								</section>
 
 								<AppearanceChoice />
+
+								<AdventurerChoice />
 
 								<Flourish className="w-full" />
 

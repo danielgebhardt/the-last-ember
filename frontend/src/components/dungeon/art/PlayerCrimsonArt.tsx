@@ -1,6 +1,6 @@
 import type { FullColorArtProps } from "../../icons/FullColorIcon";
 
-// Crimson-hooded swordsman. The outline lightens in the dark theme.
+// Crimson-hooded warrior. The outline lightens in the dark theme.
 
 export const PlayerCrimsonLight = (props: FullColorArtProps) => (
 	<svg

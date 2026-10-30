@@ -1,6 +1,5 @@
 import { Coins, Droplets, Heart, Sparkles, Star } from "lucide-react";
 import type { ReactNode } from "react";
-import adventurerPortrait from "@/assets/adventurer-portrait.png";
 import type { ActiveAffliction } from "../../domain/game/AfflictionDefinitions";
 import { afflictionImpact } from "../../domain/game/AfflictionText";
 import { type Difficulty, difficultyLabel } from "../../domain/game/Difficulty";
@@ -13,6 +12,7 @@ import {
 } from "../../domain/game/Progression";
 import type { TimedEffect } from "../../domain/game/TimedEffects";
 import type { Equipment } from "../../domain/items/Equipment";
+import AdventurerPortrait from "./AdventurerPortrait";
 import ExperienceProgress from "./ExperienceProgress";
 import HealthDisplay, { isLowHealth } from "./HealthDisplay";
 import ManaDisplay from "./ManaDisplay";
@@ -162,13 +162,7 @@ const PlayerStatus = ({
       lg:col-span-1 lg:border-b-0 lg:border-r lg:pb-0
    "
 				>
-					<img
-						src={adventurerPortrait}
-						alt=""
-						aria-hidden="true"
-						draggable={false}
-						className="size-16 shrink-0 object-contain lg:max-xl:size-12"
-					/>
+					<AdventurerPortrait className="size-16 lg:max-xl:size-12" />
 
 					<div className="flex min-w-0 flex-1 flex-col gap-1">
 						{/* Single row: character name, difficulty, turn */}

@@ -1,4 +1,4 @@
-import { ChevronsDown, CircleDot, Flame, UserRound } from "lucide-react";
+import { ChevronsDown, CircleDot, Flame } from "lucide-react";
 import {
 	type RefObject,
 	useCallback,
@@ -18,6 +18,8 @@ import {
 } from "../../domain/town/TownDefinition";
 import type { TownLocation } from "../../domain/town/TownLocation";
 import { townPortalMessage } from "../../domain/town/TownPortal";
+import { useAdventurer } from "../../settings/Adventurers";
+import { FullColor } from "../icons/FullColorIcon";
 import TownDirectory from "./TownDirectory";
 import { TownBuildingIcon } from "./TownVisuals";
 import TownWelcome from "./TownWelcome";
@@ -102,6 +104,16 @@ type TownMapProps = {
 	onPotionRequested?: (slot: HotbarSlot) => void;
 };
 
+// You, drawn as the adventurer chosen in Settings, as on the dungeon map.
+const TownPlayer = ({ ring }: { ring: string }) => (
+	<span className={`relative z-10 mx-auto block size-full ${ring}`}>
+		<FullColor
+			icon={useAdventurer().icon}
+			className="drop-shadow-[0_0_2px_rgba(250,89,46,0.6)]"
+		/>
+	</span>
+);
+
 const TownTileContent = ({
 	tile,
 	building,
@@ -121,9 +133,14 @@ const TownTileContent = ({
 }) => {
 	if (occupied)
 		return (
-			<UserRound
-				aria-hidden="true"
-				className={`relative z-10 mx-auto size-4 ${row === TOWN.portal.row && col === TOWN.portal.col ? (portalFloor ? "rounded-full ring-2 ring-cyan-500 dark:ring-cyan-300" : "rounded-full ring-1 ring-slate-500") : ""}`}
+			<TownPlayer
+				ring={
+					row === TOWN.portal.row && col === TOWN.portal.col
+						? portalFloor
+							? "rounded-full ring-2 ring-cyan-500 dark:ring-cyan-300"
+							: "rounded-full ring-1 ring-slate-500"
+						: ""
+				}
 			/>
 		);
 	if (row === TOWN.portal.row && col === TOWN.portal.col)
@@ -364,7 +381,8 @@ const TownMap = ({
 												ref={occupied ? player : undefined}
 												aria-label={label}
 												title={label}
-												className={`relative ${occupied ? "bg-red-100 text-red-700 outline outline-2 -outline-offset-2 outline-red-500 dark:bg-red-950 dark:text-red-300" : tile === "R" ? roofStyle(building) : TILE_STYLE[tile]} ${gateClass}`}
+												// You stand on the tile as it is; your adventurer's drawing marks you.
+												className={`relative ${tile === "R" ? roofStyle(building) : TILE_STYLE[tile]} ${gateClass}`}
 											>
 												{actionable ? (
 													<button

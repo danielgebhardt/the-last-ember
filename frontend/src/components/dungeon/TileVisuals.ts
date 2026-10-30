@@ -8,15 +8,11 @@ import {
 } from "../../domain/dungeon/Tiles.ts";
 import { fullColor, type RegisteredIcon } from "../icons/FullColorIcon";
 import { EntranceDark, EntranceLight } from "./art/EntranceArt";
-import {
-	PlayerCrimsonDark,
-	PlayerCrimsonLight,
-} from "./art/PlayerCrimsonArt.tsx";
 import { StairsDownIcon, StairsUpIcon } from "./StairIcons.tsx";
 
+// The player is drawn as the adventurer chosen in Settings (see Adventurers).
 export const TILE_ICONS: Partial<Record<string, RegisteredIcon>> = {
 	[ENTRANCE]: fullColor(EntranceLight, EntranceDark),
-	[PLAYER]: fullColor(PlayerCrimsonLight, PlayerCrimsonDark),
 	[STAIRS_UP]: StairsUpIcon,
 	[STAIRS_DOWN]: StairsDownIcon,
 };

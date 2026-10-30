@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/sheet";
 import AccountDetails from "../accounts/AccountDetails";
 import { useAccount } from "../accounts/AccountProvider";
+import AdventurerChoice from "../components/game/AdventurerChoice";
 import DifficultyChoice from "../components/game/DifficultyChoice";
 import RunHistoryDialog from "../components/game/RunHistoryDialog";
 import type { Hints } from "../components/game/useHints";
@@ -285,6 +286,12 @@ const DungeonSettings = ({
 						</ToggleGroup>
 						<p className="text-xs text-muted-foreground">
 							Saved on this device. System follows your device’s appearance.
+						</p>
+					</div>
+					<div className="grid gap-2 border-t pt-4">
+						<AdventurerChoice />
+						<p className="text-xs text-muted-foreground">
+							How you're drawn on the dungeon map. Saved on this device.
 						</p>
 					</div>
 					<div className="grid gap-2 border-t pt-4">

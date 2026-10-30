@@ -33,7 +33,7 @@ export const TILE_SIZES = [
 ] as const;
 
 export type TileSize = (typeof TILE_SIZES)[number]["tile"];
-export const DEFAULT_TILE_SIZE: TileSize = 24;
+export const DEFAULT_TILE_SIZE: TileSize = 32;
 
 const storageKey = "larn-tile-size";
 
