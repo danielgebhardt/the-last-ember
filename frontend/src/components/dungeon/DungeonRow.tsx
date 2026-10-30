@@ -73,8 +73,8 @@ const DungeonCell = memo(function DungeonCell({
 	areaThreatened?: boolean;
 	chargeThreatened?: boolean;
 	inSpellArea?: boolean;
-	// A tile of a 2×2 body, drawn by the large-monster layer: its top-left tile is
-	// the keyboard stop, the others still click to target it.
+	// A tile of a 2×2 body, drawn by the large-monster layer: its first tile in
+	// view is the keyboard stop ("anchor"), the others still click to target it.
 	bodyPart?: "anchor" | "rest";
 }) {
 	const showsPile = itemKind !== undefined && itemCount > 1 && !monsterKind;
@@ -203,6 +203,7 @@ const DungeonRow = memo(
 		areaThreatColumns,
 		chargeColumns,
 		spellColumns,
+		bodyFocusColumns,
 	}: {
 		row: readonly string[];
 		visible?: readonly boolean[];
@@ -226,6 +227,8 @@ const DungeonRow = memo(
 		areaThreatColumns?: readonly number[];
 		chargeColumns?: readonly number[];
 		spellColumns?: readonly number[];
+		// Where a 2×2 body's keyboard stop sits in this row.
+		bodyFocusColumns?: readonly number[];
 	}) {
 		return (
 			<tr
@@ -323,8 +326,7 @@ const DungeonRow = memo(
 							}
 							bodyPart={
 								monster && bodySpan(monster) > 1
-									? monster.coordinate.row === rowIndex &&
-										monster.coordinate.col === columnIndex
+									? bodyFocusColumns?.includes(columnIndex)
 										? "anchor"
 										: "rest"
 									: undefined
@@ -341,6 +343,11 @@ const DungeonRow = memo(
 			(next.chargeColumns?.length ?? 0) &&
 		(previous.chargeColumns ?? []).every(
 			(column, index) => column === next.chargeColumns?.[index],
+		) &&
+		(previous.bodyFocusColumns?.length ?? 0) ===
+			(next.bodyFocusColumns?.length ?? 0) &&
+		(previous.bodyFocusColumns ?? []).every(
+			(column, index) => column === next.bodyFocusColumns?.[index],
 		) &&
 		(previous.spellColumns?.length ?? 0) === (next.spellColumns?.length ?? 0) &&
 		(previous.spellColumns ?? []).every(

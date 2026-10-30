@@ -9,6 +9,7 @@ import {
 	omenFavorsWell,
 } from "../game/Omens";
 import { altarPacts } from "../game/Pacts";
+import { occupies } from "../monsters/MonsterFootprint";
 import { protectedFloorLocations } from "../monsters/MonsterLocations";
 import { sarcophagusOutcome } from "../objects/AncientSarcophagi";
 import { altarFloors, isDarkAltar } from "../objects/DarkAltar";
@@ -315,10 +316,11 @@ export const hasConsistentGeometry = (document: SaveDocument): boolean => {
 			!object.activated &&
 			((object.floorNumber === run.activeFloor &&
 				sameCoordinate(object.coordinate, run.playerCoordinate)) ||
+				// Any tile of a large body counts, not just its top-left one.
 				state.monsters.some(
 					(actor) =>
 						actor.floorNumber === object.floorNumber &&
-						sameCoordinate(actor.coordinate, object.coordinate),
+						occupies(actor, object.coordinate),
 				))
 		)
 			return false;

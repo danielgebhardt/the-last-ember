@@ -46,9 +46,22 @@ export const isSpellTarget = (
 	);
 };
 // Where a blast aimed at a monster bursts: on it, or on the tile of a large body
-// nearest you.
-export const spellCenter = (state: GameState, target: Monster): Coordinate =>
-	nearestBodyTile(target, state.run.playerCoordinate);
+// nearest you that you can see, so it never lands behind cover.
+export const spellCenter = (
+	state: Pick<GameState, "run" | "objects">,
+	target: Monster,
+): Coordinate => {
+	const player = state.run.playerCoordinate;
+	const terrain =
+		navigationRun(state).floors[state.run.activeFloor - 1].terrain;
+	const steps = (tile: Coordinate) =>
+		Math.abs(tile.row - player.row) + Math.abs(tile.col - player.col);
+	return (
+		bodyTiles(target)
+			.filter((tile) => hasLineOfSight(terrain, player, tile))
+			.sort((a, b) => steps(a) - steps(b))[0] ?? nearestBodyTile(target, player)
+	);
+};
 // Apply spell effects on the turn already committed by action resolution.
 export const castSpell = (
 	state: GameState,

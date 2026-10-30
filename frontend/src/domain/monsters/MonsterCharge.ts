@@ -25,11 +25,11 @@ import { coordinateKey, protectedFloorLocations } from "./MonsterLocations";
 import { actorAttackDamage } from "./MonsterStats";
 
 // Far enough to cross any hall; the charge itself stops at the first wall.
-const OVERRUN_LIMIT = 64;
+export const OVERRUN_LIMIT = 64;
 type Body = Pick<Monster, "kind" | "coordinate">;
 // The straight direction from a body toward `target`, when the target lies in
 // the body's lane (level with one of its rows or columns); otherwise none.
-const chargeDirection = (
+export const chargeDirection = (
 	body: Body,
 	target: Coordinate,
 ): Coordinate | undefined => {
@@ -42,19 +42,23 @@ const chargeDirection = (
 		? { row: 0, col: Math.sign(target.col - col) }
 		: { row: Math.sign(target.row - row), col: 0 };
 };
-// A point far past `target` in the same lane, for a charge that overruns its mark.
-const beyond = (body: Body, target: Coordinate): Coordinate => {
+// A point exactly OVERRUN_LIMIT steps past the body's leading edge in the same
+// lane, for a charge that overruns its mark, whichever way it runs.
+export const overrunMark = (body: Body, target: Coordinate): Coordinate => {
 	const direction = chargeDirection(body, target);
 	if (!direction) return target;
+	const span = bodySpan(body);
+	const edge = (start: number, step: number) =>
+		(step > 0 ? start + span - 1 : start) + step * OVERRUN_LIMIT;
 	return {
 		row:
 			direction.row === 0
 				? target.row
-				: body.coordinate.row + direction.row * OVERRUN_LIMIT,
+				: edge(body.coordinate.row, direction.row),
 		col:
 			direction.col === 0
 				? target.col
-				: body.coordinate.col + direction.col * OVERRUN_LIMIT,
+				: edge(body.coordinate.col, direction.col),
 	};
 };
 // Each step of a charge: where the body moves, and the tiles its leading edge
@@ -244,7 +248,7 @@ export const resolveMonsterCharge = (
 		? chargeSteps(
 				navigationRun(state).floors[state.run.activeFloor - 1].terrain,
 				monster,
-				beyond(monster, intent.target),
+				overrunMark(monster, intent.target),
 				OVERRUN_LIMIT,
 			)
 		: chargeSteps(

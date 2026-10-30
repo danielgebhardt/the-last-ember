@@ -46,13 +46,19 @@ import { createFloorTelemetry } from "../domain/game/FloorTelemetry";
 import { createGameState, type GameState } from "../domain/game/GameState";
 import { damageMonster } from "../domain/game/MonsterDamage";
 import { resolvePlayerAction } from "../domain/game/PlayerActions";
+import { spellCenter } from "../domain/game/SpellCasting";
 import { createTestSeedState } from "../domain/game/TestSeed";
 import { applyTimedEffect } from "../domain/game/TimedEffects";
 import { equipmentSlotFor } from "../domain/items/Equipment";
 import { exitScrollRestriction } from "../domain/items/ExitDungeonScroll";
 import type { ItemKind } from "../domain/items/Item";
 import type { Monster } from "../domain/monsters/Monster";
-import { chargeLine } from "../domain/monsters/MonsterCharge";
+import {
+	chargeLine,
+	chargeSteps,
+	OVERRUN_LIMIT,
+	overrunMark,
+} from "../domain/monsters/MonsterCharge";
 import {
 	bodyDistance,
 	bodyFitsAt,
@@ -1424,5 +1430,66 @@ describe("the arena hall around a 2×2 miniboss", () => {
 		expect(
 			save(inHall("bone-lich", { row: 2, col: 12 }, { row: 8, col: 28 })).ok,
 		).toBe(true);
+	});
+});
+
+describe("2×2 miniboss edge cases", () => {
+	it("bursts a blast on the nearest tile of its body you can see", () => {
+		// A pillar hides its nearest tile (5,16); (5,17) is the nearest in view.
+		const hall = inHall(
+			"iron-juggernaut",
+			{ row: 1, col: 14 },
+			{ row: 5, col: 16 },
+		);
+		const juggernaut = boss(hall);
+		if (!juggernaut) throw new Error("Expected the juggernaut");
+		expect(spellCenter(hall, juggernaut)).toEqual({ row: 5, col: 17 });
+	});
+
+	it("overruns the same distance whichever way it charges", () => {
+		const terrain = Array.from({ length: 4 }, () => Array(200).fill("."));
+		const body = {
+			kind: "iron-juggernaut" as const,
+			coordinate: { row: 1, col: 100 },
+		};
+		for (const target of [
+			{ row: 1, col: 105 },
+			{ row: 2, col: 95 },
+		])
+			expect(
+				chargeSteps(terrain, body, overrunMark(body, target), OVERRUN_LIMIT),
+			).toHaveLength(OVERRUN_LIMIT);
+	});
+
+	it("can't be saved over a closed door leaf, but may stand in an open doorway", () => {
+		// Its body covers both leaves of the entry doorway.
+		const doorway = inHall("bone-lich", { row: 8, col: 4 }, { row: 8, col: 8 });
+		expect(save(doorway).ok).toBe(false);
+		const open = {
+			...doorway,
+			objects: doorway.objects.map((o) =>
+				[arenaEntryId(6), arenaEntryLowerId(6)].includes(o.id)
+					? { ...o, activated: true }
+					: o,
+			),
+		};
+		expect(save(open).ok).toBe(true);
+	});
+
+	it("may stand where a broken egg sac lies, but not on a whole one", () => {
+		// Her body would cover the sac at row 4, column 16.
+		const over = inHall(
+			"broodmother",
+			{ row: 13, col: 12 },
+			{ row: 3, col: 16 },
+		);
+		expect(save(over).ok).toBe(false);
+		const broken = {
+			...over,
+			objects: over.objects.map((o) =>
+				o.id === eggSacId(6, 0) ? { ...o, activated: true } : o,
+			),
+		};
+		expect(save(broken).ok).toBe(true);
 	});
 });

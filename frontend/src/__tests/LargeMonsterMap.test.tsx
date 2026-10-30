@@ -73,6 +73,24 @@ describe("2×2 monsters on the map", () => {
 		expect(cast).toHaveBeenCalledExactlyOnceWith(lich.id);
 	});
 
+	it("keeps one keyboard stop on a tile in view when its top-left tile is hidden", () => {
+		const seen = (tiles: readonly string[]) =>
+			terrain.map((row, r) => row.map((_, c) => tiles.includes(`${r}:${c}`)));
+		render(
+			<DungeonLayout
+				{...props}
+				visible={seen(["2:2", "2:3", "4:1"])}
+				targetIds={[lich.id]}
+			/>,
+		);
+		const stops = screen
+			.getAllByRole("button", { name: /^Target Bone Lich/ })
+			.filter((target) => target.getAttribute("tabindex") !== "-1");
+		expect(stops.map((stop) => stop.getAttribute("aria-label"))).toEqual([
+			"Target Bone Lich at row 2, column 2",
+		]);
+	});
+
 	it("shows only the parts of it over tiles in view, and hides once none is", () => {
 		const seen = (tiles: readonly string[]) =>
 			terrain.map((row, r) => row.map((_, c) => tiles.includes(`${r}:${c}`)));

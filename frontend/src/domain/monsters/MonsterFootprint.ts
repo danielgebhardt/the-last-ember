@@ -110,10 +110,7 @@ export const bodyFitsOn = (
 	anchor: Coordinate,
 	blocked: (point: Coordinate) => boolean = () => false,
 ): boolean => {
-	const obstacles =
-		bodySpan(monster) > 1 && floor.bodyObstacles?.length
-			? new Set(floor.bodyObstacles)
-			: undefined;
+	const obstacles = bodySpan(monster) > 1 ? floor.bodyObstacles : undefined;
 	return bodyFitsAt(
 		floor.terrain,
 		monster,

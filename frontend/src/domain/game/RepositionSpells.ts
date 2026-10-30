@@ -49,9 +49,7 @@ export const repositionSpell = (
 	))
 		protectedTiles.add(key);
 	// A 2×2 body never lands on the hall features it walks around.
-	const obstacles = new Set(
-		bodyObstacles(state.objects, state.run.activeFloor),
-	);
+	const obstacles = bodyObstacles(state.objects, state.run.activeFloor);
 	const candidates: Coordinate[] = [];
 	for (let row = 0; row < terrain.length; row++)
 		for (let col = 0; col < terrain[row].length; col++) {

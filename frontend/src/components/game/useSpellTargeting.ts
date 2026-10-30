@@ -148,13 +148,19 @@ export const useSpellTargeting = (
 			);
 	};
 	const selected = targets.find((target) => target.id === targeting?.id);
+	// Only where you stand and what blocks sight move the blast's centre.
+	const { run, objects } = state;
 	const preview = useMemo(() => {
 		if (!selected || !selectedSpell) return undefined;
 		const definition = SPELL_DEFINITIONS[selectedSpell];
 		return "radius" in definition && definition.radius !== undefined
-			? spellArea(terrain, spellCenter(state, selected), definition.radius)
+			? spellArea(
+					terrain,
+					spellCenter({ run, objects }, selected),
+					definition.radius,
+				)
 			: undefined;
-	}, [selected, selectedSpell, terrain, state]);
+	}, [selected, selectedSpell, terrain, run, objects]);
 	return {
 		spellArea: preview,
 		activate,

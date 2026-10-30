@@ -8,7 +8,8 @@ import {
 	type MonsterDefinition,
 	type MonsterIntent,
 } from "./Monster";
-import { bodyDistance, occupies } from "./MonsterFootprint";
+import { chargeDirection } from "./MonsterCharge";
+import { bodyDistance } from "./MonsterFootprint";
 
 // Prepare-then-act behaviors whose saved intent is a single target tile. The
 // area attack carries extra state and keeps its own shape and checks.
@@ -66,11 +67,8 @@ export const TARGET_TELEGRAPHS: Readonly<
 	"preparing-charge": {
 		owns: (definition) => definition.chargeRange !== undefined,
 		reaches: (monster, target) =>
-			// Level with one of the body's rows or columns, not off to a diagonal.
-			[
-				{ row: target.row, col: monster.coordinate.col },
-				{ row: monster.coordinate.row, col: target.col },
-			].some((point) => occupies(monster, point)) &&
+			// In the body's lane, the same rule the charge itself follows.
+			chargeDirection(monster, target) !== undefined &&
 			reach(monster, target) >= 2 &&
 			reach(monster, target) <=
 				(MONSTER_DEFINITIONS[monster.kind].chargeRange ?? 0),

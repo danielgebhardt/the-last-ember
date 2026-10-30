@@ -94,6 +94,22 @@ const DungeonLayout = ({
 		}
 		return rows;
 	}, [spellArea]);
+	// A 2×2 body's keyboard stop: its first tile in view, so it can always be
+	// reached even when its top-left tile is out of sight.
+	const bodyFocusRows = useMemo(() => {
+		const rows = new Map<number, number[]>();
+		for (const monster of monsters) {
+			if (monster.health <= 0 || bodySpan(monster) === 1) continue;
+			const tile = bodyTiles(monster).find(
+				(point) => visible === undefined || visible[point.row]?.[point.col],
+			);
+			if (!tile) continue;
+			const columns = rows.get(tile.row) ?? [];
+			columns.push(tile.col);
+			rows.set(tile.row, columns);
+		}
+		return rows;
+	}, [monsters, visible]);
 	const threatRows = useMemo(() => {
 		const heavy = new Map<number, Set<number>>();
 		const area = new Map<number, Set<number>>();
@@ -280,6 +296,7 @@ const DungeonLayout = ({
 								areaThreatColumns={threatRows.area.get(rowIndex)}
 								chargeColumns={threatRows.charge.get(rowIndex)}
 								spellColumns={spellRows.get(rowIndex)}
+								bodyFocusColumns={bodyFocusRows.get(rowIndex)}
 								visible={visible?.[rowIndex]}
 								explored={explored?.[rowIndex]}
 								revealed={revealed}

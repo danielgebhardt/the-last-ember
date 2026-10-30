@@ -210,11 +210,10 @@ export const hasConsistentActors = (document: SaveDocument): boolean => {
 				bodyTiles(entry).every((tile) => walkable(entry.floorNumber, tile)) &&
 				// A 2×2 body never stands on the hall features it walks around.
 				(bodySpan(entry) === 1 ||
-					!bodyTiles(entry).some((tile) =>
-						bodyObstacles(state.objects, entry.floorNumber).includes(
-							`${tile.row}:${tile.col}`,
-						),
-					)) &&
+					((obstacles) =>
+						!bodyTiles(entry).some((tile) =>
+							obstacles.has(`${tile.row}:${tile.col}`),
+						))(bodyObstacles(state.objects, entry.floorNumber))) &&
 				!protectedLocations
 					.get(entry.floorNumber)
 					?.some((location) => occupies(entry, location)) &&

@@ -4,18 +4,22 @@ import { blocksPassage, type DungeonObject } from "./DungeonObject";
 
 // Objects a 2×2 body walks around, though one-tile creatures, spells and sight
 // pass over them: the hall features you strike, which its drawing would hide.
+// Once broken they no longer need to be seen, and stop being in the way.
 const BODY_OBSTACLE_KINDS: readonly string[] = ["egg-sac", "phylactery"];
 export const bodyObstacles = (
 	objects: readonly DungeonObject[],
 	floorNumber: number,
-): string[] =>
-	objects
-		.filter(
-			(object) =>
-				object.floorNumber === floorNumber &&
-				BODY_OBSTACLE_KINDS.includes(object.kind),
-		)
-		.map(({ coordinate }) => `${coordinate.row}:${coordinate.col}`);
+): ReadonlySet<string> =>
+	new Set(
+		objects
+			.filter(
+				(object) =>
+					object.floorNumber === floorNumber &&
+					!object.activated &&
+					BODY_OBSTACLE_KINDS.includes(object.kind),
+			)
+			.map(({ coordinate }) => `${coordinate.row}:${coordinate.col}`),
+	);
 
 const cache = new WeakMap<
 	readonly DungeonObject[],
@@ -38,7 +42,7 @@ export const navigationRun = (state: {
 				blocksPassage(object) && object.floorNumber === floor.floorNumber,
 		);
 		const obstacles = bodyObstacles(state.objects, floor.floorNumber);
-		if (!closed.length && !obstacles.length) {
+		if (!closed.length && !obstacles.size) {
 			floors.set(floor, floor);
 			return floor;
 		}
@@ -53,7 +57,7 @@ export const navigationRun = (state: {
 		const result = {
 			...floor,
 			terrain: floor.terrain.map((row, index) => changed.get(index) ?? row),
-			...(obstacles.length ? { bodyObstacles: obstacles } : {}),
+			...(obstacles.size ? { bodyObstacles: obstacles } : {}),
 		};
 		floors.set(floor, result);
 		return result;
