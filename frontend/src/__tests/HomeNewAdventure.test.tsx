@@ -125,3 +125,24 @@ it("fixes a custom adventure's sight for the whole run", async () => {
 	expect(within(settings).queryByText(/fog/i)).toBeNull();
 	expect(within(settings).queryByRole("textbox")).toBeNull();
 });
+
+it("shows why a standard start failed, whichever tab the dialog opens on", async () => {
+	const { generate } = stubDungeonRun(createCorridorEncounter());
+	render(<Home />);
+	const user = userEvent.setup();
+	generate.mockImplementationOnce(() => {
+		throw new Error("generation failed");
+	});
+	await user.click(screen.getByRole("button", { name: "New Dungeon" }));
+	await user.click(
+		screen.getByRole("button", { name: "Start standard adventure" }),
+	);
+	const dialog = await screen.findByRole("dialog", { name: "New adventure" });
+	expect(within(dialog).getByRole("tab", { name: "Standard" })).toHaveAttribute(
+		"aria-selected",
+		"true",
+	);
+	expect(within(dialog).getByRole("alert")).toHaveTextContent(
+		"Could not create a dungeon",
+	);
+});

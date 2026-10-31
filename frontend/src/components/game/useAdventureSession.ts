@@ -5,9 +5,11 @@ import {
 	generateDungeonRun,
 } from "../../domain/dungeon/DungeonRun";
 import { updateExploration } from "../../domain/dungeon/Exploration";
-import type {
-	FogConfiguration,
-	RunConfiguration,
+import {
+	type FogConfiguration,
+	isStandardDungeon,
+	isStandardSight,
+	type RunConfiguration,
 } from "../../domain/dungeon/RunConfiguration";
 import { appendActivityEvents } from "../../domain/game/ActivityHistory";
 import { emptyCombatTelemetry } from "../../domain/game/CombatTelemetry";
@@ -89,7 +91,12 @@ export const createAdventureSession = (
 			encounters: emptyRunEncounters(0),
 			floorTelemetry: createFloorTelemetry(starting),
 			combatTelemetry: emptyCombatTelemetry(),
-			...(ranked && !disabled.length && !isTestSeed(seed)
+			// Only the standard dungeon with standard sight can be ranked.
+			...(ranked &&
+			!disabled.length &&
+			!isTestSeed(seed) &&
+			isStandardDungeon(configuration) &&
+			isStandardSight(fog)
 				? { ranked: true as const, rankingVersion: GAME_VERSION }
 				: {}),
 		},

@@ -745,6 +745,7 @@ const Home = ({
 				devAction={
 					<DeveloperMenu
 						open={devOpen}
+						runId={game.state.runId}
 						onOpenChange={setDevOpen}
 						finalFocus={mapInputAvailable ? mapRef : false}
 						onStart={(seed, disabled) => {

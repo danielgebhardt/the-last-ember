@@ -81,7 +81,8 @@ export const Adventures = () => {
 						try {
 							const seed = randomAdventureSeed();
 							play(
-								// The opening dialog starts the only ranked adventures.
+								// Ranked adventures start here and from the New adventure dialog's
+								// Standard tab; either way with the standard dungeon and sight.
 								createAdventureSession(
 									seed,
 									configuration,

@@ -140,6 +140,13 @@ const NewAdventureDialog = ({
 							{difficultyLabel(difficulty)}
 						</output>
 					</p>
+					{/* A failed start may come from either tab, the developer tools or
+					    the end-of-run dialog, so its message sits above both tabs. */}
+					{generationError && (
+						<p role="alert" className="px-4 pt-2 text-sm text-destructive">
+							{generationError}
+						</p>
+					)}
 					<Dialog.Close
 						aria-label="Close"
 						className="absolute top-4 right-4 rounded-md p-1 text-muted-foreground hover:text-foreground focus-visible:outline-2 focus-visible:outline-ring"
@@ -185,7 +192,6 @@ const NewAdventureDialog = ({
 									seedError={seedError}
 									configDraft={configDraft}
 									configErrors={configErrors}
-									generationError={generationError}
 									onConfigInputChange={onConfigInputChange}
 									onSeedInputChange={onSeedInputChange}
 									fog={fog}

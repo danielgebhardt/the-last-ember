@@ -1,6 +1,6 @@
 import { Tabs } from "@base-ui/react/tabs";
 import { Wrench } from "lucide-react";
-import { lazy, type RefObject, Suspense, useState } from "react";
+import { lazy, type RefObject, Suspense, useEffect, useState } from "react";
 import { useAccount } from "../accounts/AccountProvider";
 import { Button } from "../components/ui/button";
 import { EmberMenuHeader, EmberPanel } from "../components/ui/EmberMenu";
@@ -35,17 +35,24 @@ export default function DeveloperMenu({
 	open,
 	onOpenChange,
 	finalFocus,
+	runId,
 	onStart,
 }: {
 	open: boolean;
 	onOpenChange: (open: boolean) => void;
 	finalFocus?: RefObject<HTMLElement | null> | false;
+	// Each new run, and each account, starts with every feature on again.
+	runId?: string;
 	onStart: (seed: number, disabled: DeveloperFeature[]) => void;
 }) {
 	const [seedInput, setSeedInput] = useState(String(TEST_SEED));
 	const [seedError, setSeedError] = useState<string | null>(null);
 	const [disabled, setDisabled] = useState<DeveloperFeature[]>([]);
-	if (useAccount().user?.developer !== true) return null;
+	const account = useAccount();
+	const uid = account.user?.uid;
+	// biome-ignore lint/correctness/useExhaustiveDependencies: each new run or account resets the generation draft.
+	useEffect(() => setDisabled([]), [runId, uid]);
+	if (account.user?.developer !== true) return null;
 	return (
 		<Sheet open={open} onOpenChange={onOpenChange}>
 			<SheetTrigger
@@ -153,7 +160,7 @@ export default function DeveloperMenu({
 						className="min-h-0 flex-1 overflow-y-auto"
 					>
 						<Suspense fallback={<p role="status">Loading statistics…</p>}>
-							<DeveloperStatistics />
+							<DeveloperStatistics key={uid} />
 						</Suspense>
 					</Tabs.Panel>
 					<Tabs.Panel

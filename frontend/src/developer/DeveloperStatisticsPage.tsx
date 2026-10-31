@@ -185,7 +185,9 @@ export function DeveloperStatistics() {
 	if (account.user?.developer !== true) return null;
 	return (
 		<Tabs.Root
-			className="grid gap-4"
+			ref={top}
+			tabIndex={-1}
+			className="grid gap-4 outline-none"
 			value={view}
 			onValueChange={(value) => {
 				setView(String(value));

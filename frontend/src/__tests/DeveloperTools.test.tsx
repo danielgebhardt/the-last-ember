@@ -88,6 +88,19 @@ it("gathers the developer tools in one menu that disappears when the claim is re
 	).toBeVisible();
 	expect(send).not.toHaveBeenCalled();
 
+	// A new run (or account) starts with every feature on again.
+	view.rerender(
+		<ThemeProvider>
+			<DeveloperMenu
+				open
+				onOpenChange={() => {}}
+				onStart={start}
+				runId="next-run"
+			/>
+		</ThemeProvider>,
+	);
+	await user.click(tools.getByRole("tab", { name: "Generation" }));
+	expect(tools.getByRole("checkbox", { name: "Floor omens" })).toBeChecked();
 	await user.click(tools.getByRole("tab", { name: "Seed report" }));
 	await screen.findByRole("button", { name: "Run report" });
 	account.mockReturnValue(developerTestAccount(false));
@@ -372,6 +385,16 @@ it("selects floors and metrics locally, preserves the selection across tabs, and
 		screen.getByText("No observed runs reached this floor."),
 	).toBeVisible();
 	expect(send).toHaveBeenCalledTimes(3);
+	// With the run that opened a detail gone, closing it keeps focus in the page.
+	await user.selectOptions(screen.getByLabelText("Selected floor"), "2");
+	const origin = screen.getByRole("button", { name: "Inspect floor 2 run 1" });
+	await user.click(origin);
+	await screen.findByRole("heading", { name: "Run detail · Seed 1" });
+	origin.remove();
+	await user.click(screen.getByRole("button", { name: "Close run detail" }));
+	expect(document.activeElement).toBe(
+		screen.getByRole("tablist", { name: "Statistics views" }).parentElement,
+	);
 });
 
 it("keeps unknown floor measurements, measured zero and unreached floors visually distinct", async () => {

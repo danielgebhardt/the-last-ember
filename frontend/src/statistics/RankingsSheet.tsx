@@ -84,9 +84,18 @@ export default function RankingsSheet({
 				const response = await fetch(`/api/rankings?${params}`, {
 					headers: token ? { authorization: `Bearer ${token}` } : {},
 					signal: controller.signal,
-				});
-				const data = await response.json().catch(() => {
+				}).catch((failure) => {
+					if (controller.signal.aborted) throw failure;
 					throw Error(OFFLINE);
+				});
+				// A page instead of an answer means no Rankings service here; a failed
+				// status without one is the service's own problem, not the connection.
+				const data = await response.json().catch(() => {
+					throw Error(
+						response.ok
+							? OFFLINE
+							: `Rankings had a problem (${response.status}). Try again shortly.`,
+					);
 				});
 				if (!response.ok)
 					throw Error(data.error ?? "Rankings could not be loaded.");
@@ -98,9 +107,9 @@ export default function RankingsSheet({
 			} catch (failure) {
 				if (!controller.signal.aborted)
 					setError(
-						failure instanceof Error && !(failure instanceof TypeError)
+						failure instanceof Error
 							? failure.message
-							: OFFLINE,
+							: "Rankings could not be loaded.",
 					);
 			} finally {
 				if (!controller.signal.aborted) setLoading(false);
@@ -164,10 +173,10 @@ export default function RankingsSheet({
 								</Button>
 							))}
 						</fieldset>
-						<div
-							className={`flex flex-wrap items-end gap-3 ${board === "device" ? "invisible" : ""}`}
-						>
-							<label className="grid gap-1 text-xs font-medium">
+						<div className="flex flex-wrap items-end gap-3">
+							<label
+								className={`grid gap-1 text-xs font-medium ${board === "device" ? "invisible" : ""}`}
+							>
 								Difficulty
 								<select
 									aria-label="Difficulty"
@@ -187,7 +196,9 @@ export default function RankingsSheet({
 									)}
 								</select>
 							</label>
-							<label className="grid gap-1 text-xs font-medium">
+							<label
+								className={`grid gap-1 text-xs font-medium ${board === "device" ? "invisible" : ""}`}
+							>
 								Game version
 								<select
 									aria-label="Game version"

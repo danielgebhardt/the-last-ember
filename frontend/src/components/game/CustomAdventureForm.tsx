@@ -25,7 +25,6 @@ const CustomAdventureForm = ({
 	seedError,
 	configDraft,
 	configErrors,
-	generationError,
 	inputRef,
 	fog,
 	onConfigInputChange,
@@ -36,7 +35,6 @@ const CustomAdventureForm = ({
 	seedError: string | null;
 	configDraft: ConfigurationDraft;
 	configErrors: ConfigurationErrors;
-	generationError: string | null;
 	inputRef?: RefObject<HTMLInputElement | null>;
 	// The current adventure's sight, offered as the starting choice.
 	fog: FogConfiguration;
@@ -189,9 +187,9 @@ const CustomAdventureForm = ({
 				Custom adventures aren't ranked, for victories or deaths. These choices
 				are fixed for the whole run.
 			</p>
-			{(configErrors.difficulty || generationError) && (
+			{configErrors.difficulty && (
 				<p role="alert" className="text-sm text-destructive">
-					{configErrors.difficulty ?? generationError}
+					{configErrors.difficulty}
 				</p>
 			)}
 			<Button type="submit" aria-describedby="unranked-warning">

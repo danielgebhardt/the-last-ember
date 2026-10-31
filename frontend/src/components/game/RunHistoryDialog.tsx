@@ -61,7 +61,8 @@ const RunEntry = ({ record }: { record: RunRecord }) => (
 	</li>
 );
 
-// The same history inline, for the Rankings "This device" board.
+// Finished adventures kept in this browser only, newest first by default;
+// shown on the Rankings "This device" board and in the opening's Run history.
 export const RunHistoryList = () => {
 	const [sort, setSort] = useState<Sort>("recent");
 	const [runs] = useState<readonly RunRecord[]>(readRunHistory);
@@ -111,20 +112,9 @@ const RunHistoryDialog = ({
 }: {
 	triggerClassName?: string;
 }) => {
-	const [open, setOpen] = useState(false);
-	const [sort, setSort] = useState<Sort>("recent");
-	const [runs, setRuns] = useState<readonly RunRecord[]>([]);
 	const title = useRef<HTMLHeadingElement>(null);
-	const sortId = useId();
-	const sorted = [...runs].sort(SORTS[sort].compare);
 	return (
-		<Dialog.Root
-			open={open}
-			onOpenChange={(next) => {
-				if (next) setRuns(readRunHistory());
-				setOpen(next);
-			}}
-		>
+		<Dialog.Root>
 			<Dialog.Trigger
 				render={
 					<Button
@@ -143,49 +133,17 @@ const RunHistoryDialog = ({
 					initialFocus={title}
 					className="fixed top-1/2 left-1/2 z-50 flex max-h-[calc(100dvh-2rem)] w-[min(44rem,calc(100vw-2rem))] -translate-x-1/2 -translate-y-1/2 flex-col gap-3 overflow-hidden rounded-xl border bg-popover p-5 text-popover-foreground shadow-xl"
 				>
-					<div className="flex flex-wrap items-baseline justify-between gap-3">
-						<Dialog.Title
-							ref={title}
-							tabIndex={-1}
-							className="text-xl font-semibold outline-none"
-						>
-							Run history
-						</Dialog.Title>
-						<label htmlFor={sortId} className="flex items-center gap-2 text-sm">
-							Sort by
-							<select
-								id={sortId}
-								value={sort}
-								onChange={(event) => setSort(event.target.value as Sort)}
-								className="rounded-md border bg-background px-2 py-1"
-							>
-								{(Object.keys(SORTS) as Sort[]).map((key) => (
-									<option key={key} value={key}>
-										{SORTS[key].label}
-									</option>
-								))}
-							</select>
-						</label>
+					<Dialog.Title
+						ref={title}
+						tabIndex={-1}
+						className="text-xl font-semibold outline-none"
+					>
+						Run history
+					</Dialog.Title>
+					{/* The list reads the history as it mounts, i.e. each time this opens. */}
+					<div className="min-h-0 overflow-y-auto">
+						<RunHistoryList />
 					</div>
-					<Dialog.Description className="text-sm text-muted-foreground">
-						Your last {RUN_HISTORY_LIMIT} finished adventures, kept in this
-						browser only. Select one to see its recap.
-					</Dialog.Description>
-					{sorted.length ? (
-						<ol
-							aria-label="Finished adventures"
-							className="grid min-h-0 gap-2 overflow-y-auto"
-						>
-							{sorted.map((record) => (
-								<RunEntry key={record.id} record={record} />
-							))}
-						</ol>
-					) : (
-						<p className="text-sm text-muted-foreground">
-							No finished adventures yet. Deaths and victories are recorded
-							here.
-						</p>
-					)}
 					<Dialog.Close
 						render={<Button variant="outline" className="self-end" />}
 					>

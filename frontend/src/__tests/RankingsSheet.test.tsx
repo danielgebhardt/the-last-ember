@@ -62,6 +62,19 @@ it.each([
 	expect(alert).not.toHaveTextContent(/Unexpected token|Failed to fetch/);
 	expect(screen.getByRole("button", { name: "Try again" })).toBeVisible();
 });
+it("reports a service failure as a problem with Rankings, not as being offline", async () => {
+	vi.mocked(useAccount).mockReturnValue(account());
+	vi.stubGlobal(
+		"fetch",
+		vi.fn<typeof fetch>(
+			async () => new Response("<html>Bad gateway</html>", { status: 502 }),
+		),
+	);
+	sheet();
+	const alert = await screen.findByRole("alert");
+	expect(alert).toHaveTextContent("Rankings had a problem (502)");
+	expect(alert).not.toHaveTextContent("can't be reached");
+});
 it("lists this device's finished adventures, ranked or not, without asking the server", async () => {
 	vi.mocked(useAccount).mockReturnValue(account());
 	const send = vi.fn<typeof fetch>(async () => Response.json({ rows: [] }));
@@ -84,6 +97,10 @@ it("lists this device's finished adventures, ranked or not, without asking the s
 	expect(runs).toHaveTextContent(/Died on floor 3/);
 	expect(screen.queryByRole("table")).toBeNull();
 	expect(send).toHaveBeenCalledTimes(1);
+	// Refresh still retries pending ranked runs from this board.
+	expect(
+		screen.getByRole("button", { name: "Refresh Rankings" }),
+	).toBeVisible();
 });
 it("loads personal pages with authorization, shows global ranks, and resets paging when filters change", async () => {
 	vi.mocked(useAccount).mockReturnValue(account());
