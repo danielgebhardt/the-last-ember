@@ -42,6 +42,10 @@ export const DEFAULT_FOG_CONFIGURATION: FogConfiguration = {
 	radius: 8,
 };
 export const FOG_RADIUS_LIMITS = { min: 1, max: 20 };
+// Ranked and standard runs are played with the default sight.
+export const isStandardSight = (fog: FogConfiguration) =>
+	fog.enabled === DEFAULT_FOG_CONFIGURATION.enabled &&
+	fog.radius === DEFAULT_FOG_CONFIGURATION.radius;
 
 // Internal generation rules; settings and saved configuration fields are unchanged.
 export const LOOP_CORRIDOR_RULES = {

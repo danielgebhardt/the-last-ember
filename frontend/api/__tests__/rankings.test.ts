@@ -91,6 +91,22 @@ it("requires authentication and a validated, finished, newly started ranked adve
 	}
 	expect(write).not.toHaveBeenCalled();
 });
+it("refuses an adventure played without standard sight", async () => {
+	const write = vi.fn();
+	for (const fog of [
+		{ enabled: false, radius: 8 },
+		{ enabled: true, radius: 20 },
+	]) {
+		const document = rankedAdventure();
+		document.fog = fog;
+		const response = await handleRankings(request(document), verify, write);
+		expect(response.status).toBe(400);
+		expect(await response.json()).toMatchObject({
+			error: "Only adventures played with standard sight can enter Rankings.",
+		});
+	}
+	expect(write).not.toHaveBeenCalled();
+});
 it("derives public results from the save and leaves server acceptance time to the writer", async () => {
 	const document = rankedAdventure();
 	const write = vi.fn();

@@ -1,5 +1,8 @@
 import { minibossId } from "../arena/Arena";
-import { isStandardDungeon } from "../dungeon/RunConfiguration";
+import {
+	isStandardDungeon,
+	isStandardSight,
+} from "../dungeon/RunConfiguration";
 import { defeatRecap } from "../game/DefeatRecap";
 import { GAME_VERSIONS } from "../game/GameVersion";
 import { levelForExperience } from "../game/Progression";
@@ -31,7 +34,7 @@ export const summarizeRun = (document: SaveDocument, commit: string | null) => {
 		rows: configuration.rows,
 		columns: configuration.cols,
 		floorCount: configuration.floorCount,
-		standard: isStandardDungeon(configuration),
+		standard: isStandardDungeon(configuration) && isStandardSight(document.fog),
 		ranked: state.ranked === true,
 		difficulty: configuration.difficulty,
 		gameVersion: startedOn(state),

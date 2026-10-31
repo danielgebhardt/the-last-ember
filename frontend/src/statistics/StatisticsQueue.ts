@@ -1,3 +1,4 @@
+import { isStandardSight } from "../domain/dungeon/RunConfiguration";
 import type { SaveDocument } from "../domain/saves/SaveDocument";
 
 export type StatisticsStorage = Pick<
@@ -175,6 +176,7 @@ export class StatisticsQueue {
 			(this.kind === "rankings" &&
 				(!document.state.ranked ||
 					!document.state.rankingVersion ||
+					!isStandardSight(document.fog) ||
 					document.state.developerRun)) ||
 			this.stopped.has(uid) ||
 			(document.state.player.health > 0 && !document.state.quest.victory)

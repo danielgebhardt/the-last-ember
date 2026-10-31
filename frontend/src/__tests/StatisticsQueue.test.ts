@@ -31,6 +31,28 @@ describe("Finished runs waiting in browser storage", () => {
 		expect(send).not.toHaveBeenCalled();
 		expect(localStorage.length).toBe(0);
 	});
+	it("keeps a run played without standard sight out of Rankings but in statistics", async () => {
+		const send = vi.fn<typeof fetch>(async () => new Response(null));
+		for (const fog of [
+			{ enabled: false, radius: 8 },
+			{ enabled: true, radius: 12 },
+		]) {
+			localStorage.clear();
+			send.mockClear();
+			const document = finished();
+			document.state.ranked = true;
+			document.state.rankingVersion = "0.3.0-alpha";
+			document.fog = fog;
+			const rankings = new StatisticsQueue(localStorage, send, "rankings");
+			rankings.enqueue("one", document);
+			await rankings.retry("one", token);
+			expect(send).not.toHaveBeenCalled();
+			const statistics = new StatisticsQueue(localStorage, send);
+			statistics.enqueue("one", document);
+			await statistics.retry("one", token);
+			expect(send).toHaveBeenCalledTimes(1);
+		}
+	});
 	it("retains an offline run across reload, retries, and never resends an acknowledged run", async () => {
 		const expectedOfflineError = vi
 			.spyOn(console, "error")

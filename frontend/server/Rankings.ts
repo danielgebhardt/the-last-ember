@@ -11,6 +11,7 @@ import {
 	verifiedUser,
 } from "../api/account.ts";
 import { displayNameError } from "../src/accounts/DisplayName.ts";
+import { isStandardSight } from "../src/domain/dungeon/RunConfiguration.ts";
 import {
 	type Difficulty,
 	isDifficulty,
@@ -200,6 +201,10 @@ export const handleRankings = async (
 		if (!state.ranked)
 			return json(400, {
 				error: "Adventures started in Settings are unranked.",
+			});
+		if (!isStandardSight(parsed.value.fog))
+			return json(400, {
+				error: "Only adventures played with standard sight can enter Rankings.",
 			});
 		if (!state.rankingVersion || !GAME_VERSIONS.includes(state.rankingVersion))
 			return json(400, {
