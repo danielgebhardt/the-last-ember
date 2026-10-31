@@ -361,25 +361,24 @@ it("offers local play and retry if the account profile check fails", async () =>
 
 it("updates developer controls on sign-in and returns to guest saves on sign-out", async () => {
 	const { user } = setup(undefined, true);
-	expect(screen.queryByText("Developer generation")).toBeNull();
+	const dev = () => screen.queryByRole("button", { name: /^Dev/ });
+	expect(dev()).toBeNull();
 	await signIn(user);
-	expect(await screen.findByText("Developer generation")).toBeVisible();
+	expect(await screen.findByRole("button", { name: /^Dev/ })).toBeVisible();
 	await user.click(
 		screen.getByRole("button", { name: "Account: player@example.com" }),
 	);
 	await user.click(screen.getByRole("button", { name: "Sign out" }));
 	await user.keyboard("{Escape}");
 	await waitFor(() => expect(opening()).toBeVisible());
-	expect(screen.queryByText("Developer generation")).toBeNull();
+	expect(dev()).toBeNull();
 	expect(begin()).toBeEnabled();
 });
 
-it("can visit developer statistics from the opening account and return without starting", async () => {
+it("can visit developer statistics from the opening's Dev button and return without starting", async () => {
 	const { user } = setup(undefined, true);
 	await signIn(user);
-	await user.click(
-		screen.getByRole("button", { name: "Account: player@example.com" }),
-	);
+	await user.click(await screen.findByRole("button", { name: /^Dev/ }));
 	await user.click(
 		screen.getByRole("button", { name: "Developer statistics" }),
 	);

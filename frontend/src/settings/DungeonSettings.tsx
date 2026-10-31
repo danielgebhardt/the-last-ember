@@ -1,13 +1,7 @@
 import { Toggle } from "@base-ui/react/toggle";
 import { ToggleGroup } from "@base-ui/react/toggle-group";
 import { Monitor, Moon, Settings2, Sun, TriangleAlert } from "lucide-react";
-import {
-	type RefObject,
-	type SubmitEvent,
-	useEffect,
-	useRef,
-	useState,
-} from "react";
+import { type RefObject, type SubmitEvent, useRef } from "react";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { EmberMenuHeader, EmberPanel } from "@/components/ui/EmberMenu";
 import { Input } from "@/components/ui/input";
@@ -18,18 +12,15 @@ import {
 	SheetTitle,
 } from "@/components/ui/sheet";
 import AccountDetails from "../accounts/AccountDetails";
-import { useAccount } from "../accounts/AccountProvider";
 import AdventurerChoice from "../components/game/AdventurerChoice";
 import DifficultyChoice from "../components/game/DifficultyChoice";
 import RunHistoryDialog from "../components/game/RunHistoryDialog";
 import type { Hints } from "../components/game/useHints";
-import DeveloperGeneration from "../developer/DeveloperGeneration";
 import {
 	CONFIGURATION_LIMITS,
 	type FogConfiguration,
 	type RunConfiguration,
 } from "../domain/dungeon/RunConfiguration.ts";
-import type { DeveloperFeature } from "../domain/game/DeveloperFeatures";
 import { difficultyLabel, isDifficulty } from "../domain/game/Difficulty";
 import FogSettings from "./FogSettings.tsx";
 import type {
@@ -54,11 +45,7 @@ type DungeonSettingsProps = {
 	generationError: string | null;
 	onConfigInputChange: (field: ConfigurationField, value: string) => void;
 	onSeedInputChange: (value: string) => void;
-	onSeedSubmit: (
-		event: SubmitEvent<HTMLFormElement>,
-		disabled?: DeveloperFeature[],
-	) => void;
-	runId?: string;
+	onSeedSubmit: (event: SubmitEvent<HTMLFormElement>) => void;
 	hints?: Pick<Hints, "enabled" | "seenCount" | "setEnabled" | "reset">;
 };
 
@@ -78,13 +65,7 @@ const DungeonSettings = ({
 	onSeedInputChange,
 	onSeedSubmit,
 	hints,
-	runId,
 }: DungeonSettingsProps) => {
-	const [disabled, setDisabled] = useState<DeveloperFeature[]>([]);
-	const account = useAccount();
-	const developer = account.user?.developer === true;
-	// biome-ignore lint/correctness/useExhaustiveDependencies: each new run resets the generation draft.
-	useEffect(() => setDisabled([]), [runId, account.user?.uid, developer]);
 	const selectedDifficulty = Number(configDraft.difficulty ?? 1);
 	const inputRef = useRef<HTMLInputElement>(null);
 	const { theme, setTheme } = useTheme();
@@ -135,10 +116,7 @@ const DungeonSettings = ({
 							{difficultyLabel(configuration.difficulty ?? 1)}
 						</output>
 					</p>
-					<form
-						className="grid gap-3"
-						onSubmit={(event) => onSeedSubmit(event, developer ? disabled : [])}
-					>
+					<form className="grid gap-3" onSubmit={onSeedSubmit}>
 						<div className="grid gap-2">
 							<Label htmlFor="dungeon-seed">Dungeon seed</Label>
 							<Input
@@ -236,7 +214,6 @@ const DungeonSettings = ({
 								{generationError}
 							</p>
 						)}
-						<DeveloperGeneration disabled={disabled} onChange={setDisabled} />
 						<Button
 							type="submit"
 							variant="outline"

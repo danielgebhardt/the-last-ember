@@ -29,31 +29,17 @@ for (const size of [
 			await denied.getByRole("button", { name: "Close", exact: true }).click();
 			await expect(denied).toHaveCount(0);
 			expect(new URL(page.url()).hash).toBe("");
-			await expect(
-				page.getByText("Developer generation", { exact: true }),
-			).toHaveCount(0);
+			await expect(page.getByRole("button", { name: /^Dev/ })).toHaveCount(0);
 			await page
 				.getByRole("button", { name: "Begin Adventure", exact: true })
 				.click();
+			await expect(
+				page.getByRole("button", { name: "Developer tools", exact: true }),
+			).toHaveCount(0);
 			await page.getByRole("button", { name: "Settings", exact: true }).click();
 			await expect(
 				page.getByText("Developer generation", { exact: true }),
 			).toHaveCount(0);
-			await page
-				.getByRole("dialog", { name: "Settings", exact: true })
-				.getByRole("button", { name: "Close", exact: true })
-				.click();
-			await page.getByRole("button", { name: "Catalog", exact: true }).click();
-			const catalog = page.getByRole("dialog", {
-				name: "Developer Catalog",
-				exact: true,
-			});
-			await expect(
-				catalog.getByRole("tab", { name: "Seed report", exact: true }),
-			).toHaveCount(0);
-			await expect(
-				catalog.getByRole("tab", { name: "Town", exact: true }),
-			).toBeVisible();
 			expect(reads).toBe(0);
 		});
 	}

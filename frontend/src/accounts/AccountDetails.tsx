@@ -5,7 +5,6 @@ import { Button } from "../components/ui/button";
 import { EmberMenuHeader } from "../components/ui/EmberMenu";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
-import { DeveloperStatisticsLink } from "../developer/DeveloperStatisticsRoute";
 import { slotKey } from "../persistence/LocalAdventureSave";
 import { SAVE_SLOTS, type SaveSlot } from "../saves/CloudStore";
 import { useStatistics } from "../statistics/StatisticsProvider";
@@ -83,7 +82,6 @@ export default function AccountDetails() {
 	const conflict = copies.some((copy) => copy.conflict);
 	return (
 		<div className="grid gap-4">
-			<DeveloperStatisticsLink />
 			<form
 				className="grid gap-2"
 				onSubmit={async (event) => {

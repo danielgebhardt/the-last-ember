@@ -1,7 +1,6 @@
 import { FlaskConical } from "lucide-react";
 import { lazy, Suspense, useEffect, useState } from "react";
 import { useAccount } from "../accounts/AccountProvider";
-import { Button } from "../components/ui/button";
 import { EmberMenuHeader } from "../components/ui/EmberMenu";
 import { Sheet, SheetContent, SheetTitle } from "../components/ui/sheet";
 
@@ -18,21 +17,6 @@ export const useDeveloperStatisticsOpen = () => {
 	}, []);
 	return open;
 };
-export function DeveloperStatisticsLink() {
-	if (useAccount().user?.developer !== true) return null;
-	return (
-		<Button
-			type="button"
-			variant="outline"
-			onClick={() => {
-				location.hash = DEVELOPER_STATISTICS_HASH;
-			}}
-		>
-			<FlaskConical aria-hidden="true" />
-			Developer statistics
-		</Button>
-	);
-}
 export default function DeveloperStatisticsRoute() {
 	const account = useAccount(),
 		open = useDeveloperStatisticsOpen();

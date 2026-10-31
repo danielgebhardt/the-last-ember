@@ -1,11 +1,20 @@
 import { Dialog } from "@base-ui/react/dialog";
-import { ArrowRight, FolderOpen, History, Shield } from "lucide-react";
+import { Popover } from "@base-ui/react/popover";
+import {
+	ArrowRight,
+	FlaskConical,
+	FolderOpen,
+	History,
+	Shield,
+	Wrench,
+} from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetTrigger } from "@/components/ui/sheet";
 import AccountMenu from "../../accounts/AccountMenu";
 import { useAccount } from "../../accounts/AccountProvider";
 import DeveloperGeneration from "../../developer/DeveloperGeneration";
+import { DEVELOPER_STATISTICS_HASH } from "../../developer/DeveloperStatisticsRoute";
 import {
 	DEFAULT_RUN_CONFIGURATION,
 	type RunConfiguration,
@@ -103,7 +112,7 @@ const AdventureOpening = ({
 						className={`
                      fixed top-1/2 left-1/2 z-50
                      max-h-[calc(100dvh-1.5rem)]
-                     w-[calc(100%-1.5rem)] ${developer ? "max-w-[88rem]" : "max-w-[65rem]"}
+                     w-[calc(100%-1.5rem)] max-w-[65rem]
                      -translate-x-1/2 -translate-y-1/2
                      overflow-y-auto rounded-xl
                      border border-amber-800/35
@@ -119,11 +128,11 @@ const AdventureOpening = ({
                   `}
 					>
 						<div
-							className={`grid gap-5 min-[900px]:gap-0 ${developer ? "min-[900px]:grid-cols-[minmax(0,1.8fr)_minmax(0,1.1fr)_minmax(0,1fr)]" : "min-[900px]:grid-cols-[minmax(0,13fr)_minmax(0,7fr)]"}`}
+							className={`grid gap-5 min-[900px]:gap-0 min-[900px]:grid-cols-[minmax(0,13fr)_minmax(0,7fr)]`}
 						>
 							<div className="min-w-0 min-[900px]:pr-7">
 								<form
-									className={`grid ${developer ? "gap-2 min-[1200px]:gap-2.5" : "gap-2.5"}`}
+									className={`grid gap-2.5`}
 									onSubmit={(event) => {
 										event.preventDefault();
 										if (blocked) return;
@@ -144,7 +153,7 @@ const AdventureOpening = ({
 											ref={title}
 											tabIndex={-1}
 											className={`
-                                 mt-1 font-serif ${developer ? "text-3xl min-[1200px]:text-4xl" : "text-4xl"} font-bold
+                                 mt-1 font-serif text-4xl font-bold
                                  tracking-wide text-amber-950 outline-none
                                  dark:text-amber-100
                               `}
@@ -155,7 +164,7 @@ const AdventureOpening = ({
 										<Flourish className="mt-2 max-w-sm" />
 
 										<p
-											className={`mt-2 text-[11px] font-medium uppercase text-amber-900/70 dark:text-amber-300/70 ${developer ? "tracking-[0.15em] min-[1200px]:tracking-[0.25em]" : "tracking-[0.25em]"}`}
+											className={`mt-2 text-[11px] font-medium uppercase text-amber-900/70 dark:text-amber-300/70 tracking-[0.25em]`}
 										>
 											{ADVENTURE_STORY.subtitle}
 										</p>
@@ -173,7 +182,7 @@ const AdventureOpening = ({
 									>
 										<Dialog.Description
 											render={<div />}
-											className={`grid gap-2 font-serif leading-normal text-foreground/90 ${developer ? "text-sm min-[1200px]:text-base" : "text-base"}`}
+											className={`grid gap-2 font-serif leading-normal text-foreground/90 text-base`}
 										>
 											{ADVENTURE_STORY.opening.map((paragraph) => (
 												<p key={paragraph}>{paragraph}</p>
@@ -196,7 +205,7 @@ const AdventureOpening = ({
 											className="mt-0.5 size-5 shrink-0 text-amber-800 dark:text-amber-400"
 										/>
 										<p
-											className={`leading-normal text-foreground/85 ${developer ? "text-sm min-[1200px]:text-[15px]" : "text-[15px]"}`}
+											className={`leading-normal text-foreground/85 text-[15px]`}
 										>
 											Explore carefully. Every action gives your enemies a turn.
 											Your spells, supplies, and discoveries may be the
@@ -313,10 +322,59 @@ const AdventureOpening = ({
 										<RankingsButton />
 									</div>
 
-									<div className="text-center">
+									<div className="flex items-center justify-center gap-2">
 										<p className="text-[10px] italic text-muted-foreground/70">
 											Inspired by the classic roguelike Larn.
 										</p>
+										{developer && (
+											<Popover.Root>
+												<Popover.Trigger
+													render={
+														<Button
+															type="button"
+															variant="outline"
+															size="sm"
+															title="Developer generation"
+															className="h-6 gap-1 px-2 text-[11px]"
+														/>
+													}
+												>
+													<Wrench aria-hidden="true" className="size-3" />
+													Dev
+													{disabled.length > 0 && ` · ${disabled.length} off`}
+												</Popover.Trigger>
+												<Popover.Portal>
+													<Popover.Positioner
+														side="top"
+														sideOffset={8}
+														className="z-[60]"
+													>
+														<Popover.Popup className="ember-menu-panel w-96 rounded-xl border border-amber-700/40 bg-popover p-2 shadow-2xl outline-none">
+															<Popover.Title className="sr-only">
+																Developer generation
+															</Popover.Title>
+															<DeveloperGeneration
+																disabled={disabled}
+																onChange={setDisabled}
+																expanded
+															/>
+															<Button
+																type="button"
+																variant="ghost"
+																size="sm"
+																className="mt-1 w-full"
+																onClick={() => {
+																	location.hash = DEVELOPER_STATISTICS_HASH;
+																}}
+															>
+																<FlaskConical aria-hidden="true" />
+																Developer statistics
+															</Button>
+														</Popover.Popup>
+													</Popover.Positioner>
+												</Popover.Portal>
+											</Popover.Root>
+										)}
 									</div>
 								</div>
 							</div>
@@ -325,7 +383,7 @@ const AdventureOpening = ({
 								className={`
                            grid min-w-0 content-start gap-3
                            min-[900px]:border-l min-[900px]:border-amber-800/25
-                           ${developer ? "min-[900px]:px-5" : "min-[900px]:pl-7"}
+                           min-[900px]:pl-7
                            dark:min-[900px]:border-amber-500/25
                         `}
 							>
@@ -420,15 +478,6 @@ const AdventureOpening = ({
 									}
 								/>
 							</div>
-							{developer && (
-								<div className="min-w-0 min-[900px]:border-l min-[900px]:border-amber-800/20 min-[900px]:pl-5 dark:min-[900px]:border-amber-500/25">
-									<DeveloperGeneration
-										disabled={disabled}
-										onChange={setDisabled}
-										expanded
-									/>
-								</div>
-							)}
 						</div>
 					</Dialog.Popup>
 				</Dialog.Portal>

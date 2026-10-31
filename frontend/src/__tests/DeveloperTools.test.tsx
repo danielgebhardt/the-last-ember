@@ -1,10 +1,9 @@
-import { act, render, screen, waitFor } from "@testing-library/react";
+import { act, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, expect, it, vi } from "vitest";
 import * as Accounts from "../accounts/AccountProvider";
 import AdventureOpening from "../components/game/AdventureOpening";
-import DeveloperCatalog from "../components/game/DeveloperCatalog";
-import { Sheet } from "../components/ui/sheet";
+import DeveloperMenu from "../developer/DeveloperMenu";
 import DeveloperStatisticsRoute from "../developer/DeveloperStatisticsRoute";
 import { analyticsDefaults } from "../developer/StatisticsAnalytics";
 import { filterStatistics } from "../developer/StatisticsData";
@@ -37,9 +36,11 @@ it("exposes generation choices only to a developer and discards them if the role
 			</ThemeProvider>,
 		);
 	const user = userEvent.setup();
-	await user.click(screen.getByText("Developer generation"));
+	await user.click(screen.getByRole("button", { name: /^Dev/ }));
 	expect(screen.getAllByRole("checkbox")).toHaveLength(10);
 	await user.click(screen.getByRole("checkbox", { name: "Floor omens" }));
+	await user.keyboard("{Escape}");
+	expect(screen.getByRole("button", { name: /^Dev · 1 off/ })).toBeVisible();
 	await user.click(screen.getByRole("button", { name: "Begin Adventure" }));
 	expect(begin).toHaveBeenLastCalledWith(expect.anything(), ["omens"]);
 	account.mockReturnValue(developerTestAccount(false));
@@ -48,39 +49,52 @@ it("exposes generation choices only to a developer and discards them if the role
 			<AdventureOpening onBegin={begin} onRestore={() => {}} />
 		</ThemeProvider>,
 	);
-	expect(screen.queryByText("Developer generation")).toBeNull();
+	expect(screen.queryByRole("button", { name: /^Dev/ })).toBeNull();
 	await user.click(screen.getByRole("button", { name: "Begin Adventure" }));
 	expect(begin).toHaveBeenLastCalledWith(expect.anything(), []);
 });
-it("hides the Seed report panel immediately when the claim is removed", async () => {
+it("gathers the developer tools in one menu that disappears when the claim is removed", async () => {
 	const account = vi
 		.spyOn(Accounts, "useAccount")
 		.mockReturnValue(developerTestAccount());
-	const view = render(
+	const start = vi.fn();
+	const menu = () => (
 		<ThemeProvider>
-			<Sheet open>
-				<DeveloperCatalog />
-			</Sheet>
-		</ThemeProvider>,
+			<DeveloperMenu open onOpenChange={() => {}} onStart={start} />
+		</ThemeProvider>
 	);
-	await userEvent
-		.setup()
-		.click(screen.getByRole("tab", { name: "Seed report" }));
+	const view = render(menu());
+	const user = userEvent.setup();
+	const tools = within(screen.getByRole("dialog", { name: "Developer tools" }));
+	await user.click(tools.getByRole("checkbox", { name: "Floor omens" }));
+	await user.click(tools.getByRole("button", { name: "Start test seed 7357" }));
+	expect(start).toHaveBeenLastCalledWith(7357, ["omens"]);
+	const seed = tools.getByLabelText("Seed");
+	await user.clear(seed);
+	await user.type(seed, "not a seed");
+	await user.click(tools.getByRole("button", { name: "Start from seed" }));
+	expect(tools.getByRole("alert")).toHaveTextContent("Enter a whole number");
+	expect(start).toHaveBeenCalledTimes(1);
+	await user.clear(seed);
+	await user.type(seed, "42");
+	await user.click(tools.getByRole("button", { name: "Start from seed" }));
+	expect(start).toHaveBeenLastCalledWith(42, ["omens"]);
+
+	const send = vi.fn();
+	vi.stubGlobal("fetch", send);
+	await user.click(tools.getByRole("tab", { name: "Statistics" }));
+	expect(
+		await tools.findByRole("button", { name: "Load statistics" }),
+	).toBeVisible();
+	expect(send).not.toHaveBeenCalled();
+
+	await user.click(tools.getByRole("tab", { name: "Seed report" }));
 	await screen.findByRole("button", { name: "Run report" });
 	account.mockReturnValue(developerTestAccount(false));
-	view.rerender(
-		<ThemeProvider>
-			<Sheet open>
-				<DeveloperCatalog />
-			</Sheet>
-		</ThemeProvider>,
-	);
-	expect(screen.queryByRole("tab", { name: "Seed report" })).toBeNull();
+	view.rerender(menu());
+	expect(screen.queryByRole("dialog", { name: "Developer tools" })).toBeNull();
+	expect(screen.queryByRole("button", { name: "Developer tools" })).toBeNull();
 	expect(screen.queryByRole("button", { name: "Run report" })).toBeNull();
-	expect(screen.getByRole("tab", { name: "Monsters" })).toHaveAttribute(
-		"aria-selected",
-		"true",
-	);
 });
 it("refuses direct URL access without the claim before making a statistics request", () => {
 	vi.spyOn(Accounts, "useAccount").mockReturnValue(developerTestAccount(false));

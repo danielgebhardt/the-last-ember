@@ -18,6 +18,8 @@ type HeaderProps = {
 	catalogAction?: ReactNode;
 	// The account avatar, last, as on most sites.
 	accountAction?: ReactNode;
+	// Developer tools, beside the avatar, for developer accounts only.
+	devAction?: ReactNode;
 	rankingsAction?: ReactNode;
 };
 
@@ -32,6 +34,7 @@ const Header = ({
 	helpAction,
 	catalogAction,
 	accountAction,
+	devAction,
 	rankingsAction,
 }: HeaderProps) => (
 	<header
@@ -123,6 +126,7 @@ const Header = ({
 						aria-hidden="true"
 						className="mx-0.5 hidden h-6 w-px bg-border sm:block dark:bg-amber-700/30"
 					/>
+					{devAction}
 					{accountAction}
 				</>
 			)}

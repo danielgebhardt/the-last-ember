@@ -55,6 +55,7 @@ import TownLibraryDialog from "./components/town/TownLibraryDialog";
 import TownMap from "./components/town/TownMap";
 import TownStockShop from "./components/town/TownStockShop";
 import TownStorageDialog from "./components/town/TownStorageDialog";
+import DeveloperMenu from "./developer/DeveloperMenu";
 import { useDeveloperStatisticsOpen } from "./developer/DeveloperStatisticsRoute";
 import {
 	MOVEMENT_OFFSETS,
@@ -199,6 +200,7 @@ const Home = ({
 	const [catalogOpen, setCatalogOpen] = useState(false);
 	const [helpOpen, setHelpOpen] = useState(false);
 	const [accountOpen, setAccountOpen] = useState(false);
+	const [devOpen, setDevOpen] = useState(false);
 	const [rankingsOpen, setRankingsOpen] = useState(false);
 	const developerStatisticsOpen = useDeveloperStatisticsOpen();
 	const [characterOpen, setCharacterOpen] = useState(false);
@@ -224,6 +226,7 @@ const Home = ({
 	useEffect(() => {
 		if (developerStatisticsOpen) {
 			setAccountOpen(false);
+			setDevOpen(false);
 			setSettingsOpen(false);
 			setRankingsOpen(false);
 			setHelpOpen(false);
@@ -266,6 +269,7 @@ const Home = ({
 		setHelpOpen(false);
 		setCatalogOpen(false);
 		setRankingsOpen(false);
+		setDevOpen(false);
 	}, [deathOpen]);
 	// Empty loot or death ends selection; later movement must not reopen it.
 	useEffect(() => {
@@ -333,6 +337,7 @@ const Home = ({
 		setSaveOpen(false);
 		setSettingsOpen(false);
 		setRankingsOpen(false);
+		setDevOpen(false);
 	};
 
 	const handleNewDungeon = () => {
@@ -342,10 +347,7 @@ const Home = ({
 			mapRef.current?.focus({ preventScroll: true });
 	};
 
-	const handleSeedSubmit = (
-		event: SubmitEvent<HTMLFormElement>,
-		disabled: DeveloperFeature[] = [],
-	) => {
+	const handleSeedSubmit = (event: SubmitEvent<HTMLFormElement>) => {
 		event.preventDefault();
 		const seed = parseSeedInput(seedInput);
 		const parsed = parseRunConfiguration(configDraft, configuration);
@@ -355,7 +357,7 @@ const Home = ({
 		setConfigErrors(parsed.valid ? {} : parsed.errors);
 		setGenerationError(null);
 		if (seed === undefined || !parsed.valid) return;
-		if (startRun(seed, parsed.value, false, disabled)) setSettingsOpen(false);
+		if (startRun(seed, parsed.value)) setSettingsOpen(false);
 	};
 
 	const isChestOnTile = (object: DungeonObject) =>
@@ -430,6 +432,7 @@ const Home = ({
 		!helpOpen &&
 		!catalogOpen &&
 		!accountOpen &&
+		!devOpen &&
 		!rankingsOpen &&
 		!developerStatisticsOpen &&
 		!characterOpen &&
@@ -632,7 +635,6 @@ const Home = ({
 							<span className="sr-only xl:not-sr-only">Settings</span>
 						</SheetTrigger>
 						<DungeonSettings
-							runId={game.state.runId}
 							finalFocus={mapInputAvailable ? mapRef : false}
 							fogConfiguration={fogConfiguration}
 							onFogEnabledChange={setFogEnabled}
@@ -727,6 +729,27 @@ const Home = ({
 						finalFocus={mapInputAvailable ? mapRef : false}
 						onClosed={() => {
 							if (mapInputAvailable)
+								mapRef.current?.focus({ preventScroll: true });
+						}}
+					/>
+				}
+				devAction={
+					<DeveloperMenu
+						open={devOpen}
+						onOpenChange={setDevOpen}
+						finalFocus={mapInputAvailable ? mapRef : false}
+						onStart={(seed, disabled) => {
+							if (
+								startRun(
+									seed,
+									{
+										...DEFAULT_RUN_CONFIGURATION,
+										difficulty: configuration.difficulty,
+									},
+									false,
+									disabled,
+								)
+							)
 								mapRef.current?.focus({ preventScroll: true });
 						}}
 					/>
