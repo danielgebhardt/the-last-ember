@@ -61,6 +61,50 @@ const RunEntry = ({ record }: { record: RunRecord }) => (
 	</li>
 );
 
+// The same history inline, for the Rankings "This device" board.
+export const RunHistoryList = () => {
+	const [sort, setSort] = useState<Sort>("recent");
+	const [runs] = useState<readonly RunRecord[]>(readRunHistory);
+	const sortId = useId();
+	const sorted = [...runs].sort(SORTS[sort].compare);
+	return (
+		<div className="grid gap-3">
+			<div className="flex flex-wrap items-baseline justify-between gap-3">
+				<p className="text-sm text-muted-foreground">
+					Your last {RUN_HISTORY_LIMIT} finished adventures, ranked or not, kept
+					in this browser only. Select one to see its recap.
+				</p>
+				<label htmlFor={sortId} className="flex items-center gap-2 text-sm">
+					Sort by
+					<select
+						id={sortId}
+						value={sort}
+						onChange={(event) => setSort(event.target.value as Sort)}
+						className="rounded-md border bg-background px-2 py-1"
+					>
+						{(Object.keys(SORTS) as Sort[]).map((key) => (
+							<option key={key} value={key}>
+								{SORTS[key].label}
+							</option>
+						))}
+					</select>
+				</label>
+			</div>
+			{sorted.length ? (
+				<ol aria-label="Finished adventures" className="grid gap-2">
+					{sorted.map((record) => (
+						<RunEntry key={record.id} record={record} />
+					))}
+				</ol>
+			) : (
+				<p className="rounded-xl border bg-card/60 p-10 text-center text-sm text-muted-foreground">
+					No finished adventures yet. Deaths and victories are recorded here.
+				</p>
+			)}
+		</div>
+	);
+};
+
 // Finished adventures kept in this browser only; nothing here changes the game.
 const RunHistoryDialog = ({
 	triggerClassName,

@@ -1,6 +1,7 @@
 import {
 	ChevronLeft,
 	ChevronRight,
+	History,
 	RefreshCw,
 	Trophy,
 	UserRound,
@@ -10,6 +11,7 @@ import { type RefObject, useEffect, useRef, useState } from "react";
 import AccountMenu from "../accounts/AccountMenu";
 import { useAccountProfile } from "../accounts/AccountProfileProvider";
 import { useAccount } from "../accounts/AccountProvider";
+import { RunHistoryList } from "../components/game/RunHistoryDialog";
 import { Button } from "../components/ui/button";
 import { EmberMenuHeader, EmberPanel } from "../components/ui/EmberMenu";
 import {
@@ -22,6 +24,10 @@ import { GAME_VERSION } from "../domain/game/GameVersion";
 import type { RankingsPage } from "./Rankings";
 import { useStatistics } from "./StatisticsProvider";
 
+// Without the Rankings service (offline, or a build without it) there's no JSON
+// answer; say so plainly instead of showing a parse error.
+const OFFLINE =
+	"Rankings can't be reached right now. Your finished runs are still under This device, and ranked ones are sent once Rankings is back.";
 const selectClass =
 	"h-9 rounded-md border border-border bg-background px-3 text-sm text-foreground focus-visible:ring-2 focus-visible:ring-ring";
 export default function RankingsSheet({
@@ -56,7 +62,7 @@ export default function RankingsSheet({
 		setResult(null);
 		setError(null);
 		setLoading(true);
-		if (board === "personal" && !uid) {
+		if (board === "device" || (board === "personal" && !uid)) {
 			setLoading(false);
 			return () => controller.abort();
 		}
@@ -79,7 +85,9 @@ export default function RankingsSheet({
 					headers: token ? { authorization: `Bearer ${token}` } : {},
 					signal: controller.signal,
 				});
-				const data = await response.json();
+				const data = await response.json().catch(() => {
+					throw Error(OFFLINE);
+				});
 				if (!response.ok)
 					throw Error(data.error ?? "Rankings could not be loaded.");
 				if (!controller.signal.aborted) {
@@ -90,9 +98,9 @@ export default function RankingsSheet({
 			} catch (failure) {
 				if (!controller.signal.aborted)
 					setError(
-						failure instanceof Error
+						failure instanceof Error && !(failure instanceof TypeError)
 							? failure.message
-							: "Couldn't reach Rankings. Check your connection and try again.",
+							: OFFLINE,
 					);
 			} finally {
 				if (!controller.signal.aborted) setLoading(false);
@@ -138,6 +146,7 @@ export default function RankingsSheet({
 							{[
 								{ id: "global", label: "Global", Icon: Users },
 								{ id: "personal", label: "My runs", Icon: UserRound },
+								{ id: "device", label: "This device", Icon: History },
 							].map(({ id, label, Icon }) => (
 								<Button
 									key={id}
@@ -155,7 +164,9 @@ export default function RankingsSheet({
 								</Button>
 							))}
 						</fieldset>
-						<div className="flex flex-wrap items-end gap-3">
+						<div
+							className={`flex flex-wrap items-end gap-3 ${board === "device" ? "invisible" : ""}`}
+						>
 							<label className="grid gap-1 text-xs font-medium">
 								Difficulty
 								<select
@@ -213,12 +224,14 @@ export default function RankingsSheet({
 						</div>
 					</div>
 					<p className="text-xs leading-relaxed text-muted-foreground">
-						Victories lead, ordered by fewest turns. Deaths follow, ordered by
-						deepest floor, then fewest turns. Ties go to the first
-						server-accepted submission.
+						{board === "device"
+							? "Every adventure finished in this browser, including custom ones that aren't ranked."
+							: "Victories lead, ordered by fewest turns. Deaths follow, ordered by deepest floor, then fewest turns. Ties go to the first server-accepted submission."}
 					</p>
 				</EmberPanel>
-				{board === "personal" && !uid ? (
+				{board === "device" ? (
+					<RunHistoryList />
+				) : board === "personal" && !uid ? (
 					<EmberPanel className="py-8 text-center">
 						<UserRound
 							aria-hidden="true"
@@ -260,7 +273,9 @@ export default function RankingsSheet({
 									role="alert"
 									className="grid justify-items-center gap-3 p-8 text-center"
 								>
-									<p className="text-sm text-destructive">{error}</p>
+									<p className="max-w-prose text-sm text-muted-foreground">
+										{error}
+									</p>
 									<Button
 										type="button"
 										variant="outline"

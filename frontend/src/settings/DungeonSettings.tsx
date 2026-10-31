@@ -12,7 +12,6 @@ import {
 } from "@/components/ui/sheet";
 import AccountDetails from "../accounts/AccountDetails";
 import AdventurerChoice from "../components/game/AdventurerChoice";
-import RunHistoryDialog from "../components/game/RunHistoryDialog";
 import type { Hints } from "../components/game/useHints";
 import { useTheme } from "./ThemeProvider.tsx";
 import { setTileSize, TILE_SIZES, useTileSize } from "./TileSizes";
@@ -163,12 +162,6 @@ const DungeonSettings = ({ finalFocus, hints }: DungeonSettingsProps) => {
 						<AdventurerChoice />
 						<p className="text-xs text-muted-foreground">
 							How you're drawn on the dungeon map. Saved on this device.
-						</p>
-					</EmberPanel>
-					<EmberPanel className="grid gap-2">
-						<RunHistoryDialog />
-						<p className="text-xs text-muted-foreground">
-							Your last finished adventures on this device, with their recaps.
 						</p>
 					</EmberPanel>
 					<EmberPanel>

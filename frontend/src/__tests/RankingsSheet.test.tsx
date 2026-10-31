@@ -3,7 +3,12 @@ import userEvent from "@testing-library/user-event";
 import { afterEach, expect, it, vi } from "vitest";
 import { type Account, useAccount } from "../accounts/AccountProvider";
 import { Sheet } from "../components/ui/sheet";
+import { DEFAULT_RUN_CONFIGURATION } from "../domain/dungeon/RunConfiguration";
+import { createRunRecord } from "../domain/game/RunRecap";
+import { restoreSave } from "../domain/saves/SaveFormat";
+import { addRunToHistory } from "../persistence/RunHistory";
 import RankingsSheet from "../statistics/RankingsSheet";
+import { savedAdventure } from "./SaveTestHelpers";
 
 vi.mock("../accounts/AccountProvider", () => ({ useAccount: vi.fn() }));
 vi.mock("../accounts/AccountMenu", () => ({ default: () => null }));
@@ -29,7 +34,57 @@ const row = (name: string, rank = 1) => ({
 	level: 10,
 	acceptedAt: "2026-10-25T12:00:00.000Z",
 });
-afterEach(() => vi.unstubAllGlobals());
+afterEach(() => {
+	vi.unstubAllGlobals();
+	localStorage.clear();
+});
+const sheet = () =>
+	render(
+		<Sheet open>
+			<RankingsSheet />
+		</Sheet>,
+	);
+it.each([
+	["a page instead of an answer", async () => new Response("<!doctype html>")],
+	[
+		"no connection",
+		async (): Promise<Response> => {
+			throw new TypeError("Failed to fetch");
+		},
+	],
+])("explains plainly when Rankings can't be reached: %s", async (_, reply) => {
+	vi.mocked(useAccount).mockReturnValue(account());
+	vi.stubGlobal("fetch", vi.fn<typeof fetch>().mockImplementation(reply));
+	sheet();
+	const alert = await screen.findByRole("alert");
+	expect(alert).toHaveTextContent("Rankings can't be reached right now");
+	expect(alert).toHaveTextContent("This device");
+	expect(alert).not.toHaveTextContent(/Unexpected token|Failed to fetch/);
+	expect(screen.getByRole("button", { name: "Try again" })).toBeVisible();
+});
+it("lists this device's finished adventures, ranked or not, without asking the server", async () => {
+	vi.mocked(useAccount).mockReturnValue(account());
+	const send = vi.fn<typeof fetch>(async () => Response.json({ rows: [] }));
+	vi.stubGlobal("fetch", send);
+	const ended = restoreSave(savedAdventure()).state;
+	addRunToHistory(
+		createRunRecord(
+			{ ...ended, player: { ...ended.player, health: 0 } },
+			DEFAULT_RUN_CONFIGURATION,
+			3,
+			"The goblin hits you for 3 damage.",
+			new Date("2026-10-21T12:00:00Z"),
+		),
+	);
+	sheet();
+	const user = userEvent.setup();
+	await waitFor(() => expect(send).toHaveBeenCalledTimes(1));
+	await user.click(screen.getByRole("button", { name: "This device" }));
+	const runs = screen.getByRole("list", { name: "Finished adventures" });
+	expect(runs).toHaveTextContent(/Died on floor 3/);
+	expect(screen.queryByRole("table")).toBeNull();
+	expect(send).toHaveBeenCalledTimes(1);
+});
 it("loads personal pages with authorization, shows global ranks, and resets paging when filters change", async () => {
 	vi.mocked(useAccount).mockReturnValue(account());
 	const send = vi.fn<typeof fetch>().mockImplementation(async (url) => {

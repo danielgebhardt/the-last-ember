@@ -18,11 +18,14 @@ test("a death shows its recap and is kept in the run history across reloads", as
 		.getByRole("button", { name: "Inspect run", exact: true })
 		.click();
 
-	await page.getByRole("button", { name: "Settings", exact: true }).click();
-	await page.getByRole("button", { name: "Run history", exact: true }).click();
-	const history = page.getByRole("dialog", { name: "Run history" });
-	await expect(history).toContainText(/Died on floor 1 of \d+ · turn 1/);
+	await page.getByRole("button", { name: "Rankings", exact: true }).click();
+	const rankings = page.getByRole("dialog", { name: "Rankings" });
+	await rankings
+		.getByRole("button", { name: "This device", exact: true })
+		.click();
+	await expect(rankings).toContainText(/Died on floor 1 of \d+ · turn 1/);
 	await page.keyboard.press("Escape");
+	const history = page.getByRole("dialog", { name: "Run history" });
 
 	// The record survives a reload and is reachable from the opening screen.
 	await page.reload();
