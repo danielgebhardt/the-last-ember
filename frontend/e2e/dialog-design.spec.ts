@@ -19,7 +19,7 @@ for (const width of [1280]) {
 			await expect(map(page)).toBeFocused();
 			for (const [button, name] of [
 				["Settings", "Settings"],
-				["Help", "Help / Controls"],
+				["Help", "Help"],
 				["Save/Load", "Save/Load"],
 				["Catalog", "Developer Catalog"],
 			]) {
@@ -49,10 +49,12 @@ for (const width of [1280]) {
 						}),
 					)
 					.toBe(true);
-				if (button === "Help")
+				if (button === "Help") {
+					await dialog.getByRole("tab", { name: "Map", exact: true }).click();
 					await expect(
 						dialog.getByRole("region", { name: "Map symbols" }),
 					).toBeVisible();
+				}
 				await close.click();
 				await expect(map(page)).toBeFocused();
 			}

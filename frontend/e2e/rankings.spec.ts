@@ -6,7 +6,7 @@ for (const size of [
 	{ width: 1024, height: 768 },
 ])
 	for (const theme of ["Light", "Dark"]) {
-		test(`Rankings from opening, header and Help fit at ${size.width} ${theme}`, async ({
+		test(`Rankings from opening and header fit, and Help leaves it out, at ${size.width} ${theme}`, async ({
 			page,
 		}, testInfo) => {
 			await page.setViewportSize(size);
@@ -92,17 +92,17 @@ for (const size of [
 			await expect(page.getByLabel("Town map", { exact: true })).toBeFocused();
 			await nav.getByRole("button", { name: "Help", exact: true }).click();
 			await expect(
-				page.getByRole("heading", { name: "Help / Controls", exact: true }),
+				page.getByRole("heading", { name: "Help", exact: true }),
 			).toBeFocused();
 			await page.keyboard.press("Space");
 			await expect(
 				page.getByRole("dialog", { name: "Rankings", exact: true }),
 			).toHaveCount(0);
-			await page
-				.getByRole("dialog", { name: "Help / Controls", exact: true })
-				.getByRole("button", { name: "Rankings", exact: true })
-				.click();
-			await expect(sheet.getByRole("table")).toBeVisible();
+			await expect(
+				page
+					.getByRole("dialog", { name: "Help", exact: true })
+					.getByRole("button", { name: "Rankings", exact: true }),
+			).toHaveCount(0);
 		});
 	}
 

@@ -37,6 +37,7 @@ it("Help explains the visible creature and hides another outside fog sight", asy
 	});
 	const user = userEvent.setup();
 	await user.click(screen.getByRole("button", { name: "Help" }));
+	await user.click(await screen.findByRole("tab", { name: "Map" }));
 	const creatures = within(
 		await screen.findByRole("region", { name: "Visible creatures" }),
 	);

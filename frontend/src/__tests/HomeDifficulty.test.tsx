@@ -88,6 +88,7 @@ describe("Choosing adventure difficulty", () => {
 		);
 		expect(screen.getByLabelText("Dungeon map", { exact: true })).toHaveFocus();
 		await user.click(screen.getByRole("button", { name: "Help" }));
+		await user.click(await screen.findByRole("tab", { name: "Map" }));
 		expect(screen.getByLabelText("Visible creatures")).toHaveTextContent(
 			"Maximum health 5",
 		);

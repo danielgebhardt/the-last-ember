@@ -18,7 +18,7 @@ const renderHelpRun = () => {
 };
 const openHelp = async (user: ReturnType<typeof userEvent.setup>) => {
 	await user.click(screen.getByRole("button", { name: "Help" }));
-	return screen.findByRole("dialog", { name: "Help / Controls" });
+	return screen.findByRole("dialog", { name: "Help" });
 };
 afterEach(resetHomeTestState);
 
@@ -33,12 +33,27 @@ describe("Home Help menu", () => {
 		const user = renderHelpRun();
 		expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
 		const panel = await openHelp(user);
-		expect(
-			within(panel).getByRole("heading", { name: "Help / Controls" }),
-		).toBeVisible();
+		expect(within(panel).getByRole("heading", { name: "Help" })).toBeVisible();
 		expect(
 			screen.queryByRole("dialog", { name: "Settings" }),
 		).not.toBeInTheDocument();
+	});
+	it("organizes Help in Controls, Map and Mechanics tabs, opening on Controls", async () => {
+		const user = renderHelpRun();
+		const help = within(await openHelp(user));
+		expect(help.getAllByRole("tab").map((tab) => tab.textContent)).toEqual([
+			"Controls",
+			"Map",
+			"Mechanics",
+		]);
+		expect(help.getByRole("tab", { name: "Controls" })).toHaveAttribute(
+			"aria-selected",
+			"true",
+		);
+		expect(help.queryByRole("button", { name: "Rankings" })).toBeNull();
+		expect(help.queryByRole("region", { name: "Map symbols" })).toBeNull();
+		await user.click(help.getByRole("tab", { name: "Map" }));
+		expect(help.getByRole("region", { name: "Map symbols" })).toBeVisible();
 	});
 	it("explains movement, waiting, attacking, stairs, and dismissal", async () => {
 		const user = renderHelpRun();
@@ -63,6 +78,7 @@ describe("Home Help menu", () => {
 		).toBeVisible();
 		for (const key of ["1", "2", "3", "4"])
 			expect(help.getByText(key, { selector: "kbd" })).toBeVisible();
+		await user.click(await screen.findByRole("tab", { name: "Mechanics" }));
 		expect(
 			help.getByText(/G to pick up an item on your current tile/),
 		).toBeVisible();
@@ -76,11 +92,13 @@ describe("Home Help menu", () => {
 		expect(
 			help.getByText(/Blocked movement does not use a turn/),
 		).toBeVisible();
+		await user.click(screen.getByRole("tab", { name: "Controls" }));
 		expect(help.getByText("Close this sheet")).toBeVisible();
 	});
 	it("explains that only capable pursuers can spend an action opening ordinary doors", async () => {
 		const user = renderHelpRun();
 		const help = within(await openHelp(user));
+		await user.click(await screen.findByRole("tab", { name: "Mechanics" }));
 		expect(help.getByText(/Orcs, cultists and necromancers/)).toHaveTextContent(
 			/whole action.*elite gates/i,
 		);
@@ -91,6 +109,7 @@ describe("Home Help menu", () => {
 	it("explains earned attributes, the health benefit, and the level cap", async () => {
 		const user = renderHelpRun();
 		const help = within(await openHelp(user));
+		await user.click(await screen.findByRole("tab", { name: "Mechanics" }));
 		const progression = within(
 			help.getByRole("region", { name: "Character progression" }),
 		);
@@ -131,18 +150,14 @@ describe("Home Help menu", () => {
 		await user.tab(); // Help
 		expect(screen.getByRole("button", { name: "Help" })).toHaveFocus();
 		await user.keyboard("{Enter}");
-		expect(
-			await screen.findByRole("dialog", { name: "Help / Controls" }),
-		).toBeVisible();
+		expect(await screen.findByRole("dialog", { name: "Help" })).toBeVisible();
 		await user.keyboard("{Escape}");
 		await waitFor(() =>
 			expect(screen.queryByRole("dialog")).not.toBeInTheDocument(),
 		);
 		screen.getByRole("button", { name: "Help" }).focus();
 		await user.keyboard(" ");
-		expect(
-			await screen.findByRole("dialog", { name: "Help / Controls" }),
-		).toBeVisible();
+		expect(await screen.findByRole("dialog", { name: "Help" })).toBeVisible();
 		expect(screen.getByLabelText("Turn count")).toHaveTextContent("Turn 0");
 	});
 	it("suspends movement and waiting while open, then resumes both on the map", async () => {
@@ -152,9 +167,7 @@ describe("Home Help menu", () => {
 		const log = screen.getByRole("log").textContent;
 		await openHelp(user);
 		await waitFor(() =>
-			expect(
-				screen.getByRole("heading", { name: "Help / Controls" }),
-			).toHaveFocus(),
+			expect(screen.getByRole("heading", { name: "Help" })).toHaveFocus(),
 		);
 		await user.keyboard("{ArrowRight}d ");
 		expect(
@@ -195,6 +208,7 @@ describe("Home Help menu", () => {
 	it("explains map symbols and fog states in Help even when fog is disabled", async () => {
 		const user = renderHelpRun();
 		const help = await openHelp(user);
+		await user.click(await screen.findByRole("tab", { name: "Map" }));
 		const symbols = within(help).getByRole("region", { name: "Map symbols" });
 		const legend = within(symbols).getByRole("list", {
 			name: "Dungeon legend",
@@ -220,6 +234,7 @@ describe("Home Help menu", () => {
 	it("explains enemy range, cover and the committed response to a prepared attack", async () => {
 		const user = renderHelpRun();
 		const help = await openHelp(user);
+		await user.click(await screen.findByRole("tab", { name: "Mechanics" }));
 		const tactics = within(help).getByRole("region", { name: "Enemy tactics" });
 		expect(tactics).toHaveTextContent("Goblin archer");
 		expect(tactics).toHaveTextContent("2–4");
@@ -233,6 +248,7 @@ describe("Home Help menu", () => {
 	it("explains Disease, both cures and the sanctuary fees", async () => {
 		const user = renderHelpRun();
 		const help = await openHelp(user);
+		await user.click(await screen.findByRole("tab", { name: "Mechanics" }));
 		expect(help).toHaveTextContent("Disease lowers maximum HP by 20%");
 		expect(help).toHaveTextContent("A Cure Disease potion removes it");
 		expect(help).toHaveTextContent("restores maximum HP but not lost HP");
@@ -248,6 +264,7 @@ describe("Home Help menu", () => {
 	it("explains the Forgotten Forge's prices, odds and fixed result", async () => {
 		const user = renderHelpRun();
 		const help = await openHelp(user);
+		await user.click(await screen.findByRole("tab", { name: "Mechanics" }));
 		expect(help).toHaveTextContent("about 60% of new adventures");
 		expect(help).toHaveTextContent("Reliable forging costs 300 gold");
 		expect(help).toHaveTextContent(
@@ -258,6 +275,7 @@ describe("Home Help menu", () => {
 	it("explains the town forge's tier pricing and limits", async () => {
 		const user = renderHelpRun();
 		const help = await openHelp(user);
+		await user.click(await screen.findByRole("tab", { name: "Mechanics" }));
 		expect(help).toHaveTextContent("tier base (150, 300, 600, 1000 gold)");
 		expect(help).toHaveTextContent("Rare finds and rings cannot be reforged");
 		expect(help).toHaveTextContent("never ones its dungeon holds");
@@ -265,6 +283,7 @@ describe("Home Help menu", () => {
 	it("explains Wishing Well offerings, odds and the fixed result", async () => {
 		const user = renderHelpRun();
 		const help = await openHelp(user);
+		await user.click(await screen.findByRole("tab", { name: "Mechanics" }));
 		expect(help).toHaveTextContent("one offering of 50, 100 or 250 gold");
 		expect(help).toHaveTextContent("reward chance (40%, 55%, 70%)");
 		expect(help).toHaveTextContent("a larger offering can only improve it");

@@ -49,9 +49,9 @@ test("corridor running advances visible ordinary turns, stops at decisions and c
 	const paused = await turns(page).innerText();
 	await page.waitForTimeout(300);
 	await expect(turns(page)).toHaveText(paused);
-	await expect(
-		page.getByRole("dialog", { name: "Help / Controls" }),
-	).toContainText("Run a cleared room or quiet corridor");
+	await expect(page.getByRole("dialog", { name: "Help" })).toContainText(
+		"Run a cleared room or quiet corridor",
+	);
 	await page.keyboard.press("Escape");
 	await map(page).focus();
 	await page.waitForTimeout(300);

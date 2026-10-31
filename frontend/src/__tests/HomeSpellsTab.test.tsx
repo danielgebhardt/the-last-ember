@@ -107,6 +107,7 @@ describe("Character and Spells tabs", () => {
 		const help = within(await screen.findByRole("dialog"));
 		expect(help.getByText("Z", { selector: "kbd" })).toBeVisible();
 		expect(help.getByText("H", { selector: "kbd" })).toBeVisible();
+		await user.click(await screen.findByRole("tab", { name: "Mechanics" }));
 		expect(
 			help.getByRole("region", { name: "Spellcasting" }),
 		).toHaveTextContent(/arrows.*Enter.*click/i);

@@ -79,9 +79,13 @@ describe("One-time hints", () => {
 		await user.click(
 			within(region).getByRole("button", { name: "More in Help" }),
 		);
-		await screen.findByRole("dialog", { name: "Help / Controls" });
+		await screen.findByRole("dialog", { name: "Help" });
 		await waitFor(() => expect(scroll).toHaveBeenCalled());
 		expect(scroll.mock.contexts[0]).toHaveAttribute("id", "help-equipment");
+		expect(screen.getByRole("tab", { name: "Mechanics" })).toHaveAttribute(
+			"aria-selected",
+			"true",
+		);
 		expect(hint()).not.toBeInTheDocument();
 	});
 	it("respects the Settings toggle and can show every hint again", async () => {

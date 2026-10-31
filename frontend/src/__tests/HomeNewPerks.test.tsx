@@ -76,6 +76,7 @@ it("quotes the perk-adjusted starting spell costs and range in Help", async () =
 	const missile = SPELL_DEFINITIONS["magic-missile"];
 	await user.click(screen.getByRole("button", { name: "Help" }));
 	const help = within(await screen.findByRole("dialog", { name: /Help/ }));
+	await user.click(await screen.findByRole("tab", { name: "Mechanics" }));
 	expect(
 		help.getByText(
 			new RegExp(

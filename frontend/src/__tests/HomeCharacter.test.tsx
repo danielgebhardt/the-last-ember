@@ -110,7 +110,7 @@ describe("Character sheet", () => {
 			screen.queryByRole("dialog", { name: "Settings" }),
 		).not.toBeInTheDocument();
 		expect(
-			screen.queryByRole("dialog", { name: "Help / Controls" }),
+			screen.queryByRole("dialog", { name: "Help" }),
 		).not.toBeInTheDocument();
 	});
 	it.each(["Escape", "Close button"])(

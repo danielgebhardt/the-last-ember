@@ -111,6 +111,7 @@ test("the hunted ascent announces endgame hunters and explains cure sensing with
 	).toBeVisible();
 	await expect(map(page)).toBeFocused();
 	await page.getByRole("button", { name: "Help", exact: true }).click();
+	await page.getByRole("tab", { name: "Mechanics", exact: true }).click();
 	const hunted = page.getByRole("region", {
 		name: "Hunted return",
 		exact: true,

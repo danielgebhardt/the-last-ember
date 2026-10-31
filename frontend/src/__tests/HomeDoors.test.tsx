@@ -51,7 +51,7 @@ it("E opens an adjacent door for one turn and updates sight without moving the p
 		"remembered",
 	);
 	await user.click(screen.getByRole("button", { name: "Help" }));
-	await screen.findByRole("dialog", { name: "Help / Controls" });
+	await screen.findByRole("dialog", { name: "Help" });
 	await user.keyboard("e");
 	expect(screen.getByLabelText("Turn count")).toHaveTextContent("Turn 2");
 	await user.keyboard("{Escape}");
