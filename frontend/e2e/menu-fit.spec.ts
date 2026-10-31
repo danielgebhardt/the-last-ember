@@ -18,7 +18,7 @@ for (const size of [
 	{ width: 1024, height: 768 },
 ])
 	for (const colorScheme of ["light", "dark"] as const)
-		test(`Settings and New adventure fit without scrolling at ${size.width} ${colorScheme}`, async ({
+		test(`Settings and New adventure fit without scrolling or resizing at ${size.width} ${colorScheme}`, async ({
 			page,
 		}, testInfo) => {
 			await page.setViewportSize(size);
@@ -43,6 +43,17 @@ for (const size of [
 			});
 			await page.keyboard.press("Escape");
 			const custom = await openCustomAdventure(page);
+			// Switching tabs keeps the dialog's size.
+			const customBox = await custom.boundingBox();
+			await custom.getByRole("tab", { name: "Standard", exact: true }).click();
+			await expect(
+				custom.getByRole("button", {
+					name: "Start standard adventure",
+					exact: true,
+				}),
+			).toBeVisible();
+			expect(await custom.boundingBox()).toEqual(customBox);
+			await custom.getByRole("tab", { name: "Custom", exact: true }).click();
 			await expect(
 				custom.getByRole("button", {
 					name: "Start custom adventure",

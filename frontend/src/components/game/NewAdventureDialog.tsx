@@ -2,6 +2,7 @@ import { Dialog } from "@base-ui/react/dialog";
 import { Tabs } from "@base-ui/react/tabs";
 import { Compass, Swords, X } from "lucide-react";
 import {
+	type ReactNode,
 	type RefObject,
 	type SubmitEvent,
 	useEffect,
@@ -23,6 +24,33 @@ import type {
 import { Button } from "../ui/button";
 import CustomAdventureForm from "./CustomAdventureForm";
 import DifficultyChoice from "./DifficultyChoice";
+
+// Both panels share one grid cell, so the dialog keeps the taller one's size
+// whichever tab is open; the other stays laid out but invisible and inert.
+const StackedPanel = ({
+	value,
+	className = "",
+	children,
+}: {
+	value: string;
+	className?: string;
+	children: ReactNode;
+}) => (
+	<Tabs.Panel
+		value={value}
+		keepMounted
+		render={({ hidden: _hidden, ...props }, state) => (
+			<div
+				{...props}
+				inert={state.hidden || undefined}
+				aria-hidden={state.hidden || undefined}
+				className={`[grid-area:1/1] p-4 ${state.hidden ? "invisible" : ""} ${className}`}
+			>
+				{children}
+			</div>
+		)}
+	/>
+);
 
 // Starting over: the standard ranked expedition, or a custom one with its own seed,
 // size and sight. Either replaces the adventure in progress.
@@ -129,41 +157,42 @@ const NewAdventureDialog = ({
 							</EmberTab>
 							<EmberTab value="custom">Custom</EmberTab>
 						</EmberTabsList>
-						<Tabs.Panel
-							value="standard"
-							className="grid min-h-0 gap-4 overflow-y-auto p-4"
-						>
-							<p className="text-sm text-muted-foreground">
-								The standard expedition: twenty floors of 40 × 40 tiles, with
-								fog of war. It's ranked when you're signed in.
-							</p>
-							<DifficultyChoice
-								value={standardDifficulty}
-								onChange={setStandardDifficulty}
-							/>
-							<Button
-								ref={startRef}
-								onClick={() => {
-									onOpenChange(false);
-									onStandard(standardDifficulty);
-								}}
-							>
-								Start standard adventure
-							</Button>
-						</Tabs.Panel>
-						<Tabs.Panel value="custom" className="min-h-0 overflow-y-auto p-4">
-							<CustomAdventureForm
-								seedInput={seedInput}
-								seedError={seedError}
-								configDraft={configDraft}
-								configErrors={configErrors}
-								generationError={generationError}
-								onConfigInputChange={onConfigInputChange}
-								onSeedInputChange={onSeedInputChange}
-								fog={fog}
-								onSubmit={onCustom}
-							/>
-						</Tabs.Panel>
+						<div className="grid min-h-0 overflow-y-auto">
+							<StackedPanel value="standard" className="flex flex-col gap-4">
+								<p className="text-sm text-muted-foreground">
+									The standard expedition: twenty floors of 40 × 40 tiles, with
+									fog of war. It's ranked when you're signed in.
+								</p>
+								<DifficultyChoice
+									value={standardDifficulty}
+									onChange={setStandardDifficulty}
+								/>
+								<Button
+									ref={startRef}
+									// Bottom-aligned, where the Custom tab's start button sits.
+									className="mt-auto"
+									onClick={() => {
+										onOpenChange(false);
+										onStandard(standardDifficulty);
+									}}
+								>
+									Start standard adventure
+								</Button>
+							</StackedPanel>
+							<StackedPanel value="custom">
+								<CustomAdventureForm
+									seedInput={seedInput}
+									seedError={seedError}
+									configDraft={configDraft}
+									configErrors={configErrors}
+									generationError={generationError}
+									onConfigInputChange={onConfigInputChange}
+									onSeedInputChange={onSeedInputChange}
+									fog={fog}
+									onSubmit={onCustom}
+								/>
+							</StackedPanel>
+						</div>
 					</Tabs.Root>
 				</Dialog.Popup>
 			</Dialog.Portal>
