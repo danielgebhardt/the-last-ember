@@ -49,9 +49,9 @@ for (const [theme, width] of [
 			),
 		).toBe(hotbarColor);
 		await page.keyboard.press("Escape");
-		await page.getByRole("button", { name: "Catalog", exact: true }).click();
+		await page.getByRole("button", { name: "Bestiary", exact: true }).click();
 		const catalog = page.getByRole("dialog", {
-			name: "Developer Catalog",
+			name: "Bestiary",
 			exact: true,
 		});
 		for (const section of ["Monsters", "Items", "Dungeon objects", "Spells"]) {

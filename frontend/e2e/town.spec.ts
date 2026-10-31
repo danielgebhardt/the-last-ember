@@ -24,8 +24,8 @@ test("fixed town preview works in both themes on phone, laptop and desktop witho
 			await page.getByRole("button", { name: "Settings", exact: true }).click();
 			await page.getByRole("button", { name: theme, exact: true }).click();
 			await page.keyboard.press("Escape");
-			await page.getByRole("button", { name: "Catalog", exact: true }).click();
-			const sheet = page.getByRole("dialog", { name: "Developer Catalog" });
+			await page.getByRole("button", { name: "Bestiary", exact: true }).click();
+			const sheet = page.getByRole("dialog", { name: "Bestiary" });
 			await sheet.getByRole("tab", { name: "Town", exact: true }).click();
 			const preview = sheet.getByRole("region", { name: "Town map preview" });
 			// The whole town fits; only the catalog panel scrolls.

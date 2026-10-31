@@ -712,7 +712,7 @@ const Home = ({
 							<SheetTrigger
 								render={
 									<Button
-										title="Catalog"
+										title="Bestiary"
 										type="button"
 										variant="outline"
 										className={HEADER_BUTTON_SECONDARY}
@@ -720,7 +720,7 @@ const Home = ({
 								}
 							>
 								<LibraryBig aria-hidden="true" />
-								<span className="sr-only xl:not-sr-only">Catalog</span>
+								<span className="sr-only xl:not-sr-only">Bestiary</span>
 							</SheetTrigger>
 							<Suspense fallback={null}>
 								<DeveloperCatalog

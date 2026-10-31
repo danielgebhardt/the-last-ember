@@ -21,7 +21,7 @@ for (const width of [1280]) {
 				["Settings", "Settings"],
 				["Help", "Help"],
 				["Save/Load", "Save/Load"],
-				["Catalog", "Developer Catalog"],
+				["Bestiary", "Bestiary"],
 			]) {
 				await page.getByRole("button", { name: button, exact: true }).click();
 				const dialog = page.getByRole("dialog", { name, exact: true });

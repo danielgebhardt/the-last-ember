@@ -16,14 +16,29 @@ afterEach(() => {
 	resetHomeTestState();
 	flags.developerCatalog = true;
 });
-describe("Developer catalog", () => {
+describe("Bestiary", () => {
 	it("shows the actual monster, spell and item catalogs without advancing the run", async () => {
 		renderHome(<Home />);
 		const user = userEvent.setup();
-		await user.click(screen.getByRole("button", { name: "Catalog" }));
+		await user.click(screen.getByRole("button", { name: "Bestiary" }));
 		const sheet = await screen.findByRole("dialog", {
-			name: "Developer Catalog",
+			name: "Bestiary",
 		});
+		// The seed report lives in the developer tools now.
+		expect(
+			within(sheet)
+				.getAllByRole("tab")
+				.map((tab) => tab.textContent),
+		).toEqual([
+			"Monsters",
+			"Spells",
+			"Items",
+			"Conditions",
+			"Perks",
+			"Dungeon objects",
+			"Terrain",
+			"Town",
+		]);
 		for (const [label, definitions] of [
 			["Monsters", MONSTER_DEFINITIONS],
 			["Spells", SPELL_DEFINITIONS],
@@ -75,12 +90,12 @@ describe("Developer catalog", () => {
 	it("filters by a stable kind and keeps previews informational", async () => {
 		renderHome(<Home />);
 		const user = userEvent.setup();
-		await user.click(screen.getByRole("button", { name: "Catalog" }));
+		await user.click(screen.getByRole("button", { name: "Bestiary" }));
 		const sheet = await screen.findByRole("dialog", {
-			name: "Developer Catalog",
+			name: "Bestiary",
 		});
 		await user.type(
-			within(sheet).getByRole("searchbox", { name: "Filter catalog" }),
+			within(sheet).getByRole("searchbox", { name: "Filter Bestiary" }),
 			"wyvern",
 		);
 		expect(within(sheet).getAllByRole("listitem")).toHaveLength(1);
@@ -95,15 +110,15 @@ describe("Developer catalog", () => {
 	it("filters only the open section and clears the search when switching tabs", async () => {
 		renderHome(<Home />);
 		const user = userEvent.setup();
-		await user.click(screen.getByRole("button", { name: "Catalog" }));
+		await user.click(screen.getByRole("button", { name: "Bestiary" }));
 		const sheet = within(
-			await screen.findByRole("dialog", { name: "Developer Catalog" }),
+			await screen.findByRole("dialog", { name: "Bestiary" }),
 		);
 		expect(sheet.getByRole("tab", { name: "Monsters" })).toHaveAttribute(
 			"aria-selected",
 			"true",
 		);
-		const search = sheet.getByRole("searchbox", { name: "Filter catalog" });
+		const search = sheet.getByRole("searchbox", { name: "Filter Bestiary" });
 		await user.type(search, "iron sword");
 		expect(
 			sheet.getByText("No matching entries in this section."),
@@ -130,9 +145,9 @@ describe("Developer catalog", () => {
 	it("supports keyboard tab navigation without moving the player", async () => {
 		renderHome(<Home />);
 		const user = userEvent.setup();
-		await user.click(screen.getByRole("button", { name: "Catalog" }));
+		await user.click(screen.getByRole("button", { name: "Bestiary" }));
 		const sheet = within(
-			await screen.findByRole("dialog", { name: "Developer Catalog" }),
+			await screen.findByRole("dialog", { name: "Bestiary" }),
 		);
 		await user.click(sheet.getByRole("tab", { name: "Monsters" }));
 		await user.keyboard("{ArrowRight}");
@@ -151,9 +166,9 @@ describe("Developer catalog", () => {
 		const originalPlayer = screen
 			.getByRole("cell", { name: / - player$/ })
 			.getAttribute("aria-label");
-		await user.click(screen.getByRole("button", { name: "Catalog" }));
+		await user.click(screen.getByRole("button", { name: "Bestiary" }));
 		const sheet = within(
-			await screen.findByRole("dialog", { name: "Developer Catalog" }),
+			await screen.findByRole("dialog", { name: "Bestiary" }),
 		);
 		await user.click(sheet.getByRole("tab", { name: "Town" }));
 		expect(sheet.queryByRole("searchbox")).not.toBeInTheDocument();
@@ -174,9 +189,9 @@ describe("Developer catalog", () => {
 	it("keeps all potion kinds together, including ordinary mana potion", async () => {
 		renderHome(<Home />);
 		const user = userEvent.setup();
-		await user.click(screen.getByRole("button", { name: "Catalog" }));
+		await user.click(screen.getByRole("button", { name: "Bestiary" }));
 		const sheet = within(
-			await screen.findByRole("dialog", { name: "Developer Catalog" }),
+			await screen.findByRole("dialog", { name: "Bestiary" }),
 		);
 		await user.click(sheet.getByRole("tab", { name: "Items" }));
 		const names = sheet
@@ -198,7 +213,7 @@ describe("Developer catalog", () => {
 		flags.developerCatalog = false;
 		renderHome(<Home />);
 		expect(
-			screen.queryByRole("button", { name: "Catalog" }),
+			screen.queryByRole("button", { name: "Bestiary" }),
 		).not.toBeInTheDocument();
 	});
 });

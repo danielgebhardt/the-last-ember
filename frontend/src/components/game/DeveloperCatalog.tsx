@@ -226,11 +226,7 @@ const DeveloperCatalog = ({
 			<EmberMenuHeader
 				className="pr-12"
 				icon={<LibraryBig className="size-5" />}
-				heading={
-					<SheetTitle className="ember-menu-title">
-						Developer Catalog
-					</SheetTitle>
-				}
+				heading={<SheetTitle className="ember-menu-title">Bestiary</SheetTitle>}
 				subtitle={
 					<SheetDescription className="ember-menu-description">
 						Normal baseline definitions and game visuals. Active difficulty
@@ -249,7 +245,7 @@ const DeveloperCatalog = ({
 				}}
 				className="flex min-h-0 flex-1 flex-col gap-4 px-4 pb-6"
 			>
-				<EmberTabsList aria-label="Catalog sections" className="px-2 pt-2">
+				<EmberTabsList aria-label="Bestiary sections" className="px-2 pt-2">
 					{CATALOG_SECTIONS.map((section) => (
 						<EmberTab key={section} value={section}>
 							{section}
@@ -262,7 +258,7 @@ const DeveloperCatalog = ({
 						htmlFor={filterId}
 						className="grid shrink-0 gap-2 text-sm font-medium"
 					>
-						Filter catalog
+						Filter Bestiary
 						<Input
 							id={filterId}
 							type="search"
