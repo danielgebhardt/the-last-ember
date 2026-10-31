@@ -149,7 +149,9 @@ describe("Potion hotbar gameplay", () => {
 	it("restores starter supplies and shortcuts on New Dungeon", async () => {
 		const user = setup();
 		await user.click(screen.getByRole("button", { name: "New Dungeon" }));
-		await user.click(screen.getByRole("button", { name: "Start new dungeon" }));
+		await user.click(
+			screen.getByRole("button", { name: "Start standard adventure" }),
+		);
 		await enterDungeonFromTown(user);
 		for (const [slot, name] of [
 			[3, "Greater healing potion"],

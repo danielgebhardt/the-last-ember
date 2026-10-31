@@ -84,8 +84,31 @@ export const openSettings = async (
 	user: ReturnType<typeof userEvent.setup>,
 ) => {
 	await user.click(screen.getByRole("button", { name: "Settings" }));
-	await screen.findByRole("dialog", { name: "Settings" });
+	return screen.findByRole("dialog", { name: "Settings" });
+};
+
+// New Dungeon → Custom, where a seed, size, difficulty and sight are chosen.
+export const openCustomAdventure = async (
+	user: ReturnType<typeof userEvent.setup>,
+) => {
+	await user.click(screen.getByRole("button", { name: "New Dungeon" }));
+	await screen.findByRole("dialog", { name: "New adventure" });
+	await user.click(screen.getByRole("tab", { name: "Custom" }));
 	return screen.getByRole("textbox", { name: "Dungeon seed" });
+};
+
+export const waitForNewAdventureClosed = () =>
+	waitFor(() => {
+		expect(
+			screen.queryByRole("dialog", { name: "New adventure" }),
+		).not.toBeInTheDocument();
+	});
+
+export const closeNewAdventure = async (
+	user: ReturnType<typeof userEvent.setup>,
+) => {
+	await user.keyboard("{Escape}");
+	await waitForNewAdventureClosed();
 };
 
 export const waitForSettingsClosed = () =>

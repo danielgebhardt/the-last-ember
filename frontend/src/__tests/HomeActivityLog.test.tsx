@@ -8,11 +8,12 @@ import {
 import * as GameState from "../domain/game/GameState.ts";
 import {
 	closeSettings,
+	openCustomAdventure,
 	openSettings,
 	renderHome,
 	resetHomeTestState,
 	stubDungeonRun,
-	waitForSettingsClosed,
+	waitForNewAdventureClosed,
 } from "./HomeTestHelpers.tsx";
 import Home from "./TestHome";
 import { createThreeFloorTraversalRun } from "./testhelpers.ts";
@@ -67,7 +68,7 @@ describe("Activity history on the play screen", () => {
 		renderWithHistory();
 		await userEvent.click(screen.getByRole("button", { name: "New Dungeon" }));
 		await userEvent.click(
-			screen.getByRole("button", { name: "Start new dungeon" }),
+			screen.getByRole("button", { name: "Start standard adventure" }),
 		);
 		expect(
 			within(screen.getByRole("log", { name: "Activity log" })).queryAllByRole(
@@ -84,9 +85,11 @@ describe("Activity history on the play screen", () => {
 	it("clears history even when replaying the same seed", async () => {
 		renderWithHistory();
 		const user = userEvent.setup();
-		await openSettings(user);
-		await user.click(screen.getByRole("button", { name: "Start from seed" }));
-		await waitForSettingsClosed();
+		await openCustomAdventure(user);
+		await user.click(
+			screen.getByRole("button", { name: "Start custom adventure" }),
+		);
+		await waitForNewAdventureClosed();
 		expect(
 			within(screen.getByRole("log", { name: "Activity log" })).queryAllByRole(
 				"listitem",

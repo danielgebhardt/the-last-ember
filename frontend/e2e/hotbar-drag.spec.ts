@@ -1,4 +1,5 @@
 import { expect, type Locator, type Page, test } from "@playwright/test";
+import { openCustomAdventure } from "./adventure-helpers";
 import { importAdventure, turns } from "./adventure-helpers.js";
 import { mouseDrag } from "./drag-helpers.js";
 
@@ -128,13 +129,12 @@ test("spell shortcuts stay in view while the spell list scrolls, so the last car
 	await page
 		.getByRole("button", { name: "Begin Adventure", exact: true })
 		.click();
-	await page.getByRole("button", { name: "Settings", exact: true }).click();
-	const settings = page.getByRole("dialog", { name: "Settings", exact: true });
+	const settings = await openCustomAdventure(page);
 	await settings
 		.getByRole("textbox", { name: "Dungeon seed", exact: true })
 		.fill("7357");
 	await settings
-		.getByRole("button", { name: "Start from seed", exact: true })
+		.getByRole("button", { name: "Start custom adventure", exact: true })
 		.click();
 	await expect(settings).toBeHidden();
 	// The seed has perks waiting, which renames the Character button; use its key.

@@ -77,7 +77,9 @@ describe("Home run restart", () => {
 
 		await user.click(screen.getByRole("button", { name: "New Dungeon" }));
 
-		await user.click(screen.getByRole("button", { name: "Start new dungeon" }));
+		await user.click(
+			screen.getByRole("button", { name: "Start standard adventure" }),
+		);
 		await enterDungeonFromTown(user);
 
 		expect(generateSpy).toHaveBeenCalledTimes(callsBeforeClick + 1);
@@ -126,7 +128,7 @@ describe("Home run restart", () => {
 			await user.click(screen.getByRole("button", { name: "New Dungeon" }));
 
 			await user.click(
-				screen.getByRole("button", { name: "Start new dungeon" }),
+				screen.getByRole("button", { name: "Start standard adventure" }),
 			);
 			await enterDungeonFromTown(user);
 
@@ -155,7 +157,9 @@ describe("Home run restart", () => {
 
 		await user.click(screen.getByRole("button", { name: "New Dungeon" }));
 
-		await user.click(screen.getByRole("button", { name: "Start new dungeon" }));
+		await user.click(
+			screen.getByRole("button", { name: "Start standard adventure" }),
+		);
 		await enterDungeonFromTown(user);
 
 		expect(screen.getByRole("heading", { name: "Floor 1 of 3" })).toBeVisible();

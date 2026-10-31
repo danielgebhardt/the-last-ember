@@ -183,7 +183,7 @@ test("a queued corridor step stays canceled through confirmed save/load and a ne
 	).toContainText("Running");
 	await page.getByRole("button", { name: "New Dungeon", exact: true }).click();
 	await page
-		.getByRole("button", { name: "Start new dungeon", exact: true })
+		.getByRole("button", { name: "Start standard adventure", exact: true })
 		.click();
 	await enterDungeonFromTown(page);
 	await expect(turns(page)).toHaveText("Turn 0");
@@ -224,7 +224,7 @@ test("New Dungeon cancellation keeps queued corridor steps canceled", async ({
 	).toContainText("Running");
 	await page.getByRole("button", { name: "New Dungeon", exact: true }).click();
 	const dialog = page.getByRole("dialog", {
-		name: "Start a new dungeon?",
+		name: "New adventure",
 		exact: true,
 	});
 	await expect(dialog).toBeVisible();

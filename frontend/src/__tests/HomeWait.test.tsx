@@ -4,9 +4,9 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import * as GameState from "../domain/game/GameState";
 import { ThemeProvider } from "../settings/ThemeProvider";
 import {
-	closeSettings,
+	closeNewAdventure,
 	inspectEndedRun,
-	openSettings,
+	openCustomAdventure,
 	readDungeonCells,
 	resetHomeTestState,
 	stubDungeonRun,
@@ -79,18 +79,18 @@ describe("Waiting on the play screen", () => {
 	it("leaves Spacebar to Settings and log focus, then waits only when gameplay is focused", async () => {
 		const user = renderWaitingRun(false);
 		const before = readDungeonCells();
-		const input = await openSettings(user);
+		const input = await openCustomAdventure(user);
 		await user.click(input);
 		await user.keyboard(" ");
 		expect(screen.getByLabelText("Turn count")).toHaveTextContent("Turn 0");
-		await closeSettings(user);
+		await closeNewAdventure(user);
 		// Dismissal returns to gameplay; explicitly focusing the toolbar still gives Space to its button.
 		expect(screen.getByLabelText("Dungeon map", { exact: true })).toHaveFocus();
 		screen.getByRole("button", { name: "Settings" }).focus();
 		expect(screen.getByRole("button", { name: "Settings" })).toHaveFocus();
 		await user.keyboard(" ");
 		expect(screen.getByRole("dialog", { name: "Settings" })).toBeVisible();
-		await closeSettings(user);
+		await closeNewAdventure(user);
 		screen.getByRole("log").focus();
 		await user.keyboard(" ");
 		expect(screen.getByLabelText("Turn count")).toHaveTextContent("Turn 0");

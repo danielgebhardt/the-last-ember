@@ -6,7 +6,11 @@ import { ITEM_DEFINITIONS } from "../domain/items/Item";
 import * as ItemPlacement from "../domain/items/ItemPlacement";
 import * as MonsterPlacement from "../domain/monsters/MonsterPlacement";
 import { ThemeProvider } from "../settings/ThemeProvider";
-import { enterDungeonFromTown, resetHomeTestState } from "./HomeTestHelpers";
+import {
+	enterDungeonFromTown,
+	openCustomAdventure,
+	resetHomeTestState,
+} from "./HomeTestHelpers";
 import { createCorridorEncounter } from "./MonsterEncounterTestHelpers";
 import Home from "./TestHome";
 
@@ -49,9 +53,10 @@ describe("Generated loot on the play screen", () => {
 			screen.getByLabelText(`row1col${target.coordinate.col} - floor`),
 		).toBeVisible();
 		expect(spawn).toHaveBeenCalledTimes(1);
-		await user.click(screen.getByRole("button", { name: "Settings" }));
-		await screen.findByRole("dialog", { name: "Settings" });
-		await user.click(screen.getByRole("button", { name: "Start from seed" }));
+		await openCustomAdventure(user);
+		await user.click(
+			screen.getByRole("button", { name: "Start custom adventure" }),
+		);
 		await enterDungeonFromTown(user);
 		await waitFor(() =>
 			expect(screen.queryByRole("dialog")).not.toBeInTheDocument(),

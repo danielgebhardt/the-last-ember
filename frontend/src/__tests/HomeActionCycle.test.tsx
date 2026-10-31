@@ -2,13 +2,14 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it } from "vitest";
 import { ThemeProvider } from "../settings/ThemeProvider.tsx";
-import { enterDungeonFromTown } from "./HomeTestHelpers";
 import {
 	closeSettings,
+	enterDungeonFromTown,
+	openCustomAdventure,
 	openSettings,
 	resetHomeTestState,
 	stubDungeonRun,
-	waitForSettingsClosed,
+	waitForNewAdventureClosed,
 } from "./HomeTestHelpers.tsx";
 import Home from "./TestHome";
 import { createThreeFloorTraversalRun } from "./testhelpers.ts";
@@ -47,11 +48,11 @@ describe("Complete exploration action cycle", () => {
 		);
 		expect(generate).toHaveBeenCalledTimes(1);
 		expect(run).toEqual(before);
-		const replaySeed = await openSettings(user);
+		const replaySeed = await openCustomAdventure(user);
 		await user.clear(replaySeed);
 		await user.type(replaySeed, "123{Enter}");
 		await enterDungeonFromTown(user);
-		await waitForSettingsClosed();
+		await waitForNewAdventureClosed();
 		expect(screen.getByLabelText("Turn count")).toHaveTextContent("Turn 0");
 		await user.keyboard("ddd");
 		expect(screen.getByLabelText("row2col2 - undiscovered")).toBeVisible();

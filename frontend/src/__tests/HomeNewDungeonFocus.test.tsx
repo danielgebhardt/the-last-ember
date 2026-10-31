@@ -28,7 +28,9 @@ it("returns focus to gameplay after New Dungeon so G works without clicking the 
 	render(<Home />);
 	const user = userEvent.setup();
 	await user.click(screen.getByRole("button", { name: "New Dungeon" }));
-	await user.click(screen.getByRole("button", { name: "Start new dungeon" }));
+	await user.click(
+		screen.getByRole("button", { name: "Start standard adventure" }),
+	);
 	await enterDungeonFromTown(user);
 	expect(screen.getByLabelText("Dungeon map", { exact: true })).toHaveFocus();
 	await user.keyboard("{ArrowRight}g");

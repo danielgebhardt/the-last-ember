@@ -15,7 +15,7 @@ import { createThreeFloorTraversalRun } from "./testhelpers.ts";
 afterEach(resetHomeTestState);
 
 describe("Home settings and appearance", () => {
-	it("changes appearance with mouse and keyboard without losing exploration, seed draft, or errors", async () => {
+	it("changes appearance with mouse and keyboard without losing exploration", async () => {
 		const run = createThreeFloorTraversalRun();
 		const generate = vi
 			.spyOn(DungeonRun, "generateDungeonRun")
@@ -27,11 +27,7 @@ describe("Home settings and appearance", () => {
 		expect(screen.getByRole("heading", { name: "Floor 2 of 3" })).toBeVisible();
 		const board = screen.getByRole("table");
 		const terrain = readDungeonCells(board);
-		const input = await openSettings(user);
-		await user.clear(input);
-		await user.type(input, "invalid");
-		await user.click(screen.getByRole("button", { name: "Start from seed" }));
-		const error = screen.getByRole("alert").textContent;
+		await openSettings(user);
 		expect(
 			screen.getByRole("button", { name: "Dark", pressed: true }),
 		).toBeVisible();
@@ -45,12 +41,7 @@ describe("Home settings and appearance", () => {
 			screen.getByRole("button", { name: "Dark", pressed: true }),
 		).toHaveFocus();
 		expect(document.documentElement).toHaveClass("dark");
-		expect(input).toHaveValue("invalid");
-		expect(screen.getByRole("alert")).toHaveTextContent(error ?? "");
 		expect(readDungeonCells(board)).toEqual(terrain);
-		expect(screen.getByLabelText("Current dungeon seed")).toHaveTextContent(
-			"123",
-		);
 		await closeSettings(user);
 		expect(screen.getByRole("heading", { name: "Floor 2 of 3" })).toBeVisible();
 		await openSettings(user);
@@ -63,7 +54,7 @@ describe("Home settings and appearance", () => {
 		expect(generate).toHaveBeenCalledTimes(1);
 	});
 
-	it("opens settings from the header, focuses the seed field, and restores focus on dismissal", async () => {
+	it("opens settings from the header with only preferences, and restores focus on dismissal", async () => {
 		const run = createThreeFloorTraversalRun();
 		const generate = vi
 			.spyOn(DungeonRun, "generateDungeonRun")
@@ -74,22 +65,25 @@ describe("Home settings and appearance", () => {
 		const trigger = within(screen.getByRole("banner")).getByRole("button", {
 			name: "Settings",
 		});
-		expect(
-			screen.queryByRole("textbox", { name: "Dungeon seed" }),
-		).not.toBeInTheDocument();
-		expect(
-			screen.queryByLabelText("Current dungeon seed"),
-		).not.toBeInTheDocument();
 		await user.click(trigger);
 		const panel = await screen.findByRole("dialog", { name: "Settings" });
-		expect(
-			within(panel).getByLabelText("Current dungeon seed"),
-		).toHaveTextContent("123");
 		await waitFor(() =>
-			expect(
-				within(panel).getByRole("textbox", { name: "Dungeon seed" }),
-			).toHaveFocus(),
+			expect(panel).toContainElement(document.activeElement as HTMLElement),
 		);
+		// Run setup and sight are chosen when an adventure starts, not here.
+		expect(within(panel).queryByRole("textbox")).toBeNull();
+		expect(within(panel).queryByText(/seed|fog/i)).toBeNull();
+		expect(within(panel).getByRole("button", { name: "Light" })).toBeVisible();
+		expect(
+			within(panel).getByRole("slider", { name: "Map tile size" }),
+		).toBeVisible();
+		expect(
+			within(panel).getByRole("checkbox", {
+				name: "Show hints for new mechanics",
+			}),
+		).toBeVisible();
+		expect(within(panel).getByText("Adventurer Avatar")).toBeVisible();
+		expect(within(panel).getByText("Accounts & privacy")).toBeVisible();
 		await user.keyboard("{Escape}");
 		await waitFor(() =>
 			expect(screen.queryByRole("dialog")).not.toBeInTheDocument(),
@@ -130,10 +124,9 @@ describe("Home settings and appearance", () => {
 		expect(
 			await screen.findByRole("dialog", { name: "Settings" }),
 		).toBeVisible();
+		const panel = screen.getByRole("dialog", { name: "Settings" });
 		await waitFor(() =>
-			expect(
-				screen.getByRole("textbox", { name: "Dungeon seed" }),
-			).toHaveFocus(),
+			expect(panel).toContainElement(document.activeElement as HTMLElement),
 		);
 		await closeSettings(user);
 		expect(

@@ -3,10 +3,10 @@ import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it } from "vitest";
 import { ThemeProvider } from "../settings/ThemeProvider";
 import {
-	openSettings,
+	openCustomAdventure,
 	resetHomeTestState,
 	stubDungeonRun,
-	waitForSettingsClosed,
+	waitForNewAdventureClosed,
 } from "./HomeTestHelpers";
 import Home from "./TestHome";
 import { createThreeFloorTraversalRun } from "./testhelpers";
@@ -107,24 +107,28 @@ describe("Victory summary and ended-run controls", () => {
 	it("keeps victory through invalid settings and resets through the ordinary seed form", async () => {
 		const { user } = await win();
 		await user.keyboard("{Escape}");
-		await openSettings(user);
+		await openCustomAdventure(user);
 		const seed = screen.getByRole("textbox", { name: "Dungeon seed" });
 		await user.clear(seed);
 		await user.type(seed, "bad");
-		await user.click(screen.getByRole("button", { name: "Start from seed" }));
+		await user.click(
+			screen.getByRole("button", { name: "Start custom adventure" }),
+		);
 		expect(screen.getByRole("alert")).toHaveTextContent("Enter a whole number");
 		await user.keyboard("{Escape}");
 		expect(screen.getByLabelText("Quest objective")).toHaveTextContent(
 			"The flame is restored. Your town is saved.",
 		);
-		await openSettings(user);
+		await openCustomAdventure(user);
 		await user.clear(screen.getByRole("textbox", { name: "Dungeon seed" }));
 		await user.type(
 			screen.getByRole("textbox", { name: "Dungeon seed" }),
 			"123",
 		);
-		await user.click(screen.getByRole("button", { name: "Start from seed" }));
-		await waitForSettingsClosed();
+		await user.click(
+			screen.getByRole("button", { name: "Start custom adventure" }),
+		);
+		await waitForNewAdventureClosed();
 		expect(screen.getByLabelText("Quest objective")).toHaveTextContent(
 			"Claim the Warden's Flame",
 		);

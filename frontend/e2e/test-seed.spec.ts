@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { openCustomAdventure } from "./adventure-helpers";
 import { map } from "./adventure-helpers.js";
 import { enterDungeonFromTown } from "./town-helpers.js";
 
@@ -11,13 +12,12 @@ test("the reserved test seed starts the full kit on the authored encounter floor
 	await page
 		.getByRole("button", { name: "Begin Adventure", exact: true })
 		.click();
-	await page.getByRole("button", { name: "Settings", exact: true }).click();
-	const settings = page.getByRole("dialog", { name: "Settings", exact: true });
+	const settings = await openCustomAdventure(page);
 	await settings
 		.getByRole("textbox", { name: "Dungeon seed", exact: true })
 		.fill("7357");
 	await settings
-		.getByRole("button", { name: "Start from seed", exact: true })
+		.getByRole("button", { name: "Start custom adventure", exact: true })
 		.click();
 	await expect(page.getByRole("status", { name: "Player gold" })).toHaveText(
 		"Gold 10000",

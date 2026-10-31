@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { openCustomAdventure } from "./adventure-helpers";
 import { importAdventure, map, saveSheet, turns } from "./adventure-helpers.js";
 import { enterDungeonFromTown } from "./town-helpers.js";
 
@@ -20,8 +21,7 @@ test("welcome choices and keyboard Settings apply return control to the map", as
 	await expect(
 		page.getByLabel("Adventure difficulty", { exact: true }),
 	).toHaveText("Harder");
-	await page.getByRole("button", { name: "Settings", exact: true }).click();
-	const settings = page.getByRole("dialog", { name: "Settings", exact: true });
+	const settings = await openCustomAdventure(page);
 	await expect(settings.getByLabel("Current dungeon configuration")).toHaveText(
 		"40 rows × 40 columns · 20 floors",
 	);
@@ -149,13 +149,12 @@ test("a fatal committed turn opens defeat, freezes play and permits replay", asy
 	await expect(page.getByLabel("Player health", { exact: true })).toContainText(
 		"0 / 10",
 	);
-	await page.getByRole("button", { name: "Settings", exact: true }).click();
-	await page
-		.getByRole("button", { name: "Start from seed", exact: true })
+	await (await openCustomAdventure(page))
+		.getByRole("button", { name: "Start custom adventure", exact: true })
 		.click();
 	await enterDungeonFromTown(page);
 	await expect(
-		page.getByRole("dialog", { name: "Settings", exact: true }),
+		page.getByRole("dialog", { name: "New adventure", exact: true }),
 	).toBeHidden();
 	await expect(map(page)).toBeFocused();
 	await expect(turns(page)).toHaveText("Turn 0");
@@ -194,7 +193,7 @@ for (const dismiss of ["Escape", "Close"]) {
 
 for (const width of [1280])
 	for (const theme of ["Light", "Dark"]) {
-		test(`New Dungeon requires confirmation and restores map focus at ${width}px ${theme}`, async ({
+		test(`New Dungeon asks which adventure and restores map focus at ${width}px ${theme}`, async ({
 			page,
 		}, testInfo) => {
 			await page.setViewportSize({ width, height: 720 });
@@ -224,15 +223,17 @@ for (const width of [1280])
 				exact: true,
 			});
 			const dialog = page.getByRole("dialog", {
-				name: "Start a new dungeon?",
+				name: "New adventure",
 				exact: true,
 			});
 			await newDungeon.click();
 			await expect(dialog).toBeInViewport({ ratio: 1 });
 			await expect(
-				dialog.getByRole("button", { name: "Cancel", exact: true }),
+				dialog.getByRole("button", {
+					name: "Start standard adventure",
+					exact: true,
+				}),
 			).toBeFocused();
-			await page.keyboard.press("ArrowRight");
 			await page.keyboard.press("6");
 			await expect(turns(page)).toHaveText(before ?? "");
 			await page.screenshot({
@@ -243,7 +244,7 @@ for (const width of [1280])
 			await expect(map(page)).toBeFocused();
 			await expect(turns(page)).toHaveText(before ?? "");
 			await newDungeon.click();
-			await dialog.getByRole("button", { name: "Cancel", exact: true }).click();
+			await dialog.getByRole("button", { name: "Close", exact: true }).click();
 			await expect(map(page)).toBeFocused();
 			await expect(turns(page)).toHaveText(before ?? "");
 			await newDungeon.click();
@@ -253,7 +254,7 @@ for (const width of [1280])
 			await expect(turns(page)).toHaveText(before ?? "");
 			await newDungeon.click();
 			await dialog
-				.getByRole("button", { name: "Start new dungeon", exact: true })
+				.getByRole("button", { name: "Start standard adventure", exact: true })
 				.click();
 			const town = page.getByLabel("Town map", { exact: true });
 			await expect(town).toBeFocused();

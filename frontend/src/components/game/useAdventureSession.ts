@@ -172,12 +172,13 @@ export const useAdventureSession = ({
 		configuration: RunConfiguration,
 		ranked = false,
 		disabled: readonly DeveloperFeature[] = [],
+		fog: FogConfiguration = session.fog,
 	): boolean => {
 		try {
 			const next = createAdventureSession(
 				seed,
 				configuration,
-				session.fog,
+				fog,
 				ranked,
 				disabled,
 			);
@@ -194,29 +195,6 @@ export const useAdventureSession = ({
 	};
 	const setActionError = (actionError: string) =>
 		setSession((current) => ({ ...current, actionError }));
-	const setFogEnabled = (enabled: boolean) =>
-		setSession((current) =>
-			observeSession({ ...current, fog: { ...current.fog, enabled } }),
-		);
-	const applyFogRadius = (radius: number) =>
-		setSession((current) =>
-			observeSession({
-				...current,
-				fog: { ...current.fog, radius },
-				exploration: updateExploration(
-					navigationRun(current.state),
-					omenSightRadius(
-						current.state,
-						playerSightRadius(
-							radius,
-							current.state.progression,
-							current.state.afflictions,
-						),
-					),
-					current.exploration,
-				),
-			}),
-		);
 	const requestAction = (action: PlayerAction) => {
 		setSession((current) => {
 			const result = resolvePlayerAction(current.state, action);
@@ -300,7 +278,5 @@ export const useAdventureSession = ({
 		restore,
 		requestAction,
 		setActionError,
-		setFogEnabled,
-		applyFogRadius,
 	};
 };

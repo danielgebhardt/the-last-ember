@@ -200,7 +200,7 @@ export const handleRankings = async (
 			});
 		if (!state.ranked)
 			return json(400, {
-				error: "Adventures started in Settings are unranked.",
+				error: "Custom adventures are unranked.",
 			});
 		if (!isStandardSight(parsed.value.fog))
 			return json(400, {

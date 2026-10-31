@@ -6,6 +6,7 @@ import { createBag } from "../domain/items/Bag";
 import { createEquipment } from "../domain/items/Equipment";
 import {
 	inspectEndedRun,
+	openCustomAdventure,
 	readDungeonCells,
 	renderHome as render,
 	resetHomeTestState,
@@ -191,7 +192,7 @@ describe("Character sheet", () => {
 			),
 		).toBeVisible();
 	});
-	it.each(["New Dungeon", "Start from seed"])(
+	it.each(["New Dungeon", "Start custom adventure"])(
 		"restores health and starting gear after %s",
 		async (restart) => {
 			const create = GameState.createGameState;
@@ -211,15 +212,14 @@ describe("Character sheet", () => {
 				"Health 0 / 10",
 			);
 			await dismissCharacter(user);
-			if (restart === "Start from seed") {
-				await user.click(screen.getByRole("button", { name: "Settings" }));
-				await screen.findByRole("dialog", { name: "Settings" });
+			if (restart === "Start custom adventure") {
+				await openCustomAdventure(user);
 			}
 			await user.click(screen.getByRole("button", { name: restart }));
 			if (restart === "New Dungeon")
 				await user.click(
 					screen.getByRole("button", {
-						name: "Start new dungeon",
+						name: "Start standard adventure",
 					}),
 				);
 			await waitFor(() =>

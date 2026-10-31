@@ -5,10 +5,10 @@ import * as GameState from "../domain/game/GameState";
 import * as MonsterPlacement from "../domain/monsters/MonsterPlacement";
 import { ThemeProvider } from "../settings/ThemeProvider";
 import {
-	closeSettings,
+	closeNewAdventure,
 	enterDungeonFromTown,
 	inspectEndedRun,
-	openSettings,
+	openCustomAdventure,
 	readDungeonCells,
 	resetHomeTestState,
 	stubDungeonRun,
@@ -42,8 +42,10 @@ describe("Complete monster encounters on screen", () => {
 		expect(
 			screen.getByLabelText("row1col1 - remembered entrance"),
 		).toBeVisible();
-		await openSettings(user);
-		await user.click(screen.getByRole("button", { name: "Start from seed" }));
+		await openCustomAdventure(user);
+		await user.click(
+			screen.getByRole("button", { name: "Start custom adventure" }),
+		);
 		await enterDungeonFromTown(user);
 		expect(readDungeonCells()).toEqual(initialMap);
 		expect(screen.getByLabelText("Player health")).toHaveTextContent(
@@ -127,13 +129,17 @@ describe("Complete monster encounters on screen", () => {
 		stubs.generate.mockImplementationOnce(() => {
 			throw new Error("Cannot generate");
 		});
-		await openSettings(user);
-		await user.click(screen.getByRole("button", { name: "Start from seed" }));
+		await openCustomAdventure(user);
+		await user.click(
+			screen.getByRole("button", { name: "Start custom adventure" }),
+		);
 		expect(screen.getByText(/Could not create a dungeon/)).toBeVisible();
-		await closeSettings(user);
+		await closeNewAdventure(user);
 		expect(screen.getByRole("alert")).toHaveTextContent("You died.");
 		await user.click(screen.getByRole("button", { name: "New Dungeon" }));
-		await user.click(screen.getByRole("button", { name: "Start new dungeon" }));
+		await user.click(
+			screen.getByRole("button", { name: "Start standard adventure" }),
+		);
 		expect(screen.queryByRole("alert")).not.toBeInTheDocument();
 		expect(screen.getByLabelText("Player health")).toHaveTextContent(
 			"Health 10 / 10",

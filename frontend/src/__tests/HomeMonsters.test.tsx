@@ -5,12 +5,7 @@ import type { DungeonRun } from "../domain/dungeon/DungeonRun.ts";
 import type { Monster } from "../domain/monsters/Monster.ts";
 import * as MonsterPursuit from "../domain/monsters/MonsterPursuit";
 import { ThemeProvider } from "../settings/ThemeProvider.tsx";
-import {
-	closeSettings,
-	openSettings,
-	resetHomeTestState,
-	stubDungeonRun,
-} from "./HomeTestHelpers.tsx";
+import { resetHomeTestState, stubDungeonRun } from "./HomeTestHelpers.tsx";
 import Home from "./TestHome";
 import { createTestDungeonFloor } from "./testhelpers.ts";
 
@@ -93,24 +88,21 @@ describe("Goblin on the play screen", () => {
 		expect(goblin.health).toBe(2);
 	});
 
-	it("hides the goblin outside sight, reveals it with fog off, and remembers only terrain", async () => {
+	it("shows the goblin from the start in an adventure without fog", () => {
+		stubDungeonRun(encounterRun(), [goblin]);
+		render(<Home initialFogConfiguration={{ enabled: false, radius: 1 }} />, {
+			wrapper: ThemeProvider,
+		});
+		expect(screen.getByLabelText("row1col4 - goblin")).toBeVisible();
+	});
+
+	it("hides the goblin outside sight and remembers only terrain", async () => {
 		stubDungeonRun(encounterRun(), [goblin]);
 		const user = userEvent.setup();
 		render(<Home initialFogConfiguration={{ enabled: true, radius: 1 }} />, {
 			wrapper: ThemeProvider,
 		});
 		expect(screen.getByLabelText("row1col4 - undiscovered")).toBeVisible();
-		await openSettings(user);
-		await user.click(
-			screen.getByRole("checkbox", { name: "Enable fog of war" }),
-		);
-		await closeSettings(user);
-		expect(screen.getByLabelText("row1col4 - goblin")).toBeVisible();
-		await openSettings(user);
-		await user.click(
-			screen.getByRole("checkbox", { name: "Enable fog of war" }),
-		);
-		await closeSettings(user);
 		expect(screen.queryByLabelText(/goblin/)).not.toBeInTheDocument();
 		await user.keyboard("sddd");
 		expect(screen.getByLabelText("row1col4 - goblin")).toBeVisible();

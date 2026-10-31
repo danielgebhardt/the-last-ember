@@ -3,8 +3,8 @@ import { afterEach, describe, expect, it } from "vitest";
 import { renderEncounter } from "./HomeEncounterTestHelpers.tsx";
 import { enterDungeonFromTown, inspectEndedRun } from "./HomeTestHelpers";
 import {
-	closeSettings,
-	openSettings,
+	closeNewAdventure,
+	openCustomAdventure,
 	readDungeonCells,
 	resetHomeTestState,
 } from "./HomeTestHelpers.tsx";
@@ -61,14 +61,14 @@ describe("Ending a run on player death", () => {
 				await user.click(screen.getByRole("button", { name: "New Dungeon" }));
 				await user.click(
 					screen.getByRole("button", {
-						name: "Start new dungeon",
+						name: "Start standard adventure",
 					}),
 				);
 				await enterDungeonFromTown(user);
 			} else {
-				await openSettings(user);
+				await openCustomAdventure(user);
 				await user.click(
-					screen.getByRole("button", { name: "Start from seed" }),
+					screen.getByRole("button", { name: "Start custom adventure" }),
 				);
 				await enterDungeonFromTown(user);
 			}
@@ -81,7 +81,8 @@ describe("Ending a run on player death", () => {
 				"0 / 10 XP",
 			);
 			expect(screen.getByRole("log")).toHaveTextContent("No activity yet.");
-			expect(readDungeonCells()).toEqual(initialMap);
+			// The standard adventure brings standard sight; a replay keeps this one's.
+			if (restart === "replay") expect(readDungeonCells()).toEqual(initialMap);
 			await user.keyboard("d");
 			expect(screen.getByLabelText("row1col2 - goblin")).toBeVisible();
 			expect(screen.getByLabelText("Player health")).toHaveTextContent(
@@ -91,13 +92,13 @@ describe("Ending a run on player death", () => {
 	);
 
 	it.each(["invalid seed", "generation failure"])(
-		"keeps the ended run after %s and leaves Settings usable",
+		"keeps the ended run after %s and leaves the New adventure dialog usable",
 		async (failure) => {
 			const { user, generate } = renderEncounter(1);
 			await user.keyboard("d");
 			await inspectEndedRun(user);
 			const endedMap = readDungeonCells();
-			const seedInput = await openSettings(user);
+			const seedInput = await openCustomAdventure(user);
 			if (failure === "invalid seed") {
 				await user.clear(seedInput);
 				await user.type(seedInput, "invalid");
@@ -106,8 +107,12 @@ describe("Ending a run on player death", () => {
 					throw new Error("Generation failed");
 				});
 			}
-			await user.click(screen.getByRole("button", { name: "Start from seed" }));
-			expect(screen.getByRole("dialog", { name: "Settings" })).toBeVisible();
+			await user.click(
+				screen.getByRole("button", { name: "Start custom adventure" }),
+			);
+			expect(
+				screen.getByRole("dialog", { name: "New adventure" }),
+			).toBeVisible();
 			expect(
 				screen.getByText(
 					failure === "invalid seed"
@@ -115,7 +120,7 @@ describe("Ending a run on player death", () => {
 						: /Could not create a dungeon/,
 				),
 			).toBeVisible();
-			await closeSettings(user);
+			await closeNewAdventure(user);
 			expectEndedRun();
 			expect(readDungeonCells()).toEqual(endedMap);
 		},

@@ -5,13 +5,13 @@ import App from "../App";
 import * as GameState from "../domain/game/GameState";
 import { ThemeProvider } from "../settings/ThemeProvider";
 import {
-	closeSettings,
+	closeNewAdventure,
 	enterDungeonFromTown,
-	openSettings,
+	openCustomAdventure,
 	renderHome,
 	resetHomeTestState,
 	stubDungeonRun,
-	waitForSettingsClosed,
+	waitForNewAdventureClosed,
 } from "./HomeTestHelpers";
 import { createCorridorEncounter } from "./MonsterEncounterTestHelpers";
 import Home from "./TestHome";
@@ -68,18 +68,20 @@ describe("Choosing adventure difficulty", () => {
 		render(<Home initialFogConfiguration={{ enabled: false, radius: 8 }} />, {
 			wrapper: ThemeProvider,
 		});
-		await openSettings(user);
+		await openCustomAdventure(user);
 		await user.click(screen.getByRole("radio", { name: /Harder/ }));
 		expect(
 			screen.getByLabelText("Current adventure difficulty"),
 		).toHaveTextContent("Normal");
-		await closeSettings(user);
+		await closeNewAdventure(user);
 		expect(screen.getByLabelText("Adventure difficulty")).toHaveTextContent(
 			"Normal",
 		);
-		await openSettings(user);
-		await user.click(screen.getByRole("button", { name: "Start from seed" }));
-		await waitForSettingsClosed();
+		await openCustomAdventure(user);
+		await user.click(
+			screen.getByRole("button", { name: "Start custom adventure" }),
+		);
+		await waitForNewAdventureClosed();
 		await enterDungeonFromTown(user);
 		expect(screen.getByLabelText("Adventure difficulty")).toHaveTextContent(
 			"Harder",
@@ -91,7 +93,9 @@ describe("Choosing adventure difficulty", () => {
 		);
 		await user.keyboard("{Escape}");
 		await user.click(screen.getByRole("button", { name: "New Dungeon" }));
-		await user.click(screen.getByRole("button", { name: "Start new dungeon" }));
+		await user.click(
+			screen.getByRole("button", { name: "Start standard adventure" }),
+		);
 		expect(screen.getByLabelText("Adventure difficulty")).toHaveTextContent(
 			"Harder",
 		);
@@ -100,12 +104,14 @@ describe("Choosing adventure difficulty", () => {
 		const user = userEvent.setup();
 		const { generate } = stubDungeonRun(createCorridorEncounter());
 		renderHome(<Home />);
-		await openSettings(user);
+		await openCustomAdventure(user);
 		await user.click(screen.getByRole("radio", { name: /Easier/ }));
 		generate.mockImplementationOnce(() => {
 			throw new Error("generation failed");
 		});
-		await user.click(screen.getByRole("button", { name: "Start from seed" }));
+		await user.click(
+			screen.getByRole("button", { name: "Start custom adventure" }),
+		);
 		expect(screen.getByRole("alert")).toHaveTextContent(/Could not create/);
 		expect(
 			screen.getByLabelText("Current adventure difficulty"),

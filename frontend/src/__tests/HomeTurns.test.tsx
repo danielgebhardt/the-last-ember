@@ -3,11 +3,12 @@ import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it } from "vitest";
 import {
 	closeSettings,
+	openCustomAdventure,
 	openSettings,
 	renderHome,
 	resetHomeTestState,
 	stubDungeonRun,
-	waitForSettingsClosed,
+	waitForNewAdventureClosed,
 } from "./HomeTestHelpers.tsx";
 import Home from "./TestHome";
 import { createThreeFloorTraversalRun } from "./testhelpers.ts";
@@ -49,7 +50,7 @@ describe("Turn display", () => {
 		expect(screen.getByRole("heading", { name: "Floor 1 of 3" })).toBeVisible();
 	});
 
-	it("keeps the turn through settings, theme, and fog changes", async () => {
+	it("keeps the turn through settings and theme changes", async () => {
 		stubDungeonRun(createThreeFloorTraversalRun());
 		const user = userEvent.setup();
 		renderHome(<Home />);
@@ -57,12 +58,6 @@ describe("Turn display", () => {
 		await openSettings(user);
 		await user.keyboard("{ArrowRight}");
 		await user.click(screen.getByRole("button", { name: "Light" }));
-		await user.click(
-			screen.getByRole("checkbox", { name: "Enable fog of war" }),
-		);
-		const radius = screen.getByRole("textbox", { name: "Visibility radius" });
-		await user.clear(radius);
-		await user.type(radius, "2{Enter}");
 		await closeSettings(user);
 		expect(screen.getByLabelText("Turn count")).toHaveTextContent("Turn 1");
 		expect(screen.getByLabelText("row1col1 - player")).toBeVisible();
@@ -77,14 +72,14 @@ describe("Turn display", () => {
 			await user.keyboard("{ArrowRight}");
 			expect(screen.getByLabelText("Turn count")).toHaveTextContent("Turn 1");
 			if (restart === "seed replay") {
-				const seed = await openSettings(user);
+				const seed = await openCustomAdventure(user);
 				await user.clear(seed);
 				await user.type(seed, "123{Enter}");
-				await waitForSettingsClosed();
+				await waitForNewAdventureClosed();
 			} else {
 				await user.click(screen.getByRole("button", { name: "New Dungeon" }));
 				await user.click(
-					screen.getByRole("button", { name: "Start new dungeon" }),
+					screen.getByRole("button", { name: "Start standard adventure" }),
 				);
 			}
 			expect(screen.getByLabelText("Turn count")).toHaveTextContent("Turn 0");

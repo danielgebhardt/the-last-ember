@@ -5,15 +5,15 @@ import * as DungeonRun from "../domain/dungeon/DungeonRun.ts";
 import * as GameState from "../domain/game/GameState.ts";
 import { enterDungeonFromTown } from "./HomeTestHelpers";
 import {
-	closeSettings,
+	closeNewAdventure,
 	DEFAULT_DUNGEON_CONFIG,
 	editConfiguration,
 	movementKeysTo,
-	openSettings,
+	openCustomAdventure,
 	readDungeonCells,
 	renderHome as render,
 	resetHomeTestState,
-	waitForSettingsClosed,
+	waitForNewAdventureClosed,
 } from "./HomeTestHelpers.tsx";
 import Home from "./TestHome";
 import { createThreeFloorTraversalRun } from "./testhelpers.ts";
@@ -32,9 +32,11 @@ describe("Home dungeon configuration", () => {
 		await user.keyboard("{ArrowRight}{ArrowRight}");
 		const board = screen.getByRole("table");
 		const original = readDungeonCells(board);
-		await openSettings(user);
+		await openCustomAdventure(user);
 		await editConfiguration(user, { rows: "4", columns: "101", floors: "4" });
-		await user.click(screen.getByRole("button", { name: "Start from seed" }));
+		await user.click(
+			screen.getByRole("button", { name: "Start custom adventure" }),
+		);
 		expect(screen.getAllByRole("alert")).toHaveLength(3);
 		for (const name of ["Rows", "Columns", "Floors"])
 			expect(screen.getByRole("textbox", { name })).toHaveAttribute(
@@ -49,9 +51,9 @@ describe("Home dungeon configuration", () => {
 		).toHaveAccessibleDescription(/Enter a whole number from 5 to 20/);
 		expect(readDungeonCells(board)).toEqual(original);
 		expect(generate).toHaveBeenCalledTimes(1);
-		await closeSettings(user);
+		await closeNewAdventure(user);
 		expect(screen.getByRole("heading", { name: "Floor 2 of 3" })).toBeVisible();
-		await openSettings(user);
+		await openCustomAdventure(user);
 		expect(screen.getByRole("textbox", { name: "Columns" })).toHaveValue("101");
 		await user.clear(screen.getByRole("textbox", { name: "Rows" }));
 		await user.type(screen.getByRole("textbox", { name: "Rows" }), "10");
@@ -78,7 +80,7 @@ describe("Home dungeon configuration", () => {
 			await user.keyboard("{ArrowRight}");
 			const board = screen.getByRole("table");
 			const original = readDungeonCells(board);
-			await openSettings(user);
+			await openCustomAdventure(user);
 			await editConfiguration(user, { rows: "10", columns: "10", floors: "6" });
 			(stage === "terrain"
 				? generate
@@ -88,7 +90,9 @@ describe("Home dungeon configuration", () => {
 			).mockImplementationOnce(() => {
 				throw new Error("generation failed");
 			});
-			await user.click(screen.getByRole("button", { name: "Start from seed" }));
+			await user.click(
+				screen.getByRole("button", { name: "Start custom adventure" }),
+			);
 			expect(screen.getByRole("alert")).toHaveTextContent(
 				"Try a different seed or larger dimensions",
 			);
@@ -97,26 +101,18 @@ describe("Home dungeon configuration", () => {
 			expect(
 				screen.getByLabelText("Current dungeon configuration"),
 			).toHaveTextContent("15 rows × 15 columns · 5 floors");
-			await closeSettings(user);
+			await closeNewAdventure(user);
 			expect(
 				screen.getByRole("heading", { name: "Floor 2 of 3" }),
 			).toBeVisible();
-			await user.click(screen.getByRole("button", { name: "New Dungeon" }));
-			await user.click(
-				screen.getByRole("button", { name: "Start new dungeon" }),
-			);
-			expect(generate).toHaveBeenLastCalledWith(
-				expect.any(Number),
-				5,
-				DEFAULT_DUNGEON_CONFIG,
-			);
-			await openSettings(user);
-			expect(screen.getByRole("textbox", { name: "Rows" })).toHaveValue("15");
+			// The failed choices stay as drafts to adjust and retry; the error clears.
+			await openCustomAdventure(user);
+			expect(screen.getByRole("textbox", { name: "Rows" })).toHaveValue("10");
 			expect(screen.queryByRole("alert")).not.toBeInTheDocument();
 		},
 	);
 
-	it("replays configured floors and stairs, resets exploration, and reuses active settings for random restarts", async () => {
+	it("replays configured floors and stairs, resets exploration, and starts the standard size for a standard adventure", async () => {
 		const originalGenerate = DungeonRun.generateDungeonRun;
 		const generate = vi
 			.spyOn(DungeonRun, "generateDungeonRun")
@@ -135,13 +131,15 @@ describe("Home dungeon configuration", () => {
 		const user = userEvent.setup();
 		render(<Home />);
 		await user.keyboard("{ArrowRight}");
-		const seed = await openSettings(user);
+		const seed = await openCustomAdventure(user);
 		await user.clear(seed);
 		await user.type(seed, "123");
 		await editConfiguration(user, { rows: "10", columns: "15", floors: "6" });
-		await user.click(screen.getByRole("button", { name: "Start from seed" }));
+		await user.click(
+			screen.getByRole("button", { name: "Start custom adventure" }),
+		);
 		await enterDungeonFromTown(user);
-		await waitForSettingsClosed();
+		await waitForNewAdventureClosed();
 		expect(screen.getByRole("heading", { name: "Floor 1 of 6" })).toBeVisible();
 		const firstBoard = readDungeonCells(screen.getByRole("table"));
 		const first = expected.floors[0];
@@ -154,33 +152,37 @@ describe("Home dungeon configuration", () => {
 		await user.keyboard(keys);
 		expect(screen.getByRole("heading", { name: "Floor 2 of 6" })).toBeVisible();
 		const secondBoard = readDungeonCells(screen.getByRole("table"));
-		await openSettings(user);
-		await user.click(screen.getByRole("button", { name: "Start from seed" }));
+		await openCustomAdventure(user);
+		await user.click(
+			screen.getByRole("button", { name: "Start custom adventure" }),
+		);
 		await enterDungeonFromTown(user);
-		await waitForSettingsClosed();
+		await waitForNewAdventureClosed();
 		expect(screen.getByRole("heading", { name: "Floor 1 of 6" })).toBeVisible();
 		expect(readDungeonCells(screen.getByRole("table"))).toEqual(firstBoard);
 		await user.keyboard(keys);
 		expect(readDungeonCells(screen.getByRole("table"))).toEqual(secondBoard);
-		await openSettings(user);
+		await openCustomAdventure(user);
 		await editConfiguration(user, { rows: "20", columns: "25", floors: "7" });
-		await closeSettings(user);
+		await closeNewAdventure(user);
 		vi.spyOn(Math, "random").mockReturnValue(0);
 		await user.click(screen.getByRole("button", { name: "New Dungeon" }));
-		await user.click(screen.getByRole("button", { name: "Start new dungeon" }));
-		await enterDungeonFromTown(user);
-		expect(generate).toHaveBeenLastCalledWith(0, 6, {
-			...DEFAULT_DUNGEON_CONFIG,
-			rows: 10,
-			cols: 15,
-		});
-		expect(screen.getByRole("heading", { name: "Floor 1 of 6" })).toBeVisible();
-		expect(within(screen.getByRole("table")).getAllByRole("cell")).toHaveLength(
-			150,
+		await user.click(
+			screen.getByRole("button", { name: "Start standard adventure" }),
 		);
-		await openSettings(user);
-		expect(screen.getByRole("textbox", { name: "Rows" })).toHaveValue("10");
-		expect(screen.getByRole("textbox", { name: "Floors" })).toHaveValue("6");
+		await enterDungeonFromTown(user);
+		// Unapplied custom drafts don't leak into the standard adventure.
+		expect(generate).toHaveBeenLastCalledWith(0, 20, {
+			...DEFAULT_DUNGEON_CONFIG,
+			rows: 40,
+			cols: 40,
+		});
+		expect(
+			screen.getByRole("heading", { name: "Floor 1 of 20" }),
+		).toBeVisible();
+		await openCustomAdventure(user);
+		expect(screen.getByRole("textbox", { name: "Rows" })).toHaveValue("40");
+		expect(screen.getByRole("textbox", { name: "Floors" })).toHaveValue("20");
 		expect(screen.getByRole("textbox", { name: "Dungeon seed" })).toHaveValue(
 			"0",
 		);
@@ -191,7 +193,7 @@ describe("Home dungeon configuration", () => {
 		render(<Home />);
 		const board = screen.getByRole("table");
 		const original = readDungeonCells(board);
-		await openSettings(user);
+		await openCustomAdventure(user);
 		expect(screen.getByRole("textbox", { name: "Rows" })).toHaveValue("15");
 		expect(screen.getByRole("textbox", { name: "Columns" })).toHaveValue("15");
 		expect(screen.getByRole("textbox", { name: "Floors" })).toHaveValue("5");
@@ -205,12 +207,14 @@ describe("Home dungeon configuration", () => {
 			await user.type(field, value);
 		}
 		expect(readDungeonCells(board)).toEqual(original);
-		await closeSettings(user);
+		await closeNewAdventure(user);
 		expect(screen.getByRole("heading", { name: "Floor 1 of 5" })).toBeVisible();
-		await openSettings(user);
+		await openCustomAdventure(user);
 		expect(screen.getByRole("textbox", { name: "Rows" })).toHaveValue("10");
-		await user.click(screen.getByRole("button", { name: "Start from seed" }));
-		await waitForSettingsClosed();
+		await user.click(
+			screen.getByRole("button", { name: "Start custom adventure" }),
+		);
+		await waitForNewAdventureClosed();
 		await enterDungeonFromTown(user);
 		expect(screen.getByRole("heading", { name: "Floor 1 of 5" })).toBeVisible();
 		expect(within(screen.getByRole("table")).getAllByRole("row")).toHaveLength(
@@ -219,7 +223,7 @@ describe("Home dungeon configuration", () => {
 		expect(within(screen.getByRole("table")).getAllByRole("cell")).toHaveLength(
 			150,
 		);
-		await openSettings(user);
+		await openCustomAdventure(user);
 		expect(
 			screen.getByLabelText("Current dungeon configuration"),
 		).toHaveTextContent("10 rows × 15 columns · 5 floors");

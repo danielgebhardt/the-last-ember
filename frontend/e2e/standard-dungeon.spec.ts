@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { openCustomAdventure } from "./adventure-helpers";
 
 for (const size of [
 	{ width: 1470, height: 830 },
@@ -49,17 +50,16 @@ for (const size of [
 			await page
 				.getByRole("button", { name: "Begin Adventure", exact: true })
 				.click();
-			await page.getByRole("button", { name: "Settings", exact: true }).click();
-			const settings = page.getByRole("dialog", { name: "Settings" });
+			const settings = await openCustomAdventure(page);
 			const start = settings.getByRole("button", {
-				name: "Start from seed",
+				name: "Start custom adventure",
 				exact: true,
 			});
 			await expect(start).toHaveAccessibleDescription(
-				"Adventures started here aren't recorded on the leaderboards, for victories or deaths.",
+				"Custom adventures aren't ranked, for victories or deaths. These choices are fixed for the whole run.",
 			);
 			await start.scrollIntoViewIfNeeded();
 			await expect(
-				settings.getByText("aren't recorded on the leaderboards"),
+				settings.getByText("Custom adventures aren't ranked"),
 			).toBeVisible();
 		});

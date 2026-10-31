@@ -141,7 +141,9 @@ describe("Spell targeting controls", () => {
 		);
 		await user.keyboard("z");
 		await user.click(screen.getByRole("button", { name: "New Dungeon" }));
-		await user.click(screen.getByRole("button", { name: "Start new dungeon" }));
+		await user.click(
+			screen.getByRole("button", { name: "Start standard adventure" }),
+		);
 		expect(
 			screen.queryByRole("button", { name: /Target goblin/ }),
 		).not.toBeInTheDocument();

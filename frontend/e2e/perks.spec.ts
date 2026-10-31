@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { openCustomAdventure } from "./adventure-helpers";
 import { enterDungeonFromTown } from "./town-helpers.js";
 
 test("a waiting perk is chosen from Character → Progression without using a turn", async ({
@@ -10,13 +11,12 @@ test("a waiting perk is chosen from Character → Progression without using a tu
 	await page
 		.getByRole("button", { name: "Begin Adventure", exact: true })
 		.click();
-	await page.getByRole("button", { name: "Settings", exact: true }).click();
-	const settings = page.getByRole("dialog", { name: "Settings", exact: true });
+	const settings = await openCustomAdventure(page);
 	await settings
 		.getByRole("textbox", { name: "Dungeon seed", exact: true })
 		.fill("7357");
 	await settings
-		.getByRole("button", { name: "Start from seed", exact: true })
+		.getByRole("button", { name: "Start custom adventure", exact: true })
 		.click();
 	await enterDungeonFromTown(page);
 	// The test seed starts at level 10: levels 3, 5, 7 and 9 are waiting.

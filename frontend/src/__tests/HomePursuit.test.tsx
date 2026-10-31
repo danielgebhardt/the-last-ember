@@ -3,8 +3,8 @@ import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it } from "vitest";
 import { ThemeProvider } from "../settings/ThemeProvider";
 import {
-	closeSettings,
-	openSettings,
+	closeNewAdventure,
+	openCustomAdventure,
 	resetHomeTestState,
 	stubDungeonRun,
 } from "./HomeTestHelpers";
@@ -55,9 +55,9 @@ describe("Pursuit on the play screen", () => {
 			if (!fog.enabled || fog.radius === 20)
 				expect(screen.getByLabelText("row1col5 - goblin")).toBeVisible();
 			else expect(screen.queryByLabelText(/goblin/)).not.toBeInTheDocument();
-			await openSettings(user);
+			await openCustomAdventure(user);
 			await user.keyboard("d{ArrowRight}");
-			await closeSettings(user);
+			await closeNewAdventure(user);
 			expect(screen.getByLabelText("Turn count")).toHaveTextContent("Turn 1");
 			await user.keyboard("d");
 			expect(screen.getByLabelText("row1col4 - goblin")).toBeVisible();

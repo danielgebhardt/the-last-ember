@@ -6,10 +6,10 @@ import { LOCAL_SAVE_KEY } from "../persistence/LocalAdventureSave";
 import { ThemeProvider } from "../settings/ThemeProvider";
 import {
 	enterDungeonFromTown,
+	openCustomAdventure,
 	openSaveSheet,
-	openSettings,
 	resetHomeTestState,
-	waitForSettingsClosed,
+	waitForNewAdventureClosed,
 } from "./HomeTestHelpers";
 import { savedAdventureWithPickupAndHealing } from "./SaveTestHelpers";
 import Home from "./TestHome";
@@ -48,7 +48,7 @@ describe("Non-normal saved adventure controls", () => {
 			expect(screen.getByLabelText("Player health")).toHaveTextContent(
 				"Health 9 / 10",
 			);
-			await openSettings(user);
+			await openCustomAdventure(user);
 			expect(screen.getByRole("textbox", { name: "Rows" })).toHaveValue("15");
 			expect(screen.getByRole("textbox", { name: "Columns" })).toHaveValue(
 				"15",
@@ -56,9 +56,11 @@ describe("Non-normal saved adventure controls", () => {
 			expect(
 				screen.getByRole("radio", { name: new RegExp(label) }),
 			).toBeChecked();
-			await user.click(screen.getByRole("button", { name: "Start from seed" }));
+			await user.click(
+				screen.getByRole("button", { name: "Start custom adventure" }),
+			);
 			await enterDungeonFromTown(user);
-			await waitForSettingsClosed();
+			await waitForNewAdventureClosed();
 			expect(screen.getByLabelText("Adventure difficulty")).toHaveTextContent(
 				label,
 			);

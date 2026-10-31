@@ -50,7 +50,7 @@ describe("The standard dungeon", () => {
 		const dungeon = screen.getByRole("region", { name: "The dungeon" });
 		expect(dungeon).toHaveTextContent("Twenty floors deep");
 		expect(dungeon).toHaveTextContent("40 × 40 tiles");
-		expect(dungeon).toHaveTextContent("aren't ranked");
+		expect(dungeon).toHaveTextContent("custom adventure, which isn't ranked");
 		expect(screen.queryByRole("radio", { name: /Small|Medium|Large/ })).toBe(
 			null,
 		);

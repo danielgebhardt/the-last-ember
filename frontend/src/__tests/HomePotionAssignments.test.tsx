@@ -132,7 +132,9 @@ describe("Assigning potion shortcuts in Character", () => {
 			expect(screen.queryByRole("dialog")).not.toBeInTheDocument(),
 		);
 		await user.click(screen.getByRole("button", { name: "New Dungeon" }));
-		await user.click(screen.getByRole("button", { name: "Start new dungeon" }));
+		await user.click(
+			screen.getByRole("button", { name: "Start standard adventure" }),
+		);
 		await enterDungeonFromTown(user);
 		await user.keyboard("i");
 		const fresh = within(

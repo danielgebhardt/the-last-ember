@@ -3,8 +3,8 @@ import { afterEach, describe, expect, it } from "vitest";
 import { renderEncounter } from "./HomeEncounterTestHelpers.tsx";
 import { enterDungeonFromTown } from "./HomeTestHelpers";
 import {
-	closeSettings,
-	openSettings,
+	closeNewAdventure,
+	openCustomAdventure,
 	resetHomeTestState,
 } from "./HomeTestHelpers.tsx";
 
@@ -87,9 +87,9 @@ describe("Combat on the play screen", () => {
 	it("retains injured health through Settings and floor travel, then kills the injured goblin", async () => {
 		const { user } = renderEncounter();
 		await user.keyboard("d");
-		await openSettings(user);
+		await openCustomAdventure(user);
 		await user.keyboard("d{ArrowRight}");
-		await closeSettings(user);
+		await closeNewAdventure(user);
 		expect(screen.getByLabelText("Turn count")).toHaveTextContent("Turn 1");
 		// Pass the goblin along the lower room row and descend; leaving its
 		// side twice draws two strikes on top of its ordinary attack.
@@ -128,14 +128,14 @@ describe("Combat on the play screen", () => {
 				await user.click(screen.getByRole("button", { name: "New Dungeon" }));
 				await user.click(
 					screen.getByRole("button", {
-						name: "Start new dungeon",
+						name: "Start standard adventure",
 					}),
 				);
 				await enterDungeonFromTown(user);
 			} else {
-				await openSettings(user);
+				await openCustomAdventure(user);
 				await user.click(
-					screen.getByRole("button", { name: "Start from seed" }),
+					screen.getByRole("button", { name: "Start custom adventure" }),
 				);
 				await enterDungeonFromTown(user);
 			}

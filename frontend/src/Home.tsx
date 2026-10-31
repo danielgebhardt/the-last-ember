@@ -29,7 +29,7 @@ import CharacterDialog from "./components/game/CharacterDialog.tsx";
 import DungeonNotices from "./components/game/DungeonNotices";
 import GameOverDialog from "./components/game/GameOverDialog";
 import { isLowHealth } from "./components/game/HealthDisplay";
-import NewDungeonDialog from "./components/game/NewDungeonDialog";
+import NewAdventureDialog from "./components/game/NewAdventureDialog";
 import OmenArrivalDialog, {
 	useOmenArrival,
 } from "./components/game/OmenArrivalDialog";
@@ -71,6 +71,7 @@ import { MAX_SEED, parseSeedInput } from "./domain/dungeon/Seed.ts";
 import type { VictorySummary } from "./domain/game/Adventure";
 import { defeatRecap } from "./domain/game/DefeatRecap";
 import type { DeveloperFeature } from "./domain/game/DeveloperFeatures";
+import type { Difficulty } from "./domain/game/Difficulty";
 import {
 	OMEN_DEFINITIONS,
 	omenAt,
@@ -104,6 +105,7 @@ import DungeonSettings from "./settings/DungeonSettings.tsx";
 import { APP_FEATURES } from "./settings/FeatureFlags";
 import {
 	type ConfigurationErrors,
+	type ConfigurationField,
 	configurationDraft,
 	parseRunConfiguration,
 } from "./settings/RunConfigurationDraft.ts";
@@ -139,8 +141,6 @@ const Home = ({
 		restore,
 		requestAction: handleActionRequested,
 		setActionError,
-		setFogEnabled,
-		applyFogRadius: handleFogRadiusApply,
 	} = useAdventureSession({
 		initialSeed,
 		initialAdventure,
@@ -288,19 +288,20 @@ const Home = ({
 		}
 	}, [game.state.activityHistory, turn]);
 
-	// Only a new dungeon after a ranked one stays ranked; replays and Settings starts
-	// never are.
+	// Standard adventures and a new dungeon after a ranked one are ranked; replays,
+	// custom and developer starts never are.
 	const startRun = (
 		seed: number,
 		nextConfiguration: RunConfiguration,
 		ranked = false,
 		disabled: readonly DeveloperFeature[] = [],
+		fog?: FogConfiguration,
 	): boolean => {
-		if (!start(seed, nextConfiguration, ranked, disabled)) {
+		if (!start(seed, nextConfiguration, ranked, disabled, fog)) {
 			setGenerationError(
 				"Could not create a dungeon with this seed and configuration. Try a different seed or larger dimensions.",
 			);
-			setSettingsOpen(true);
+			setNewDungeonOpen(true);
 			return false;
 		}
 		setPickupOpen(false);
@@ -347,7 +348,36 @@ const Home = ({
 			mapRef.current?.focus({ preventScroll: true });
 	};
 
-	const handleSeedSubmit = (event: SubmitEvent<HTMLFormElement>) => {
+	const handleConfigInputChange = (
+		field: ConfigurationField,
+		value: string,
+	) => {
+		setConfigDraft((current) => ({ ...current, [field]: value }));
+		setConfigErrors((current) => ({ ...current, [field]: undefined }));
+		setGenerationError(null);
+	};
+	const handleSeedInputChange = (value: string) => {
+		setSeedInput(value);
+		setSeedError(null);
+		setGenerationError(null);
+	};
+	// The standard adventure always has standard sight; a custom one fixes its own.
+	const handleStandardAdventure = (difficulty: Difficulty) => {
+		if (
+			startRun(
+				randomAdventureSeed(),
+				{ ...DEFAULT_RUN_CONFIGURATION, difficulty },
+				true,
+				[],
+				DEFAULT_FOG_CONFIGURATION,
+			)
+		)
+			mapRef.current?.focus({ preventScroll: true });
+	};
+	const handleCustomAdventure = (
+		event: SubmitEvent<HTMLFormElement>,
+		fog: FogConfiguration,
+	) => {
 		event.preventDefault();
 		const seed = parseSeedInput(seedInput);
 		const parsed = parseRunConfiguration(configDraft, configuration);
@@ -357,7 +387,10 @@ const Home = ({
 		setConfigErrors(parsed.valid ? {} : parsed.errors);
 		setGenerationError(null);
 		if (seed === undefined || !parsed.valid) return;
-		if (startRun(seed, parsed.value)) setSettingsOpen(false);
+		if (startRun(seed, parsed.value, false, [], fog)) {
+			setNewDungeonOpen(false);
+			mapRef.current?.focus({ preventScroll: true });
+		}
 	};
 
 	const isChestOnTile = (object: DungeonObject) =>
@@ -636,30 +669,6 @@ const Home = ({
 						</SheetTrigger>
 						<DungeonSettings
 							finalFocus={mapInputAvailable ? mapRef : false}
-							fogConfiguration={fogConfiguration}
-							onFogEnabledChange={setFogEnabled}
-							onFogRadiusApply={handleFogRadiusApply}
-							seed={run.seed}
-							seedInput={seedInput}
-							seedError={seedError}
-							configuration={configuration}
-							configDraft={configDraft}
-							configErrors={configErrors}
-							generationError={generationError}
-							onConfigInputChange={(field, value) => {
-								setConfigDraft((current) => ({ ...current, [field]: value }));
-								setConfigErrors((current) => ({
-									...current,
-									[field]: undefined,
-								}));
-								setGenerationError(null);
-							}}
-							onSeedInputChange={(value) => {
-								setSeedInput(value);
-								setSeedError(null);
-								setGenerationError(null);
-							}}
-							onSeedSubmit={handleSeedSubmit}
 							hints={hints}
 						/>
 					</Sheet>
@@ -1035,12 +1044,26 @@ const Home = ({
 					</div>
 				</section>
 			</main>
-			<NewDungeonDialog
+			<NewAdventureDialog
 				open={newDungeonOpen}
-				onOpenChange={setNewDungeonOpen}
-				onConfirm={handleNewDungeon}
-				settingsOpen={settingsOpen}
+				onOpenChange={(open) => {
+					setNewDungeonOpen(open);
+					// A failed start's message belongs to that attempt only.
+					if (!open) setGenerationError(null);
+				}}
 				mapRef={mapRef}
+				seed={run.seed}
+				configuration={configuration}
+				fog={fogConfiguration}
+				onStandard={handleStandardAdventure}
+				seedInput={seedInput}
+				seedError={seedError}
+				configDraft={configDraft}
+				configErrors={configErrors}
+				generationError={generationError}
+				onConfigInputChange={handleConfigInputChange}
+				onSeedInputChange={handleSeedInputChange}
+				onCustom={handleCustomAdventure}
 			/>
 
 			<OmenArrivalDialog

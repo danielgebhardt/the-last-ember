@@ -1,15 +1,14 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it } from "vitest";
 import type { DungeonRun } from "../domain/dungeon/DungeonRun.ts";
 import { ThemeProvider } from "../settings/ThemeProvider.tsx";
 import { enterDungeonFromTown } from "./HomeTestHelpers";
 import {
-	closeSettings,
-	openSettings,
+	openCustomAdventure,
 	resetHomeTestState,
 	stubDungeonRun,
-	waitForSettingsClosed,
+	waitForNewAdventureClosed,
 } from "./HomeTestHelpers.tsx";
 import Home from "./TestHome";
 import { createTestDungeonFloor } from "./testhelpers.ts";
@@ -82,103 +81,65 @@ describe("Fog across complete dungeon runs", () => {
 		expect(run).toEqual(before);
 	});
 
-	it("clears every floor's memory on seed replay and again on a random restart", async () => {
+	it("clears every floor's memory on each seed replay, keeping the adventure's sight", async () => {
 		stubDungeonRun(linkedCorridors());
-		vi.spyOn(Math, "random").mockReturnValue(0);
 		const user = userEvent.setup();
 		render(<Home initialFogConfiguration={{ enabled: true, radius: 1 }} />, {
 			wrapper: ThemeProvider,
 		});
-		await user.keyboard(walkRight(9));
-		await user.keyboard(walkRight(6));
-		const seed = await openSettings(user);
-		await user.clear(seed);
-		await user.type(seed, "123{Enter}");
-		await enterDungeonFromTown(user);
-		await waitForSettingsClosed();
-		expect(screen.getByRole("heading", { name: "Floor 1 of 2" })).toBeVisible();
-		expect(
-			screen.getByRole("cell", { name: "row1col7 - undiscovered" }),
-		).toBeVisible();
-		await user.keyboard(walkRight(9));
-		expect(
-			screen.getByRole("cell", { name: "row1col7 - undiscovered" }),
-		).toBeVisible();
-		await user.keyboard(walkRight(6));
-		await user.click(screen.getByRole("button", { name: "New Dungeon" }));
-		await user.click(screen.getByRole("button", { name: "Start new dungeon" }));
-		await enterDungeonFromTown(user);
-		expect(screen.getByRole("heading", { name: "Floor 1 of 2" })).toBeVisible();
-		await user.keyboard(walkRight(9));
-		expect(
-			screen.getByRole("cell", { name: "row1col7 - undiscovered" }),
-		).toBeVisible();
+		for (const replay of ["123", "456"]) {
+			await user.keyboard(walkRight(9));
+			await user.keyboard(walkRight(6));
+			const seed = await openCustomAdventure(user);
+			expect(
+				screen.getByRole("textbox", { name: "Visibility radius" }),
+			).toHaveValue("1");
+			await user.clear(seed);
+			await user.type(seed, `${replay}{Enter}`);
+			await waitForNewAdventureClosed();
+			await enterDungeonFromTown(user);
+			expect(
+				screen.getByRole("heading", { name: "Floor 1 of 2" }),
+			).toBeVisible();
+			expect(
+				screen.getByRole("cell", { name: "row1col7 - undiscovered" }),
+			).toBeVisible();
+			await user.keyboard(walkRight(9));
+			expect(
+				screen.getByRole("cell", { name: "row1col7 - undiscovered" }),
+			).toBeVisible();
+		}
 	});
 
-	it("records normal sight while fog is disabled without discovering the entire map", async () => {
-		stubDungeonRun(linkedCorridors());
-		const user = userEvent.setup();
-		render(<Home initialFogConfiguration={{ enabled: false, radius: 1 }} />, {
-			wrapper: ThemeProvider,
-		});
-		expect(
-			screen.getByRole("cell", { name: "row1col18 - floor" }),
-		).toBeVisible();
-		await user.keyboard(walkRight(5));
-		await openSettings(user);
-		await user.click(
-			screen.getByRole("checkbox", { name: "Enable fog of war" }),
-		);
-		await closeSettings(user);
-		expect(
-			screen.getByRole("cell", { name: "row1col6 - player" }),
-		).toBeVisible();
-		expect(
-			screen.getByRole("cell", { name: "row1col1 - remembered entrance" }),
-		).toBeVisible();
-		expect(
-			screen.getByRole("cell", { name: "row1col18 - undiscovered" }),
-		).toBeVisible();
-	});
-
-	it("retains fog preferences across theme changes, new dungeons, and seed replays", async () => {
+	it("offers the current adventure's sight for the next custom one, and standard sight after a standard one", async () => {
 		stubDungeonRun(linkedCorridors());
 		const user = userEvent.setup();
 		render(<Home />, { wrapper: ThemeProvider });
-		await openSettings(user);
-		await user.click(
-			screen.getByRole("checkbox", { name: "Enable fog of war" }),
-		);
+		await openCustomAdventure(user);
 		const radius = screen.getByRole("textbox", { name: "Visibility radius" });
 		await user.clear(radius);
-		await user.type(radius, "2{Enter}");
-		await user.click(screen.getByRole("button", { name: "Light" }));
-		await closeSettings(user);
-		await user.click(screen.getByRole("button", { name: "New Dungeon" }));
-		await user.click(screen.getByRole("button", { name: "Start new dungeon" }));
-		await enterDungeonFromTown(user);
-		await openSettings(user);
+		await user.type(radius, "2");
+		await user.click(screen.getByRole("checkbox", { name: "Fog of war" }));
+		await user.click(
+			screen.getByRole("button", { name: "Start custom adventure" }),
+		);
+		await waitForNewAdventureClosed();
+		await openCustomAdventure(user);
 		expect(
-			screen.getByRole("checkbox", { name: "Enable fog of war" }),
+			screen.getByRole("checkbox", { name: "Fog of war" }),
 		).not.toBeChecked();
 		expect(
 			screen.getByRole("textbox", { name: "Visibility radius" }),
 		).toHaveValue("2");
+		await user.click(screen.getByRole("tab", { name: "Standard" }));
 		await user.click(
-			screen.getByRole("checkbox", { name: "Enable fog of war" }),
+			screen.getByRole("button", { name: "Start standard adventure" }),
 		);
-		await user.click(screen.getByRole("button", { name: "Start from seed" }));
-		await enterDungeonFromTown(user);
-		await waitForSettingsClosed();
-		expect(
-			screen.getByRole("cell", { name: "row1col8 - undiscovered" }),
-		).toBeVisible();
-		await openSettings(user);
-		expect(
-			screen.getByRole("checkbox", { name: "Enable fog of war" }),
-		).toBeChecked();
+		await waitForNewAdventureClosed();
+		await openCustomAdventure(user);
+		expect(screen.getByRole("checkbox", { name: "Fog of war" })).toBeChecked();
 		expect(
 			screen.getByRole("textbox", { name: "Visibility radius" }),
-		).toHaveValue("2");
+		).toHaveValue("8");
 	});
 });

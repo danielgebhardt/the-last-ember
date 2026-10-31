@@ -403,10 +403,10 @@ export default function RankingsSheet({
 					</>
 				)}
 				<p className="text-xs leading-relaxed text-muted-foreground">
-					New standard adventures started from the opening are eligible when
-					finished while signed in. Settings and developer adventures aren't
-					ranked. Older adventures aren't backfilled. Offline finishes retry
-					automatically; Refresh also retries pending submissions.
+					Standard adventures are eligible when finished while signed in. Custom
+					and developer adventures aren't ranked. Older adventures aren't
+					backfilled. Offline finishes retry automatically; Refresh also retries
+					pending submissions.
 				</p>
 			</div>
 		</SheetContent>

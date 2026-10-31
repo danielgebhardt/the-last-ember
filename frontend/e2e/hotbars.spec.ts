@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { openCustomAdventure } from "./adventure-helpers";
 import { importAdventure, map, turns } from "./adventure-helpers.js";
 import { enterDungeonFromTown } from "./town-helpers.js";
 
@@ -51,7 +52,7 @@ test("fresh starts, New Dungeon and seed replay restore starter potions without 
 	).toBeVisible();
 	await page.getByRole("button", { name: "New Dungeon", exact: true }).click();
 	await page
-		.getByRole("button", { name: "Start new dungeon", exact: true })
+		.getByRole("button", { name: "Start standard adventure", exact: true })
 		.click();
 	await enterDungeonFromTown(page);
 	await expect(
@@ -75,13 +76,12 @@ test("fresh starts, New Dungeon and seed replay restore starter potions without 
 		.getByRole("button", { name: "Assign to potion slot 3", exact: true })
 		.click();
 	await page.keyboard.press("Escape");
-	await page.getByRole("button", { name: "Settings", exact: true }).click();
-	const settings = page.getByRole("dialog", { name: "Settings", exact: true });
+	const settings = await openCustomAdventure(page);
 	await settings
 		.getByRole("textbox", { name: "Dungeon seed", exact: true })
 		.fill("123");
 	await settings
-		.getByRole("button", { name: "Start from seed", exact: true })
+		.getByRole("button", { name: "Start custom adventure", exact: true })
 		.click();
 	await enterDungeonFromTown(page);
 	await expect(map(page)).toBeFocused();

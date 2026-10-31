@@ -15,11 +15,11 @@ import {
 import { LOCAL_SAVE_KEY } from "../persistence/LocalAdventureSave";
 import { ThemeProvider } from "../settings/ThemeProvider";
 import {
+	closeNewAdventure,
 	closeSaveSheet,
-	closeSettings,
 	enterDungeonFromTown,
+	openCustomAdventure,
 	openSaveSheet,
-	openSettings,
 	readDungeonCells,
 	resetHomeTestState,
 } from "./HomeTestHelpers";
@@ -49,11 +49,11 @@ afterEach(resetHomeTestState);
 describe("Confirmed local Save and Load", () => {
 	it("opens a dedicated sheet, pauses gameplay and returns focus when dismissed", async () => {
 		const user = setup();
-		await openSettings(user);
+		await openCustomAdventure(user);
 		expect(
 			screen.queryByRole("region", { name: "Adventure saves" }),
 		).not.toBeInTheDocument();
-		await closeSettings(user);
+		await closeNewAdventure(user);
 		const sheet = await openSaveSheet(user);
 		expect(
 			within(sheet).getByRole("button", { name: "Save adventure" }),
@@ -229,7 +229,7 @@ describe("Confirmed local Save and Load", () => {
 		expect(localStorage.getItem(LOCAL_SAVE_KEY)).toBe(old);
 		expect(screen.getByLabelText("Turn count")).toHaveTextContent("Turn 0");
 	});
-	it("restores configuration, fog, progression and spell knowledge together for future new runs", async () => {
+	it("restores configuration, sight, progression and spell knowledge, offering the configuration and sight for the next custom run", async () => {
 		const config = { ...COMPACT_TEST_CONFIGURATION, rows: 10, cols: 12 };
 		const run = connectDungeonFloors(generateDungeonRun(123, 5, config));
 		const state = {
@@ -273,19 +273,19 @@ describe("Confirmed local Save and Load", () => {
 			),
 		).toHaveLength(1);
 		expect(screen.getAllByRole("cell")).toHaveLength(120);
-		await openSettings(user);
+		await openCustomAdventure(user);
 		expect(
 			screen.getByLabelText("Current dungeon configuration"),
 		).toHaveTextContent("10 rows × 12 columns");
 		expect(
-			screen.getByRole("checkbox", { name: "Enable fog of war" }),
+			screen.getByRole("checkbox", { name: "Fog of war" }),
 		).not.toBeChecked();
 		expect(
 			screen.getByRole("textbox", { name: "Visibility radius" }),
 		).toHaveValue("2");
-		await closeSettings(user);
-		await user.click(screen.getByRole("button", { name: "New Dungeon" }));
-		await user.click(screen.getByRole("button", { name: "Start new dungeon" }));
+		await user.click(
+			screen.getByRole("button", { name: "Start custom adventure" }),
+		);
 		await enterDungeonFromTown(user);
 		expect(screen.getAllByRole("cell")).toHaveLength(120);
 		expect(screen.getByLabelText("Player level")).toHaveTextContent("Level 1");

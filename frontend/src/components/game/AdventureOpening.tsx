@@ -457,8 +457,8 @@ const AdventureOpening = ({
 										</p>
 									</div>
 									<p className="mt-1.5 text-[11px] leading-relaxed text-muted-foreground">
-										Want a different size, floor count or seed? Settings starts
-										custom adventures, which aren't ranked.
+										Want a different size, seed or sight? Once you're in, New
+										Dungeon starts a custom adventure, which isn't ranked.
 									</p>
 								</section>
 

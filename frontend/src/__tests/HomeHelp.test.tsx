@@ -2,6 +2,7 @@ import { screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it } from "vitest";
 import {
+	openCustomAdventure,
 	readDungeonCells,
 	renderHome as render,
 	resetHomeTestState,
@@ -174,10 +175,9 @@ describe("Home Help menu", () => {
 		expect(screen.getByLabelText("row1col2 - player")).toBeVisible();
 		expect(screen.getByLabelText("Turn count")).toHaveTextContent("Turn 2");
 	});
-	it("keeps Settings drafts when Help is opened and closed", async () => {
+	it("keeps custom adventure drafts when Help is opened and closed", async () => {
 		const user = renderHelpRun();
-		await user.click(screen.getByRole("button", { name: "Settings" }));
-		const input = await screen.findByRole("textbox", { name: "Dungeon seed" });
+		const input = await openCustomAdventure(user);
 		await user.clear(input);
 		await user.type(input, "456");
 		await user.keyboard("{Escape}");
@@ -189,10 +189,7 @@ describe("Home Help menu", () => {
 		await waitFor(() =>
 			expect(screen.queryByRole("dialog")).not.toBeInTheDocument(),
 		);
-		await user.click(screen.getByRole("button", { name: "Settings" }));
-		expect(
-			await screen.findByRole("textbox", { name: "Dungeon seed" }),
-		).toHaveValue("456");
+		expect(await openCustomAdventure(user)).toHaveValue("456");
 		expect(screen.getByLabelText("Turn count")).toHaveTextContent("Turn 0");
 	});
 	it("explains map symbols and fog states in Help even when fog is disabled", async () => {

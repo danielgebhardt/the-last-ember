@@ -11,6 +11,16 @@ export const turns = (page: Page) =>
 	page.getByLabel("Turn count", { exact: true });
 export const saveSheet = (page: Page) =>
 	page.getByRole("dialog", { name: "Save/Load", exact: true });
+// New Dungeon → Custom, where a seed, size, difficulty and sight are chosen.
+export const openCustomAdventure = async (page: Page) => {
+	await page.getByRole("button", { name: "New Dungeon", exact: true }).click();
+	const dialog = page.getByRole("dialog", {
+		name: "New adventure",
+		exact: true,
+	});
+	await dialog.getByRole("tab", { name: "Custom", exact: true }).click();
+	return dialog;
+};
 // Puts a generated fixture in the browser save, runs `load`, then puts the slot back as it
 // was so tests keep starting with an empty browser save.
 const withFixtureInSlot = async (

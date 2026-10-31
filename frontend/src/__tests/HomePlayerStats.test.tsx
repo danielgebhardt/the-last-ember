@@ -4,11 +4,12 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import * as GameState from "../domain/game/GameState.ts";
 import {
 	closeSettings,
+	openCustomAdventure,
 	openSettings,
 	renderHome,
 	resetHomeTestState,
 	stubDungeonRun,
-	waitForSettingsClosed,
+	waitForNewAdventureClosed,
 } from "./HomeTestHelpers.tsx";
 import Home from "./TestHome";
 import { createThreeFloorTraversalRun } from "./testhelpers.ts";
@@ -48,12 +49,6 @@ describe("Player status on the play screen", () => {
 		await user.keyboard("{ArrowRight}{ArrowRight}{ArrowLeft}");
 		await openSettings(user);
 		await user.click(screen.getByRole("button", { name: "Light" }));
-		await user.click(
-			screen.getByRole("checkbox", { name: "Enable fog of war" }),
-		);
-		const radius = screen.getByRole("textbox", { name: "Visibility radius" });
-		await user.clear(radius);
-		await user.type(radius, "2{Enter}");
 		await closeSettings(user);
 		expect(screen.getByLabelText("Player health")).toHaveTextContent(
 			"Health 4 / 10",
@@ -65,7 +60,7 @@ describe("Player status on the play screen", () => {
 		startWithInjuredPlayer();
 		await userEvent.click(screen.getByRole("button", { name: "New Dungeon" }));
 		await userEvent.click(
-			screen.getByRole("button", { name: "Start new dungeon" }),
+			screen.getByRole("button", { name: "Start standard adventure" }),
 		);
 		expect(screen.getByLabelText("Player health")).toHaveTextContent(
 			"Health 10 / 10",
@@ -76,9 +71,11 @@ describe("Player status on the play screen", () => {
 	it("restores full health and turn zero when replaying the same seed", async () => {
 		startWithInjuredPlayer();
 		const user = userEvent.setup();
-		await openSettings(user);
-		await user.click(screen.getByRole("button", { name: "Start from seed" }));
-		await waitForSettingsClosed();
+		await openCustomAdventure(user);
+		await user.click(
+			screen.getByRole("button", { name: "Start custom adventure" }),
+		);
+		await waitForNewAdventureClosed();
 		expect(screen.getByLabelText("Player health")).toHaveTextContent(
 			"Health 10 / 10",
 		);

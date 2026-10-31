@@ -139,7 +139,7 @@ test("a fresh town budget buys two healing potions, survives travel and resets o
 	await expect(gold).toHaveText("Gold 0");
 	await page.getByRole("button", { name: "New Dungeon", exact: true }).click();
 	await page
-		.getByRole("button", { name: "Start new dungeon", exact: true })
+		.getByRole("button", { name: "Start standard adventure", exact: true })
 		.click();
 	await expect(town).toBeFocused();
 	await expect(gold).toHaveText("Gold 300");

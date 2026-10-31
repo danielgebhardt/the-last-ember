@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { openCustomAdventure } from "./adventure-helpers";
 import { importAdventure, map } from "./adventure-helpers.js";
 
 test.beforeEach(async ({ page }) => {
@@ -470,13 +471,12 @@ test("the perk reminder fits beside the level and pulses only when motion is all
 	await page
 		.getByRole("button", { name: "Begin Adventure", exact: true })
 		.click();
-	await page.getByRole("button", { name: "Settings", exact: true }).click();
-	const settings = page.getByRole("dialog", { name: "Settings", exact: true });
+	const settings = await openCustomAdventure(page);
 	await settings
 		.getByRole("textbox", { name: "Dungeon seed", exact: true })
 		.fill("7357");
 	await settings
-		.getByRole("button", { name: "Start from seed", exact: true })
+		.getByRole("button", { name: "Start custom adventure", exact: true })
 		.click();
 	await expect(settings).toBeHidden();
 	// The test seed starts at level 10 with four perks waiting.
@@ -531,13 +531,12 @@ test("the Character tab fits without scrolling on laptop and both iPad sizes", a
 	await page
 		.getByRole("button", { name: "Begin Adventure", exact: true })
 		.click();
-	await page.getByRole("button", { name: "Settings", exact: true }).click();
-	const settings = page.getByRole("dialog", { name: "Settings", exact: true });
+	const settings = await openCustomAdventure(page);
 	await settings
 		.getByRole("textbox", { name: "Dungeon seed", exact: true })
 		.fill("7357");
 	await settings
-		.getByRole("button", { name: "Start from seed", exact: true })
+		.getByRole("button", { name: "Start custom adventure", exact: true })
 		.click();
 	await expect(settings).toBeHidden();
 	const character = page.getByRole("dialog", {

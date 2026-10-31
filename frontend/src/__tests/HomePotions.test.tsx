@@ -82,7 +82,9 @@ describe("Healing potions in Character", () => {
 			"You drink Healing potion and recover 2 health.",
 		);
 		await user.click(screen.getByRole("button", { name: "New Dungeon" }));
-		await user.click(screen.getByRole("button", { name: "Start new dungeon" }));
+		await user.click(
+			screen.getByRole("button", { name: "Start standard adventure" }),
+		);
 		expect(screen.getByLabelText("Turn count")).toHaveTextContent("Turn 0");
 		expect(screen.getByRole("log")).not.toHaveTextContent("You drink");
 		await user.click(screen.getByRole("button", { name: "Character" }));
